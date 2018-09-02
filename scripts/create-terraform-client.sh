@@ -56,8 +56,6 @@ masterRealmAdminRoleId=$(echo ${masterRealmAdminRole} | jq -r '.id')
 terraformClientServiceAccount=$(get "/realms/master/clients/${KEYCLOAK_CLIENT_ID}/service-account-user")
 terraformClientServiceAccountId=$(echo ${terraformClientServiceAccount} | jq -r '.id')
 
-# [{"id":"6a4d83a2-4cc6-43c9-81b7-fa7440431eaa","name":"admin","description":"${role_admin}","composite":true,"clientRole":false,"containerId":"master"}]
-
 serviceAccountAdminRoleMapping=$(jq -n "[{
     clientRole: false,
     composite: true,
