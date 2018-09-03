@@ -73,7 +73,7 @@ func resourceKeycloakRealm() *schema.Resource {
 	}
 }
 
-func getRealm(data *schema.ResourceData) *keycloak.Realm {
+func getRealmFromData(data *schema.ResourceData) *keycloak.Realm {
 	return &keycloak.Realm{
 		Id:          data.Get("realm").(string),
 		Realm:       data.Get("realm").(string),
@@ -92,7 +92,7 @@ func getRealm(data *schema.ResourceData) *keycloak.Realm {
 	}
 }
 
-func setData(data *schema.ResourceData, realm *keycloak.Realm) {
+func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.SetId(realm.Realm)
 
 	data.Set("realm", realm.Realm)
@@ -113,7 +113,7 @@ func setData(data *schema.ResourceData, realm *keycloak.Realm) {
 func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm := getRealm(data)
+	realm := getRealmFromData(data)
 
 	err := realm.Validate()
 	if err != nil {
@@ -125,7 +125,7 @@ func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	setData(data, realm)
+	setRealmData(data, realm)
 
 	return resourceKeycloakRealmRead(data, meta)
 }
@@ -138,7 +138,7 @@ func resourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	setData(data, realm)
+	setRealmData(data, realm)
 
 	return nil
 }
@@ -146,7 +146,7 @@ func resourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) erro
 func resourceKeycloakRealmUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm := getRealm(data)
+	realm := getRealmFromData(data)
 
 	err := realm.Validate()
 	if err != nil {
@@ -158,7 +158,7 @@ func resourceKeycloakRealmUpdate(data *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	setData(data, realm)
+	setRealmData(data, realm)
 
 	return nil
 }

@@ -18,3 +18,8 @@ resource "keycloak_realm" "test" {
   login_with_email_allowed       = true
   duplicate_emails_allowed       = false
 }
+
+resource "keycloak_client" "test-client" {
+  client_id = "test-client"
+  realm_id  = "${keycloak_realm.test.id}"
+}
