@@ -116,25 +116,57 @@ func (keycloakClient *KeycloakClient) refresh() error {
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) get(path string, resource interface{}) error {
-	resourceUrl := keycloakClient.baseUrl + apiUrl + path
-
-	log.Printf("[DEBUG] Sending GET to %s", resourceUrl)
-
-	request, err := http.NewRequest("GET", resourceUrl, nil)
-	if err != nil {
-		return err
-	}
-
+func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 	tokenType := keycloakClient.clientCredentials.TokenType
 	accessToken := keycloakClient.clientCredentials.AccessToken
 
 	request.Header.Set("Authorization", fmt.Sprintf("%s %s", tokenType, accessToken))
 	request.Header.Set("Accept", "application/json")
 
+	if request.Method == http.MethodPost {
+		request.Header.Set("Content-type", "application/json")
+	}
+}
+
+/**
+Sends an HTTP request and refreshes credentials on 403 or 401 errors
+*/
+func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte, error) {
+	requestMethod := request.Method
+	requestPath := request.URL.Path
+
+	log.Printf("[DEBUG] Sending %s to %s", requestMethod, requestPath)
+	if request.Body != nil {
+		requestBody, err := request.GetBody()
+		if err != nil {
+			return nil, err
+		}
+
+		requestBodyBuffer := new(bytes.Buffer)
+		requestBodyBuffer.ReadFrom(requestBody)
+
+		log.Printf("[DEBUG] Request body: %s", requestBodyBuffer.String())
+	}
+
+	keycloakClient.addRequestHeaders(request)
+
 	response, err := keycloakClient.httpClient.Do(request)
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	if response.StatusCode == http.StatusUnauthorized || response.StatusCode == http.StatusForbidden {
+		err := keycloakClient.refresh()
+		if err != nil {
+			return nil, fmt.Errorf("error refreshing credentials: %s", err)
+		}
+
+		keycloakClient.addRequestHeaders(request)
+
+		response, err = keycloakClient.httpClient.Do(request)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	log.Printf("[DEBUG] Response: %s", response.Status)
@@ -143,11 +175,31 @@ func (keycloakClient *KeycloakClient) get(path string, resource interface{}) err
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(body) != 0 {
-		log.Printf("[DEBUG] GET response body: %s", body)
+		log.Printf("[DEBUG] Response body: %s", body)
+	}
+
+	if response.StatusCode >= 400 {
+		return nil, fmt.Errorf("error sending %s request to %s: %s", request.Method, request.URL.Path, response.Status)
+	}
+
+	return body, nil
+}
+
+func (keycloakClient *KeycloakClient) get(path string, resource interface{}) error {
+	resourceUrl := keycloakClient.baseUrl + apiUrl + path
+
+	request, err := http.NewRequest("GET", resourceUrl, nil)
+	if err != nil {
+		return err
+	}
+
+	body, err := keycloakClient.sendRequest(request)
+	if err != nil {
+		return err
 	}
 
 	return json.Unmarshal(body, resource)
@@ -161,64 +213,25 @@ func (keycloakClient *KeycloakClient) post(path string, requestBody interface{})
 		return err
 	}
 
-	log.Printf("[DEBUG] Sending POST to %s", resourceUrl)
-	log.Printf("[DEBUG] Request body: %s", payload)
-
 	request, err := http.NewRequest("POST", resourceUrl, bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
 
-	tokenType := keycloakClient.clientCredentials.TokenType
-	accessToken := keycloakClient.clientCredentials.AccessToken
+	_, err = keycloakClient.sendRequest(request)
 
-	request.Header.Set("Authorization", fmt.Sprintf("%s %s", tokenType, accessToken))
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Accept", "application/json")
-
-	response, err := keycloakClient.httpClient.Do(request)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("[DEBUG] Response: %s", response.Status)
-
-	defer response.Body.Close()
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-
-	if len(body) != 0 {
-		log.Printf("[DEBUG] POST response body: %s", body)
-	}
-
-	return keycloakClient.refresh()
+	return err
 }
 
 func (keycloakClient *KeycloakClient) delete(path string) error {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
-
-	log.Printf("[DEBUG] Sending DELETE to %s", resourceUrl)
 
 	request, err := http.NewRequest("DELETE", resourceUrl, nil)
 	if err != nil {
 		return err
 	}
 
-	tokenType := keycloakClient.clientCredentials.TokenType
-	accessToken := keycloakClient.clientCredentials.AccessToken
+	_, err = keycloakClient.sendRequest(request)
 
-	request.Header.Set("Authorization", fmt.Sprintf("%s %s", tokenType, accessToken))
-	request.Header.Set("Accept", "application/json")
-
-	response, err := keycloakClient.httpClient.Do(request)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("[DEBUG] Response: %s", response.Status)
-
-	return nil
+	return err
 }
