@@ -3,9 +3,10 @@ package keycloak
 import "fmt"
 
 type Realm struct {
-	Id      string `json:"id"`
-	Realm   string `json:"realm"`
-	Enabled bool   `json:"enabled"`
+	Id          string `json:"id"`
+	Realm       string `json:"realm"`
+	Enabled     bool   `json:"enabled"`
+	DisplayName string `json:"displayName"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
