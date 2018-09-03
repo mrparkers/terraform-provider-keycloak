@@ -200,6 +200,8 @@ func (keycloakClient *KeycloakClient) post(path string, requestBody interface{})
 func (keycloakClient *KeycloakClient) delete(path string) error {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
+	log.Printf("[DEBUG] Sending DELETE to %s", resourceUrl)
+
 	request, err := http.NewRequest("DELETE", resourceUrl, nil)
 	if err != nil {
 		return err
@@ -211,7 +213,12 @@ func (keycloakClient *KeycloakClient) delete(path string) error {
 	request.Header.Set("Authorization", fmt.Sprintf("%s %s", tokenType, accessToken))
 	request.Header.Set("Accept", "application/json")
 
-	_, err = keycloakClient.httpClient.Do(request)
+	response, err := keycloakClient.httpClient.Do(request)
+	if err != nil {
+		return err
+	}
 
-	return err
+	log.Printf("[DEBUG] Response: %s", response.Status)
+
+	return nil
 }

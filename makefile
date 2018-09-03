@@ -1,4 +1,5 @@
-all=build
+TEST?=$$(go list ./... |grep -v 'vendor')
+GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 
 MAKEFLAGS += --silent
 
@@ -8,7 +9,6 @@ build:
 example: build
 	mkdir -p example/.terraform/plugins/darwin_amd64
 	cp terraform-provider-keycloak example/.terraform/plugins/darwin_amd64/
-	cd example && terraform init && terraform plan
 
 local: deps
 	docker-compose up --build -d
@@ -17,3 +17,18 @@ local: deps
 
 deps:
 	./scripts/check-deps.sh
+
+fmt:
+	gofmt -w -s $(GOFMT_FILES)
+
+test: fmtcheck vet
+	go test $(TEST)
+
+testacc: fmtcheck vet
+	TF_ACC=1 go test $(TEST) -v $(TESTARGS)
+
+fmtcheck:
+	lineCount=$(shell gofmt -l -s $(GOFMT_FILES) | wc -l | tr -d ' ') && exit $$lineCount
+
+vet:
+	go vet ./...
