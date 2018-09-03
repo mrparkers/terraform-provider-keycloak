@@ -7,7 +7,9 @@ import (
 
 func KeycloakProvider() *schema.Provider {
 	return &schema.Provider{
-		ResourcesMap: map[string]*schema.Resource{},
+		ResourcesMap: map[string]*schema.Resource{
+			"keycloak_realm": resourceKeycloakRealm(),
+		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
 				Required: true,
