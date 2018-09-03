@@ -6,4 +6,5 @@ provider "keycloak" {
 
 resource "keycloak_realm" "test" {
   realm = "test"
+  enabled = false
 }

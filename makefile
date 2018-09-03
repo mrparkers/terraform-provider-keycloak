@@ -6,7 +6,7 @@ MAKEFLAGS += --silent
 build:
 	 GO111MODULE=on go build -o terraform-provider-keycloak
 
-example: build
+build-example: build
 	mkdir -p example/.terraform/plugins/darwin_amd64
 	cp terraform-provider-keycloak example/.terraform/plugins/darwin_amd64/
 

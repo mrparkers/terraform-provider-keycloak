@@ -3,22 +3,19 @@ package keycloak
 import "fmt"
 
 type Realm struct {
-	Id    string `json:"id"`
-	Realm string `json:"realm"`
+	Id      string `json:"id"`
+	Realm   string `json:"realm"`
+	Enabled bool   `json:"enabled"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
-	err := keycloakClient.post("/realms/", realm)
-
-	return err
+	return keycloakClient.post("/realms/", realm)
 }
 
 func (keycloakClient *KeycloakClient) GetRealm(id string) (*Realm, error) {
 	var realm Realm
 
-	url := fmt.Sprintf("/realms/%s", id)
-
-	err := keycloakClient.get(url, &realm)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s", id), &realm)
 	if err != nil {
 		return nil, err
 	}
@@ -26,10 +23,10 @@ func (keycloakClient *KeycloakClient) GetRealm(id string) (*Realm, error) {
 	return &realm, nil
 }
 
+func (keycloakClient *KeycloakClient) UpdateRealm(realm *Realm) error {
+	return keycloakClient.put(fmt.Sprintf("/realms/%s", realm.Id), realm)
+}
+
 func (keycloakClient *KeycloakClient) DeleteRealm(id string) error {
-	url := fmt.Sprintf("/realms/%s", id)
-
-	err := keycloakClient.delete(url)
-
-	return err
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s", id))
 }

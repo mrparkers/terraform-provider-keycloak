@@ -46,7 +46,7 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret string) (*KeycloakClient,
 
 	log.Printf("[DEBUG] Login request: %s", accessTokenData.Encode())
 
-	accessTokenRequest, _ := http.NewRequest("POST", accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
+	accessTokenRequest, _ := http.NewRequest(http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
 	accessTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	accessTokenResponse, err := httpClient.Do(accessTokenRequest)
@@ -89,7 +89,7 @@ func (keycloakClient *KeycloakClient) refresh() error {
 
 	log.Printf("[DEBUG] Refresh request: %s", refreshTokenData.Encode())
 
-	accessTokenRequest, _ := http.NewRequest("POST", refreshTokenUrl, strings.NewReader(refreshTokenData.Encode()))
+	accessTokenRequest, _ := http.NewRequest(http.MethodPost, refreshTokenUrl, strings.NewReader(refreshTokenData.Encode()))
 	accessTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	refreshTokenResponse, err := keycloakClient.httpClient.Do(accessTokenRequest)
@@ -123,7 +123,7 @@ func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 	request.Header.Set("Authorization", fmt.Sprintf("%s %s", tokenType, accessToken))
 	request.Header.Set("Accept", "application/json")
 
-	if request.Method == http.MethodPost {
+	if request.Method == http.MethodPost || request.Method == http.MethodPut {
 		request.Header.Set("Content-type", "application/json")
 	}
 }
@@ -192,7 +192,7 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 func (keycloakClient *KeycloakClient) get(path string, resource interface{}) error {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
-	request, err := http.NewRequest("GET", resourceUrl, nil)
+	request, err := http.NewRequest(http.MethodGet, resourceUrl, nil)
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,25 @@ func (keycloakClient *KeycloakClient) post(path string, requestBody interface{})
 		return err
 	}
 
-	request, err := http.NewRequest("POST", resourceUrl, bytes.NewReader(payload))
+	request, err := http.NewRequest(http.MethodPost, resourceUrl, bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	_, err = keycloakClient.sendRequest(request)
+
+	return err
+}
+
+func (keycloakClient *KeycloakClient) put(path string, requestBody interface{}) error {
+	resourceUrl := keycloakClient.baseUrl + apiUrl + path
+
+	payload, err := json.Marshal(requestBody)
+	if err != nil {
+		return err
+	}
+
+	request, err := http.NewRequest(http.MethodPut, resourceUrl, bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
@@ -226,7 +244,7 @@ func (keycloakClient *KeycloakClient) post(path string, requestBody interface{})
 func (keycloakClient *KeycloakClient) delete(path string) error {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
-	request, err := http.NewRequest("DELETE", resourceUrl, nil)
+	request, err := http.NewRequest(http.MethodDelete, resourceUrl, nil)
 	if err != nil {
 		return err
 	}
