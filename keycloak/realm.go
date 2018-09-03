@@ -10,14 +10,15 @@ type Realm struct {
 	Enabled     bool   `json:"enabled"`
 	DisplayName string `json:"displayName"`
 
-	// Login
-	RegistrationAllowed bool `json:"registrationAllowed"`
-	EmailAsUsername     bool `json:"registrationEmailAsUsername"`
-	EditUsername        bool `json:"editUsernameAllowed"`
-	ForgotPassword      bool `json:"resetPasswordAllowed"`
-	RememberMe          bool `json:"rememberMe"`
-	VerifyEmail         bool `json:"verifyEmail"`
-	LoginWithEmail      bool `json:"loginWithEmailAllowed"`
+	// Login Config
+	RegistrationAllowed         bool `json:"registrationAllowed"`
+	RegistrationEmailAsUsername bool `json:"registrationEmailAsUsername"`
+	EditUsernameAllowed         bool `json:"editUsernameAllowed"`
+	ResetPasswordAllowed        bool `json:"resetPasswordAllowed"`
+	RememberMe                  bool `json:"rememberMe"`
+	VerifyEmail                 bool `json:"verifyEmail"`
+	LoginWithEmailAllowed       bool `json:"loginWithEmailAllowed"`
+	DuplicateEmailsAllowed      bool `json:"duplicateEmailsAllowed"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
@@ -41,4 +42,20 @@ func (keycloakClient *KeycloakClient) UpdateRealm(realm *Realm) error {
 
 func (keycloakClient *KeycloakClient) DeleteRealm(id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s", id))
+}
+
+func (realm *Realm) Validate() error {
+	if realm.RegistrationAllowed == false && realm.RegistrationEmailAsUsername == true {
+		return fmt.Errorf("validation error: RegistrationEmailAsUsername cannot be true if RegistrationAllowed is false")
+	}
+
+	if realm.DuplicateEmailsAllowed == true && realm.RegistrationEmailAsUsername == true {
+		return fmt.Errorf("validation error: DuplicateEmailsAllowed cannot be true if RegistrationEmailAsUsername is true")
+	}
+
+	if realm.DuplicateEmailsAllowed == true && realm.LoginWithEmailAllowed == true {
+		return fmt.Errorf("validation error: DuplicateEmailsAllowed cannot be true if LoginWithEmailAllowed is true")
+	}
+
+	return nil
 }
