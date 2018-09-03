@@ -19,6 +19,7 @@ func resourceKeycloakClient() *schema.Resource {
 			"realm_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 		},
 	}
