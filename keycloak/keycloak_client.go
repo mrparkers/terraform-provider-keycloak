@@ -131,7 +131,7 @@ func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 /**
 Sends an HTTP request and refreshes credentials on 403 or 401 errors
 */
-func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte, error) {
+func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte, string, error) {
 	requestMethod := request.Method
 	requestPath := request.URL.Path
 
@@ -139,7 +139,7 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 	if request.Body != nil {
 		requestBody, err := request.GetBody()
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 
 		requestBodyBuffer := new(bytes.Buffer)
@@ -152,20 +152,24 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 
 	response, err := keycloakClient.httpClient.Do(request)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
+	// Unauthorized: Token could have expired
+	// Forbidden: After creating a realm, following GETs for the realm return 403 until you refresh
 	if response.StatusCode == http.StatusUnauthorized || response.StatusCode == http.StatusForbidden {
+		log.Printf("[DEBUG] Response: %s.  Attempting refresh", response.Status)
+
 		err := keycloakClient.refresh()
 		if err != nil {
-			return nil, fmt.Errorf("error refreshing credentials: %s", err)
+			return nil, "", fmt.Errorf("error refreshing credentials: %s", err)
 		}
 
 		keycloakClient.addRequestHeaders(request)
 
 		response, err = keycloakClient.httpClient.Do(request)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 	}
 
@@ -175,7 +179,7 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	if len(body) != 0 {
@@ -183,10 +187,10 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 	}
 
 	if response.StatusCode >= 400 {
-		return nil, fmt.Errorf("error sending %s request to %s: %s", request.Method, request.URL.Path, response.Status)
+		return nil, "", fmt.Errorf("error sending %s request to %s: %s", request.Method, request.URL.Path, response.Status)
 	}
 
-	return body, nil
+	return body, response.Header.Get("Location"), nil
 }
 
 func (keycloakClient *KeycloakClient) get(path string, resource interface{}) error {
@@ -197,7 +201,7 @@ func (keycloakClient *KeycloakClient) get(path string, resource interface{}) err
 		return err
 	}
 
-	body, err := keycloakClient.sendRequest(request)
+	body, _, err := keycloakClient.sendRequest(request)
 	if err != nil {
 		return err
 	}
@@ -205,22 +209,22 @@ func (keycloakClient *KeycloakClient) get(path string, resource interface{}) err
 	return json.Unmarshal(body, resource)
 }
 
-func (keycloakClient *KeycloakClient) post(path string, requestBody interface{}) error {
+func (keycloakClient *KeycloakClient) post(path string, requestBody interface{}) (string, error) {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
 	payload, err := json.Marshal(requestBody)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	request, err := http.NewRequest(http.MethodPost, resourceUrl, bytes.NewReader(payload))
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = keycloakClient.sendRequest(request)
+	_, location, err := keycloakClient.sendRequest(request)
 
-	return err
+	return location, err
 }
 
 func (keycloakClient *KeycloakClient) put(path string, requestBody interface{}) error {
@@ -236,7 +240,7 @@ func (keycloakClient *KeycloakClient) put(path string, requestBody interface{}) 
 		return err
 	}
 
-	_, err = keycloakClient.sendRequest(request)
+	_, _, err = keycloakClient.sendRequest(request)
 
 	return err
 }
@@ -249,7 +253,7 @@ func (keycloakClient *KeycloakClient) delete(path string) error {
 		return err
 	}
 
-	_, err = keycloakClient.sendRequest(request)
+	_, _, err = keycloakClient.sendRequest(request)
 
 	return err
 }
