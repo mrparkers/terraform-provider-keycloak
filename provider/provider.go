@@ -12,17 +12,20 @@ func KeycloakProvider() *schema.Provider {
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
-				Required: true,
-				Type:     schema.TypeString,
+				Required:    true,
+				Type:        schema.TypeString,
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_ID", nil),
 			},
 			"client_secret": {
-				Required: true,
-				Type:     schema.TypeString,
+				Required:    true,
+				Type:        schema.TypeString,
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_SECRET", nil),
 			},
 			"url": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The base URL of the Keycloak instance, before `/auth`",
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_URL", nil),
 			},
 		},
 		ConfigureFunc: configureKeycloakProvider,
