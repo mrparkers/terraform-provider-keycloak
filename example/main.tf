@@ -9,5 +9,5 @@ resource "keycloak_realm" "test" {
   enabled           = false
   display_name      = "foo"
 
-  user_registration = true
+  registration_allowed = true
 }
