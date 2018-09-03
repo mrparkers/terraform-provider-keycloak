@@ -1,12 +1,23 @@
 package keycloak
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Realm struct {
 	Id          string `json:"id"`
 	Realm       string `json:"realm"`
 	Enabled     bool   `json:"enabled"`
 	DisplayName string `json:"displayName"`
+
+	// Login
+	UserRegistration bool `json:"registrationAllowed"`
+	EmailAsUsername  bool `json:"registrationEmailAsUsername"`
+	EditUsername     bool `json:"editUsernameAllowed"`
+	ForgotPassword   bool `json:"resetPasswordAllowed"`
+	RememberMe       bool `json:"rememberMe"`
+	VerifyEmail      bool `json:"verifyEmail"`
+	LoginWithEmail   bool `json:"loginWithEmailAllowed"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
