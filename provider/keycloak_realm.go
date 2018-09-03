@@ -26,6 +26,11 @@ func resourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"user_registration": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -36,14 +41,19 @@ func getRealm(data *schema.ResourceData) *keycloak.Realm {
 		Realm:       data.Get("realm").(string),
 		Enabled:     data.Get("enabled").(bool),
 		DisplayName: data.Get("display_name").(string),
+
+		UserRegistration: data.Get("user_registration").(bool),
 	}
 }
 
 func setData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.SetId(realm.Realm)
+
 	data.Set("realm", realm.Realm)
 	data.Set("enabled", realm.Enabled)
 	data.Set("display_name", realm.DisplayName)
+
+	data.Set("user_registration", realm.UserRegistration)
 }
 
 func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {

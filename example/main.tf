@@ -5,7 +5,9 @@ provider "keycloak" {
 }
 
 resource "keycloak_realm" "test" {
-  realm        = "test"
-  enabled      = false
-  display_name = "foo"
+  realm             = "test"
+  enabled           = false
+  display_name      = "foo"
+
+  user_registration = true
 }
