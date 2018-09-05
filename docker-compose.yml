@@ -12,10 +12,15 @@ services:
     - 5432:5432
     volumes:
     - postgres:/var/lib/postgresql
+  openldap:
+    image: osixia/openldap:1.2.2
+    ports:
+    - 8389:8389
   keycloak:
     image: jboss/keycloak:4.2.1.Final
     depends_on:
     - postgres
+    - openldap
     environment:
     - DB_VENDOR=POSTGRES
     - KEYCLOAK_LOGLEVEL=DEBUG
