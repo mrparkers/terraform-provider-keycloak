@@ -42,7 +42,6 @@ type LdapUserFederation struct {
 	UserObjectClasses      []string // api expects comma + space separated for some reason
 	ConnectionUrl          string
 	UsersDn                string
-	AuthType               string // can be "simple" or "none". don't need bind fields if set to "none"
 	BindDn                 string
 	BindCredential         string
 	CustomUserSearchFilter string // must start with '(' and end with ')'
@@ -82,7 +81,7 @@ func convertToUserFederationComponent(ldap *LdapUserFederation) *userFederationC
 			strconv.FormatBool(ldap.SyncRegistrations),
 		},
 		"vendor": {
-			ldap.Vendor,
+			strings.ToLower(ldap.Vendor),
 		},
 		"usernameLDAPAttribute": {
 			ldap.UsernameLDAPAttribute,
@@ -101,18 +100,6 @@ func convertToUserFederationComponent(ldap *LdapUserFederation) *userFederationC
 		},
 		"usersDn": {
 			ldap.UsersDn,
-		},
-		"authType": {
-			ldap.AuthType,
-		},
-		"bindDn": {
-			ldap.BindDn,
-		},
-		"bindCredential": {
-			ldap.BindCredential,
-		},
-		"customUserSearchFilter": {
-			ldap.CustomUserSearchFilter,
 		},
 		"searchScope": {
 			ldap.SearchScope,
@@ -143,16 +130,23 @@ func convertToUserFederationComponent(ldap *LdapUserFederation) *userFederationC
 		},
 	}
 
-	if ldap.BindDn != "" {
-		componentConfig["bindDn"][0] = ldap.BindDn
+	if ldap.BindDn != "" && ldap.BindCredential != "" {
+		componentConfig["bindDn"] = []string{ldap.BindDn}
+		componentConfig["bindCredential"] = []string{ldap.BindCredential}
+
+		componentConfig["authType"] = []string{"simple"}
+	} else {
+		componentConfig["authType"] = []string{"none"}
 	}
 
-	if ldap.BindCredential != "" {
-		componentConfig["bindCredential"][0] = ldap.BindCredential
+	if ldap.SearchScope == "ONE_LEVEL" {
+		componentConfig["searchScope"] = []string{"1"}
+	} else {
+		componentConfig["searchScope"] = []string{"2"}
 	}
 
 	if ldap.CustomUserSearchFilter != "" {
-		componentConfig["customUserSearchFilter"][0] = ldap.CustomUserSearchFilter
+		componentConfig["customUserSearchFilter"] = []string{ldap.CustomUserSearchFilter}
 	}
 
 	return &userFederationComponent{
@@ -235,14 +229,13 @@ func convertToLdapUserFederation(component *userFederationComponent) (*LdapUserF
 		EditMode:          component.getConfig("editMode"),
 		SyncRegistrations: syncRegistrations,
 
-		Vendor:                 component.getConfig("vendor"),
+		Vendor:                 strings.ToUpper(component.getConfig("vendor")),
 		UsernameLDAPAttribute:  component.getConfig("usernameLDAPAttribute"),
 		RdnLDAPAttribute:       component.getConfig("rdnLDAPAttribute"),
 		UuidLDAPAttribute:      component.getConfig("uuidLDAPAttribute"),
 		UserObjectClasses:      userObjectClasses,
 		ConnectionUrl:          component.getConfig("connectionUrl"),
 		UsersDn:                component.getConfig("usersDn"),
-		AuthType:               component.getConfig("authType"),
 		BindDn:                 component.getConfig("bindDn"),
 		BindCredential:         component.getConfig("bindCredential"),
 		CustomUserSearchFilter: component.getConfig("customUserSearchFilter"),
@@ -271,6 +264,12 @@ func convertToLdapUserFederation(component *userFederationComponent) (*LdapUserF
 
 	if customUserSearchFilter := component.getConfig("customUserSearchFilter"); customUserSearchFilter != "" {
 		ldap.CustomUserSearchFilter = customUserSearchFilter
+	}
+
+	if component.getConfig("searchScope") == "1" {
+		ldap.SearchScope = "ONE_LEVEL"
+	} else {
+		ldap.SearchScope = "SUBTREE"
 	}
 
 	return ldap, nil
