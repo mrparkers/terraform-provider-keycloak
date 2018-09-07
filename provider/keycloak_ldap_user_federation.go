@@ -125,10 +125,12 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			"connection_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  30,
 			},
 			"read_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  30,
 			},
 			"pagination": {
 				Type:     schema.TypeBool,

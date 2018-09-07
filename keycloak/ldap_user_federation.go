@@ -16,6 +16,10 @@ type userFederationComponent struct {
 }
 
 func (component *userFederationComponent) getConfig(val string) string {
+	if len(component.Config[val]) == 0 {
+		return ""
+	}
+
 	return component.Config[val][0]
 }
 
@@ -58,92 +62,106 @@ type LdapUserFederation struct {
 }
 
 func convertToUserFederationComponent(ldap *LdapUserFederation) *userFederationComponent {
+	componentConfig := map[string][]string{
+		"cachePolicy": {
+			ldap.CachePolicy,
+		},
+		"enabled": {
+			strconv.FormatBool(ldap.Enabled),
+		},
+		"priority": {
+			strconv.Itoa(ldap.Priority),
+		},
+		"importEnabled": {
+			strconv.FormatBool(ldap.ImportEnabled),
+		},
+		"editMode": {
+			ldap.EditMode,
+		},
+		"syncRegistrations": {
+			strconv.FormatBool(ldap.SyncRegistrations),
+		},
+		"vendor": {
+			ldap.Vendor,
+		},
+		"usernameLDAPAttribute": {
+			ldap.UsernameLDAPAttribute,
+		},
+		"rdnLDAPAttribute": {
+			ldap.RdnLDAPAttribute,
+		},
+		"uuidLDAPAttribute": {
+			ldap.UuidLDAPAttribute,
+		},
+		"userObjectClasses": {
+			strings.Join(ldap.UserObjectClasses, ", "),
+		},
+		"connectionUrl": {
+			ldap.ConnectionUrl,
+		},
+		"usersDn": {
+			ldap.UsersDn,
+		},
+		"authType": {
+			ldap.AuthType,
+		},
+		"bindDn": {
+			ldap.BindDn,
+		},
+		"bindCredential": {
+			ldap.BindCredential,
+		},
+		"customUserSearchFilter": {
+			ldap.CustomUserSearchFilter,
+		},
+		"searchScope": {
+			ldap.SearchScope,
+		},
+		"validatePasswordPolicy": {
+			strconv.FormatBool(ldap.ValidatePasswordPolicy),
+		},
+		"useTruststoreSpi": {
+			ldap.UseTruststoreSpi,
+		},
+		"connectionTimeout": {
+			strconv.Itoa(ldap.ConnectionTimeout),
+		},
+		"readTimeout": {
+			strconv.Itoa(ldap.ReadTimeout),
+		},
+		"pagination": {
+			strconv.FormatBool(ldap.Pagination),
+		},
+		"batchSizeForSync": {
+			strconv.Itoa(ldap.BatchSizeForSync),
+		},
+		"fullSyncPeriod": {
+			strconv.Itoa(ldap.FullSyncPeriod),
+		},
+		"changedSyncPeriod": {
+			strconv.Itoa(ldap.ChangedSyncPeriod),
+		},
+	}
+
+	if ldap.BindDn != "" {
+		componentConfig["bindDn"][0] = ldap.BindDn
+	}
+
+	if ldap.BindCredential != "" {
+		componentConfig["bindCredential"][0] = ldap.BindCredential
+	}
+
+	if ldap.CustomUserSearchFilter != "" {
+		componentConfig["customUserSearchFilter"][0] = ldap.CustomUserSearchFilter
+	}
+
 	return &userFederationComponent{
 		Id:           ldap.Id,
 		Name:         ldap.Name,
 		ProviderId:   "ldap",
 		ProviderType: "org.keycloak.storage.UserStorageProvider",
 		ParentId:     ldap.RealmId,
-		Config: map[string][]string{
-			"cachePolicy": {
-				ldap.CachePolicy,
-			},
-			"enabled": {
-				strconv.FormatBool(ldap.Enabled),
-			},
-			"priority": {
-				strconv.Itoa(ldap.Priority),
-			},
-			"importEnabled": {
-				strconv.FormatBool(ldap.ImportEnabled),
-			},
-			"editMode": {
-				ldap.EditMode,
-			},
-			"syncRegistrations": {
-				strconv.FormatBool(ldap.SyncRegistrations),
-			},
-			"vendor": {
-				ldap.Vendor,
-			},
-			"usernameLDAPAttribute": {
-				ldap.UsernameLDAPAttribute,
-			},
-			"rdnLDAPAttribute": {
-				ldap.RdnLDAPAttribute,
-			},
-			"uuidLDAPAttribute": {
-				ldap.UuidLDAPAttribute,
-			},
-			"userObjectClasses": {
-				strings.Join(ldap.UserObjectClasses, ", "),
-			},
-			"connectionUrl": {
-				ldap.ConnectionUrl,
-			},
-			"usersDn": {
-				ldap.UsersDn,
-			},
-			"authType": {
-				ldap.AuthType,
-			},
-			"bindDn": {
-				ldap.BindDn,
-			},
-			"bindCredential": {
-				ldap.BindCredential,
-			},
-			"customUserSearchFilter": {
-				ldap.CustomUserSearchFilter,
-			},
-			"searchScope": {
-				ldap.SearchScope,
-			},
-			"validatePasswordPolicy": {
-				strconv.FormatBool(ldap.ValidatePasswordPolicy),
-			},
-			"useTruststoreSpi": {
-				ldap.UseTruststoreSpi,
-			},
-			"connectionTimeout": {
-				strconv.Itoa(ldap.ConnectionTimeout),
-			},
-			"readTimeout": {
-				strconv.Itoa(ldap.ReadTimeout),
-			},
-			"pagination": {
-				strconv.FormatBool(ldap.Pagination),
-			},
-			"batchSizeForSync": {
-				strconv.Itoa(ldap.BatchSizeForSync),
-			},
-			"fullSyncPeriod": {
-				strconv.Itoa(ldap.FullSyncPeriod),
-			},
-			"changedSyncPeriod": {
-				strconv.Itoa(ldap.ChangedSyncPeriod),
-			},
-		},
+		Config:       componentConfig,
 	}
 }
 
@@ -205,7 +223,7 @@ func convertToLdapUserFederation(component *userFederationComponent) (*LdapUserF
 		return nil, err
 	}
 
-	return &LdapUserFederation{
+	ldap := &LdapUserFederation{
 		Id:      component.Id,
 		Name:    component.Name,
 		RealmId: component.ParentId,
@@ -241,7 +259,21 @@ func convertToLdapUserFederation(component *userFederationComponent) (*LdapUserF
 		ChangedSyncPeriod: changedSyncPeriod,
 
 		CachePolicy: component.getConfig("cachePolicy"),
-	}, nil
+	}
+
+	if bindDn := component.getConfig("bindDn"); bindDn != "" {
+		ldap.BindDn = bindDn
+	}
+
+	if bindCredential := component.getConfig("bindCredential"); bindCredential != "" {
+		ldap.BindCredential = bindCredential
+	}
+
+	if customUserSearchFilter := component.getConfig("customUserSearchFilter"); customUserSearchFilter != "" {
+		ldap.CustomUserSearchFilter = customUserSearchFilter
+	}
+
+	return ldap, nil
 }
 
 func (keycloakClient *KeycloakClient) NewLdapUserFederation(ldapUserFederation *LdapUserFederation) error {
