@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -241,4 +242,34 @@ func convertToLdapUserFederation(component *userFederationComponent) (*LdapUserF
 
 		CachePolicy: component.getConfig("cachePolicy"),
 	}, nil
+}
+
+func (keycloakClient *KeycloakClient) NewLdapUserFederation(ldapUserFederation *LdapUserFederation) error {
+	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), convertToUserFederationComponent(ldapUserFederation))
+	if err != nil {
+		return err
+	}
+
+	ldapUserFederation.Id = getIdFromLocationHeader(location)
+
+	return nil
+}
+
+func (keycloakClient *KeycloakClient) GetLdapUserFederation(realmId, id string) (*LdapUserFederation, error) {
+	var component *userFederationComponent
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component)
+	if err != nil {
+		return nil, err
+	}
+
+	return convertToLdapUserFederation(component)
+}
+
+func (keycloakClient *KeycloakClient) UpdateLdapUserFederation(ldapUserFederation *LdapUserFederation) error {
+	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapUserFederation.RealmId, ldapUserFederation.Id), convertToUserFederationComponent(ldapUserFederation))
+}
+
+func (keycloakClient *KeycloakClient) DeleteLdapUserFederation(realmId, id string) error {
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id))
 }
