@@ -23,3 +23,22 @@ resource "keycloak_client" "test-client" {
   client_id = "test-client"
   realm_id  = "${keycloak_realm.test.id}"
 }
+
+resource "keycloak_ldap_user_federation" "openldap" {
+  name                    = "openldap"
+  realm_id                = "${keycloak_realm.test.id}"
+
+  enabled                 = true
+
+  username_ldap_attribute = "cn"
+  rdn_ldap_attribute      = "cn"
+  uuid_ldap_attribute     = "entryDN"
+  user_object_classes     = [
+    "simpleSecurityObject",
+    "organiationalRole"
+  ]
+  connection_url          = "ldap://openldap"
+  users_dn                = "dc=example,dc=org"
+  bind_dn                 = "admin"
+  bind_credential         = "admin"
+}
