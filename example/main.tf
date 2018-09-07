@@ -6,16 +6,16 @@ provider "keycloak" {
 
 resource "keycloak_realm" "test" {
   realm                          = "test"
-  enabled                        = false
+  enabled                        = true
   display_name                   = "foo"
 
-  registration_allowed           = true
+  registration_allowed           = false
   registration_email_as_username = false
   edit_username_allowed          = false
-  reset_password_allowed         = true
+  reset_password_allowed         = false
   remember_me                    = false
-  verify_email                   = true
-  login_with_email_allowed       = true
+  verify_email                   = false
+  login_with_email_allowed       = false
   duplicate_emails_allowed       = false
 }
 
@@ -26,7 +26,7 @@ resource "keycloak_client" "test-client" {
 
 resource "keycloak_ldap_user_federation" "openldap" {
   name                    = "openldap"
-  realm_id                = "${keycloak_realm.test.id}"
+  realm_id                = "master"
 
   enabled                 = true
 
@@ -35,10 +35,10 @@ resource "keycloak_ldap_user_federation" "openldap" {
   uuid_ldap_attribute     = "entryDN"
   user_object_classes     = [
     "simpleSecurityObject",
-    "organiationalRole"
+    "organizationalRole"
   ]
   connection_url          = "ldap://openldap"
   users_dn                = "dc=example,dc=org"
-  bind_dn                 = "admin"
+  bind_dn                 = "cn=admin,dc=example,dc=org"
   bind_credential         = "admin"
 }
