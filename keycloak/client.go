@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"fmt"
-	"strings"
 )
 
 type Client struct {
@@ -17,7 +16,7 @@ func (keycloakClient *KeycloakClient) NewClient(client *Client) error {
 		return err
 	}
 
-	client.Id = parseClientLocation(location)
+	client.Id = getIdFromLocationHeader(location)
 
 	return nil
 }
@@ -41,10 +40,4 @@ func (keycloakClient *KeycloakClient) UpdateClient(client *Client) error {
 
 func (keycloakClient *KeycloakClient) DeleteClient(realmId, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s", realmId, id))
-}
-
-func parseClientLocation(location string) string {
-	parts := strings.Split(location, "/")
-
-	return parts[len(parts)-1]
 }
