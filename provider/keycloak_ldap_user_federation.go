@@ -31,7 +31,8 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			},
 			"priority": {
 				Type:        schema.TypeInt,
-				Required:    true,
+				Optional:    true,
+				Default:     0,
 				Description: "Priority of this provider when looking up users. Lower values are first.",
 			},
 
@@ -43,7 +44,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			},
 			"edit_mode": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				Default:      "READ_ONLY",
 				ValidateFunc: validation.StringInSlice([]string{"READ_ONLY", "WRITABLE", "UNSYNCED"}, false),
 				Description:  "READ_ONLY and WRITABLE are self-explanatory. UNSYNCED allowed user data to be imported but not synced back to LDAP.",
