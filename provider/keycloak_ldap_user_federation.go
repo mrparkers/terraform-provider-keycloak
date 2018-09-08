@@ -102,6 +102,9 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return old != new && new != "**********"
+				},
 			},
 			"custom_user_search_filter": {
 				Type:     schema.TypeString,
