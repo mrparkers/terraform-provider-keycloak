@@ -17,9 +17,16 @@ jobs:
       KEYCLOAK_URL: "http://localhost:8080"
     steps:
     - checkout
+    - restore_cache:
+        keys:
+          - go-mod-cache
+    - run: go mod download -dir ~/.cache/go-build
+    - save_cache:
+        key: go-mod-cache
+        paths:
+          - ~/.cache/go-build
     - run:
         command: |
-          go mod download
           ./scripts/wait-for-local-keycloak.sh
           ./scripts/create-terraform-client.sh
           make testacc
