@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
 	"testing"
 )
 
@@ -21,6 +22,75 @@ func TestAccKeycloakLdapUserFederation_basic(t *testing.T) {
 			{
 				Config: testKeycloakLdapUserFederation_basic(realmName, ldapName),
 				Check:  testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakLdapUserFederation_editModeValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	ldapName := "terraform-" + acctest.RandString(10)
+	validEditModes := []string{"READ_ONLY", "WRITABLE", "UNSYNCED"}
+	editMode := randomStringInSlice(validEditModes)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("edit_mode", realmName, ldapName, editMode),
+				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "edit_mode", editMode),
+			},
+			{
+				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("edit_mode", realmName, ldapName, acctest.RandString(10)),
+				ExpectError: regexp.MustCompile("expected edit_mode to be one of .+ got .+"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakLdapUserFederation_vendorValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	ldapName := "terraform-" + acctest.RandString(10)
+	validVendors := []string{"OTHER", "EDIRECTORY", "AD", "RHDS", "TIVOLI"}
+	vendor := randomStringInSlice(validVendors)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("vendor", realmName, ldapName, vendor),
+				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "vendor", vendor),
+			},
+			{
+				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("vendor", realmName, ldapName, acctest.RandString(10)),
+				ExpectError: regexp.MustCompile("expected vendor to be one of .+ got .+"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakLdapUserFederation_searchScopeValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	ldapName := "terraform-" + acctest.RandString(10)
+	validSearchScopes := []string{"ONE_LEVEL", "SUBTREE"}
+	searchScope := randomStringInSlice(validSearchScopes)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("search_scope", realmName, ldapName, searchScope),
+				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "search_scope", searchScope),
+			},
+			{
+				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("search_scope", realmName, ldapName, acctest.RandString(10)),
+				ExpectError: regexp.MustCompile("expected search_scope to be one of .+ got .+"),
 			},
 		},
 	})
@@ -103,4 +173,33 @@ resource "keycloak_ldap_user_federation" "openldap" {
   bind_credential         = "admin"
 }
 	`, realm, ldap)
+}
+
+func testKeycloakLdapUserFederation_basicWithAttrValidation(attr, realm, ldap, val string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+  name                    = "%s"
+  realm_id                = "master"
+
+  enabled                 = true
+
+  %s                      = "%s"
+
+  username_ldap_attribute = "cn"
+  rdn_ldap_attribute      = "cn"
+  uuid_ldap_attribute     = "entryDN"
+  user_object_classes     = [
+    "simpleSecurityObject",
+    "organizationalRole"
+  ]
+  connection_url          = "ldap://openldap"
+  users_dn                = "dc=example,dc=org"
+  bind_dn                 = "cn=admin,dc=example,dc=org"
+  bind_credential         = "admin"
+}
+	`, realm, ldap, attr, val)
 }
