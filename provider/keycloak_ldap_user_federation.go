@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -163,16 +164,18 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Description: "The number of users to sync within a single transaction.",
 			},
 			"full_sync_period": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     -1,
-				Description: "How frequently Keycloak should sync all LDAP users, in seconds. Omit this property to disable periodic full sync.",
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      -1,
+				ValidateFunc: validateSyncPeriod,
+				Description:  "How frequently Keycloak should sync all LDAP users, in seconds. Omit this property to disable periodic full sync.",
 			},
 			"changed_sync_period": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     -1,
-				Description: "How frequently Keycloak should sync changed LDAP users, in seconds. Omit this property to disable periodic changed users sync.",
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      -1,
+				ValidateFunc: validateSyncPeriod,
+				Description:  "How frequently Keycloak should sync changed LDAP users, in seconds. Omit this property to disable periodic changed users sync.",
 			},
 
 			"cache_policy": {
@@ -183,6 +186,20 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			},
 		},
 	}
+}
+
+func validateSyncPeriod(i interface{}, k string) (s []string, errs []error) {
+	num, ok := i.(int)
+	if !ok {
+		errs = append(errs, fmt.Errorf("expected type of %s to be int", k))
+	}
+	log.Printf("[DEBUG] validate %s, num is %d", k, num)
+
+	if num < 1 && num != -1 {
+		errs = append(errs, fmt.Errorf("expected %s to be either -1 (disabled), or greater than zero, got %d", k, num))
+	}
+
+	return
 }
 
 func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUserFederation {

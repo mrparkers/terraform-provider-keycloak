@@ -6,7 +6,9 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"log"
 	"regexp"
+	"strconv"
 	"testing"
 )
 
@@ -191,6 +193,51 @@ func TestAccKeycloakLdapUserFederation_bindValidation(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakLdapUserFederation_syncPeriodValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	ldapName := "terraform-" + acctest.RandString(10)
+
+	validSyncPeriod := acctest.RandIntRange(1, 3600)
+
+	invalidNegativeSyncPeriod := -acctest.RandIntRange(1, 3600)
+
+	log.Printf("[DEBUG] validSyncPeriod %d", validSyncPeriod)
+	log.Printf("[DEBUG] invalidNegativeSyncPeriod %d", invalidNegativeSyncPeriod)
+
+	invalidZeroSyncPeriod := 0
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakLdapUserFederation_basicWithSyncPeriod(realmName, ldapName, validSyncPeriod, invalidNegativeSyncPeriod),
+				ExpectError: regexp.MustCompile(`expected .+ to be either -1 \(disabled\), or greater than zero`),
+			},
+			{
+				Config:      testKeycloakLdapUserFederation_basicWithSyncPeriod(realmName, ldapName, invalidNegativeSyncPeriod, validSyncPeriod),
+				ExpectError: regexp.MustCompile(`expected .+ to be either -1 \(disabled\), or greater than zero`),
+			},
+			{
+				Config:      testKeycloakLdapUserFederation_basicWithSyncPeriod(realmName, ldapName, validSyncPeriod, invalidZeroSyncPeriod),
+				ExpectError: regexp.MustCompile(`expected .+ to be either -1 \(disabled\), or greater than zero`),
+			},
+			{
+				Config:      testKeycloakLdapUserFederation_basicWithSyncPeriod(realmName, ldapName, invalidZeroSyncPeriod, validSyncPeriod),
+				ExpectError: regexp.MustCompile(`expected .+ to be either -1 \(disabled\), or greater than zero`),
+			},
+			{
+				Config: testKeycloakLdapUserFederation_basicWithSyncPeriod(realmName, ldapName, validSyncPeriod, validSyncPeriod),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "full_sync_period", strconv.Itoa(validSyncPeriod)),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "changed_sync_period", strconv.Itoa(validSyncPeriod)),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakLdapUserFederationExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getLdapUserFederationFromState(s, resourceName)
@@ -351,4 +398,34 @@ resource "keycloak_ldap_user_federation" "openldap" {
   users_dn                = "dc=example,dc=org"
 }
 	`, realm, ldap)
+}
+
+func testKeycloakLdapUserFederation_basicWithSyncPeriod(realm, ldap string, fullSyncPeriod, changedSyncPeriod int) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+  name                    = "%s"
+  realm_id                = "${keycloak_realm.realm.id}"
+
+  enabled                 = true
+
+  username_ldap_attribute = "cn"
+  rdn_ldap_attribute      = "cn"
+  uuid_ldap_attribute     = "entryDN"
+  user_object_classes     = [
+    "simpleSecurityObject",
+    "organizationalRole"
+  ]
+  connection_url          = "ldap://openldap"
+  users_dn                = "dc=example,dc=org"
+  bind_dn                 = "cn=admin,dc=example,dc=org"
+  bind_credential         = "admin"
+
+  full_sync_period        = %d
+  changed_sync_period     = %d
+}
+	`, realm, ldap, fullSyncPeriod, changedSyncPeriod)
 }
