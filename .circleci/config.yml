@@ -19,12 +19,12 @@ jobs:
     - checkout
     - restore_cache:
         keys:
-          - go-mod-cache
-    - run: go mod download -dir ~/.cache/go-build
+        - go-mod-cache
+    - run: go mod download
     - save_cache:
         key: go-mod-cache
         paths:
-          - ~/.cache/go-build
+        - $GOPATH/pkg/mod
     - run:
         command: |
           ./scripts/wait-for-local-keycloak.sh
