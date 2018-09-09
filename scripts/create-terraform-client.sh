@@ -26,6 +26,15 @@ function post() {
         "${KEYCLOAK_URL}/auth/admin${1}"
 }
 
+function put() {
+    curl --fail \
+        -X PUT \
+        -H "Authorization: bearer ${accessToken}" \
+        -H "Content-Type: application/json" \
+        -d "${2}" \
+        "${KEYCLOAK_URL}/auth/admin${1}"
+}
+
 function get() {
     curl --fail --silent \
         -H "Authorization: bearer ${accessToken}" \
@@ -66,5 +75,23 @@ serviceAccountAdminRoleMapping=$(jq -n "[{
 }]")
 
 post "/realms/master/users/${terraformClientServiceAccountId}/role-mappings/realm" "${serviceAccountAdminRoleMapping}"
+
+echo "Extending access token lifespan"
+
+masterRealmExtendAccessToken=$(jq -n "{
+    accessTokenLifespan: 86400,
+    accessTokenLifespanForImplicitFlow: 86400,
+    ssoSessionIdleTimeout: 86400,
+    ssoSessionMaxLifespan: 86400,
+    offlineSessionIdleTimeout: 86400,
+    offlineSessionMaxLifespan: 5184000,
+    accessCodeLifespan: 86400,
+    accessCodeLifespanUserAction: 86400,
+    accessCodeLifespanLogin: 86400,
+    actionTokenGeneratedByAdminLifespan: 86400,
+    actionTokenGeneratedByUserLifespan: 86400
+}")
+
+put "/realms/master" "${masterRealmExtendAccessToken}"
 
 echo "Done"
