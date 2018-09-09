@@ -27,6 +27,34 @@ func TestAccKeycloakLdapUserFederation_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
+	firstRealm := "terraform-" + acctest.RandString(10)
+	secondRealm := "terraform-" + acctest.RandString(10)
+	ldapName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserFederation_basic(firstRealm, ldapName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "realm_id", firstRealm),
+				),
+			},
+			{
+				Config: testKeycloakLdapUserFederation_basic(secondRealm, ldapName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "realm_id", secondRealm),
+				),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakLdapUserFederation_editModeValidation(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	ldapName := "terraform-" + acctest.RandString(10)
@@ -223,7 +251,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_ldap_user_federation" "openldap" {
   name                    = "%s"
-  realm_id                = "master"
+  realm_id                = "${keycloak_realm.realm.id}"
 
   enabled                 = true
 
@@ -250,7 +278,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_ldap_user_federation" "openldap" {
   name                    = "%s"
-  realm_id                = "master"
+  realm_id                = "${keycloak_realm.realm.id}"
 
   enabled                 = true
 
@@ -279,7 +307,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_ldap_user_federation" "openldap" {
   name                    = "%s"
-  realm_id                = "master"
+  realm_id                = "${keycloak_realm.realm.id}"
 
   enabled                 = true
 
@@ -306,7 +334,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_ldap_user_federation" "openldap" {
   name                    = "%s"
-  realm_id                = "master"
+  realm_id                = "${keycloak_realm.realm.id}"
 
   enabled                 = true
 
