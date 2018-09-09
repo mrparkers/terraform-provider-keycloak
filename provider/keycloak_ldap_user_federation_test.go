@@ -96,6 +96,52 @@ func TestAccKeycloakLdapUserFederation_searchScopeValidation(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakLdapUserFederation_useTrustStoreValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	ldapName := "terraform-" + acctest.RandString(10)
+	validUseTruststoreConfig := []string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}
+	useTrustStore := randomStringInSlice(validUseTruststoreConfig)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("use_truststore_spi", realmName, ldapName, useTrustStore),
+				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "use_truststore_spi", useTrustStore),
+			},
+			{
+				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("use_truststore_spi", realmName, ldapName, acctest.RandString(10)),
+				ExpectError: regexp.MustCompile("expected use_truststore_spi to be one of .+ got .+"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakLdapUserFederation_cachePolicyValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	ldapName := "terraform-" + acctest.RandString(10)
+	validCachePolicy := []string{"DEFAULT", "EVICT_DAILY", "EVICT_WEEKLY", "MAX_LIFESPAN", "NO_CACHE"}
+	cachePolicy := randomStringInSlice(validCachePolicy)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("cache_policy", realmName, ldapName, cachePolicy),
+				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "cache_policy", cachePolicy),
+			},
+			{
+				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("cache_policy", realmName, ldapName, acctest.RandString(10)),
+				ExpectError: regexp.MustCompile("expected cache_policy to be one of .+ got .+"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakLdapUserFederationExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getLdapUserFederationFromState(s, resourceName)
