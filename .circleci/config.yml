@@ -9,7 +9,7 @@ jobs:
         KEYCLOAK_LOGLEVEL: DEBUG
         KEYCLOAK_USER: keycloak
         KEYCLOAK_PASSWORD: password
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
     environment:
       GO111MODULE: "on"
       KEYCLOAK_CLIENT_ID: "terraform"
@@ -19,12 +19,12 @@ jobs:
     - checkout
     - restore_cache:
         keys:
-        - go-mod-cache
+        - go-cache
     - run: go mod download
     - save_cache:
-        key: go-mod-cache
+        key: go-cache
         paths:
-        - $GOPATH/pkg/mod
+        - /go/pkg
     - run:
         command: |
           ./scripts/wait-for-local-keycloak.sh
