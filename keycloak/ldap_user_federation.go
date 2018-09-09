@@ -275,6 +275,14 @@ func convertToLdapUserFederation(component *userFederationComponent) (*LdapUserF
 	return ldap, nil
 }
 
+func (ldap *LdapUserFederation) Validate() error {
+	if (ldap.BindDn == "" && ldap.BindCredential != "") || (ldap.BindDn != "" && ldap.BindCredential == "") {
+		return fmt.Errorf("validation error: authentication requires both BindDN and BindCredential to be set")
+	}
+
+	return nil
+}
+
 func (keycloakClient *KeycloakClient) NewLdapUserFederation(ldapUserFederation *LdapUserFederation) error {
 	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), convertToUserFederationComponent(ldapUserFederation))
 	if err != nil {

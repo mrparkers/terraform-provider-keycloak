@@ -142,6 +142,27 @@ func TestAccKeycloakLdapUserFederation_cachePolicyValidation(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakLdapUserFederation_bindValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	ldapName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakLdapUserFederation_noBindCredentialValidation(realmName, ldapName),
+				ExpectError: regexp.MustCompile("validation error: authentication requires both BindDN and BindCredential to be set"),
+			},
+			{
+				Config:      testKeycloakLdapUserFederation_nobindDnValidation(realmName, ldapName),
+				ExpectError: regexp.MustCompile("validation error: authentication requires both BindDN and BindCredential to be set"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakLdapUserFederationExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getLdapUserFederationFromState(s, resourceName)
@@ -248,4 +269,58 @@ resource "keycloak_ldap_user_federation" "openldap" {
   bind_credential         = "admin"
 }
 	`, realm, ldap, attr, val)
+}
+
+func testKeycloakLdapUserFederation_nobindDnValidation(realm, ldap string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+  name                    = "%s"
+  realm_id                = "master"
+
+  enabled                 = true
+
+  bind_credential         = "admin"
+
+  username_ldap_attribute = "cn"
+  rdn_ldap_attribute      = "cn"
+  uuid_ldap_attribute     = "entryDN"
+  user_object_classes     = [
+    "simpleSecurityObject",
+    "organizationalRole"
+  ]
+  connection_url          = "ldap://openldap"
+  users_dn                = "dc=example,dc=org"
+}
+	`, realm, ldap)
+}
+
+func testKeycloakLdapUserFederation_noBindCredentialValidation(realm, ldap string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+  name                    = "%s"
+  realm_id                = "master"
+
+  enabled                 = true
+
+  bind_dn                 = "cn=admin,dc=example,dc=org"
+
+  username_ldap_attribute = "cn"
+  rdn_ldap_attribute      = "cn"
+  uuid_ldap_attribute     = "entryDN"
+  user_object_classes     = [
+    "simpleSecurityObject",
+    "organizationalRole"
+  ]
+  connection_url          = "ldap://openldap"
+  users_dn                = "dc=example,dc=org"
+}
+	`, realm, ldap)
 }
