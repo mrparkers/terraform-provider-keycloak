@@ -36,12 +36,30 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret string) (*KeycloakClient,
 		Timeout: time.Second * 5,
 	}
 
-	accessTokenUrl := baseUrl + tokenUrl
+	keycloakClient := KeycloakClient{
+		baseUrl: baseUrl,
+		clientCredentials: &ClientCredentials{
+			ClientId:     clientId,
+			ClientSecret: clientSecret,
+		},
+		httpClient: httpClient,
+	}
+
+	err := keycloakClient.login()
+	if err != nil {
+		return nil, err
+	}
+
+	return &keycloakClient, nil
+}
+
+func (keycloakClient *KeycloakClient) login() error {
+	accessTokenUrl := keycloakClient.baseUrl + tokenUrl
 
 	accessTokenData := url.Values{}
 
-	accessTokenData.Set("client_id", clientId)
-	accessTokenData.Set("client_secret", clientSecret)
+	accessTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+	accessTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
 	accessTokenData.Set("grant_type", "client_credentials")
 
 	log.Printf("[DEBUG] Login request: %s", accessTokenData.Encode())
@@ -49,9 +67,9 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret string) (*KeycloakClient,
 	accessTokenRequest, _ := http.NewRequest(http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
 	accessTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	accessTokenResponse, err := httpClient.Do(accessTokenRequest)
+	accessTokenResponse, err := keycloakClient.httpClient.Do(accessTokenRequest)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	defer accessTokenResponse.Body.Close()
@@ -64,17 +82,14 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret string) (*KeycloakClient,
 	err = json.Unmarshal(body, &clientCredentials)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	clientCredentials.ClientId = clientId
-	clientCredentials.ClientSecret = clientSecret
+	keycloakClient.clientCredentials.AccessToken = clientCredentials.AccessToken
+	keycloakClient.clientCredentials.RefreshToken = clientCredentials.RefreshToken
+	keycloakClient.clientCredentials.TokenType = clientCredentials.TokenType
 
-	return &KeycloakClient{
-		baseUrl:           baseUrl,
-		clientCredentials: &clientCredentials,
-		httpClient:        httpClient,
-	}, nil
+	return nil
 }
 
 func (keycloakClient *KeycloakClient) refresh() error {
@@ -102,6 +117,15 @@ func (keycloakClient *KeycloakClient) refresh() error {
 	body, _ := ioutil.ReadAll(refreshTokenResponse.Body)
 
 	log.Printf("[DEBUG] Refresh response: %s", body)
+
+	log.Printf("[DEBUG] status: %d", refreshTokenResponse.StatusCode)
+
+	// Handle 401 "User or client no longer has role permissions for client key" until I better understand why that happens in the first place
+	if refreshTokenResponse.StatusCode == http.StatusUnauthorized {
+		log.Printf("[DEBUG] Unexpected 401, attemting to log in again")
+
+		return keycloakClient.login()
+	}
 
 	var clientCredentials ClientCredentials
 	err = json.Unmarshal(body, &clientCredentials)
