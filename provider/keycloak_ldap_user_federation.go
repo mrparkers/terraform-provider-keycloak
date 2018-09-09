@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"log"
 )
 
 func resourceKeycloakLdapUserFederation() *schema.Resource {
@@ -102,8 +103,8 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return old != new && new != "**********"
+				DiffSuppressFunc: func(_, remoteBindCredential, _ string, _ *schema.ResourceData) bool {
+					return remoteBindCredential == "**********"
 				},
 			},
 			"custom_user_search_filter": {
@@ -176,6 +177,9 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 	for _, userObjectClass := range data.Get("user_object_classes").([]interface{}) {
 		userObjectClasses = append(userObjectClasses, userObjectClass.(string))
 	}
+
+	log.Printf("[DEBUG] bind_dn: %s", data.Get("bind_dn").(string))
+	log.Printf("[DEBUG] bind_credential: %s", data.Get("bind_credential").(string))
 
 	return &keycloak.LdapUserFederation{
 		Id:      data.Id(),
