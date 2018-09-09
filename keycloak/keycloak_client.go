@@ -118,11 +118,9 @@ func (keycloakClient *KeycloakClient) refresh() error {
 
 	log.Printf("[DEBUG] Refresh response: %s", body)
 
-	log.Printf("[DEBUG] status: %d", refreshTokenResponse.StatusCode)
-
 	// Handle 401 "User or client no longer has role permissions for client key" until I better understand why that happens in the first place
-	if refreshTokenResponse.StatusCode == http.StatusUnauthorized {
-		log.Printf("[DEBUG] Unexpected 401, attemting to log in again")
+	if refreshTokenResponse.StatusCode == http.StatusBadRequest {
+		log.Printf("[DEBUG] Unexpected 400, attemting to log in again")
 
 		return keycloakClient.login()
 	}
