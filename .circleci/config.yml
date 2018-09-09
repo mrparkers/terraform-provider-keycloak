@@ -1,0 +1,25 @@
+version: 2
+jobs:
+  build:
+    docker:
+    - image: circleci/golang:1.11
+    - image: jboss/keycloak:4.2.1.Final
+      environment:
+        DB_VENDOR: H2
+        KEYCLOAK_LOGLEVEL: DEBUG
+        KEYCLOAK_USER: keycloak
+        KEYCLOAK_PASSWORD: password
+    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    environment:
+      GO111MODULE: "on"
+      KEYCLOAK_CLIENT_ID: "terraform"
+      KEYCLOAK_CLIENT_SECRET: "884e0f95-0f42-4a63-9b1f-94274655669e"
+      KEYCLOAK_URL: "http://localhost:8080"
+    steps:
+    - checkout
+    - run:
+        command: |
+          go mod download
+          ./scripts/wait-for-local-keycloak.sh
+          ./scripts/create-terraform-client.sh
+          make testacc
