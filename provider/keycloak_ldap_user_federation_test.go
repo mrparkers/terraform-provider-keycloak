@@ -39,12 +39,12 @@ func TestAccKeycloakLdapUserFederation_editModeValidation(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("edit_mode", realmName, ldapName, editMode),
-				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "edit_mode", editMode),
-			},
-			{
 				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("edit_mode", realmName, ldapName, acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("expected edit_mode to be one of .+ got .+"),
+			},
+			{
+				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("edit_mode", realmName, ldapName, editMode),
+				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "edit_mode", editMode),
 			},
 		},
 	})
@@ -62,12 +62,12 @@ func TestAccKeycloakLdapUserFederation_vendorValidation(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("vendor", realmName, ldapName, vendor),
-				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "vendor", vendor),
-			},
-			{
 				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("vendor", realmName, ldapName, acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("expected vendor to be one of .+ got .+"),
+			},
+			{
+				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("vendor", realmName, ldapName, vendor),
+				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "vendor", vendor),
 			},
 		},
 	})
@@ -85,12 +85,12 @@ func TestAccKeycloakLdapUserFederation_searchScopeValidation(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("search_scope", realmName, ldapName, searchScope),
-				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "search_scope", searchScope),
-			},
-			{
 				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("search_scope", realmName, ldapName, acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("expected search_scope to be one of .+ got .+"),
+			},
+			{
+				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("search_scope", realmName, ldapName, searchScope),
+				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "search_scope", searchScope),
 			},
 		},
 	})
@@ -108,12 +108,12 @@ func TestAccKeycloakLdapUserFederation_useTrustStoreValidation(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("use_truststore_spi", realmName, ldapName, useTrustStore),
-				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "use_truststore_spi", useTrustStore),
-			},
-			{
 				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("use_truststore_spi", realmName, ldapName, acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("expected use_truststore_spi to be one of .+ got .+"),
+			},
+			{
+				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("use_truststore_spi", realmName, ldapName, useTrustStore),
+				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "use_truststore_spi", useTrustStore),
 			},
 		},
 	})
@@ -131,12 +131,12 @@ func TestAccKeycloakLdapUserFederation_cachePolicyValidation(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("cache_policy", realmName, ldapName, cachePolicy),
-				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "cache_policy", cachePolicy),
-			},
-			{
 				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("cache_policy", realmName, ldapName, acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("expected cache_policy to be one of .+ got .+"),
+			},
+			{
+				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("cache_policy", realmName, ldapName, cachePolicy),
+				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "cache_policy", cachePolicy),
 			},
 		},
 	})
