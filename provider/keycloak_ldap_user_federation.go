@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"log"
+	"time"
 )
 
 func resourceKeycloakLdapUserFederation() *schema.Resource {
@@ -73,7 +74,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			"rdn_ldap_attribute": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Name of the LDAP attribute to use as the relative distinguished name..",
+				Description: "Name of the LDAP attribute to use as the relative distinguished name.",
 			},
 			"uuid_ldap_attribute": {
 				Type:        schema.TypeString,
@@ -85,19 +86,22 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Required:    true,
 				MinItems:    1,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: "All values of LDAP objectClass attribute for users in LDAP",
+				Description: "All values of LDAP objectClass attribute for users in LDAP.",
 			},
 			"connection_url": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Connection URL to the LDAP server.",
 			},
 			"users_dn": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Full DN of LDAP tree where your users are.",
 			},
 			"bind_dn": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "DN of LDAP admin, which will be used by Keycloak to access LDAP server.",
 			},
 			"bind_credential": {
 				Type:      schema.TypeString,
@@ -106,22 +110,26 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				DiffSuppressFunc: func(_, remoteBindCredential, _ string, _ *schema.ResourceData) bool {
 					return remoteBindCredential == "**********"
 				},
+				Description: "Password of LDAP admin.",
 			},
 			"custom_user_search_filter": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Additional LDAP filter for filtering searched users. Must begin with '(' and end with ')'.",
 			},
 			"search_scope": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "ONE_LEVEL",
 				ValidateFunc: validation.StringInSlice([]string{"ONE_LEVEL", "SUBTREE"}, false),
+				Description:  "ONE_LEVEL: only search for users in the DN specified by user_dn. SUBTREE: search entire LDAP subtree.",
 			},
 
 			"validate_password_policy": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When true, Keycloak will validate passwords using the realm policy before updating it.",
 			},
 			"use_truststore_spi": {
 				Type:         schema.TypeString,
@@ -130,35 +138,41 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}, false),
 			},
 			"connection_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  30,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     10 * time.Second,
+				Description: "LDAP connection timeout in miliseconds",
 			},
 			"read_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  30,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     5 * time.Second,
+				Description: "LDAP read timeout in miliseconds",
 			},
 			"pagination": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "When true, Keycloak assumes the LDAP server supports pagination.",
 			},
 
 			"batch_size_for_sync": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  1000,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     1000,
+				Description: "The number of users to sync within a single transaction.",
 			},
 			"full_sync_period": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  -1,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     -1,
+				Description: "How frequently Keycloak should sync all LDAP users, in seconds. Omit this property to disable periodic full sync.",
 			},
 			"changed_sync_period": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  -1,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     -1,
+				Description: "How frequently Keycloak should sync changed LDAP users, in seconds. Omit this property to disable periodic changed users sync.",
 			},
 
 			"cache_policy": {
