@@ -9,6 +9,7 @@ import (
 	"log"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -52,6 +53,75 @@ func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
 					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "realm_id", secondRealm),
 				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	firstEnabled := randomBool()
+	firstValidatePasswordPolicy := randomBool()
+	firstPagination := randomBool()
+
+	firstLdap := &keycloak.LdapUserFederation{
+		RealmId:                realmName,
+		Name:                   "terraform-" + acctest.RandString(10),
+		Enabled:                firstEnabled,
+		UsernameLDAPAttribute:  acctest.RandString(10),
+		UuidLDAPAttribute:      acctest.RandString(10),
+		UserObjectClasses:      []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
+		ConnectionUrl:          "ldap://" + acctest.RandString(10),
+		UsersDn:                acctest.RandString(10),
+		BindDn:                 acctest.RandString(10),
+		BindCredential:         acctest.RandString(10),
+		SearchScope:            randomStringInSlice([]string{"ONE_LEVEL", "SUBTREE"}),
+		ValidatePasswordPolicy: firstValidatePasswordPolicy,
+		UseTruststoreSpi:       randomStringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}),
+		ConnectionTimeout:      acctest.RandIntRange(1, 3600),
+		ReadTimeout:            acctest.RandIntRange(1, 3600),
+		Pagination:             firstPagination,
+		BatchSizeForSync:       acctest.RandIntRange(50, 10000),
+		FullSyncPeriod:         acctest.RandIntRange(1, 3600),
+		ChangedSyncPeriod:      acctest.RandIntRange(1, 3600),
+		CachePolicy:            randomStringInSlice([]string{"DEFAULT", "EVICT_DAILY", "EVICT_WEEKLY", "MAX_LIFESPAN", "NO_CACHE"}),
+	}
+
+	secondLdap := &keycloak.LdapUserFederation{
+		RealmId:                realmName,
+		Name:                   "terraform-" + acctest.RandString(10),
+		Enabled:                !firstEnabled,
+		UsernameLDAPAttribute:  acctest.RandString(10),
+		UuidLDAPAttribute:      acctest.RandString(10),
+		UserObjectClasses:      []string{acctest.RandString(10)},
+		ConnectionUrl:          "ldap://" + acctest.RandString(10),
+		UsersDn:                acctest.RandString(10),
+		BindDn:                 acctest.RandString(10),
+		BindCredential:         acctest.RandString(10),
+		SearchScope:            randomStringInSlice([]string{"ONE_LEVEL", "SUBTREE"}),
+		ValidatePasswordPolicy: !firstValidatePasswordPolicy,
+		UseTruststoreSpi:       randomStringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}),
+		ConnectionTimeout:      acctest.RandIntRange(1, 3600),
+		ReadTimeout:            acctest.RandIntRange(1, 3600),
+		Pagination:             !firstPagination,
+		BatchSizeForSync:       acctest.RandIntRange(50, 10000),
+		FullSyncPeriod:         acctest.RandIntRange(1, 3600),
+		ChangedSyncPeriod:      acctest.RandIntRange(1, 3600),
+		CachePolicy:            randomStringInSlice([]string{"DEFAULT", "EVICT_DAILY", "EVICT_WEEKLY", "MAX_LIFESPAN", "NO_CACHE"}),
+	}
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserFederation_basicFromInterface(firstLdap),
+				Check:  testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
+			},
+			{
+				Config: testKeycloakLdapUserFederation_basicFromInterface(secondLdap),
+				Check:  testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
 			},
 		},
 	})
@@ -315,6 +385,51 @@ resource "keycloak_ldap_user_federation" "openldap" {
   bind_credential         = "admin"
 }
 	`, realm, ldap)
+}
+
+func testKeycloakLdapUserFederation_basicFromInterface(ldap *keycloak.LdapUserFederation) string {
+	var userObjectClassesTfStrings []string
+
+	for _, userObjectClass := range ldap.UserObjectClasses {
+		userObjectClassesTfStrings = append(userObjectClassesTfStrings, fmt.Sprintf(`"%s"`, userObjectClass))
+	}
+
+	userObjectClassTfString := strings.Join(userObjectClassesTfStrings, ", ")
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+  name                     = "%s"
+  realm_id                 = "${keycloak_realm.realm.id}"
+
+  enabled                  = %t
+
+  username_ldap_attribute  = "%s"
+  rdn_ldap_attribute       = "%s"
+  uuid_ldap_attribute      = "%s"
+  user_object_classes      = [ %s ]
+  connection_url           = "%s"
+  users_dn                 = "%s"
+  bind_dn                  = "%s"
+  bind_credential          = "%s"
+  search_scope             = "%s"
+
+  validate_password_policy = %t
+  use_truststore_spi       = "%s"
+  connection_timeout       = %d
+  read_timeout             = %d
+  pagination               = %t
+
+  batch_size_for_sync      = %d
+  full_sync_period         = %d
+  changed_sync_period      = %d
+
+  cache_policy             = "%s"
+}
+	`, ldap.RealmId, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, userObjectClassTfString, ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.ValidatePasswordPolicy, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.CachePolicy)
 }
 
 func testKeycloakLdapUserFederation_basicWithAttrValidation(attr, realm, ldap, val string) string {
