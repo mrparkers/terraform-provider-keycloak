@@ -5,18 +5,9 @@ provider "keycloak" {
 }
 
 resource "keycloak_realm" "test" {
-  realm                          = "test"
-  enabled                        = true
-  display_name                   = "foo"
-
-  registration_allowed           = false
-  registration_email_as_username = false
-  edit_username_allowed          = false
-  reset_password_allowed         = false
-  remember_me                    = false
-  verify_email                   = false
-  login_with_email_allowed       = false
-  duplicate_emails_allowed       = false
+  realm        = "test"
+  enabled      = true
+  display_name = "foo"
 }
 
 resource "keycloak_client" "test-client" {
@@ -41,4 +32,13 @@ resource "keycloak_ldap_user_federation" "openldap" {
   users_dn                = "dc=example,dc=org"
   bind_dn                 = "cn=admin,dc=example,dc=org"
   bind_credential         = "admin"
+}
+
+resource "keycloak_ldap_user_attribute_mapper" "test-mapper" {
+  name                    = "test mapper"
+  realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
+  ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
+
+  user_model_attribute    = "foo"
+  ldap_attribute          = "bar"
 }

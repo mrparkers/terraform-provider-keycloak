@@ -1,9 +1,8 @@
-package provider_test
+package provider
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/mrparkers/terraform-provider-keycloak/provider"
 	"os"
 	"testing"
 )
@@ -18,7 +17,7 @@ var requiredEnvironmentVariables = []string{
 }
 
 func init() {
-	testAccProvider = provider.KeycloakProvider()
+	testAccProvider = KeycloakProvider()
 	testAccProviders = map[string]terraform.ResourceProvider{
 		"keycloak": testAccProvider,
 	}

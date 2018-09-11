@@ -1,4 +1,4 @@
-package provider_test
+package provider
 
 import (
 	"github.com/hashicorp/terraform/helper/acctest"
