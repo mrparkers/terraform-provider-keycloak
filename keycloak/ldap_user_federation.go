@@ -43,7 +43,7 @@ type LdapUserFederation struct {
 	CachePolicy string
 }
 
-func convertToComponent(ldap *LdapUserFederation) *component {
+func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) *component {
 	componentConfig := map[string][]string{
 		"cachePolicy": {
 			ldap.CachePolicy,
@@ -142,7 +142,7 @@ func convertToComponent(ldap *LdapUserFederation) *component {
 	}
 }
 
-func convertToLdapUserFederation(component *component) (*LdapUserFederation, error) {
+func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFederation, error) {
 	enabled, err := strconv.ParseBool(component.getConfig("enabled"))
 	if err != nil {
 		return nil, err
@@ -267,7 +267,7 @@ func (ldap *LdapUserFederation) Validate() error {
 }
 
 func (keycloakClient *KeycloakClient) NewLdapUserFederation(ldapUserFederation *LdapUserFederation) error {
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), convertToComponent(ldapUserFederation))
+	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), convertFromLdapUserFederationToComponent(ldapUserFederation))
 	if err != nil {
 		return err
 	}
@@ -285,11 +285,11 @@ func (keycloakClient *KeycloakClient) GetLdapUserFederation(realmId, id string) 
 		return nil, err
 	}
 
-	return convertToLdapUserFederation(component)
+	return convertFromComponentToLdapUserFederation(component)
 }
 
 func (keycloakClient *KeycloakClient) UpdateLdapUserFederation(ldapUserFederation *LdapUserFederation) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapUserFederation.RealmId, ldapUserFederation.Id), convertToComponent(ldapUserFederation))
+	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapUserFederation.RealmId, ldapUserFederation.Id), convertFromLdapUserFederationToComponent(ldapUserFederation))
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapUserFederation(realmId, id string) error {
