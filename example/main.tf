@@ -8,15 +8,6 @@ resource "keycloak_realm" "test" {
   realm                          = "test"
   enabled                        = true
   display_name                   = "foo"
-
-  registration_allowed           = false
-  registration_email_as_username = false
-  edit_username_allowed          = false
-  reset_password_allowed         = false
-  remember_me                    = false
-  verify_email                   = false
-  login_with_email_allowed       = false
-  duplicate_emails_allowed       = false
 }
 
 resource "keycloak_client" "test-client" {
