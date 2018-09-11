@@ -8,9 +8,10 @@ import (
 func KeycloakProvider() *schema.Provider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			"keycloak_realm":                resourceKeycloakRealm(),
-			"keycloak_client":               resourceKeycloakClient(),
-			"keycloak_ldap_user_federation": resourceKeycloakLdapUserFederation(),
+			"keycloak_realm":                      resourceKeycloakRealm(),
+			"keycloak_client":                     resourceKeycloakClient(),
+			"keycloak_ldap_user_federation":       resourceKeycloakLdapUserFederation(),
+			"keycloak_ldap_user_attribute_mapper": resourceKeycloakLdapUserAttributeMapper(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
