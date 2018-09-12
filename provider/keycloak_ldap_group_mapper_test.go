@@ -93,6 +93,28 @@ func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testi
 	})
 }
 
+func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupsLdapFilter := "(" + acctest.RandString(10) + ")"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "groups_ldap_filter", acctest.RandString(10)),
+				ExpectError: regexp.MustCompile(`validation error: groups ldap filter must start with '\(' and end with '\)'`),
+			},
+			{
+				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "groups_ldap_filter", groupsLdapFilter),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)

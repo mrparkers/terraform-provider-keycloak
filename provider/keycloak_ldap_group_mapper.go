@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
 )
 
 var (
@@ -75,8 +76,9 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 				Required: true,
 			},
 			"groups_ldap_filter": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\(.+\)`), "validation error: groups ldap filter must start with '(' and end with ')'"),
 			},
 			"mode": {
 				Type:         schema.TypeString,
