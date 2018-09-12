@@ -156,7 +156,7 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationForceNew(t *testing.
 
 func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
-	preserveGroupInheritance := randomBool()
+	preserveGroupInheritance := true
 	ignoreMissingGroups := randomBool()
 	dropNonExistingGroupsDuringSync := randomBool()
 
@@ -169,9 +169,9 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 		PreserveGroupInheritance:        preserveGroupInheritance,
 		IgnoreMissingGroups:             ignoreMissingGroups,
 		MembershipLdapAttribute:         acctest.RandString(10),
-		MembershipAttributeType:         randomStringInSlice(keycloakLdapGroupMapperMembershipAttributeTypes),
+		MembershipAttributeType:         "DN",
 		MembershipUserLdapAttribute:     acctest.RandString(10),
-		GroupsLdapFilter:                acctest.RandString(10),
+		GroupsLdapFilter:                "(" + acctest.RandString(10) + ")",
 		Mode:                            randomStringInSlice(keycloakLdapGroupMapperModes),
 		UserRolesRetrieveStrategy:       randomStringInSlice(keycloakLdapGroupMapperUserRolesRetrieveStrategies),
 		MemberofLdapAttribute:           acctest.RandString(10),
@@ -190,7 +190,7 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 		MembershipLdapAttribute:         acctest.RandString(10),
 		MembershipAttributeType:         randomStringInSlice(keycloakLdapGroupMapperMembershipAttributeTypes),
 		MembershipUserLdapAttribute:     acctest.RandString(10),
-		GroupsLdapFilter:                acctest.RandString(10),
+		GroupsLdapFilter:                "(" + acctest.RandString(10) + ")",
 		Mode:                            randomStringInSlice(keycloakLdapGroupMapperModes),
 		UserRolesRetrieveStrategy:       randomStringInSlice(keycloakLdapGroupMapperUserRolesRetrieveStrategies),
 		MemberofLdapAttribute:           acctest.RandString(10),
