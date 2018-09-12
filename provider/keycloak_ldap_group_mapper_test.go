@@ -93,6 +93,23 @@ func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testi
 	})
 }
 
+func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	groupMapperName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakLdapGroupMapper_groupInheritanceValidation(realmName, groupMapperName),
+				ExpectError: regexp.MustCompile("validation error: group inheritance cannot be preserved while membership attribute type is UID"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakLdapGroupMapper_updateLdapUserFederation(t *testing.T) {
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
@@ -252,6 +269,51 @@ resource "keycloak_ldap_group_mapper" "group-mapper" {
   memberof_ldap_attribute        = "memberOf"
 }
 	`, realm, groupMapperName, attr, val)
+}
+
+func testKeycloakLdapGroupMapper_groupInheritanceValidation(realm, groupMapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+  name                    = "openldap"
+  realm_id                = "${keycloak_realm.realm.id}"
+
+  enabled                 = true
+
+  username_ldap_attribute = "cn"
+  rdn_ldap_attribute      = "cn"
+  uuid_ldap_attribute     = "entryDN"
+  user_object_classes     = [
+    "simpleSecurityObject",
+    "organizationalRole"
+  ]
+  connection_url          = "ldap://openldap"
+  users_dn                = "dc=example,dc=org"
+  bind_dn                 = "cn=admin,dc=example,dc=org"
+  bind_credential         = "admin"
+}
+
+resource "keycloak_ldap_group_mapper" "group-mapper" {
+  name                        = "%s"
+  realm_id                    = "${keycloak_realm.realm.id}"
+  ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
+
+  membership_attribute_type      = "UID"
+  preserve_group_inheritance     = true
+
+  ldap_groups_dn                 = "dc=example,dc=org"
+  group_name_ldap_attribute      = "cn"
+  group_object_classes           = [
+    "groupOfNames"
+  ]
+  membership_ldap_attribute      = "member"
+  membership_user_ldap_attribute = "cn"
+  memberof_ldap_attribute        = "memberOf"
+}
+	`, realm, groupMapperName)
 }
 
 func testKeycloakLdapGroupMapper_updateLdapUserFederationBefore(realmOne, realmTwo, groupMapperName string) string {

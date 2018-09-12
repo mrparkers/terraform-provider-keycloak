@@ -172,7 +172,12 @@ func resourceKeycloakLdapGroupMapperCreate(data *schema.ResourceData, meta inter
 
 	ldapGroupMapper := getLdapGroupMapperFromData(data)
 
-	err := keycloakClient.NewLdapGroupMapper(ldapGroupMapper)
+	err := ldapGroupMapper.Validate()
+	if err != nil {
+		return err
+	}
+
+	err = keycloakClient.NewLdapGroupMapper(ldapGroupMapper)
 	if err != nil {
 		return err
 	}
@@ -203,7 +208,12 @@ func resourceKeycloakLdapGroupMapperUpdate(data *schema.ResourceData, meta inter
 
 	ldapGroupMapper := getLdapGroupMapperFromData(data)
 
-	err := keycloakClient.UpdateLdapGroupMapper(ldapGroupMapper)
+	err := ldapGroupMapper.Validate()
+	if err != nil {
+		return err
+	}
+
+	err = keycloakClient.UpdateLdapGroupMapper(ldapGroupMapper)
 	if err != nil {
 		return err
 	}

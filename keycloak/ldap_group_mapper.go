@@ -144,6 +144,14 @@ func convertFromComponentToLdapGroupMapper(component *component, realmId string)
 	return ldapGroupMapper, nil
 }
 
+func (ldapGroupMapper *LdapGroupMapper) Validate() error {
+	if ldapGroupMapper.MembershipAttributeType == "UID" && ldapGroupMapper.PreserveGroupInheritance == true {
+		return fmt.Errorf("validation error: group inheritance cannot be preserved while membership attribute type is UID")
+	}
+
+	return nil
+}
+
 func (keycloakClient *KeycloakClient) NewLdapGroupMapper(ldapGroupMapper *LdapGroupMapper) error {
 	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapGroupMapper.RealmId), convertFromLdapGroupMapperToComponent(ldapGroupMapper))
 	if err != nil {
