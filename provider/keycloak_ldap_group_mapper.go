@@ -6,6 +6,12 @@ import (
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
+var (
+	keycloakLdapGroupMapperModes                       = []string{"READ_ONLY", "IMPORT", "LDAP_ONLY"}
+	keycloakLdapGroupMapperMembershipAttributeTypes    = []string{"DN", "UID"}
+	keycloakLdapGroupMapperUserRolesRetrieveStrategies = []string{"LOAD_GROUPS_BY_MEMBER_ATTRIBUTE", "GET_GROUPS_FROM_USER_MEMBEROF_ATTRIBUTE", "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE_RECURSIVELY"}
+)
+
 func resourceKeycloakLdapGroupMapper() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceKeycloakLdapGroupMapperCreate,
@@ -62,7 +68,7 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "DN",
-				ValidateFunc: validation.StringInSlice([]string{"DN", "UID"}, false),
+				ValidateFunc: validation.StringInSlice(keycloakLdapGroupMapperMembershipAttributeTypes, false),
 			},
 			"membership_user_ldap_attribute": {
 				Type:     schema.TypeString,
@@ -76,13 +82,13 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "READ_ONLY",
-				ValidateFunc: validation.StringInSlice([]string{"READ_ONLY", "IMPORT", "LDAP_ONLY"}, false),
+				ValidateFunc: validation.StringInSlice(keycloakLdapGroupMapperModes, false),
 			},
 			"user_roles_retrieve_strategy": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE",
-				ValidateFunc: validation.StringInSlice([]string{"LOAD_GROUPS_BY_MEMBER_ATTRIBUTE", "GET_GROUPS_FROM_USER_MEMBEROF_ATTRIBUTE", "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE_RECURSIVELY"}, false),
+				ValidateFunc: validation.StringInSlice(keycloakLdapGroupMapperUserRolesRetrieveStrategies, false),
 			},
 			"memberof_ldap_attribute": {
 				Type:     schema.TypeString,
