@@ -12,6 +12,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_client":                     resourceKeycloakClient(),
 			"keycloak_ldap_user_federation":       resourceKeycloakLdapUserFederation(),
 			"keycloak_ldap_user_attribute_mapper": resourceKeycloakLdapUserAttributeMapper(),
+			"keycloak_ldap_group_mapper":          resourceKeycloakLdapGroupMapper(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {

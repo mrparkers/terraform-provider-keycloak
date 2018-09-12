@@ -42,3 +42,19 @@ resource "keycloak_ldap_user_attribute_mapper" "test-mapper" {
   user_model_attribute    = "foo"
   ldap_attribute          = "bar"
 }
+
+resource "keycloak_ldap_group_mapper" "group-mapper" {
+  name                           = "group mapper"
+  realm_id                       = "${keycloak_ldap_user_federation.openldap.realm_id}"
+  ldap_user_federation_id        = "${keycloak_ldap_user_federation.openldap.id}"
+
+  ldap_groups_dn                 = "dc=example,dc=org"
+  group_name_ldap_attribute      = "cn"
+  group_object_classes           = [
+    "groupOfNames"
+  ]
+  membership_attribute_type = "DN"
+  membership_ldap_attribute      = "member"
+  membership_user_ldap_attribute = "cn"
+  memberof_ldap_attribute        = "memberOf"
+}
