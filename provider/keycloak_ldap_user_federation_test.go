@@ -9,7 +9,6 @@ import (
 	"log"
 	"regexp"
 	"strconv"
-	"strings"
 	"testing"
 )
 
@@ -388,14 +387,6 @@ resource "keycloak_ldap_user_federation" "openldap" {
 }
 
 func testKeycloakLdapUserFederation_basicFromInterface(ldap *keycloak.LdapUserFederation) string {
-	var userObjectClassesTfStrings []string
-
-	for _, userObjectClass := range ldap.UserObjectClasses {
-		userObjectClassesTfStrings = append(userObjectClassesTfStrings, fmt.Sprintf(`"%s"`, userObjectClass))
-	}
-
-	userObjectClassTfString := strings.Join(userObjectClassesTfStrings, ", ")
-
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -410,7 +401,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
   username_ldap_attribute  = "%s"
   rdn_ldap_attribute       = "%s"
   uuid_ldap_attribute      = "%s"
-  user_object_classes      = [ %s ]
+  user_object_classes      = %s
   connection_url           = "%s"
   users_dn                 = "%s"
   bind_dn                  = "%s"
@@ -429,7 +420,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
   cache_policy             = "%s"
 }
-	`, ldap.RealmId, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, userObjectClassTfString, ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.ValidatePasswordPolicy, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.CachePolicy)
+	`, ldap.RealmId, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, arrayOfStringsForTerraformResource(ldap.UserObjectClasses), ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.ValidatePasswordPolicy, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.CachePolicy)
 }
 
 func testKeycloakLdapUserFederation_basicWithAttrValidation(attr, realm, ldap, val string) string {
