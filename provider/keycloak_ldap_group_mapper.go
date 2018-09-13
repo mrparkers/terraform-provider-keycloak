@@ -4,6 +4,13 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
+)
+
+var (
+	keycloakLdapGroupMapperModes                       = []string{"READ_ONLY", "IMPORT", "LDAP_ONLY"}
+	keycloakLdapGroupMapperMembershipAttributeTypes    = []string{"DN", "UID"}
+	keycloakLdapGroupMapperUserRolesRetrieveStrategies = []string{"LOAD_GROUPS_BY_MEMBER_ATTRIBUTE", "GET_GROUPS_FROM_USER_MEMBEROF_ATTRIBUTE", "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE_RECURSIVELY"}
 )
 
 func resourceKeycloakLdapGroupMapper() *schema.Resource {
@@ -62,27 +69,28 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "DN",
-				ValidateFunc: validation.StringInSlice([]string{"DN", "UID"}, false),
+				ValidateFunc: validation.StringInSlice(keycloakLdapGroupMapperMembershipAttributeTypes, false),
 			},
 			"membership_user_ldap_attribute": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 			"groups_ldap_filter": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\(.+\)`), "validation error: groups ldap filter must start with '(' and end with ')'"),
 			},
 			"mode": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "READ_ONLY",
-				ValidateFunc: validation.StringInSlice([]string{"READ_ONLY", "IMPORT", "LDAP_ONLY"}, false),
+				ValidateFunc: validation.StringInSlice(keycloakLdapGroupMapperModes, false),
 			},
 			"user_roles_retrieve_strategy": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE",
-				ValidateFunc: validation.StringInSlice([]string{"LOAD_GROUPS_BY_MEMBER_ATTRIBUTE", "GET_GROUPS_FROM_USER_MEMBEROF_ATTRIBUTE", "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE_RECURSIVELY"}, false),
+				ValidateFunc: validation.StringInSlice(keycloakLdapGroupMapperUserRolesRetrieveStrategies, false),
 			},
 			"memberof_ldap_attribute": {
 				Type:     schema.TypeString,
@@ -166,7 +174,12 @@ func resourceKeycloakLdapGroupMapperCreate(data *schema.ResourceData, meta inter
 
 	ldapGroupMapper := getLdapGroupMapperFromData(data)
 
-	err := keycloakClient.NewLdapGroupMapper(ldapGroupMapper)
+	err := ldapGroupMapper.Validate()
+	if err != nil {
+		return err
+	}
+
+	err = keycloakClient.NewLdapGroupMapper(ldapGroupMapper)
 	if err != nil {
 		return err
 	}
@@ -197,7 +210,12 @@ func resourceKeycloakLdapGroupMapperUpdate(data *schema.ResourceData, meta inter
 
 	ldapGroupMapper := getLdapGroupMapperFromData(data)
 
-	err := keycloakClient.UpdateLdapGroupMapper(ldapGroupMapper)
+	err := ldapGroupMapper.Validate()
+	if err != nil {
+		return err
+	}
+
+	err = keycloakClient.UpdateLdapGroupMapper(ldapGroupMapper)
 	if err != nil {
 		return err
 	}
