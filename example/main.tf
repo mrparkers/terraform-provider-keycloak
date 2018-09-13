@@ -34,7 +34,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
   bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_user_attribute_mapper" "test-mapper" {
+resource "keycloak_ldap_user_attribute_mapper" "attr-mapper" {
   name                    = "test mapper"
   realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
   ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
@@ -53,8 +53,14 @@ resource "keycloak_ldap_group_mapper" "group-mapper" {
   group_object_classes           = [
     "groupOfNames"
   ]
-  membership_attribute_type = "DN"
+  membership_attribute_type      = "DN"
   membership_ldap_attribute      = "member"
   membership_user_ldap_attribute = "cn"
   memberof_ldap_attribute        = "memberOf"
+}
+
+resource "keycloak_ldap_msad_user_account_control_mapper" "msad_uac_mapper" {
+  name                    = "uac-mapper1"
+  realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
+  ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
 }
