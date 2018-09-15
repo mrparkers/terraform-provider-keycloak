@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"log"
 	"regexp"
 	"strconv"
 	"testing"
@@ -129,8 +128,7 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 func TestAccKeycloakLdapUserFederation_editModeValidation(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	ldapName := "terraform-" + acctest.RandString(10)
-	validEditModes := []string{"READ_ONLY", "WRITABLE", "UNSYNCED"}
-	editMode := randomStringInSlice(validEditModes)
+	editMode := randomStringInSlice(keycloakLdapUserFederationEditModes)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -152,8 +150,7 @@ func TestAccKeycloakLdapUserFederation_editModeValidation(t *testing.T) {
 func TestAccKeycloakLdapUserFederation_vendorValidation(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	ldapName := "terraform-" + acctest.RandString(10)
-	validVendors := []string{"OTHER", "EDIRECTORY", "AD", "RHDS", "TIVOLI"}
-	vendor := randomStringInSlice(validVendors)
+	vendor := randomStringInSlice(keycloakLdapUserFederationVendors)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -175,8 +172,7 @@ func TestAccKeycloakLdapUserFederation_vendorValidation(t *testing.T) {
 func TestAccKeycloakLdapUserFederation_searchScopeValidation(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	ldapName := "terraform-" + acctest.RandString(10)
-	validSearchScopes := []string{"ONE_LEVEL", "SUBTREE"}
-	searchScope := randomStringInSlice(validSearchScopes)
+	searchScope := randomStringInSlice(keycloakLdapUserFederationSearchScopes)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -198,8 +194,7 @@ func TestAccKeycloakLdapUserFederation_searchScopeValidation(t *testing.T) {
 func TestAccKeycloakLdapUserFederation_useTrustStoreValidation(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	ldapName := "terraform-" + acctest.RandString(10)
-	validUseTruststoreConfig := []string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}
-	useTrustStore := randomStringInSlice(validUseTruststoreConfig)
+	useTrustStore := randomStringInSlice(keycloakLdapUserFederationTruststoreSpiSettings)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -221,8 +216,7 @@ func TestAccKeycloakLdapUserFederation_useTrustStoreValidation(t *testing.T) {
 func TestAccKeycloakLdapUserFederation_cachePolicyValidation(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	ldapName := "terraform-" + acctest.RandString(10)
-	validCachePolicy := []string{"DEFAULT", "EVICT_DAILY", "EVICT_WEEKLY", "MAX_LIFESPAN", "NO_CACHE"}
-	cachePolicy := randomStringInSlice(validCachePolicy)
+	cachePolicy := randomStringInSlice(keycloakLdapUserFederationCachePolicies)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -267,12 +261,7 @@ func TestAccKeycloakLdapUserFederation_syncPeriodValidation(t *testing.T) {
 	ldapName := "terraform-" + acctest.RandString(10)
 
 	validSyncPeriod := acctest.RandIntRange(1, 3600)
-
 	invalidNegativeSyncPeriod := -acctest.RandIntRange(1, 3600)
-
-	log.Printf("[DEBUG] validSyncPeriod %d", validSyncPeriod)
-	log.Printf("[DEBUG] invalidNegativeSyncPeriod %d", invalidNegativeSyncPeriod)
-
 	invalidZeroSyncPeriod := 0
 
 	resource.Test(t, resource.TestCase{

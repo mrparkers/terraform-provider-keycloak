@@ -5,8 +5,15 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"log"
 	"time"
+)
+
+var (
+	keycloakLdapUserFederationEditModes             = []string{"READ_ONLY", "WRITABLE", "UNSYNCED"}
+	keycloakLdapUserFederationVendors               = []string{"OTHER", "EDIRECTORY", "AD", "RHDS", "TIVOLI"}
+	keycloakLdapUserFederationSearchScopes          = []string{"ONE_LEVEL", "SUBTREE"}
+	keycloakLdapUserFederationTruststoreSpiSettings = []string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}
+	keycloakLdapUserFederationCachePolicies         = []string{"DEFAULT", "EVICT_DAILY", "EVICT_WEEKLY", "MAX_LIFESPAN", "NO_CACHE"}
 )
 
 func resourceKeycloakLdapUserFederation() *schema.Resource {
@@ -50,7 +57,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "READ_ONLY",
-				ValidateFunc: validation.StringInSlice([]string{"READ_ONLY", "WRITABLE", "UNSYNCED"}, false),
+				ValidateFunc: validation.StringInSlice(keycloakLdapUserFederationEditModes, false),
 				Description:  "READ_ONLY and WRITABLE are self-explanatory. UNSYNCED allowed user data to be imported but not synced back to LDAP.",
 			},
 			"sync_registrations": {
@@ -64,7 +71,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "OTHER",
-				ValidateFunc: validation.StringInSlice([]string{"OTHER", "EDIRECTORY", "AD", "RHDS", "TIVOLI"}, false),
+				ValidateFunc: validation.StringInSlice(keycloakLdapUserFederationVendors, false),
 				Description:  "LDAP vendor. I am almost certain this field does nothing, but the UI indicates that it is required.",
 			},
 			"username_ldap_attribute": {
@@ -122,7 +129,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "ONE_LEVEL",
-				ValidateFunc: validation.StringInSlice([]string{"ONE_LEVEL", "SUBTREE"}, false),
+				ValidateFunc: validation.StringInSlice(keycloakLdapUserFederationSearchScopes, false),
 				Description:  "ONE_LEVEL: only search for users in the DN specified by user_dn. SUBTREE: search entire LDAP subtree.",
 			},
 
@@ -136,7 +143,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "ONLY_FOR_LDAPS",
-				ValidateFunc: validation.StringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}, false),
+				ValidateFunc: validation.StringInSlice(keycloakLdapUserFederationTruststoreSpiSettings, false),
 			},
 			"connection_timeout": {
 				Type:        schema.TypeInt,
@@ -182,7 +189,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "DEFAULT",
-				ValidateFunc: validation.StringInSlice([]string{"DEFAULT", "EVICT_DAILY", "EVICT_WEEKLY", "MAX_LIFESPAN", "NO_CACHE"}, false),
+				ValidateFunc: validation.StringInSlice(keycloakLdapUserFederationCachePolicies, false),
 			},
 		},
 	}
@@ -193,7 +200,6 @@ func validateSyncPeriod(i interface{}, k string) (s []string, errs []error) {
 	if !ok {
 		errs = append(errs, fmt.Errorf("expected type of %s to be int", k))
 	}
-	log.Printf("[DEBUG] validate %s, num is %d", k, num)
 
 	if num < 1 && num != -1 {
 		errs = append(errs, fmt.Errorf("expected %s to be either -1 (disabled), or greater than zero, got %d", k, num))
@@ -208,9 +214,6 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 	for _, userObjectClass := range data.Get("user_object_classes").([]interface{}) {
 		userObjectClasses = append(userObjectClasses, userObjectClass.(string))
 	}
-
-	log.Printf("[DEBUG] bind_dn: %s", data.Get("bind_dn").(string))
-	log.Printf("[DEBUG] bind_credential: %s", data.Get("bind_credential").(string))
 
 	return &keycloak.LdapUserFederation{
 		Id:      data.Id(),
