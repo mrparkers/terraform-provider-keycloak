@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 )
 
@@ -47,10 +46,6 @@ func convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper *Ldap
 }
 
 func convertFromComponentToLdapUserAttributeMapper(component *component, realmId string) (*LdapUserAttributeMapper, error) {
-	log.Printf("[DEBUG] convertFromComponentToLdapUserAttributeMapper %s", component.getConfig("is.mandatory.in.ldap"))
-	log.Printf("[DEBUG] %s", component.getConfig("read.only"))
-	log.Printf("[DEBUG] %s", component.getConfig("always.read.value.from.ldap"))
-
 	isMandatoryInLdap, err := strconv.ParseBool(component.getConfig("is.mandatory.in.ldap"))
 	if err != nil {
 		return nil, err

@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"log"
 	"regexp"
 	"strconv"
 	"testing"
@@ -262,12 +261,7 @@ func TestAccKeycloakLdapUserFederation_syncPeriodValidation(t *testing.T) {
 	ldapName := "terraform-" + acctest.RandString(10)
 
 	validSyncPeriod := acctest.RandIntRange(1, 3600)
-
 	invalidNegativeSyncPeriod := -acctest.RandIntRange(1, 3600)
-
-	log.Printf("[DEBUG] validSyncPeriod %d", validSyncPeriod)
-	log.Printf("[DEBUG] invalidNegativeSyncPeriod %d", invalidNegativeSyncPeriod)
-
 	invalidZeroSyncPeriod := 0
 
 	resource.Test(t, resource.TestCase{

@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"log"
 	"time"
 )
 
@@ -201,7 +200,6 @@ func validateSyncPeriod(i interface{}, k string) (s []string, errs []error) {
 	if !ok {
 		errs = append(errs, fmt.Errorf("expected type of %s to be int", k))
 	}
-	log.Printf("[DEBUG] validate %s, num is %d", k, num)
 
 	if num < 1 && num != -1 {
 		errs = append(errs, fmt.Errorf("expected %s to be either -1 (disabled), or greater than zero, got %d", k, num))
@@ -216,9 +214,6 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 	for _, userObjectClass := range data.Get("user_object_classes").([]interface{}) {
 		userObjectClasses = append(userObjectClasses, userObjectClass.(string))
 	}
-
-	log.Printf("[DEBUG] bind_dn: %s", data.Get("bind_dn").(string))
-	log.Printf("[DEBUG] bind_credential: %s", data.Get("bind_credential").(string))
 
 	return &keycloak.LdapUserFederation{
 		Id:      data.Id(),
