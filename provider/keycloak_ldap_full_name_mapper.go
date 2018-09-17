@@ -1,0 +1,129 @@
+package provider
+
+import (
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+)
+
+func resourceKeycloakLdapFullNameMapper() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceKeycloakLdapFullNameMapperCreate,
+		Read:   resourceKeycloakLdapFullNameMapperRead,
+		Update: resourceKeycloakLdapFullNameMapperUpdate,
+		Delete: resourceKeycloakLdapFullNameMapperDelete,
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Display name of the mapper when displayed in the console.",
+			},
+			"realm_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The realm in which the ldap user federation provider exists.",
+			},
+			"ldap_user_federation_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The ldap user federation provider to attach this mapper to.",
+			},
+			"ldap_full_name_attribute": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"read_only": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"write_only": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+		},
+	}
+}
+
+func getLdapFullNameMapperFromData(data *schema.ResourceData) *keycloak.LdapFullNameMapper {
+	return &keycloak.LdapFullNameMapper{
+		Id:                   data.Id(),
+		Name:                 data.Get("name").(string),
+		RealmId:              data.Get("realm_id").(string),
+		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
+
+		LdapFullNameAttribute: data.Get("ldap_full_name_attribute").(string),
+		ReadOnly:              data.Get("read_only").(bool),
+		WriteOnly:             data.Get("write_only").(bool),
+	}
+}
+
+func setLdapFullNameMapperData(data *schema.ResourceData, ldapFullNameMapper *keycloak.LdapFullNameMapper) {
+	data.SetId(ldapFullNameMapper.Id)
+
+	data.Set("id", ldapFullNameMapper.Id)
+	data.Set("name", ldapFullNameMapper.Name)
+	data.Set("realm_id", ldapFullNameMapper.RealmId)
+	data.Set("ldap_user_federation_id", ldapFullNameMapper.LdapUserFederationId)
+
+	data.Set("ldap_full_name_attribute", ldapFullNameMapper.LdapFullNameAttribute)
+	data.Set("read_only", ldapFullNameMapper.ReadOnly)
+	data.Set("write_only", ldapFullNameMapper.WriteOnly)
+}
+
+func resourceKeycloakLdapFullNameMapperCreate(data *schema.ResourceData, meta interface{}) error {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
+
+	err := keycloakClient.NewLdapFullNameMapper(ldapFullNameMapper)
+	if err != nil {
+		return err
+	}
+
+	setLdapFullNameMapperData(data, ldapFullNameMapper)
+
+	return resourceKeycloakLdapFullNameMapperRead(data, meta)
+}
+
+func resourceKeycloakLdapFullNameMapperRead(data *schema.ResourceData, meta interface{}) error {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	realmId := data.Get("realm_id").(string)
+	id := data.Id()
+
+	ldapFullNameMapper, err := keycloakClient.GetLdapFullNameMapper(realmId, id)
+	if err != nil {
+		return err
+	}
+
+	setLdapFullNameMapperData(data, ldapFullNameMapper)
+
+	return nil
+}
+
+func resourceKeycloakLdapFullNameMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
+
+	err := keycloakClient.UpdateLdapFullNameMapper(ldapFullNameMapper)
+	if err != nil {
+		return err
+	}
+
+	setLdapFullNameMapperData(data, ldapFullNameMapper)
+
+	return nil
+}
+
+func resourceKeycloakLdapFullNameMapperDelete(data *schema.ResourceData, meta interface{}) error {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	realmId := data.Get("realm_id").(string)
+	id := data.Id()
+
+	return keycloakClient.DeleteLdapFullNameMapper(realmId, id)
+}
