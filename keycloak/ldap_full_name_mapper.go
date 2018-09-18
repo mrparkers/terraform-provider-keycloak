@@ -60,6 +60,14 @@ func convertFromComponentToLdapFullNameMapper(component *component, realmId stri
 	}, nil
 }
 
+func (mapper *LdapFullNameMapper) Validate() error {
+	if mapper.ReadOnly && mapper.WriteOnly {
+		return fmt.Errorf("validation error: ldap full name mapper cannot be both read only and write only")
+	}
+
+	return nil
+}
+
 func (keycloakClient *KeycloakClient) NewLdapFullNameMapper(ldapFullNameMapper *LdapFullNameMapper) error {
 	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapFullNameMapper.RealmId), convertFromLdapFullNameMapperToComponent(ldapFullNameMapper))
 	if err != nil {
