@@ -14,6 +14,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_ldap_user_attribute_mapper":            resourceKeycloakLdapUserAttributeMapper(),
 			"keycloak_ldap_group_mapper":                     resourceKeycloakLdapGroupMapper(),
 			"keycloak_ldap_msad_user_account_control_mapper": resourceKeycloakLdapMsadUserAccountControlMapper(),
+			"keycloak_ldap_full_name_mapper":                 resourceKeycloakLdapFullNameMapper(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
