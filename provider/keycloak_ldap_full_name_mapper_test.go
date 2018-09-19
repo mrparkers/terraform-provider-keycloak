@@ -49,6 +49,28 @@ func TestAccKeycloakLdapFullNameMapper_readWriteValidation(t *testing.T) {
 	})
 }
 
+// write_only can't be set to true if the user federation provider is not writable
+func TestAccKeycloakLdapFullNameMapper_writableValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	mapperName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapFullNameMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakLdapFullNameMapper_writableInvalid(realmName, mapperName),
+				ExpectError: regexp.MustCompile("validation error: ldap full name mapper cannot be write only when ldap provider is not writable"),
+			},
+			{
+				Config: testKeycloakLdapFullNameMapper_writableValid(realmName, mapperName),
+				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full-name-mapper"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakLdapFullNameMapper_updateLdapUserFederation(t *testing.T) {
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
@@ -309,4 +331,78 @@ resource "keycloak_ldap_full_name_mapper" "full-name-mapper" {
   ldap_full_name_attribute = "cn"
 }
 	`, realmOne, realmTwo, mapperName)
+}
+
+func testKeycloakLdapFullNameMapper_writableInvalid(realm, mapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+  name                    = "openldap"
+  realm_id                = "${keycloak_realm.realm.id}"
+
+  enabled                 = true
+  edit_mode               = "READ_ONLY"
+
+  username_ldap_attribute = "cn"
+  rdn_ldap_attribute      = "cn"
+  uuid_ldap_attribute     = "entryDN"
+  user_object_classes     = [
+    "simpleSecurityObject",
+    "organizationalRole"
+  ]
+  connection_url          = "ldap://openldap"
+  users_dn                = "dc=example,dc=org"
+  bind_dn                 = "cn=admin,dc=example,dc=org"
+  bind_credential         = "admin"
+}
+
+resource "keycloak_ldap_full_name_mapper" "full-name-mapper" {
+  name                     = "%s"
+  realm_id                 = "${keycloak_realm.realm.id}"
+  ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
+
+  ldap_full_name_attribute = "cn"
+  write_only               = true
+}
+	`, realm, mapperName)
+}
+
+func testKeycloakLdapFullNameMapper_writableValid(realm, mapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+  name                    = "openldap"
+  realm_id                = "${keycloak_realm.realm.id}"
+
+  enabled                 = true
+  edit_mode               = "WRITABLE"
+
+  username_ldap_attribute = "cn"
+  rdn_ldap_attribute      = "cn"
+  uuid_ldap_attribute     = "entryDN"
+  user_object_classes     = [
+    "simpleSecurityObject",
+    "organizationalRole"
+  ]
+  connection_url          = "ldap://openldap"
+  users_dn                = "dc=example,dc=org"
+  bind_dn                 = "cn=admin,dc=example,dc=org"
+  bind_credential         = "admin"
+}
+
+resource "keycloak_ldap_full_name_mapper" "full-name-mapper" {
+  name                     = "%s"
+  realm_id                 = "${keycloak_realm.realm.id}"
+  ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
+
+  ldap_full_name_attribute = "cn"
+  write_only               = true
+}
+	`, realm, mapperName)
 }

@@ -78,7 +78,7 @@ func resourceKeycloakLdapFullNameMapperCreate(data *schema.ResourceData, meta in
 
 	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
 
-	err := ldapFullNameMapper.Validate()
+	err := ldapFullNameMapper.Validate(keycloakClient)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func resourceKeycloakLdapFullNameMapperUpdate(data *schema.ResourceData, meta in
 
 	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
 
-	err := ldapFullNameMapper.Validate()
+	err := ldapFullNameMapper.Validate(keycloakClient)
 	if err != nil {
 		return err
 	}
