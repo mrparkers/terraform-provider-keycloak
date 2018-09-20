@@ -71,6 +71,34 @@ func TestAccKeycloakRealm_themes(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_themesValidation(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakRealm_themesValidation(realm, "login", acctest.RandString(10)),
+				ExpectError: regexp.MustCompile("validation error: theme \".+\" does not exist on the server"),
+			},
+			{
+				Config:      testKeycloakRealm_themesValidation(realm, "account", acctest.RandString(10)),
+				ExpectError: regexp.MustCompile("validation error: theme \".+\" does not exist on the server"),
+			},
+			{
+				Config:      testKeycloakRealm_themesValidation(realm, "admin", acctest.RandString(10)),
+				ExpectError: regexp.MustCompile("validation error: theme \".+\" does not exist on the server"),
+			},
+			{
+				Config:      testKeycloakRealm_themesValidation(realm, "email", acctest.RandString(10)),
+				ExpectError: regexp.MustCompile("validation error: theme \".+\" does not exist on the server"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_loginConfigBasic(t *testing.T) {
 	realm := &keycloak.Realm{
 		Realm:                       "terraform-" + acctest.RandString(10),
@@ -286,6 +314,18 @@ resource "keycloak_realm" "realm" {
     email_theme   = "%s"
 }
 	`, realm.Realm, realm.DisplayName, realm.LoginTheme, realm.AccountTheme, realm.AdminTheme, realm.EmailTheme)
+}
+
+func testKeycloakRealm_themesValidation(realm, theme, value string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+
+    %s_theme     = "%s"
+}
+	`, realm, realm, theme, value)
 }
 
 func testKeycloakRealm_notEnabled(realm, realmDisplayName string) string {
