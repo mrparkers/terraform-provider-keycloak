@@ -19,6 +19,12 @@ type Realm struct {
 	VerifyEmail                 bool `json:"verifyEmail"`
 	LoginWithEmailAllowed       bool `json:"loginWithEmailAllowed"`
 	DuplicateEmailsAllowed      bool `json:"duplicateEmailsAllowed"`
+
+	// Themes
+	LoginTheme   string `json:"loginTheme"`
+	AccountTheme string `json:"accountTheme"`
+	AdminTheme   string `json:"adminTheme"`
+	EmailTheme   string `json:"emailTheme"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {

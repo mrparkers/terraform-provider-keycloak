@@ -5,9 +5,11 @@ provider "keycloak" {
 }
 
 resource "keycloak_realm" "test" {
-  realm        = "test"
-  enabled      = true
-  display_name = "foo"
+  realm         = "test"
+  enabled       = true
+  display_name  = "foo"
+
+  account_theme = "base"
 }
 
 resource "keycloak_client" "test-client" {
