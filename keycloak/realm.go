@@ -19,6 +19,12 @@ type Realm struct {
 	VerifyEmail                 bool `json:"verifyEmail"`
 	LoginWithEmailAllowed       bool `json:"loginWithEmailAllowed"`
 	DuplicateEmailsAllowed      bool `json:"duplicateEmailsAllowed"`
+
+	// Themes
+	LoginTheme   string `json:"loginTheme"`
+	AccountTheme string `json:"accountTheme"`
+	AdminTheme   string `json:"adminTheme"`
+	EmailTheme   string `json:"emailTheme"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
@@ -46,7 +52,7 @@ func (keycloakClient *KeycloakClient) DeleteRealm(id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s", id))
 }
 
-func (realm *Realm) Validate() error {
+func (realm *Realm) Validate(keycloakClient *KeycloakClient) error {
 	if realm.RegistrationAllowed == false && realm.RegistrationEmailAsUsername == true {
 		return fmt.Errorf("validation error: RegistrationEmailAsUsername cannot be true if RegistrationAllowed is false")
 	}
@@ -57,6 +63,28 @@ func (realm *Realm) Validate() error {
 
 	if realm.DuplicateEmailsAllowed == true && realm.LoginWithEmailAllowed == true {
 		return fmt.Errorf("validation error: DuplicateEmailsAllowed cannot be true if LoginWithEmailAllowed is true")
+	}
+
+	// validate if the given theme exists on the server. the keycloak API allows you to use any random string for a theme
+	serverInfo, err := keycloakClient.GetServerInfo()
+	if err != nil {
+		return err
+	}
+
+	if !serverInfo.ThemeIsInstalled("login", realm.LoginTheme) {
+		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.LoginTheme)
+	}
+
+	if !serverInfo.ThemeIsInstalled("account", realm.AccountTheme) {
+		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.AccountTheme)
+	}
+
+	if !serverInfo.ThemeIsInstalled("admin", realm.AdminTheme) {
+		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.AdminTheme)
+	}
+
+	if !serverInfo.ThemeIsInstalled("email", realm.EmailTheme) {
+		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.EmailTheme)
 	}
 
 	return nil

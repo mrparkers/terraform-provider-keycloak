@@ -69,6 +69,29 @@ func resourceKeycloakRealm() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+
+			// Themes
+
+			"login_theme": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "keycloak",
+			},
+			"account_theme": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "keycloak",
+			},
+			"admin_theme": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "keycloak",
+			},
+			"email_theme": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "keycloak",
+			},
 		},
 	}
 }
@@ -89,6 +112,12 @@ func getRealmFromData(data *schema.ResourceData) *keycloak.Realm {
 		VerifyEmail:                 data.Get("verify_email").(bool),
 		LoginWithEmailAllowed:       data.Get("login_with_email_allowed").(bool),
 		DuplicateEmailsAllowed:      data.Get("duplicate_emails_allowed").(bool),
+
+		// Themes
+		LoginTheme:   data.Get("login_theme").(string),
+		AccountTheme: data.Get("account_theme").(string),
+		AdminTheme:   data.Get("admin_theme").(string),
+		EmailTheme:   data.Get("email_theme").(string),
 	}
 }
 
@@ -108,6 +137,11 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("verify_email", realm.VerifyEmail)
 	data.Set("login_with_email_allowed", realm.LoginWithEmailAllowed)
 	data.Set("duplicate_emails_allowed", realm.DuplicateEmailsAllowed)
+
+	data.Set("login_theme", realm.LoginTheme)
+	data.Set("account_theme", realm.AccountTheme)
+	data.Set("admin_theme", realm.AdminTheme)
+	data.Set("email_theme", realm.EmailTheme)
 }
 
 func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {
@@ -115,7 +149,7 @@ func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) er
 
 	realm := getRealmFromData(data)
 
-	err := realm.Validate()
+	err := realm.Validate(keycloakClient)
 	if err != nil {
 		return err
 	}
@@ -148,7 +182,7 @@ func resourceKeycloakRealmUpdate(data *schema.ResourceData, meta interface{}) er
 
 	realm := getRealmFromData(data)
 
-	err := realm.Validate()
+	err := realm.Validate(keycloakClient)
 	if err != nil {
 		return err
 	}
