@@ -62,7 +62,7 @@ func resourceKeycloakRealm() *schema.Resource {
 			"login_with_email_allowed": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  true,
 			},
 			"duplicate_emails_allowed": {
 				Type:     schema.TypeBool,
