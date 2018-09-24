@@ -21,10 +21,10 @@ type Realm struct {
 	DuplicateEmailsAllowed      bool `json:"duplicateEmailsAllowed"`
 
 	// Themes
-	LoginTheme   string `json:"loginTheme"`
-	AccountTheme string `json:"accountTheme"`
-	AdminTheme   string `json:"adminTheme"`
-	EmailTheme   string `json:"emailTheme"`
+	LoginTheme   string `json:"loginTheme,omitempty"`
+	AccountTheme string `json:"accountTheme,omitempty"`
+	AdminTheme   string `json:"adminTheme,omitempty"`
+	EmailTheme   string `json:"emailTheme,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
@@ -71,19 +71,19 @@ func (realm *Realm) Validate(keycloakClient *KeycloakClient) error {
 		return err
 	}
 
-	if !serverInfo.ThemeIsInstalled("login", realm.LoginTheme) {
+	if realm.LoginTheme != "" && !serverInfo.ThemeIsInstalled("login", realm.LoginTheme) {
 		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.LoginTheme)
 	}
 
-	if !serverInfo.ThemeIsInstalled("account", realm.AccountTheme) {
+	if realm.AccountTheme != "" && !serverInfo.ThemeIsInstalled("account", realm.AccountTheme) {
 		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.AccountTheme)
 	}
 
-	if !serverInfo.ThemeIsInstalled("admin", realm.AdminTheme) {
+	if realm.AdminTheme != "" && !serverInfo.ThemeIsInstalled("admin", realm.AdminTheme) {
 		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.AdminTheme)
 	}
 
-	if !serverInfo.ThemeIsInstalled("email", realm.EmailTheme) {
+	if realm.EmailTheme != "" && !serverInfo.ThemeIsInstalled("email", realm.EmailTheme) {
 		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.EmailTheme)
 	}
 
