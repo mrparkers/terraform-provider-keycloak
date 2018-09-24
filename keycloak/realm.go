@@ -21,10 +21,10 @@ type Realm struct {
 	DuplicateEmailsAllowed      bool `json:"duplicateEmailsAllowed"`
 
 	// Themes
-	LoginTheme   string `json:"loginTheme"`
-	AccountTheme string `json:"accountTheme"`
-	AdminTheme   string `json:"adminTheme"`
-	EmailTheme   string `json:"emailTheme"`
+	LoginTheme   string `json:"loginTheme,omitempty"`
+	AccountTheme string `json:"accountTheme,omitempty"`
+	AdminTheme   string `json:"adminTheme,omitempty"`
+	EmailTheme   string `json:"emailTheme,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
