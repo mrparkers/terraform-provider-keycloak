@@ -62,7 +62,7 @@ func resourceKeycloakRealm() *schema.Resource {
 			"login_with_email_allowed": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  true,
 			},
 			"duplicate_emails_allowed": {
 				Type:     schema.TypeBool,
@@ -93,11 +93,6 @@ func resourceKeycloakRealm() *schema.Resource {
 }
 
 func getRealmFromData(data *schema.ResourceData) *keycloak.Realm {
-	loginTheme := data.Get("login_theme").(string)
-	accountTheme := data.Get("account_theme").(string)
-	adminTheme := data.Get("admin_theme").(string)
-	emailTheme := data.Get("email_theme").(string)
-
 	realm := &keycloak.Realm{
 		Id:          data.Get("realm").(string),
 		Realm:       data.Get("realm").(string),
@@ -115,20 +110,22 @@ func getRealmFromData(data *schema.ResourceData) *keycloak.Realm {
 		DuplicateEmailsAllowed:      data.Get("duplicate_emails_allowed").(bool),
 	}
 
-	if loginTheme != "" {
-		realm.LoginTheme = loginTheme
+	// Themes
+
+	if loginTheme, ok := data.GetOk("login_theme"); ok {
+		realm.LoginTheme = loginTheme.(string)
 	}
 
-	if accountTheme != "" {
-		realm.AccountTheme = accountTheme
+	if accountTheme, ok := data.GetOk("account_theme"); ok {
+		realm.AccountTheme = accountTheme.(string)
 	}
 
-	if adminTheme != "" {
-		realm.AdminTheme = adminTheme
+	if adminTheme, ok := data.GetOk("admin_theme"); ok {
+		realm.AdminTheme = adminTheme.(string)
 	}
 
-	if emailTheme != "" {
-		realm.EmailTheme = emailTheme
+	if emailTheme, ok := data.GetOk("email_theme"); ok {
+		realm.EmailTheme = emailTheme.(string)
 	}
 
 	return realm
