@@ -75,29 +75,30 @@ func resourceKeycloakRealm() *schema.Resource {
 			"login_theme": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "keycloak",
 			},
 			"account_theme": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "keycloak",
 			},
 			"admin_theme": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "keycloak",
 			},
 			"email_theme": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "keycloak",
 			},
 		},
 	}
 }
 
 func getRealmFromData(data *schema.ResourceData) *keycloak.Realm {
-	return &keycloak.Realm{
+	loginTheme := data.Get("login_theme").(string)
+	accountTheme := data.Get("account_theme").(string)
+	adminTheme := data.Get("admin_theme").(string)
+	emailTheme := data.Get("email_theme").(string)
+
+	realm := &keycloak.Realm{
 		Id:          data.Get("realm").(string),
 		Realm:       data.Get("realm").(string),
 		Enabled:     data.Get("enabled").(bool),
@@ -112,13 +113,25 @@ func getRealmFromData(data *schema.ResourceData) *keycloak.Realm {
 		VerifyEmail:                 data.Get("verify_email").(bool),
 		LoginWithEmailAllowed:       data.Get("login_with_email_allowed").(bool),
 		DuplicateEmailsAllowed:      data.Get("duplicate_emails_allowed").(bool),
-
-		// Themes
-		LoginTheme:   data.Get("login_theme").(string),
-		AccountTheme: data.Get("account_theme").(string),
-		AdminTheme:   data.Get("admin_theme").(string),
-		EmailTheme:   data.Get("email_theme").(string),
 	}
+
+	if loginTheme != "" {
+		realm.LoginTheme = loginTheme
+	}
+
+	if accountTheme != "" {
+		realm.AccountTheme = accountTheme
+	}
+
+	if adminTheme != "" {
+		realm.AdminTheme = adminTheme
+	}
+
+	if emailTheme != "" {
+		realm.EmailTheme = emailTheme
+	}
+
+	return realm
 }
 
 func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
