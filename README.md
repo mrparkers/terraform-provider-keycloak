@@ -13,6 +13,7 @@ Long term, I'd like to support as much as I can while I tinker with Keycloak in 
 
 - [`keycloak_realm`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_realm.go)
 - [`keycloak_client`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_client.go)
+- [`keycloak_client_scope`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_client_scope.go)
 - [`keycloak_ldap_user_federation`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_ldap_user_federation.go)
 - [`keycloak_ldap_user_attribute_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_ldap_user_attribute_mapper.go)
 - [`keycloak_ldap_group_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_ldap_group_mapper.go)
