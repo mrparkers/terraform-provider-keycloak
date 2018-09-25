@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"math/rand"
 	"strings"
+	"time"
 )
 
 func randomBool() bool {
@@ -25,4 +26,8 @@ func arrayOfStringsForTerraformResource(parts []string) string {
 	}
 
 	return "[" + strings.Join(tfStrings, ", ") + "]"
+}
+
+func randomDurationString() string {
+	return (time.Duration(acctest.RandIntRange(1, 604800)) * time.Second).String()
 }
