@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
 	"testing"
 )
 
@@ -49,6 +50,52 @@ func TestAccKeycloakClientScope_updateRealm(t *testing.T) {
 					testAccCheckKeycloakClientScopeExists("keycloak_client_scope.client-scope"),
 					testAccCheckKeycloakClientScopeBelongsToRealm("keycloak_client_scope.client-scope", realmTwo),
 				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakClientScope_protocolValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientScopeName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakClientScopeDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakClientScope_withProtocol(realmName, clientScopeName, acctest.RandString(10)),
+				ExpectError: regexp.MustCompile("expected protocol to be one of .+ got .+"),
+			},
+			{
+				Config: testKeycloakClientScope_withProtocol(realmName, clientScopeName, randomStringInSlice(keycloakClientScopeProtocols)),
+				Check:  testAccCheckKeycloakClientScopeExists("keycloak_client_scope.client-scope"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakClientScope_consentScreenText(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientScopeName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakClientScopeDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
+				Check:  testAccCheckKeycloakClientScopeExists("keycloak_client_scope.client-scope"),
+			},
+			{
+				Config: testKeycloakClientScope_withConsentText(realmName, clientScopeName, acctest.RandString(10)),
+				Check:  testAccCheckKeycloakClientScopeExists("keycloak_client_scope.client-scope"),
+			},
+			{
+				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
+				Check:  testAccCheckKeycloakClientScopeExists("keycloak_client_scope.client-scope"),
 			},
 		},
 	})
@@ -128,10 +175,44 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_client_scope" "client-scope" {
-	name      = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
+	name        = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+
+	description = "test description"
 }
 	`, realm, clientScopeName)
+}
+
+func testKeycloakClientScope_withConsentText(realm, clientScopeName, consentText string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_client_scope" "client-scope" {
+	name                = "%s"
+	realm_id            = "${keycloak_realm.realm.id}"
+
+	description         = "test description"
+
+	consent_screen_text = "%s"
+}
+	`, realm, clientScopeName, consentText)
+}
+
+func testKeycloakClientScope_withProtocol(realm, clientScopeName, protocol string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_client_scope" "client-scope" {
+	name        = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+
+	protocol    = "%s"
+}
+	`, realm, clientScopeName, protocol)
 }
 
 func testKeycloakClientScope_updateRealmBefore(realmOne, realmTwo, clientScopeName string) string {
