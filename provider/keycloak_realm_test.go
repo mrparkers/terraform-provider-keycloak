@@ -165,6 +165,31 @@ func TestAccKeycloakRealm_loginConfigValidation(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmName),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+			{
+				Config: testKeycloakRealm_tokenSettings(realmName),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+			// This is duplicated so another set of random value is used, effectively an update test
+			{
+				Config: testKeycloakRealm_tokenSettings(realmName),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+		},
+	})
+}
+
 func testKeycloakRealmLoginInfo(resourceName string, realm *keycloak.Realm) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		realmFromState, err := getRealmFromState(s, resourceName)
@@ -387,4 +412,38 @@ resource "keycloak_realm" "realm" {
 	duplicate_emails_allowed       = true
 }
 	`, realm)
+}
+
+func testKeycloakRealm_tokenSettings(realm string) string {
+	ssoSessionIdleTimeout := randomDurationString()
+	ssoSessionMaxLifespan := randomDurationString()
+	offlineSessionIdleTimeout := randomDurationString()
+	offlineSessionMaxLifespan := randomDurationString()
+	accessTokenLifespan := randomDurationString()
+	accessTokenLifespanForImplicitFlow := randomDurationString()
+	accessCodeLifespan := randomDurationString()
+	accessCodeLifespanLogin := randomDurationString()
+	accessCodeLifespanUserAction := randomDurationString()
+	actionTokenGeneratedByUserLifespan := randomDurationString()
+	actionTokenGeneratedByAdminLifespan := randomDurationString()
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm                                    = "%s"
+	enabled                                  = true
+	display_name                             = "%s"
+
+	sso_session_idle_timeout                 = "%s"
+	sso_session_max_lifespan                 = "%s"
+	offline_session_idle_timeout             = "%s"
+	offline_session_max_lifespan             = "%s"
+	access_token_lifespan                    = "%s"
+	access_token_lifespan_for_implicit_flow  = "%s"
+	access_code_lifespan                     = "%s"
+	access_code_lifespan_login               = "%s"
+	access_code_lifespan_user_action         = "%s"
+	action_token_generated_by_user_lifespan  = "%s"
+	action_token_generated_by_admin_lifespan = "%s"
+}
+	`, realm, realm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, offlineSessionIdleTimeout, offlineSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
 }

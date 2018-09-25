@@ -10,6 +10,8 @@ resource "keycloak_realm" "test" {
   display_name  = "foo"
 
   account_theme = "base"
+
+  access_code_lifespan = "30m"
 }
 
 resource "keycloak_client" "test-client" {

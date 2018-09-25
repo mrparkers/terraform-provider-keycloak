@@ -25,6 +25,21 @@ type Realm struct {
 	AccountTheme string `json:"accountTheme,omitempty"`
 	AdminTheme   string `json:"adminTheme,omitempty"`
 	EmailTheme   string `json:"emailTheme,omitempty"`
+
+	// Tokens
+	RevokeRefreshToken                  bool `json:"revokeRefreshToken"`
+	RefreshTokenMaxReuse                int  `json:"refreshTokenMaxReuse"`
+	SsoSessionIdleTimeout               int  `json:"ssoSessionIdleTimeout"`
+	SsoSessionMaxLifespan               int  `json:"ssoSessionMaxLifespan"`
+	OfflineSessionIdleTimeout           int  `json:"offlineSessionIdleTimeout"`
+	OfflineSessionMaxLifespan           int  `json:"offlineSessionMaxLifespan"`
+	AccessTokenLifespan                 int  `json:"accessTokenLifespan"`
+	AccessTokenLifespanForImplicitFlow  int  `json:"accessTokenLifespanForImplicitFlow"`
+	AccessCodeLifespan                  int  `json:"accessCodeLifespan"`
+	AccessCodeLifespanLogin             int  `json:"accessCodeLifespanLogin"`
+	AccessCodeLifespanUserAction        int  `json:"accessCodeLifespanUserAction"`
+	ActionTokenGeneratedByUserLifespan  int  `json:"actionTokenGeneratedByUserLifespan"`
+	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
