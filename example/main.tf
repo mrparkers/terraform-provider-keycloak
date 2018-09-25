@@ -5,11 +5,11 @@ provider "keycloak" {
 }
 
 resource "keycloak_realm" "test" {
-  realm         = "test"
-  enabled       = true
-  display_name  = "foo"
+  realm                = "test"
+  enabled              = true
+  display_name         = "foo"
 
-  account_theme = "base"
+  account_theme        = "base"
 
   access_code_lifespan = "30m"
 }
@@ -17,6 +17,15 @@ resource "keycloak_realm" "test" {
 resource "keycloak_client" "test-client" {
   client_id = "test-client"
   realm_id  = "${keycloak_realm.test.id}"
+}
+
+resource "keycloak_client_scope" "test-client-scope" {
+  name                = "foo1"
+  realm_id            = "${keycloak_realm.test.id}"
+
+  description         = "test"
+  protocol            = "saml"
+  consent_screen_text = "hello"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
@@ -75,5 +84,5 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
   ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
 
   ldap_full_name_attribute = "cn"
-  read_only = true
+  read_only                = true
 }
