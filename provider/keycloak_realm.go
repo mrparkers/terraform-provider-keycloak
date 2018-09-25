@@ -88,11 +88,84 @@ func resourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
+			// Tokens
+
+			"refresh_token_max_reuse": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  0,
+			},
+			"sso_session_idle_timeout": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "30m",
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"sso_session_max_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "10h",
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"offline_session_idle_timeout": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "10h",
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"offline_session_max_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "0",
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"access_token_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "5m",
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"access_token_lifespan_for_implicit_flow": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "15m",
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"access_code_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "1m",
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"access_code_lifespan_login": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "30m",
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"access_code_lifespan_user_action": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "5m",
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"action_token_generated_by_user_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "5m",
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"action_token_generated_by_admin_lifespan": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "12h",
+			},
 		},
 	}
 }
 
-func getRealmFromData(data *schema.ResourceData) *keycloak.Realm {
+func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	realm := &keycloak.Realm{
 		Id:          data.Get("realm").(string),
 		Realm:       data.Get("realm").(string),
@@ -128,7 +201,82 @@ func getRealmFromData(data *schema.ResourceData) *keycloak.Realm {
 		realm.EmailTheme = emailTheme.(string)
 	}
 
-	return realm
+	// Tokens
+
+	if refreshTokenMaxReuse := data.Get("refresh_token_max_reuse").(int); refreshTokenMaxReuse > 0 {
+		realm.RevokeRefreshToken = true
+		realm.RefreshTokenMaxReuse = refreshTokenMaxReuse
+	} else {
+		realm.RevokeRefreshToken = false
+	}
+
+	ssoSessionIdleTimeout, err := getSecondsFromDurationString(data.Get("sso_session_idle_timeout").(string))
+	if err != nil {
+		return nil, err
+	}
+	realm.SsoSessionIdleTimeout = ssoSessionIdleTimeout
+
+	ssoSessionMaxLifespan, err := getSecondsFromDurationString(data.Get("sso_session_max_lifespan").(string))
+	if err != nil {
+		return nil, err
+	}
+	realm.SsoSessionMaxLifespan = ssoSessionMaxLifespan
+
+	offlineSessionIdleTimeout, err := getSecondsFromDurationString(data.Get("offline_session_idle_timeout").(string))
+	if err != nil {
+		return nil, err
+	}
+	realm.OfflineSessionIdleTimeout = offlineSessionIdleTimeout
+
+	offlineSessionMaxLifespan, err := getSecondsFromDurationString(data.Get("offline_session_max_lifespan").(string))
+	if err != nil {
+		return nil, err
+	}
+	realm.OfflineSessionMaxLifespan = offlineSessionMaxLifespan
+
+	accessTokenLifespan, err := getSecondsFromDurationString(data.Get("access_token_lifespan").(string))
+	if err != nil {
+		return nil, err
+	}
+	realm.AccessTokenLifespan = accessTokenLifespan
+
+	accessTokenLifespanForImplicitFlow, err := getSecondsFromDurationString(data.Get("access_token_lifespan_for_implicit_flow").(string))
+	if err != nil {
+		return nil, err
+	}
+	realm.AccessTokenLifespanForImplicitFlow = accessTokenLifespanForImplicitFlow
+
+	accessCodeLifespan, err := getSecondsFromDurationString(data.Get("access_code_lifespan").(string))
+	if err != nil {
+		return nil, err
+	}
+	realm.AccessCodeLifespan = accessCodeLifespan
+
+	accessCodeLifespanLogin, err := getSecondsFromDurationString(data.Get("access_code_lifespan_login").(string))
+	if err != nil {
+		return nil, err
+	}
+	realm.AccessCodeLifespanLogin = accessCodeLifespanLogin
+
+	accessCodeLifespanUserAction, err := getSecondsFromDurationString(data.Get("access_code_lifespan_user_action").(string))
+	if err != nil {
+		return nil, err
+	}
+	realm.AccessCodeLifespanUserAction = accessCodeLifespanUserAction
+
+	actionTokenGeneratedByUserLifespan, err := getSecondsFromDurationString(data.Get("action_token_generated_by_user_lifespan").(string))
+	if err != nil {
+		return nil, err
+	}
+	realm.ActionTokenGeneratedByUserLifespan = actionTokenGeneratedByUserLifespan
+
+	actionTokenGeneratedByAdminLifespan, err := getSecondsFromDurationString(data.Get("action_token_generated_by_admin_lifespan").(string))
+	if err != nil {
+		return nil, err
+	}
+	realm.ActionTokenGeneratedByAdminLifespan = actionTokenGeneratedByAdminLifespan
+
+	return realm, nil
 }
 
 func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
@@ -148,18 +296,36 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("login_with_email_allowed", realm.LoginWithEmailAllowed)
 	data.Set("duplicate_emails_allowed", realm.DuplicateEmailsAllowed)
 
+	// Themes
 	data.Set("login_theme", realm.LoginTheme)
 	data.Set("account_theme", realm.AccountTheme)
 	data.Set("admin_theme", realm.AdminTheme)
 	data.Set("email_theme", realm.EmailTheme)
+
+	// Tokens
+
+	data.Set("refresh_token_max_reuse", realm.RefreshTokenMaxReuse)
+	data.Set("sso_session_idle_timeout", getDurationStringFromSeconds(realm.SsoSessionIdleTimeout))
+	data.Set("sso_session_max_lifespan", getDurationStringFromSeconds(realm.SsoSessionMaxLifespan))
+	data.Set("offline_session_idle_timeout", getDurationStringFromSeconds(realm.OfflineSessionIdleTimeout))
+	data.Set("offline_session_max_lifespan", getDurationStringFromSeconds(realm.OfflineSessionMaxLifespan))
+	data.Set("access_token_lifespan", getDurationStringFromSeconds(realm.AccessTokenLifespan))
+	data.Set("access_token_lifespan_for_implicit_flow", getDurationStringFromSeconds(realm.AccessTokenLifespanForImplicitFlow))
+	data.Set("access_code_lifespan", getDurationStringFromSeconds(realm.AccessCodeLifespan))
+	data.Set("access_code_lifespan_login", getDurationStringFromSeconds(realm.AccessCodeLifespanLogin))
+	data.Set("access_code_lifespan_user_action", getDurationStringFromSeconds(realm.AccessCodeLifespanUserAction))
+	data.Set("action_token_generated_by_user_lifespan", getDurationStringFromSeconds(realm.ActionTokenGeneratedByUserLifespan))
 }
 
 func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm := getRealmFromData(data)
+	realm, err := getRealmFromData(data)
+	if err != nil {
+		return err
+	}
 
-	err := realm.Validate(keycloakClient)
+	err = realm.Validate(keycloakClient)
 	if err != nil {
 		return err
 	}
@@ -190,9 +356,12 @@ func resourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) erro
 func resourceKeycloakRealmUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm := getRealmFromData(data)
+	realm, err := getRealmFromData(data)
+	if err != nil {
+		return err
+	}
 
-	err := realm.Validate(keycloakClient)
+	err = realm.Validate(keycloakClient)
 	if err != nil {
 		return err
 	}
