@@ -4,13 +4,13 @@ import (
 	"fmt"
 )
 
-type Client struct {
+type OpenidClient struct {
 	Id       string `json:"id,omitempty"`
 	ClientId string `json:"clientId"`
 	RealmId  string `json:"-"`
 }
 
-func (keycloakClient *KeycloakClient) NewClient(client *Client) error {
+func (keycloakClient *KeycloakClient) NewOpenidClient(client *OpenidClient) error {
 	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients", client.RealmId), client)
 	if err != nil {
 		return err
@@ -21,8 +21,8 @@ func (keycloakClient *KeycloakClient) NewClient(client *Client) error {
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetClient(realmId, id string) (*Client, error) {
-	var client Client
+func (keycloakClient *KeycloakClient) GetOpenidClient(realmId, id string) (*OpenidClient, error) {
+	var client OpenidClient
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s", realmId, id), &client)
 	if err != nil {
@@ -34,10 +34,10 @@ func (keycloakClient *KeycloakClient) GetClient(realmId, id string) (*Client, er
 	return &client, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateClient(client *Client) error {
+func (keycloakClient *KeycloakClient) UpdateOpenidClient(client *OpenidClient) error {
 	return keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s", client.RealmId, client.Id), client)
 }
 
-func (keycloakClient *KeycloakClient) DeleteClient(realmId, id string) error {
+func (keycloakClient *KeycloakClient) DeleteOpenidClient(realmId, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s", realmId, id))
 }

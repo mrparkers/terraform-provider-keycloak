@@ -14,7 +14,7 @@ resource "keycloak_realm" "test" {
   access_code_lifespan = "30m"
 }
 
-resource "keycloak_client" "test-client" {
+resource "keycloak_openid_client" "test-client" {
   client_id = "test-client"
   realm_id  = "${keycloak_realm.test.id}"
 }

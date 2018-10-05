@@ -9,24 +9,24 @@ import (
 	"testing"
 )
 
-func TestAccKeycloakClient_basic(t *testing.T) {
+func TestAccKeycloakOpenidClient_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakClientDestroy(),
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakClient_basic(realmName, clientId),
-				Check:  testAccCheckKeycloakClientExists("keycloak_client.client"),
+				Config: testKeycloakOpenidClient_basic(realmName, clientId),
+				Check:  testAccCheckKeycloakOpenidClientExists("keycloak_openid_client.client"),
 			},
 		},
 	})
 }
 
-func TestAccKeycloakClient_updateRealm(t *testing.T) {
+func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
@@ -34,29 +34,29 @@ func TestAccKeycloakClient_updateRealm(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakClientDestroy(),
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakClient_updateRealmBefore(realmOne, realmTwo, clientId),
+				Config: testKeycloakOpenidClient_updateRealmBefore(realmOne, realmTwo, clientId),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakClientExists("keycloak_client.client"),
-					testAccCheckKeycloakClientBelongsToRealm("keycloak_client.client", realmOne),
+					testAccCheckKeycloakOpenidClientExists("keycloak_openid_client.client"),
+					testAccCheckKeycloakOpenidClientBelongsToRealm("keycloak_openid_client.client", realmOne),
 				),
 			},
 			{
-				Config: testKeycloakClient_updateRealmAfter(realmOne, realmTwo, clientId),
+				Config: testKeycloakOpenidClient_updateRealmAfter(realmOne, realmTwo, clientId),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakClientExists("keycloak_client.client"),
-					testAccCheckKeycloakClientBelongsToRealm("keycloak_client.client", realmTwo),
+					testAccCheckKeycloakOpenidClientExists("keycloak_openid_client.client"),
+					testAccCheckKeycloakOpenidClientBelongsToRealm("keycloak_openid_client.client", realmTwo),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckKeycloakClientExists(resourceName string) resource.TestCheckFunc {
+func testAccCheckKeycloakOpenidClientExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		_, err := getClientFromState(s, resourceName)
+		_, err := getOpenidClientFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
@@ -65,25 +65,25 @@ func testAccCheckKeycloakClientExists(resourceName string) resource.TestCheckFun
 	}
 }
 
-func testAccCheckKeycloakClientBelongsToRealm(resourceName, realm string) resource.TestCheckFunc {
+func testAccCheckKeycloakOpenidClientBelongsToRealm(resourceName, realm string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client, err := getClientFromState(s, resourceName)
+		client, err := getOpenidClientFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
 
 		if client.RealmId != realm {
-			return fmt.Errorf("expected client %s to have realm_id of %s, but got %s", client.ClientId, realm, client.RealmId)
+			return fmt.Errorf("expected openid client %s to have realm_id of %s, but got %s", client.ClientId, realm, client.RealmId)
 		}
 
 		return nil
 	}
 }
 
-func testAccCheckKeycloakClientDestroy() resource.TestCheckFunc {
+func testAccCheckKeycloakOpenidClientDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_client" {
+			if rs.Type != "keycloak_openid_client" {
 				continue
 			}
 
@@ -92,9 +92,9 @@ func testAccCheckKeycloakClientDestroy() resource.TestCheckFunc {
 
 			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-			client, _ := keycloakClient.GetClient(realm, id)
+			client, _ := keycloakClient.GetOpenidClient(realm, id)
 			if client != nil {
-				return fmt.Errorf("client %s still exists", id)
+				return fmt.Errorf("openid client %s still exists", id)
 			}
 		}
 
@@ -102,7 +102,7 @@ func testAccCheckKeycloakClientDestroy() resource.TestCheckFunc {
 	}
 }
 
-func getClientFromState(s *terraform.State, resourceName string) (*keycloak.Client, error) {
+func getOpenidClientFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClient, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 	rs, ok := s.RootModule().Resources[resourceName]
@@ -113,28 +113,28 @@ func getClientFromState(s *terraform.State, resourceName string) (*keycloak.Clie
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	client, err := keycloakClient.GetClient(realm, id)
+	client, err := keycloakClient.GetOpenidClient(realm, id)
 	if err != nil {
-		return nil, fmt.Errorf("error getting client %s: %s", id, err)
+		return nil, fmt.Errorf("error getting openid client %s: %s", id, err)
 	}
 
 	return client, nil
 }
 
-func testKeycloakClient_basic(realm, clientId string) string {
+func testKeycloakOpenidClient_basic(realm, clientId string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_client" "client" {
+resource "keycloak_openid_client" "client" {
 	client_id = "%s"
 	realm_id  = "${keycloak_realm.realm.id}"
 }
 	`, realm, clientId)
 }
 
-func testKeycloakClient_updateRealmBefore(realmOne, realmTwo, clientId string) string {
+func testKeycloakOpenidClient_updateRealmBefore(realmOne, realmTwo, clientId string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm-1" {
 	realm = "%s"
@@ -144,14 +144,14 @@ resource "keycloak_realm" "realm-2" {
 	realm = "%s"
 }
 
-resource "keycloak_client" "client" {
+resource "keycloak_openid_client" "client" {
 	client_id = "%s"
 	realm_id  = "${keycloak_realm.realm-1.id}"
 }
 	`, realmOne, realmTwo, clientId)
 }
 
-func testKeycloakClient_updateRealmAfter(realmOne, realmTwo, clientId string) string {
+func testKeycloakOpenidClient_updateRealmAfter(realmOne, realmTwo, clientId string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm-1" {
 	realm = "%s"
@@ -161,7 +161,7 @@ resource "keycloak_realm" "realm-2" {
 	realm = "%s"
 }
 
-resource "keycloak_client" "client" {
+resource "keycloak_openid_client" "client" {
 	client_id = "%s"
 	realm_id  = "${keycloak_realm.realm-2.id}"
 }
