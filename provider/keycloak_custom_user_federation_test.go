@@ -6,12 +6,14 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
 	"testing"
 )
 
 func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	name := "terraform-" + acctest.RandString(10)
+	providerId := "custom"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -19,8 +21,26 @@ func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakCustomUserFederation_basic(realmName, name),
+				Config: testKeycloakCustomUserFederation_basic(realmName, name, providerId),
 				Check:  testAccCheckKeycloakCustomUserFederationExists("keycloak_custom_user_federation.custom"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakCustomUserFederation_validation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	name := "terraform-" + acctest.RandString(10)
+	providerId := acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakCustomUserFederation_basic(realmName, name, providerId),
+				ExpectError: regexp.MustCompile("custom user federation provider with id .+ is not installed on the server"),
 			},
 		},
 	})
@@ -78,7 +98,7 @@ func getCustomUserFederationFromState(s *terraform.State, resourceName string) (
 	return custom, nil
 }
 
-func testKeycloakCustomUserFederation_basic(realm, name string) string {
+func testKeycloakCustomUserFederation_basic(realm, name, providerId string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -87,9 +107,9 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_custom_user_federation" "custom" {
 	name        = "%s"
 	realm_id    = "master"
-	provider_id = "custom"
+	provider_id = "%s"
 
 	enabled     = true
 }
-	`, realm, name)
+	`, realm, name, providerId)
 }

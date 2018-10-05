@@ -66,6 +66,20 @@ func convertFromComponentToCustomUserFederation(component *component) (*CustomUs
 	return custom, nil
 }
 
+func (custom *CustomUserFederation) Validate(keycloakClient *KeycloakClient) error {
+	// validate if the given custom user storage provider exists on the server.
+	serverInfo, err := keycloakClient.GetServerInfo()
+	if err != nil {
+		return err
+	}
+
+	if !serverInfo.ComponentTypeIsInstalled("org.keycloak.storage.UserStorageProvider", custom.ProviderId) {
+		return fmt.Errorf("custom user federation provider with id %s is not installed on the server", custom.ProviderId)
+	}
+
+	return nil
+}
+
 func (keycloakClient *KeycloakClient) NewCustomUserFederation(customUserFederation *CustomUserFederation) error {
 	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", customUserFederation.RealmId), convertFromCustomUserFederationToComponent(customUserFederation))
 	if err != nil {
