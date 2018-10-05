@@ -216,7 +216,7 @@ func TestAccKeycloakLdapUserFederation_useTrustStoreValidation(t *testing.T) {
 func TestAccKeycloakLdapUserFederation_cachePolicyValidation(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	ldapName := "terraform-" + acctest.RandString(10)
-	cachePolicy := randomStringInSlice(keycloakLdapUserFederationCachePolicies)
+	cachePolicy := randomStringInSlice(keycloakUserFederationCachePolicies)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,

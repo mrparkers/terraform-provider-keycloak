@@ -13,7 +13,7 @@ var (
 	keycloakLdapUserFederationVendors               = []string{"OTHER", "EDIRECTORY", "AD", "RHDS", "TIVOLI"}
 	keycloakLdapUserFederationSearchScopes          = []string{"ONE_LEVEL", "SUBTREE"}
 	keycloakLdapUserFederationTruststoreSpiSettings = []string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}
-	keycloakLdapUserFederationCachePolicies         = []string{"DEFAULT", "EVICT_DAILY", "EVICT_WEEKLY", "MAX_LIFESPAN", "NO_CACHE"}
+	keycloakUserFederationCachePolicies             = []string{"DEFAULT", "EVICT_DAILY", "EVICT_WEEKLY", "MAX_LIFESPAN", "NO_CACHE"}
 )
 
 func resourceKeycloakLdapUserFederation() *schema.Resource {
@@ -189,7 +189,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "DEFAULT",
-				ValidateFunc: validation.StringInSlice(keycloakLdapUserFederationCachePolicies, false),
+				ValidateFunc: validation.StringInSlice(keycloakUserFederationCachePolicies, false),
 			},
 		},
 	}
