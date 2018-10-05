@@ -86,3 +86,11 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
   ldap_full_name_attribute = "cn"
   read_only                = true
 }
+
+resource "keycloak_custom_user_federation" "custom" {
+  name        = "custom1"
+  realm_id    = "master"
+  provider_id = "custom"
+
+  enabled     = true
+}
