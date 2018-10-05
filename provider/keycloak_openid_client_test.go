@@ -20,7 +20,7 @@ func TestAccKeycloakOpenidClient_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClient_basic(realmName, clientId),
-				Check:  testAccCheckKeycloakOpenidClientExists("keycloak_openid_client.client"),
+				Check:  testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 			},
 		},
 	})
@@ -39,14 +39,14 @@ func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 			{
 				Config: testKeycloakOpenidClient_updateRealmBefore(realmOne, realmTwo, clientId),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakOpenidClientExists("keycloak_openid_client.client"),
+					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 					testAccCheckKeycloakOpenidClientBelongsToRealm("keycloak_openid_client.client", realmOne),
 				),
 			},
 			{
 				Config: testKeycloakOpenidClient_updateRealmAfter(realmOne, realmTwo, clientId),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakOpenidClientExists("keycloak_openid_client.client"),
+					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 					testAccCheckKeycloakOpenidClientBelongsToRealm("keycloak_openid_client.client", realmTwo),
 				),
 			},
@@ -54,11 +54,15 @@ func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 	})
 }
 
-func testAccCheckKeycloakOpenidClientExists(resourceName string) resource.TestCheckFunc {
+func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		_, err := getOpenidClientFromState(s, resourceName)
+		client, err := getOpenidClientFromState(s, resourceName)
 		if err != nil {
 			return err
+		}
+
+		if client.Protocol != "openid-connect" {
+			return fmt.Errorf("expected openid client to have openid-connect protocol, but got %s", client.Protocol)
 		}
 
 		return nil

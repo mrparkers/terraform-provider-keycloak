@@ -8,9 +8,12 @@ type OpenidClient struct {
 	Id       string `json:"id,omitempty"`
 	ClientId string `json:"clientId"`
 	RealmId  string `json:"-"`
+	Protocol string `json:"protocol"`
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClient(client *OpenidClient) error {
+	client.Protocol = "openid-connect"
+
 	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients", client.RealmId), client)
 	if err != nil {
 		return err
@@ -35,6 +38,8 @@ func (keycloakClient *KeycloakClient) GetOpenidClient(realmId, id string) (*Open
 }
 
 func (keycloakClient *KeycloakClient) UpdateOpenidClient(client *OpenidClient) error {
+	client.Protocol = "openid-connect"
+
 	return keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s", client.RealmId, client.Id), client)
 }
 
