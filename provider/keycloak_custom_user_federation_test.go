@@ -26,6 +26,12 @@ func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
 				Config: testKeycloakCustomUserFederation_basic(realmName, name, providerId),
 				Check:  testAccCheckKeycloakCustomUserFederationExists("keycloak_custom_user_federation.custom"),
 			},
+			{
+				ResourceName:        "keycloak_custom_user_federation.custom",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
 		},
 	})
 }
@@ -108,7 +114,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_custom_user_federation" "custom" {
 	name        = "%s"
-	realm_id    = "master"
+	realm_id    = "${keycloak_realm.realm.id}"
 	provider_id = "%s"
 
 	enabled     = true
