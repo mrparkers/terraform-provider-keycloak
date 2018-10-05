@@ -17,6 +17,10 @@ type CustomUserFederation struct {
 	CachePolicy string
 }
 
+var (
+	userStorageProviderType = "org.keycloak.storage.UserStorageProvider"
+)
+
 func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *component {
 	componentConfig := map[string][]string{
 		"cachePolicy": {
@@ -34,7 +38,7 @@ func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *c
 		Id:           custom.Id,
 		Name:         custom.Name,
 		ProviderId:   custom.ProviderId,
-		ProviderType: "org.keycloak.storage.UserStorageProvider",
+		ProviderType: userStorageProviderType,
 		ParentId:     custom.RealmId,
 		Config:       componentConfig,
 	}
@@ -73,7 +77,7 @@ func (custom *CustomUserFederation) Validate(keycloakClient *KeycloakClient) err
 		return err
 	}
 
-	if !serverInfo.ComponentTypeIsInstalled("org.keycloak.storage.UserStorageProvider", custom.ProviderId) {
+	if !serverInfo.ComponentTypeIsInstalled(userStorageProviderType, custom.ProviderId) {
 		return fmt.Errorf("custom user federation provider with id %s is not installed on the server", custom.ProviderId)
 	}
 

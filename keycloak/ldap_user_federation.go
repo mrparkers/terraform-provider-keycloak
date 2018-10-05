@@ -136,7 +136,7 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) *compone
 		Id:           ldap.Id,
 		Name:         ldap.Name,
 		ProviderId:   "ldap",
-		ProviderType: "org.keycloak.storage.UserStorageProvider",
+		ProviderType: userStorageProviderType,
 		ParentId:     ldap.RealmId,
 		Config:       componentConfig,
 	}
