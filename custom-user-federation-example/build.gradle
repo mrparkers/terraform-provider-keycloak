@@ -1,0 +1,47 @@
+buildscript {
+    ext.kotlinVersion = '1.2.51'
+    ext.keycloakVersion = '4.2.1.Final'
+    ext.shadowJarVersion = '2.0.4'
+
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+        classpath "com.github.jengelman.gradle.plugins:shadow:${shadowJarVersion}"
+    }
+}
+
+apply {
+    plugin 'java'
+    plugin 'kotlin'
+    plugin 'com.github.johnrengelman.shadow'
+}
+
+shadowJar {
+    classifier = null
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+    compile "org.keycloak:keycloak-core:${keycloakVersion}"
+    compile "org.keycloak:keycloak-server-spi:${keycloakVersion}"
+}
+
+repositories {
+    mavenCentral()
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}

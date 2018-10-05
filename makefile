@@ -32,3 +32,6 @@ fmtcheck:
 
 vet:
 	go vet ./...
+
+user-federation-example:
+	cd custom-user-federation-example && ./gradlew shadowJar
