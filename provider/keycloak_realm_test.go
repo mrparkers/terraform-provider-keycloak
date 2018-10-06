@@ -35,6 +35,28 @@ func TestAccKeycloakRealm_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_import(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	realmDisplayName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+			{
+				ResourceName:      "keycloak_realm.realm",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_themes(t *testing.T) {
 	realmOne := &keycloak.Realm{
 		Realm:        "terraform-" + acctest.RandString(10),

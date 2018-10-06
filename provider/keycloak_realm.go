@@ -11,6 +11,9 @@ func resourceKeycloakRealm() *schema.Resource {
 		Read:   resourceKeycloakRealmRead,
 		Delete: resourceKeycloakRealmDelete,
 		Update: resourceKeycloakRealmUpdate,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"realm": {
 				Type:     schema.TypeString,
@@ -157,9 +160,10 @@ func resourceKeycloakRealm() *schema.Resource {
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"action_token_generated_by_admin_lifespan": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "12h",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "12h",
+				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 		},
 	}
@@ -315,6 +319,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("access_code_lifespan_login", getDurationStringFromSeconds(realm.AccessCodeLifespanLogin))
 	data.Set("access_code_lifespan_user_action", getDurationStringFromSeconds(realm.AccessCodeLifespanUserAction))
 	data.Set("action_token_generated_by_user_lifespan", getDurationStringFromSeconds(realm.ActionTokenGeneratedByUserLifespan))
+	data.Set("action_token_generated_by_admin_lifespan", getDurationStringFromSeconds(realm.ActionTokenGeneratedByAdminLifespan))
 }
 
 func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {
