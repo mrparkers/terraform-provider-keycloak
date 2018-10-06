@@ -19,6 +19,9 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 		Read:   resourceKeycloakLdapGroupMapperRead,
 		Update: resourceKeycloakLdapGroupMapperUpdate,
 		Delete: resourceKeycloakLdapGroupMapperDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceKeycloakLdapGenericMapperImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,

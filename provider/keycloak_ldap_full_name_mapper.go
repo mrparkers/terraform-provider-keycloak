@@ -13,7 +13,7 @@ func resourceKeycloakLdapFullNameMapper() *schema.Resource {
 		Update: resourceKeycloakLdapFullNameMapperUpdate,
 		Delete: resourceKeycloakLdapFullNameMapperDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakLdapFullNameMapperImport,
+			State: resourceKeycloakLdapGenericMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -142,7 +142,7 @@ func resourceKeycloakLdapFullNameMapperDelete(data *schema.ResourceData, meta in
 	return keycloakClient.DeleteLdapFullNameMapper(realmId, id)
 }
 
-func resourceKeycloakLdapFullNameMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakLdapGenericMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	realm := parts[0]
