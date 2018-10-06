@@ -11,6 +11,9 @@ func resourceKeycloakLdapMsadUserAccountControlMapper() *schema.Resource {
 		Read:   resourceKeycloakLdapMsadUserAccountControlMapperRead,
 		Update: resourceKeycloakLdapMsadUserAccountControlMapperUpdate,
 		Delete: resourceKeycloakLdapMsadUserAccountControlMapperDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceKeycloakLdapGenericMapperImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
