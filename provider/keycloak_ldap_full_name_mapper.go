@@ -3,6 +3,7 @@ package provider
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strings"
 )
 
 func resourceKeycloakLdapFullNameMapper() *schema.Resource {
@@ -11,6 +12,9 @@ func resourceKeycloakLdapFullNameMapper() *schema.Resource {
 		Read:   resourceKeycloakLdapFullNameMapperRead,
 		Update: resourceKeycloakLdapFullNameMapperUpdate,
 		Delete: resourceKeycloakLdapFullNameMapperDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceKeycloakLdapFullNameMapperImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
@@ -136,4 +140,18 @@ func resourceKeycloakLdapFullNameMapperDelete(data *schema.ResourceData, meta in
 	id := data.Id()
 
 	return keycloakClient.DeleteLdapFullNameMapper(realmId, id)
+}
+
+func resourceKeycloakLdapFullNameMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+
+	realm := parts[0]
+	ldapUserFederationId := parts[1]
+	id := parts[2]
+
+	d.Set("realm_id", realm)
+	d.Set("ldap_user_federation_id", ldapUserFederationId)
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
 }
