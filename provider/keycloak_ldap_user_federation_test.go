@@ -24,6 +24,12 @@ func TestAccKeycloakLdapUserFederation_basic(t *testing.T) {
 				Config: testKeycloakLdapUserFederation_basic(realmName, ldapName),
 				Check:  testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
 			},
+			{
+				ResourceName:        "keycloak_ldap_user_federation.openldap",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
 		},
 	})
 }
