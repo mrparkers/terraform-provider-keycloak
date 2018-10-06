@@ -22,6 +22,12 @@ func TestAccKeycloakLdapUserAttributeMapper_basic(t *testing.T) {
 				Config: testKeycloakLdapUserAttributeMapper_basic(realmName, userAttributeMapperName),
 				Check:  testAccCheckKeycloakLdapUserAttributeMapperExists("keycloak_ldap_user_attribute_mapper.username"),
 			},
+			{
+				ResourceName:      "keycloak_ldap_user_attribute_mapper.username",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getLdapGenericMapperImportId("keycloak_ldap_user_attribute_mapper.username"),
+			},
 		},
 	})
 }

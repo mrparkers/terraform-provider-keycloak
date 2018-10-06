@@ -22,6 +22,12 @@ func TestAccKeycloakLdapMsadUserAccountControlMapper_basic(t *testing.T) {
 				Config: testKeycloakLdapMsadUserAccountControlMapper_basic(realmName, msadUacMapperName, randomBool()),
 				Check:  testAccCheckKeycloakLdapMsadUserAccountControlMapperExists("keycloak_ldap_msad_user_account_control_mapper.uac-mapper"),
 			},
+			{
+				ResourceName:      "keycloak_ldap_msad_user_account_control_mapper.uac-mapper",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getLdapGenericMapperImportId("keycloak_ldap_msad_user_account_control_mapper.uac-mapper"),
+			},
 		},
 	})
 }

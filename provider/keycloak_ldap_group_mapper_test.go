@@ -27,7 +27,7 @@ func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
 				ResourceName:      "keycloak_ldap_group_mapper.group-mapper",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateIdFunc: getLdapGroupMapperImportId,
+				ImportStateIdFunc: getLdapGenericMapperImportId("keycloak_ldap_group_mapper.group-mapper"),
 			},
 		},
 	})
@@ -271,22 +271,6 @@ func getLdapGroupMapperFromState(s *terraform.State, resourceName string) (*keyc
 	}
 
 	return ldapGroupMapper, nil
-}
-
-func getLdapGroupMapperImportId(s *terraform.State) (string, error) {
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "keycloak_ldap_group_mapper" {
-			continue
-		}
-
-		id := rs.Primary.ID
-		realmId := rs.Primary.Attributes["realm_id"]
-		ldapUserFederationId := rs.Primary.Attributes["ldap_user_federation_id"]
-
-		return fmt.Sprintf("%s/%s/%s", realmId, ldapUserFederationId, id), nil
-	}
-
-	return "", fmt.Errorf("unable to locate group mapper in state")
 }
 
 func testKeycloakLdapGroupMapper_basic(realm, groupMapperName string) string {

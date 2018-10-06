@@ -11,6 +11,10 @@ func resourceKeycloakLdapMsadUserAccountControlMapper() *schema.Resource {
 		Read:   resourceKeycloakLdapMsadUserAccountControlMapperRead,
 		Update: resourceKeycloakLdapMsadUserAccountControlMapperUpdate,
 		Delete: resourceKeycloakLdapMsadUserAccountControlMapperDelete,
+		// This resource can be imported using {{realm}}/{{provider_id}}/{{mapper_id}}. The Provider and Mapper IDs are displayed in the GUI
+		Importer: &schema.ResourceImporter{
+			State: resourceKeycloakLdapGenericMapperImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
