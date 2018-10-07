@@ -3,6 +3,7 @@ package provider
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strings"
 )
 
 func resourceKeycloakOpenidClient() *schema.Resource {
@@ -11,6 +12,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 		Read:   resourceKeycloakOpenidClientRead,
 		Delete: resourceKeycloakOpenidClientDelete,
 		Update: resourceKeycloakOpenidClientUpdate,
+		// This resource can be imported using {{realm}}/{{client_id}}. The Client ID is displayed in the GUI
+		Importer: &schema.ResourceImporter{
+			State: resourceKeycloakOpenidClientImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
 				Type:     schema.TypeString,
@@ -93,4 +98,16 @@ func resourceKeycloakOpenidClientDelete(data *schema.ResourceData, meta interfac
 	id := data.Id()
 
 	return keycloakClient.DeleteOpenidClient(realmId, id)
+}
+
+func resourceKeycloakOpenidClientImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+
+	realm := parts[0]
+	id := parts[1]
+
+	d.Set("realm_id", realm)
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
 }
