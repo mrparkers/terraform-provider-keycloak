@@ -22,6 +22,12 @@ func TestAccKeycloakOpenidClient_basic(t *testing.T) {
 				Config: testKeycloakOpenidClient_basic(realmName, clientId),
 				Check:  testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 			},
+			{
+				ResourceName:        "keycloak_openid_client.client",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
 		},
 	})
 }

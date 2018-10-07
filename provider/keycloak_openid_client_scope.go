@@ -12,7 +12,7 @@ func resourceKeycloakOpenidClientScope() *schema.Resource {
 		Read:   resourceKeycloakOpenidClientScopeRead,
 		Delete: resourceKeycloakOpenidClientScopeDelete,
 		Update: resourceKeycloakOpenidClientScopeUpdate,
-		// This resource can be imported using {{realm}}/{{provider_id}}. The Provider ID is displayed in the GUI
+		// This resource can be imported using {{realm}}/{{client_scope_id}}. The Client Scope ID is displayed in the GUI
 		Importer: &schema.ResourceImporter{
 			State: resourceKeycloakOpenidClientScopeImport,
 		},
