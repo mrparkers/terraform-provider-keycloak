@@ -19,12 +19,11 @@ resource "keycloak_openid_client" "test-client" {
   realm_id  = "${keycloak_realm.test.id}"
 }
 
-resource "keycloak_client_scope" "test-client-scope" {
+resource "keycloak_openid_client_scope" "test-client-scope" {
   name                = "foo1"
   realm_id            = "${keycloak_realm.test.id}"
 
   description         = "test"
-  protocol            = "saml"
   consent_screen_text = "hello"
 }
 
