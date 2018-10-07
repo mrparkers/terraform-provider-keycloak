@@ -22,6 +22,12 @@ func TestAccKeycloakClientScope_basic(t *testing.T) {
 				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
 				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client-scope"),
 			},
+			{
+				ResourceName:        "keycloak_openid_client_scope.client-scope",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
 		},
 	})
 }
