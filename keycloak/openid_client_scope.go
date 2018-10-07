@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-type ClientScope struct {
+type OpenidClientScope struct {
 	Id          string `json:"id,omitempty"`
 	RealmId     string `json:"-"`
 	Name        string `json:"name"`
@@ -16,7 +16,9 @@ type ClientScope struct {
 	} `json:"attributes"`
 }
 
-func (keycloakClient *KeycloakClient) NewClientScope(clientScope *ClientScope) error {
+func (keycloakClient *KeycloakClient) NewOpenidClientScope(clientScope *OpenidClientScope) error {
+	clientScope.Protocol = "openid-connect"
+
 	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/client-scopes", clientScope.RealmId), clientScope)
 	if err != nil {
 		return err
@@ -27,8 +29,8 @@ func (keycloakClient *KeycloakClient) NewClientScope(clientScope *ClientScope) e
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetClientScope(realmId, id string) (*ClientScope, error) {
-	var clientScope ClientScope
+func (keycloakClient *KeycloakClient) GetOpenidClientScope(realmId, id string) (*OpenidClientScope, error) {
+	var clientScope OpenidClientScope
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id), &clientScope)
 	if err != nil {
@@ -40,10 +42,12 @@ func (keycloakClient *KeycloakClient) GetClientScope(realmId, id string) (*Clien
 	return &clientScope, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateClientScope(clientScope *ClientScope) error {
+func (keycloakClient *KeycloakClient) UpdateOpenidClientScope(clientScope *OpenidClientScope) error {
+	clientScope.Protocol = "openid-connect"
+
 	return keycloakClient.put(fmt.Sprintf("/realms/%s/client-scopes/%s", clientScope.RealmId, clientScope.Id), clientScope)
 }
 
-func (keycloakClient *KeycloakClient) DeleteClientScope(realmId, id string) error {
+func (keycloakClient *KeycloakClient) DeleteOpenidClientScope(realmId, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id))
 }
