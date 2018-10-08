@@ -51,30 +51,36 @@ func (mapper *OpenIdUserAttributeProtocolMapper) convertToGenericProtocolMapper(
 		Name:           mapper.Name,
 		Protocol:       "openid-connect",
 		ProtocolMapper: "oidc-usermodel-attribute-mapper",
-		Config: map[string]interface{}{
-			addToIdTokenField:     mapper.AddToIdToken,
-			addToAccessTokenField: mapper.AddToAccessToken,
-			addToUserInfoField:    mapper.AddToUserInfo,
+		Config: map[string]string{
+			addToIdTokenField:     strconv.FormatBool(mapper.AddToIdToken),
+			addToAccessTokenField: strconv.FormatBool(mapper.AddToAccessToken),
+			addToUserInfoField:    strconv.FormatBool(mapper.AddToUserInfo),
 			userAttributeField:    mapper.UserAttribute,
 			claimNameField:        mapper.ClaimName,
 			claimValueTypeField:   mapper.ClaimValueType,
-			multivaluedField:      mapper.Multivalued,
+			multivaluedField:      strconv.FormatBool(mapper.Multivalued),
 		},
 	}
 }
 
 func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdUserAttributeProtocolMapper, error) {
-	addToIdToken, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField].(string))
+	addToIdToken, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	addToAccessToken, err := strconv.ParseBool(protocolMapper.Config[addToAccessTokenField].(string))
+	addToAccessToken, err := strconv.ParseBool(protocolMapper.Config[addToAccessTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	addToUserInfoField, err := strconv.ParseBool(protocolMapper.Config[addToUserInfoField].(string))
+	addToUserInfo, err := strconv.ParseBool(protocolMapper.Config[addToUserInfoField])
+	if err != nil {
+		return nil, err
+	}
+
+	multivalued, err := strconv.ParseBool(protocolMapper.Config[multivaluedField])
+
 	if err != nil {
 		return nil, err
 	}
@@ -88,12 +94,12 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper
 
 		AddToIdToken:     addToIdToken,
 		AddToAccessToken: addToAccessToken,
-		AddToUserInfo:    addToUserInfoField,
+		AddToUserInfo:    addToUserInfo,
 
-		UserAttribute:  protocolMapper.Config[userAttributeField].(string),
-		ClaimName:      protocolMapper.Config[claimNameField].(string),
-		ClaimValueType: protocolMapper.Config[claimValueTypeField].(string),
-		Multivalued:    protocolMapper.Config[multivaluedField].(bool),
+		UserAttribute:  protocolMapper.Config[userAttributeField],
+		ClaimName:      protocolMapper.Config[claimNameField],
+		ClaimValueType: protocolMapper.Config[claimValueTypeField],
+		Multivalued:    multivalued,
 	}, nil
 }
 
