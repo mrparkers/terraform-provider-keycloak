@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"math/rand"
+	"os"
 	"strings"
+	"testing"
 	"time"
 )
 
@@ -30,4 +32,12 @@ func arrayOfStringsForTerraformResource(parts []string) string {
 
 func randomDurationString() string {
 	return (time.Duration(acctest.RandIntRange(1, 604800)) * time.Second).String()
+}
+
+func skipIfEnvSet(t *testing.T, envs ...string) {
+	for _, k := range envs {
+		if os.Getenv(k) != "" {
+			t.Skipf("Environment variable %s is set, skipping...", k)
+		}
+	}
 }

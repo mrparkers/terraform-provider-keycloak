@@ -23,6 +23,12 @@ func TestAccKeycloakLdapFullNameMapper_basic(t *testing.T) {
 				Config: testKeycloakLdapFullNameMapper_basic(realmName, fullNameMapperName),
 				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full-name-mapper"),
 			},
+			{
+				ResourceName:      "keycloak_ldap_full_name_mapper.full-name-mapper",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getLdapGenericMapperImportId("keycloak_ldap_full_name_mapper.full-name-mapper"),
+			},
 		},
 	})
 }
@@ -143,6 +149,21 @@ func getLdapFullNameMapperFromState(s *terraform.State, resourceName string) (*k
 	}
 
 	return ldapFullNameMapper, nil
+}
+
+func getLdapGenericMapperImportId(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		id := rs.Primary.ID
+		realmId := rs.Primary.Attributes["realm_id"]
+		ldapUserFederationId := rs.Primary.Attributes["ldap_user_federation_id"]
+
+		return fmt.Sprintf("%s/%s/%s", realmId, ldapUserFederationId, id), nil
+	}
 }
 
 func testKeycloakLdapFullNameMapper_basic(realm, mapperName string) string {

@@ -23,6 +23,12 @@ func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
 				Config: testKeycloakLdapGroupMapper_basic(realmName, groupMapperName),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
 			},
+			{
+				ResourceName:      "keycloak_ldap_group_mapper.group-mapper",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getLdapGenericMapperImportId("keycloak_ldap_group_mapper.group-mapper"),
+			},
 		},
 	})
 }

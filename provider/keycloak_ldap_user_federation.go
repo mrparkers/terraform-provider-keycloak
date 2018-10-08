@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strings"
 	"time"
 )
 
@@ -13,7 +14,7 @@ var (
 	keycloakLdapUserFederationVendors               = []string{"OTHER", "EDIRECTORY", "AD", "RHDS", "TIVOLI"}
 	keycloakLdapUserFederationSearchScopes          = []string{"ONE_LEVEL", "SUBTREE"}
 	keycloakLdapUserFederationTruststoreSpiSettings = []string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}
-	keycloakLdapUserFederationCachePolicies         = []string{"DEFAULT", "EVICT_DAILY", "EVICT_WEEKLY", "MAX_LIFESPAN", "NO_CACHE"}
+	keycloakUserFederationCachePolicies             = []string{"DEFAULT", "EVICT_DAILY", "EVICT_WEEKLY", "MAX_LIFESPAN", "NO_CACHE"}
 )
 
 func resourceKeycloakLdapUserFederation() *schema.Resource {
@@ -22,6 +23,10 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 		Read:   resourceKeycloakLdapUserFederationRead,
 		Update: resourceKeycloakLdapUserFederationUpdate,
 		Delete: resourceKeycloakLdapUserFederationDelete,
+		// This resource can be imported using {{realm}}/{{provider_id}}. The Provider ID is displayed in the GUI
+		Importer: &schema.ResourceImporter{
+			State: resourceKeycloakLdapUserFederationImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
@@ -189,7 +194,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "DEFAULT",
-				ValidateFunc: validation.StringInSlice(keycloakLdapUserFederationCachePolicies, false),
+				ValidateFunc: validation.StringInSlice(keycloakUserFederationCachePolicies, false),
 			},
 		},
 	}
@@ -354,4 +359,16 @@ func resourceKeycloakLdapUserFederationDelete(data *schema.ResourceData, meta in
 	id := data.Id()
 
 	return keycloakClient.DeleteLdapUserFederation(realmId, id)
+}
+
+func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+
+	realm := parts[0]
+	id := parts[1]
+
+	d.Set("realm_id", realm)
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
 }

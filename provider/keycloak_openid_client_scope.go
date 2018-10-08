@@ -2,20 +2,20 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strings"
 )
 
-var (
-	keycloakClientScopeProtocols = []string{"openid-connect", "saml"}
-)
-
-func resourceKeycloakClientScope() *schema.Resource {
+func resourceKeycloakOpenidClientScope() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakClientScopeCreate,
-		Read:   resourceKeycloakClientScopeRead,
-		Delete: resourceKeycloakClientScopeDelete,
-		Update: resourceKeycloakClientScopeUpdate,
+		Create: resourceKeycloakOpenidClientScopeCreate,
+		Read:   resourceKeycloakOpenidClientScopeRead,
+		Delete: resourceKeycloakOpenidClientScopeDelete,
+		Update: resourceKeycloakOpenidClientScopeUpdate,
+		// This resource can be imported using {{realm}}/{{client_scope_id}}. The Client Scope ID is displayed in the GUI
+		Importer: &schema.ResourceImporter{
+			State: resourceKeycloakOpenidClientScopeImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -30,12 +30,6 @@ func resourceKeycloakClientScope() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"protocol": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "openid-connect",
-				ValidateFunc: validation.StringInSlice(keycloakClientScopeProtocols, false),
-			},
 			"consent_screen_text": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -44,13 +38,12 @@ func resourceKeycloakClientScope() *schema.Resource {
 	}
 }
 
-func getClientScopeFromData(data *schema.ResourceData) *keycloak.ClientScope {
-	clientScope := &keycloak.ClientScope{
+func getClientScopeFromData(data *schema.ResourceData) *keycloak.OpenidClientScope {
+	clientScope := &keycloak.OpenidClientScope{
 		Id:          data.Id(),
 		RealmId:     data.Get("realm_id").(string),
 		Name:        data.Get("name").(string),
 		Description: data.Get("description").(string),
-		Protocol:    data.Get("protocol").(string),
 	}
 
 	if consentScreenText, ok := data.GetOk("consent_screen_text"); ok {
@@ -63,41 +56,40 @@ func getClientScopeFromData(data *schema.ResourceData) *keycloak.ClientScope {
 	return clientScope
 }
 
-func setClientScopeData(data *schema.ResourceData, clientScope *keycloak.ClientScope) {
+func setClientScopeData(data *schema.ResourceData, clientScope *keycloak.OpenidClientScope) {
 	data.SetId(clientScope.Id)
 
 	data.Set("realm_id", clientScope.RealmId)
 	data.Set("name", clientScope.Name)
 	data.Set("description", clientScope.Description)
-	data.Set("protocol", clientScope.Protocol)
 
 	if clientScope.Attributes.DisplayOnConsentScreen == "true" {
 		data.Set("consent_screen_text", clientScope.Attributes.ConsentScreenText)
 	}
 }
 
-func resourceKeycloakClientScopeCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientScopeCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	clientScope := getClientScopeFromData(data)
 
-	err := keycloakClient.NewClientScope(clientScope)
+	err := keycloakClient.NewOpenidClientScope(clientScope)
 	if err != nil {
 		return err
 	}
 
 	setClientScopeData(data, clientScope)
 
-	return resourceKeycloakClientScopeRead(data, meta)
+	return resourceKeycloakOpenidClientScopeRead(data, meta)
 }
 
-func resourceKeycloakClientScopeRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientScopeRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	clientScope, err := keycloakClient.GetClientScope(realmId, id)
+	clientScope, err := keycloakClient.GetOpenidClientScope(realmId, id)
 	if err != nil {
 		return err
 	}
@@ -107,12 +99,12 @@ func resourceKeycloakClientScopeRead(data *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func resourceKeycloakClientScopeUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientScopeUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	clientScope := getClientScopeFromData(data)
 
-	err := keycloakClient.UpdateClientScope(clientScope)
+	err := keycloakClient.UpdateOpenidClientScope(clientScope)
 	if err != nil {
 		return err
 	}
@@ -122,11 +114,23 @@ func resourceKeycloakClientScopeUpdate(data *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceKeycloakClientScopeDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientScopeDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteClientScope(realmId, id)
+	return keycloakClient.DeleteOpenidClientScope(realmId, id)
+}
+
+func resourceKeycloakOpenidClientScopeImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+
+	realm := parts[0]
+	id := parts[1]
+
+	d.Set("realm_id", realm)
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
 }

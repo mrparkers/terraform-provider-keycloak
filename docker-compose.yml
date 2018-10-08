@@ -33,3 +33,5 @@ services:
     - POSTGRES_PORT_5432_TCP_PORT=5432
     ports:
     - 8080:8080
+    volumes:
+    - ./custom-user-federation-example/build/libs:/opt/jboss/keycloak/providers/
