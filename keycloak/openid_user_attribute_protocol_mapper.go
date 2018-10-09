@@ -138,7 +138,7 @@ func (keycloakClient *KeycloakClient) GetOpenIdUserAttributeProtocolMapperForCli
 	return keycloakClient.getOpenIdUserAttributeProtocolMapper(realmId, clientId, "")
 }
 
-func (keycloakClient *KeycloakClient) GetOpenIdUserAttributeProtocolMapperForClientScope(mapper OpenIdUserAttributeProtocolMapper, realmId, clientScopeId string) (*OpenIdUserAttributeProtocolMapper, error) {
+func (keycloakClient *KeycloakClient) GetOpenIdUserAttributeProtocolMapperForClientScope(realmId, clientScopeId string) (*OpenIdUserAttributeProtocolMapper, error) {
 	return keycloakClient.getOpenIdUserAttributeProtocolMapper(realmId, "", clientScopeId)
 }
 
