@@ -36,7 +36,7 @@ func resourceKeycloakLdapMsadUserAccountControlMapper() *schema.Resource {
 			"ldap_password_policy_hints_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 		},
 	}

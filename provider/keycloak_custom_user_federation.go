@@ -44,14 +44,14 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 			"priority": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     0,
+				Computed:    true,
 				Description: "Priority of this provider when looking up users. Lower values are first.",
 			},
 
 			"cache_policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "DEFAULT",
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice(keycloakUserFederationCachePolicies, false),
 			},
 		},

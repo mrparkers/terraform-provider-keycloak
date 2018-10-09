@@ -46,19 +46,19 @@ func resourceKeycloakLdapUserAttributeMapper() *schema.Resource {
 			"read_only": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Computed:    true,
 				Description: "When true, this attribute is not saved back to LDAP when the user attribute is updated in Keycloak.",
 			},
 			"always_read_value_from_ldap": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Computed:    true,
 				Description: "When true, the value fetched from LDAP will override the value stored in Keycloak.",
 			},
 			"is_mandatory_in_ldap": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Computed:    true,
 				Description: "When true, this attribute must exist in LDAP.",
 			},
 		},
