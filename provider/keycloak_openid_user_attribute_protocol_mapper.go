@@ -81,7 +81,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapper() *schema.Resource {
 			},
 			"claim_value_type": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				Description:  "Claim type used when serializing tokens.",
 				Default:      "String",
 				ValidateFunc: validation.StringInSlice([]string{"String", "long", "int", "boolean"}, true),
@@ -159,9 +159,9 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperRead(data *schema.Resource
 	var openIdUserAttributeMapper *keycloak.OpenIdUserAttributeProtocolMapper
 	var err error
 	if clientId != "" {
-		openIdUserAttributeMapper, err = keycloakClient.GetOpenIdUserAttributeProtocolMapperForClient(realmId, clientId)
+		openIdUserAttributeMapper, err = keycloakClient.GetOpenIdUserAttributeProtocolMapperForClient(realmId, clientId, data.Id())
 	} else {
-		openIdUserAttributeMapper, err = keycloakClient.GetOpenIdUserAttributeProtocolMapperForClientScope(realmId, clientScopeId)
+		openIdUserAttributeMapper, err = keycloakClient.GetOpenIdUserAttributeProtocolMapperForClientScope(realmId, clientScopeId, data.Id())
 	}
 
 	if err != nil {
@@ -194,9 +194,9 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperDelete(data *schema.Resour
 	clientScopeId := data.Get("client_scope_id").(string)
 
 	if clientId != "" {
-		return keycloakClient.DeleteOpenIdUserAttributeProtocolMapperForClient(realmId, clientId)
+		return keycloakClient.DeleteOpenIdUserAttributeProtocolMapperForClient(realmId, clientId, data.Id())
 	} else {
-		return keycloakClient.DeleteOpenIdUserAttributeProtocolMapperForClientScope(realmId, clientScopeId)
+		return keycloakClient.DeleteOpenIdUserAttributeProtocolMapperForClientScope(realmId, clientScopeId, data.Id())
 	}
 }
 
