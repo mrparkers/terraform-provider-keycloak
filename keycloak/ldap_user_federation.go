@@ -14,9 +14,10 @@ type LdapUserFederation struct {
 	Enabled  bool
 	Priority int
 
-	ImportEnabled     bool
-	EditMode          string // can be "READ_ONLY", "WRITABLE", or "UNSYNCED"
-	SyncRegistrations bool   // I think this field controls whether or not BatchSizeForSync, FullSyncPeriod, and ChangedSyncPeriod are needed
+	ImportEnabled       bool
+	ImportEnabledExists bool   // only used to determine if `ImportEnabled` is set by tf
+	EditMode            string // can be "READ_ONLY", "WRITABLE", or "UNSYNCED"
+	SyncRegistrations   bool   // I think this field controls whether or not BatchSizeForSync, FullSyncPeriod, and ChangedSyncPeriod are needed
 
 	Vendor                 string // can be "other", "edirectory", "ad", "rhds", or "tivoli". honestly I don't think this field actually does anything
 	UsernameLDAPAttribute  string
@@ -53,9 +54,6 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) *compone
 		},
 		"priority": {
 			strconv.Itoa(ldap.Priority),
-		},
-		"importEnabled": {
-			strconv.FormatBool(ldap.ImportEnabled),
 		},
 		"editMode": {
 			ldap.EditMode,
@@ -132,6 +130,10 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) *compone
 		componentConfig["customUserSearchFilter"] = []string{ldap.CustomUserSearchFilter}
 	}
 
+	if ldap.ImportEnabledExists {
+		componentConfig["importEnabled"] = []string{strconv.FormatBool(ldap.ImportEnabled)}
+	}
+
 	return &component{
 		Id:           ldap.Id,
 		Name:         ldap.Name,
@@ -149,11 +151,6 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 	}
 
 	priority, err := strconv.Atoi(component.getConfig("priority"))
-	if err != nil {
-		return nil, err
-	}
-
-	importEnabled, err := strconv.ParseBool(component.getConfig("importEnabled"))
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +205,6 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		Enabled:  enabled,
 		Priority: priority,
 
-		ImportEnabled:     importEnabled,
 		EditMode:          component.getConfig("editMode"),
 		SyncRegistrations: syncRegistrations,
 
@@ -253,6 +249,13 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		ldap.SearchScope = "ONE_LEVEL"
 	} else {
 		ldap.SearchScope = "SUBTREE"
+	}
+
+	if importEnabled, ok := component.getConfigOk("importEnabled"); ok {
+		ldap.ImportEnabled, err = strconv.ParseBool(importEnabled)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return ldap, nil
