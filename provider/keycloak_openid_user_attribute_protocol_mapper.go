@@ -183,7 +183,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperUpdate(data *schema.Resour
 		return err
 	}
 
-	return resourceKeycloakOpenIdUserAttributeProtocolMapperDelete(data, meta)
+	return resourceKeycloakOpenIdUserAttributeProtocolMapperRead(data, meta)
 }
 
 func resourceKeycloakOpenIdUserAttributeProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
