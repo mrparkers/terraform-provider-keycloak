@@ -145,7 +145,7 @@ func (keycloakClient *KeycloakClient) GetOpenIdUserAttributeProtocolMapperForCli
 }
 
 func (keycloakClient *KeycloakClient) UpdateOpenIdUserAttributeProtocolMapper(mapper *OpenIdUserAttributeProtocolMapper) error {
-	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
+	path := individualProtocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 
 	return keycloakClient.put(path, mapper.convertToGenericProtocolMapper())
 }
