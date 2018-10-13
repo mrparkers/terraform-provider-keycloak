@@ -17,6 +17,8 @@ resource "keycloak_realm" "test" {
 resource "keycloak_openid_client" "test-client" {
   client_id = "test-client"
   realm_id  = "${keycloak_realm.test.id}"
+
+  access_type = "CONFIDENTIAL"
 }
 
 resource "keycloak_openid_client_scope" "test-client-scope" {

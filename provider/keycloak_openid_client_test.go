@@ -140,6 +140,13 @@ func TestAccKeycloakOpenidClient_secret(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
+				Config: testKeycloakOpenidClient_basic(realmName, clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
+					testAccCheckKeycloakOpenidClientHasNonEmptyClientSecret("keycloak_openid_client.client"),
+				),
+			},
+			{
 				Config: testKeycloakOpenidClient_secret(realmName, clientId, clientSecret),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
@@ -208,6 +215,21 @@ func testAccCheckKeycloakOpenidClientHasClientSecret(resourceName, secret string
 
 		if client.ClientSecret != secret {
 			return fmt.Errorf("expected openid client %s to have secret value of %s, but got %s", client.ClientId, secret, client.ClientSecret)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientHasNonEmptyClientSecret(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.ClientSecret == "" {
+			return fmt.Errorf("expected openid client %s to have non empty secret value", client.ClientId)
 		}
 
 		return nil

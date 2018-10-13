@@ -15,7 +15,7 @@ type OpenidClient struct {
 	RealmId                 string `json:"-"`
 	Protocol                string `json:"protocol"`                // always openid-connect for this resource
 	ClientAuthenticatorType string `json:"clientAuthenticatorType"` // always client-secret for now, don't have a need for JWT here
-	ClientSecret            string `json:"secret"`
+	ClientSecret            string `json:"secret,omitempty"`
 
 	Enabled     bool   `json:"enabled"`
 	Description string `json:"description"`
