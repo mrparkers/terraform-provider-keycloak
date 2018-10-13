@@ -85,6 +85,48 @@ func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+	enabled := randomBool()
+	accessTypeBefore := randomStringInSlice(keycloakOpenidClientAccessTypes)
+	accessTypeAfter := randomStringInSlice(keycloakOpenidClientAccessTypes)
+
+	openidClientBefore := &keycloak.OpenidClient{
+		RealmId:     realm,
+		ClientId:    clientId,
+		Enabled:     enabled,
+		Description: acctest.RandString(50),
+	}
+
+	openidClientAfter := &keycloak.OpenidClient{
+		RealmId:     realm,
+		ClientId:    clientId,
+		Enabled:     !enabled,
+		Description: acctest.RandString(50),
+	}
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_fromInterface(openidClientBefore, accessTypeBefore),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
+				),
+			},
+			{
+				Config: testKeycloakOpenidClient_fromInterface(openidClientAfter, accessTypeAfter),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -237,4 +279,21 @@ resource "keycloak_openid_client" "client" {
 	access_type = "CONFIDENTIAL"
 }
 	`, realmOne, realmTwo, clientId)
+}
+
+func testKeycloakOpenidClient_fromInterface(openidClient *keycloak.OpenidClient, accessType string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "%s"
+
+	enabled     = %t
+	description = "%s"
+}
+	`, openidClient.RealmId, openidClient.ClientId, accessType, openidClient.Enabled, openidClient.Description)
 }
