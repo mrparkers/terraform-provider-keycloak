@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
-	"time"
 )
 
 var (
@@ -55,7 +54,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			"import_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     true,
+				Computed:    true,
 				Description: "When true, LDAP users will be imported into the Keycloak database.",
 			},
 			"edit_mode": {
@@ -68,7 +67,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			"sync_registrations": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Computed:    true,
 				Description: "When true, newly created users will be synced back to LDAP.",
 			},
 
@@ -133,7 +132,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			"search_scope": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "ONE_LEVEL",
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice(keycloakLdapUserFederationSearchScopes, false),
 				Description:  "ONE_LEVEL: only search for users in the DN specified by user_dn. SUBTREE: search entire LDAP subtree.",
 			},
@@ -141,7 +140,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			"validate_password_policy": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Computed:    true,
 				Description: "When true, Keycloak will validate passwords using the realm policy before updating it.",
 			},
 			"use_truststore_spi": {
@@ -153,26 +152,26 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			"connection_timeout": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     10 * time.Second,
+				Computed:    true,
 				Description: "LDAP connection timeout in miliseconds",
 			},
 			"read_timeout": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     5 * time.Second,
+				Computed:    true,
 				Description: "LDAP read timeout in miliseconds",
 			},
 			"pagination": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     true,
+				Computed:    true,
 				Description: "When true, Keycloak assumes the LDAP server supports pagination.",
 			},
 
 			"batch_size_for_sync": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     1000,
+				Computed:    true,
 				Description: "The number of users to sync within a single transaction.",
 			},
 			"full_sync_period": {

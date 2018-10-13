@@ -35,42 +35,42 @@ func resourceKeycloakRealm() *schema.Resource {
 			"registration_allowed": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"registration_email_as_username": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"edit_username_allowed": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"reset_password_allowed": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"remember_me": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"verify_email": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"login_with_email_allowed": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Computed: true,
 			},
 			"duplicate_emails_allowed": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 
 			// Themes
@@ -97,72 +97,72 @@ func resourceKeycloakRealm() *schema.Resource {
 			"refresh_token_max_reuse": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  0,
+				Computed: true,
 			},
 			"sso_session_idle_timeout": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "30m",
+				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"sso_session_max_lifespan": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "10h",
+				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"offline_session_idle_timeout": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "10h",
+				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"offline_session_max_lifespan": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "0",
+				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"access_token_lifespan": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "5m",
+				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"access_token_lifespan_for_implicit_flow": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "15m",
+				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"access_code_lifespan": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "1m",
+				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"access_code_lifespan_login": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "30m",
+				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"access_code_lifespan_user_action": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "5m",
+				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"action_token_generated_by_user_lifespan": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "5m",
+				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"action_token_generated_by_admin_lifespan": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "12h",
+				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 		},
@@ -214,71 +214,93 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		realm.RevokeRefreshToken = false
 	}
 
-	ssoSessionIdleTimeout, err := getSecondsFromDurationString(data.Get("sso_session_idle_timeout").(string))
-	if err != nil {
-		return nil, err
+	if ssoSessionIdleTimeout := data.Get("sso_session_idle_timeout").(string); ssoSessionIdleTimeout != "" {
+		ssoSessionIdleTimeoutDurationString, err := getSecondsFromDurationString(ssoSessionIdleTimeout)
+		if err != nil {
+			return nil, err
+		}
+		realm.SsoSessionIdleTimeout = ssoSessionIdleTimeoutDurationString
 	}
-	realm.SsoSessionIdleTimeout = ssoSessionIdleTimeout
 
-	ssoSessionMaxLifespan, err := getSecondsFromDurationString(data.Get("sso_session_max_lifespan").(string))
-	if err != nil {
-		return nil, err
+	if ssoSessionMaxLifespan := data.Get("sso_session_max_lifespan").(string); ssoSessionMaxLifespan != "" {
+		ssoSessionMaxLifespanDurationString, err := getSecondsFromDurationString(ssoSessionMaxLifespan)
+		if err != nil {
+			return nil, err
+		}
+		realm.SsoSessionMaxLifespan = ssoSessionMaxLifespanDurationString
 	}
-	realm.SsoSessionMaxLifespan = ssoSessionMaxLifespan
 
-	offlineSessionIdleTimeout, err := getSecondsFromDurationString(data.Get("offline_session_idle_timeout").(string))
-	if err != nil {
-		return nil, err
+	if offlineSessionIdleTimeout := data.Get("offline_session_idle_timeout").(string); offlineSessionIdleTimeout != "" {
+		offlineSessionIdleTimeoutDurationString, err := getSecondsFromDurationString(offlineSessionIdleTimeout)
+		if err != nil {
+			return nil, err
+		}
+		realm.OfflineSessionIdleTimeout = offlineSessionIdleTimeoutDurationString
 	}
-	realm.OfflineSessionIdleTimeout = offlineSessionIdleTimeout
 
-	offlineSessionMaxLifespan, err := getSecondsFromDurationString(data.Get("offline_session_max_lifespan").(string))
-	if err != nil {
-		return nil, err
+	if offlineSessionMaxLifespan := data.Get("offline_session_max_lifespan").(string); offlineSessionMaxLifespan != "" {
+		offlineSessionMaxLifespanDurationString, err := getSecondsFromDurationString(offlineSessionMaxLifespan)
+		if err != nil {
+			return nil, err
+		}
+		realm.OfflineSessionMaxLifespan = offlineSessionMaxLifespanDurationString
 	}
-	realm.OfflineSessionMaxLifespan = offlineSessionMaxLifespan
 
-	accessTokenLifespan, err := getSecondsFromDurationString(data.Get("access_token_lifespan").(string))
-	if err != nil {
-		return nil, err
+	if accessTokenLifespan := data.Get("access_token_lifespan").(string); accessTokenLifespan != "" {
+		accessTokenLifespanDurationString, err := getSecondsFromDurationString(accessTokenLifespan)
+		if err != nil {
+			return nil, err
+		}
+		realm.AccessTokenLifespan = accessTokenLifespanDurationString
 	}
-	realm.AccessTokenLifespan = accessTokenLifespan
 
-	accessTokenLifespanForImplicitFlow, err := getSecondsFromDurationString(data.Get("access_token_lifespan_for_implicit_flow").(string))
-	if err != nil {
-		return nil, err
+	if accessTokenLifespanForImplicitFlow := data.Get("access_token_lifespan_for_implicit_flow").(string); accessTokenLifespanForImplicitFlow != "" {
+		accessTokenLifespanForImplicitFlowDurationString, err := getSecondsFromDurationString(accessTokenLifespanForImplicitFlow)
+		if err != nil {
+			return nil, err
+		}
+		realm.AccessTokenLifespanForImplicitFlow = accessTokenLifespanForImplicitFlowDurationString
 	}
-	realm.AccessTokenLifespanForImplicitFlow = accessTokenLifespanForImplicitFlow
 
-	accessCodeLifespan, err := getSecondsFromDurationString(data.Get("access_code_lifespan").(string))
-	if err != nil {
-		return nil, err
+	if accessCodeLifespan := data.Get("access_code_lifespan").(string); accessCodeLifespan != "" {
+		accessCodeLifespanDurationString, err := getSecondsFromDurationString(accessCodeLifespan)
+		if err != nil {
+			return nil, err
+		}
+		realm.AccessCodeLifespan = accessCodeLifespanDurationString
 	}
-	realm.AccessCodeLifespan = accessCodeLifespan
 
-	accessCodeLifespanLogin, err := getSecondsFromDurationString(data.Get("access_code_lifespan_login").(string))
-	if err != nil {
-		return nil, err
+	if accessCodeLifespanLogin := data.Get("access_code_lifespan_login").(string); accessCodeLifespanLogin != "" {
+		accessCodeLifespanLoginDurationString, err := getSecondsFromDurationString(accessCodeLifespanLogin)
+		if err != nil {
+			return nil, err
+		}
+		realm.AccessCodeLifespanLogin = accessCodeLifespanLoginDurationString
 	}
-	realm.AccessCodeLifespanLogin = accessCodeLifespanLogin
 
-	accessCodeLifespanUserAction, err := getSecondsFromDurationString(data.Get("access_code_lifespan_user_action").(string))
-	if err != nil {
-		return nil, err
+	if accessCodeLifespanUserAction := data.Get("access_code_lifespan_user_action").(string); accessCodeLifespanUserAction != "" {
+		accessCodeLifespanUserActionDurationString, err := getSecondsFromDurationString(accessCodeLifespanUserAction)
+		if err != nil {
+			return nil, err
+		}
+		realm.AccessCodeLifespanUserAction = accessCodeLifespanUserActionDurationString
 	}
-	realm.AccessCodeLifespanUserAction = accessCodeLifespanUserAction
 
-	actionTokenGeneratedByUserLifespan, err := getSecondsFromDurationString(data.Get("action_token_generated_by_user_lifespan").(string))
-	if err != nil {
-		return nil, err
+	if actionTokenGeneratedByUserLifespan := data.Get("action_token_generated_by_user_lifespan").(string); actionTokenGeneratedByUserLifespan != "" {
+		actionTokenGeneratedByUserLifespanDurationString, err := getSecondsFromDurationString(actionTokenGeneratedByUserLifespan)
+		if err != nil {
+			return nil, err
+		}
+		realm.ActionTokenGeneratedByUserLifespan = actionTokenGeneratedByUserLifespanDurationString
 	}
-	realm.ActionTokenGeneratedByUserLifespan = actionTokenGeneratedByUserLifespan
 
-	actionTokenGeneratedByAdminLifespan, err := getSecondsFromDurationString(data.Get("action_token_generated_by_admin_lifespan").(string))
-	if err != nil {
-		return nil, err
+	if actionTokenGeneratedByAdminLifespan := data.Get("action_token_generated_by_admin_lifespan").(string); actionTokenGeneratedByAdminLifespan != "" {
+		actionTokenGeneratedByAdminLifespanDurationString, err := getSecondsFromDurationString(actionTokenGeneratedByAdminLifespan)
+		if err != nil {
+			return nil, err
+		}
+		realm.ActionTokenGeneratedByAdminLifespan = actionTokenGeneratedByAdminLifespanDurationString
 	}
-	realm.ActionTokenGeneratedByAdminLifespan = actionTokenGeneratedByAdminLifespan
 
 	return realm, nil
 }

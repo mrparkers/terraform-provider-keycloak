@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	keycloakLdapGroupMapperModes                       = []string{"READ_ONLY", "IMPORT", "LDAP_ONLY"}
+	keycloakLdapGroupMapperModes                       = []string{"READ_ONLY", "LDAP_ONLY"}
 	keycloakLdapGroupMapperMembershipAttributeTypes    = []string{"DN", "UID"}
 	keycloakLdapGroupMapperUserRolesRetrieveStrategies = []string{"LOAD_GROUPS_BY_MEMBER_ATTRIBUTE", "GET_GROUPS_FROM_USER_MEMBEROF_ATTRIBUTE", "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE_RECURSIVELY"}
 )
@@ -58,12 +58,12 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 			"preserve_group_inheritance": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Computed: true,
 			},
 			"ignore_missing_groups": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"membership_ldap_attribute": {
 				Type:     schema.TypeString,
@@ -72,7 +72,7 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 			"membership_attribute_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "DN",
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice(keycloakLdapGroupMapperMembershipAttributeTypes, false),
 			},
 			"membership_user_ldap_attribute": {
@@ -93,7 +93,7 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 			"user_roles_retrieve_strategy": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE",
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice(keycloakLdapGroupMapperUserRolesRetrieveStrategies, false),
 			},
 			"memberof_ldap_attribute": {
@@ -108,7 +108,7 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 			"drop_non_existing_groups_during_sync": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 		},
 	}

@@ -41,12 +41,12 @@ func resourceKeycloakLdapFullNameMapper() *schema.Resource {
 			"read_only": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"write_only": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 		},
 	}
