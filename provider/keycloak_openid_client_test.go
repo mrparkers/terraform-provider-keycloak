@@ -93,17 +93,19 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	accessTypeAfter := randomStringInSlice(keycloakOpenidClientAccessTypes)
 
 	openidClientBefore := &keycloak.OpenidClient{
-		RealmId:     realm,
-		ClientId:    clientId,
-		Enabled:     enabled,
-		Description: acctest.RandString(50),
+		RealmId:      realm,
+		ClientId:     clientId,
+		Enabled:      enabled,
+		Description:  acctest.RandString(50),
+		ClientSecret: acctest.RandString(10),
 	}
 
 	openidClientAfter := &keycloak.OpenidClient{
-		RealmId:     realm,
-		ClientId:    clientId,
-		Enabled:     !enabled,
-		Description: acctest.RandString(50),
+		RealmId:      realm,
+		ClientId:     clientId,
+		Enabled:      !enabled,
+		Description:  acctest.RandString(50),
+		ClientSecret: acctest.RandString(10),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -121,6 +123,27 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 				Config: testKeycloakOpenidClient_fromInterface(openidClientAfter, accessTypeAfter),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenidClient_secret(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+	clientSecret := acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_secret(realmName, clientId, clientSecret),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
+					testAccCheckKeycloakOpenidClientHasClientSecret("keycloak_openid_client.client", clientSecret),
 				),
 			},
 		},
@@ -170,6 +193,21 @@ func testAccCheckKeycloakOpenidClientBelongsToRealm(resourceName, realm string) 
 
 		if client.RealmId != realm {
 			return fmt.Errorf("expected openid client %s to have realm_id of %s, but got %s", client.ClientId, realm, client.RealmId)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientHasClientSecret(resourceName, secret string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.ClientSecret != secret {
+			return fmt.Errorf("expected openid client %s to have secret value of %s, but got %s", client.ClientId, secret, client.ClientSecret)
 		}
 
 		return nil
@@ -288,12 +326,28 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client" {
-	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
-	access_type = "%s"
+	client_id     = "%s"
+	realm_id      = "${keycloak_realm.realm.id}"
+	access_type   = "%s"
+	client_secret = "%s"
 
 	enabled     = %t
 	description = "%s"
 }
-	`, openidClient.RealmId, openidClient.ClientId, accessType, openidClient.Enabled, openidClient.Description)
+	`, openidClient.RealmId, openidClient.ClientId, accessType, openidClient.ClientSecret, openidClient.Enabled, openidClient.Description)
+}
+
+func testKeycloakOpenidClient_secret(realm, clientId, clientSecret string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id     = "%s"
+	realm_id      = "${keycloak_realm.realm.id}"
+	access_type   = "CONFIDENTIAL"
+	client_secret = "%s"
+}
+	`, realm, clientId, clientSecret)
 }

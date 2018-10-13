@@ -45,17 +45,24 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringInSlice(keycloakOpenidClientAccessTypes, false),
 			},
+			"client_secret": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Computed:  true,
+				Sensitive: true,
+			},
 		},
 	}
 }
 
 func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
 	openidClient := &keycloak.OpenidClient{
-		Id:          data.Id(),
-		ClientId:    data.Get("client_id").(string),
-		RealmId:     data.Get("realm_id").(string),
-		Enabled:     data.Get("enabled").(bool),
-		Description: data.Get("description").(string),
+		Id:           data.Id(),
+		ClientId:     data.Get("client_id").(string),
+		RealmId:      data.Get("realm_id").(string),
+		Enabled:      data.Get("enabled").(bool),
+		Description:  data.Get("description").(string),
+		ClientSecret: data.Get("client_secret").(string),
 	}
 
 	// access type
@@ -75,6 +82,7 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 	data.Set("realm_id", client.RealmId)
 	data.Set("enabled", client.Enabled)
 	data.Set("description", client.Description)
+	data.Set("client_secret", client.ClientSecret)
 
 	// access type
 	if client.PublicClient {
