@@ -60,6 +60,31 @@ func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_accessType(realmName, clientId, "CONFIDENTIAL"),
+				Check:  testAccCheckKeycloakOpenidClientAccessType("keycloak_openid_client.client", false, false),
+			},
+			{
+				Config: testKeycloakOpenidClient_accessType(realmName, clientId, "PUBLIC"),
+				Check:  testAccCheckKeycloakOpenidClientAccessType("keycloak_openid_client.client", true, false),
+			},
+			{
+				Config: testKeycloakOpenidClient_accessType(realmName, clientId, "BEARER-ONLY"),
+				Check:  testAccCheckKeycloakOpenidClientAccessType("keycloak_openid_client.client", false, true),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -69,6 +94,25 @@ func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName stri
 
 		if client.Protocol != "openid-connect" {
 			return fmt.Errorf("expected openid client to have openid-connect protocol, but got %s", client.Protocol)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientAccessType(resourceName string, public, bearer bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.PublicClient != public {
+			return fmt.Errorf("expected openid client to have public set to %t, but got %t", public, client.PublicClient)
+		}
+
+		if client.BearerOnly != bearer {
+			return fmt.Errorf("expected openid client to have bearer set to %t, but got %t", bearer, client.BearerOnly)
 		}
 
 		return nil
@@ -138,10 +182,25 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client" {
-	client_id = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "CONFIDENTIAL"
 }
 	`, realm, clientId)
+}
+
+func testKeycloakOpenidClient_accessType(realm, clientId, accessType string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "%s"
+}
+	`, realm, clientId, accessType)
 }
 
 func testKeycloakOpenidClient_updateRealmBefore(realmOne, realmTwo, clientId string) string {
@@ -155,8 +214,9 @@ resource "keycloak_realm" "realm-2" {
 }
 
 resource "keycloak_openid_client" "client" {
-	client_id = "%s"
-	realm_id  = "${keycloak_realm.realm-1.id}"
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm-1.id}"
+	access_type = "CONFIDENTIAL"
 }
 	`, realmOne, realmTwo, clientId)
 }
@@ -172,8 +232,9 @@ resource "keycloak_realm" "realm-2" {
 }
 
 resource "keycloak_openid_client" "client" {
-	client_id = "%s"
-	realm_id  = "${keycloak_realm.realm-2.id}"
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm-2.id}"
+	access_type = "CONFIDENTIAL"
 }
 	`, realmOne, realmTwo, clientId)
 }

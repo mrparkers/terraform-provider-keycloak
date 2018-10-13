@@ -2,8 +2,13 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
+)
+
+var (
+	keycloakOpenidClientAccessTypes = []string{"CONFIDENTIAL", "PUBLIC", "BEARER-ONLY"}
 )
 
 func resourceKeycloakOpenidClient() *schema.Resource {
@@ -26,16 +31,30 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"access_type": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice(keycloakOpenidClientAccessTypes, false),
+			},
 		},
 	}
 }
 
 func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
-	return &keycloak.OpenidClient{
+	openidClient := &keycloak.OpenidClient{
 		Id:       data.Id(),
 		ClientId: data.Get("client_id").(string),
 		RealmId:  data.Get("realm_id").(string),
 	}
+
+	// access type
+	if accessType := data.Get("access_type").(string); accessType == "PUBLIC" {
+		openidClient.PublicClient = true
+	} else if accessType == "BEARER-ONLY" {
+		openidClient.BearerOnly = true
+	}
+
+	return openidClient
 }
 
 func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClient) {
@@ -43,6 +62,15 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 
 	data.Set("client_id", client.ClientId)
 	data.Set("realm_id", client.RealmId)
+
+	// access type
+	if client.PublicClient {
+		data.Set("access_type", "PUBLIC")
+	} else if client.BearerOnly {
+		data.Set("access_type", "BEARER-ONLY")
+	} else {
+		data.Set("access_type", "CONFIDENTIAL")
+	}
 }
 
 func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interface{}) error {

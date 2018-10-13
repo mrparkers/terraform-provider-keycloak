@@ -9,6 +9,10 @@ type OpenidClient struct {
 	ClientId string `json:"clientId"`
 	RealmId  string `json:"-"`
 	Protocol string `json:"protocol"`
+
+	// Attributes below indicate client access type. If both are false, access type is confidential. Both cannot be true (although the Keycloak API lets you do this)
+	PublicClient bool `json:"publicClient"`
+	BearerOnly   bool `json:"bearerOnly"`
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClient(client *OpenidClient) error {
