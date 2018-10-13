@@ -31,6 +31,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -60,6 +64,7 @@ func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
 		Id:           data.Id(),
 		ClientId:     data.Get("client_id").(string),
 		RealmId:      data.Get("realm_id").(string),
+		Name:         data.Get("name").(string),
 		Enabled:      data.Get("enabled").(bool),
 		Description:  data.Get("description").(string),
 		ClientSecret: data.Get("client_secret").(string),
@@ -80,6 +85,7 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 
 	data.Set("client_id", client.ClientId)
 	data.Set("realm_id", client.RealmId)
+	data.Set("name", client.Name)
 	data.Set("enabled", client.Enabled)
 	data.Set("description", client.Description)
 	data.Set("client_secret", client.ClientSecret)

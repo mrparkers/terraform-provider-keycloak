@@ -95,6 +95,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	openidClientBefore := &keycloak.OpenidClient{
 		RealmId:      realm,
 		ClientId:     clientId,
+		Name:         acctest.RandString(10),
 		Enabled:      enabled,
 		Description:  acctest.RandString(50),
 		ClientSecret: acctest.RandString(10),
@@ -103,6 +104,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	openidClientAfter := &keycloak.OpenidClient{
 		RealmId:      realm,
 		ClientId:     clientId,
+		Name:         acctest.RandString(10),
 		Enabled:      !enabled,
 		Description:  acctest.RandString(50),
 		ClientSecret: acctest.RandString(10),
@@ -350,13 +352,14 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_openid_client" "client" {
 	client_id     = "%s"
 	realm_id      = "${keycloak_realm.realm.id}"
+	name          = "%s"
+	enabled       = %t
+	description   = "%s"
+
 	access_type   = "%s"
 	client_secret = "%s"
-
-	enabled     = %t
-	description = "%s"
 }
-	`, openidClient.RealmId, openidClient.ClientId, accessType, openidClient.ClientSecret, openidClient.Enabled, openidClient.Description)
+	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, accessType, openidClient.ClientSecret)
 }
 
 func testKeycloakOpenidClient_secret(realm, clientId, clientSecret string) string {

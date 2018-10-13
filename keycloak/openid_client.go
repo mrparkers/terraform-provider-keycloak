@@ -13,6 +13,7 @@ type OpenidClient struct {
 	Id                      string `json:"id,omitempty"`
 	ClientId                string `json:"clientId"`
 	RealmId                 string `json:"-"`
+	Name                    string `json:"name"`
 	Protocol                string `json:"protocol"`                // always openid-connect for this resource
 	ClientAuthenticatorType string `json:"clientAuthenticatorType"` // always client-secret for now, don't have a need for JWT here
 	ClientSecret            string `json:"secret,omitempty"`
