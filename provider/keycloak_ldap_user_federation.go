@@ -219,7 +219,7 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 		userObjectClasses = append(userObjectClasses, userObjectClass.(string))
 	}
 
-	ldap := &keycloak.LdapUserFederation{
+	return &keycloak.LdapUserFederation{
 		Id:      data.Id(),
 		Name:    data.Get("name").(string),
 		RealmId: data.Get("realm_id").(string),
@@ -227,6 +227,7 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 		Enabled:  data.Get("enabled").(bool),
 		Priority: data.Get("priority").(int),
 
+		ImportEnabled:     data.Get("import_enabled").(bool),
 		EditMode:          data.Get("edit_mode").(string),
 		SyncRegistrations: data.Get("sync_registrations").(bool),
 
@@ -254,13 +255,6 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 
 		CachePolicy: data.Get("cache_policy").(string),
 	}
-
-	if importEnabled, ok := data.GetOkExists("import_enabled"); ok {
-		ldap.ImportEnabled = importEnabled.(bool)
-		ldap.ImportEnabledExists = true
-	}
-
-	return ldap
 }
 
 func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUserFederation) {
