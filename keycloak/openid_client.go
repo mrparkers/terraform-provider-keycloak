@@ -5,10 +5,11 @@ import (
 )
 
 type OpenidClient struct {
-	Id       string `json:"id,omitempty"`
-	ClientId string `json:"clientId"`
-	RealmId  string `json:"-"`
-	Protocol string `json:"protocol"`
+	Id                      string `json:"id,omitempty"`
+	ClientId                string `json:"clientId"`
+	RealmId                 string `json:"-"`
+	Protocol                string `json:"protocol"`                // always openid-connect for this resource
+	ClientAuthenticatorType string `json:"clientAuthenticatorType"` // always client-secret for now, don't have a need for JWT here
 
 	// Attributes below indicate client access type. If both are false, access type is confidential. Both cannot be true (although the Keycloak API lets you do this)
 	PublicClient bool `json:"publicClient"`
@@ -17,6 +18,7 @@ type OpenidClient struct {
 
 func (keycloakClient *KeycloakClient) NewOpenidClient(client *OpenidClient) error {
 	client.Protocol = "openid-connect"
+	client.ClientAuthenticatorType = "client-secret"
 
 	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients", client.RealmId), client)
 	if err != nil {
@@ -43,6 +45,7 @@ func (keycloakClient *KeycloakClient) GetOpenidClient(realmId, id string) (*Open
 
 func (keycloakClient *KeycloakClient) UpdateOpenidClient(client *OpenidClient) error {
 	client.Protocol = "openid-connect"
+	client.ClientAuthenticatorType = "client-secret"
 
 	return keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s", client.RealmId, client.Id), client)
 }
