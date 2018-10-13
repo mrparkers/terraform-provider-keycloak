@@ -55,19 +55,44 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Computed:  true,
 				Sensitive: true,
 			},
+			"valid_redirect_uris": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				DiffSuppressFunc: func(k, remoteRedirectUri, local string, data *schema.ResourceData) bool {
+					if remoteRedirectUri == "" || local == "" {
+						return false
+					}
+
+					for _, localRedirectUri := range data.Get("valid_redirect_uris").([]interface{}) {
+						if remoteRedirectUri == localRedirectUri.(string) {
+							return true
+						}
+					}
+
+					return false
+				},
+			},
 		},
 	}
 }
 
 func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
+	var validRedirectUris []string
+
+	for _, validRedirectUri := range data.Get("valid_redirect_uris").([]interface{}) {
+		validRedirectUris = append(validRedirectUris, validRedirectUri.(string))
+	}
+
 	openidClient := &keycloak.OpenidClient{
-		Id:           data.Id(),
-		ClientId:     data.Get("client_id").(string),
-		RealmId:      data.Get("realm_id").(string),
-		Name:         data.Get("name").(string),
-		Enabled:      data.Get("enabled").(bool),
-		Description:  data.Get("description").(string),
-		ClientSecret: data.Get("client_secret").(string),
+		Id:                data.Id(),
+		ClientId:          data.Get("client_id").(string),
+		RealmId:           data.Get("realm_id").(string),
+		Name:              data.Get("name").(string),
+		Enabled:           data.Get("enabled").(bool),
+		Description:       data.Get("description").(string),
+		ClientSecret:      data.Get("client_secret").(string),
+		ValidRedirectUris: validRedirectUris,
 	}
 
 	// access type
@@ -89,6 +114,7 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 	data.Set("enabled", client.Enabled)
 	data.Set("description", client.Description)
 	data.Set("client_secret", client.ClientSecret)
+	data.Set("valid_redirect_uris", client.ValidRedirectUris)
 
 	// access type
 	if client.PublicClient {
@@ -105,7 +131,12 @@ func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interfac
 
 	client := getOpenidClientFromData(data)
 
-	err := keycloakClient.NewOpenidClient(client)
+	err := client.Validate()
+	if err != nil {
+		return err
+	}
+
+	err = keycloakClient.NewOpenidClient(client)
 	if err != nil {
 		return err
 	}
@@ -136,7 +167,12 @@ func resourceKeycloakOpenidClientUpdate(data *schema.ResourceData, meta interfac
 
 	client := getOpenidClientFromData(data)
 
-	err := keycloakClient.UpdateOpenidClient(client)
+	err := client.Validate()
+	if err != nil {
+		return err
+	}
+
+	err = keycloakClient.UpdateOpenidClient(client)
 	if err != nil {
 		return err
 	}

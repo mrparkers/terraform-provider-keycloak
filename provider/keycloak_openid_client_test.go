@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
 	"testing"
 )
 
@@ -93,21 +94,23 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	accessTypeAfter := randomStringInSlice(keycloakOpenidClientAccessTypes)
 
 	openidClientBefore := &keycloak.OpenidClient{
-		RealmId:      realm,
-		ClientId:     clientId,
-		Name:         acctest.RandString(10),
-		Enabled:      enabled,
-		Description:  acctest.RandString(50),
-		ClientSecret: acctest.RandString(10),
+		RealmId:           realm,
+		ClientId:          clientId,
+		Name:              acctest.RandString(10),
+		Enabled:           enabled,
+		Description:       acctest.RandString(50),
+		ClientSecret:      acctest.RandString(10),
+		ValidRedirectUris: []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 	}
 
 	openidClientAfter := &keycloak.OpenidClient{
-		RealmId:      realm,
-		ClientId:     clientId,
-		Name:         acctest.RandString(10),
-		Enabled:      !enabled,
-		Description:  acctest.RandString(50),
-		ClientSecret: acctest.RandString(10),
+		RealmId:           realm,
+		ClientId:          clientId,
+		Name:              acctest.RandString(10),
+		Enabled:           !enabled,
+		Description:       acctest.RandString(50),
+		ClientSecret:      acctest.RandString(10),
+		ValidRedirectUris: []string{acctest.RandString(10), acctest.RandString(10)},
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -154,6 +157,24 @@ func TestAccKeycloakOpenidClient_secret(t *testing.T) {
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 					testAccCheckKeycloakOpenidClientHasClientSecret("keycloak_openid_client.client", clientSecret),
 				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+	accessType := randomStringInSlice([]string{"PUBLIC", "CONFIDENTIAL"})
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenidClient_invalidRedirectUris(realmName, clientId, accessType),
+				ExpectError: regexp.MustCompile("validation error: must specify at least one valid redirect uri if access type is PUBLIC or CONFIDENTIAL"),
 			},
 		},
 	})
@@ -288,7 +309,7 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
-	access_type = "CONFIDENTIAL"
+	access_type = "BEARER-ONLY"
 }
 	`, realm, clientId)
 }
@@ -300,9 +321,11 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client" {
-	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
-	access_type = "%s"
+	client_id           = "%s"
+	realm_id            = "${keycloak_realm.realm.id}"
+	access_type         = "%s"
+
+	valid_redirect_uris = ["foo"]
 }
 	`, realm, clientId, accessType)
 }
@@ -320,7 +343,7 @@ resource "keycloak_realm" "realm-2" {
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm-1.id}"
-	access_type = "CONFIDENTIAL"
+	access_type = "BEARER-ONLY"
 }
 	`, realmOne, realmTwo, clientId)
 }
@@ -338,7 +361,7 @@ resource "keycloak_realm" "realm-2" {
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm-2.id}"
-	access_type = "CONFIDENTIAL"
+	access_type = "BEARER-ONLY"
 }
 	`, realmOne, realmTwo, clientId)
 }
@@ -358,8 +381,10 @@ resource "keycloak_openid_client" "client" {
 
 	access_type   = "%s"
 	client_secret = "%s"
+
+	valid_redirect_uris = %s
 }
-	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, accessType, openidClient.ClientSecret)
+	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, accessType, openidClient.ClientSecret, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris))
 }
 
 func testKeycloakOpenidClient_secret(realm, clientId, clientSecret string) string {
@@ -369,10 +394,26 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client" {
-	client_id     = "%s"
-	realm_id      = "${keycloak_realm.realm.id}"
-	access_type   = "CONFIDENTIAL"
-	client_secret = "%s"
+	client_id           = "%s"
+	realm_id            = "${keycloak_realm.realm.id}"
+	access_type         = "CONFIDENTIAL"
+	client_secret       = "%s"
+
+	valid_redirect_uris = ["foo"]
 }
 	`, realm, clientId, clientSecret)
+}
+
+func testKeycloakOpenidClient_invalidRedirectUris(realm, clientId, accessType string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "%s"
+}
+	`, realm, clientId, accessType)
 }

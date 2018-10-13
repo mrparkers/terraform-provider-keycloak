@@ -24,6 +24,16 @@ type OpenidClient struct {
 	// Attributes below indicate client access type. If both are false, access type is confidential. Both cannot be true (although the Keycloak API lets you do this)
 	PublicClient bool `json:"publicClient"`
 	BearerOnly   bool `json:"bearerOnly"`
+
+	ValidRedirectUris []string `json:"redirectUris"`
+}
+
+func (client *OpenidClient) Validate() error {
+	if !client.BearerOnly && len(client.ValidRedirectUris) == 0 {
+		return fmt.Errorf("validation error: must specify at least one valid redirect uri if access type is PUBLIC or CONFIDENTIAL")
+	}
+
+	return nil
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClient(client *OpenidClient) error {

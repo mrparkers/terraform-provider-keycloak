@@ -64,7 +64,13 @@ func (keycloakClient *KeycloakClient) UpdateRealm(realm *Realm) error {
 }
 
 func (keycloakClient *KeycloakClient) DeleteRealm(id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s", id))
+	err := keycloakClient.delete(fmt.Sprintf("/realms/%s", id))
+	if err != nil {
+		// For whatever reason, this fails sometimes with a 500 during acceptance tests. try again
+		return keycloakClient.delete(fmt.Sprintf("/realms/%s", id))
+	}
+
+	return nil
 }
 
 func (realm *Realm) Validate(keycloakClient *KeycloakClient) error {
