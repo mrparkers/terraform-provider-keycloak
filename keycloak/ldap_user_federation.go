@@ -90,9 +90,6 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) *compone
 		"validatePasswordPolicy": {
 			strconv.FormatBool(ldap.ValidatePasswordPolicy),
 		},
-		"useTruststoreSpi": {
-			ldap.UseTruststoreSpi,
-		},
 		"connectionTimeout": {
 			strconv.Itoa(ldap.ConnectionTimeout),
 		},
@@ -130,6 +127,12 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) *compone
 
 	if ldap.CustomUserSearchFilter != "" {
 		componentConfig["customUserSearchFilter"] = []string{ldap.CustomUserSearchFilter}
+	}
+
+	if ldap.UseTruststoreSpi == "ONLY_FOR_LDAPS" {
+		componentConfig["useTruststoreSpi"] = []string{"ldapsOnly"}
+	} else {
+		componentConfig["useTruststoreSpi"] = []string{strings.ToLower(ldap.UseTruststoreSpi)}
 	}
 
 	return &component{
@@ -253,6 +256,12 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		ldap.SearchScope = "ONE_LEVEL"
 	} else {
 		ldap.SearchScope = "SUBTREE"
+	}
+
+	if useTruststoreSpi := component.getConfig("useTruststoreSpi"); useTruststoreSpi == "ldapsOnly" {
+		ldap.UseTruststoreSpi = "ONLY_FOR_LDAPS"
+	} else {
+		ldap.UseTruststoreSpi = strings.ToUpper(useTruststoreSpi)
 	}
 
 	return ldap, nil
