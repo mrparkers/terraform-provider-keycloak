@@ -56,22 +56,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Sensitive: true,
 			},
 			"valid_redirect_uris": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
 				Optional: true,
-				DiffSuppressFunc: func(k, remoteRedirectUri, local string, data *schema.ResourceData) bool {
-					if remoteRedirectUri == "" || local == "" {
-						return false
-					}
-
-					for _, localRedirectUri := range data.Get("valid_redirect_uris").([]interface{}) {
-						if remoteRedirectUri == localRedirectUri.(string) {
-							return true
-						}
-					}
-
-					return false
-				},
 			},
 		},
 	}
@@ -80,8 +68,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
 	var validRedirectUris []string
 
-	for _, validRedirectUri := range data.Get("valid_redirect_uris").([]interface{}) {
-		validRedirectUris = append(validRedirectUris, validRedirectUri.(string))
+	if v, ok := data.GetOk("valid_redirect_uris"); ok {
+		for _, validRedirectUri := range v.(*schema.Set).List() {
+			validRedirectUris = append(validRedirectUris, validRedirectUri.(string))
+		}
 	}
 
 	openidClient := &keycloak.OpenidClient{
