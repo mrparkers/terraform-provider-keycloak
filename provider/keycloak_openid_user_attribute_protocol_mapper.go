@@ -104,6 +104,7 @@ func mapFromDataToOpenIdUserAttributeProtocolMapper(data *schema.ResourceData) *
 		UserAttribute:  data.Get("user_attribute").(string),
 		ClaimName:      data.Get("claim_name").(string),
 		ClaimValueType: data.Get("claim_value_type").(string),
+		Multivalued:    data.Get("multivalued").(bool),
 	}
 }
 
@@ -124,6 +125,7 @@ func mapFromOpenIdUserAttributeMapperToData(mapper *keycloak.OpenIdUserAttribute
 	data.Set("user_attribute", mapper.UserAttribute)
 	data.Set("claim_name", mapper.ClaimName)
 	data.Set("claim_value_type", mapper.ClaimValueType)
+	data.Set("multivalued", mapper.Multivalued)
 }
 
 func resourceKeycloakOpenIdUserAttributeProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
