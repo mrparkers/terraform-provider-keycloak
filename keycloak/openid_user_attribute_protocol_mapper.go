@@ -67,6 +67,14 @@ func (mapper *OpenIdUserAttributeProtocolMapper) convertToGenericProtocolMapper(
 	}
 }
 
+func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
+	if b == "" {
+		return false, nil
+	}
+
+	return strconv.ParseBool(b)
+}
+
 func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdUserAttributeProtocolMapper, error) {
 	addToIdToken, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
@@ -83,7 +91,8 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper
 		return nil, err
 	}
 
-	multivalued, err := strconv.ParseBool(protocolMapper.Config[multivaluedField])
+	// multivalued's default is "", this is an issue when importing an existing mapper
+	multivalued, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[multivaluedField])
 
 	if err != nil {
 		return nil, err
