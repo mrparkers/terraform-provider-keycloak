@@ -145,14 +145,6 @@ func (keycloakClient *KeycloakClient) NewOpenIdUserAttributeProtocolMapper(mappe
 	return nil
 }
 
-//func (keycloakClient *KeycloakClient) GetOpenIdUserAttributeProtocolMapperForClient(realmId, clientId, mapperId string) (*OpenIdUserAttributeProtocolMapper, error) {
-//	return keycloakClient.getOpenIdUserAttributeProtocolMapper(realmId, clientId, "", mapperId)
-//}
-//
-//func (keycloakClient *KeycloakClient) GetOpenIdUserAttributeProtocolMapperForClientScope(realmId, clientScopeId, mapperId string) (*OpenIdUserAttributeProtocolMapper, error) {
-//	return keycloakClient.getOpenIdUserAttributeProtocolMapper(realmId, "", clientScopeId, mapperId)
-//}
-
 func (keycloakClient *KeycloakClient) UpdateOpenIdUserAttributeProtocolMapper(mapper *OpenIdUserAttributeProtocolMapper) error {
 	path := individualProtocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 
