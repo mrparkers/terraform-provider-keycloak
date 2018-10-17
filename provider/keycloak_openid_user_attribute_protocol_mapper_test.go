@@ -246,11 +246,7 @@ func getUserAttributeMapperUsingState(state *terraform.State, resourceName strin
 
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-	if clientId != "" {
-		return keycloakClient.GetOpenIdUserAttributeProtocolMapperForClient(realm, clientId, id)
-	} else {
-		return keycloakClient.GetOpenIdUserAttributeProtocolMapperForClientScope(realm, clientScopeId, id)
-	}
+	return keycloakClient.GetOpenIdUserAttributeProtocolMapper(realm, clientId, clientScopeId, id)
 }
 
 func testKeycloakOpenIdUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName string) string {

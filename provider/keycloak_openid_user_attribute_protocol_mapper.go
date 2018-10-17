@@ -159,13 +159,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperRead(data *schema.Resource
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	var openIdUserAttributeMapper *keycloak.OpenIdUserAttributeProtocolMapper
-	var err error
-	if clientId != "" {
-		openIdUserAttributeMapper, err = keycloakClient.GetOpenIdUserAttributeProtocolMapperForClient(realmId, clientId, data.Id())
-	} else {
-		openIdUserAttributeMapper, err = keycloakClient.GetOpenIdUserAttributeProtocolMapperForClientScope(realmId, clientScopeId, data.Id())
-	}
+	openIdUserAttributeMapper, err := keycloakClient.GetOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId, data.Id())
 
 	if err != nil {
 		return err
@@ -196,11 +190,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperDelete(data *schema.Resour
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	if clientId != "" {
-		return keycloakClient.DeleteOpenIdUserAttributeProtocolMapperForClient(realmId, clientId, data.Id())
-	} else {
-		return keycloakClient.DeleteOpenIdUserAttributeProtocolMapperForClientScope(realmId, clientScopeId, data.Id())
-	}
+	return keycloakClient.DeleteOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId, data.Id())
 }
 
 func resourceKeycloakOpenIdUserAttributeProtocolMapperImport(data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
