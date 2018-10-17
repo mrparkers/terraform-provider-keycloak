@@ -244,6 +244,8 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_openid_client" "openid-client" {
 	realm_id  = "${keycloak_realm.realm.id}"
 	client_id = "%s"
+
+	access_type = "BEARER-ONLY"
 }
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper-client" {
@@ -298,6 +300,8 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_openid_client" "openid-client" {
 	realm_id  = "${keycloak_realm.realm.id}"
 	client_id = "%s"
+
+	access_type = "BEARER-ONLY"
 }
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper" {
