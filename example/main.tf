@@ -15,8 +15,15 @@ resource "keycloak_realm" "test" {
 }
 
 resource "keycloak_openid_client" "test-client" {
-  client_id = "test-client"
-  realm_id  = "${keycloak_realm.test.id}"
+  client_id           = "test-client"
+  name                = "test-client"
+  realm_id            = "${keycloak_realm.test.id}"
+  description         = "a test client"
+
+  access_type         = "CONFIDENTIAL"
+  valid_redirect_uris = [
+    "http://localhost:8080/callback"
+  ]
 }
 
 resource "keycloak_openid_client_scope" "test-client-scope" {
