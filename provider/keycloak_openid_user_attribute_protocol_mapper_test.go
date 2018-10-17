@@ -89,7 +89,7 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_validateClientOrClientScop
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdUserAttributeProtocolMapper_validation(realmName, mapperName),
-				ExpectError: regexp.MustCompile("one of client_id or client_scope_id must be set"),
+				ExpectError: regexp.MustCompile("validation error: one of ClientId or ClientScopeId must be set"),
 			},
 		},
 	})

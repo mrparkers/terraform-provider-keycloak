@@ -129,18 +129,19 @@ func mapFromOpenIdUserAttributeMapperToData(mapper *keycloak.OpenIdUserAttribute
 }
 
 func resourceKeycloakOpenIdUserAttributeProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
-	clientId := data.Get("client_id")
-	clientScopeId := data.Get("client_scope_id")
-
-	if clientId == "" && clientScopeId == "" {
-		return fmt.Errorf("one of client_id or client_scope_id must be set")
-	}
-
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdUserAttributeMapper := mapFromDataToOpenIdUserAttributeProtocolMapper(data)
 
-	err := keycloakClient.NewOpenIdUserAttributeProtocolMapper(openIdUserAttributeMapper)
+	err := openIdUserAttributeMapper.Validate()
+
+	if err != nil {
+		return err
+	}
+
+	if err = keycloakClient.NewOpenIdUserAttributeProtocolMapper(openIdUserAttributeMapper); err != nil {
+		return err
+	}
 
 	if err != nil {
 		return err

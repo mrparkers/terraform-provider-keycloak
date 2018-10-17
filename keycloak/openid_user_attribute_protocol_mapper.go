@@ -166,3 +166,11 @@ func (keycloakClient *KeycloakClient) DeleteOpenIdUserAttributeProtocolMapperFor
 func (keycloakClient *KeycloakClient) DeleteOpenIdUserAttributeProtocolMapperForClientScope(realmId, clientScopeId, mapperId string) error {
 	return keycloakClient.deleteOpenIdUserAttributeProtocolMapper(realmId, "", clientScopeId, mapperId)
 }
+
+func (mapper *OpenIdUserAttributeProtocolMapper) Validate() error {
+	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
+		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
+	}
+
+	return nil
+}
