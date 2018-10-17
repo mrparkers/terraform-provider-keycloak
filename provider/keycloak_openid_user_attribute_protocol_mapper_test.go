@@ -191,7 +191,6 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_updateRealmIdForceNew(t *t
 
 func testAccKeycloakOpenIdUserAttributeProtocolMapperDestroy() resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-
 		for resourceName, rs := range state.RootModule().Resources {
 			if rs.Type != "keycloak_openid_user_attribute_protocol_mapper" {
 				continue
