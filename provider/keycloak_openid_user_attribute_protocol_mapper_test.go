@@ -243,16 +243,16 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "openid-client" {
-	realm_id = "${keycloak_realm.realm.id}"
-	client_id = "%s"
+	realm_id 	= "${keycloak_realm.realm.id}"
+	client_id 	= "%s"
 }
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper-client" {
-  	name = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
-  	client_id = "${keycloak_openid_client.openid-client.id}"
-  	user_attribute = "foo"
-  	claim_name = "bar"
+  	name			= "%s"
+	realm_id		= "${keycloak_realm.realm.id}"
+  	client_id		= "${keycloak_openid_client.openid-client.id}"
+  	user_attribute	= "foo"
+  	claim_name		= "bar"
 }`, realmName, clientId, mapperName)
 }
 
@@ -271,7 +271,7 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper
 	name 			= "%s"
 	realm_id 		= "${keycloak_realm.realm.id}"
 	client_scope_id	= "${keycloak_openid_client_scope.client-scope.id}"
-	user_attribute 	= "foo"
+	user_attribute	= "foo"
 	claim_name 		= "bar"
 }`, realmName, clientScopeId, mapperName)
 }
