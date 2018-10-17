@@ -93,3 +93,19 @@ resource "keycloak_custom_user_federation" "custom" {
 
   enabled     = true
 }
+
+resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_client" {
+  name            = "tf-test-open-id-user-attribute-protocol-mapper-client"
+  realm_id        = "${keycloak_realm.test.id}"
+  client_id       = "${keycloak_openid_client.test-client.id}"
+  user_attribute  = "foo"
+  claim_name      = "bar"
+}
+
+resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_client_scope" {
+  name            = "tf-test-open-id-user-attribute-protocol-mapper-client-scope"
+  realm_id        = "${keycloak_realm.test.id}"
+  client_scope_id = "${keycloak_openid_client_scope.test-client-scope.id}"
+  user_attribute  = "foo2"
+  claim_name      = "bar2"
+}
