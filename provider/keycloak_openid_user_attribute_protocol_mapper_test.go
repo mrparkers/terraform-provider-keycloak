@@ -99,19 +99,6 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_validateClaimValueType(t *
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-attribute-mapper-" + acctest.RandString(10)
 	invalidClaimValueType := acctest.RandString(5)
-	config := fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm = "%s"
-}
-
-resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper-validation" {
-  	name = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
-  	user_attribute = "foo"
-  	claim_name = "bar"
-	claim_value_type = "%s"
-}
-`, realmName, mapperName, invalidClaimValueType)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -119,8 +106,8 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper
 		CheckDestroy: testAccKeycloakOpenIdUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      config,
-				ExpectError: regexp.MustCompile(" expected claim_value_type to be one of .+ got " + invalidClaimValueType),
+				Config:      testKeycloakOpenIdUserAttributeProtocolMapper_claimValueType(realmName, mapperName, invalidClaimValueType),
+				ExpectError: regexp.MustCompile("expected claim_value_type to be one of .+ got " + invalidClaimValueType),
 			},
 		},
 	})
@@ -276,16 +263,16 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client_scope" "client-scope" {
-  name                = "%s"
-  realm_id            = "${keycloak_realm.realm.id}"
+	name		= "%s"
+	realm_id	= "${keycloak_realm.realm.id}"
 }
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper-client-scope" {
-  	name = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
-  	client_scope_id = "${keycloak_openid_client_scope.client-scope.id}"
-  	user_attribute = "foo"
-  	claim_name = "bar"
+	name 			= "%s"
+	realm_id 		= "${keycloak_realm.realm.id}"
+	client_scope_id	= "${keycloak_openid_client_scope.client-scope.id}"
+	user_attribute 	= "foo"
+	claim_name 		= "bar"
 }`, realmName, clientScopeId, mapperName)
 }
 
@@ -296,12 +283,11 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper-validation" {
-  	name = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
-  	user_attribute = "foo"
-  	claim_name = "bar"
-}
-`, realmName, mapperName)
+	name			= "%s"
+	realm_id		= "${keycloak_realm.realm.id}"
+	user_attribute	= "foo"
+	claim_name		= "bar"
+}`, realmName, mapperName)
 }
 
 func testKeycloakOpenIdUserAttributeProtocolMapper_claim(realmName, clientId, mapperName, attributeName string) string {
@@ -311,15 +297,30 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "openid-client" {
-	realm_id = "${keycloak_realm.realm.id}"
-	client_id = "%s"
+	realm_id	= "${keycloak_realm.realm.id}"
+	client_id	= "%s"
 }
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper" {
-  	name = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
-  	client_id = "${keycloak_openid_client.openid-client.id}"
-  	user_attribute = "%s"
-  	claim_name = "bar"
+	name 			= "%s"
+	realm_id 		= "${keycloak_realm.realm.id}"
+	client_id 		= "${keycloak_openid_client.openid-client.id}"
+	user_attribute	= "%s"
+	claim_name 		= "bar"
 }`, realmName, clientId, mapperName, attributeName)
+}
+
+func testKeycloakOpenIdUserAttributeProtocolMapper_claimValueType(realmName, mapperName, claimValueType string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper-validation" {
+	name 				= "%s"
+	realm_id 			= "${keycloak_realm.realm.id}"
+	user_attribute		= "foo"
+	claim_name 			= "bar"
+	claim_value_type	= "%s"
+}`, realmName, mapperName, claimValueType)
 }
