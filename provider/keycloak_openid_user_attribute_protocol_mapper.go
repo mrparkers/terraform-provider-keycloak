@@ -18,7 +18,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapper() *schema.Resource {
 			// import a mapper tied to a client:
 			// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 			// or a client scope:
-			// {{realmId}}/client-scope/{{clientScopeId}}/protocolMapperId
+			// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
 			State: resourceKeycloakOpenIdUserAttributeProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
