@@ -3,6 +3,8 @@ package provider
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/acctest"
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 	"math/rand"
 	"os"
 	"strings"
@@ -39,5 +41,16 @@ func skipIfEnvSet(t *testing.T, envs ...string) {
 		if os.Getenv(k) != "" {
 			t.Skipf("Environment variable %s is set, skipping...", k)
 		}
+	}
+}
+
+func TestCheckResourceAttrNot(name, key, value string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		err := resource.TestCheckResourceAttr(name, key, value)(s)
+		if err == nil {
+			return fmt.Errorf("%s: Attribute '%s' expected to not equal %#v", name, key, value)
+		}
+
+		return nil
 	}
 }
