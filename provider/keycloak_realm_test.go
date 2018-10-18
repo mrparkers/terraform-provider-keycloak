@@ -212,6 +212,58 @@ func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	realmDisplayName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "sso_session_idle_timeout"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "sso_session_idle_timeout", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "sso_session_max_lifespan"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "sso_session_max_lifespan", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "offline_session_idle_timeout"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "offline_session_idle_timeout", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "offline_session_max_lifespan"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "offline_session_max_lifespan", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "access_token_lifespan"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "access_token_lifespan", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "access_token_lifespan_for_implicit_flow"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "access_token_lifespan_for_implicit_flow", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "access_code_lifespan"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "access_code_lifespan", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "access_code_lifespan_login"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "access_code_lifespan_login", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "access_code_lifespan_user_action"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "access_code_lifespan_user_action", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "action_token_generated_by_user_lifespan"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "action_token_generated_by_user_lifespan", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "action_token_generated_by_admin_lifespan"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "action_token_generated_by_admin_lifespan", "0s"),
+				),
+			},
+		},
+	})
+}
+
 func testKeycloakRealmLoginInfo(resourceName string, realm *keycloak.Realm) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		realmFromState, err := getRealmFromState(s, resourceName)

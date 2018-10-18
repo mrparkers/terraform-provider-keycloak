@@ -27,19 +27,19 @@ type Realm struct {
 	EmailTheme   string `json:"emailTheme,omitempty"`
 
 	// Tokens
-	RevokeRefreshToken                  bool `json:"revokeRefreshToken"`
-	RefreshTokenMaxReuse                int  `json:"refreshTokenMaxReuse"`
-	SsoSessionIdleTimeout               int  `json:"ssoSessionIdleTimeout"`
-	SsoSessionMaxLifespan               int  `json:"ssoSessionMaxLifespan"`
-	OfflineSessionIdleTimeout           int  `json:"offlineSessionIdleTimeout"`
-	OfflineSessionMaxLifespan           int  `json:"offlineSessionMaxLifespan"`
-	AccessTokenLifespan                 int  `json:"accessTokenLifespan"`
-	AccessTokenLifespanForImplicitFlow  int  `json:"accessTokenLifespanForImplicitFlow"`
-	AccessCodeLifespan                  int  `json:"accessCodeLifespan"`
-	AccessCodeLifespanLogin             int  `json:"accessCodeLifespanLogin"`
-	AccessCodeLifespanUserAction        int  `json:"accessCodeLifespanUserAction"`
-	ActionTokenGeneratedByUserLifespan  int  `json:"actionTokenGeneratedByUserLifespan"`
-	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan"`
+	RevokeRefreshToken                  bool `json:"revokeRefreshToken,omitempty"`
+	RefreshTokenMaxReuse                int  `json:"refreshTokenMaxReuse,omitempty"`
+	SsoSessionIdleTimeout               int  `json:"ssoSessionIdleTimeout,omitempty"`
+	SsoSessionMaxLifespan               int  `json:"ssoSessionMaxLifespan,omitempty"`
+	OfflineSessionIdleTimeout           int  `json:"offlineSessionIdleTimeout,omitempty"`
+	OfflineSessionMaxLifespan           int  `json:"offlineSessionMaxLifespan,omitempty"`
+	AccessTokenLifespan                 int  `json:"accessTokenLifespan,omitempty"`
+	AccessTokenLifespanForImplicitFlow  int  `json:"accessTokenLifespanForImplicitFlow,omitempty"`
+	AccessCodeLifespan                  int  `json:"accessCodeLifespan,omitempty"`
+	AccessCodeLifespanLogin             int  `json:"accessCodeLifespanLogin,omitempty"`
+	AccessCodeLifespanUserAction        int  `json:"accessCodeLifespanUserAction,omitempty"`
+	ActionTokenGeneratedByUserLifespan  int  `json:"actionTokenGeneratedByUserLifespan,omitempty"`
+	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
