@@ -149,31 +149,31 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
-  name                    = "openldap"
-  realm_id                = "${keycloak_realm.realm.id}"
+	name                    = "openldap"
+	realm_id                = "${keycloak_realm.realm.id}"
 
-  enabled                 = true
+	enabled                 = true
 
-  username_ldap_attribute = "cn"
-  rdn_ldap_attribute      = "cn"
-  uuid_ldap_attribute     = "entryDN"
-  user_object_classes     = [
-    "simpleSecurityObject",
-    "organizationalRole"
-  ]
-  connection_url          = "ldap://openldap"
-  users_dn                = "dc=example,dc=org"
-  bind_dn                 = "cn=admin,dc=example,dc=org"
-  bind_credential         = "admin"
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
 }
 
 resource "keycloak_ldap_user_attribute_mapper" "username" {
-  name                        = "%s"
-  realm_id                    = "${keycloak_realm.realm.id}"
-  ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
+	name                        = "%s"
+	realm_id                    = "${keycloak_realm.realm.id}"
+	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
-  user_model_attribute        = "username"
-  ldap_attribute              = "cn"
+	user_model_attribute        = "username"
+	ldap_attribute              = "cn"
 }
 	`, realm, userAttributeMapperName)
 }
@@ -185,35 +185,35 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
-  name                    = "openldap"
-  realm_id                = "${keycloak_realm.realm.id}"
+	name                    = "openldap"
+	realm_id                = "${keycloak_realm.realm.id}"
 
-  enabled                 = true
+	enabled                 = true
 
-  username_ldap_attribute = "cn"
-  rdn_ldap_attribute      = "cn"
-  uuid_ldap_attribute     = "entryDN"
-  user_object_classes     = [
-    "simpleSecurityObject",
-    "organizationalRole"
-  ]
-  connection_url          = "ldap://openldap"
-  users_dn                = "dc=example,dc=org"
-  bind_dn                 = "cn=admin,dc=example,dc=org"
-  bind_credential         = "admin"
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
 }
 
 resource "keycloak_ldap_user_attribute_mapper" "username" {
-  name                        = "%s"
-  realm_id                    = "${keycloak_realm.realm.id}"
-  ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
+	name                        = "%s"
+	realm_id                    = "${keycloak_realm.realm.id}"
+	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
-  user_model_attribute        = "%s"
-  ldap_attribute              = "%s"
+	user_model_attribute        = "%s"
+	ldap_attribute              = "%s"
 
-  read_only                   = %t
-  always_read_value_from_ldap = %t
-  is_mandatory_in_ldap        = %t
+	read_only                   = %t
+	always_read_value_from_ldap = %t
+	is_mandatory_in_ldap        = %t
 }
 	`, realm, mapper.Name, mapper.UserModelAttribute, mapper.LdapAttribute, mapper.ReadOnly, mapper.AlwaysReadValueFromLdap, mapper.IsMandatoryInLdap)
 }
@@ -229,50 +229,50 @@ resource "keycloak_realm" "realm-two" {
 }
 
 resource "keycloak_ldap_user_federation" "openldap-one" {
-  name                    = "openldap"
-  realm_id                = "${keycloak_realm.realm-one.id}"
+	name                    = "openldap"
+	realm_id                = "${keycloak_realm.realm-one.id}"
 
-  enabled                 = true
+	enabled                 = true
 
-  username_ldap_attribute = "cn"
-  rdn_ldap_attribute      = "cn"
-  uuid_ldap_attribute     = "entryDN"
-  user_object_classes     = [
-    "simpleSecurityObject",
-    "organizationalRole"
-  ]
-  connection_url          = "ldap://openldap"
-  users_dn                = "dc=example,dc=org"
-  bind_dn                 = "cn=admin,dc=example,dc=org"
-  bind_credential         = "admin"
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
 }
 
 resource "keycloak_ldap_user_federation" "openldap-two" {
-  name                    = "openldap"
-  realm_id                = "${keycloak_realm.realm-two.id}"
+	name                    = "openldap"
+	realm_id                = "${keycloak_realm.realm-two.id}"
 
-  enabled                 = true
+	enabled                 = true
 
-  username_ldap_attribute = "cn"
-  rdn_ldap_attribute      = "cn"
-  uuid_ldap_attribute     = "entryDN"
-  user_object_classes     = [
-    "simpleSecurityObject",
-    "organizationalRole"
-  ]
-  connection_url          = "ldap://openldap"
-  users_dn                = "dc=example,dc=org"
-  bind_dn                 = "cn=admin,dc=example,dc=org"
-  bind_credential         = "admin"
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
 }
 
 resource "keycloak_ldap_user_attribute_mapper" "username" {
-  name                        = "%s"
-  realm_id                    = "${keycloak_realm.realm-one.id}"
-  ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap-one.id}"
+	name                        = "%s"
+	realm_id                    = "${keycloak_realm.realm-one.id}"
+	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap-one.id}"
 
-  user_model_attribute        = "username"
-  ldap_attribute              = "cn"
+	user_model_attribute        = "username"
+	ldap_attribute              = "cn"
 }
 	`, realmOne, realmTwo, userAttributeMapperName)
 }
@@ -288,50 +288,50 @@ resource "keycloak_realm" "realm-two" {
 }
 
 resource "keycloak_ldap_user_federation" "openldap-one" {
-  name                    = "openldap"
-  realm_id                = "${keycloak_realm.realm-one.id}"
+	name                    = "openldap"
+	realm_id                = "${keycloak_realm.realm-one.id}"
 
-  enabled                 = true
+	enabled                 = true
 
-  username_ldap_attribute = "cn"
-  rdn_ldap_attribute      = "cn"
-  uuid_ldap_attribute     = "entryDN"
-  user_object_classes     = [
-    "simpleSecurityObject",
-    "organizationalRole"
-  ]
-  connection_url          = "ldap://openldap"
-  users_dn                = "dc=example,dc=org"
-  bind_dn                 = "cn=admin,dc=example,dc=org"
-  bind_credential         = "admin"
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
 }
 
 resource "keycloak_ldap_user_federation" "openldap-two" {
-  name                    = "openldap"
-  realm_id                = "${keycloak_realm.realm-two.id}"
+	name                    = "openldap"
+	realm_id                = "${keycloak_realm.realm-two.id}"
 
-  enabled                 = true
+	enabled                 = true
 
-  username_ldap_attribute = "cn"
-  rdn_ldap_attribute      = "cn"
-  uuid_ldap_attribute     = "entryDN"
-  user_object_classes     = [
-    "simpleSecurityObject",
-    "organizationalRole"
-  ]
-  connection_url          = "ldap://openldap"
-  users_dn                = "dc=example,dc=org"
-  bind_dn                 = "cn=admin,dc=example,dc=org"
-  bind_credential         = "admin"
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
 }
 
 resource "keycloak_ldap_user_attribute_mapper" "username" {
-  name                        = "%s"
-  realm_id                    = "${keycloak_realm.realm-two.id}"
-  ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap-two.id}"
+	name                        = "%s"
+	realm_id                    = "${keycloak_realm.realm-two.id}"
+	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap-two.id}"
 
-  user_model_attribute        = "username"
-  ldap_attribute              = "cn"
+	user_model_attribute        = "username"
+	ldap_attribute              = "cn"
 }
 	`, realmOne, realmTwo, userAttributeMapperName)
 }

@@ -407,10 +407,10 @@ resource "keycloak_realm" "realm" {
 	enabled      = true
 	display_name = "%s"
 
-    login_theme   = "%s"
-    account_theme = "%s"
-    admin_theme   = "%s"
-    email_theme   = "%s"
+	login_theme   = "%s"
+	account_theme = "%s"
+	admin_theme   = "%s"
+	email_theme   = "%s"
 }
 	`, realm.Realm, realm.DisplayName, realm.LoginTheme, realm.AccountTheme, realm.AdminTheme, realm.EmailTheme)
 }
@@ -422,7 +422,7 @@ resource "keycloak_realm" "realm" {
 	enabled      = true
 	display_name = "%s"
 
-    %s_theme     = "%s"
+	%s_theme     = "%s"
 }
 	`, realm, realm, theme, value)
 }
