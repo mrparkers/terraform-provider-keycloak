@@ -15,7 +15,7 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_basicClient(t *testing.T
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-group-membership-mapper-" + acctest.RandString(5)
 
-	resourceName := "keycloak_openid_group_membership_protocol_mapper.group-membership-mapper-client"
+	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -36,7 +36,7 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_basicClientScope(t *test
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-group-membership-mapper-" + acctest.RandString(5)
 
-	resourceName := "keycloak_openid_group_membership_protocol_mapper.group-membership-mapper-client-scope"
+	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -53,7 +53,7 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_basicClientScope(t *test
 }
 
 func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_update(t *testing.T) {
-	resourceName := "keycloak_openid_group_membership_protocol_mapper.group-membership-mapper"
+	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper"
 
 	mapperOne := &keycloak.OpenIdGroupMembershipProtocolMapper{
 		Name:               acctest.RandString(10),
@@ -117,7 +117,7 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_updateMapperNameForceNew
 	mapperNameOne := acctest.RandString(10)
 	mapperNameTwo := acctest.RandString(10)
 
-	resourceName := "keycloak_openid_group_membership_protocol_mapper.group-membership-mapper-client"
+	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -141,7 +141,7 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_updateClientIdForceNew(t
 	clientIdOne := "terraform-client-" + acctest.RandString(10)
 	clientIdTwo := "terraform-client-" + acctest.RandString(10)
 
-	resourceName := "keycloak_openid_group_membership_protocol_mapper.group-membership-mapper-client"
+	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -149,11 +149,11 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_updateClientIdForceNew(t
 		CheckDestroy: testAccKeycloakOpenIdGroupMembershipProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_updateClientForceNew(realmName, clientIdOne, clientIdTwo, "openid-client-one"),
+				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_updateClientForceNew(realmName, clientIdOne, clientIdTwo, "openid_client_one"),
 				Check:  testKeycloakOpenIdGroupMembershipProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_updateClientForceNew(realmName, clientIdOne, clientIdTwo, "openid-client-two"),
+				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_updateClientForceNew(realmName, clientIdOne, clientIdTwo, "openid_client_two"),
 				Check:  testKeycloakOpenIdGroupMembershipProtocolMapperExists(resourceName),
 			},
 		},
@@ -165,7 +165,7 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_updateClientScopeForceNe
 	clientScopeOne := "terraform-client-scope-" + acctest.RandString(10)
 	clientScopeTwo := "terraform-client-scope-" + acctest.RandString(10)
 
-	resourceName := "keycloak_openid_group_membership_protocol_mapper.group-membership-mapper-client-scope"
+	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -173,11 +173,11 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_updateClientScopeForceNe
 		CheckDestroy: testAccKeycloakOpenIdGroupMembershipProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_updateClientScopeForceNew(realmName, clientScopeOne, clientScopeTwo, "client-scope-one"),
+				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_updateClientScopeForceNew(realmName, clientScopeOne, clientScopeTwo, "client_scope_one"),
 				Check:  testKeycloakOpenIdGroupMembershipProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_updateClientScopeForceNew(realmName, clientScopeOne, clientScopeTwo, "client-scope-two"),
+				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_updateClientScopeForceNew(realmName, clientScopeOne, clientScopeTwo, "client_scope_two"),
 				Check:  testKeycloakOpenIdGroupMembershipProtocolMapperExists(resourceName),
 			},
 		},
@@ -236,18 +236,18 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client" "openid-client" {
+resource "keycloak_openid_client" "openid_client" {
 	realm_id    = "${keycloak_realm.realm.id}"
 	client_id   = "%s"
 
 	access_type = "BEARER-ONLY"
 }
 
-resource "keycloak_openid_group_membership_protocol_mapper" "group-membership-mapper-client" {
-  	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
-  	client_id        = "${keycloak_openid_client.openid-client.id}"
-  	claim_name       = "bar"
+resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper_client" {
+  	name       = "%s"
+	realm_id   = "${keycloak_realm.realm.id}"
+  	client_id  = "${keycloak_openid_client.openid_client.id}"
+  	claim_name = "bar"
 }`, realmName, clientId, mapperName)
 }
 
@@ -257,15 +257,15 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client_scope" "client-scope" {
+resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
 	realm_id = "${keycloak_realm.realm.id}"
 }
 
-resource "keycloak_openid_group_membership_protocol_mapper" "group-membership-mapper-client-scope" {
+resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper_client_scope" {
 	name            = "%s"
 	realm_id        = "${keycloak_realm.realm.id}"
-	client_scope_id = "${keycloak_openid_client_scope.client-scope.id}"
+	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
 	claim_name      = "bar"
 }`, realmName, clientScopeId, mapperName)
 }
@@ -276,17 +276,17 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client" "openid-client" {
+resource "keycloak_openid_client" "openid_client" {
 	realm_id    = "${keycloak_realm.realm.id}"
 	client_id   = "%s"
 
 	access_type = "BEARER-ONLY"
 }
 
-resource "keycloak_openid_group_membership_protocol_mapper" "group-membership-mapper" {
+resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper" {
   	name                 = "%s"
 	realm_id             = "${keycloak_realm.realm.id}"
-  	client_id            = "${keycloak_openid_client.openid-client.id}"
+  	client_id            = "${keycloak_openid_client.openid_client.id}"
 
   	claim_name           = "%s"
 	full_path            = %t
@@ -302,26 +302,26 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client" "openid-client-one" {
+resource "keycloak_openid_client" "openid_client_one" {
 	realm_id    = "${keycloak_realm.realm.id}"
 	client_id   = "%s"
 
 	access_type = "BEARER-ONLY"
 }
 
-resource "keycloak_openid_client" "openid-client-two" {
+resource "keycloak_openid_client" "openid_client_two" {
 	realm_id    = "${keycloak_realm.realm.id}"
 	client_id   = "%s"
 
 	access_type = "BEARER-ONLY"
 }
 
-resource "keycloak_openid_group_membership_protocol_mapper" "group-membership-mapper-client" {
-  	name                 = "group-mapper"
-	realm_id             = "${keycloak_realm.realm.id}"
-  	client_id            = "${keycloak_openid_client.%s.id}"
+resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper_client" {
+  	name       = "group-mapper"
+	realm_id   = "${keycloak_realm.realm.id}"
+  	client_id  = "${keycloak_openid_client.%s.id}"
 
-  	claim_name           = "foo"
+  	claim_name = "foo"
 }`, realmId, clientIdOne, clientIdTwo, currentClient)
 }
 
@@ -331,22 +331,22 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client_scope" "client-scope-one" {
+resource "keycloak_openid_client_scope" "client_scope_one" {
 	name     = "%s"
 	realm_id = "${keycloak_realm.realm.id}"
 }
 
-resource "keycloak_openid_client_scope" "client-scope-two" {
+resource "keycloak_openid_client_scope" "client_scope_two" {
 	name     = "%s"
 	realm_id = "${keycloak_realm.realm.id}"
 }
 
-resource "keycloak_openid_group_membership_protocol_mapper" "group-membership-mapper-client-scope" {
-  	name                 = "group-mapper"
-	realm_id             = "${keycloak_realm.realm.id}"
-  	client_scope_id      = "${keycloak_openid_client_scope.%s.id}"
+resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper_client_scope" {
+  	name            = "group-mapper"
+	realm_id        = "${keycloak_realm.realm.id}"
+  	client_scope_id = "${keycloak_openid_client_scope.%s.id}"
 
-  	claim_name           = "foo"
+  	claim_name      = "foo"
 }`, realmId, clientScopeIdOne, clientScopeIdTwo, currentClientScope)
 }
 
@@ -356,9 +356,9 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_group_membership_protocol_mapper" "group-membership-mapper-validation" {
-	name           = "%s"
-	realm_id       = "${keycloak_realm.realm.id}"
-	claim_name     = "bar"
+resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper_validation" {
+	name       = "%s"
+	realm_id   = "${keycloak_realm.realm.id}"
+	claim_name = "bar"
 }`, realmName, mapperName)
 }
