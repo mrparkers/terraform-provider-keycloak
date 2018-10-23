@@ -197,7 +197,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperImport(data *schema.Resour
 	parts := strings.Split(data.Id(), "/")
 
 	if len(parts) != 4 {
-		return nil, fmt.Errorf("invalid import. supported import formats: {{realmId}}/client/{{clientId}}/protocolMapperId or {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}")
+		return nil, fmt.Errorf("invalid import. supported import formats: {{realmId}}/client/{{clientId}}/{{protocolMapperId}} or {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}")
 	}
 
 	realmId := parts[0]
