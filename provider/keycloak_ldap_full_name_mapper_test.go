@@ -33,6 +33,37 @@ func TestAccKeycloakLdapFullNameMapper_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakLdapFullNameMapper_createAfterManualDestroy(t *testing.T) {
+	var mapper = &keycloak.LdapFullNameMapper{}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	fullNameMapperName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapFullNameMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapFullNameMapper_basic(realmName, fullNameMapperName),
+				Check:  testAccCheckKeycloakLdapFullNameMapperFetch("keycloak_ldap_full_name_mapper.full-name-mapper", mapper),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteLdapFullNameMapper(mapper.RealmId, mapper.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakLdapFullNameMapper_basic(realmName, fullNameMapperName),
+				Check:  testAccCheckKeycloakLdapFullNameMapperFetch("keycloak_ldap_full_name_mapper.full-name-mapper", mapper),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakLdapFullNameMapper_readWriteValidation(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 
@@ -105,6 +136,20 @@ func testAccCheckKeycloakLdapFullNameMapperExists(resourceName string) resource.
 		if err != nil {
 			return err
 		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakLdapFullNameMapperFetch(resourceName string, mapper *keycloak.LdapFullNameMapper) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedMapper, err := getLdapFullNameMapperFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		mapper.Id = fetchedMapper.Id
+		mapper.RealmId = fetchedMapper.RealmId
 
 		return nil
 	}
