@@ -221,10 +221,10 @@ func testKeycloakOpenIdUserAttributeProtocolMapperExists(resourceName string) re
 
 func getUserAttributeMapperUsingState(state *terraform.State, resourceName string) (*keycloak.OpenIdUserAttributeProtocolMapper, error) {
 	rs, ok := state.RootModule().Resources[resourceName]
-
 	if !ok {
 		return nil, fmt.Errorf("resource not found in TF state: %s ", resourceName)
 	}
+
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 	clientId := rs.Primary.Attributes["client_id"]

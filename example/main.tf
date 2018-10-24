@@ -116,3 +116,17 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_c
   user_attribute  = "foo2"
   claim_name      = "bar2"
 }
+
+resource "keycloak_openid_group_membership_protocol_mapper" "map_group_memberships_client" {
+  name            = "tf-test-open-id-group-membership-protocol-mapper-client"
+  realm_id        = "${keycloak_realm.test.id}"
+  client_id       = "${keycloak_openid_client.test-client.id}"
+  claim_name      = "bar"
+}
+
+resource "keycloak_openid_group_membership_protocol_mapper" "map_group_memberships_client_scope" {
+  name            = "tf-test-open-id-group-membership-protocol-mapper-client-scope"
+  realm_id        = "${keycloak_realm.test.id}"
+  client_scope_id = "${keycloak_openid_client_scope.test-client-scope.id}"
+  claim_name      = "bar2"
+}

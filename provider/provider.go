@@ -8,16 +8,17 @@ import (
 func KeycloakProvider() *schema.Provider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			"keycloak_realm":                                 resourceKeycloakRealm(),
-			"keycloak_openid_client":                         resourceKeycloakOpenidClient(),
-			"keycloak_openid_client_scope":                   resourceKeycloakOpenidClientScope(),
-			"keycloak_ldap_user_federation":                  resourceKeycloakLdapUserFederation(),
-			"keycloak_ldap_user_attribute_mapper":            resourceKeycloakLdapUserAttributeMapper(),
-			"keycloak_ldap_group_mapper":                     resourceKeycloakLdapGroupMapper(),
-			"keycloak_ldap_msad_user_account_control_mapper": resourceKeycloakLdapMsadUserAccountControlMapper(),
-			"keycloak_ldap_full_name_mapper":                 resourceKeycloakLdapFullNameMapper(),
-			"keycloak_custom_user_federation":                resourceKeycloakCustomUserFederation(),
-			"keycloak_openid_user_attribute_protocol_mapper": resourceKeycloakOpenIdUserAttributeProtocolMapper(),
+			"keycloak_realm":                                   resourceKeycloakRealm(),
+			"keycloak_openid_client":                           resourceKeycloakOpenidClient(),
+			"keycloak_openid_client_scope":                     resourceKeycloakOpenidClientScope(),
+			"keycloak_ldap_user_federation":                    resourceKeycloakLdapUserFederation(),
+			"keycloak_ldap_user_attribute_mapper":              resourceKeycloakLdapUserAttributeMapper(),
+			"keycloak_ldap_group_mapper":                       resourceKeycloakLdapGroupMapper(),
+			"keycloak_ldap_msad_user_account_control_mapper":   resourceKeycloakLdapMsadUserAccountControlMapper(),
+			"keycloak_ldap_full_name_mapper":                   resourceKeycloakLdapFullNameMapper(),
+			"keycloak_custom_user_federation":                  resourceKeycloakCustomUserFederation(),
+			"keycloak_openid_user_attribute_protocol_mapper":   resourceKeycloakOpenIdUserAttributeProtocolMapper(),
+			"keycloak_openid_group_membership_protocol_mapper": resourceKeycloakOpenIdGroupMembershipProtocolMapper(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {

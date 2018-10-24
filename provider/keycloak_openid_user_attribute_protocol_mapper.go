@@ -134,15 +134,11 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperCreate(data *schema.Resour
 	openIdUserAttributeMapper := mapFromDataToOpenIdUserAttributeProtocolMapper(data)
 
 	err := openIdUserAttributeMapper.Validate()
-
 	if err != nil {
 		return err
 	}
 
-	if err = keycloakClient.NewOpenIdUserAttributeProtocolMapper(openIdUserAttributeMapper); err != nil {
-		return err
-	}
-
+	err = keycloakClient.NewOpenIdUserAttributeProtocolMapper(openIdUserAttributeMapper)
 	if err != nil {
 		return err
 	}
@@ -160,7 +156,6 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperRead(data *schema.Resource
 	clientScopeId := data.Get("client_scope_id").(string)
 
 	openIdUserAttributeMapper, err := keycloakClient.GetOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId, data.Id())
-
 	if err != nil {
 		return err
 	}
@@ -175,7 +170,6 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperUpdate(data *schema.Resour
 
 	openIdUserAttributeMapper := mapFromDataToOpenIdUserAttributeProtocolMapper(data)
 	err := keycloakClient.UpdateOpenIdUserAttributeProtocolMapper(openIdUserAttributeMapper)
-
 	if err != nil {
 		return err
 	}
@@ -197,7 +191,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperImport(data *schema.Resour
 	parts := strings.Split(data.Id(), "/")
 
 	if len(parts) != 4 {
-		return nil, fmt.Errorf("invalid import. supported import formats: {{realmId}}/client/{{clientId}}/protocolMapperId or {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}")
+		return nil, fmt.Errorf("invalid import. supported import formats: {{realmId}}/client/{{clientId}}/{{protocolMapperId}} or {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}")
 	}
 
 	realmId := parts[0]
