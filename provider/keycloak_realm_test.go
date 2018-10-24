@@ -54,7 +54,7 @@ func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 
 					err := keycloakClient.DeleteRealm(realmName)
 					if err != nil {
-						panic(err)
+						t.Fatal(err)
 					}
 				},
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
