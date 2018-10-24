@@ -36,6 +36,40 @@ func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) {
+	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
+
+	var customFederation = &keycloak.CustomUserFederation{}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	name := "terraform-" + acctest.RandString(10)
+	providerId := "custom"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakCustomUserFederation_basic(realmName, name, providerId),
+				Check:  testAccCheckKeycloakCustomUserFederationFetch("keycloak_custom_user_federation.custom", customFederation),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteCustomUserFederation(customFederation.RealmId, customFederation.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakCustomUserFederation_basic(realmName, name, providerId),
+				Check:  testAccCheckKeycloakCustomUserFederationExists("keycloak_custom_user_federation.custom"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakCustomUserFederation_validation(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	name := "terraform-" + acctest.RandString(10)
@@ -60,6 +94,20 @@ func testAccCheckKeycloakCustomUserFederationExists(resourceName string) resourc
 		if err != nil {
 			return err
 		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakCustomUserFederationFetch(resourceName string, federation *keycloak.CustomUserFederation) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedFederation, err := getCustomUserFederationFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		federation.Id = fetchedFederation.Id
+		federation.RealmId = fetchedFederation.RealmId
 
 		return nil
 	}
