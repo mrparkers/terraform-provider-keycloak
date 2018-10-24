@@ -209,7 +209,10 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 	}
 
 	if response.StatusCode >= 400 {
-		return nil, "", fmt.Errorf("error sending %s request to %s: %s", request.Method, request.URL.Path, response.Status)
+		return nil, "", &Error{
+			Code:    response.StatusCode,
+			Message: fmt.Sprintf("error sending %s request to %s: %s", request.Method, request.URL.Path, response.Status),
+		}
 	}
 
 	return body, response.Header.Get("Location"), nil
