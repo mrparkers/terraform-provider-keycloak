@@ -372,7 +372,7 @@ func resourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) erro
 
 	realm, err := keycloakClient.GetRealm(data.Id())
 	if err != nil {
-		return err
+		return handleNotFoundError(err, data)
 	}
 
 	setRealmData(data, realm)
