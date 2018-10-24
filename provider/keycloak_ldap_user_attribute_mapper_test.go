@@ -32,6 +32,37 @@ func TestAccKeycloakLdapUserAttributeMapper_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakLdapUserAttributeMapper_createAfterManualDestroy(t *testing.T) {
+	var mapper = &keycloak.LdapUserAttributeMapper{}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	userAttributeMapperName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserAttributeMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserAttributeMapper_basic(realmName, userAttributeMapperName),
+				Check:  testAccCheckKeycloakLdapUserAttributeMapperFetch("keycloak_ldap_user_attribute_mapper.username", mapper),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteLdapUserAttributeMapper(mapper.RealmId, mapper.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakLdapUserAttributeMapper_basic(realmName, userAttributeMapperName),
+				Check:  testAccCheckKeycloakLdapUserAttributeMapperExists("keycloak_ldap_user_attribute_mapper.username"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakLdapUserAttributeMapper_updateLdapUserFederation(t *testing.T) {
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
@@ -96,6 +127,20 @@ func testAccCheckKeycloakLdapUserAttributeMapperExists(resourceName string) reso
 		if err != nil {
 			return err
 		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakLdapUserAttributeMapperFetch(resourceName string, mapper *keycloak.LdapUserAttributeMapper) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedMapper, err := getLdapUserAttributeMapperFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		mapper.Id = fetchedMapper.Id
+		mapper.RealmId = fetchedMapper.RealmId
 
 		return nil
 	}
