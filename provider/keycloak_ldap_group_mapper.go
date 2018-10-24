@@ -201,7 +201,7 @@ func resourceKeycloakLdapGroupMapperRead(data *schema.ResourceData, meta interfa
 
 	ldapGroupMapper, err := keycloakClient.GetLdapGroupMapper(realmId, id)
 	if err != nil {
-		return err
+		return handleNotFoundError(err, data)
 	}
 
 	setLdapGroupMapperData(data, ldapGroupMapper)
