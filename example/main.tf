@@ -14,7 +14,7 @@ resource "keycloak_realm" "test" {
   access_code_lifespan = "30m"
 }
 
-resource "keycloak_openid_client" "test-client" {
+resource "keycloak_openid_client" "test_client" {
   client_id           = "test-client"
   name                = "test-client"
   realm_id            = "${keycloak_realm.test.id}"
@@ -26,7 +26,7 @@ resource "keycloak_openid_client" "test-client" {
   ]
 }
 
-resource "keycloak_openid_client_scope" "test-client-scope" {
+resource "keycloak_openid_client_scope" "test_client_scope" {
   name                = "foo1"
   realm_id            = "${keycloak_realm.test.id}"
 
@@ -53,7 +53,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
   bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_user_attribute_mapper" "attr-mapper" {
+resource "keycloak_ldap_user_attribute_mapper" "attr_mapper" {
   name                    = "test mapper"
   realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
   ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
@@ -62,7 +62,7 @@ resource "keycloak_ldap_user_attribute_mapper" "attr-mapper" {
   ldap_attribute          = "bar"
 }
 
-resource "keycloak_ldap_group_mapper" "group-mapper" {
+resource "keycloak_ldap_group_mapper" "group_mapper" {
   name                           = "group mapper"
   realm_id                       = "${keycloak_ldap_user_federation.openldap.realm_id}"
   ldap_user_federation_id        = "${keycloak_ldap_user_federation.openldap.id}"
@@ -104,7 +104,7 @@ resource "keycloak_custom_user_federation" "custom" {
 resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_client" {
   name            = "tf-test-open-id-user-attribute-protocol-mapper-client"
   realm_id        = "${keycloak_realm.test.id}"
-  client_id       = "${keycloak_openid_client.test-client.id}"
+  client_id       = "${keycloak_openid_client.test_client.id}"
   user_attribute  = "foo"
   claim_name      = "bar"
 }
@@ -112,7 +112,7 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_c
 resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_client_scope" {
   name            = "tf-test-open-id-user-attribute-protocol-mapper-client-scope"
   realm_id        = "${keycloak_realm.test.id}"
-  client_scope_id = "${keycloak_openid_client_scope.test-client-scope.id}"
+  client_scope_id = "${keycloak_openid_client_scope.test_client_scope.id}"
   user_attribute  = "foo2"
   claim_name      = "bar2"
 }
@@ -120,13 +120,13 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_c
 resource "keycloak_openid_group_membership_protocol_mapper" "map_group_memberships_client" {
   name            = "tf-test-open-id-group-membership-protocol-mapper-client"
   realm_id        = "${keycloak_realm.test.id}"
-  client_id       = "${keycloak_openid_client.test-client.id}"
+  client_id       = "${keycloak_openid_client.test_client.id}"
   claim_name      = "bar"
 }
 
 resource "keycloak_openid_group_membership_protocol_mapper" "map_group_memberships_client_scope" {
   name            = "tf-test-open-id-group-membership-protocol-mapper-client-scope"
   realm_id        = "${keycloak_realm.test.id}"
-  client_scope_id = "${keycloak_openid_client_scope.test-client-scope.id}"
+  client_scope_id = "${keycloak_openid_client_scope.test_client_scope.id}"
   claim_name      = "bar2"
 }

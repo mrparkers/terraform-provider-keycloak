@@ -20,10 +20,10 @@ func TestAccKeycloakClientScope_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
-				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client-scope"),
+				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
 			},
 			{
-				ResourceName:        "keycloak_openid_client_scope.client-scope",
+				ResourceName:        "keycloak_openid_client_scope.client_scope",
 				ImportState:         true,
 				ImportStateVerify:   true,
 				ImportStateIdPrefix: realmName + "/",
@@ -46,8 +46,8 @@ func TestAccKeycloakClientScope_createAfterManualDestroy(t *testing.T) {
 			{
 				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client-scope"),
-					testAccCheckKeycloakClientScopeFetch("keycloak_openid_client_scope.client-scope", clientScope),
+					testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
+					testAccCheckKeycloakClientScopeFetch("keycloak_openid_client_scope.client_scope", clientScope),
 				),
 			},
 			{
@@ -60,7 +60,7 @@ func TestAccKeycloakClientScope_createAfterManualDestroy(t *testing.T) {
 					}
 				},
 				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
-				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client-scope"),
+				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
 			},
 		},
 	})
@@ -79,15 +79,15 @@ func TestAccKeycloakClientScope_updateRealm(t *testing.T) {
 			{
 				Config: testKeycloakClientScope_updateRealmBefore(realmOne, realmTwo, clientScopeName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client-scope"),
-					testAccCheckKeycloakClientScopeBelongsToRealm("keycloak_openid_client_scope.client-scope", realmOne),
+					testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
+					testAccCheckKeycloakClientScopeBelongsToRealm("keycloak_openid_client_scope.client_scope", realmOne),
 				),
 			},
 			{
 				Config: testKeycloakClientScope_updateRealmAfter(realmOne, realmTwo, clientScopeName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client-scope"),
-					testAccCheckKeycloakClientScopeBelongsToRealm("keycloak_openid_client_scope.client-scope", realmTwo),
+					testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
+					testAccCheckKeycloakClientScopeBelongsToRealm("keycloak_openid_client_scope.client_scope", realmTwo),
 				),
 			},
 		},
@@ -105,15 +105,15 @@ func TestAccKeycloakClientScope_consentScreenText(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
-				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client-scope"),
+				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
 			},
 			{
 				Config: testKeycloakClientScope_withConsentText(realmName, clientScopeName, acctest.RandString(10)),
-				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client-scope"),
+				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
 			},
 			{
 				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
-				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client-scope"),
+				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
 			},
 		},
 	})
@@ -210,7 +210,7 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client_scope" "client-scope" {
+resource "keycloak_openid_client_scope" "client_scope" {
 	name        = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
 
@@ -225,7 +225,7 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client_scope" "client-scope" {
+resource "keycloak_openid_client_scope" "client_scope" {
 	name                = "%s"
 	realm_id            = "${keycloak_realm.realm.id}"
 
@@ -238,34 +238,34 @@ resource "keycloak_openid_client_scope" "client-scope" {
 
 func testKeycloakClientScope_updateRealmBefore(realmOne, realmTwo, clientScopeName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm-1" {
+resource "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm-2" {
+resource "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client_scope" "client-scope" {
+resource "keycloak_openid_client_scope" "client_scope" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm-1.id}"
+	realm_id  = "${keycloak_realm.realm_1.id}"
 }
 	`, realmOne, realmTwo, clientScopeName)
 }
 
 func testKeycloakClientScope_updateRealmAfter(realmOne, realmTwo, clientScopeName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm-1" {
+resource "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm-2" {
+resource "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client_scope" "client-scope" {
+resource "keycloak_openid_client_scope" "client_scope" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm-2.id}"
+	realm_id  = "${keycloak_realm.realm_2.id}"
 }
 	`, realmOne, realmTwo, clientScopeName)
 }

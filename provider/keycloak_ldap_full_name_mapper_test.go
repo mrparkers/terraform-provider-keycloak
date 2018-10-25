@@ -21,13 +21,13 @@ func TestAccKeycloakLdapFullNameMapper_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapFullNameMapper_basic(realmName, fullNameMapperName),
-				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full-name-mapper"),
+				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full_name_mapper"),
 			},
 			{
-				ResourceName:      "keycloak_ldap_full_name_mapper.full-name-mapper",
+				ResourceName:      "keycloak_ldap_full_name_mapper.full_name_mapper",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateIdFunc: getLdapGenericMapperImportId("keycloak_ldap_full_name_mapper.full-name-mapper"),
+				ImportStateIdFunc: getLdapGenericMapperImportId("keycloak_ldap_full_name_mapper.full_name_mapper"),
 			},
 		},
 	})
@@ -46,7 +46,7 @@ func TestAccKeycloakLdapFullNameMapper_createAfterManualDestroy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapFullNameMapper_basic(realmName, fullNameMapperName),
-				Check:  testAccCheckKeycloakLdapFullNameMapperFetch("keycloak_ldap_full_name_mapper.full-name-mapper", mapper),
+				Check:  testAccCheckKeycloakLdapFullNameMapperFetch("keycloak_ldap_full_name_mapper.full_name_mapper", mapper),
 			},
 			{
 				PreConfig: func() {
@@ -58,7 +58,7 @@ func TestAccKeycloakLdapFullNameMapper_createAfterManualDestroy(t *testing.T) {
 					}
 				},
 				Config: testKeycloakLdapFullNameMapper_basic(realmName, fullNameMapperName),
-				Check:  testAccCheckKeycloakLdapFullNameMapperFetch("keycloak_ldap_full_name_mapper.full-name-mapper", mapper),
+				Check:  testAccCheckKeycloakLdapFullNameMapperFetch("keycloak_ldap_full_name_mapper.full_name_mapper", mapper),
 			},
 		},
 	})
@@ -102,7 +102,7 @@ func TestAccKeycloakLdapFullNameMapper_writableValidation(t *testing.T) {
 			},
 			{
 				Config: testKeycloakLdapFullNameMapper_writableValid(realmName, mapperName),
-				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full-name-mapper"),
+				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full_name_mapper"),
 			},
 		},
 	})
@@ -120,11 +120,11 @@ func TestAccKeycloakLdapFullNameMapper_updateLdapUserFederation(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapFullNameMapper_updateLdapUserFederationBefore(realmOne, realmTwo, mapperName),
-				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full-name-mapper"),
+				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full_name_mapper"),
 			},
 			{
 				Config: testKeycloakLdapFullNameMapper_updateLdapUserFederationAfter(realmOne, realmTwo, mapperName),
-				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full-name-mapper"),
+				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full_name_mapper"),
 			},
 		},
 	})
@@ -236,7 +236,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_full_name_mapper" "full-name-mapper" {
+resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 	name                     = "%s"
 	realm_id                 = "${keycloak_realm.realm.id}"
 	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
@@ -271,7 +271,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_full_name_mapper" "full-name-mapper" {
+resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 	name                     = "%s"
 	realm_id                 = "${keycloak_realm.realm.id}"
 	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
@@ -285,17 +285,17 @@ resource "keycloak_ldap_full_name_mapper" "full-name-mapper" {
 
 func testKeycloakLdapFullNameMapper_updateLdapUserFederationBefore(realmOne, realmTwo, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm-one" {
+resource "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm-two" {
+resource "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
-resource "keycloak_ldap_user_federation" "openldap-one" {
+resource "keycloak_ldap_user_federation" "openldap_one" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm-one.id}"
+	realm_id                = "${keycloak_realm.realm_one.id}"
 
 	enabled                 = true
 
@@ -312,9 +312,9 @@ resource "keycloak_ldap_user_federation" "openldap-one" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_user_federation" "openldap-two" {
+resource "keycloak_ldap_user_federation" "openldap_two" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm-two.id}"
+	realm_id                = "${keycloak_realm.realm_two.id}"
 
 	enabled                 = true
 
@@ -331,10 +331,10 @@ resource "keycloak_ldap_user_federation" "openldap-two" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_full_name_mapper" "full-name-mapper" {
+resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm-one.id}"
-	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap-one.id}"
+	realm_id                 = "${keycloak_realm.realm_one.id}"
+	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap_one.id}"
 
 	ldap_full_name_attribute = "cn"
 }
@@ -343,17 +343,17 @@ resource "keycloak_ldap_full_name_mapper" "full-name-mapper" {
 
 func testKeycloakLdapFullNameMapper_updateLdapUserFederationAfter(realmOne, realmTwo, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm-one" {
+resource "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm-two" {
+resource "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
-resource "keycloak_ldap_user_federation" "openldap-one" {
+resource "keycloak_ldap_user_federation" "openldap_one" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm-one.id}"
+	realm_id                = "${keycloak_realm.realm_one.id}"
 
 	enabled                 = true
 
@@ -370,9 +370,9 @@ resource "keycloak_ldap_user_federation" "openldap-one" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_user_federation" "openldap-two" {
+resource "keycloak_ldap_user_federation" "openldap_two" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm-two.id}"
+	realm_id                = "${keycloak_realm.realm_two.id}"
 
 	enabled                 = true
 
@@ -389,10 +389,10 @@ resource "keycloak_ldap_user_federation" "openldap-two" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_full_name_mapper" "full-name-mapper" {
+resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm-two.id}"
-	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap-two.id}"
+	realm_id                 = "${keycloak_realm.realm_two.id}"
+	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap_two.id}"
 
 	ldap_full_name_attribute = "cn"
 }
@@ -425,7 +425,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_full_name_mapper" "full-name-mapper" {
+resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 	name                     = "%s"
 	realm_id                 = "${keycloak_realm.realm.id}"
 	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
@@ -462,7 +462,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_full_name_mapper" "full-name-mapper" {
+resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 	name                     = "%s"
 	realm_id                 = "${keycloak_realm.realm.id}"
 	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
