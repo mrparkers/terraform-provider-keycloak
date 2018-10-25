@@ -32,8 +32,8 @@ type LdapUserFederation struct {
 
 	ValidatePasswordPolicy bool
 	UseTruststoreSpi       string // can be "ldapsOnly", "always", or "never"
-	ConnectionTimeout      int
-	ReadTimeout            int
+	ConnectionTimeout      string // duration string (ex: 1h30m)
+	ReadTimeout            string // duration string (ex: 1h30m)
 	Pagination             bool
 
 	BatchSizeForSync  int
@@ -43,7 +43,7 @@ type LdapUserFederation struct {
 	CachePolicy string
 }
 
-func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) *component {
+func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) (*component, error) {
 	componentConfig := map[string][]string{
 		"cachePolicy": {
 			ldap.CachePolicy,
@@ -90,12 +90,6 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) *compone
 		"validatePasswordPolicy": {
 			strconv.FormatBool(ldap.ValidatePasswordPolicy),
 		},
-		"connectionTimeout": {
-			strconv.Itoa(ldap.ConnectionTimeout),
-		},
-		"readTimeout": {
-			strconv.Itoa(ldap.ReadTimeout),
-		},
 		"pagination": {
 			strconv.FormatBool(ldap.Pagination),
 		},
@@ -135,6 +129,28 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) *compone
 		componentConfig["useTruststoreSpi"] = []string{strings.ToLower(ldap.UseTruststoreSpi)}
 	}
 
+	if ldap.ConnectionTimeout != "" {
+		connectionTimeoutMs, err := getMillisecondsFromDurationString(ldap.ConnectionTimeout)
+		if err != nil {
+			return nil, err
+		}
+
+		componentConfig["connectionTimeout"] = []string{connectionTimeoutMs}
+	} else {
+		componentConfig["connectionTimeout"] = []string{} // the keycloak API will not unset this unless the config is present with an empty array
+	}
+
+	if ldap.ReadTimeout != "" {
+		readTimeoutMs, err := getMillisecondsFromDurationString(ldap.ReadTimeout)
+		if err != nil {
+			return nil, err
+		}
+
+		componentConfig["readTimeout"] = []string{readTimeoutMs}
+	} else {
+		componentConfig["readTimeout"] = []string{} // the keycloak API will not unset this unless the config is present with an empty array
+	}
+
 	return &component{
 		Id:           ldap.Id,
 		Name:         ldap.Name,
@@ -142,7 +158,7 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) *compone
 		ProviderType: userStorageProviderType,
 		ParentId:     ldap.RealmId,
 		Config:       componentConfig,
-	}
+	}, nil
 }
 
 func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFederation, error) {
@@ -169,16 +185,6 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 	userObjectClasses := strings.Split(component.getConfig("userObjectClasses"), ", ")
 
 	validatePasswordPolicy, err := strconv.ParseBool(component.getConfig("validatePasswordPolicy"))
-	if err != nil {
-		return nil, err
-	}
-
-	connectionTimeout, err := strconv.Atoi(component.getConfig("connectionTimeout"))
-	if err != nil {
-		return nil, err
-	}
-
-	readTimeout, err := strconv.Atoi(component.getConfig("readTimeout"))
 	if err != nil {
 		return nil, err
 	}
@@ -229,8 +235,6 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 
 		ValidatePasswordPolicy: validatePasswordPolicy,
 		UseTruststoreSpi:       component.getConfig("useTruststoreSpi"),
-		ConnectionTimeout:      connectionTimeout,
-		ReadTimeout:            readTimeout,
 		Pagination:             pagination,
 
 		BatchSizeForSync:  batchSizeForSync,
@@ -264,6 +268,24 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		ldap.UseTruststoreSpi = strings.ToUpper(useTruststoreSpi)
 	}
 
+	if connectionTimeout, ok := component.getConfigOk("connectionTimeout"); ok {
+		connectionTimeoutDurationString, err := GetDurationStringFromMilliseconds(connectionTimeout)
+		if err != nil {
+			return nil, err
+		}
+
+		ldap.ConnectionTimeout = connectionTimeoutDurationString
+	}
+
+	if readTimeout, ok := component.getConfigOk("readTimeout"); ok {
+		readTimeoutDurationString, err := GetDurationStringFromMilliseconds(readTimeout)
+		if err != nil {
+			return nil, err
+		}
+
+		ldap.ReadTimeout = readTimeoutDurationString
+	}
+
 	return ldap, nil
 }
 
@@ -276,7 +298,12 @@ func (ldap *LdapUserFederation) Validate() error {
 }
 
 func (keycloakClient *KeycloakClient) NewLdapUserFederation(ldapUserFederation *LdapUserFederation) error {
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), convertFromLdapUserFederationToComponent(ldapUserFederation))
+	component, err := convertFromLdapUserFederationToComponent(ldapUserFederation)
+	if err != nil {
+		return err
+	}
+
+	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), component)
 	if err != nil {
 		return err
 	}
@@ -298,7 +325,12 @@ func (keycloakClient *KeycloakClient) GetLdapUserFederation(realmId, id string) 
 }
 
 func (keycloakClient *KeycloakClient) UpdateLdapUserFederation(ldapUserFederation *LdapUserFederation) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapUserFederation.RealmId, ldapUserFederation.Id), convertFromLdapUserFederationToComponent(ldapUserFederation))
+	component, err := convertFromLdapUserFederationToComponent(ldapUserFederation)
+	if err != nil {
+		return err
+	}
+
+	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapUserFederation.RealmId, ldapUserFederation.Id), component)
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapUserFederation(realmId, id string) error {
