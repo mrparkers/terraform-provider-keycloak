@@ -99,6 +99,11 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 	firstValidatePasswordPolicy := randomBool()
 	firstPagination := randomBool()
 
+	firstConnectionTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1000, 3600000)))
+	secondConnectionTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1000, 3600000)))
+	firstReadTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1000, 3600000)))
+	secondReadTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1000, 3600000)))
+
 	firstLdap := &keycloak.LdapUserFederation{
 		RealmId:                realmName,
 		Name:                   "terraform-" + acctest.RandString(10),
@@ -113,8 +118,8 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		SearchScope:            randomStringInSlice([]string{"ONE_LEVEL", "SUBTREE"}),
 		ValidatePasswordPolicy: firstValidatePasswordPolicy,
 		UseTruststoreSpi:       randomStringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}),
-		ConnectionTimeout:      acctest.RandIntRange(1, 3600),
-		ReadTimeout:            acctest.RandIntRange(1, 3600),
+		ConnectionTimeout:      firstConnectionTimeout,
+		ReadTimeout:            firstReadTimeout,
 		Pagination:             firstPagination,
 		BatchSizeForSync:       acctest.RandIntRange(50, 10000),
 		FullSyncPeriod:         acctest.RandIntRange(1, 3600),
@@ -136,8 +141,8 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		SearchScope:            randomStringInSlice([]string{"ONE_LEVEL", "SUBTREE"}),
 		ValidatePasswordPolicy: !firstValidatePasswordPolicy,
 		UseTruststoreSpi:       randomStringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}),
-		ConnectionTimeout:      acctest.RandIntRange(1, 3600),
-		ReadTimeout:            acctest.RandIntRange(1, 3600),
+		ConnectionTimeout:      secondConnectionTimeout,
+		ReadTimeout:            secondReadTimeout,
 		Pagination:             !firstPagination,
 		BatchSizeForSync:       acctest.RandIntRange(50, 10000),
 		FullSyncPeriod:         acctest.RandIntRange(1, 3600),
@@ -156,6 +161,27 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 			},
 			{
 				Config: testKeycloakLdapUserFederation_basicFromInterface(secondLdap),
+				Check:  testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakLdapUserFederation_unsetTimeoutDurationStrings(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	ldapName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserFederation_basicWithTimeouts(realmName, ldapName),
+				Check:  testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
+			},
+			{
+				Config: testKeycloakLdapUserFederation_basic(realmName, ldapName),
 				Check:  testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
 			},
 		},
@@ -450,8 +476,8 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 	validate_password_policy = %t
 	use_truststore_spi       = "%s"
-	connection_timeout       = %d
-	read_timeout             = %d
+	connection_timeout       = "%s"
+	read_timeout             = "%s"
 	pagination               = %t
 
 	batch_size_for_sync      = %d
@@ -574,4 +600,34 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	changed_sync_period     = %d
 }
 	`, realm, ldap, fullSyncPeriod, changedSyncPeriod)
+}
+
+func testKeycloakLdapUserFederation_basicWithTimeouts(realm, ldap string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+	name                    = "%s"
+	realm_id                = "${keycloak_realm.realm.id}"
+
+	enabled                 = true
+
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
+
+	connection_timeout      = "10s"
+	read_timeout            = "5s"
+}
+	`, realm, ldap)
 }

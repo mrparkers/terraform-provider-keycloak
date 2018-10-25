@@ -18,3 +18,11 @@ func (component *component) getConfig(val string) string {
 
 	return component.Config[val][0]
 }
+
+func (component *component) getConfigOk(val string) (string, bool) {
+	if v, ok := component.Config[val]; ok {
+		return v[0], true
+	}
+
+	return "", false
+}

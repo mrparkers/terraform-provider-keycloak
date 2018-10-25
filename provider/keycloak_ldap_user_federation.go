@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
-	"time"
 )
 
 var (
@@ -151,16 +150,16 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(keycloakLdapUserFederationTruststoreSpiSettings, false),
 			},
 			"connection_timeout": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     10 * time.Second,
-				Description: "LDAP connection timeout in miliseconds",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "LDAP connection timeout (duration string)",
+				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"read_timeout": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     5 * time.Second,
-				Description: "LDAP read timeout in miliseconds",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "LDAP read timeout (duration string)",
+				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 			"pagination": {
 				Type:        schema.TypeBool,
@@ -246,8 +245,8 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 
 		ValidatePasswordPolicy: data.Get("validate_password_policy").(bool),
 		UseTruststoreSpi:       data.Get("use_truststore_spi").(string),
-		ConnectionTimeout:      data.Get("connection_timeout").(int),
-		ReadTimeout:            data.Get("read_timeout").(int),
+		ConnectionTimeout:      data.Get("connection_timeout").(string),
+		ReadTimeout:            data.Get("read_timeout").(string),
 		Pagination:             data.Get("pagination").(bool),
 
 		BatchSizeForSync:  data.Get("batch_size_for_sync").(int),
