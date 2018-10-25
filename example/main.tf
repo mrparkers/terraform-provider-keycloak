@@ -51,6 +51,9 @@ resource "keycloak_ldap_user_federation" "openldap" {
   users_dn                = "dc=example,dc=org"
   bind_dn                 = "cn=admin,dc=example,dc=org"
   bind_credential         = "admin"
+
+  connection_timeout      = "5s"
+  read_timeout            = "10s"
 }
 
 resource "keycloak_ldap_user_attribute_mapper" "attr_mapper" {
