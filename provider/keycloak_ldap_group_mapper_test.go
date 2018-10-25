@@ -21,13 +21,13 @@ func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapGroupMapper_basic(realmName, groupMapperName),
-				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 			{
-				ResourceName:      "keycloak_ldap_group_mapper.group-mapper",
+				ResourceName:      "keycloak_ldap_group_mapper.group_mapper",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateIdFunc: getLdapGenericMapperImportId("keycloak_ldap_group_mapper.group-mapper"),
+				ImportStateIdFunc: getLdapGenericMapperImportId("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
 	})
@@ -46,7 +46,7 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapGroupMapper_basic(realmName, groupMapperName),
-				Check:  testAccCheckKeycloakLdapGroupMapperFetch("keycloak_ldap_group_mapper.group-mapper", mapper),
+				Check:  testAccCheckKeycloakLdapGroupMapperFetch("keycloak_ldap_group_mapper.group_mapper", mapper),
 			},
 			{
 				PreConfig: func() {
@@ -58,7 +58,7 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 					}
 				},
 				Config: testKeycloakLdapGroupMapper_basic(realmName, groupMapperName),
-				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
 	})
@@ -80,7 +80,7 @@ func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
 			},
 			{
 				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "mode", mode),
-				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
 	})
@@ -102,7 +102,7 @@ func TestAccKeycloakLdapGroupMapper_membershipAttributeTypeValidation(t *testing
 			},
 			{
 				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "membership_attribute_type", membershipAttributeType),
-				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
 	})
@@ -124,7 +124,7 @@ func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testi
 			},
 			{
 				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "user_roles_retrieve_strategy", userRolesRetrieveStrategy),
-				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
 	})
@@ -146,7 +146,7 @@ func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
 			},
 			{
 				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "groups_ldap_filter", groupsLdapFilter),
-				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
 	})
@@ -181,11 +181,11 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationForceNew(t *testing.
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapGroupMapper_updateLdapUserFederationBefore(realmOne, realmTwo, groupMapperName),
-				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 			{
 				Config: testKeycloakLdapGroupMapper_updateLdapUserFederationAfter(realmOne, realmTwo, groupMapperName),
-				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
 	})
@@ -242,11 +242,11 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapGroupMapper_basicFromInterface(realm, groupMapperOne),
-				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 			{
 				Config: testKeycloakLdapGroupMapper_basicFromInterface(realm, groupMapperTwo),
-				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
 	})
@@ -343,7 +343,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_group_mapper" "group-mapper" {
+resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
 	realm_id                    = "${keycloak_realm.realm.id}"
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
@@ -386,7 +386,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_group_mapper" "group-mapper" {
+resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
 	realm_id                    = "${keycloak_realm.realm.id}"
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
@@ -430,7 +430,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_group_mapper" "group-mapper" {
+resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
 	realm_id                    = "${keycloak_realm.realm.id}"
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
@@ -475,7 +475,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_group_mapper" "group-mapper" {
+resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
 	realm_id                    = "${keycloak_realm.realm.id}"
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
@@ -500,17 +500,17 @@ resource "keycloak_ldap_group_mapper" "group-mapper" {
 
 func testKeycloakLdapGroupMapper_updateLdapUserFederationBefore(realmOne, realmTwo, groupMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm-one" {
+resource "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm-two" {
+resource "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
-resource "keycloak_ldap_user_federation" "openldap-one" {
+resource "keycloak_ldap_user_federation" "openldap_one" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm-one.id}"
+	realm_id                = "${keycloak_realm.realm_one.id}"
 
 	enabled                 = true
 
@@ -527,9 +527,9 @@ resource "keycloak_ldap_user_federation" "openldap-one" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_user_federation" "openldap-two" {
+resource "keycloak_ldap_user_federation" "openldap_two" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm-two.id}"
+	realm_id                = "${keycloak_realm.realm_two.id}"
 
 	enabled                 = true
 
@@ -546,10 +546,10 @@ resource "keycloak_ldap_user_federation" "openldap-two" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_group_mapper" "group-mapper" {
+resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm-one.id}"
-	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap-one.id}"
+	realm_id                    = "${keycloak_realm.realm_one.id}"
+	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap_one.id}"
 
 	ldap_groups_dn                 = "dc=example,dc=org"
 	group_name_ldap_attribute      = "cn"
@@ -566,17 +566,17 @@ resource "keycloak_ldap_group_mapper" "group-mapper" {
 
 func testKeycloakLdapGroupMapper_updateLdapUserFederationAfter(realmOne, realmTwo, groupMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm-one" {
+resource "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm-two" {
+resource "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
-resource "keycloak_ldap_user_federation" "openldap-one" {
+resource "keycloak_ldap_user_federation" "openldap_one" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm-one.id}"
+	realm_id                = "${keycloak_realm.realm_one.id}"
 
 	enabled                 = true
 
@@ -593,9 +593,9 @@ resource "keycloak_ldap_user_federation" "openldap-one" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_user_federation" "openldap-two" {
+resource "keycloak_ldap_user_federation" "openldap_two" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm-two.id}"
+	realm_id                = "${keycloak_realm.realm_two.id}"
 
 	enabled                 = true
 
@@ -612,10 +612,10 @@ resource "keycloak_ldap_user_federation" "openldap-two" {
 	bind_credential         = "admin"
 }
 
-resource "keycloak_ldap_group_mapper" "group-mapper" {
+resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm-two.id}"
-	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap-two.id}"
+	realm_id                    = "${keycloak_realm.realm_two.id}"
+	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap_two.id}"
 
 	ldap_groups_dn                 = "dc=example,dc=org"
 	group_name_ldap_attribute      = "cn"

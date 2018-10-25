@@ -15,7 +15,7 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_basicClient(t *testing.T) 
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-attribute-mapper-" + acctest.RandString(5)
 
-	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user-attribute-mapper-client"
+	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user_attribute_mapper_client"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -35,7 +35,7 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_basicClientScope(t *testin
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-attribute-mapper-" + acctest.RandString(5)
 
-	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user-attribute-mapper-client-scope"
+	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user_attribute_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -57,7 +57,7 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_update(t *testing.T) {
 
 	attributeName := "claim-" + acctest.RandString(10)
 	updatedAttributeName := "claim-update-" + acctest.RandString(10)
-	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user-attribute-mapper"
+	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user_attribute_mapper"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -83,7 +83,7 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_createAfterManualDestroy(t
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-attribute-mapper-" + acctest.RandString(5)
 
-	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user-attribute-mapper-client"
+	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user_attribute_mapper_client"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -152,7 +152,7 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_updateClientIdForceNew(t *
 	mapperName := "terraform-openid-connect-user-attribute-mapper-" + acctest.RandString(5)
 
 	attributeName := "claim-" + acctest.RandString(10)
-	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user-attribute-mapper"
+	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user_attribute_mapper"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -176,7 +176,7 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_updateClientScopeForceNew(
 	mapperName := "terraform-openid-connect-user-attribute-mapper-" + acctest.RandString(5)
 	clientScopeId := "terraform-client-" + acctest.RandString(10)
 	newClientScopeId := "terraform-client-scope-" + acctest.RandString(10)
-	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user-attribute-mapper-client-scope"
+	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user_attribute_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -202,7 +202,7 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_updateRealmIdForceNew(t *t
 	mapperName := "terraform-openid-connect-user-attribute-mapper-" + acctest.RandString(5)
 
 	attributeName := "claim-" + acctest.RandString(10)
-	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user-attribute-mapper"
+	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user_attribute_mapper"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -288,17 +288,17 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client" "openid-client" {
+resource "keycloak_openid_client" "openid_client" {
 	realm_id  = "${keycloak_realm.realm.id}"
 	client_id = "%s"
 
 	access_type = "BEARER-ONLY"
 }
 
-resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper-client" {
+resource "keycloak_openid_user_attribute_protocol_mapper" "user_attribute_mapper_client" {
   	name           = "%s"
 	realm_id       = "${keycloak_realm.realm.id}"
-  	client_id      = "${keycloak_openid_client.openid-client.id}"
+  	client_id      = "${keycloak_openid_client.openid_client.id}"
   	user_attribute = "foo"
   	claim_name     = "bar"
 }`, realmName, clientId, mapperName)
@@ -310,15 +310,15 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client_scope" "client-scope" {
+resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
 	realm_id = "${keycloak_realm.realm.id}"
 }
 
-resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper-client-scope" {
+resource "keycloak_openid_user_attribute_protocol_mapper" "user_attribute_mapper_client_scope" {
 	name            = "%s"
 	realm_id        = "${keycloak_realm.realm.id}"
-	client_scope_id = "${keycloak_openid_client_scope.client-scope.id}"
+	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
 	user_attribute  = "foo"
 	claim_name      = "bar"
 }`, realmName, clientScopeId, mapperName)
@@ -330,7 +330,7 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper-validation" {
+resource "keycloak_openid_user_attribute_protocol_mapper" "user_attribute_mapper_validation" {
 	name           = "%s"
 	realm_id       = "${keycloak_realm.realm.id}"
 	user_attribute = "foo"
@@ -344,17 +344,17 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client" "openid-client" {
+resource "keycloak_openid_client" "openid_client" {
 	realm_id  = "${keycloak_realm.realm.id}"
 	client_id = "%s"
 
 	access_type = "BEARER-ONLY"
 }
 
-resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper" {
+resource "keycloak_openid_user_attribute_protocol_mapper" "user_attribute_mapper" {
 	name           = "%s"
 	realm_id       = "${keycloak_realm.realm.id}"
-	client_id      = "${keycloak_openid_client.openid-client.id}"
+	client_id      = "${keycloak_openid_client.openid_client.id}"
 	user_attribute = "%s"
 	claim_name     = "bar"
 }`, realmName, clientId, mapperName, attributeName)
@@ -366,7 +366,7 @@ resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_user_attribute_protocol_mapper" "user-attribute-mapper-validation" {
+resource "keycloak_openid_user_attribute_protocol_mapper" "user_attribute_mapper_validation" {
 	name              = "%s"
 	realm_id          = "${keycloak_realm.realm.id}"
 	user_attribute    = "foo"

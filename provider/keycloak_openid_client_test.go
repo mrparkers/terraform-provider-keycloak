@@ -380,17 +380,17 @@ resource "keycloak_openid_client" "client" {
 
 func testKeycloakOpenidClient_updateRealmBefore(realmOne, realmTwo, clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm-1" {
+resource "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm-2" {
+resource "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm-1.id}"
+	realm_id    = "${keycloak_realm.realm_1.id}"
 	access_type = "BEARER-ONLY"
 }
 	`, realmOne, realmTwo, clientId)
@@ -398,17 +398,17 @@ resource "keycloak_openid_client" "client" {
 
 func testKeycloakOpenidClient_updateRealmAfter(realmOne, realmTwo, clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm-1" {
+resource "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm-2" {
+resource "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm-2.id}"
+	realm_id    = "${keycloak_realm.realm_2.id}"
 	access_type = "BEARER-ONLY"
 }
 	`, realmOne, realmTwo, clientId)
