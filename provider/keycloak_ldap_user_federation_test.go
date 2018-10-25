@@ -34,6 +34,37 @@ func TestAccKeycloakLdapUserFederation_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakLdapUserFederation_createAfterManualDestroy(t *testing.T) {
+	var ldap = &keycloak.LdapUserFederation{}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	ldapName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserFederation_basic(realmName, ldapName),
+				Check:  testAccCheckKeycloakLdapUserFederationFetch("keycloak_ldap_user_federation.openldap", ldap),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteLdapUserFederation(ldap.RealmId, ldap.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakLdapUserFederation_basic(realmName, ldapName),
+				Check:  testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
 	firstRealm := "terraform-" + acctest.RandString(10)
 	secondRealm := "terraform-" + acctest.RandString(10)
@@ -308,6 +339,20 @@ func testAccCheckKeycloakLdapUserFederationExists(resourceName string) resource.
 		if err != nil {
 			return err
 		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakLdapUserFederationFetch(resourceName string, ldap *keycloak.LdapUserFederation) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedLdap, err := getLdapUserFederationFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		ldap.Id = fetchedLdap.Id
+		ldap.RealmId = fetchedLdap.RealmId
 
 		return nil
 	}

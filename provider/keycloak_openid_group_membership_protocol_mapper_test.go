@@ -23,7 +23,6 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_basicClient(t *testing.T
 		CheckDestroy: testAccKeycloakOpenIdGroupMembershipProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-
 				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_basic_client(realmName, clientId, mapperName),
 				Check:  testKeycloakOpenIdGroupMembershipProtocolMapperExists(resourceName),
 			},
@@ -44,7 +43,6 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_basicClientScope(t *test
 		CheckDestroy: testAccKeycloakOpenIdGroupMembershipProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-
 				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
 				Check:  testKeycloakOpenIdGroupMembershipProtocolMapperExists(resourceName),
 			},
@@ -88,6 +86,40 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_update(t *testing.T) {
 			},
 			{
 				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_fromInterface(mapperTwo),
+				Check:  testKeycloakOpenIdGroupMembershipProtocolMapperExists(resourceName),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	var mapper = &keycloak.OpenIdGroupMembershipProtocolMapper{}
+
+	realmName := "terraform-realm-" + acctest.RandString(10)
+	clientId := "terraform-client-" + acctest.RandString(10)
+	mapperName := "terraform-openid-connect-group-membership-mapper-" + acctest.RandString(5)
+
+	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccKeycloakOpenIdGroupMembershipProtocolMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Check:  testKeycloakOpenIdGroupMembershipProtocolMapperFetch(resourceName, mapper),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteOpenIdUserAttributeProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					if err != nil {
+						t.Error(err)
+					}
+				},
+				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_basic_client(realmName, clientId, mapperName),
 				Check:  testKeycloakOpenIdGroupMembershipProtocolMapperExists(resourceName),
 			},
 		},
@@ -209,6 +241,22 @@ func testKeycloakOpenIdGroupMembershipProtocolMapperExists(resourceName string) 
 		if err != nil {
 			return err
 		}
+
+		return nil
+	}
+}
+
+func testKeycloakOpenIdGroupMembershipProtocolMapperFetch(resourceName string, mapper *keycloak.OpenIdGroupMembershipProtocolMapper) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		fetchedMapper, err := getGroupMembershipMapperUsingState(state, resourceName)
+		if err != nil {
+			return err
+		}
+
+		mapper.Id = fetchedMapper.Id
+		mapper.ClientId = fetchedMapper.ClientId
+		mapper.ClientScopeId = fetchedMapper.ClientScopeId
+		mapper.RealmId = fetchedMapper.RealmId
 
 		return nil
 	}

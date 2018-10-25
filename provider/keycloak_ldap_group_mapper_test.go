@@ -33,6 +33,37 @@ func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
+	var mapper = &keycloak.LdapGroupMapper{}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	groupMapperName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapGroupMapper_basic(realmName, groupMapperName),
+				Check:  testAccCheckKeycloakLdapGroupMapperFetch("keycloak_ldap_group_mapper.group-mapper", mapper),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteLdapGroupMapper(mapper.RealmId, mapper.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakLdapGroupMapper_basic(realmName, groupMapperName),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group-mapper"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
@@ -227,6 +258,20 @@ func testAccCheckKeycloakLdapGroupMapperExists(resourceName string) resource.Tes
 		if err != nil {
 			return err
 		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakLdapGroupMapperFetch(resourceName string, mapper *keycloak.LdapGroupMapper) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedMapper, err := getLdapGroupMapperFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		mapper.Id = fetchedMapper.Id
+		mapper.RealmId = fetchedMapper.RealmId
 
 		return nil
 	}

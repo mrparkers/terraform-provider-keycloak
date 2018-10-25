@@ -32,6 +32,37 @@ func TestAccKeycloakLdapMsadUserAccountControlMapper_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakLdapMsadUserAccountControlMapper_createAfterManualDestroy(t *testing.T) {
+	var mapper = &keycloak.LdapMsadUserAccountControlMapper{}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	msadUacMapperName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakLdapMsadUserAccountControlMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapMsadUserAccountControlMapper_basic(realmName, msadUacMapperName, randomBool()),
+				Check:  testAccCheckKeycloakLdapMsadUserAccountControlMapperFetch("keycloak_ldap_msad_user_account_control_mapper.uac-mapper", mapper),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteLdapMsadUserAccountControlMapper(mapper.RealmId, mapper.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakLdapMsadUserAccountControlMapper_basic(realmName, msadUacMapperName, randomBool()),
+				Check:  testAccCheckKeycloakLdapMsadUserAccountControlMapperExists("keycloak_ldap_msad_user_account_control_mapper.uac-mapper"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakLdapMsadUserAccountControlMapper_updateLdapUserFederation(t *testing.T) {
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
@@ -81,6 +112,20 @@ func testAccCheckKeycloakLdapMsadUserAccountControlMapperExists(resourceName str
 		if err != nil {
 			return err
 		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakLdapMsadUserAccountControlMapperFetch(resourceName string, mapper *keycloak.LdapMsadUserAccountControlMapper) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedMapper, err := getLdapMsadUserAccountControlMapperFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		mapper.Id = fetchedMapper.Id
+		mapper.RealmId = fetchedMapper.RealmId
 
 		return nil
 	}

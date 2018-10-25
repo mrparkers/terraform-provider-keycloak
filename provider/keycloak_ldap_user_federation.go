@@ -324,7 +324,7 @@ func resourceKeycloakLdapUserFederationRead(data *schema.ResourceData, meta inte
 
 	ldap, err := keycloakClient.GetLdapUserFederation(realmId, id)
 	if err != nil {
-		return err
+		return handleNotFoundError(err, data)
 	}
 
 	setLdapUserFederationData(data, ldap)

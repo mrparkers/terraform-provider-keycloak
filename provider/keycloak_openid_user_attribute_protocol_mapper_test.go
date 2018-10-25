@@ -23,7 +23,6 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_basicClient(t *testing.T) 
 		CheckDestroy: testAccKeycloakOpenIdUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-
 				Config: testKeycloakOpenIdUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName),
 				Check:  testKeycloakOpenIdUserAttributeProtocolMapperExists(resourceName),
 			},
@@ -44,7 +43,6 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_basicClientScope(t *testin
 		CheckDestroy: testAccKeycloakOpenIdUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-
 				Config: testKeycloakOpenIdUserAttributeProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
 				Check:  testKeycloakOpenIdUserAttributeProtocolMapperExists(resourceName),
 			},
@@ -72,6 +70,40 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_update(t *testing.T) {
 			},
 			{
 				Config: testKeycloakOpenIdUserAttributeProtocolMapper_claim(realmName, clientId, mapperName, updatedAttributeName),
+				Check:  testKeycloakOpenIdUserAttributeProtocolMapperExists(resourceName),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenIdUserAttributeProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	var mapper = &keycloak.OpenIdUserAttributeProtocolMapper{}
+
+	realmName := "terraform-realm-" + acctest.RandString(10)
+	clientId := "terraform-client-" + acctest.RandString(10)
+	mapperName := "terraform-openid-connect-user-attribute-mapper-" + acctest.RandString(5)
+
+	resourceName := "keycloak_openid_user_attribute_protocol_mapper.user-attribute-mapper-client"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccKeycloakOpenIdUserAttributeProtocolMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenIdUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Check:  testKeycloakOpenIdUserAttributeProtocolMapperFetch(resourceName, mapper),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteOpenIdUserAttributeProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					if err != nil {
+						t.Error(err)
+					}
+				},
+				Config: testKeycloakOpenIdUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName),
 				Check:  testKeycloakOpenIdUserAttributeProtocolMapperExists(resourceName),
 			},
 		},
@@ -210,10 +242,25 @@ func testAccKeycloakOpenIdUserAttributeProtocolMapperDestroy() resource.TestChec
 func testKeycloakOpenIdUserAttributeProtocolMapperExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		_, err := getUserAttributeMapperUsingState(state, resourceName)
-
 		if err != nil {
 			return err
 		}
+
+		return nil
+	}
+}
+
+func testKeycloakOpenIdUserAttributeProtocolMapperFetch(resourceName string, mapper *keycloak.OpenIdUserAttributeProtocolMapper) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		fetchedMapper, err := getUserAttributeMapperUsingState(state, resourceName)
+		if err != nil {
+			return err
+		}
+
+		mapper.Id = fetchedMapper.Id
+		mapper.ClientId = fetchedMapper.ClientId
+		mapper.ClientScopeId = fetchedMapper.ClientScopeId
+		mapper.RealmId = fetchedMapper.RealmId
 
 		return nil
 	}

@@ -32,6 +32,40 @@ func TestAccKeycloakClientScope_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakClientScope_createAfterManualDestroy(t *testing.T) {
+	var clientScope = &keycloak.OpenidClientScope{}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	clientScopeName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakClientScopeDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client-scope"),
+					testAccCheckKeycloakClientScopeFetch("keycloak_openid_client_scope.client-scope", clientScope),
+				),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteOpenidClientScope(clientScope.RealmId, clientScope.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
+				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client-scope"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakClientScope_updateRealm(t *testing.T) {
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
@@ -95,6 +129,20 @@ func testAccCheckKeycloakClientScopeExistsWithCorrectProtocol(resourceName strin
 		if clientScope.Protocol != "openid-connect" {
 			return fmt.Errorf("expected openid client scope to have openid-connect protocol, but got %s", clientScope.Protocol)
 		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakClientScopeFetch(resourceName string, clientScope *keycloak.OpenidClientScope) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedClientScope, err := getClientScopeFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		clientScope.Id = fetchedClientScope.Id
+		clientScope.RealmId = fetchedClientScope.RealmId
 
 		return nil
 	}

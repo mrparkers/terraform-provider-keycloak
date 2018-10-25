@@ -35,6 +35,35 @@ func TestAccKeycloakRealm_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	realmDisplayName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteRealm(realmName)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_import(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)

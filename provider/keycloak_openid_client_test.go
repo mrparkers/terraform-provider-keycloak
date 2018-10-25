@@ -33,6 +33,40 @@ func TestAccKeycloakOpenidClient_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
+	var client = &keycloak.OpenidClient{}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_basic(realmName, clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
+					testAccCheckKeycloakOpenidClientFetch("keycloak_openid_client.client", client),
+				),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteOpenidClient(client.RealmId, client.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakOpenidClient_basic(realmName, clientId),
+				Check:  testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
@@ -190,6 +224,20 @@ func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName stri
 		if client.Protocol != "openid-connect" {
 			return fmt.Errorf("expected openid client to have openid-connect protocol, but got %s", client.Protocol)
 		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientFetch(resourceName string, client *keycloak.OpenidClient) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedClient, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		client.Id = fetchedClient.Id
+		client.RealmId = fetchedClient.RealmId
 
 		return nil
 	}

@@ -91,7 +91,7 @@ func resourceKeycloakOpenidClientScopeRead(data *schema.ResourceData, meta inter
 
 	clientScope, err := keycloakClient.GetOpenidClientScope(realmId, id)
 	if err != nil {
-		return err
+		return handleNotFoundError(err, data)
 	}
 
 	setClientScopeData(data, clientScope)
