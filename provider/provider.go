@@ -19,6 +19,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_custom_user_federation":                  resourceKeycloakCustomUserFederation(),
 			"keycloak_openid_user_attribute_protocol_mapper":   resourceKeycloakOpenIdUserAttributeProtocolMapper(),
 			"keycloak_openid_group_membership_protocol_mapper": resourceKeycloakOpenIdGroupMembershipProtocolMapper(),
+			"keycloak_openid_full_name_protocol_mapper":        resourceKeycloakOpenIdFullNameProtocolMapper(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
