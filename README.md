@@ -22,6 +22,7 @@ Long term, I'd like to support as much as I can while I tinker with Keycloak in 
 - [`keycloak_custom_user_federation`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_custom_user_federation.go)
 - [`keycloak_openid_user_attribute_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_user_attribute_protocol_mapper.go)
 - [`keycloak_openid_group_membership_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_group_membership_protocol_mapper.go)
+- [`keycloak_openid_full_name_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_full_name_protocol_mapper.go)
 
 I will write some docs for each resource once more are supported. For now, please refer to the linked source files.
 
