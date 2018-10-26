@@ -11,6 +11,20 @@ type protocolMapper struct {
 	Config         map[string]string `json:"config"`
 }
 
+var (
+	accessTokenClaimField   = "access.token.claim"
+	addToAccessTokenField   = "access.token.claim"
+	addToIdTokenField       = "id.token.claim"
+	addToUserInfoField      = "userinfo.token.claim"
+	claimNameField          = "claim.name"
+	claimValueTypeField     = "jsonType.label"
+	fullPathField           = "full.path"
+	idTokenClaimField       = "id.token.claim"
+	multivaluedField        = "multivalued"
+	userAttributeField      = "user.attribute"
+	userinfoTokenClaimField = "userinfo.token.claim"
+)
+
 func protocolMapperPath(realmId, clientId, clientScopeId string) string {
 	parentResourceId := clientId
 	parentResourcePath := "clients"

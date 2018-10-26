@@ -5,42 +5,33 @@ import (
 	"strconv"
 )
 
-type OpenIdGroupMembershipProtocolMapper struct {
+type OpenIdFullNameProtocolMapper struct {
 	Id            string
 	Name          string
 	RealmId       string
 	ClientId      string
 	ClientScopeId string
 
-	ClaimName          string
-	FullPath           bool
 	IdTokenClaim       bool
 	AccessTokenClaim   bool
 	UserinfoTokenClaim bool
 }
 
-func (mapper *OpenIdGroupMembershipProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
+func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
 	return &protocolMapper{
 		Id:             mapper.Id,
 		Name:           mapper.Name,
 		Protocol:       "openid-connect",
-		ProtocolMapper: "oidc-group-membership-mapper",
+		ProtocolMapper: "oidc-full-name-mapper",
 		Config: map[string]string{
-			fullPathField:           strconv.FormatBool(mapper.FullPath),
 			idTokenClaimField:       strconv.FormatBool(mapper.IdTokenClaim),
 			accessTokenClaimField:   strconv.FormatBool(mapper.AccessTokenClaim),
 			userinfoTokenClaimField: strconv.FormatBool(mapper.UserinfoTokenClaim),
-			claimNameField:          mapper.ClaimName,
 		},
 	}
 }
 
-func (protocolMapper *protocolMapper) convertToOpenIdGroupMembershipProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdGroupMembershipProtocolMapper, error) {
-	fullPath, err := strconv.ParseBool(protocolMapper.Config[fullPathField])
-	if err != nil {
-		return nil, err
-	}
-
+func (protocolMapper *protocolMapper) convertToOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdFullNameProtocolMapper, error) {
 	idTokenClaim, err := strconv.ParseBool(protocolMapper.Config[idTokenClaimField])
 	if err != nil {
 		return nil, err
@@ -56,22 +47,20 @@ func (protocolMapper *protocolMapper) convertToOpenIdGroupMembershipProtocolMapp
 		return nil, err
 	}
 
-	return &OpenIdGroupMembershipProtocolMapper{
+	return &OpenIdFullNameProtocolMapper{
 		Id:            protocolMapper.Id,
 		Name:          protocolMapper.Name,
 		RealmId:       realmId,
 		ClientId:      clientId,
 		ClientScopeId: clientScopeId,
 
-		ClaimName:          protocolMapper.Config[claimNameField],
-		FullPath:           fullPath,
 		IdTokenClaim:       idTokenClaim,
 		AccessTokenClaim:   accessTokenClaim,
 		UserinfoTokenClaim: userinfoTokenClaim,
 	}, nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenIdGroupMembershipProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdGroupMembershipProtocolMapper, error) {
+func (keycloakClient *KeycloakClient) GetOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdFullNameProtocolMapper, error) {
 	var protocolMapper *protocolMapper
 
 	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper)
@@ -79,14 +68,14 @@ func (keycloakClient *KeycloakClient) GetOpenIdGroupMembershipProtocolMapper(rea
 		return nil, err
 	}
 
-	return protocolMapper.convertToOpenIdGroupMembershipProtocolMapper(realmId, clientId, clientScopeId)
+	return protocolMapper.convertToOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId)
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenIdGroupMembershipProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
+func (keycloakClient *KeycloakClient) DeleteOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
 	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId))
 }
 
-func (keycloakClient *KeycloakClient) NewOpenIdGroupMembershipProtocolMapper(mapper *OpenIdGroupMembershipProtocolMapper) error {
+func (keycloakClient *KeycloakClient) NewOpenIdFullNameProtocolMapper(mapper *OpenIdFullNameProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
 	location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
@@ -99,13 +88,13 @@ func (keycloakClient *KeycloakClient) NewOpenIdGroupMembershipProtocolMapper(map
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateOpenIdGroupMembershipProtocolMapper(mapper *OpenIdGroupMembershipProtocolMapper) error {
+func (keycloakClient *KeycloakClient) UpdateOpenIdFullNameProtocolMapper(mapper *OpenIdFullNameProtocolMapper) error {
 	path := individualProtocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 
 	return keycloakClient.put(path, mapper.convertToGenericProtocolMapper())
 }
 
-func (mapper *OpenIdGroupMembershipProtocolMapper) Validate() error {
+func (mapper *OpenIdFullNameProtocolMapper) Validate() error {
 	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
