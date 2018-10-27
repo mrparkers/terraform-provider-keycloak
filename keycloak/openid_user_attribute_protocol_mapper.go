@@ -23,16 +23,6 @@ type OpenIdUserAttributeProtocolMapper struct {
 	Multivalued bool // indicates whether is this an array of attributes or a single attribute
 }
 
-var (
-	addToIdTokenField     = "id.token.claim"
-	addToAccessTokenField = "access.token.claim"
-	addToUserInfoField    = "userinfo.token.claim"
-	userAttributeField    = "user.attribute"
-	claimNameField        = "claim.name"
-	claimValueTypeField   = "jsonType.label"
-	multivaluedField      = "multivalued"
-)
-
 func (mapper *OpenIdUserAttributeProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
 	return &protocolMapper{
 		Id:             mapper.Id,
@@ -104,7 +94,6 @@ func (keycloakClient *KeycloakClient) GetOpenIdUserAttributeProtocolMapper(realm
 	var protocolMapper *protocolMapper
 
 	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper)
-
 	if err != nil {
 		return nil, err
 	}
@@ -118,8 +107,8 @@ func (keycloakClient *KeycloakClient) DeleteOpenIdUserAttributeProtocolMapper(re
 
 func (keycloakClient *KeycloakClient) NewOpenIdUserAttributeProtocolMapper(mapper *OpenIdUserAttributeProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
-	location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
 
+	location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}

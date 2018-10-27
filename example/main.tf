@@ -133,3 +133,15 @@ resource "keycloak_openid_group_membership_protocol_mapper" "map_group_membershi
   client_scope_id = "${keycloak_openid_client_scope.test_client_scope.id}"
   claim_name      = "bar2"
 }
+
+resource "keycloak_openid_full_name_protocol_mapper" "map_full_names_client" {
+  name            = "tf-test-open-id-full-name-protocol-mapper-client"
+  realm_id        = "${keycloak_realm.test.id}"
+  client_id       = "${keycloak_openid_client.test_client.id}"
+}
+
+resource "keycloak_openid_full_name_protocol_mapper" "map_full_names_client_scope" {
+  name            = "tf-test-open-id-full-name-protocol-mapper-client-scope"
+  realm_id        = "${keycloak_realm.test.id}"
+  client_scope_id = "${keycloak_openid_client_scope.test_client_scope.id}"
+}
