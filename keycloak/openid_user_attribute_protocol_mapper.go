@@ -67,7 +67,6 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper
 
 	// multivalued's default is "", this is an issue when importing an existing mapper
 	multivalued, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[multivaluedField])
-
 	if err != nil {
 		return nil, err
 	}
