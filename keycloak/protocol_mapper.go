@@ -40,3 +40,14 @@ func protocolMapperPath(realmId, clientId, clientScopeId string) string {
 func individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId string) string {
 	return fmt.Sprintf("%s/%s", protocolMapperPath(realmId, clientId, clientScopeId), mapperId)
 }
+
+func (keycloakClient *KeycloakClient) listGenericProtocolMappers(realmId, clientId, clientScopeId string) ([]*protocolMapper, error) {
+	var protocolMappers []*protocolMapper
+
+	err := keycloakClient.get(protocolMapperPath(realmId, clientId, clientScopeId), &protocolMappers)
+	if err != nil {
+		return nil, err
+	}
+
+	return protocolMappers, nil
+}

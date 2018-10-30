@@ -110,23 +110,6 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_createAfterManualDestroy(t
 	})
 }
 
-func TestAccKeycloakOpenIdUserAttributeProtocolMapper_validateClientOrClientScopeSet(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-user-attribute-mapper-" + acctest.RandString(10)
-
-	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdUserAttributeProtocolMapperDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config:      testKeycloakOpenIdUserAttributeProtocolMapper_validation(realmName, mapperName),
-				ExpectError: regexp.MustCompile("validation error: one of ClientId or ClientScopeId must be set"),
-			},
-		},
-	})
-}
-
 func TestAccKeycloakOpenIdUserAttributeProtocolMapper_validateClaimValueType(t *testing.T) {
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-attribute-mapper-" + acctest.RandString(10)
@@ -322,20 +305,6 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "user_attribute_mapper
 	user_attribute  = "foo"
 	claim_name      = "bar"
 }`, realmName, clientScopeId, mapperName)
-}
-
-func testKeycloakOpenIdUserAttributeProtocolMapper_validation(realmName, mapperName string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm = "%s"
-}
-
-resource "keycloak_openid_user_attribute_protocol_mapper" "user_attribute_mapper_validation" {
-	name           = "%s"
-	realm_id       = "${keycloak_realm.realm.id}"
-	user_attribute = "foo"
-	claim_name     = "bar"
-}`, realmName, mapperName)
 }
 
 func testKeycloakOpenIdUserAttributeProtocolMapper_claim(realmName, clientId, mapperName, attributeName string) string {

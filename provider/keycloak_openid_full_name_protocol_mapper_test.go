@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"regexp"
 	"testing"
 )
 
@@ -117,23 +116,6 @@ func TestAccKeycloakOpenIdFullNameProtocolMapper_createAfterManualDestroy(t *tes
 				},
 				Config: testKeycloakOpenIdFullNameProtocolMapper_basic_client(realmName, clientId, mapperName),
 				Check:  testKeycloakOpenIdFullNameProtocolMapperExists(resourceName),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakOpenIdFullNameProtocolMapper_validateClientOrClientScopeSet(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-full-name-mapper-" + acctest.RandString(10)
-
-	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config:      testKeycloakOpenIdFullNameProtocolMapper_validation(realmName, mapperName),
-				ExpectError: regexp.MustCompile("validation error: one of ClientId or ClientScopeId must be set"),
 			},
 		},
 	})
@@ -384,16 +366,4 @@ resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper_client_sc
 	realm_id        = "${keycloak_realm.realm.id}"
   	client_scope_id = "${keycloak_openid_client_scope.%s.id}"
 }`, realmId, clientScopeIdOne, clientScopeIdTwo, currentClientScope)
-}
-
-func testKeycloakOpenIdFullNameProtocolMapper_validation(realmName, mapperName string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm = "%s"
-}
-
-resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper_validation" {
-	name       = "%s"
-	realm_id   = "${keycloak_realm.realm.id}"
-}`, realmName, mapperName)
 }

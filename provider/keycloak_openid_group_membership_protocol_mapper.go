@@ -114,7 +114,7 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapperCreate(data *schema.Reso
 
 	openIdGroupMembershipMapper := mapFromDataToOpenIdGroupMembershipProtocolMapper(data)
 
-	err := openIdGroupMembershipMapper.Validate()
+	err := openIdGroupMembershipMapper.Validate(keycloakClient)
 	if err != nil {
 		return err
 	}
