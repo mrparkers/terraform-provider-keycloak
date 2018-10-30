@@ -22,6 +22,7 @@ var (
 	idTokenClaimField       = "id.token.claim"
 	multivaluedField        = "multivalued"
 	userAttributeField      = "user.attribute"
+	userPropertyField       = "user.attribute"
 	userinfoTokenClaimField = "userinfo.token.claim"
 )
 
