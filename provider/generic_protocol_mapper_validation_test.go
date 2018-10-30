@@ -12,8 +12,8 @@ import (
  * Keycloak does not allow two protocol mappers to exist with the same name, but if you create two of them with the same
  * name quickly enough (which Terraform is pretty good at), the API allows it.
  *
- * The following tests check to see if that error is caught by creating a single protocol mapper first, then creating
- * another mapper with the same name in the next test step.
+ * The following tests check to see if that error is caught by creating a single protocol mapper first (each test uses a
+ * different one), then creating another mapper with the same name in the next test step.
  */
 
 func TestAccKeycloakOpenIdFullNameProtocolMapper_clientDuplicateNameValidation(t *testing.T) {
@@ -26,7 +26,7 @@ func TestAccKeycloakOpenIdFullNameProtocolMapper_clientDuplicateNameValidation(t
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		CheckDestroy: testAccKeycloakOpenIdGroupMembershipProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testGenericProtocolMapperValidation_clientGroupMembershipMapper(realmName, clientId, mapperName),
@@ -50,7 +50,7 @@ func TestAccKeycloakOpenIdFullNameProtocolMapper_clientScopeDuplicateNameValidat
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		CheckDestroy: testAccKeycloakOpenIdGroupMembershipProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testGenericProtocolMapperValidation_clientScopeGroupMembershipMapper(realmName, clientId, mapperName),
@@ -122,7 +122,7 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_clientDuplicateNameValidat
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		CheckDestroy: testAccKeycloakOpenIdGroupMembershipProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testGenericProtocolMapperValidation_clientGroupMembershipMapper(realmName, clientId, mapperName),
@@ -146,7 +146,7 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_clientScopeDuplicateNameVa
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		CheckDestroy: testAccKeycloakOpenIdGroupMembershipProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testGenericProtocolMapperValidation_clientScopeGroupMembershipMapper(realmName, clientId, mapperName),
@@ -170,7 +170,7 @@ func TestAccKeycloakOpenIdUserPropertyProtocolMapper_clientDuplicateNameValidati
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		CheckDestroy: testAccKeycloakOpenIdUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testGenericProtocolMapperValidation_clientUserAttributeMapper(realmName, clientId, mapperName),
@@ -194,7 +194,7 @@ func TestAccKeycloakOpenIdUserPropertyProtocolMapper_clientScopeDuplicateNameVal
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		CheckDestroy: testAccKeycloakOpenIdUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testGenericProtocolMapperValidation_clientScopeUserAttributeMapper(realmName, clientId, mapperName),
@@ -218,9 +218,8 @@ func TestAccKeycloakOpenIdFullNameProtocolMapper_validateClientOrClientScopeSet(
 	mapperName := "terraform-openid-connect-full-name-mapper-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdFullNameProtocolMapper_parentResourceValidation(realmName, mapperName),
@@ -235,9 +234,8 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_validateClientOrClientSc
 	mapperName := "terraform-openid-connect-group-membership-mapper-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdGroupMembershipProtocolMapperDestroy(),
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdGroupMembershipProtocolMapper_parentResourceValidation(realmName, mapperName),
@@ -252,9 +250,8 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_validateClientOrClientScop
 	mapperName := "terraform-openid-connect-user-attribute-mapper-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdUserAttributeProtocolMapperDestroy(),
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdUserAttributeProtocolMapper_parentResourceValidation(realmName, mapperName),
@@ -269,9 +266,8 @@ func TestAccKeycloakOpenIdUserPropertyProtocolMapper_validateClientOrClientScope
 	mapperName := "terraform-openid-connect-user-property-mapper-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdUserPropertyProtocolMapperDestroy(),
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdUserPropertyProtocolMapper_parentResourceValidation(realmName, mapperName),
