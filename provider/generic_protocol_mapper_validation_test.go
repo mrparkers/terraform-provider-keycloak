@@ -18,7 +18,7 @@ import (
 func TestAccKeycloakOpenIdFullNameProtocolMapper_clientDuplicateNameValidation(t *testing.T) {
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-full-name-mapper-" + acctest.RandString(5)
+	mapperName := "terraform-protocol-mapper-" + acctest.RandString(5)
 
 	groupMembershipProtocolMapperResourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client"
 
@@ -42,7 +42,7 @@ func TestAccKeycloakOpenIdFullNameProtocolMapper_clientDuplicateNameValidation(t
 func TestAccKeycloakOpenIdFullNameProtocolMapper_clientScopeDuplicateNameValidation(t *testing.T) {
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-full-name-mapper-" + acctest.RandString(5)
+	mapperName := "terraform-protocol-mapper-" + acctest.RandString(5)
 
 	groupMembershipProtocolMapperResourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client_scope"
 
@@ -54,6 +54,54 @@ func TestAccKeycloakOpenIdFullNameProtocolMapper_clientScopeDuplicateNameValidat
 			{
 				Config: testGenericProtocolMapperValidation_clientScopeGroupMembershipMapper(realmName, clientId, mapperName),
 				Check:  testKeycloakOpenIdGroupMembershipProtocolMapperExists(groupMembershipProtocolMapperResourceName),
+			},
+			{
+				Config:      testGenericProtocolMapperValidation_clientScopeFullNameAndGroupMembershipMapper(realmName, clientId, mapperName),
+				ExpectError: regexp.MustCompile("validation error: a protocol mapper with name .+ already exists for this client"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_clientDuplicateNameValidation(t *testing.T) {
+	realmName := "terraform-realm-" + acctest.RandString(10)
+	clientId := "terraform-client-" + acctest.RandString(10)
+	mapperName := "terraform-protocol-mapper-" + acctest.RandString(5)
+
+	fullNameProtocolMapperResourceName := "keycloak_openid_full_name_protocol_mapper.full_name_mapper_client"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testGenericProtocolMapperValidation_clientFullNameMapper(realmName, clientId, mapperName),
+				Check:  testKeycloakOpenIdFullNameProtocolMapperExists(fullNameProtocolMapperResourceName),
+			},
+			{
+				Config:      testGenericProtocolMapperValidation_clientFullNameAndGroupMembershipMapper(realmName, clientId, mapperName),
+				ExpectError: regexp.MustCompile("validation error: a protocol mapper with name .+ already exists for this client"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_clientScopeDuplicateNameValidation(t *testing.T) {
+	realmName := "terraform-realm-" + acctest.RandString(10)
+	clientId := "terraform-client-" + acctest.RandString(10)
+	mapperName := "terraform-protocol-mapper-" + acctest.RandString(5)
+
+	fullNameProtocolMapperResourceName := "keycloak_openid_full_name_protocol_mapper.full_name_mapper_client_scope"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testGenericProtocolMapperValidation_clientScopeFullNameMapper(realmName, clientId, mapperName),
+				Check:  testKeycloakOpenIdFullNameProtocolMapperExists(fullNameProtocolMapperResourceName),
 			},
 			{
 				Config:      testGenericProtocolMapperValidation_clientScopeFullNameAndGroupMembershipMapper(realmName, clientId, mapperName),
@@ -82,6 +130,26 @@ resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_ma
   	client_id       = "${keycloak_openid_client.openid_client.id}"
 
   	claim_name      = "foo"
+}`, realmName, clientId, mapperName)
+}
+
+func testGenericProtocolMapperValidation_clientFullNameMapper(realmName, clientId, mapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "openid_client" {
+	realm_id    = "${keycloak_realm.realm.id}"
+	client_id   = "%s"
+
+	access_type = "BEARER-ONLY"
+}
+
+resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper_client" {
+  	name       = "%s"
+	realm_id   = "${keycloak_realm.realm.id}"
+  	client_id  = "${keycloak_openid_client.openid_client.id}"
 }`, realmName, clientId, mapperName)
 }
 
@@ -130,6 +198,24 @@ resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_ma
 	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
 	claim_name      = "bar"
 }`, realmName, clientScopeId, mapperName)
+}
+
+func testGenericProtocolMapperValidation_clientScopeFullNameMapper(realmName, clientId, mapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name     = "%s"
+	realm_id = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper_client_scope" {
+	name            = "%s"
+	realm_id        = "${keycloak_realm.realm.id}"
+	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
+}`, realmName, clientId, mapperName)
 }
 
 func testGenericProtocolMapperValidation_clientScopeFullNameAndGroupMembershipMapper(realmName, clientScopeId, mapperName string) string {
