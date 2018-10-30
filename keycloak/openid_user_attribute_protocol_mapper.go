@@ -23,8 +23,8 @@ type OpenIdUserAttributeProtocolMapper struct {
 	Multivalued bool // indicates whether is this an array of attributes or a single attribute
 }
 
-func (mapper *OpenIdUserAttributeProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
-	return &protocolMapper{
+func (mapper *OpenIdUserAttributeProtocolMapper) convertToGenericProtocolMapper() *ProtocolMapper {
+	return &ProtocolMapper{
 		Id:             mapper.Id,
 		Name:           mapper.Name,
 		Protocol:       "openid-connect",
@@ -49,7 +49,7 @@ func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
 	return strconv.ParseBool(b)
 }
 
-func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdUserAttributeProtocolMapper, error) {
+func (protocolMapper *ProtocolMapper) convertToOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdUserAttributeProtocolMapper, error) {
 	addToIdToken, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper
 }
 
 func (keycloakClient *KeycloakClient) GetOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdUserAttributeProtocolMapper, error) {
-	var protocolMapper *protocolMapper
+	var protocolMapper *ProtocolMapper
 
 	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper)
 	if err != nil {

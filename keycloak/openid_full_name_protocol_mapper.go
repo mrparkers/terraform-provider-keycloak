@@ -17,8 +17,8 @@ type OpenIdFullNameProtocolMapper struct {
 	UserinfoTokenClaim bool
 }
 
-func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
-	return &protocolMapper{
+func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *ProtocolMapper {
+	return &ProtocolMapper{
 		Id:             mapper.Id,
 		Name:           mapper.Name,
 		Protocol:       "openid-connect",
@@ -31,7 +31,7 @@ func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *pr
 	}
 }
 
-func (protocolMapper *protocolMapper) convertToOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdFullNameProtocolMapper, error) {
+func (protocolMapper *ProtocolMapper) convertToOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdFullNameProtocolMapper, error) {
 	idTokenClaim, err := strconv.ParseBool(protocolMapper.Config[idTokenClaimField])
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (protocolMapper *protocolMapper) convertToOpenIdFullNameProtocolMapper(real
 }
 
 func (keycloakClient *KeycloakClient) GetOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdFullNameProtocolMapper, error) {
-	var protocolMapper *protocolMapper
+	var protocolMapper *ProtocolMapper
 
 	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper)
 	if err != nil {
@@ -94,9 +94,20 @@ func (keycloakClient *KeycloakClient) UpdateOpenIdFullNameProtocolMapper(mapper 
 	return keycloakClient.put(path, mapper.convertToGenericProtocolMapper())
 }
 
-func (mapper *OpenIdFullNameProtocolMapper) Validate() error {
+func (mapper *OpenIdFullNameProtocolMapper) Validate(keycloakClient *KeycloakClient) error {
 	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
+	}
+
+	protocolMappers, err := keycloakClient.ListGenericProtocolMappers(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
+	if err != nil {
+		return err
+	}
+
+	for _, protocolMapper := range protocolMappers {
+		if protocolMapper.Name == mapper.Name {
+			return fmt.Errorf("validation error: a protocol mapper with name %s already exists for this client", mapper.Name)
+		}
 	}
 
 	return nil
