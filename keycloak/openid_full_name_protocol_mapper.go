@@ -17,8 +17,8 @@ type OpenIdFullNameProtocolMapper struct {
 	UserinfoTokenClaim bool
 }
 
-func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *ProtocolMapper {
-	return &ProtocolMapper{
+func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
+	return &protocolMapper{
 		Id:             mapper.Id,
 		Name:           mapper.Name,
 		Protocol:       "openid-connect",
@@ -31,7 +31,7 @@ func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *Pr
 	}
 }
 
-func (protocolMapper *ProtocolMapper) convertToOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdFullNameProtocolMapper, error) {
+func (protocolMapper *protocolMapper) convertToOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdFullNameProtocolMapper, error) {
 	idTokenClaim, err := strconv.ParseBool(protocolMapper.Config[idTokenClaimField])
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (protocolMapper *ProtocolMapper) convertToOpenIdFullNameProtocolMapper(real
 }
 
 func (keycloakClient *KeycloakClient) GetOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdFullNameProtocolMapper, error) {
-	var protocolMapper *ProtocolMapper
+	var protocolMapper *protocolMapper
 
 	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper)
 	if err != nil {

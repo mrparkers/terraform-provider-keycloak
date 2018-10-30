@@ -3,7 +3,7 @@ package keycloak
 import "fmt"
 
 // https://www.keycloak.org/docs-api/4.2/rest-api/index.html#_protocolmapperrepresentation
-type ProtocolMapper struct {
+type protocolMapper struct {
 	Id             string            `json:"id,omitempty"`
 	Name           string            `json:"name"`
 	Protocol       string            `json:"protocol"`
@@ -41,8 +41,8 @@ func individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId str
 	return fmt.Sprintf("%s/%s", protocolMapperPath(realmId, clientId, clientScopeId), mapperId)
 }
 
-func (keycloakClient *KeycloakClient) ListGenericProtocolMappers(realmId, clientId, clientScopeId string) ([]*ProtocolMapper, error) {
-	var protocolMappers []*ProtocolMapper
+func (keycloakClient *KeycloakClient) ListGenericProtocolMappers(realmId, clientId, clientScopeId string) ([]*protocolMapper, error) {
+	var protocolMappers []*protocolMapper
 
 	err := keycloakClient.get(protocolMapperPath(realmId, clientId, clientScopeId), &protocolMappers)
 	if err != nil {
