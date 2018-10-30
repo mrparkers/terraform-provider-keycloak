@@ -49,6 +49,43 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_basicClientScope(t *test
 	})
 }
 
+func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_import(t *testing.T) {
+	realmName := "terraform-realm-" + acctest.RandString(10)
+	clientId := "terraform-openid-client-" + acctest.RandString(10)
+	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
+	mapperName := "terraform-openid-connect-group-membership-mapper-" + acctest.RandString(5)
+
+	clientResourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client"
+	clientScopeResourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client_scope"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenIdGroupMembershipProtocolMapper_import(realmName, clientId, clientScopeId, mapperName),
+				Check: resource.ComposeTestCheckFunc(
+					testKeycloakOpenIdGroupMembershipProtocolMapperExists(clientResourceName),
+					testKeycloakOpenIdGroupMembershipProtocolMapperExists(clientScopeResourceName),
+				),
+			},
+			{
+				ResourceName:      clientResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getGenericProtocolMapperIdForClient(clientResourceName),
+			},
+			{
+				ResourceName:      clientScopeResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getGenericProtocolMapperIdForClientScope(clientScopeResourceName),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_update(t *testing.T) {
 	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper"
 
@@ -298,6 +335,39 @@ resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_ma
 	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
 	claim_name      = "bar"
 }`, realmName, clientScopeId, mapperName)
+}
+
+func testKeycloakOpenIdGroupMembershipProtocolMapper_import(realmName, clientId, clientScopeId, mapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "openid_client" {
+	realm_id    = "${keycloak_realm.realm.id}"
+	client_id   = "%s"
+
+	access_type = "BEARER-ONLY"
+}
+
+resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper_client" {
+  	name       = "%s"
+	realm_id   = "${keycloak_realm.realm.id}"
+  	client_id  = "${keycloak_openid_client.openid_client.id}"
+  	claim_name = "bar"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name     = "%s"
+	realm_id = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper_client_scope" {
+	name            = "%s"
+	realm_id        = "${keycloak_realm.realm.id}"
+	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
+	claim_name      = "bar"
+}`, realmName, clientId, mapperName, clientScopeId, mapperName)
 }
 
 func testKeycloakOpenIdGroupMembershipProtocolMapper_fromInterface(mapper *keycloak.OpenIdGroupMembershipProtocolMapper) string {
