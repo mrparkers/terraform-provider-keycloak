@@ -41,7 +41,7 @@ func individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId str
 	return fmt.Sprintf("%s/%s", protocolMapperPath(realmId, clientId, clientScopeId), mapperId)
 }
 
-func (keycloakClient *KeycloakClient) ListGenericProtocolMappers(realmId, clientId, clientScopeId string) ([]*protocolMapper, error) {
+func (keycloakClient *KeycloakClient) listGenericProtocolMappers(realmId, clientId, clientScopeId string) ([]*protocolMapper, error) {
 	var protocolMappers []*protocolMapper
 
 	err := keycloakClient.get(protocolMapperPath(realmId, clientId, clientScopeId), &protocolMappers)
