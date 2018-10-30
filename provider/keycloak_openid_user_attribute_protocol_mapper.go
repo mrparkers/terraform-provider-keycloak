@@ -133,7 +133,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperCreate(data *schema.Resour
 
 	openIdUserAttributeMapper := mapFromDataToOpenIdUserAttributeProtocolMapper(data)
 
-	err := openIdUserAttributeMapper.Validate()
+	err := openIdUserAttributeMapper.Validate(keycloakClient)
 	if err != nil {
 		return err
 	}
