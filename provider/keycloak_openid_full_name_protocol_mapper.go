@@ -101,7 +101,7 @@ func resourceKeycloakOpenIdFullNameProtocolMapperCreate(data *schema.ResourceDat
 
 	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data)
 
-	err := openIdFullNameMapper.Validate(keycloakClient)
+	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(openIdFullNameMapper)
 	if err != nil {
 		return err
 	}
@@ -137,7 +137,13 @@ func resourceKeycloakOpenIdFullNameProtocolMapperUpdate(data *schema.ResourceDat
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data)
-	err := keycloakClient.UpdateOpenIdFullNameProtocolMapper(openIdFullNameMapper)
+
+	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(openIdFullNameMapper)
+	if err != nil {
+		return err
+	}
+
+	err = keycloakClient.UpdateOpenIdFullNameProtocolMapper(openIdFullNameMapper)
 	if err != nil {
 		return err
 	}

@@ -105,7 +105,7 @@ func (keycloakClient *KeycloakClient) UpdateOpenIdGroupMembershipProtocolMapper(
 	return keycloakClient.put(path, mapper.convertToGenericProtocolMapper())
 }
 
-func (mapper *OpenIdGroupMembershipProtocolMapper) Validate(keycloakClient *KeycloakClient) error {
+func (keycloakClient *KeycloakClient) ValidateOpenIdGroupMembershipProtocolMapper(mapper *OpenIdGroupMembershipProtocolMapper) error {
 	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
@@ -116,7 +116,7 @@ func (mapper *OpenIdGroupMembershipProtocolMapper) Validate(keycloakClient *Keyc
 	}
 
 	for _, protocolMapper := range protocolMappers {
-		if protocolMapper.Name == mapper.Name {
+		if protocolMapper.Name == mapper.Name && protocolMapper.Id != mapper.Id {
 			return fmt.Errorf("validation error: a protocol mapper with name %s already exists for this client", mapper.Name)
 		}
 	}

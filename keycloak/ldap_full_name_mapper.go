@@ -61,7 +61,7 @@ func convertFromComponentToLdapFullNameMapper(component *component, realmId stri
 }
 
 // the keycloak api client is passed in order to fetch the ldap provider for writable validation
-func (mapper *LdapFullNameMapper) Validate(keycloakClient *KeycloakClient) error {
+func (keycloakClient *KeycloakClient) ValidateLdapFullNameMapper(mapper *LdapFullNameMapper) error {
 	if mapper.ReadOnly && mapper.WriteOnly {
 		return fmt.Errorf("validation error: ldap full name mapper cannot be both read only and write only")
 	}

@@ -144,7 +144,7 @@ func convertFromComponentToLdapGroupMapper(component *component, realmId string)
 	return ldapGroupMapper, nil
 }
 
-func (ldapGroupMapper *LdapGroupMapper) Validate() error {
+func (keycloakClient *KeycloakClient) ValidateLdapGroupMapper(ldapGroupMapper *LdapGroupMapper) error {
 	if ldapGroupMapper.MembershipAttributeType == "UID" && ldapGroupMapper.PreserveGroupInheritance == true {
 		return fmt.Errorf("validation error: group inheritance cannot be preserved while membership attribute type is UID")
 	}

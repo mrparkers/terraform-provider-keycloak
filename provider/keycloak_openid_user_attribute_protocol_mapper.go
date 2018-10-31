@@ -133,7 +133,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperCreate(data *schema.Resour
 
 	openIdUserAttributeMapper := mapFromDataToOpenIdUserAttributeProtocolMapper(data)
 
-	err := openIdUserAttributeMapper.Validate(keycloakClient)
+	err := keycloakClient.ValidateOpenIdUserAttributeProtocolMapper(openIdUserAttributeMapper)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,13 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperUpdate(data *schema.Resour
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdUserAttributeMapper := mapFromDataToOpenIdUserAttributeProtocolMapper(data)
-	err := keycloakClient.UpdateOpenIdUserAttributeProtocolMapper(openIdUserAttributeMapper)
+
+	err := keycloakClient.ValidateOpenIdUserAttributeProtocolMapper(openIdUserAttributeMapper)
+	if err != nil {
+		return err
+	}
+
+	err = keycloakClient.UpdateOpenIdUserAttributeProtocolMapper(openIdUserAttributeMapper)
 	if err != nil {
 		return err
 	}

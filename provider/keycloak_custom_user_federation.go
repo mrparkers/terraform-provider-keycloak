@@ -90,7 +90,7 @@ func resourceKeycloakCustomUserFederationCreate(data *schema.ResourceData, meta 
 
 	custom := getCustomUserFederationFromData(data)
 
-	err := custom.Validate(keycloakClient)
+	err := keycloakClient.ValidateCustomUserFederation(custom)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func resourceKeycloakCustomUserFederationUpdate(data *schema.ResourceData, meta 
 
 	custom := getCustomUserFederationFromData(data)
 
-	err := custom.Validate(keycloakClient)
+	err := keycloakClient.ValidateCustomUserFederation(custom)
 	if err != nil {
 		return err
 	}

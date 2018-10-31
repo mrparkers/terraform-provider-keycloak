@@ -114,7 +114,7 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapperCreate(data *schema.Reso
 
 	openIdGroupMembershipMapper := mapFromDataToOpenIdGroupMembershipProtocolMapper(data)
 
-	err := openIdGroupMembershipMapper.Validate(keycloakClient)
+	err := keycloakClient.ValidateOpenIdGroupMembershipProtocolMapper(openIdGroupMembershipMapper)
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,13 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapperUpdate(data *schema.Reso
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdGroupMembershipMapper := mapFromDataToOpenIdGroupMembershipProtocolMapper(data)
-	err := keycloakClient.UpdateOpenIdGroupMembershipProtocolMapper(openIdGroupMembershipMapper)
+
+	err := keycloakClient.ValidateOpenIdGroupMembershipProtocolMapper(openIdGroupMembershipMapper)
+	if err != nil {
+		return err
+	}
+
+	err = keycloakClient.UpdateOpenIdGroupMembershipProtocolMapper(openIdGroupMembershipMapper)
 	if err != nil {
 		return err
 	}

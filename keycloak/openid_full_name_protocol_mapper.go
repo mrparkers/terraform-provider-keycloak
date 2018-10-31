@@ -94,7 +94,7 @@ func (keycloakClient *KeycloakClient) UpdateOpenIdFullNameProtocolMapper(mapper 
 	return keycloakClient.put(path, mapper.convertToGenericProtocolMapper())
 }
 
-func (mapper *OpenIdFullNameProtocolMapper) Validate(keycloakClient *KeycloakClient) error {
+func (keycloakClient *KeycloakClient) ValidateOpenIdFullNameProtocolMapper(mapper *OpenIdFullNameProtocolMapper) error {
 	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
@@ -105,7 +105,7 @@ func (mapper *OpenIdFullNameProtocolMapper) Validate(keycloakClient *KeycloakCli
 	}
 
 	for _, protocolMapper := range protocolMappers {
-		if protocolMapper.Name == mapper.Name {
+		if protocolMapper.Name == mapper.Name && protocolMapper.Id != mapper.Id {
 			return fmt.Errorf("validation error: a protocol mapper with name %s already exists for this client", mapper.Name)
 		}
 	}
