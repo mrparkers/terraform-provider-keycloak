@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-type OpenIdUserAttributeProtocolMapper struct {
+type OpenIdUserPropertyProtocolMapper struct {
 	Id            string
 	Name          string
 	RealmId       string
@@ -16,40 +16,29 @@ type OpenIdUserAttributeProtocolMapper struct {
 	AddToAccessToken bool
 	AddToUserInfo    bool
 
-	UserAttribute  string
+	UserProperty   string
 	ClaimName      string
 	ClaimValueType string
-
-	Multivalued bool // indicates whether is this an array of attributes or a single attribute
 }
 
-func (mapper *OpenIdUserAttributeProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
+func (mapper *OpenIdUserPropertyProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
 	return &protocolMapper{
 		Id:             mapper.Id,
 		Name:           mapper.Name,
 		Protocol:       "openid-connect",
-		ProtocolMapper: "oidc-usermodel-attribute-mapper",
+		ProtocolMapper: "oidc-usermodel-property-mapper",
 		Config: map[string]string{
 			addToIdTokenField:     strconv.FormatBool(mapper.AddToIdToken),
 			addToAccessTokenField: strconv.FormatBool(mapper.AddToAccessToken),
 			addToUserInfoField:    strconv.FormatBool(mapper.AddToUserInfo),
-			userAttributeField:    mapper.UserAttribute,
+			userPropertyField:     mapper.UserProperty,
 			claimNameField:        mapper.ClaimName,
 			claimValueTypeField:   mapper.ClaimValueType,
-			multivaluedField:      strconv.FormatBool(mapper.Multivalued),
 		},
 	}
 }
 
-func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
-	if b == "" {
-		return false, nil
-	}
-
-	return strconv.ParseBool(b)
-}
-
-func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdUserAttributeProtocolMapper, error) {
+func (protocolMapper *protocolMapper) convertToOpenIdUserPropertyProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdUserPropertyProtocolMapper, error) {
 	addToIdToken, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
@@ -65,13 +54,7 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper
 		return nil, err
 	}
 
-	// multivalued's default is "", this is an issue when importing an existing mapper
-	multivalued, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[multivaluedField])
-	if err != nil {
-		return nil, err
-	}
-
-	return &OpenIdUserAttributeProtocolMapper{
+	return &OpenIdUserPropertyProtocolMapper{
 		Id:            protocolMapper.Id,
 		Name:          protocolMapper.Name,
 		RealmId:       realmId,
@@ -82,14 +65,13 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper
 		AddToAccessToken: addToAccessToken,
 		AddToUserInfo:    addToUserInfo,
 
-		UserAttribute:  protocolMapper.Config[userAttributeField],
+		UserProperty:   protocolMapper.Config[userPropertyField],
 		ClaimName:      protocolMapper.Config[claimNameField],
 		ClaimValueType: protocolMapper.Config[claimValueTypeField],
-		Multivalued:    multivalued,
 	}, nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdUserAttributeProtocolMapper, error) {
+func (keycloakClient *KeycloakClient) GetOpenIdUserPropertyProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdUserPropertyProtocolMapper, error) {
 	var protocolMapper *protocolMapper
 
 	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper)
@@ -97,14 +79,14 @@ func (keycloakClient *KeycloakClient) GetOpenIdUserAttributeProtocolMapper(realm
 		return nil, err
 	}
 
-	return protocolMapper.convertToOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId)
+	return protocolMapper.convertToOpenIdUserPropertyProtocolMapper(realmId, clientId, clientScopeId)
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
+func (keycloakClient *KeycloakClient) DeleteOpenIdUserPropertyProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
 	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId))
 }
 
-func (keycloakClient *KeycloakClient) NewOpenIdUserAttributeProtocolMapper(mapper *OpenIdUserAttributeProtocolMapper) error {
+func (keycloakClient *KeycloakClient) NewOpenIdUserPropertyProtocolMapper(mapper *OpenIdUserPropertyProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
 	location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
@@ -117,13 +99,13 @@ func (keycloakClient *KeycloakClient) NewOpenIdUserAttributeProtocolMapper(mappe
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateOpenIdUserAttributeProtocolMapper(mapper *OpenIdUserAttributeProtocolMapper) error {
+func (keycloakClient *KeycloakClient) UpdateOpenIdUserPropertyProtocolMapper(mapper *OpenIdUserPropertyProtocolMapper) error {
 	path := individualProtocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 
 	return keycloakClient.put(path, mapper.convertToGenericProtocolMapper())
 }
 
-func (mapper *OpenIdUserAttributeProtocolMapper) Validate(keycloakClient *KeycloakClient) error {
+func (mapper *OpenIdUserPropertyProtocolMapper) Validate(keycloakClient *KeycloakClient) error {
 	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
