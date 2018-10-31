@@ -121,7 +121,7 @@ func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interfac
 
 	client := getOpenidClientFromData(data)
 
-	err := client.Validate()
+	err := keycloakClient.ValidateOpenidClient(client)
 	if err != nil {
 		return err
 	}
@@ -157,7 +157,7 @@ func resourceKeycloakOpenidClientUpdate(data *schema.ResourceData, meta interfac
 
 	client := getOpenidClientFromData(data)
 
-	err := client.Validate()
+	err := keycloakClient.ValidateOpenidClient(client)
 	if err != nil {
 		return err
 	}

@@ -70,7 +70,7 @@ func convertFromComponentToCustomUserFederation(component *component) (*CustomUs
 	return custom, nil
 }
 
-func (custom *CustomUserFederation) Validate(keycloakClient *KeycloakClient) error {
+func (keycloakClient *KeycloakClient) ValidateCustomUserFederation(custom *CustomUserFederation) error {
 	// validate if the given custom user storage provider exists on the server.
 	serverInfo, err := keycloakClient.GetServerInfo()
 	if err != nil {

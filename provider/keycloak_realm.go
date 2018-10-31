@@ -352,7 +352,7 @@ func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	err = realm.Validate(keycloakClient)
+	err = keycloakClient.ValidateRealm(realm)
 	if err != nil {
 		return err
 	}
@@ -388,7 +388,7 @@ func resourceKeycloakRealmUpdate(data *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	err = realm.Validate(keycloakClient)
+	err = keycloakClient.ValidateRealm(realm)
 	if err != nil {
 		return err
 	}

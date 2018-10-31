@@ -28,7 +28,7 @@ type OpenidClient struct {
 	ValidRedirectUris []string `json:"redirectUris"`
 }
 
-func (client *OpenidClient) Validate() error {
+func (keycloakClient *KeycloakClient) ValidateOpenidClient(client *OpenidClient) error {
 	if !client.BearerOnly && len(client.ValidRedirectUris) == 0 {
 		return fmt.Errorf("validation error: must specify at least one valid redirect uri if access type is PUBLIC or CONFIDENTIAL")
 	}

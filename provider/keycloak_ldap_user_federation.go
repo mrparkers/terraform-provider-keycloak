@@ -300,7 +300,7 @@ func resourceKeycloakLdapUserFederationCreate(data *schema.ResourceData, meta in
 
 	ldap := getLdapUserFederationFromData(data)
 
-	err := ldap.Validate()
+	err := keycloakClient.ValidateLdapUserFederation(ldap)
 	if err != nil {
 		return err
 	}
@@ -336,7 +336,7 @@ func resourceKeycloakLdapUserFederationUpdate(data *schema.ResourceData, meta in
 
 	ldap := getLdapUserFederationFromData(data)
 
-	err := ldap.Validate()
+	err := keycloakClient.ValidateLdapUserFederation(ldap)
 	if err != nil {
 		return err
 	}

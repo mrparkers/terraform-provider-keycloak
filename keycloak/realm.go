@@ -73,7 +73,7 @@ func (keycloakClient *KeycloakClient) DeleteRealm(id string) error {
 	return nil
 }
 
-func (realm *Realm) Validate(keycloakClient *KeycloakClient) error {
+func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
 	if realm.RegistrationAllowed == false && realm.RegistrationEmailAsUsername == true {
 		return fmt.Errorf("validation error: RegistrationEmailAsUsername cannot be true if RegistrationAllowed is false")
 	}

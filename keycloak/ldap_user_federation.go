@@ -289,7 +289,7 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 	return ldap, nil
 }
 
-func (ldap *LdapUserFederation) Validate() error {
+func (keycloakClient *KeycloakClient) ValidateLdapUserFederation(ldap *LdapUserFederation) error {
 	if (ldap.BindDn == "" && ldap.BindCredential != "") || (ldap.BindDn != "" && ldap.BindCredential == "") {
 		return fmt.Errorf("validation error: authentication requires both BindDN and BindCredential to be set")
 	}
