@@ -90,25 +90,25 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_update(t *testing.T) {
 	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper"
 
 	mapperOne := &keycloak.OpenIdGroupMembershipProtocolMapper{
-		Name:               acctest.RandString(10),
-		RealmId:            "terraform-realm-" + acctest.RandString(10),
-		ClientId:           "terraform-client-" + acctest.RandString(10),
-		ClaimName:          acctest.RandString(10),
-		FullPath:           randomBool(),
-		IdTokenClaim:       randomBool(),
-		AccessTokenClaim:   randomBool(),
-		UserinfoTokenClaim: randomBool(),
+		Name:             acctest.RandString(10),
+		RealmId:          "terraform-realm-" + acctest.RandString(10),
+		ClientId:         "terraform-client-" + acctest.RandString(10),
+		ClaimName:        acctest.RandString(10),
+		FullPath:         randomBool(),
+		AddToIdToken:     randomBool(),
+		AddToAccessToken: randomBool(),
+		AddToUserinfo:    randomBool(),
 	}
 
 	mapperTwo := &keycloak.OpenIdGroupMembershipProtocolMapper{
-		Name:               mapperOne.Name,
-		RealmId:            mapperOne.RealmId,
-		ClientId:           mapperOne.ClientId,
-		ClaimName:          acctest.RandString(10),
-		FullPath:           randomBool(),
-		IdTokenClaim:       randomBool(),
-		AccessTokenClaim:   randomBool(),
-		UserinfoTokenClaim: randomBool(),
+		Name:             mapperOne.Name,
+		RealmId:          mapperOne.RealmId,
+		ClientId:         mapperOne.ClientId,
+		ClaimName:        acctest.RandString(10),
+		FullPath:         randomBool(),
+		AddToIdToken:     randomBool(),
+		AddToAccessToken: randomBool(),
+		AddToUserinfo:    randomBool(),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -393,7 +393,7 @@ resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_ma
 	id_token_claim       = %t
 	access_token_claim   = %t
 	userinfo_token_claim = %t
-}`, mapper.RealmId, mapper.ClientId, mapper.Name, mapper.ClaimName, mapper.FullPath, mapper.IdTokenClaim, mapper.AccessTokenClaim, mapper.UserinfoTokenClaim)
+}`, mapper.RealmId, mapper.ClientId, mapper.Name, mapper.ClaimName, mapper.FullPath, mapper.AddToIdToken, mapper.AddToAccessToken, mapper.AddToUserinfo)
 }
 
 func testKeycloakOpenIdGroupMembershipProtocolMapper_updateClientForceNew(realmId, clientIdOne, clientIdTwo, currentClient string) string {

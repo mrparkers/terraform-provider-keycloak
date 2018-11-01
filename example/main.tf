@@ -161,3 +161,21 @@ resource "keycloak_openid_user_property_protocol_mapper" "map_user_properties_cl
   user_property   = "foo2"
   claim_name      = "bar2"
 }
+
+resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_client" {
+  name        = "tf-test-open-id-hardcoded-claim-protocol-mapper-client"
+  realm_id    = "${keycloak_realm.test.id}"
+  client_id   = "${keycloak_openid_client.test_client.id}"
+
+  claim_name  = "foo"
+  claim_value = "bar"
+}
+
+resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_client_scope" {
+  name            = "tf-test-open-id-hardcoded-claim-protocol-mapper-client-scope"
+  realm_id        = "${keycloak_realm.test.id}"
+  client_scope_id = "${keycloak_openid_client_scope.test_client_scope.id}"
+
+  claim_name      = "foo"
+  claim_value     = "bar"
+}

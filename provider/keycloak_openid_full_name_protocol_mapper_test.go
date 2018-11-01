@@ -90,21 +90,21 @@ func TestAccKeycloakOpenIdFullNameProtocolMapper_update(t *testing.T) {
 	resourceName := "keycloak_openid_full_name_protocol_mapper.full_name_mapper"
 
 	mapperOne := &keycloak.OpenIdFullNameProtocolMapper{
-		Name:               acctest.RandString(10),
-		RealmId:            "terraform-realm-" + acctest.RandString(10),
-		ClientId:           "terraform-client-" + acctest.RandString(10),
-		IdTokenClaim:       randomBool(),
-		AccessTokenClaim:   randomBool(),
-		UserinfoTokenClaim: randomBool(),
+		Name:             acctest.RandString(10),
+		RealmId:          "terraform-realm-" + acctest.RandString(10),
+		ClientId:         "terraform-client-" + acctest.RandString(10),
+		AddToIdToken:     randomBool(),
+		AddToAccessToken: randomBool(),
+		AddToUserInfo:    randomBool(),
 	}
 
 	mapperTwo := &keycloak.OpenIdFullNameProtocolMapper{
-		Name:               mapperOne.Name,
-		RealmId:            mapperOne.RealmId,
-		ClientId:           mapperOne.ClientId,
-		IdTokenClaim:       randomBool(),
-		AccessTokenClaim:   randomBool(),
-		UserinfoTokenClaim: randomBool(),
+		Name:             mapperOne.Name,
+		RealmId:          mapperOne.RealmId,
+		ClientId:         mapperOne.ClientId,
+		AddToIdToken:     randomBool(),
+		AddToAccessToken: randomBool(),
+		AddToUserInfo:    randomBool(),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -413,7 +413,7 @@ resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper" {
 	id_token_claim       = %t
 	access_token_claim   = %t
 	userinfo_token_claim = %t
-}`, mapper.RealmId, mapper.ClientId, mapper.Name, mapper.IdTokenClaim, mapper.AccessTokenClaim, mapper.UserinfoTokenClaim)
+}`, mapper.RealmId, mapper.ClientId, mapper.Name, mapper.AddToIdToken, mapper.AddToAccessToken, mapper.AddToUserInfo)
 }
 
 func testKeycloakOpenIdFullNameProtocolMapper_updateClientForceNew(realmId, clientIdOne, clientIdTwo, currentClient string) string {

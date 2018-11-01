@@ -24,6 +24,7 @@ Long term, I'd like to support as much as I can while I tinker with Keycloak in 
 - [`keycloak_openid_user_property_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_user_property_protocol_mapper.go)
 - [`keycloak_openid_group_membership_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_group_membership_protocol_mapper.go)
 - [`keycloak_openid_full_name_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_full_name_protocol_mapper.go)
+- [`keycloak_openid_hardcoded_claim_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_hardcoded_claim_protocol_mapper.go)
 
 I will write some docs for each resource once more are supported. For now, please refer to the linked source files.
 

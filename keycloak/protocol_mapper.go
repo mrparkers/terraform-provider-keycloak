@@ -12,18 +12,16 @@ type protocolMapper struct {
 }
 
 var (
-	accessTokenClaimField   = "access.token.claim"
-	addToAccessTokenField   = "access.token.claim"
-	addToIdTokenField       = "id.token.claim"
-	addToUserInfoField      = "userinfo.token.claim"
-	claimNameField          = "claim.name"
-	claimValueTypeField     = "jsonType.label"
-	fullPathField           = "full.path"
-	idTokenClaimField       = "id.token.claim"
-	multivaluedField        = "multivalued"
-	userAttributeField      = "user.attribute"
-	userPropertyField       = "user.attribute"
-	userinfoTokenClaimField = "userinfo.token.claim"
+	addToAccessTokenField = "access.token.claim"
+	addToIdTokenField     = "id.token.claim"
+	addToUserInfoField    = "userinfo.token.claim"
+	claimNameField        = "claim.name"
+	claimValueField       = "claim.value"
+	claimValueTypeField   = "jsonType.label"
+	fullPathField         = "full.path"
+	multivaluedField      = "multivalued"
+	userAttributeField    = "user.attribute"
+	userPropertyField     = "user.attribute"
 )
 
 func protocolMapperPath(realmId, clientId, clientScopeId string) string {
