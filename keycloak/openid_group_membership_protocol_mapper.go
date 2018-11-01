@@ -12,11 +12,12 @@ type OpenIdGroupMembershipProtocolMapper struct {
 	ClientId      string
 	ClientScopeId string
 
-	ClaimName          string
-	FullPath           bool
-	IdTokenClaim       bool
-	AccessTokenClaim   bool
-	UserinfoTokenClaim bool
+	AddToIdToken     bool
+	AddToAccessToken bool
+	AddToUserinfo    bool
+
+	ClaimName string
+	FullPath  bool
 }
 
 func (mapper *OpenIdGroupMembershipProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
@@ -26,11 +27,11 @@ func (mapper *OpenIdGroupMembershipProtocolMapper) convertToGenericProtocolMappe
 		Protocol:       "openid-connect",
 		ProtocolMapper: "oidc-group-membership-mapper",
 		Config: map[string]string{
-			fullPathField:           strconv.FormatBool(mapper.FullPath),
-			idTokenClaimField:       strconv.FormatBool(mapper.IdTokenClaim),
-			accessTokenClaimField:   strconv.FormatBool(mapper.AccessTokenClaim),
-			userinfoTokenClaimField: strconv.FormatBool(mapper.UserinfoTokenClaim),
-			claimNameField:          mapper.ClaimName,
+			fullPathField:         strconv.FormatBool(mapper.FullPath),
+			addToIdTokenField:     strconv.FormatBool(mapper.AddToIdToken),
+			addToAccessTokenField: strconv.FormatBool(mapper.AddToAccessToken),
+			addToUserInfoField:    strconv.FormatBool(mapper.AddToUserinfo),
+			claimNameField:        mapper.ClaimName,
 		},
 	}
 }
@@ -41,17 +42,17 @@ func (protocolMapper *protocolMapper) convertToOpenIdGroupMembershipProtocolMapp
 		return nil, err
 	}
 
-	idTokenClaim, err := strconv.ParseBool(protocolMapper.Config[idTokenClaimField])
+	idTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	accessTokenClaim, err := strconv.ParseBool(protocolMapper.Config[accessTokenClaimField])
+	accessTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToAccessTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	userinfoTokenClaim, err := strconv.ParseBool(protocolMapper.Config[userinfoTokenClaimField])
+	userinfoTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToUserInfoField])
 	if err != nil {
 		return nil, err
 	}
@@ -63,11 +64,11 @@ func (protocolMapper *protocolMapper) convertToOpenIdGroupMembershipProtocolMapp
 		ClientId:      clientId,
 		ClientScopeId: clientScopeId,
 
-		ClaimName:          protocolMapper.Config[claimNameField],
-		FullPath:           fullPath,
-		IdTokenClaim:       idTokenClaim,
-		AccessTokenClaim:   accessTokenClaim,
-		UserinfoTokenClaim: userinfoTokenClaim,
+		ClaimName:        protocolMapper.Config[claimNameField],
+		FullPath:         fullPath,
+		AddToIdToken:     idTokenClaim,
+		AddToAccessToken: accessTokenClaim,
+		AddToUserinfo:    userinfoTokenClaim,
 	}, nil
 }
 

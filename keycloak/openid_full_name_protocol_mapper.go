@@ -24,25 +24,25 @@ func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *pr
 		Protocol:       "openid-connect",
 		ProtocolMapper: "oidc-full-name-mapper",
 		Config: map[string]string{
-			idTokenClaimField:       strconv.FormatBool(mapper.IdTokenClaim),
-			accessTokenClaimField:   strconv.FormatBool(mapper.AccessTokenClaim),
-			userinfoTokenClaimField: strconv.FormatBool(mapper.UserinfoTokenClaim),
+			addToIdTokenField:     strconv.FormatBool(mapper.IdTokenClaim),
+			addToAccessTokenField: strconv.FormatBool(mapper.AccessTokenClaim),
+			addToUserInfoField:    strconv.FormatBool(mapper.UserinfoTokenClaim),
 		},
 	}
 }
 
 func (protocolMapper *protocolMapper) convertToOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdFullNameProtocolMapper, error) {
-	idTokenClaim, err := strconv.ParseBool(protocolMapper.Config[idTokenClaimField])
+	idTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	accessTokenClaim, err := strconv.ParseBool(protocolMapper.Config[accessTokenClaimField])
+	accessTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToAccessTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	userinfoTokenClaim, err := strconv.ParseBool(protocolMapper.Config[userinfoTokenClaimField])
+	userinfoTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToUserInfoField])
 	if err != nil {
 		return nil, err
 	}
