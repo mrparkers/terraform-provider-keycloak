@@ -16,6 +16,7 @@ var (
 	addToIdTokenField     = "id.token.claim"
 	addToUserInfoField    = "userinfo.token.claim"
 	claimNameField        = "claim.name"
+	claimValueField       = "claim.value"
 	claimValueTypeField   = "jsonType.label"
 	fullPathField         = "full.path"
 	multivaluedField      = "multivalued"
