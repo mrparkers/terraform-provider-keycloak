@@ -12,9 +12,9 @@ type OpenIdFullNameProtocolMapper struct {
 	ClientId      string
 	ClientScopeId string
 
-	IdTokenClaim       bool
-	AccessTokenClaim   bool
-	UserinfoTokenClaim bool
+	AddToIdToken     bool
+	AddToAccessToken bool
+	AddToUserInfo    bool
 }
 
 func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
@@ -24,9 +24,9 @@ func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *pr
 		Protocol:       "openid-connect",
 		ProtocolMapper: "oidc-full-name-mapper",
 		Config: map[string]string{
-			addToIdTokenField:     strconv.FormatBool(mapper.IdTokenClaim),
-			addToAccessTokenField: strconv.FormatBool(mapper.AccessTokenClaim),
-			addToUserInfoField:    strconv.FormatBool(mapper.UserinfoTokenClaim),
+			addToIdTokenField:     strconv.FormatBool(mapper.AddToIdToken),
+			addToAccessTokenField: strconv.FormatBool(mapper.AddToAccessToken),
+			addToUserInfoField:    strconv.FormatBool(mapper.AddToUserInfo),
 		},
 	}
 }
@@ -54,9 +54,9 @@ func (protocolMapper *protocolMapper) convertToOpenIdFullNameProtocolMapper(real
 		ClientId:      clientId,
 		ClientScopeId: clientScopeId,
 
-		IdTokenClaim:       idTokenClaim,
-		AccessTokenClaim:   accessTokenClaim,
-		UserinfoTokenClaim: userinfoTokenClaim,
+		AddToIdToken:     idTokenClaim,
+		AddToAccessToken: accessTokenClaim,
+		AddToUserInfo:    userinfoTokenClaim,
 	}, nil
 }
 
