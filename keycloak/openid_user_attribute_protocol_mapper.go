@@ -41,14 +41,6 @@ func (mapper *OpenIdUserAttributeProtocolMapper) convertToGenericProtocolMapper(
 	}
 }
 
-func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
-	if b == "" {
-		return false, nil
-	}
-
-	return strconv.ParseBool(b)
-}
-
 func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdUserAttributeProtocolMapper, error) {
 	addToIdToken, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
 	if err != nil {

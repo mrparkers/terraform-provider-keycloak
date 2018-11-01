@@ -33,3 +33,11 @@ func GetDurationStringFromMilliseconds(milliseconds string) (string, error) {
 
 	return (time.Duration(ms) * time.Millisecond).String(), nil
 }
+
+func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
+	if b == "" {
+		return false, nil
+	}
+
+	return strconv.ParseBool(b)
+}
