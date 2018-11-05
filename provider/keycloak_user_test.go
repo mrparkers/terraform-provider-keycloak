@@ -130,6 +130,44 @@ func TestAccKeycloakUser_updateUsername(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakUser_updateInPlace(t *testing.T) {
+	userOne := &keycloak.User{
+		RealmId:   "terraform-" + acctest.RandString(10),
+		Username:  "terraform-user-" + acctest.RandString(10),
+		Email:     fmt.Sprintf("%s@gmail.com", acctest.RandString(10)),
+		FirstName: acctest.RandString(10),
+		LastName:  acctest.RandString(10),
+		Enabled:   randomBool(),
+	}
+
+	userTwo := &keycloak.User{
+		RealmId:   userOne.RealmId,
+		Username:  userOne.Username,
+		Email:     fmt.Sprintf("%s@gmail.com", acctest.RandString(10)),
+		FirstName: acctest.RandString(10),
+		LastName:  acctest.RandString(10),
+		Enabled:   randomBool(),
+	}
+
+	resourceName := "keycloak_user.user"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakUser_fromInterface(userOne),
+				Check:  testAccCheckKeycloakUserExists(resourceName),
+			},
+			{
+				Config: testKeycloakUser_fromInterface(userTwo),
+				Check:  testAccCheckKeycloakUserExists(resourceName),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakUserExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getUserFromState(s, resourceName)
@@ -241,4 +279,22 @@ resource "keycloak_user" "user" {
 	username  = "%s"
 }
 	`, realmOne, realmTwo, username)
+}
+
+func testKeycloakUser_fromInterface(user *keycloak.User) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_user" "user" {
+	realm_id   = "${keycloak_realm.realm.id}"
+	username   = "%s"
+
+	email      = "%s"
+	first_name = "%s"
+	last_name  = "%s"
+	enabled    = %t
+}
+	`, user.RealmId, user.Username, user.Email, user.FirstName, user.LastName, user.Enabled)
 }
