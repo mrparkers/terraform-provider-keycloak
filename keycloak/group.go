@@ -86,7 +86,7 @@ func (keycloakClient *KeycloakClient) GetGroup(realmId, id string) (*Group, erro
 		return nil, err
 	}
 
-	group.RealmId = realmId // its important to set RealmId here because fetching the ParentId depends on it
+	group.RealmId = realmId // it's important to set RealmId here because fetching the ParentId depends on it
 
 	parentId, err := keycloakClient.groupParentId(&group)
 	if err != nil {
