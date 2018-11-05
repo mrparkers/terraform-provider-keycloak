@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 )
 
@@ -28,7 +29,7 @@ func (keycloakClient *KeycloakClient) groupParentId(group *Group) (string, error
 		return "", nil
 	}
 
-	groups, err := keycloakClient.listGroups(group.RealmId)
+	groups, err := keycloakClient.listGroupsWithName(group.RealmId, group.Name)
 	if err != nil {
 		return "", err
 	}
@@ -60,15 +61,15 @@ func (keycloakClient *KeycloakClient) groupParentId(group *Group) (string, error
  * Child groups are created via POST /realms/${realm_id}/groups/${parent_id}/children
  */
 func (keycloakClient *KeycloakClient) NewGroup(group *Group) error {
-	var url string
+	var createGroupUrl string
 
 	if group.ParentId == "" {
-		url = fmt.Sprintf("/realms/%s/groups", group.RealmId)
+		createGroupUrl = fmt.Sprintf("/realms/%s/groups", group.RealmId)
 	} else {
-		url = fmt.Sprintf("/realms/%s/groups/%s/children", group.RealmId, group.ParentId)
+		createGroupUrl = fmt.Sprintf("/realms/%s/groups/%s/children", group.RealmId, group.ParentId)
 	}
 
-	location, err := keycloakClient.post(url, group)
+	location, err := keycloakClient.post(createGroupUrl, group)
 	if err != nil {
 		return err
 	}
@@ -106,10 +107,10 @@ func (keycloakClient *KeycloakClient) DeleteGroup(realmId, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/groups/%s", realmId, id))
 }
 
-func (keycloakClient *KeycloakClient) listGroups(realmId string) ([]*Group, error) {
+func (keycloakClient *KeycloakClient) listGroupsWithName(realmId, name string) ([]*Group, error) {
 	var groups []*Group
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups", realmId), &groups)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups?search=%s", realmId, url.QueryEscape(name)), &groups)
 	if err != nil {
 		return nil, err
 	}
