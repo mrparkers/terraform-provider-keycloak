@@ -34,7 +34,7 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 			},
 			"display_name": {
 				Type:        schema.TypeString,
-				Required:    false,
+				Optional:    true,
 				Description: "Friendly name for Identity Providers.",
 			},
 			"provider_id": {
@@ -75,8 +75,9 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 				Description: "If true, users cannot log in through this provider.  They can only link to this provider.  This is useful if you don't want to allow login from the provider, but want to integrate with a provider",
 			},
 			"trust_email": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Optional:    true,
+				Default:     false,
 				Description: "If enabled then email provided by this provider is not verified even if verification is enabled for the realm.",
 			},
 			"first_broker_login_flow_alias": {
@@ -100,6 +101,7 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "Service base url.",
+							//
 						},
 						"backchannel_supported": {
 							Type:        schema.TypeBool,
@@ -107,11 +109,18 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 							Default:     true,
 							Description: "Does the external IDP support backchannel logout?",
 						},
+						"host_ip": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Google Host IP",
+							//google
+						},
 						"use_jwks_url": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     true,
 							Description: "Use JWKS url",
+							//github,twitter,facebook,google,gitlab
 						},
 						"validate_signature": {
 							Type:        schema.TypeBool,
@@ -119,44 +128,60 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 							Default:     false,
 							Description: "Enable/disable signature validation of SAML responses.",
 						},
-						"authorization_url": {
+						"key": {
 							Type:        schema.TypeString,
-							Required:    true,
+							Optional:    true,
+							Description: "StackOverFlow key.",
+						},
+						"authorization_url": {
+							Type:     schema.TypeString,
+							Optional: true,
+							//Required:    true,
 							Description: "OIDC authorization URL.",
 						},
 						"client_id": {
-							Type:        schema.TypeString,
-							Required:    true,
+							Type: schema.TypeString,
+							//Required:    true,
+							Optional:    true,
 							Description: "Client ID.",
+							//github,twitter,facebook,google,gitlab
 						},
 						"client_secret": {
-							Type:        schema.TypeString,
-							Required:    true,
+							Type: schema.TypeString,
+							//Required:    true,
+							Optional:    true,
 							Description: "Client Secret.",
+							//github,twitter,facebook,google,gitlab
 						},
 						"disable_user_info": {
-							Type:        schema.TypeString,
-							Required:    false,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
 							Description: "Disable User Info.",
+							//github,twitter,facebook,google
 						},
 						"hide_on_login_page": {
-							Type:        schema.TypeString,
-							Required:    false,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
 							Description: "Hide On Login Page.",
+							//github,twitter,facebook,google,gitlab
 						},
 						"token_url": {
-							Type:        schema.TypeString,
-							Required:    true,
+							Type: schema.TypeString,
+							//Required:    true,
+							Optional:    true,
 							Description: "Token URL.",
 						},
 						"login_hint": {
 							Type:        schema.TypeString,
-							Required:    false,
+							Optional:    true,
 							Description: "Login Hint.",
 						},
 						"name_id_policy_format": {
-							Type:        schema.TypeString,
-							Required:    true,
+							Type: schema.TypeString,
+							//Required:    true,
+							Optional:    true,
 							Default:     "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
 							Description: "Name ID Policy Format.",
 						},
@@ -166,8 +191,9 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 							Description: "Logout URL.",
 						},
 						"single_sign_on_service_url": {
-							Type:        schema.TypeString,
-							Required:    true,
+							Type: schema.TypeString,
+							//Required:    true,
+							Optional:    true,
 							Description: "SSO Logout URL.",
 						},
 						"signing_certificate": {
@@ -177,13 +203,13 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 						},
 						"signature_algorithm": {
 							Type:        schema.TypeString,
-							Required:    true,
+							Optional:    true,
 							Default:     "RSA_SHA256",
 							Description: "Signing Algorithm.",
 						},
 						"xml_sign_key_info_key_name_transformer": {
 							Type:        schema.TypeString,
-							Required:    true,
+							Optional:    true,
 							Default:     "KEY_ID",
 							Description: "Sign Key Transformer.",
 						},
@@ -267,8 +293,8 @@ func getIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityP
 			AuthorizationUrl:                 config["authorization_url"].(string),
 			ClientId:                         config["client_id"].(string),
 			ClientSecret:                     config["client_secret"].(string),
-			DisableUserInfo:                  config["disable_user_info"].(string),
-			HideOnLoginPage:                  config["hide_on_login_page"].(string),
+			DisableUserInfo:                  config["disable_user_info"].(bool),
+			HideOnLoginPage:                  config["hide_on_login_page"].(bool),
 			TokenUrl:                         config["token_url"].(string),
 			LoginHint:                        config["login_hint"].(string),
 			NameIDPolicyFormat:               config["name_id_policy_format"].(string),
@@ -277,13 +303,14 @@ func getIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityP
 			SigningCertificate:               config["signing_certificate"].(string),
 			SignatureAlgorithm:               config["signature_algorithm"].(string),
 			XmlSignKeyInfoKeyNameTransformer: config["xml_sign_key_info_key_name_transformer"].(string),
-			PostBindingAuthnRequest:          config["post_binding_authn_request"].(string),
-			PostBindingResponse:              config["post_binding_response"].(string),
-			PostBindingLogout:                config["post_binding_logout"].(string),
+			PostBindingAuthnRequest:          config["post_binding_authn_request"].(bool),
+			PostBindingResponse:              config["post_binding_response"].(bool),
+			PostBindingLogout:                config["post_binding_logout"].(bool),
 			ForceAuthn:                       config["force_authn"].(bool),
 			WantAuthnRequestsSigned:          config["want_authn_requests_signed"].(bool),
 			WantAssertionsSigned:             config["want_assertions_signed"].(bool),
 			WantAssertionsEncrypted:          config["want_assertions_encrypted"].(bool),
+			Key:                              config["key"].(string),
 		}
 		log.Printf("[DEBUG] Creating config: %#v", config)
 	} else {
@@ -295,7 +322,18 @@ func getIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityP
 func resourceIdentityProviderConfigHash(v interface{}) int {
 	var buf bytes.Buffer
 	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s-", m["alias"].(string)))
+	if v, ok := m["client_id"]; ok && v.(string) != "" {
+		buf.WriteString(fmt.Sprintf("%s-", v.(string)))
+	}
+	if v, ok := m["authorization_url"]; ok && v.(string) != "" {
+		buf.WriteString(fmt.Sprintf("%s-", v.(string)))
+	}
+	if v, ok := m["single_sign_on_service_url"]; ok && v.(string) != "" {
+		buf.WriteString(fmt.Sprintf("%s-", v.(string)))
+	}
+	if v, ok := m["signature_algorithm"]; ok && v.(string) != "" {
+		buf.WriteString(fmt.Sprintf("%s-", v.(string)))
+	}
 	return hashcode.String(buf.String())
 }
 
@@ -316,30 +354,32 @@ func setIdentityProviderData(data *schema.ResourceData, identityProvider *keyclo
 	if config := identityProvider.Config; config != nil {
 		data.Set("config", []interface{}{
 			map[string]interface{}{
-				"base_url":                               *config.BaseUrl,
-				"backchannel_supported":                  *config.BackchannelSupported,
-				"use_jwks_url":                           *config.UseJwksUrl,
-				"validate_signature":                     *config.ValidateSignature,
-				"authorization_url":                      *config.AuthorizationUrl,
-				"client_id":                              *config.ClientId,
-				"client_secret":                          *config.ClientSecret,
-				"disable_user_info":                      *config.DisableUserInfo,
-				"hide_on_login_page":                     *config.HideOnLoginPage,
-				"token_url":                              *config.TokenUrl,
-				"login_hint":                             *config.LoginHint,
-				"name_id_policy_format":                  *config.NameIDPolicyFormat,
-				"single_logout_service_url":              *config.SingleLogutServiceUrl,
-				"single_sign_on_service_url":             *config.SingleSignOnServiceUrl,
-				"signing_certificate":                    *config.SigningCertificate,
-				"signature_algorithm":                    *config.SignatureAlgorithm,
-				"xml_sign_key_info_key_name_transformer": *config.XmlSignKeyInfoKeyNameTransformer,
-				"post_binding_authn_request":             *config.PostBindingAuthnRequest,
-				"post_binding_response":                  *config.PostBindingResponse,
-				"post_binding_logout":                    *config.PostBindingLogout,
-				"force_authn":                            *config.ForceAuthn,
-				"want_authn_requests_signed":             *config.WantAuthnRequestsSigned,
-				"want_assertions_signed":                 *config.WantAssertionsSigned,
-				"want_assertions_encrypted":              *config.WantAssertionsEncrypted,
+				"base_url":                               config.BaseUrl,
+				"backchannel_supported":                  config.BackchannelSupported,
+				"use_jwks_url":                           config.UseJwksUrl,
+				"validate_signature":                     config.ValidateSignature,
+				"authorization_url":                      config.AuthorizationUrl,
+				"client_id":                              config.ClientId,
+				"client_secret":                          config.ClientSecret,
+				"disable_user_info":                      config.DisableUserInfo,
+				"hide_on_login_page":                     config.HideOnLoginPage,
+				"token_url":                              config.TokenUrl,
+				"login_hint":                             config.LoginHint,
+				"name_id_policy_format":                  config.NameIDPolicyFormat,
+				"single_logout_service_url":              config.SingleLogutServiceUrl,
+				"single_sign_on_service_url":             config.SingleSignOnServiceUrl,
+				"signing_certificate":                    config.SigningCertificate,
+				"signature_algorithm":                    config.SignatureAlgorithm,
+				"xml_sign_key_info_key_name_transformer": config.XmlSignKeyInfoKeyNameTransformer,
+				"post_binding_authn_request":             config.PostBindingAuthnRequest,
+				"post_binding_response":                  config.PostBindingResponse,
+				"post_binding_logout":                    config.PostBindingLogout,
+				"force_authn":                            config.ForceAuthn,
+				"want_authn_requests_signed":             config.WantAuthnRequestsSigned,
+				"want_assertions_signed":                 config.WantAssertionsSigned,
+				"want_assertions_encrypted":              config.WantAssertionsEncrypted,
+				"key":                                    config.Key,
+				"host_ip":                                config.HostIp,
 			},
 		})
 	}
@@ -379,7 +419,7 @@ func resourceKeycloakIdentityProviderRead(data *schema.ResourceData, meta interf
 func resourceKeycloakIdentityProviderUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	identityProvider := getIdentityProviderFromData(data)
+	identityProvider, err := getIdentityProviderFromData(data)
 
 	err = keycloakClient.UpdateIdentityProvider(identityProvider)
 	if err != nil {

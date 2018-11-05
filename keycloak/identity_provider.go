@@ -12,8 +12,8 @@ type IdentityProviderConfig struct {
 	AuthorizationUrl                 string `json:"authorizationUrl,omitempty"`
 	ClientId                         string `json:"clientId,omitempty"`
 	ClientSecret                     string `json:"clientSecret,omitempty"`
-	DisableUserInfo                  string `json:"disableUserInfo,omitempty"`
-	HideOnLoginPage                  string `json:"hideOnLoginPage,omitempty"`
+	DisableUserInfo                  bool   `json:"disableUserInfo,omitempty"`
+	HideOnLoginPage                  bool   `json:"hideOnLoginPage,omitempty"`
 	TokenUrl                         string `json:"tokeUrl,omitempty"`
 	LoginHint                        string `json:"loginHint,omitempty"`
 	NameIDPolicyFormat               string `json:"nameIDPolicyFormat,omitempty"`
@@ -22,13 +22,15 @@ type IdentityProviderConfig struct {
 	SigningCertificate               string `json:"signingCertificate,omitempty"`
 	SignatureAlgorithm               string `json:"signatureAlgorithm,omitempty"`
 	XmlSignKeyInfoKeyNameTransformer string `json:"xmlSignKeyInfoKeyNameTransformer,omitempty"`
-	PostBindingAuthnRequest          string `json:"postBindingAuthnRequest,omitempty"`
-	PostBindingResponse              string `json:"postBindingResponse,omitempty"`
-	PostBindingLogout                string `json:"postBindingLogout,omitempty"`
+	PostBindingAuthnRequest          bool   `json:"postBindingAuthnRequest,omitempty"`
+	PostBindingResponse              bool   `json:"postBindingResponse,omitempty"`
+	PostBindingLogout                bool   `json:"postBindingLogout,omitempty"`
 	ForceAuthn                       bool   `json:"forceAuthn,omitempty"`
 	WantAuthnRequestsSigned          bool   `json:"wantAuthnRequestsSigned,omitempty"`
 	WantAssertionsSigned             bool   `json:"wantAssertionsSigned,omitempty"`
 	WantAssertionsEncrypted          bool   `json:"wantAssertionsEncrypted,omitempty"`
+	Key                              string `json:"key,omitempty"`
+	HostIp                           string `json:"hostIp,omitempty"`
 }
 
 type IdentityProvider struct {
