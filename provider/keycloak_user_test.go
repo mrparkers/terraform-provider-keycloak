@@ -168,6 +168,40 @@ func TestAccKeycloakUser_updateInPlace(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakUser_unsetOptionalAttributes(t *testing.T) {
+	userWithOptionalAttributes := &keycloak.User{
+		RealmId:   "terraform-" + acctest.RandString(10),
+		Username:  "terraform-user-" + acctest.RandString(10),
+		Email:     fmt.Sprintf("%s@gmail.com", acctest.RandString(10)),
+		FirstName: acctest.RandString(10),
+		LastName:  acctest.RandString(10),
+		Enabled:   randomBool(),
+	}
+
+	resourceName := "keycloak_user.user"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakUser_fromInterface(userWithOptionalAttributes),
+				Check:  testAccCheckKeycloakUserExists(resourceName),
+			},
+			{
+				Config: testKeycloakUser_basic(userWithOptionalAttributes.RealmId, userWithOptionalAttributes.Username),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakUserExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "email", ""),
+					resource.TestCheckResourceAttr(resourceName, "first_name", ""),
+					resource.TestCheckResourceAttr(resourceName, "last_name", ""),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakUserExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getUserFromState(s, resourceName)

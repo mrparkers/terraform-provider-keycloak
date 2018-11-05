@@ -7,9 +7,9 @@ type User struct {
 	RealmId string `json:"-"`
 
 	Username  string `json:"username"`
-	Email     string `json:"email,omitempty"`
-	FirstName string `json:"firstName,omitempty"`
-	LastName  string `json:"lastName,omitempty"`
+	Email     string `json:"email"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 	Enabled   bool   `json:"enabled"`
 }
 
