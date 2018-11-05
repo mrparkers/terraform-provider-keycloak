@@ -30,6 +30,15 @@ resource "keycloak_group" "bar" {
   name     = "bar"
 }
 
+resource "keycloak_user" "user" {
+  realm_id   = "${keycloak_realm.test.id}"
+  username   = "test-user"
+
+  email      = "test-user@fakedomain.com"
+  first_name = "Testy"
+  last_name  = "Tester"
+}
+
 resource "keycloak_openid_client" "test_client" {
   client_id           = "test-client"
   name                = "test-client"
