@@ -22,6 +22,12 @@ func TestAccKeycloakGroup_basic(t *testing.T) {
 				Config: testKeycloakGroup_basic(realmName, groupName),
 				Check:  testAccCheckKeycloakGroupExists("keycloak_group.group"),
 			},
+			{
+				ResourceName:        "keycloak_group.group",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
 		},
 	})
 }

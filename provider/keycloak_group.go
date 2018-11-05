@@ -3,6 +3,7 @@ package provider
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strings"
 )
 
 func resourceKeycloakGroup() *schema.Resource {
@@ -11,6 +12,10 @@ func resourceKeycloakGroup() *schema.Resource {
 		Read:   resourceKeycloakGroupRead,
 		Delete: resourceKeycloakGroupDelete,
 		Update: resourceKeycloakGroupUpdate,
+		// This resource can be imported using {{realm}}/{{group_id}}. The Group ID is displayed in the URL when editing it from the GUI
+		Importer: &schema.ResourceImporter{
+			State: resourceKeycloakGroupImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -110,4 +115,16 @@ func resourceKeycloakGroupDelete(data *schema.ResourceData, meta interface{}) er
 	id := data.Id()
 
 	return keycloakClient.DeleteGroup(realmId, id)
+}
+
+func resourceKeycloakGroupImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+
+	realm := parts[0]
+	id := parts[1]
+
+	d.Set("realm_id", realm)
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
 }
