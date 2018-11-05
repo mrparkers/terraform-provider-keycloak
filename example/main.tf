@@ -14,6 +14,22 @@ resource "keycloak_realm" "test" {
   access_code_lifespan = "30m"
 }
 
+resource "keycloak_group" "foo" {
+  realm_id = "${keycloak_realm.test.id}"
+  name     = "foo"
+}
+
+resource "keycloak_group" "nested_foo" {
+  realm_id  = "${keycloak_realm.test.id}"
+  parent_id = "${keycloak_group.foo.id}"
+  name      = "nested-foo"
+}
+
+resource "keycloak_group" "bar" {
+  realm_id = "${keycloak_realm.test.id}"
+  name     = "bar"
+}
+
 resource "keycloak_openid_client" "test_client" {
   client_id           = "test-client"
   name                = "test-client"
