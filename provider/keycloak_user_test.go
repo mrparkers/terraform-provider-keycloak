@@ -100,6 +100,36 @@ func TestAccKeycloakUser_updateRealm(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakUser_updateUsername(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	usernameOne := "terraform-user-" + acctest.RandString(10)
+	usernameTwo := "terraform-user-" + acctest.RandString(10)
+
+	resourceName := "keycloak_user.user"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakUser_basic(realmName, usernameOne),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakUserExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "username", usernameOne),
+				),
+			},
+			{
+				Config: testKeycloakUser_basic(realmName, usernameTwo),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakUserExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "username", usernameTwo),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakUserExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getUserFromState(s, resourceName)
