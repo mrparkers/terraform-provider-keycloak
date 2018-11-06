@@ -10,6 +10,7 @@ func KeycloakProvider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_realm":                                   resourceKeycloakRealm(),
 			"keycloak_group":                                   resourceKeycloakGroup(),
+			"keycloak_user":                                    resourceKeycloakUser(),
 			"keycloak_openid_client":                           resourceKeycloakOpenidClient(),
 			"keycloak_openid_client_scope":                     resourceKeycloakOpenidClientScope(),
 			"keycloak_ldap_user_federation":                    resourceKeycloakLdapUserFederation(),
