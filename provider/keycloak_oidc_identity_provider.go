@@ -1,12 +1,8 @@
 package provider
 
 import (
-	"bytes"
-	"fmt"
-	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"log"
 	"strings"
 )
 
@@ -151,90 +147,77 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 	}
 }
 
-func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
-	rec := &keycloak.IdentityProvider{
-		Id:                        data.Id(),
+func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.OidcIdentityProvider, error) {
+	rec := &keycloak.OidcIdentityProvider{
+		InternalId:                data.Id(),
 		RealmId:                   data.Get("realm_id").(string),
 		Alias:                     data.Get("alias").(string),
 		DisplayName:               data.Get("display_name").(string),
 		ProviderId:                data.Get("provider_id").(string),
 		Enabled:                   data.Get("enabled").(bool),
-		StoreToken:                data.Get("store_token").(bool),
-		AddReadTokenRoleOnCreate:  data.Get("add_read_token_role_on_create").(bool),
+		StoreToken:                keycloak.KeycloakBool(data.Get("store_token").(bool)),
+		AddReadTokenRoleOnCreate:  keycloak.KeycloakBool(data.Get("add_read_token_role_on_create").(bool)),
 		AuthenticateByDefault:     data.Get("authenticate_by_default").(bool),
-		LinkOnly:                  data.Get("link_only").(bool),
-		TrustEmail:                data.Get("trust_email").(bool),
+		LinkOnly:                  keycloak.KeycloakBool(data.Get("link_only").(bool)),
+		TrustEmail:                keycloak.KeycloakBool(data.Get("trust_email").(bool)),
 		FirstBrokerLoginFlowAlias: data.Get("first_broker_login_flow_alias").(string),
 		PostBrokerLoginFlowAlias:  data.Get("post_broker_login_flow_alias").(string),
 	}
-	if v, ok := data.GetOk("config"); ok {
-		configs := v.(*schema.Set).List()
-		if len(configs) > 1 {
-			return nil, fmt.Errorf("You can only define a single alias target per record")
-		}
-		config := configs[0].(map[string]interface{})
-		rec.Config = &keycloak.IdentityProviderConfig{
-			BackchannelSupported: config["backchannel_supported"].(bool),
-			UseJwksUrl:           config["use_jwks_url"].(bool),
-			ValidateSignature:    config["validate_signature"].(bool),
-			AuthorizationUrl:     config["authorization_url"].(string),
-			ClientId:             config["client_id"].(string),
-			ClientSecret:         config["client_secret"].(string),
-			DisableUserInfo:      config["disable_user_info"].(bool),
-			HideOnLoginPage:      config["hide_on_login_page"].(bool),
-			TokenUrl:             config["token_url"].(string),
-			LoginHint:            config["login_hint"].(string),
-		}
-		log.Printf("[DEBUG] Creating config: %#v", config)
-	} else {
-		return nil, fmt.Errorf("No config is defined")
+	rec.Config = &keycloak.OidcIdentityProviderConfig{
+		BackchannelSupported: keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
+		UseJwksUrl:           keycloak.KeycloakBoolQuoted(data.Get("use_jwks_url").(bool)),
+		ValidateSignature:    keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
+		AuthorizationUrl:     data.Get("authorization_url").(string),
+		ClientId:             data.Get("client_id").(string),
+		ClientSecret:         data.Get("client_secret").(string),
+		DisableUserInfo:      keycloak.KeycloakBoolQuoted(data.Get("disable_user_info").(bool)),
+		HideOnLoginPage:      keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
+		TokenUrl:             data.Get("token_url").(string),
+		LoginHint:            data.Get("login_hint").(string),
 	}
 	return rec, nil
 }
 
-func setOidcIdentityProviderData(data *schema.ResourceData, identityProvider *keycloak.IdentityProvider) {
-	data.SetId(identityProvider.Id)
-	data.Set("realm_id", identityProvider.RealmId)
-	data.Set("alias", identityProvider.Alias)
-	data.Set("display_name", identityProvider.DisplayName)
-	data.Set("provider_id", identityProvider.ProviderId)
-	data.Set("enabled", identityProvider.Enabled)
-	data.Set("store_token", identityProvider.StoreToken)
-	data.Set("add_read_token_role_on_create", identityProvider.AddReadTokenRoleOnCreate)
-	data.Set("authenticate_by_default", identityProvider.AuthenticateByDefault)
-	data.Set("link_only", identityProvider.LinkOnly)
-	data.Set("trust_email", identityProvider.TrustEmail)
-	data.Set("first_broker_login_flow_alias", identityProvider.FirstBrokerLoginFlowAlias)
-	data.Set("post_broker_login_flow_alias", identityProvider.PostBrokerLoginFlowAlias)
-	if config := identityProvider.Config; config != nil {
-		data.Set("config", []interface{}{
-			map[string]interface{}{
-				"backchannel_supported": config.BackchannelSupported,
-				"use_jwks_url":          config.UseJwksUrl,
-				"validate_signature":    config.ValidateSignature,
-				"authorization_url":     config.AuthorizationUrl,
-				"client_id":             config.ClientId,
-				"client_secret":         config.ClientSecret,
-				"disable_user_info":     config.DisableUserInfo,
-				"hide_on_login_page":    config.HideOnLoginPage,
-				"token_url":             config.TokenUrl,
-				"login_hint":            config.LoginHint,
-			},
-		})
+func setOidcIdentityProviderData(data *schema.ResourceData, oidcIdentityProvider *keycloak.OidcIdentityProvider) {
+	data.SetId(oidcIdentityProvider.RealmId + "/" + oidcIdentityProvider.Alias)
+	data.Set("internal_id", oidcIdentityProvider.InternalId)
+	data.Set("realm_id", oidcIdentityProvider.RealmId)
+	data.Set("alias", oidcIdentityProvider.Alias)
+	data.Set("display_name", oidcIdentityProvider.DisplayName)
+	data.Set("provider_id", oidcIdentityProvider.ProviderId)
+	data.Set("enabled", oidcIdentityProvider.Enabled)
+	data.Set("store_token", oidcIdentityProvider.StoreToken)
+	data.Set("add_read_token_role_on_create", oidcIdentityProvider.AddReadTokenRoleOnCreate)
+	data.Set("authenticate_by_default", oidcIdentityProvider.AuthenticateByDefault)
+	data.Set("link_only", oidcIdentityProvider.LinkOnly)
+	data.Set("trust_email", oidcIdentityProvider.TrustEmail)
+	data.Set("first_broker_login_flow_alias", oidcIdentityProvider.FirstBrokerLoginFlowAlias)
+	data.Set("post_broker_login_flow_alias", oidcIdentityProvider.PostBrokerLoginFlowAlias)
+	if config := oidcIdentityProvider.Config; config != nil {
+		data.Set("backchannel_supported", config.BackchannelSupported)
+		data.Set("use_jwks_url", config.UseJwksUrl)
+		data.Set("validate_signature", config.ValidateSignature)
+		data.Set("authorization_url", config.AuthorizationUrl)
+		data.Set("client_id", config.ClientId)
+		data.Set("client_secret", config.ClientSecret)
+		data.Set("disable_user_info", config.DisableUserInfo)
+		data.Set("hide_on_login_page", config.HideOnLoginPage)
+		data.Set("token_url", config.TokenUrl)
+		data.Set("login_hint", config.LoginHint)
 	}
 }
 
 func resourceKeycloakOidcIdentityProviderCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	identityProvider, err := getOidcIdentityProviderFromData(data)
+	oidcIdentityProvider, err := getOidcIdentityProviderFromData(data)
 
-	err = keycloakClient.NewIdentityProvider(identityProvider)
+	err = keycloakClient.NewOidcIdentityProvider(oidcIdentityProvider)
 	if err != nil {
 		return err
 	}
 
-	setOidcIdentityProviderData(data, identityProvider)
+	setOidcIdentityProviderData(data, oidcIdentityProvider)
 
 	return resourceKeycloakOidcIdentityProviderRead(data, meta)
 }
@@ -243,14 +226,14 @@ func resourceKeycloakOidcIdentityProviderRead(data *schema.ResourceData, meta in
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	id := data.Id()
+	alias := data.Get("alias").(string)
 
-	identityProvider, err := keycloakClient.GetIdentityProvider(realmId, id)
+	oidcIdentityProvider, err := keycloakClient.GetOidcIdentityProvider(realmId, alias)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
-	setOidcIdentityProviderData(data, identityProvider)
+	setOidcIdentityProviderData(data, oidcIdentityProvider)
 
 	return nil
 }
@@ -258,14 +241,14 @@ func resourceKeycloakOidcIdentityProviderRead(data *schema.ResourceData, meta in
 func resourceKeycloakOidcIdentityProviderUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	identityProvider, err := getOidcIdentityProviderFromData(data)
+	oidcIdentityProvider, err := getOidcIdentityProviderFromData(data)
 
-	err = keycloakClient.UpdateIdentityProvider(identityProvider)
+	err = keycloakClient.UpdateOidcIdentityProvider(oidcIdentityProvider)
 	if err != nil {
 		return err
 	}
 
-	setOidcIdentityProviderData(data, identityProvider)
+	setOidcIdentityProviderData(data, oidcIdentityProvider)
 
 	return nil
 }
@@ -274,19 +257,19 @@ func resourceKeycloakOidcIdentityProviderDelete(data *schema.ResourceData, meta 
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	id := data.Id()
+	alias := data.Get("alias").(string)
 
-	return keycloakClient.DeleteIdentityProvider(realmId, id)
+	return keycloakClient.DeleteOidcIdentityProvider(realmId, alias)
 }
 
 func resourceKeycloakOidcIdentityProviderImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	realm := parts[0]
-	id := parts[1]
+	alias := parts[1]
 
 	d.Set("realm_id", realm)
-	d.SetId(id)
+	d.Set("alias", alias)
 
 	return []*schema.ResourceData{d}, nil
 }

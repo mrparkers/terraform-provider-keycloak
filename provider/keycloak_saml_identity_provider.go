@@ -1,12 +1,8 @@
 package provider
 
 import (
-	"bytes"
-	"fmt"
-	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"log"
 	"strings"
 )
 
@@ -195,103 +191,90 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	}
 }
 
-func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
-	rec := &keycloak.IdentityProvider{
-		Id:                        data.Id(),
+func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.SamlIdentityProvider, error) {
+	rec := &keycloak.SamlIdentityProvider{
+		InternalId:                data.Id(),
 		RealmId:                   data.Get("realm_id").(string),
 		Alias:                     data.Get("alias").(string),
 		DisplayName:               data.Get("display_name").(string),
 		ProviderId:                data.Get("provider_id").(string),
 		Enabled:                   data.Get("enabled").(bool),
-		StoreToken:                data.Get("store_token").(bool),
-		AddReadTokenRoleOnCreate:  data.Get("add_read_token_role_on_create").(bool),
+		StoreToken:                keycloak.KeycloakBool(data.Get("store_token").(bool)),
+		AddReadTokenRoleOnCreate:  keycloak.KeycloakBool(data.Get("add_read_token_role_on_create").(bool)),
 		AuthenticateByDefault:     data.Get("authenticate_by_default").(bool),
-		LinkOnly:                  data.Get("link_only").(bool),
-		TrustEmail:                data.Get("trust_email").(bool),
+		LinkOnly:                  keycloak.KeycloakBool(data.Get("link_only").(bool)),
+		TrustEmail:                keycloak.KeycloakBool(data.Get("trust_email").(bool)),
 		FirstBrokerLoginFlowAlias: data.Get("first_broker_login_flow_alias").(string),
 		PostBrokerLoginFlowAlias:  data.Get("post_broker_login_flow_alias").(string),
 	}
-	if v, ok := data.GetOk("config"); ok {
-		configs := v.(*schema.Set).List()
-		if len(configs) > 1 {
-			return nil, fmt.Errorf("You can only define a single alias target per record")
-		}
-		config := configs[0].(map[string]interface{})
-		rec.Config = &keycloak.IdentityProviderConfig{
-			UseJwksUrl:                       config["use_jwks_url"].(bool),
-			ValidateSignature:                config["validate_signature"].(bool),
-			HideOnLoginPage:                  config["hide_on_login_page"].(bool),
-			NameIDPolicyFormat:               config["name_id_policy_format"].(string),
-			SingleLogutServiceUrl:            config["single_logout_service_url"].(string),
-			SingleSignOnServiceUrl:           config["single_sign_on_service_url"].(string),
-			SigningCertificate:               config["signing_certificate"].(string),
-			SignatureAlgorithm:               config["signature_algorithm"].(string),
-			XmlSignKeyInfoKeyNameTransformer: config["xml_sign_key_info_key_name_transformer"].(string),
-			PostBindingAuthnRequest:          config["post_binding_authn_request"].(bool),
-			PostBindingResponse:              config["post_binding_response"].(bool),
-			PostBindingLogout:                config["post_binding_logout"].(bool),
-			ForceAuthn:                       config["force_authn"].(bool),
-			WantAuthnRequestsSigned:          config["want_authn_requests_signed"].(bool),
-			WantAssertionsSigned:             config["want_assertions_signed"].(bool),
-			WantAssertionsEncrypted:          config["want_assertions_encrypted"].(bool),
-		}
-		log.Printf("[DEBUG] Creating config: %#v", config)
-	} else {
-		return nil, fmt.Errorf("No config is defined")
+	rec.Config = &keycloak.SamlIdentityProviderConfig{
+		UseJwksUrl:                       keycloak.KeycloakBoolQuoted(data.Get("use_jwks_url").(bool)),
+		ValidateSignature:                keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
+		HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
+		NameIDPolicyFormat:               data.Get("name_id_policy_format").(string),
+		SingleLogutServiceUrl:            data.Get("single_logout_service_url").(string),
+		SingleSignOnServiceUrl:           data.Get("single_sign_on_service_url").(string),
+		SigningCertificate:               data.Get("signing_certificate").(string),
+		SignatureAlgorithm:               data.Get("signature_algorithm").(string),
+		XmlSignKeyInfoKeyNameTransformer: data.Get("xml_sign_key_info_key_name_transformer").(string),
+		PostBindingAuthnRequest:          keycloak.KeycloakBoolQuoted(data.Get("post_binding_authn_request").(bool)),
+		PostBindingResponse:              keycloak.KeycloakBoolQuoted(data.Get("post_binding_response").(bool)),
+		PostBindingLogout:                keycloak.KeycloakBoolQuoted(data.Get("post_binding_logout").(bool)),
+		ForceAuthn:                       keycloak.KeycloakBoolQuoted(data.Get("force_authn").(bool)),
+		WantAuthnRequestsSigned:          keycloak.KeycloakBoolQuoted(data.Get("want_authn_requests_signed").(bool)),
+		WantAssertionsSigned:             keycloak.KeycloakBoolQuoted(data.Get("want_assertions_signed").(bool)),
+		WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
 	}
 	return rec, nil
 }
 
-func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *keycloak.IdentityProvider) {
-	data.SetId(identityProvider.Id)
-	data.Set("realm_id", identityProvider.RealmId)
-	data.Set("alias", identityProvider.Alias)
-	data.Set("display_name", identityProvider.DisplayName)
-	data.Set("provider_id", identityProvider.ProviderId)
-	data.Set("enabled", identityProvider.Enabled)
-	data.Set("store_token", identityProvider.StoreToken)
-	data.Set("add_read_token_role_on_create", identityProvider.AddReadTokenRoleOnCreate)
-	data.Set("authenticate_by_default", identityProvider.AuthenticateByDefault)
-	data.Set("link_only", identityProvider.LinkOnly)
-	data.Set("trust_email", identityProvider.TrustEmail)
-	data.Set("first_broker_login_flow_alias", identityProvider.FirstBrokerLoginFlowAlias)
-	data.Set("post_broker_login_flow_alias", identityProvider.PostBrokerLoginFlowAlias)
-	if config := identityProvider.Config; config != nil {
-		data.Set("config", []interface{}{
-			map[string]interface{}{
-				"backchannel_supported":                  config.BackchannelSupported,
-				"use_jwks_url":                           config.UseJwksUrl,
-				"validate_signature":                     config.ValidateSignature,
-				"hide_on_login_page":                     config.HideOnLoginPage,
-				"name_id_policy_format":                  config.NameIDPolicyFormat,
-				"single_logout_service_url":              config.SingleLogutServiceUrl,
-				"single_sign_on_service_url":             config.SingleSignOnServiceUrl,
-				"signing_certificate":                    config.SigningCertificate,
-				"signature_algorithm":                    config.SignatureAlgorithm,
-				"xml_sign_key_info_key_name_transformer": config.XmlSignKeyInfoKeyNameTransformer,
-				"post_binding_authn_request":             config.PostBindingAuthnRequest,
-				"post_binding_response":                  config.PostBindingResponse,
-				"post_binding_logout":                    config.PostBindingLogout,
-				"force_authn":                            config.ForceAuthn,
-				"want_authn_requests_signed":             config.WantAuthnRequestsSigned,
-				"want_assertions_signed":                 config.WantAssertionsSigned,
-				"want_assertions_encrypted":              config.WantAssertionsEncrypted,
-			},
-		})
+func setSamlIdentityProviderData(data *schema.ResourceData, samlIdentityProvider *keycloak.SamlIdentityProvider) {
+	data.SetId(samlIdentityProvider.RealmId + "/" + samlIdentityProvider.Alias)
+	data.Set("internal_id", samlIdentityProvider.InternalId)
+	data.Set("realm_id", samlIdentityProvider.RealmId)
+	data.Set("alias", samlIdentityProvider.Alias)
+	data.Set("display_name", samlIdentityProvider.DisplayName)
+	data.Set("provider_id", samlIdentityProvider.ProviderId)
+	data.Set("enabled", samlIdentityProvider.Enabled)
+	data.Set("store_token", samlIdentityProvider.StoreToken)
+	data.Set("add_read_token_role_on_create", samlIdentityProvider.AddReadTokenRoleOnCreate)
+	data.Set("authenticate_by_default", samlIdentityProvider.AuthenticateByDefault)
+	data.Set("link_only", samlIdentityProvider.LinkOnly)
+	data.Set("trust_email", samlIdentityProvider.TrustEmail)
+	data.Set("first_broker_login_flow_alias", samlIdentityProvider.FirstBrokerLoginFlowAlias)
+	data.Set("post_broker_login_flow_alias", samlIdentityProvider.PostBrokerLoginFlowAlias)
+	if config := samlIdentityProvider.Config; config != nil {
+		data.Set("backchannel_supported", config.BackchannelSupported)
+		data.Set("use_jwks_url", config.UseJwksUrl)
+		data.Set("validate_signature", config.ValidateSignature)
+		data.Set("hide_on_login_page", config.HideOnLoginPage)
+		data.Set("name_id_policy_format", config.NameIDPolicyFormat)
+		data.Set("single_logout_service_url", config.SingleLogutServiceUrl)
+		data.Set("single_sign_on_service_url", config.SingleSignOnServiceUrl)
+		data.Set("signing_certificate", config.SigningCertificate)
+		data.Set("signature_algorithm", config.SignatureAlgorithm)
+		data.Set("xml_sign_key_info_key_name_transformer", config.XmlSignKeyInfoKeyNameTransformer)
+		data.Set("post_binding_authn_request", config.PostBindingAuthnRequest)
+		data.Set("post_binding_response", config.PostBindingResponse)
+		data.Set("post_binding_logout", config.PostBindingLogout)
+		data.Set("force_authn", config.ForceAuthn)
+		data.Set("want_authn_requests_signed", config.WantAuthnRequestsSigned)
+		data.Set("want_assertions_signed", config.WantAssertionsSigned)
+		data.Set("want_assertions_encrypted", config.WantAssertionsEncrypted)
 	}
 }
 
 func resourceKeycloakSamlIdentityProviderCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	identityProvider, err := getSamlIdentityProviderFromData(data)
+	samlIdentityProvider, err := getSamlIdentityProviderFromData(data)
 
-	err = keycloakClient.NewIdentityProvider(identityProvider)
+	err = keycloakClient.NewSamlIdentityProvider(samlIdentityProvider)
 	if err != nil {
 		return err
 	}
 
-	setSamlIdentityProviderData(data, identityProvider)
+	setSamlIdentityProviderData(data, samlIdentityProvider)
 
 	return resourceKeycloakSamlIdentityProviderRead(data, meta)
 }
@@ -300,14 +283,14 @@ func resourceKeycloakSamlIdentityProviderRead(data *schema.ResourceData, meta in
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	id := data.Id()
+	alias := data.Get("alias").(string)
 
-	identityProvider, err := keycloakClient.GetIdentityProvider(realmId, id)
+	samlIdentityProvider, err := keycloakClient.GetSamlIdentityProvider(realmId, alias)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
-	setSamlIdentityProviderData(data, identityProvider)
+	setSamlIdentityProviderData(data, samlIdentityProvider)
 
 	return nil
 }
@@ -315,14 +298,14 @@ func resourceKeycloakSamlIdentityProviderRead(data *schema.ResourceData, meta in
 func resourceKeycloakSamlIdentityProviderUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	identityProvider, err := getSamlIdentityProviderFromData(data)
+	samlIdentityProvider, err := getSamlIdentityProviderFromData(data)
 
-	err = keycloakClient.UpdateIdentityProvider(identityProvider)
+	err = keycloakClient.UpdateSamlIdentityProvider(samlIdentityProvider)
 	if err != nil {
 		return err
 	}
 
-	setSamlIdentityProviderData(data, identityProvider)
+	setSamlIdentityProviderData(data, samlIdentityProvider)
 
 	return nil
 }
@@ -331,19 +314,19 @@ func resourceKeycloakSamlIdentityProviderDelete(data *schema.ResourceData, meta 
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	id := data.Id()
+	alias := data.Get("alias").(string)
 
-	return keycloakClient.DeleteIdentityProvider(realmId, id)
+	return keycloakClient.DeleteSamlIdentityProvider(realmId, alias)
 }
 
 func resourceKeycloakSamlIdentityProviderImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	realm := parts[0]
-	id := parts[1]
+	alias := parts[1]
 
 	d.Set("realm_id", realm)
-	d.SetId(id)
+	d.Set("alias", alias)
 
 	return []*schema.ResourceData{d}, nil
 }
