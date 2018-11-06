@@ -66,7 +66,7 @@ func (keycloakClient *KeycloakClient) getUserByUsername(realmId, username string
 		}
 	}
 
-	// the requested user does not exist even though the search parameter returned results
+	// the requested user does not exist
 	// I don't think raising an error is appropriate here - consumers should check if the user is nil
 	return nil, nil
 }
