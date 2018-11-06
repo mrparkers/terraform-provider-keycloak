@@ -81,6 +81,9 @@ func (keycloakClient *KeycloakClient) AddUsersToGroup(realmId, groupId string, u
 		if err != nil {
 			return err
 		}
+		if user == nil {
+			return fmt.Errorf("user with username %s does not exist", username.(string))
+		}
 
 		err = keycloakClient.addUserToGroup(user, groupId)
 		if err != nil {
