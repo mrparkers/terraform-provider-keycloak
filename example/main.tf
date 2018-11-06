@@ -39,6 +39,25 @@ resource "keycloak_user" "user" {
 	last_name  = "Tester"
 }
 
+resource "keycloak_user" "another_user" {
+	realm_id   = "${keycloak_realm.test.id}"
+	username   = "another-test-user"
+
+	email      = "another-test-user@fakedomain.com"
+	first_name = "Testy"
+	last_name  = "Tester"
+}
+
+resource "keycloak_group_memberships" "foo_members" {
+	realm_id = "${keycloak_realm.test.id}"
+	group_id = "${keycloak_group.foo.id}"
+
+	members  = [
+		"${keycloak_user.user.username}",
+		"${keycloak_user.another_user.username}"
+	]
+}
+
 resource "keycloak_openid_client" "test_client" {
 	client_id           = "test-client"
 	name                = "test-client"
