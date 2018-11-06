@@ -54,15 +54,15 @@ func (keycloakClient *KeycloakClient) NewSamlIdentityProvider(samlIdentityProvid
 }
 
 func (keycloakClient *KeycloakClient) GetSamlIdentityProvider(realm, alias string) (*SamlIdentityProvider, error) {
-	var samlIdentityProvider *SamlIdentityProvider
+	var samlIdentityProvider SamlIdentityProvider
 	samlIdentityProvider.Realm = realm
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), samlIdentityProvider)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), &samlIdentityProvider)
 	if err != nil {
 		return nil, err
 	}
 
-	return samlIdentityProvider, nil
+	return &samlIdentityProvider, nil
 }
 
 func (keycloakClient *KeycloakClient) UpdateSamlIdentityProvider(samlIdentityProvider *SamlIdentityProvider) error {

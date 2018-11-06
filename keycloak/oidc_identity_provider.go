@@ -47,15 +47,15 @@ func (keycloakClient *KeycloakClient) NewOidcIdentityProvider(oidcIdentityProvid
 }
 
 func (keycloakClient *KeycloakClient) GetOidcIdentityProvider(realm, alias string) (*OidcIdentityProvider, error) {
-	var oidcIdentityProvider *OidcIdentityProvider
+	var oidcIdentityProvider OidcIdentityProvider
 	oidcIdentityProvider.Realm = realm
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), oidcIdentityProvider)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), &oidcIdentityProvider)
 	if err != nil {
 		return nil, err
 	}
 
-	return oidcIdentityProvider, nil
+	return &oidcIdentityProvider, nil
 }
 
 func (keycloakClient *KeycloakClient) UpdateOidcIdentityProvider(oidcIdentityProvider *OidcIdentityProvider) error {
