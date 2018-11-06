@@ -29,7 +29,7 @@ func (keycloakClient *KeycloakClient) groupParentId(group *Group) (string, error
 		return "", nil
 	}
 
-	groups, err := keycloakClient.listGroupsWithName(group.RealmId, group.Name)
+	groups, err := keycloakClient.ListGroupsWithName(group.RealmId, group.Name)
 	if err != nil {
 		return "", err
 	}
@@ -107,7 +107,7 @@ func (keycloakClient *KeycloakClient) DeleteGroup(realmId, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/groups/%s", realmId, id))
 }
 
-func (keycloakClient *KeycloakClient) listGroupsWithName(realmId, name string) ([]*Group, error) {
+func (keycloakClient *KeycloakClient) ListGroupsWithName(realmId, name string) ([]*Group, error) {
 	var groups []*Group
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups?search=%s", realmId, url.QueryEscape(name)), &groups)

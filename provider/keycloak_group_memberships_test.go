@@ -22,7 +22,7 @@ func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroupMemberships_basic(realmName, groupName, username),
-				Check:  testAccCheckKeycloakUserBelongsToGroup("keycloak_group_memberships.group_members", username),
+				Check:  testAccCheckUserBelongsToGroup("keycloak_group_memberships.group_members", username),
 			},
 		},
 	})
@@ -42,11 +42,11 @@ func TestAccKeycloakGroupMemberships_updateGroupForceNew(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroupMemberships_updateGroupForceNew(realmName, groupOne, groupTwo, username, "group_one"),
-				Check:  testAccCheckKeycloakUserBelongsToGroup("keycloak_group_memberships.group_members", username),
+				Check:  testAccCheckUserBelongsToGroup("keycloak_group_memberships.group_members", username),
 			},
 			{
 				Config: testKeycloakGroupMemberships_updateGroupForceNew(realmName, groupOne, groupTwo, username, "group_two"),
-				Check:  testAccCheckKeycloakUserBelongsToGroup("keycloak_group_memberships.group_members", username),
+				Check:  testAccCheckUserBelongsToGroup("keycloak_group_memberships.group_members", username),
 			},
 		},
 	})
@@ -61,11 +61,12 @@ func TestAccKeycloakGroupMemberships_updateInPlace(t *testing.T) {
 		"terraform-user-" + acctest.RandString(10),
 		"terraform-user-" + acctest.RandString(10),
 	}
-	randomUserToRemove := acctest.RandIntRange(0, len(allUsersForTest)-1)
+	indexOfRandomUserToRemove := acctest.RandIntRange(0, len(allUsersForTest)-1)
+	randomUserToRemove := allUsersForTest[indexOfRandomUserToRemove]
 
 	var subsetOfUsers []string
 	for index, user := range allUsersForTest {
-		if index != randomUserToRemove {
+		if index != indexOfRandomUserToRemove {
 			subsetOfUsers = append(subsetOfUsers, user)
 		}
 	}
@@ -77,17 +78,20 @@ func TestAccKeycloakGroupMemberships_updateInPlace(t *testing.T) {
 			// init
 			{
 				Config: testKeycloakGroupMemberships_multipleUsers(realmName, groupName, allUsersForTest, allUsersForTest),
-				Check:  testAccCheckKeycloakUsersBelongToGroup("keycloak_group_memberships.group_members", allUsersForTest),
+				Check:  testAccCheckUsersBelongToGroup("keycloak_group_memberships.group_members", allUsersForTest),
 			},
 			// remove
 			{
 				Config: testKeycloakGroupMemberships_multipleUsers(realmName, groupName, allUsersForTest, subsetOfUsers),
-				Check:  testAccCheckKeycloakUsersBelongToGroup("keycloak_group_memberships.group_members", subsetOfUsers),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUsersBelongToGroup("keycloak_group_memberships.group_members", subsetOfUsers),
+					testAccCheckUsersDontBelongToGroup("keycloak_group_memberships.group_members", []string{randomUserToRemove}),
+				),
 			},
 			// add
 			{
 				Config: testKeycloakGroupMemberships_multipleUsers(realmName, groupName, allUsersForTest, allUsersForTest),
-				Check:  testAccCheckKeycloakUsersBelongToGroup("keycloak_group_memberships.group_members", allUsersForTest),
+				Check:  testAccCheckUsersBelongToGroup("keycloak_group_memberships.group_members", allUsersForTest),
 			},
 		},
 	})
@@ -110,23 +114,122 @@ func TestAccKeycloakGroupMemberships_userDoesNotExist(t *testing.T) {
 	})
 }
 
-func testAccCheckKeycloakUserBelongsToGroup(resourceName, user string) resource.TestCheckFunc {
-	return testAccCheckKeycloakUsersBelongToGroup(resourceName, []string{user})
+// if a user is removed from a group controlled by this resource, terraform should add them again
+func TestAccKeycloakGroupMemberships_authoritativeAdd(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	groupName := "terraform-group-" + acctest.RandString(10)
+
+	usersInGroup := []string{
+		"terraform-user-" + acctest.RandString(10),
+		"terraform-user-" + acctest.RandString(10),
+		"terraform-user-" + acctest.RandString(10),
+	}
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGroupMemberships_multipleUsers(realmName, groupName, usersInGroup, usersInGroup),
+				Check:  testAccCheckUsersBelongToGroup("keycloak_group_memberships.group_members", usersInGroup),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					groupsWithName, err := keycloakClient.ListGroupsWithName(realmName, groupName)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					userToManuallyRemove := usersInGroup[acctest.RandIntRange(0, len(usersInGroup)-1)]
+
+					err = keycloakClient.RemoveUsersFromGroup(realmName, groupsWithName[0].Id, []interface{}{userToManuallyRemove})
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakGroupMemberships_multipleUsers(realmName, groupName, usersInGroup, usersInGroup),
+				Check:  testAccCheckUsersBelongToGroup("keycloak_group_memberships.group_members", usersInGroup),
+			},
+		},
+	})
 }
 
-func testAccCheckKeycloakUsersBelongToGroup(resourceName string, users []string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+// if a user is added to a group controlled by this resource, terraform should remove them
+func TestAccKeycloakGroupMemberships_authoritativeRemove(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	groupName := "terraform-group-" + acctest.RandString(10)
 
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("resource not found: %s", resourceName)
+	allUsersForTest := []string{
+		"terraform-user-" + acctest.RandString(10),
+		"terraform-user-" + acctest.RandString(10),
+		"terraform-user-" + acctest.RandString(10),
+		"terraform-user-" + acctest.RandString(10),
+	}
+
+	var usersInGroup []string
+	indexOfUserToManuallyAdd := acctest.RandIntRange(0, len(allUsersForTest)-1)
+	userToManuallyAdd := allUsersForTest[indexOfUserToManuallyAdd]
+	for index, user := range allUsersForTest {
+		if index != indexOfUserToManuallyAdd {
+			usersInGroup = append(usersInGroup, user)
 		}
+	}
 
-		realmId := rs.Primary.Attributes["realm_id"]
-		groupId := rs.Primary.Attributes["group_id"]
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGroupMemberships_multipleUsers(realmName, groupName, allUsersForTest, usersInGroup),
+				Check:  testAccCheckUsersBelongToGroup("keycloak_group_memberships.group_members", usersInGroup),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-		usersInGroup, err := keycloakClient.GetGroupMembers(realmId, groupId)
+					groupsWithName, err := keycloakClient.ListGroupsWithName(realmName, groupName)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					err = keycloakClient.AddUsersToGroup(realmName, groupsWithName[0].Id, []interface{}{userToManuallyAdd})
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakGroupMemberships_multipleUsers(realmName, groupName, allUsersForTest, usersInGroup),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUsersBelongToGroup("keycloak_group_memberships.group_members", usersInGroup),
+					testAccCheckUsersDontBelongToGroup("keycloak_group_memberships.group_members", []string{userToManuallyAdd}),
+				),
+			},
+		},
+	})
+}
+
+func testAccGetUsersInGroupFromGroupMembershipsState(resourceName string, s *terraform.State) ([]*keycloak.User, error) {
+	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+	rs, ok := s.RootModule().Resources[resourceName]
+	if !ok {
+		return nil, fmt.Errorf("resource not found: %s", resourceName)
+	}
+
+	realmId := rs.Primary.Attributes["realm_id"]
+	groupId := rs.Primary.Attributes["group_id"]
+
+	return keycloakClient.GetGroupMembers(realmId, groupId)
+}
+
+func testAccCheckUserBelongsToGroup(resourceName, user string) resource.TestCheckFunc {
+	return testAccCheckUsersBelongToGroup(resourceName, []string{user})
+}
+
+func testAccCheckUsersBelongToGroup(resourceName string, users []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		usersInGroup, err := testAccGetUsersInGroupFromGroupMembershipsState(resourceName, s)
 		if err != nil {
 			return err
 		}
@@ -143,7 +246,26 @@ func testAccCheckKeycloakUsersBelongToGroup(resourceName string, users []string)
 			}
 
 			if !userFound {
-				return fmt.Errorf("unable to find user %s in group with id %s", user, groupId)
+				return fmt.Errorf("unable to find user %s in group", user)
+			}
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckUsersDontBelongToGroup(resourceName string, users []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		usersInGroup, err := testAccGetUsersInGroupFromGroupMembershipsState(resourceName, s)
+		if err != nil {
+			return err
+		}
+
+		for _, user := range users {
+			for _, userInGroup := range usersInGroup {
+				if user == userInGroup.Username {
+					return fmt.Errorf("expected user %s to not belong to group", user)
+				}
 			}
 		}
 

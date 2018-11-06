@@ -98,8 +98,8 @@ func (keycloakClient *KeycloakClient) RemoveUserFromGroup(user *User, groupId st
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/groups/%s", user.RealmId, user.Id, groupId))
 }
 
-func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId string, users []interface{}) error {
-	for _, username := range users {
+func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId string, usernames []interface{}) error {
+	for _, username := range usernames {
 		user, err := keycloakClient.getUserByUsername(realmId, username.(string)) // we need the user's id in order to remove them from a group
 		if err != nil {
 			return err
