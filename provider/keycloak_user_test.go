@@ -250,7 +250,7 @@ func testAccCheckKeycloakUserDestroy() resource.TestCheckFunc {
 }
 
 func getUserFromState(s *terraform.State, resourceName string) (*keycloak.User, error) {
-	keycloakUser := testAccProvider.Meta().(*keycloak.KeycloakClient)
+	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
@@ -260,7 +260,7 @@ func getUserFromState(s *terraform.State, resourceName string) (*keycloak.User, 
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	user, err := keycloakUser.GetUser(realm, id)
+	user, err := keycloakClient.GetUser(realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting user with id %s: %s", id, err)
 	}
