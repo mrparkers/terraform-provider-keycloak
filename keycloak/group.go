@@ -117,3 +117,18 @@ func (keycloakClient *KeycloakClient) listGroupsWithName(realmId, name string) (
 
 	return groups, nil
 }
+
+func (keycloakClient *KeycloakClient) GetGroupMembers(realmId, groupId string) ([]*User, error) {
+	var users []*User
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s/members", realmId, groupId), &users)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, user := range users {
+		user.RealmId = realmId
+	}
+
+	return users, nil
+}
