@@ -19,7 +19,7 @@ type OidcIdentityProviderConfig struct {
 }
 
 type OidcIdentityProvider struct {
-	RealmId                     string                      `json:"-"`
+	Realm                       string                      `json:"-"`
 	InternalId                  string                      `json:"internalId,omitempty"`
 	UpdateProfileFirstLoginMode string                      `json:"updateProfileFirstLoginMode,omitempty"`
 	Alias                       string                      `json:"alias,omitempty"`
@@ -37,8 +37,8 @@ type OidcIdentityProvider struct {
 }
 
 func (keycloakClient *KeycloakClient) NewOidcIdentityProvider(oidcIdentityProvider *OidcIdentityProvider) error {
-	log.Printf("[WARN] Realm: %s", oidcIdentityProvider.RealmId)
-	_, err := keycloakClient.post(fmt.Sprintf("/realms/%s/identity-provider/instances", oidcIdentityProvider.RealmId), oidcIdentityProvider)
+	log.Printf("[WARN] Realm: %s", oidcIdentityProvider.Realm)
+	_, err := keycloakClient.post(fmt.Sprintf("/realms/%s/identity-provider/instances", oidcIdentityProvider.Realm), oidcIdentityProvider)
 	if err != nil {
 		return err
 	}
@@ -46,11 +46,11 @@ func (keycloakClient *KeycloakClient) NewOidcIdentityProvider(oidcIdentityProvid
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetOidcIdentityProvider(realmId, alias string) (*OidcIdentityProvider, error) {
+func (keycloakClient *KeycloakClient) GetOidcIdentityProvider(realm, alias string) (*OidcIdentityProvider, error) {
 	var oidcIdentityProvider *OidcIdentityProvider
-	oidcIdentityProvider.RealmId = realmId
+	oidcIdentityProvider.Realm = realm
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realmId, alias), oidcIdentityProvider)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), oidcIdentityProvider)
 	if err != nil {
 		return nil, err
 	}
@@ -59,9 +59,9 @@ func (keycloakClient *KeycloakClient) GetOidcIdentityProvider(realmId, alias str
 }
 
 func (keycloakClient *KeycloakClient) UpdateOidcIdentityProvider(oidcIdentityProvider *OidcIdentityProvider) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", oidcIdentityProvider.RealmId, oidcIdentityProvider.Alias), oidcIdentityProvider)
+	return keycloakClient.put(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", oidcIdentityProvider.Realm, oidcIdentityProvider.Alias), oidcIdentityProvider)
 }
 
-func (keycloakClient *KeycloakClient) DeleteOidcIdentityProvider(realmId, alias string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realmId, alias))
+func (keycloakClient *KeycloakClient) DeleteOidcIdentityProvider(realm, alias string) error {
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias))
 }

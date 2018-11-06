@@ -16,7 +16,7 @@ type SocialIdentityProviderConfig struct {
 }
 
 type SocialIdentityProvider struct {
-	RealmId                     string                        `json:"-"`
+	Realm                       string                        `json:"-"`
 	InternalId                  string                        `json:"internalId,omitempty"`
 	UpdateProfileFirstLoginMode string                        `json:"updateProfileFirstLoginMode,omitempty"`
 	Alias                       string                        `json:"alias,omitempty"`
@@ -34,8 +34,8 @@ type SocialIdentityProvider struct {
 }
 
 func (keycloakClient *KeycloakClient) NewSocialIdentityProvider(socialIdentityProvider *SocialIdentityProvider) error {
-	log.Printf("[WARN] Realm: %s", socialIdentityProvider.RealmId)
-	_, err := keycloakClient.post(fmt.Sprintf("/realms/%s/identity-provider/instances", socialIdentityProvider.RealmId), socialIdentityProvider)
+	log.Printf("[WARN] Realm: %s", socialIdentityProvider.Realm)
+	_, err := keycloakClient.post(fmt.Sprintf("/realms/%s/identity-provider/instances", socialIdentityProvider.Realm), socialIdentityProvider)
 	if err != nil {
 		return err
 	}
@@ -43,11 +43,11 @@ func (keycloakClient *KeycloakClient) NewSocialIdentityProvider(socialIdentityPr
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetSocialIdentityProvider(realmId, alias string) (*SocialIdentityProvider, error) {
+func (keycloakClient *KeycloakClient) GetSocialIdentityProvider(realm, alias string) (*SocialIdentityProvider, error) {
 	var socialIdentityProvider SocialIdentityProvider
-	socialIdentityProvider.RealmId = realmId
+	socialIdentityProvider.Realm = realm
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realmId, alias), &socialIdentityProvider)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), &socialIdentityProvider)
 	if err != nil {
 		return nil, err
 	}
@@ -56,9 +56,9 @@ func (keycloakClient *KeycloakClient) GetSocialIdentityProvider(realmId, alias s
 }
 
 func (keycloakClient *KeycloakClient) UpdateSocialIdentityProvider(socialIdentityProvider *SocialIdentityProvider) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", socialIdentityProvider.RealmId, socialIdentityProvider.Alias), socialIdentityProvider)
+	return keycloakClient.put(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", socialIdentityProvider.Realm, socialIdentityProvider.Alias), socialIdentityProvider)
 }
 
-func (keycloakClient *KeycloakClient) DeleteSocialIdentityProvider(realmId, alias string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realmId, alias))
+func (keycloakClient *KeycloakClient) DeleteSocialIdentityProvider(realm, alias string) error {
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias))
 }

@@ -22,11 +22,11 @@ func resourceKeycloakSocialIdentityProvider() *schema.Resource {
 				ForceNew:    true,
 				Description: "The alias uniquely identifies an identity provider and it is also used to build the redirect uri.",
 			},
-			"realm_id": {
+			"realm": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "Realm ID",
+				Description: "Realm Name",
 			},
 			"display_name": {
 				Type:        schema.TypeString,
@@ -125,7 +125,7 @@ func resourceKeycloakSocialIdentityProvider() *schema.Resource {
 func getSocialIdentityProviderFromData(data *schema.ResourceData) (*keycloak.SocialIdentityProvider, error) {
 	rec := &keycloak.SocialIdentityProvider{
 		InternalId:                data.Id(),
-		RealmId:                   data.Get("realm_id").(string),
+		Realm:                     data.Get("realm").(string),
 		Alias:                     data.Get("alias").(string),
 		DisplayName:               data.Get("display_name").(string),
 		ProviderId:                data.Get("provider_id").(string),
@@ -150,9 +150,9 @@ func getSocialIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Soc
 }
 
 func setSocialIdentityProviderData(data *schema.ResourceData, socialIdentityProvider *keycloak.SocialIdentityProvider) {
-	data.SetId(socialIdentityProvider.RealmId + "/" + socialIdentityProvider.Alias)
+	data.SetId(socialIdentityProvider.Realm + "/" + socialIdentityProvider.Alias)
 	data.Set("internal_id", socialIdentityProvider.InternalId)
-	data.Set("realm_id", socialIdentityProvider.RealmId)
+	data.Set("realm", socialIdentityProvider.Realm)
 	data.Set("alias", socialIdentityProvider.Alias)
 	data.Set("display_name", socialIdentityProvider.DisplayName)
 	data.Set("provider_id", socialIdentityProvider.ProviderId)
@@ -193,10 +193,10 @@ func resourceKeycloakSocialIdentityProviderCreate(data *schema.ResourceData, met
 func resourceKeycloakSocialIdentityProviderRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmId := data.Get("realm_id").(string)
+	realm := data.Get("realm").(string)
 	alias := data.Get("alias").(string)
 
-	socialIdentityProvider, err := keycloakClient.GetSocialIdentityProvider(realmId, alias)
+	socialIdentityProvider, err := keycloakClient.GetSocialIdentityProvider(realm, alias)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -224,10 +224,10 @@ func resourceKeycloakSocialIdentityProviderUpdate(data *schema.ResourceData, met
 func resourceKeycloakSocialIdentityProviderDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmId := data.Get("realm_id").(string)
+	realm := data.Get("realm").(string)
 	alias := data.Get("alias").(string)
 
-	return keycloakClient.DeleteSocialIdentityProvider(realmId, alias)
+	return keycloakClient.DeleteSocialIdentityProvider(realm, alias)
 }
 
 func resourceKeycloakSocialIdentityProviderImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
@@ -236,7 +236,7 @@ func resourceKeycloakSocialIdentityProviderImport(d *schema.ResourceData, _ inte
 	realm := parts[0]
 	alias := parts[1]
 
-	d.Set("realm_id", realm)
+	d.Set("realm", realm)
 	d.Set("alias", alias)
 
 	return []*schema.ResourceData{d}, nil

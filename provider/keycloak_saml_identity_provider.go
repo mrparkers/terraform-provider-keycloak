@@ -22,11 +22,11 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 				ForceNew:    true,
 				Description: "The alias uniquely identifies an identity provider and it is also used to build the redirect uri.",
 			},
-			"realm_id": {
+			"realm": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "Realm ID",
+				Description: "Realm Name",
 			},
 			"display_name": {
 				Type:        schema.TypeString,
@@ -54,8 +54,6 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			"add_read_token_role_on_create": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
-				ForceNew:    true,
 				Description: "Enable/disable if new users can read any stored tokens. This assigns the broker.read-token role.",
 			},
 			"authenticate_by_default": {
@@ -67,13 +65,11 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			"link_only": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "If true, users cannot log in through this provider.  They can only link to this provider.  This is useful if you don't want to allow login from the provider, but want to integrate with a provider",
 			},
 			"trust_email": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "If enabled then email provided by this provider is not verified even if verification is enabled for the realm.",
 			},
 			"first_broker_login_flow_alias": {
@@ -85,13 +81,11 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			"post_broker_login_flow_alias": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
 				Description: "Alias of authentication flow, which is triggered after each login with this identity provider. Useful if you want additional verification of each user authenticated with this identity provider (for example OTP). Leave this empty if you don't want any additional authenticators to be triggered after login with this identity provider. Also note, that authenticator implementations must assume that user is already set in ClientSession as identity provider already set it.",
 			},
 			"backchannel_supported": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     true,
 				Description: "Does the external IDP support backchannel logout?",
 			},
 			"use_jwks_url": {
@@ -103,13 +97,11 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			"validate_signature": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Enable/disable signature validation of SAML responses.",
 			},
 			"hide_on_login_page": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Hide On Login Page.",
 			},
 			"name_id_policy_format": {
@@ -148,43 +140,36 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			"post_binding_authn_request": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Post Binding Authn Request.",
 			},
 			"post_binding_response": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Post Binding Response.",
 			},
 			"post_binding_logout": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Post Binding Logout.",
 			},
 			"force_authn": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     true,
 				Description: "Require Force Authn.",
 			},
 			"want_authn_requests_signed": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Require Force Authn Requests Sign.",
 			},
 			"want_assertions_signed": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Want Assertions Signed.",
 			},
 			"want_assertions_encrypted": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: "Want Assertions Encrypted.",
 			},
 		},
@@ -194,7 +179,7 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.SamlIdentityProvider, error) {
 	rec := &keycloak.SamlIdentityProvider{
 		InternalId:                data.Id(),
-		RealmId:                   data.Get("realm_id").(string),
+		Realm:                     data.Get("realm").(string),
 		Alias:                     data.Get("alias").(string),
 		DisplayName:               data.Get("display_name").(string),
 		ProviderId:                data.Get("provider_id").(string),
@@ -229,9 +214,9 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.SamlI
 }
 
 func setSamlIdentityProviderData(data *schema.ResourceData, samlIdentityProvider *keycloak.SamlIdentityProvider) {
-	data.SetId(samlIdentityProvider.RealmId + "/" + samlIdentityProvider.Alias)
+	data.SetId(samlIdentityProvider.Realm + "/" + samlIdentityProvider.Alias)
 	data.Set("internal_id", samlIdentityProvider.InternalId)
-	data.Set("realm_id", samlIdentityProvider.RealmId)
+	data.Set("realm", samlIdentityProvider.Realm)
 	data.Set("alias", samlIdentityProvider.Alias)
 	data.Set("display_name", samlIdentityProvider.DisplayName)
 	data.Set("provider_id", samlIdentityProvider.ProviderId)
@@ -282,10 +267,10 @@ func resourceKeycloakSamlIdentityProviderCreate(data *schema.ResourceData, meta 
 func resourceKeycloakSamlIdentityProviderRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmId := data.Get("realm_id").(string)
+	realm := data.Get("realm").(string)
 	alias := data.Get("alias").(string)
 
-	samlIdentityProvider, err := keycloakClient.GetSamlIdentityProvider(realmId, alias)
+	samlIdentityProvider, err := keycloakClient.GetSamlIdentityProvider(realm, alias)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -313,10 +298,10 @@ func resourceKeycloakSamlIdentityProviderUpdate(data *schema.ResourceData, meta 
 func resourceKeycloakSamlIdentityProviderDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmId := data.Get("realm_id").(string)
+	realm := data.Get("realm").(string)
 	alias := data.Get("alias").(string)
 
-	return keycloakClient.DeleteSamlIdentityProvider(realmId, alias)
+	return keycloakClient.DeleteSamlIdentityProvider(realm, alias)
 }
 
 func resourceKeycloakSamlIdentityProviderImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
@@ -325,7 +310,7 @@ func resourceKeycloakSamlIdentityProviderImport(d *schema.ResourceData, _ interf
 	realm := parts[0]
 	alias := parts[1]
 
-	d.Set("realm_id", realm)
+	d.Set("realm", realm)
 	d.Set("alias", alias)
 
 	return []*schema.ResourceData{d}, nil
