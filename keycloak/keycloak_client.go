@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 	"time"
@@ -147,6 +148,7 @@ func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 
 	if request.Method == http.MethodPost || request.Method == http.MethodPut {
 		request.Header.Set("Content-type", "application/json")
+		request.ContentLength = 0
 	}
 }
 
@@ -158,7 +160,9 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 	requestPath := request.URL.Path
 
 	log.Printf("[DEBUG] Sending %s to %s", requestMethod, requestPath)
+	showBody := false
 	if request.Body != nil {
+		showBody = true
 		requestBody, err := request.GetBody()
 		if err != nil {
 			return nil, "", err
@@ -171,6 +175,12 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 	}
 
 	keycloakClient.addRequestHeaders(request)
+
+	dump, err := httputil.DumpRequest(request, showBody)
+	if err != nil {
+		return nil, "", err
+	}
+	log.Printf("[DEBUG] %s", dump)
 
 	response, err := keycloakClient.httpClient.Do(request)
 	if err != nil {
