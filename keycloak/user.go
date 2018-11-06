@@ -67,7 +67,7 @@ func (keycloakClient *KeycloakClient) getUserByUsername(realmId, username string
 	}
 
 	// the requested user does not exist
-	// I don't think raising an error is appropriate here - consumers should check if the user is nil
+	// we shouldn't raise an error here since it will be difficult to differentiate between a non-existent user and a network error
 	return nil, nil
 }
 
@@ -103,6 +103,9 @@ func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId stri
 		user, err := keycloakClient.getUserByUsername(realmId, username.(string)) // we need the user's id in order to remove them from a group
 		if err != nil {
 			return err
+		}
+		if user == nil {
+			return fmt.Errorf("user with username %s does not exist", username.(string))
 		}
 
 		err = keycloakClient.RemoveUserFromGroup(user, groupId)
