@@ -24,6 +24,12 @@ func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
 				Config: testKeycloakGroupMemberships_basic(realmName, groupName, username),
 				Check:  testAccCheckUserBelongsToGroup("keycloak_group_memberships.group_members", username),
 			},
+			{
+				// we need a separate test for destroy instead of using CheckDestroy because this resource is implicitly
+				// destroyed at the end of each test via destroying users or groups they're tied to
+				Config: testKeycloakGroupMemberships_destroy(realmName, groupName, username),
+				Check:  testAccCheckUsersDontBelongToGroup("keycloak_group.group", []string{username}),
+			},
 		},
 	})
 }
@@ -218,7 +224,13 @@ func testAccGetUsersInGroupFromGroupMembershipsState(resourceName string, s *ter
 	}
 
 	realmId := rs.Primary.Attributes["realm_id"]
-	groupId := rs.Primary.Attributes["group_id"]
+
+	var groupId string
+	if strings.HasPrefix(resourceName, "keycloak_group_membership") {
+		groupId = rs.Primary.Attributes["group_id"]
+	} else {
+		groupId = rs.Primary.ID
+	}
 
 	return keycloakClient.GetGroupMembers(realmId, groupId)
 }
@@ -388,6 +400,24 @@ resource "keycloak_group_memberships" "group_members" {
 	members = [
 		"%s"
 	]
+}
+	`, realm, group, username)
+}
+
+func testKeycloakGroupMemberships_destroy(realm, group, username string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_group" "group" {
+	name     = "%s"
+	realm_id = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_user" "user" {
+	realm_id = "${keycloak_realm.realm.id}"
+	username = "%s"
 }
 	`, realm, group, username)
 }
