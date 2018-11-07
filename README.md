@@ -12,8 +12,9 @@ Long term, I'd like to support as much as I can while I tinker with Keycloak in 
 ### Supported Resources
 
 - [`keycloak_realm`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_realm.go)
-- [`keycloak_group`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_group.go)
 - [`keycloak_user`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_user.go)
+- [`keycloak_group`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_group.go)
+- [`keycloak_group_memberships`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_group_memberships.go)
 - [`keycloak_openid_client`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_client.go)
 - [`keycloak_openid_client_scope`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_client_scope.go)
 - [`keycloak_ldap_user_federation`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_ldap_user_federation.go)
