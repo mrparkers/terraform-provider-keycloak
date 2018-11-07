@@ -27,7 +27,7 @@ func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
 			{
 				// we need a separate test for destroy instead of using CheckDestroy because this resource is implicitly
 				// destroyed at the end of each test via destroying users or groups they're tied to
-				Config: testKeycloakGroupMemberships_destroy(realmName, groupName, username),
+				Config: testKeycloakGroupMemberships_noGroupMemberships(realmName, groupName, username),
 				Check:  testAccCheckUsersDontBelongToGroup("keycloak_group.group", []string{username}),
 			},
 		},
@@ -210,6 +210,41 @@ func TestAccKeycloakGroupMemberships_authoritativeRemove(t *testing.T) {
 					testAccCheckUsersBelongToGroup("keycloak_group_memberships.group_members", usersInGroup),
 					testAccCheckUsersDontBelongToGroup("keycloak_group_memberships.group_members", []string{userToManuallyAdd}),
 				),
+			},
+		},
+	})
+}
+
+// this resource doesn't support import because it can be created even if the desired state already exists in keycloak
+func TestAccKeycloakGroupMemberships_noImportNeeded(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	groupName := "terraform-group-" + acctest.RandString(10)
+	username := "terraform-user-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGroupMemberships_noGroupMemberships(realmName, groupName, username),
+				Check:  testAccCheckUsersDontBelongToGroup("keycloak_group.group", []string{username}),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					groupsWithName, err := keycloakClient.ListGroupsWithName(realmName, groupName)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					err = keycloakClient.AddUsersToGroup(realmName, groupsWithName[0].Id, []interface{}{username})
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakGroupMemberships_basic(realmName, groupName, username),
+				Check:  testAccCheckUserBelongsToGroup("keycloak_group.group", username),
 			},
 		},
 	})
@@ -404,7 +439,7 @@ resource "keycloak_group_memberships" "group_members" {
 	`, realm, group, username)
 }
 
-func testKeycloakGroupMemberships_destroy(realm, group, username string) string {
+func testKeycloakGroupMemberships_noGroupMemberships(realm, group, username string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
