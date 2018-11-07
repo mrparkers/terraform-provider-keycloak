@@ -4,6 +4,16 @@ provider "keycloak" {
   url           = "http://localhost:8080"
 }
 
+//Or you can use basic auth instead
+
+//provider keycloak {
+//  client_id = "admin-cli"
+//  username  = "<your_keycloak_username>"
+//  password  = "<your_keycloak_password>"
+//  url   = "https://keycloak.host"
+//  realm = "master"
+//}
+
 resource "keycloak_realm" "test" {
   realm                = "test"
   enabled              = true
@@ -179,3 +189,38 @@ resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_clie
   claim_name      = "foo"
   claim_value     = "bar"
 }
+
+resource keycloak_identity_provider github {
+  alias   = "github"
+  realm   = "master"
+  enabled = true
+
+  social {
+    client_id     = "<your_client_id>"
+    client_secret = "<your_client_secret>"
+  }
+}
+
+resource keycloak_identity_provider oidc {
+  alias   = "oidc"
+  realm   = "master"
+  enabled = true
+
+  oidc {
+    token_url         = "https://example.com"
+    authorization_url = "https://example.com"
+    client_id         = "<your_client_id>"
+    client_secret     = "<your_client_secret>"
+  }
+}
+
+resource keycloak_identity_provider saml {
+  alias   = "saml"
+  realm   = "master"
+  enabled = true
+
+  saml {
+    single_sign_on_service_url = "https://example.com"
+  }
+}
+
