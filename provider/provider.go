@@ -22,9 +22,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_group_membership_protocol_mapper": resourceKeycloakOpenIdGroupMembershipProtocolMapper(),
 			"keycloak_openid_full_name_protocol_mapper":        resourceKeycloakOpenIdFullNameProtocolMapper(),
 			"keycloak_openid_hardcoded_claim_protocol_mapper":  resourceKeycloakOpenIdHardcodedClaimProtocolMapper(),
-			"keycloak_oidc_identity_provider":                  resourceKeycloakOidcIdentityProvider(),
-			"keycloak_saml_identity_provider":                  resourceKeycloakSamlIdentityProvider(),
-			"keycloak_social_identity_provider":                resourceKeycloakSocialIdentityProvider(),
+			"keycloak_identity_provider":                       resourceKeycloakIdentityProvider(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -33,9 +31,27 @@ func KeycloakProvider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_ID", nil),
 			},
 			"client_secret": {
+				Optional:      true,
+				Type:          schema.TypeString,
+				DefaultFunc:   schema.EnvDefaultFunc("KEYCLOAK_CLIENT_SECRET", nil),
+				ConflictsWith: []string{"username", "password"},
+			},
+			"username": {
+				Optional:      true,
+				Type:          schema.TypeString,
+				DefaultFunc:   schema.EnvDefaultFunc("KEYCLOAK_USERNAME", nil),
+				ConflictsWith: []string{"client_secret"},
+			},
+			"password": {
+				Optional:      true,
+				Type:          schema.TypeString,
+				DefaultFunc:   schema.EnvDefaultFunc("KEYCLOAK_PASSWORD", nil),
+				ConflictsWith: []string{"client_secret"},
+			},
+			"realm": {
 				Required:    true,
 				Type:        schema.TypeString,
-				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_SECRET", nil),
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_REALM", nil),
 			},
 			"url": {
 				Type:        schema.TypeString,
@@ -52,6 +68,9 @@ func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
 	url := data.Get("url").(string)
 	clientId := data.Get("client_id").(string)
 	clientSecret := data.Get("client_secret").(string)
+	username := data.Get("username").(string)
+	password := data.Get("password").(string)
+	realm := data.Get("realm").(string)
 
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password)
 }
