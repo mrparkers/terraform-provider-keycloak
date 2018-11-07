@@ -51,3 +51,23 @@ func (keycloakClient *KeycloakClient) UpdateOpenidClientScope(clientScope *Openi
 func (keycloakClient *KeycloakClient) DeleteOpenidClientScope(realmId, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id))
 }
+
+func (keycloakClient *KeycloakClient) listOpenidClientScopes(realmId string) ([]*OpenidClientScope, error) {
+	var clientScopes []OpenidClientScope
+	var openidClientScopes []*OpenidClientScope
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/client-scopes", realmId), &clientScopes)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, clientScope := range clientScopes {
+		if clientScope.Protocol == "openid-connect" {
+			func(cs OpenidClientScope) {
+				openidClientScopes = append(openidClientScopes, &cs)
+			}(clientScope)
+		}
+	}
+
+	return openidClientScopes, nil
+}

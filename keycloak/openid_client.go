@@ -80,3 +80,36 @@ func (keycloakClient *KeycloakClient) UpdateOpenidClient(client *OpenidClient) e
 func (keycloakClient *KeycloakClient) DeleteOpenidClient(realmId, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s", realmId, id))
 }
+
+func (keycloakClient *KeycloakClient) GetOpenidClientDefaultScopes(realmId, clientId string) ([]*OpenidClientScope, error) {
+	var scopes []*OpenidClientScope
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes", realmId, clientId), &scopes)
+	if err != nil {
+		return nil, err
+	}
+
+	return scopes, nil
+}
+
+func (keycloakClient *KeycloakClient) AttachOpenidClientDefaultScopes(realmId, clientId string, scopeNames []interface{}) error {
+	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopes(realmId)
+	if err != nil {
+		return err
+	}
+
+	for _, scopeName := range scopeNames {
+		for _, openidClientScope := range allOpenidClientScopes {
+			if scopeName.(string) == openidClientScope.Name {
+				err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes/%s", realmId, clientId, openidClientScope.Id), nil)
+				if err != nil {
+					return err
+				}
+
+				break
+			}
+		}
+	}
+
+	return nil
+}
