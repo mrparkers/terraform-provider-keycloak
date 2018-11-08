@@ -93,6 +93,13 @@ func (keycloakClient *KeycloakClient) GetOpenidClientDefaultScopes(realmId, clie
 }
 
 func (keycloakClient *KeycloakClient) AttachOpenidClientDefaultScopes(realmId, clientId string, scopeNames []interface{}) error {
+	_, err := keycloakClient.GetOpenidClient(realmId, clientId)
+	if err != nil && ErrorIs404(err) {
+		return fmt.Errorf("validation error: client with id %s does not exist", clientId)
+	} else if err != nil {
+		return err
+	}
+
 	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopes(realmId)
 	if err != nil {
 		return err

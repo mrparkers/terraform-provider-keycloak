@@ -1,11 +1,9 @@
 package provider
 
 import (
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"log"
-	"net/http"
 	"time"
 )
 
@@ -40,8 +38,7 @@ func suppressDurationStringDiff(_, old, new string, _ *schema.ResourceData) bool
 }
 
 func handleNotFoundError(err error, data *schema.ResourceData) error {
-	keycloakError, ok := errwrap.GetType(err, &keycloak.Error{}).(*keycloak.Error)
-	if ok && keycloakError != nil && keycloakError.Code == http.StatusNotFound {
+	if keycloak.ErrorIs404(err) {
 		log.Printf("[WARN] Removing resource with id %s from state as it no longer exists", data.Id())
 		data.SetId("")
 

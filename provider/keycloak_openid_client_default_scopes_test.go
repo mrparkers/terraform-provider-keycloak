@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -104,6 +105,23 @@ func TestAccKeycloakOpenidClientDefaultScopes_updateInPlace(t *testing.T) {
 			{
 				Config: testKeycloakOpenidClientDefaultScopes_listOfScopes(realm, client, clientScope, allClientScopes),
 				Check:  testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", allClientScopes),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenidClientDefaultScopes_validateClientDoesNotExist(t *testing.T) {
+	realm := "terraform-realm-" + acctest.RandString(10)
+	client := "terraform-client-" + acctest.RandString(10)
+	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenidClientDefaultScopes_noClient(realm, client, clientScope),
+				ExpectError: regexp.MustCompile("validation error: client with id .+ does not exist"),
 			},
 		},
 	})
@@ -261,4 +279,29 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 	depends_on = ["keycloak_openid_client_scope.client_scope"]
 }
 	`, realm, client, clientScope, arrayOfStringsForTerraformResource(listOfDefaultScopes))
+}
+
+func testKeycloakOpenidClientDefaultScopes_noClient(realm, client, clientScope string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name        = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+
+	description = "test description"
+}
+
+resource "keycloak_openid_client_default_scopes" "default_scopes" {
+	realm_id       = "${keycloak_realm.realm.id}"
+	client_id      = "%s"
+	default_scopes = [
+        "profile",
+        "email",
+        "${keycloak_openid_client_scope.client_scope.name}"
+    ]
+}
+	`, realm, clientScope, client)
 }
