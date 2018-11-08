@@ -29,8 +29,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_basic(t *testing.T) {
 				Config: testKeycloakOpenidClientDefaultScopes_basic(realm, client, clientScope),
 				Check:  testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", clientScopes),
 			},
-			// we need a separate test for destroy instead of using CheckDestroy because this resource is implicitly
-			// destroyed at the end of each test via destroying clients or the scopes they're attached to
+			// we need a separate test step for destroy instead of using CheckDestroy because this resource is implicitly
+			// destroyed at the end of each test via destroying clients
 			{
 				Config: testKeycloakOpenidClientDefaultScopes_noDefaultScopes(realm, client, clientScope),
 				Check:  testAccCheckKeycloakOpenidClientHasNoDefaultScopes("keycloak_openid_client.client"),
