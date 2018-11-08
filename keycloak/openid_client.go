@@ -113,3 +113,25 @@ func (keycloakClient *KeycloakClient) AttachOpenidClientDefaultScopes(realmId, c
 
 	return nil
 }
+
+func (keycloakClient *KeycloakClient) DetachOpenidClientDefaultScopes(realmId, clientId string, scopeNames []interface{}) error {
+	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopes(realmId)
+	if err != nil {
+		return err
+	}
+
+	for _, scopeName := range scopeNames {
+		for _, openidClientScope := range allOpenidClientScopes {
+			if scopeName.(string) == openidClientScope.Name {
+				err := keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes/%s", realmId, clientId, openidClientScope.Id))
+				if err != nil {
+					return err
+				}
+
+				break
+			}
+		}
+	}
+
+	return nil
+}

@@ -73,7 +73,13 @@ func resourceKeycloakOpenidClientDefaultScopesRead(data *schema.ResourceData, me
 }
 
 func resourceKeycloakOpenidClientDefaultScopesDelete(data *schema.ResourceData, meta interface{}) error {
-	return nil
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	realmId := data.Get("realm_id").(string)
+	clientId := data.Get("client_id").(string)
+	defaultScopes := data.Get("default_scopes").(*schema.Set)
+
+	return keycloakClient.DetachOpenidClientDefaultScopes(realmId, clientId, defaultScopes.List())
 }
 
 func resourceKeycloakOpenidClientDefaultScopesUpdate(data *schema.ResourceData, meta interface{}) error {
