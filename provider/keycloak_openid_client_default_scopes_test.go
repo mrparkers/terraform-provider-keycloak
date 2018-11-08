@@ -120,8 +120,25 @@ func TestAccKeycloakOpenidClientDefaultScopes_validateClientDoesNotExist(t *test
 		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenidClientDefaultScopes_noClient(realm, client, clientScope),
+				Config:      testKeycloakOpenidClientDefaultScopes_validationNoClient(realm, client, clientScope),
 				ExpectError: regexp.MustCompile("validation error: client with id .+ does not exist"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenidClientDefaultScopes_validateClientAccessType(t *testing.T) {
+	realm := "terraform-realm-" + acctest.RandString(10)
+	client := "terraform-client-" + acctest.RandString(10)
+	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenidClientDefaultScopes_validationBearerOnlyClient(realm, client, clientScope),
+				ExpectError: regexp.MustCompile("validation error: client with id .+ uses access type BEARER-ONLY which does not use scopes"),
 			},
 		},
 	})
@@ -281,7 +298,7 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 	`, realm, client, clientScope, arrayOfStringsForTerraformResource(listOfDefaultScopes))
 }
 
-func testKeycloakOpenidClientDefaultScopes_noClient(realm, client, clientScope string) string {
+func testKeycloakOpenidClientDefaultScopes_validationNoClient(realm, client, clientScope string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -304,4 +321,37 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
     ]
 }
 	`, realm, clientScope, client)
+}
+
+func testKeycloakOpenidClientDefaultScopes_validationBearerOnlyClient(realm, client, clientScope string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "BEARER-ONLY"
+
+	valid_redirect_uris = ["foo"]
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name        = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+
+	description = "test description"
+}
+
+resource "keycloak_openid_client_default_scopes" "default_scopes" {
+	realm_id       = "${keycloak_realm.realm.id}"
+	client_id      = "${keycloak_openid_client.client.id}"
+	default_scopes = [
+        "profile",
+        "email",
+        "${keycloak_openid_client_scope.client_scope.name}"
+    ]
+}
+	`, realm, client, clientScope)
 }
