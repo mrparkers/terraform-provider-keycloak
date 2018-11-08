@@ -130,21 +130,15 @@ func (keycloakClient *KeycloakClient) AttachOpenidClientDefaultScopes(realmId, c
 		return fmt.Errorf("validation error: client with id %s uses access type BEARER-ONLY which does not use scopes", clientId)
 	}
 
-	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopes(realmId)
+	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopesWithFilter(realmId, includeOpenidClientScopesMatchingNames(scopeNames))
 	if err != nil {
 		return err
 	}
 
-	for _, scopeName := range scopeNames {
-		for _, openidClientScope := range allOpenidClientScopes {
-			if scopeName.(string) == openidClientScope.Name {
-				err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes/%s", realmId, clientId, openidClientScope.Id), nil)
-				if err != nil {
-					return err
-				}
-
-				break
-			}
+	for _, openidClientScope := range allOpenidClientScopes {
+		err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes/%s", realmId, clientId, openidClientScope.Id), nil)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -152,21 +146,15 @@ func (keycloakClient *KeycloakClient) AttachOpenidClientDefaultScopes(realmId, c
 }
 
 func (keycloakClient *KeycloakClient) DetachOpenidClientDefaultScopes(realmId, clientId string, scopeNames []interface{}) error {
-	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopes(realmId)
+	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopesWithFilter(realmId, includeOpenidClientScopesMatchingNames(scopeNames))
 	if err != nil {
 		return err
 	}
 
-	for _, scopeName := range scopeNames {
-		for _, openidClientScope := range allOpenidClientScopes {
-			if scopeName.(string) == openidClientScope.Name {
-				err := keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes/%s", realmId, clientId, openidClientScope.Id))
-				if err != nil {
-					return err
-				}
-
-				break
-			}
+	for _, openidClientScope := range allOpenidClientScopes {
+		err := keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes/%s", realmId, clientId, openidClientScope.Id))
+		if err != nil {
+			return err
 		}
 	}
 
