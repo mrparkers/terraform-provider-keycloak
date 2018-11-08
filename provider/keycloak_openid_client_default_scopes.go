@@ -45,9 +45,13 @@ func resourceKeycloakOpenidClientDefaultScopesCreate(data *schema.ResourceData, 
 		return err
 	}
 
-	data.SetId(fmt.Sprintf("%s/%s", realmId, clientId))
+	data.SetId(openidClientDefaultScopesId(realmId, clientId))
 
 	return resourceKeycloakOpenidClientDefaultScopesRead(data, meta)
+}
+
+func openidClientDefaultScopesId(realmId string, clientId string) string {
+	return fmt.Sprintf("%s/%s", realmId, clientId)
 }
 
 func resourceKeycloakOpenidClientDefaultScopesRead(data *schema.ResourceData, meta interface{}) error {
@@ -67,9 +71,50 @@ func resourceKeycloakOpenidClientDefaultScopesRead(data *schema.ResourceData, me
 	}
 
 	data.Set("default_scopes", defaultScopes)
-	data.SetId(fmt.Sprintf("%s/%s", realmId, clientId))
+	data.SetId(openidClientDefaultScopesId(realmId, clientId))
 
 	return nil
+}
+
+func resourceKeycloakOpenidClientDefaultScopesUpdate(data *schema.ResourceData, meta interface{}) error {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	realmId := data.Get("realm_id").(string)
+	clientId := data.Get("client_id").(string)
+	tfOpenidClientDefaultScopes := data.Get("default_scopes").(*schema.Set)
+
+	keycloakOpenidClientDefaultScopes, err := keycloakClient.GetOpenidClientDefaultScopes(realmId, clientId)
+	if err != nil {
+		return err
+	}
+
+	var openidClientDefaultScopesToDetach []interface{}
+	for _, keycloakOpenidClientDefaultScope := range keycloakOpenidClientDefaultScopes {
+		// if this scope is attached in keycloak and tf state, no update is required for this scope
+		// remove it from the set so we can look at scopes that need to be attached later
+		if tfOpenidClientDefaultScopes.Contains(keycloakOpenidClientDefaultScope.Name) {
+			tfOpenidClientDefaultScopes.Remove(keycloakOpenidClientDefaultScope.Name)
+		} else {
+			// if this scope is attached in keycloak but not in tf state, add them to a slice containing all scopes to detach
+			openidClientDefaultScopesToDetach = append(openidClientDefaultScopesToDetach, keycloakOpenidClientDefaultScope.Name)
+		}
+	}
+
+	// detach scopes that aren't in tf state
+	err = keycloakClient.DetachOpenidClientDefaultScopes(realmId, clientId, openidClientDefaultScopesToDetach)
+	if err != nil {
+		return err
+	}
+
+	// attach scopes that exist in tf state but not in keycloak
+	err = keycloakClient.AttachOpenidClientDefaultScopes(realmId, clientId, tfOpenidClientDefaultScopes.List())
+	if err != nil {
+		return err
+	}
+
+	data.SetId(openidClientDefaultScopesId(realmId, clientId))
+
+	return resourceKeycloakOpenidClientDefaultScopesRead(data, meta)
 }
 
 func resourceKeycloakOpenidClientDefaultScopesDelete(data *schema.ResourceData, meta interface{}) error {
@@ -80,8 +125,4 @@ func resourceKeycloakOpenidClientDefaultScopesDelete(data *schema.ResourceData, 
 	defaultScopes := data.Get("default_scopes").(*schema.Set)
 
 	return keycloakClient.DetachOpenidClientDefaultScopes(realmId, clientId, defaultScopes.List())
-}
-
-func resourceKeycloakOpenidClientDefaultScopesUpdate(data *schema.ResourceData, meta interface{}) error {
-	return nil
 }

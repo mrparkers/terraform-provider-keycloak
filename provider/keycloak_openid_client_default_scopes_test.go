@@ -39,6 +39,48 @@ func TestAccKeycloakOpenidClientDefaultScopes_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClientDefaultScopes_updateInPlace(t *testing.T) {
+	realm := "terraform-realm-" + acctest.RandString(10)
+	client := "terraform-client-" + acctest.RandString(10)
+	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+
+	allClientScopes := []string{
+		"profile",
+		"email",
+		clientScope,
+	}
+
+	clientScopeToRemove := allClientScopes[acctest.RandIntRange(0, 2)]
+	var subsetOfClientScopes []string
+	for _, cs := range allClientScopes {
+		if cs != clientScopeToRemove {
+			subsetOfClientScopes = append(subsetOfClientScopes, cs)
+		}
+	}
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			// init
+			{
+				Config: testKeycloakOpenidClientDefaultScopes_listOfScopes(realm, client, clientScope, allClientScopes),
+				Check:  testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", allClientScopes),
+			},
+			// remove
+			{
+				Config: testKeycloakOpenidClientDefaultScopes_listOfScopes(realm, client, clientScope, subsetOfClientScopes),
+				Check:  testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", subsetOfClientScopes),
+			},
+			// add
+			{
+				Config: testKeycloakOpenidClientDefaultScopes_listOfScopes(realm, client, clientScope, allClientScopes),
+				Check:  testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", allClientScopes),
+			},
+		},
+	})
+}
+
 func getDefaultClientScopesFromState(resourceName string, s *terraform.State) ([]*keycloak.OpenidClientScope, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -160,4 +202,35 @@ resource "keycloak_openid_client_scope" "client_scope" {
 	description = "test description"
 }
 	`, realm, client, clientScope)
+}
+
+func testKeycloakOpenidClientDefaultScopes_listOfScopes(realm, client, clientScope string, listOfDefaultScopes []string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "PUBLIC"
+
+	valid_redirect_uris = ["foo"]
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name        = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+
+	description = "test description"
+}
+
+resource "keycloak_openid_client_default_scopes" "default_scopes" {
+	realm_id       = "${keycloak_realm.realm.id}"
+	client_id      = "${keycloak_openid_client.client.id}"
+	default_scopes = %s
+
+	depends_on = ["keycloak_openid_client_scope.client_scope"]
+}
+	`, realm, client, clientScope, arrayOfStringsForTerraformResource(listOfDefaultScopes))
 }
