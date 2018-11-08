@@ -70,6 +70,32 @@ func (keycloakClient *KeycloakClient) GetOpenidClient(realmId, id string) (*Open
 	return &client, nil
 }
 
+func (keycloakClient *KeycloakClient) GetOpenidClientByClientId(realmId, clientId string) (*OpenidClient, error) {
+	var clients []OpenidClient
+	var clientSecret openidClientSecret
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients", realmId), &clients)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, client := range clients {
+		if client.ClientId == clientId {
+			err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/client-secret", realmId, client.Id), &clientSecret)
+			if err != nil {
+				return nil, err
+			}
+
+			client.RealmId = realmId
+			client.ClientSecret = clientSecret.Value
+
+			return &client, nil
+		}
+	}
+
+	return nil, fmt.Errorf("openid client with name %s does not exist", clientId)
+}
+
 func (keycloakClient *KeycloakClient) UpdateOpenidClient(client *OpenidClient) error {
 	client.Protocol = "openid-connect"
 	client.ClientAuthenticatorType = "client-secret"
