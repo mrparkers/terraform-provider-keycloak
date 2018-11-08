@@ -39,6 +39,34 @@ func TestAccKeycloakOpenidClientDefaultScopes_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClientDefaultScopes_updateClientForceNew(t *testing.T) {
+	realm := "terraform-realm-" + acctest.RandString(10)
+	clientOne := "terraform-client-" + acctest.RandString(10)
+	clientTwo := "terraform-client-" + acctest.RandString(10)
+	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+
+	clientScopes := []string{
+		"profile",
+		"email",
+		clientScope,
+	}
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClientDefaultScopes_basic(realm, clientOne, clientScope),
+				Check:  testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", clientScopes),
+			},
+			{
+				Config: testKeycloakOpenidClientDefaultScopes_basic(realm, clientTwo, clientScope),
+				Check:  testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", clientScopes),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClientDefaultScopes_updateInPlace(t *testing.T) {
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
