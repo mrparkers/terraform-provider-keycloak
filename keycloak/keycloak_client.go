@@ -209,7 +209,7 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 	}
 
 	if response.StatusCode >= 400 {
-		return nil, "", &Error{
+		return nil, "", &ApiError{
 			Code:    response.StatusCode,
 			Message: fmt.Sprintf("error sending %s request to %s: %s", request.Method, request.URL.Path, response.Status),
 		}
