@@ -79,14 +79,14 @@ func TestAccKeycloakIdentityProvider_basicUpdateRealm(t *testing.T) {
 				Config: testKeycloakIdentityProvider_basic(firstRealm, aliasName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
-					resource.TestCheckResourceAttr("keycloak_identity_provider.saml", "realm_id", firstRealm),
+					resource.TestCheckResourceAttr("keycloak_identity_provider.saml", "realm", firstRealm),
 				),
 			},
 			{
 				Config: testKeycloakIdentityProvider_basic(secondRealm, aliasName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
-					resource.TestCheckResourceAttr("keycloak_identity_provider.saml", "realm_id", secondRealm),
+					resource.TestCheckResourceAttr("keycloak_identity_provider.saml", "realm", secondRealm),
 				),
 			},
 		},
@@ -209,7 +209,7 @@ func testAccCheckKeycloakIdentityProviderDestroy() resource.TestCheckFunc {
 			}
 
 			id := rs.Primary.ID
-			realm := rs.Primary.Attributes["realm_id"]
+			realm := rs.Primary.Attributes["realm"]
 
 			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -232,7 +232,7 @@ func getIdentityProviderFromState(s *terraform.State, resourceName string) (*key
 	}
 
 	id := rs.Primary.ID
-	realm := rs.Primary.Attributes["realm_id"]
+	realm := rs.Primary.Attributes["realm"]
 
 	alias, err := keycloakClient.GetIdentityProvider(realm, id)
 	if err != nil {

@@ -161,7 +161,7 @@ func getGenericMapperImportId(resourceName string) resource.ImportStateIdFunc {
 		}
 
 		id := rs.Primary.ID
-		Realm := rs.Primary.Attributes["realm_id"]
+		Realm := rs.Primary.Attributes["realm"]
 		UserFederationId := rs.Primary.Attributes["_user_federation_id"]
 
 		return fmt.Sprintf("%s/%s/%s", Realm, UserFederationId, id), nil
