@@ -387,7 +387,7 @@ resource "keycloak_identity_provider" "saml" {
     single_sign_on_service_url = "https://example.com"
   }
 }
-   `, realm, alias, fullSyncPeriod, changedSyncPeriod)
+   `, realm, alias)
 }
 
 func testKeycloakIdentityProvider_basicWithTimeouts(realm, alias string) string {
