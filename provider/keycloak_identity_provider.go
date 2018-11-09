@@ -420,7 +420,7 @@ func setIdentityProviderData(data *schema.ResourceData, identityProvider *keyclo
 					"login_hint":            config.LoginHint,
 				},
 			})
-		case "social":
+		case "facebook", "stackoverflow", "twitter", "github", "gitlab", "instagram", "bitbucket", "google", "microsoft", "paypal":
 			data.Set("provider_id", identityProvider.ProviderId)
 			data.Set("config", []interface{}{
 				map[string]interface{}{

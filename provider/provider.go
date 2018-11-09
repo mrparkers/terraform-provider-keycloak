@@ -23,6 +23,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_full_name_protocol_mapper":        resourceKeycloakOpenIdFullNameProtocolMapper(),
 			"keycloak_openid_hardcoded_claim_protocol_mapper":  resourceKeycloakOpenIdHardcodedClaimProtocolMapper(),
 			"keycloak_identity_provider":                       resourceKeycloakIdentityProvider(),
+			"keycloak_identity_provider_mapper":                resourceKeycloakIdentityMapperProvider(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
