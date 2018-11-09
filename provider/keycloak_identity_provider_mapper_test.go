@@ -176,7 +176,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_identity_provider" "saml" {
   alias   = "saml"
-  realm   = "${keycloak_realm.realm_two.name}"
+  realm   = "${keycloak_realm.realm_two.realm}"
   enabled = true
 
   saml {
@@ -185,7 +185,7 @@ resource "keycloak_identity_provider" "saml" {
 }
 
 resource keycloak_identity_provider_mapper saml_mapper {
-  realm   = "${keycloak_realm.realm.id}"
+  realm   = "${keycloak_realm.realm.realm}"
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
@@ -204,7 +204,7 @@ resource "keycloak_realm" "realm" {
 
 resource keycloak_identity_provider saml {
   alias   = "saml"
-  realm   = "${keycloak_realm.realm.name}"
+  realm   = "${keycloak_realm.realm.realm}"
   enabled = true
 
   saml {
@@ -213,7 +213,7 @@ resource keycloak_identity_provider saml {
 }
 
 resource keycloak_identity_provider_mapper saml {
-  realm   = "${keycloak_realm.realm.name}"
+  realm   = "${keycloak_realm.realm.realm}"
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
@@ -236,7 +236,7 @@ resource "keycloak_realm" "realm_two" {
 
 resource "keycloak_identity_provider" "saml_one" {
   alias   = "saml"
-  realm   = "${keycloak_realm.realm_one.name}"
+  realm   = "${keycloak_realm.realm_one.realm}"
   enabled = true
 
   saml {
@@ -246,7 +246,7 @@ resource "keycloak_identity_provider" "saml_one" {
 
 resource "keycloak_identity_provider" "saml_two" {
   alias   = "saml"
-  realm   = "${keycloak_realm.realm_two.name}"
+  realm   = "${keycloak_realm.realm_two.realm}"
   enabled = true
 
   saml {
@@ -255,7 +255,7 @@ resource "keycloak_identity_provider" "saml_two" {
 }
 
 resource keycloak_identity_provider_mapper saml_mapper {
-  realm   = "${keycloak_realm.realm_one.id}"
+  realm   = "${keycloak_realm.realm_one.realm"
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
@@ -278,7 +278,7 @@ resource "keycloak_realm" "realm_two" {
 
 resource "keycloak_identity_provider" "saml_one" {
   alias   = "saml"
-  realm   = "${keycloak_realm.realm_one.name}"
+  realm   = "${keycloak_realm.realm_one.realm}"
   enabled = true
 
   saml {
@@ -288,7 +288,7 @@ resource "keycloak_identity_provider" "saml_one" {
 
 resource "keycloak_identity_provider" "saml_two" {
   alias   = "saml"
-  realm   = "${keycloak_realm.realm_two.name}"
+  realm   = "${keycloak_realm.realm_two.realm}"
   enabled = true
 
   saml {
@@ -297,7 +297,7 @@ resource "keycloak_identity_provider" "saml_two" {
 }
 
 resource keycloak_identity_provider_mapper saml_mapper {
-  realm   = "${keycloak_realm.realm_two.id}"
+  realm   = "${keycloak_realm.realm_two.realm}"
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
@@ -316,7 +316,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_identity_provider" "saml" {
   alias   = "saml"
-  realm   = "${keycloak_realm.realm_two.name}"
+  realm   = "${keycloak_realm.realm_two.realm}"
   enabled = true
 
   saml {
@@ -325,7 +325,7 @@ resource "keycloak_identity_provider" "saml" {
 }
 
 resource keycloak_identity_provider_mapper saml_mapper {
-  realm   = "${keycloak_realm.realm.id}"
+  realm   = "${keycloak_realm.realm.realm}"
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
@@ -344,7 +344,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_identity_provider" "saml" {
   alias   = "saml"
-  realm   = "${keycloak_realm.realm_two.name}"
+  realm   = "${keycloak_realm.realm_two.realm}"
   enabled = true
 
   saml {
@@ -353,7 +353,7 @@ resource "keycloak_identity_provider" "saml" {
 }
 
 resource keycloak_identity_provider_mapper saml_mapper {
-  realm   = "${keycloak_realm.realm.id}"
+  realm   = "${keycloak_realm.realm.realm}"
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
