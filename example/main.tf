@@ -83,6 +83,8 @@ resource "keycloak_openid_client_default_scopes" "default_client_scopes" {
 	client_id = "${keycloak_openid_client.test_client.id}"
 
 	default_scopes = [
+		"profile",
+		"email",
 		"${keycloak_openid_client_scope.test_client_scope.name}"
 	]
 }

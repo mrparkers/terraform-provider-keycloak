@@ -283,6 +283,33 @@ func TestAccKeycloakOpenidClientDefaultScopes_noImportNeeded(t *testing.T) {
 	})
 }
 
+// by default, keycloak clients have the scopes "profile" and "email" attached.
+// if you create this resource with only one scope, it won't remove these two scopes,
+// because the creation of a new resource should not result in anything destructive.
+// thus, a following plan will not be empty, as terraform will think it needs to remove
+// these scopes, which is okay to do during an update
+func TestAccKeycloakOpenidClientDefaultScopes_profileAndEmailDefaultScopes(t *testing.T) {
+	realm := "terraform-realm-" + acctest.RandString(10)
+	client := "terraform-client-" + acctest.RandString(10)
+	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+
+	clientScopes := []string{
+		clientScope,
+	}
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config:             testKeycloakOpenidClientDefaultScopes_listOfScopes(realm, client, clientScope, clientScopes),
+				Check:              testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client.client", []string{"profile", "email", clientScope}),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
 func getDefaultClientScopesFromState(resourceName string, s *terraform.State) ([]*keycloak.OpenidClientScope, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
