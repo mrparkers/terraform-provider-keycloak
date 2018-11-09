@@ -176,7 +176,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_identity_provider" "saml" {
   alias   = "saml"
-  realm   = "${keycloak_realm.realm_two.realm}"
+  realm   = "${keycloak_realm.realm.realm}"
   enabled = true
 
   saml {
@@ -194,34 +194,6 @@ resource keycloak_identity_provider_mapper saml_mapper {
   }
 }
    `, realm, mapperName)
-}
-
-func testKeycloakIdentityProviderMapper_basicFromInterface(realm string, mapper *keycloak.IdentityProviderMapper) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-   realm = "%s"
-}
-
-resource keycloak_identity_provider saml {
-  alias   = "saml"
-  realm   = "${keycloak_realm.realm.realm}"
-  enabled = true
-
-  saml {
-    single_sign_on_service_url = "https://example.com"
-  }
-}
-
-resource keycloak_identity_provider_mapper saml {
-  realm   = "${keycloak_realm.realm.realm}"
-  name = "%s"
-  identity_provider_alias = "saml"
-  identity_provider_mapper = "user-attribute-mapper"
-  saml {
-    template = "asdasdasdadsdad"
-  }
-}
-   `, realm, mapper.Name)
 }
 
 func testKeycloakIdentityProviderMapper_updateUserFederationBefore(realmOne, realmTwo, mapperName string) string {
@@ -306,60 +278,4 @@ resource keycloak_identity_provider_mapper saml_mapper {
   }
 }
    `, realmOne, realmTwo, mapperName)
-}
-
-func testKeycloakIdentityProviderMapper_writableInvalid(realm, mapperName string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-   realm = "%s"
-}
-
-resource "keycloak_identity_provider" "saml" {
-  alias   = "saml"
-  realm   = "${keycloak_realm.realm_two.realm}"
-  enabled = true
-
-  saml {
-    single_sign_on_service_url = "https://example.com"
-  }
-}
-
-resource keycloak_identity_provider_mapper saml_mapper {
-  realm   = "${keycloak_realm.realm.realm}"
-  name = "%s"
-  identity_provider_alias = "saml"
-  identity_provider_mapper = "user-attribute-mapper"
-  saml {
-    template = "asdasdasdadsdad"
-  }
-}
-   `, realm, mapperName)
-}
-
-func testKeycloakIdentityProviderMapper_writableValid(realm, mapperName string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-   realm = "%s"
-}
-
-resource "keycloak_identity_provider" "saml" {
-  alias   = "saml"
-  realm   = "${keycloak_realm.realm_two.realm}"
-  enabled = true
-
-  saml {
-    single_sign_on_service_url = "https://example.com"
-  }
-}
-
-resource keycloak_identity_provider_mapper saml_mapper {
-  realm   = "${keycloak_realm.realm.realm}"
-  name = "%s"
-  identity_provider_alias = "saml"
-  identity_provider_mapper = "user-attribute-mapper"
-  saml {
-    template = "asdasdasdadsdad"
-  }
-}
-   `, realm, mapperName)
 }

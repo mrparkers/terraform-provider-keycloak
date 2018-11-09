@@ -176,46 +176,6 @@ func TestAccKeycloakIdentityProvider_displayNameValidation(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakIdentityProvider_syncPeriodValidation(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	aliasName := "terraform-" + acctest.RandString(10)
-
-	validSyncPeriod := acctest.RandIntRange(1, 3600)
-	invalidNegativeSyncPeriod := -acctest.RandIntRange(1, 3600)
-	invalidZeroSyncPeriod := 0
-
-	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakIdentityProviderDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config:      testKeycloakIdentityProvider_basicWithSyncPeriod(realmName, aliasName, validSyncPeriod, invalidNegativeSyncPeriod),
-				ExpectError: regexp.MustCompile(`expected .+ to be either -1 \(disabled\), or greater than zero`),
-			},
-			{
-				Config:      testKeycloakIdentityProvider_basicWithSyncPeriod(realmName, aliasName, invalidNegativeSyncPeriod, validSyncPeriod),
-				ExpectError: regexp.MustCompile(`expected .+ to be either -1 \(disabled\), or greater than zero`),
-			},
-			{
-				Config:      testKeycloakIdentityProvider_basicWithSyncPeriod(realmName, aliasName, validSyncPeriod, invalidZeroSyncPeriod),
-				ExpectError: regexp.MustCompile(`expected .+ to be either -1 \(disabled\), or greater than zero`),
-			},
-			{
-				Config:      testKeycloakIdentityProvider_basicWithSyncPeriod(realmName, aliasName, invalidZeroSyncPeriod, validSyncPeriod),
-				ExpectError: regexp.MustCompile(`expected .+ to be either -1 \(disabled\), or greater than zero`),
-			},
-			{
-				Config: testKeycloakIdentityProvider_basicWithSyncPeriod(realmName, aliasName, validSyncPeriod, validSyncPeriod),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("keycloak_identity_provider.saml", "full_sync_period", strconv.Itoa(validSyncPeriod)),
-					resource.TestCheckResourceAttr("keycloak_identity_provider.saml", "changed_sync_period", strconv.Itoa(validSyncPeriod)),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckKeycloakIdentityProviderExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getIdentityProviderFromState(s, resourceName)
