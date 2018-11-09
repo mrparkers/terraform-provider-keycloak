@@ -174,7 +174,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeAdd(t *testing.T) {
 					}
 
 					clientToManuallyDetach := clientScopes[acctest.RandIntRange(0, len(clientScopes)-1)]
-					err = keycloakClient.DetachOpenidClientDefaultScopes(realm, client.Id, []interface{}{clientToManuallyDetach})
+					err = keycloakClient.DetachOpenidClientDefaultScopes(realm, client.Id, []string{clientToManuallyDetach})
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -227,7 +227,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeRemove(t *testing.T) 
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachOpenidClientDefaultScopes(realm, client.Id, []interface{}{clientToManuallyAttach})
+					err = keycloakClient.AttachOpenidClientDefaultScopes(realm, client.Id, []string{clientToManuallyAttach})
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -248,11 +248,6 @@ func TestAccKeycloakOpenidClientDefaultScopes_noImportNeeded(t *testing.T) {
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	clientScopesInterface := []interface{}{
-		"profile",
-		"email",
-		clientScope,
-	}
 	clientScopes := []string{
 		"profile",
 		"email",
@@ -276,7 +271,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_noImportNeeded(t *testing.T) {
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachOpenidClientDefaultScopes(realm, openidClient.Id, clientScopesInterface)
+					err = keycloakClient.AttachOpenidClientDefaultScopes(realm, openidClient.Id, clientScopes)
 					if err != nil {
 						t.Fatal(err)
 					}

@@ -72,10 +72,10 @@ func (keycloakClient *KeycloakClient) listOpenidClientScopesWithFilter(realmId s
 	return openidClientScopes, nil
 }
 
-func includeOpenidClientScopesMatchingNames(scopeNames []interface{}) func(*OpenidClientScope) bool {
+func includeOpenidClientScopesMatchingNames(scopeNames []string) func(*OpenidClientScope) bool {
 	return func(scope *OpenidClientScope) bool {
 		for _, scopeName := range scopeNames {
-			if scopeName.(string) == scope.Name {
+			if scopeName == scope.Name {
 				return true
 			}
 		}

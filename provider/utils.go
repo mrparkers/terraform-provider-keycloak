@@ -47,3 +47,12 @@ func handleNotFoundError(err error, data *schema.ResourceData) error {
 
 	return err
 }
+
+func interfaceSliceToStringSlice(iv []interface{}) []string {
+	var sv []string
+	for _, i := range iv {
+		sv = append(sv, i.(string))
+	}
+
+	return sv
+}

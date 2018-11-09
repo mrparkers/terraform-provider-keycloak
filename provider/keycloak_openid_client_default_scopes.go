@@ -40,7 +40,7 @@ func resourceKeycloakOpenidClientDefaultScopesCreate(data *schema.ResourceData, 
 	clientId := data.Get("client_id").(string)
 	defaultScopes := data.Get("default_scopes").(*schema.Set)
 
-	err := keycloakClient.AttachOpenidClientDefaultScopes(realmId, clientId, defaultScopes.List())
+	err := keycloakClient.AttachOpenidClientDefaultScopes(realmId, clientId, interfaceSliceToStringSlice(defaultScopes.List()))
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func resourceKeycloakOpenidClientDefaultScopesUpdate(data *schema.ResourceData, 
 		return err
 	}
 
-	var openidClientDefaultScopesToDetach []interface{}
+	var openidClientDefaultScopesToDetach []string
 	for _, keycloakOpenidClientDefaultScope := range keycloakOpenidClientDefaultScopes {
 		// if this scope is attached in keycloak and tf state, no update is required for this scope
 		// remove it from the set so we can look at scopes that need to be attached later
@@ -107,7 +107,7 @@ func resourceKeycloakOpenidClientDefaultScopesUpdate(data *schema.ResourceData, 
 	}
 
 	// attach scopes that exist in tf state but not in keycloak
-	err = keycloakClient.AttachOpenidClientDefaultScopes(realmId, clientId, tfOpenidClientDefaultScopes.List())
+	err = keycloakClient.AttachOpenidClientDefaultScopes(realmId, clientId, interfaceSliceToStringSlice(tfOpenidClientDefaultScopes.List()))
 	if err != nil {
 		return err
 	}
@@ -124,5 +124,5 @@ func resourceKeycloakOpenidClientDefaultScopesDelete(data *schema.ResourceData, 
 	clientId := data.Get("client_id").(string)
 	defaultScopes := data.Get("default_scopes").(*schema.Set)
 
-	return keycloakClient.DetachOpenidClientDefaultScopes(realmId, clientId, defaultScopes.List())
+	return keycloakClient.DetachOpenidClientDefaultScopes(realmId, clientId, interfaceSliceToStringSlice(defaultScopes.List()))
 }
