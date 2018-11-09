@@ -9,6 +9,9 @@ func KeycloakProvider() *schema.Provider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_realm":                                   resourceKeycloakRealm(),
+			"keycloak_group":                                   resourceKeycloakGroup(),
+			"keycloak_group_memberships":                       resourceKeycloakGroupMemberships(),
+			"keycloak_user":                                    resourceKeycloakUser(),
 			"keycloak_openid_client":                           resourceKeycloakOpenidClient(),
 			"keycloak_openid_client_scope":                     resourceKeycloakOpenidClientScope(),
 			"keycloak_ldap_user_federation":                    resourceKeycloakLdapUserFederation(),
@@ -24,6 +27,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_hardcoded_claim_protocol_mapper":  resourceKeycloakOpenIdHardcodedClaimProtocolMapper(),
 			"keycloak_identity_provider":                       resourceKeycloakIdentityProvider(),
 			"keycloak_identity_provider_mapper":                resourceKeycloakIdentityMapperProvider(),
+			"keycloak_openid_client_default_scopes":            resourceKeycloakOpenidClientDefaultScopes(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
