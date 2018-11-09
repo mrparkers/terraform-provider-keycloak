@@ -207,14 +207,14 @@ func testAccCheckKeycloakIdentityProviderDestroy() resource.TestCheckFunc {
 				continue
 			}
 
-			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm"]
+         alias := rs.Primary.Attributes["alias"]
 
 			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-			alias, _ := keycloakClient.GetIdentityProvider(realm, id)
-			if alias != nil {
-				return fmt.Errorf("alias config with id %s still exists", id)
+			idp, _ := keycloakClient.GetIdentityProvider(realm, alias)
+			if idp != nil {
+				return fmt.Errorf("idp config with alias %s still exists", alias)
 			}
 		}
 
@@ -230,15 +230,15 @@ func getIdentityProviderFromState(s *terraform.State, resourceName string) (*key
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
 	}
 
-	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm"]
+   alias := rs.Primary.Attributes["alias"]
 
-	alias, err := keycloakClient.GetIdentityProvider(realm, id)
+	idp, err := keycloakClient.GetIdentityProvider(realm, alias)
 	if err != nil {
-		return nil, fmt.Errorf("error getting alias config with id %s: %s", id, err)
+		return nil, fmt.Errorf("error getting idp config with alias %s: %s", alias, err)
 	}
 
-	return alias, nil
+	return idp, nil
 }
 
 func testKeycloakIdentityProvider_basic(realm, alias string) string {
