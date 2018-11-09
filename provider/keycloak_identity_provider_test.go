@@ -208,7 +208,7 @@ func testAccCheckKeycloakIdentityProviderDestroy() resource.TestCheckFunc {
 			}
 
 			realm := rs.Primary.Attributes["realm"]
-         alias := rs.Primary.Attributes["alias"]
+			alias := rs.Primary.Attributes["alias"]
 
 			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -231,7 +231,7 @@ func getIdentityProviderFromState(s *terraform.State, resourceName string) (*key
 	}
 
 	realm := rs.Primary.Attributes["realm"]
-   alias := rs.Primary.Attributes["alias"]
+	alias := rs.Primary.Attributes["alias"]
 
 	idp, err := keycloakClient.GetIdentityProvider(realm, alias)
 	if err != nil {
