@@ -12,8 +12,6 @@ var requiredEnvironmentVariables = []string{
 	"KEYCLOAK_CLIENT_ID",
 	"KEYCLOAK_CLIENT_SECRET",
 	"KEYCLOAK_URL",
-	"KEYCLOAK_USERNAME",
-	"KEYCLOAK_PASSWORD",
 	"KEYCLOAK_REALM",
 }
 
