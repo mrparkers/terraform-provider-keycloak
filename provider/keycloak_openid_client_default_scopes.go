@@ -90,7 +90,7 @@ func resourceKeycloakOpenidClientDefaultScopesUpdate(data *schema.ResourceData, 
 
 	var openidClientDefaultScopesToDetach []string
 	for _, keycloakOpenidClientDefaultScope := range keycloakOpenidClientDefaultScopes {
-		// if this scope is attached in keycloak and tf state, no update is required for this scope
+		// if this scope is attached in keycloak and tf state, no update is required
 		// remove it from the set so we can look at scopes that need to be attached later
 		if tfOpenidClientDefaultScopes.Contains(keycloakOpenidClientDefaultScope.Name) {
 			tfOpenidClientDefaultScopes.Remove(keycloakOpenidClientDefaultScope.Name)

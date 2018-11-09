@@ -144,7 +144,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_validateClientAccessType(t *testin
 	})
 }
 
-// if a default client scope is detached from a client with default scopes controlled by this resource, terraform should add it again
+// if a default client scope is manually detached from a client with default scopes controlled by this resource, terraform should add it again
 func TestAccKeycloakOpenidClientDefaultScopes_authoritativeAdd(t *testing.T) {
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
@@ -186,7 +186,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeAdd(t *testing.T) {
 	})
 }
 
-// if a default client scope is attached to a client with default scopes controlled by this resource, terraform should detach it
+// if a default client scope is manually attached to a client with default scopes controlled by this resource, terraform should detach it
 func TestAccKeycloakOpenidClientDefaultScopes_authoritativeRemove(t *testing.T) {
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
