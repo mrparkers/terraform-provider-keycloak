@@ -293,16 +293,12 @@ func TestAccKeycloakOpenidClientDefaultScopes_profileAndEmailDefaultScopes(t *te
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	clientScopes := []string{
-		clientScope,
-	}
-
 	resource.Test(t, resource.TestCase{
 		Providers: testAccProviders,
 		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config:             testKeycloakOpenidClientDefaultScopes_listOfScopes(realm, client, clientScope, clientScopes),
+				Config:             testKeycloakOpenidClientDefaultScopes_listOfScopes(realm, client, clientScope, []string{clientScope}),
 				Check:              testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client.client", []string{"profile", "email", clientScope}),
 				ExpectNonEmptyPlan: true,
 			},
