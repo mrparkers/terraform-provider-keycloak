@@ -1,0 +1,12 @@
+site_name: "Terraform Provider: Keycloak"
+nav:
+- Getting Started:
+  - Installing: index.md
+- Resources:
+  - keycloak_realm: resources/keycloak_realm.md
+  - keycloak_client: resources/keycloak_client.md
+theme: readthedocs
+markdown_extensions:
+- toc:
+    toc_depth: 6
+extra_css: [index.css]
