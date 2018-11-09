@@ -189,7 +189,7 @@ resource keycloak_identity_provider_mapper saml_mapper {
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
-  social {
+  saml {
     template = "asdasdasdadsdad"
   }
 }
@@ -217,7 +217,7 @@ resource keycloak_identity_provider_mapper saml {
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
-  social {
+  saml {
     template = "asdasdasdadsdad"
   }
 }
@@ -259,7 +259,7 @@ resource keycloak_identity_provider_mapper saml_mapper {
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
-  social {
+  saml {
     template = "asdasdasdadsdad"
   }
 }
@@ -301,7 +301,7 @@ resource keycloak_identity_provider_mapper saml_mapper {
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
-  social {
+  saml {
     template = "asdasdasdadsdad"
   }
 }
@@ -329,7 +329,7 @@ resource keycloak_identity_provider_mapper saml_mapper {
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
-  social {
+  saml {
     template = "asdasdasdadsdad"
   }
 }
@@ -357,7 +357,7 @@ resource keycloak_identity_provider_mapper saml_mapper {
   name = "%s"
   identity_provider_alias = "saml"
   identity_provider_mapper = "user-attribute-mapper"
-  social {
+  saml {
     template = "asdasdasdadsdad"
   }
 }

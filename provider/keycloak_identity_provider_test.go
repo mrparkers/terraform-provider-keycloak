@@ -326,7 +326,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_identity_provider" "saml" {
   alias   = "%s"
-  realm   = "${keycloak_realm.realm.name}"
+  realm   = "${keycloak_realm.realm.realm}"
   %s      = "%s"
 
   saml {
@@ -344,7 +344,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_identity_provider" "saml" {
   alias   = "%s"
-  realm   = "${keycloak_realm.realm.name}"
+  realm   = "${keycloak_realm.realm.realm}"
   enabled = true
 
   saml {
@@ -362,7 +362,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_identity_provider" "saml" {
   alias   = %s"
-  realm   = "${keycloak_realm.realm.name}"
+  realm   = "${keycloak_realm.realm.realm}"
   enabled = true
 
   saml {
@@ -380,7 +380,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_identity_provider" "saml" {
   alias   = "%s"
-  realm   = "${keycloak_realm.realm.name}"
+  realm   = "${keycloak_realm.realm.realm}"
   enabled = true
 
   saml {
@@ -398,7 +398,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_identity_provider" "saml" {
   alias   = "%s"
-  realm   = "${keycloak_realm.realm.name}"
+  realm   = "${keycloak_realm.realm.realm}"
   enabled = true
 
   saml {
