@@ -74,26 +74,26 @@ func (keycloakClient *KeycloakClient) GetOpenidClientByClientId(realmId, clientI
 	var clients []OpenidClient
 	var clientSecret openidClientSecret
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients", realmId), &clients)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients?clientId=%s", realmId, clientId), &clients)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, client := range clients {
-		if client.ClientId == clientId {
-			err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/client-secret", realmId, client.Id), &clientSecret)
-			if err != nil {
-				return nil, err
-			}
-
-			client.RealmId = realmId
-			client.ClientSecret = clientSecret.Value
-
-			return &client, nil
-		}
+	if len(clients) == 0 {
+		return nil, fmt.Errorf("openid client with name %s does not exist", clientId)
 	}
 
-	return nil, fmt.Errorf("openid client with name %s does not exist", clientId)
+	client := clients[0]
+
+	err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/client-secret", realmId, client.Id), &clientSecret)
+	if err != nil {
+		return nil, err
+	}
+
+	client.RealmId = realmId
+	client.ClientSecret = clientSecret.Value
+
+	return &client, nil
 }
 
 func (keycloakClient *KeycloakClient) UpdateOpenidClient(client *OpenidClient) error {
