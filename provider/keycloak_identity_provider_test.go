@@ -325,24 +325,13 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_identity_provider" "saml" {
-   name                    = "%s"
-   realm_id                = "${keycloak_realm.realm.id}"
+  alias   = "%s"
+  realm   = "${keycloak_realm.realm.name}"
+  %s      = "%s"
 
-   enabled                 = true
-
-   %s                      = "%s"
-
-   username_alias_attribute = "cn"
-   rdn_alias_attribute      = "cn"
-   uuid_alias_attribute     = "entryDN"
-   user_object_classes     = [
-      "simpleSecurityObject",
-      "organizationalRole"
-   ]
-   connection_url          = "alias://saml"
-   users_dn                = "dc=example,dc=org"
-   bind_dn                 = "cn=admin,dc=example,dc=org"
-   bind_credential         = "admin"
+  saml {
+    single_sign_on_service_url = "https://example.com"
+  }
 }
    `, realm, alias, attr, val)
 }
@@ -354,22 +343,13 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_identity_provider" "saml" {
-   name                    = "%s"
-   realm_id                = "${keycloak_realm.realm.id}"
+  alias   = "%s"
+  realm   = "${keycloak_realm.realm.name}"
+  enabled = true
 
-   enabled                 = true
-
-   bind_credential         = "admin"
-
-   username_alias_attribute = "cn"
-   rdn_alias_attribute      = "cn"
-   uuid_alias_attribute     = "entryDN"
-   user_object_classes     = [
-      "simpleSecurityObject",
-      "organizationalRole"
-   ]
-   connection_url          = "alias://saml"
-   users_dn                = "dc=example,dc=org"
+  saml {
+    single_sign_on_service_url = "https://example.com"
+  }
 }
    `, realm, alias)
 }
@@ -381,22 +361,13 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_identity_provider" "saml" {
-   name                    = "%s"
-   realm_id                = "${keycloak_realm.realm.id}"
+  alias   = %s"
+  realm   = "${keycloak_realm.realm.name}"
+  enabled = true
 
-   enabled                 = true
-
-   bind_dn                 = "cn=admin,dc=example,dc=org"
-
-   username_alias_attribute = "cn"
-   rdn_alias_attribute      = "cn"
-   uuid_alias_attribute     = "entryDN"
-   user_object_classes     = [
-      "simpleSecurityObject",
-      "organizationalRole"
-   ]
-   connection_url          = "alias://saml"
-   users_dn                = "dc=example,dc=org"
+  saml {
+    single_sign_on_service_url = "https://example.com"
+  }
 }
    `, realm, alias)
 }
@@ -408,25 +379,13 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_identity_provider" "saml" {
-   name                    = "%s"
-   realm_id                = "${keycloak_realm.realm.id}"
+  alias   = "%s"
+  realm   = "${keycloak_realm.realm.name}"
+  enabled = true
 
-   enabled                 = true
-
-   username_alias_attribute = "cn"
-   rdn_alias_attribute      = "cn"
-   uuid_alias_attribute     = "entryDN"
-   user_object_classes     = [
-      "simpleSecurityObject",
-      "organizationalRole"
-   ]
-   connection_url          = "alias://saml"
-   users_dn                = "dc=example,dc=org"
-   bind_dn                 = "cn=admin,dc=example,dc=org"
-   bind_credential         = "admin"
-
-   full_sync_period        = %d
-   changed_sync_period     = %d
+  saml {
+    single_sign_on_service_url = "https://example.com"
+  }
 }
    `, realm, alias, fullSyncPeriod, changedSyncPeriod)
 }
@@ -438,25 +397,13 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_identity_provider" "saml" {
-   name                    = "%s"
-   realm_id                = "${keycloak_realm.realm.id}"
+  alias   = "%s"
+  realm   = "${keycloak_realm.realm.name}"
+  enabled = true
 
-   enabled                 = true
-
-   username_alias_attribute = "cn"
-   rdn_alias_attribute      = "cn"
-   uuid_alias_attribute     = "entryDN"
-   user_object_classes     = [
-      "simpleSecurityObject",
-      "organizationalRole"
-   ]
-   connection_url          = "alias://saml"
-   users_dn                = "dc=example,dc=org"
-   bind_dn                 = "cn=admin,dc=example,dc=org"
-   bind_credential         = "admin"
-
-   connection_timeout      = "10s"
-   read_timeout            = "5s"
+  saml {
+    single_sign_on_service_url = "https://example.com"
+  }
 }
    `, realm, alias)
 }

@@ -174,31 +174,24 @@ resource "keycloak_realm" "realm" {
    realm = "%s"
 }
 
-resource "keycloak__user_federation" "open" {
-   name                    = "open"
-   realm_id                = "${keycloak_realm.realm.id}"
+resource "keycloak_identity_provider" "saml" {
+  alias   = "saml"
+  realm   = "${keycloak_realm.realm_two.name}"
+  enabled = true
 
-   enabled                 = true
-
-   username__attribute = "cn"
-   rdn__attribute      = "cn"
-   uuid__attribute     = "entryDN"
-   user_object_classes     = [
-      "simpleSecurityObject",
-      "organizationalRole"
-   ]
-   connection_url          = "://open"
-   users_dn                = "dc=example,dc=org"
-   bind_dn                 = "cn=admin,dc=example,dc=org"
-   bind_credential         = "admin"
+  saml {
+    single_sign_on_service_url = "https://example.com"
+  }
 }
 
-resource "keycloak__full_name_mapper" "full_name_mapper" {
-   name                     = "%s"
-   realm_id                 = "${keycloak_realm.realm.id}"
-   _user_federation_id  = "${keycloak__user_federation.open.id}"
-
-   _full_name_attribute = "cn"
+resource keycloak_identity_provider_mapper saml_mapper {
+  realm   = "${keycloak_realm.realm.id}"
+  name = "%s"
+  identity_provider_alias = "saml"
+  identity_provider_mapper = "user-attribute-mapper"
+  social {
+    template = "asdasdasdadsdad"
+  }
 }
    `, realm, mapperName)
 }
@@ -283,50 +276,34 @@ resource "keycloak_realm" "realm_two" {
    realm = "%s"
 }
 
-resource "keycloak__user_federation" "open_one" {
-   name                    = "open"
-   realm_id                = "${keycloak_realm.realm_one.id}"
+resource "keycloak_identity_provider" "saml_one" {
+  alias   = "saml"
+  realm   = "${keycloak_realm.realm_one.name}"
+  enabled = true
 
-   enabled                 = true
-
-   username__attribute = "cn"
-   rdn__attribute      = "cn"
-   uuid__attribute     = "entryDN"
-   user_object_classes     = [
-      "simpleSecurityObject",
-      "organizationalRole"
-   ]
-   connection_url          = "://open"
-   users_dn                = "dc=example,dc=org"
-   bind_dn                 = "cn=admin,dc=example,dc=org"
-   bind_credential         = "admin"
+  saml {
+    single_sign_on_service_url = "https://example.com"
+  }
 }
 
-resource "keycloak__user_federation" "open_two" {
-   name                    = "open"
-   realm_id                = "${keycloak_realm.realm_two.id}"
+resource "keycloak_identity_provider" "saml_two" {
+  alias   = "saml"
+  realm   = "${keycloak_realm.realm_two.name}"
+  enabled = true
 
-   enabled                 = true
-
-   username__attribute = "cn"
-   rdn__attribute      = "cn"
-   uuid__attribute     = "entryDN"
-   user_object_classes     = [
-      "simpleSecurityObject",
-      "organizationalRole"
-   ]
-   connection_url          = "://open"
-   users_dn                = "dc=example,dc=org"
-   bind_dn                 = "cn=admin,dc=example,dc=org"
-   bind_credential         = "admin"
+  saml {
+    single_sign_on_service_url = "https://example.com"
+  }
 }
 
-resource "keycloak__full_name_mapper" "full_name_mapper" {
-   name                     = "%s"
-   realm_id                 = "${keycloak_realm.realm_two.id}"
-   _user_federation_id  = "${keycloak__user_federation.open_two.id}"
-
-   _full_name_attribute = "cn"
+resource keycloak_identity_provider_mapper saml_mapper {
+  realm   = "${keycloak_realm.realm_two.id}"
+  name = "%s"
+  identity_provider_alias = "saml"
+  identity_provider_mapper = "user-attribute-mapper"
+  social {
+    template = "asdasdasdadsdad"
+  }
 }
    `, realmOne, realmTwo, mapperName)
 }
@@ -337,33 +314,24 @@ resource "keycloak_realm" "realm" {
    realm = "%s"
 }
 
-resource "keycloak__user_federation" "open" {
-   name                    = "open"
-   realm_id                = "${keycloak_realm.realm.id}"
+resource "keycloak_identity_provider" "saml" {
+  alias   = "saml"
+  realm   = "${keycloak_realm.realm_two.name}"
+  enabled = true
 
-   enabled                 = true
-   edit_mode               = "READ_ONLY"
-
-   username__attribute = "cn"
-   rdn__attribute      = "cn"
-   uuid__attribute     = "entryDN"
-   user_object_classes     = [
-      "simpleSecurityObject",
-      "organizationalRole"
-   ]
-   connection_url          = "://open"
-   users_dn                = "dc=example,dc=org"
-   bind_dn                 = "cn=admin,dc=example,dc=org"
-   bind_credential         = "admin"
+  saml {
+    single_sign_on_service_url = "https://example.com"
+  }
 }
 
-resource "keycloak__full_name_mapper" "full_name_mapper" {
-   name                     = "%s"
-   realm_id                 = "${keycloak_realm.realm.id}"
-   _user_federation_id  = "${keycloak__user_federation.open.id}"
-
-   _full_name_attribute = "cn"
-   write_only               = true
+resource keycloak_identity_provider_mapper saml_mapper {
+  realm   = "${keycloak_realm.realm.id}"
+  name = "%s"
+  identity_provider_alias = "saml"
+  identity_provider_mapper = "user-attribute-mapper"
+  social {
+    template = "asdasdasdadsdad"
+  }
 }
    `, realm, mapperName)
 }
@@ -374,33 +342,24 @@ resource "keycloak_realm" "realm" {
    realm = "%s"
 }
 
-resource "keycloak__user_federation" "open" {
-   name                    = "open"
-   realm_id                = "${keycloak_realm.realm.id}"
+resource "keycloak_identity_provider" "saml" {
+  alias   = "saml"
+  realm   = "${keycloak_realm.realm_two.name}"
+  enabled = true
 
-   enabled                 = true
-   edit_mode               = "WRITABLE"
-
-   username__attribute = "cn"
-   rdn__attribute      = "cn"
-   uuid__attribute     = "entryDN"
-   user_object_classes     = [
-      "simpleSecurityObject",
-      "organizationalRole"
-   ]
-   connection_url          = "://open"
-   users_dn                = "dc=example,dc=org"
-   bind_dn                 = "cn=admin,dc=example,dc=org"
-   bind_credential         = "admin"
+  saml {
+    single_sign_on_service_url = "https://example.com"
+  }
 }
 
-resource "keycloak__full_name_mapper" "full_name_mapper" {
-   name                     = "%s"
-   realm_id                 = "${keycloak_realm.realm.id}"
-   _user_federation_id  = "${keycloak__user_federation.open.id}"
-
-   _full_name_attribute = "cn"
-   write_only               = true
+resource keycloak_identity_provider_mapper saml_mapper {
+  realm   = "${keycloak_realm.realm.id}"
+  name = "%s"
+  identity_provider_alias = "saml"
+  identity_provider_mapper = "user-attribute-mapper"
+  social {
+    template = "asdasdasdadsdad"
+  }
 }
    `, realm, mapperName)
 }
