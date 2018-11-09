@@ -16,6 +16,8 @@ type OpenidClientScope struct {
 	} `json:"attributes"`
 }
 
+type OpenidClientScopeFilterFunc func(*OpenidClientScope) bool
+
 func (keycloakClient *KeycloakClient) NewOpenidClientScope(clientScope *OpenidClientScope) error {
 	clientScope.Protocol = "openid-connect"
 
@@ -52,7 +54,7 @@ func (keycloakClient *KeycloakClient) DeleteOpenidClientScope(realmId, id string
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id))
 }
 
-func (keycloakClient *KeycloakClient) listOpenidClientScopesWithFilter(realmId string, filter func(*OpenidClientScope) bool) ([]*OpenidClientScope, error) {
+func (keycloakClient *KeycloakClient) listOpenidClientScopesWithFilter(realmId string, filter OpenidClientScopeFilterFunc) ([]*OpenidClientScope, error) {
 	var clientScopes []OpenidClientScope
 	var openidClientScopes []*OpenidClientScope
 
@@ -63,16 +65,17 @@ func (keycloakClient *KeycloakClient) listOpenidClientScopesWithFilter(realmId s
 
 	for _, clientScope := range clientScopes {
 		if clientScope.Protocol == "openid-connect" && filter(&clientScope) {
-			func(cs OpenidClientScope) {
-				openidClientScopes = append(openidClientScopes, &cs)
-			}(clientScope)
+			scope := new(OpenidClientScope)
+			*scope = clientScope
+
+			openidClientScopes = append(openidClientScopes, scope)
 		}
 	}
 
 	return openidClientScopes, nil
 }
 
-func includeOpenidClientScopesMatchingNames(scopeNames []string) func(*OpenidClientScope) bool {
+func includeOpenidClientScopesMatchingNames(scopeNames []string) OpenidClientScopeFilterFunc {
 	return func(scope *OpenidClientScope) bool {
 		for _, scopeName := range scopeNames {
 			if scopeName == scope.Name {
