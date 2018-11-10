@@ -249,7 +249,7 @@ resource "keycloak_realm" "realm" {
 
 resource keycloak_identity_provider saml {
   alias   = "%s"
-  realm   = "master"
+  realm   = "${keycloak_realm.realm.realm}"
   enabled = true
 
   saml {

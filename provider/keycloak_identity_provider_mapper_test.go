@@ -164,7 +164,7 @@ func getGenericMapperImportId(resourceName string) resource.ImportStateIdFunc {
 		realm := rs.Primary.Attributes["realm"]
 		alias := rs.Primary.Attributes["identity_provider_alias"]
 
-		return fmt.Sprintf("%s/%s/%s", realm, alias, id), nil
+		return fmt.Sprintf("%s", id), nil
 	}
 }
 
@@ -187,7 +187,7 @@ resource "keycloak_identity_provider" "saml" {
 resource keycloak_identity_provider_mapper saml_mapper {
   realm   = "${keycloak_realm.realm.realm}"
   name = "%s"
-  identity_provider_alias = "saml"
+  identity_provider_alias = "${keycloak_identity_provider.saml.alias}"
   identity_provider_mapper = "user-attribute-mapper"
   saml {
     template = "asdasdasdadsdad"
@@ -229,7 +229,7 @@ resource "keycloak_identity_provider" "saml_two" {
 resource keycloak_identity_provider_mapper saml_mapper {
   realm   = "${keycloak_realm.realm_one.realm"
   name = "%s"
-  identity_provider_alias = "saml"
+  identity_provider_alias = "${keycloak_identity_provider.saml.alias}"
   identity_provider_mapper = "user-attribute-mapper"
   saml {
     template = "asdasdasdadsdad"
@@ -271,7 +271,7 @@ resource "keycloak_identity_provider" "saml_two" {
 resource keycloak_identity_provider_mapper saml_mapper {
   realm   = "${keycloak_realm.realm_two.realm}"
   name = "%s"
-  identity_provider_alias = "saml"
+  identity_provider_alias = "${keycloak_identity_provider.saml.alias}"
   identity_provider_mapper = "user-attribute-mapper"
   saml {
     template = "asdasdasdadsdad"
