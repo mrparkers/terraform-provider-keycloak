@@ -22,7 +22,9 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 		Read:   resourceKeycloakLdapUserFederationRead,
 		Update: resourceKeycloakLdapUserFederationUpdate,
 		Delete: resourceKeycloakLdapUserFederationDelete,
-		// This resource can be imported using {{realm}}/{{provider_id}}. The Provider ID is displayed in the GUI
+		// If this resource uses authentication, then this resource must be imported using the syntax {{realm_id}}/{{provider_id}}/{{bind_credential}}
+		// Otherwise, this resource can be imported using {{realm}}/{{provider_id}}.
+		// The Provider ID is displayed in the GUI when editing this provider
 		Importer: &schema.ResourceImporter{
 			State: resourceKeycloakLdapUserFederationImport,
 		},
@@ -326,6 +328,7 @@ func resourceKeycloakLdapUserFederationRead(data *schema.ResourceData, meta inte
 		return handleNotFoundError(err, data)
 	}
 
+	ldap.BindCredential = data.Get("bind_credential").(string) // we can't trust the API to set this field correctly since it just responds with "**********"
 	setLdapUserFederationData(data, ldap)
 
 	return nil
@@ -368,6 +371,11 @@ func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, _ interfac
 
 	d.Set("realm_id", realm)
 	d.SetId(id)
+
+	if len(parts) == 3 { // bind_credential was specified
+		bindCredential := parts[2]
+		d.Set("bind_credential", bindCredential)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
