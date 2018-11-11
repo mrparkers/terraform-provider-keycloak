@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 	"time"
@@ -14,6 +15,8 @@ import (
 
 type KeycloakClient struct {
 	baseUrl           string
+	realm             string
+	RealmId           string
 	clientCredentials *ClientCredentials
 	httpClient        *http.Client
 }
@@ -21,6 +24,8 @@ type KeycloakClient struct {
 type ClientCredentials struct {
 	ClientId     string
 	ClientSecret string
+	Username     string
+	Password     string
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	TokenType    string `json:"token_type"`
@@ -28,21 +33,34 @@ type ClientCredentials struct {
 
 const (
 	apiUrl   = "/auth/admin"
-	tokenUrl = "/auth/realms/master/protocol/openid-connect/token"
+	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret string) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string) (*KeycloakClient, error) {
 	httpClient := &http.Client{
 		Timeout: time.Second * 5,
 	}
-
-	keycloakClient := KeycloakClient{
-		baseUrl: baseUrl,
-		clientCredentials: &ClientCredentials{
+	var clientCredentials *ClientCredentials
+	if username != "" && password != "" {
+		clientCredentials = &ClientCredentials{
+			ClientId: clientId,
+			Username: username,
+			Password: password,
+		}
+	} else if clientSecret != "" {
+		clientCredentials = &ClientCredentials{
 			ClientId:     clientId,
 			ClientSecret: clientSecret,
-		},
-		httpClient: httpClient,
+		}
+	} else {
+		return nil, fmt.Errorf("Neither clientSecret nor username&password pair are defined")
+	}
+
+	keycloakClient := KeycloakClient{
+		baseUrl:           baseUrl,
+		realm:             realm,
+		clientCredentials: clientCredentials,
+		httpClient:        httpClient,
 	}
 
 	err := keycloakClient.login()
@@ -50,17 +68,33 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret string) (*KeycloakClient,
 		return nil, err
 	}
 
+	var realmObj Realm
+
+	err = keycloakClient.get(fmt.Sprintf("/realms/%s", realm), &realmObj)
+	if err != nil {
+		return nil, err
+	}
+
+	keycloakClient.RealmId = realmObj.Id
+
 	return &keycloakClient, nil
 }
 
 func (keycloakClient *KeycloakClient) login() error {
-	accessTokenUrl := keycloakClient.baseUrl + tokenUrl
-
+	accessTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	accessTokenData := url.Values{}
-
-	accessTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
-	accessTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
-	accessTokenData.Set("grant_type", "client_credentials")
+	if keycloakClient.clientCredentials.Username != "" && keycloakClient.clientCredentials.Password != "" {
+		accessTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+		accessTokenData.Set("username", keycloakClient.clientCredentials.Username)
+		accessTokenData.Set("password", keycloakClient.clientCredentials.Password)
+		accessTokenData.Set("grant_type", "password")
+	} else if keycloakClient.clientCredentials.ClientSecret != "" {
+		accessTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+		accessTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
+		accessTokenData.Set("grant_type", "client_credentials")
+	} else {
+		return fmt.Errorf("Neither clientSecret nor username&password pair are defined")
+	}
 
 	log.Printf("[DEBUG] Login request: %s", accessTokenData.Encode())
 
@@ -93,14 +127,20 @@ func (keycloakClient *KeycloakClient) login() error {
 }
 
 func (keycloakClient *KeycloakClient) refresh() error {
-	refreshTokenUrl := keycloakClient.baseUrl + tokenUrl
-
+	refreshTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	refreshTokenData := url.Values{}
-
-	refreshTokenData.Set("grant_type", "refresh_token")
-	refreshTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
-	refreshTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
-	refreshTokenData.Set("refresh_token", keycloakClient.clientCredentials.RefreshToken)
+	if keycloakClient.clientCredentials.Username != "" && keycloakClient.clientCredentials.Password != "" {
+		refreshTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+		refreshTokenData.Set("username", keycloakClient.clientCredentials.Username)
+		refreshTokenData.Set("password", keycloakClient.clientCredentials.Password)
+		refreshTokenData.Set("grant_type", "password")
+	} else if keycloakClient.clientCredentials.ClientSecret != "" {
+		refreshTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+		refreshTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
+		refreshTokenData.Set("grant_type", "refresh_token")
+	} else {
+		return fmt.Errorf("Neither clientSecret nor username&password pair are defined")
+	}
 
 	log.Printf("[DEBUG] Refresh request: %s", refreshTokenData.Encode())
 
@@ -147,6 +187,7 @@ func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 
 	if request.Method == http.MethodPost || request.Method == http.MethodPut {
 		request.Header.Set("Content-type", "application/json")
+		request.ContentLength = 0
 	}
 }
 
@@ -158,7 +199,9 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 	requestPath := request.URL.Path
 
 	log.Printf("[DEBUG] Sending %s to %s", requestMethod, requestPath)
+	showBody := false
 	if request.Body != nil {
+		showBody = true
 		requestBody, err := request.GetBody()
 		if err != nil {
 			return nil, "", err
@@ -171,6 +214,12 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 	}
 
 	keycloakClient.addRequestHeaders(request)
+
+	dump, err := httputil.DumpRequest(request, showBody)
+	if err != nil {
+		return nil, "", err
+	}
+	log.Printf("[DEBUG] %s", dump)
 
 	response, err := keycloakClient.httpClient.Do(request)
 	if err != nil {

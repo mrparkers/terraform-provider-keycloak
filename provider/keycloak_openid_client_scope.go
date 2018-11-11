@@ -19,7 +19,7 @@ func resourceKeycloakOpenidClientScope() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"name": {
@@ -38,10 +38,18 @@ func resourceKeycloakOpenidClientScope() *schema.Resource {
 	}
 }
 
-func getClientScopeFromData(data *schema.ResourceData) *keycloak.OpenidClientScope {
+func getClientScopeFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenidClientScope {
+
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
+
 	clientScope := &keycloak.OpenidClientScope{
 		Id:          data.Id(),
-		RealmId:     data.Get("realm_id").(string),
+		RealmId:     realmId,
 		Name:        data.Get("name").(string),
 		Description: data.Get("description").(string),
 	}
@@ -71,7 +79,7 @@ func setClientScopeData(data *schema.ResourceData, clientScope *keycloak.OpenidC
 func resourceKeycloakOpenidClientScopeCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	clientScope := getClientScopeFromData(data)
+	clientScope := getClientScopeFromData(data, keycloakClient)
 
 	err := keycloakClient.NewOpenidClientScope(clientScope)
 	if err != nil {
@@ -102,7 +110,7 @@ func resourceKeycloakOpenidClientScopeRead(data *schema.ResourceData, meta inter
 func resourceKeycloakOpenidClientScopeUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	clientScope := getClientScopeFromData(data)
+	clientScope := getClientScopeFromData(data, keycloakClient)
 
 	err := keycloakClient.UpdateOpenidClientScope(clientScope)
 	if err != nil {

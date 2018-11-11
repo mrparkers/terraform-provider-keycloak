@@ -29,7 +29,7 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm id where the associated client or client scope exists.",
 			},
@@ -75,11 +75,19 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapper() *schema.Resource {
 	}
 }
 
-func mapFromDataToOpenIdGroupMembershipProtocolMapper(data *schema.ResourceData) *keycloak.OpenIdGroupMembershipProtocolMapper {
+func mapFromDataToOpenIdGroupMembershipProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenIdGroupMembershipProtocolMapper {
+
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
+
 	return &keycloak.OpenIdGroupMembershipProtocolMapper{
 		Id:            data.Id(),
 		Name:          data.Get("name").(string),
-		RealmId:       data.Get("realm_id").(string),
+		RealmId:       realmId,
 		ClientId:      data.Get("client_id").(string),
 		ClientScopeId: data.Get("client_scope_id").(string),
 
@@ -112,7 +120,7 @@ func mapFromOpenIdGroupMembershipMapperToData(mapper *keycloak.OpenIdGroupMember
 func resourceKeycloakOpenIdGroupMembershipProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdGroupMembershipMapper := mapFromDataToOpenIdGroupMembershipProtocolMapper(data)
+	openIdGroupMembershipMapper := mapFromDataToOpenIdGroupMembershipProtocolMapper(data, keycloakClient)
 
 	err := keycloakClient.ValidateOpenIdGroupMembershipProtocolMapper(openIdGroupMembershipMapper)
 	if err != nil {
@@ -149,7 +157,7 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapperRead(data *schema.Resour
 func resourceKeycloakOpenIdGroupMembershipProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdGroupMembershipMapper := mapFromDataToOpenIdGroupMembershipProtocolMapper(data)
+	openIdGroupMembershipMapper := mapFromDataToOpenIdGroupMembershipProtocolMapper(data, keycloakClient)
 
 	err := keycloakClient.ValidateOpenIdGroupMembershipProtocolMapper(openIdGroupMembershipMapper)
 	if err != nil {

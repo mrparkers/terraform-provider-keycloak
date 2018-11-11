@@ -19,7 +19,7 @@ func resourceKeycloakUser() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"username": {
@@ -48,10 +48,18 @@ func resourceKeycloakUser() *schema.Resource {
 	}
 }
 
-func mapFromDataToUser(data *schema.ResourceData) *keycloak.User {
+func mapFromDataToUser(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.User {
+
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
+
 	return &keycloak.User{
 		Id:        data.Id(),
-		RealmId:   data.Get("realm_id").(string),
+		RealmId:   realmId,
 		Username:  data.Get("username").(string),
 		Email:     data.Get("email").(string),
 		FirstName: data.Get("first_name").(string),
@@ -62,7 +70,6 @@ func mapFromDataToUser(data *schema.ResourceData) *keycloak.User {
 
 func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
 	data.SetId(user.Id)
-
 	data.Set("realm_id", user.RealmId)
 	data.Set("username", user.Username)
 	data.Set("email", user.Email)
@@ -74,7 +81,7 @@ func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
 func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	user := mapFromDataToUser(data)
+	user := mapFromDataToUser(data, keycloakClient)
 
 	err := keycloakClient.NewUser(user)
 	if err != nil {
@@ -105,7 +112,7 @@ func resourceKeycloakUserRead(data *schema.ResourceData, meta interface{}) error
 func resourceKeycloakUserUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	user := mapFromDataToUser(data)
+	user := mapFromDataToUser(data, keycloakClient)
 
 	err := keycloakClient.UpdateUser(user)
 	if err != nil {

@@ -29,7 +29,7 @@ func resourceKeycloakOpenIdFullNameProtocolMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm id where the associated client or client scope exists.",
 			},
@@ -66,11 +66,19 @@ func resourceKeycloakOpenIdFullNameProtocolMapper() *schema.Resource {
 	}
 }
 
-func mapFromDataToOpenIdFullNameProtocolMapper(data *schema.ResourceData) *keycloak.OpenIdFullNameProtocolMapper {
+func mapFromDataToOpenIdFullNameProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenIdFullNameProtocolMapper {
+
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
+
 	return &keycloak.OpenIdFullNameProtocolMapper{
 		Id:            data.Id(),
 		Name:          data.Get("name").(string),
-		RealmId:       data.Get("realm_id").(string),
+		RealmId:       realmId,
 		ClientId:      data.Get("client_id").(string),
 		ClientScopeId: data.Get("client_scope_id").(string),
 
@@ -99,7 +107,7 @@ func mapFromOpenIdFullNameMapperToData(mapper *keycloak.OpenIdFullNameProtocolMa
 func resourceKeycloakOpenIdFullNameProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data)
+	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data, keycloakClient)
 
 	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(openIdFullNameMapper)
 	if err != nil {
@@ -136,7 +144,7 @@ func resourceKeycloakOpenIdFullNameProtocolMapperRead(data *schema.ResourceData,
 func resourceKeycloakOpenIdFullNameProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data)
+	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data, keycloakClient)
 
 	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(openIdFullNameMapper)
 	if err != nil {

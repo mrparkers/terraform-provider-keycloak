@@ -29,7 +29,7 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm id where the associated client or client scope exists.",
 			},
@@ -84,11 +84,19 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapper() *schema.Resource {
 	}
 }
 
-func mapFromDataToOpenIdHardcodedClaimProtocolMapper(data *schema.ResourceData) *keycloak.OpenIdHardcodedClaimProtocolMapper {
+func mapFromDataToOpenIdHardcodedClaimProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenIdHardcodedClaimProtocolMapper {
+
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
+
 	return &keycloak.OpenIdHardcodedClaimProtocolMapper{
 		Id:               data.Id(),
 		Name:             data.Get("name").(string),
-		RealmId:          data.Get("realm_id").(string),
+		RealmId:          realmId,
 		ClientId:         data.Get("client_id").(string),
 		ClientScopeId:    data.Get("client_scope_id").(string),
 		AddToIdToken:     data.Get("add_to_id_token").(bool),
@@ -123,7 +131,7 @@ func mapFromOpenIdHardcodedClaimMapperToData(mapper *keycloak.OpenIdHardcodedCla
 func resourceKeycloakOpenIdHardcodedClaimProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdHardcodedClaimMapper := mapFromDataToOpenIdHardcodedClaimProtocolMapper(data)
+	openIdHardcodedClaimMapper := mapFromDataToOpenIdHardcodedClaimProtocolMapper(data, keycloakClient)
 
 	err := keycloakClient.ValidateOpenIdHardcodedClaimProtocolMapper(openIdHardcodedClaimMapper)
 	if err != nil {
@@ -143,7 +151,12 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapperCreate(data *schema.Resou
 func resourceKeycloakOpenIdHardcodedClaimProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmId := data.Get("realm_id").(string)
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = keycloakClient.RealmId
+	}
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
@@ -160,7 +173,7 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapperRead(data *schema.Resourc
 func resourceKeycloakOpenIdHardcodedClaimProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdHardcodedClaimMapper := mapFromDataToOpenIdHardcodedClaimProtocolMapper(data)
+	openIdHardcodedClaimMapper := mapFromDataToOpenIdHardcodedClaimProtocolMapper(data, keycloakClient)
 
 	err := keycloakClient.ValidateOpenIdHardcodedClaimProtocolMapper(openIdHardcodedClaimMapper)
 	if err != nil {

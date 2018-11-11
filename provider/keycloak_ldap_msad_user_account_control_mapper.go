@@ -23,7 +23,7 @@ func resourceKeycloakLdapMsadUserAccountControlMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm in which the ldap user federation provider exists.",
 			},
@@ -42,11 +42,19 @@ func resourceKeycloakLdapMsadUserAccountControlMapper() *schema.Resource {
 	}
 }
 
-func getLdapMsadUserAccountControlMapperFromData(data *schema.ResourceData) *keycloak.LdapMsadUserAccountControlMapper {
+func getLdapMsadUserAccountControlMapperFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapMsadUserAccountControlMapper {
+
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
+
 	return &keycloak.LdapMsadUserAccountControlMapper{
 		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
-		RealmId:              data.Get("realm_id").(string),
+		RealmId:              realmId,
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
 
 		LdapPasswordPolicyHintsEnabled: data.Get("ldap_password_policy_hints_enabled").(bool),
@@ -67,7 +75,7 @@ func setLdapMsadUserAccountControlMapperData(data *schema.ResourceData, ldapMsad
 func resourceKeycloakLdapMsadUserAccountControlMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapMsadUserAccountControlMapper := getLdapMsadUserAccountControlMapperFromData(data)
+	ldapMsadUserAccountControlMapper := getLdapMsadUserAccountControlMapperFromData(data, keycloakClient)
 
 	err := keycloakClient.NewLdapMsadUserAccountControlMapper(ldapMsadUserAccountControlMapper)
 	if err != nil {
@@ -98,7 +106,7 @@ func resourceKeycloakLdapMsadUserAccountControlMapperRead(data *schema.ResourceD
 func resourceKeycloakLdapMsadUserAccountControlMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapMsadUserAccountControlMapper := getLdapMsadUserAccountControlMapperFromData(data)
+	ldapMsadUserAccountControlMapper := getLdapMsadUserAccountControlMapperFromData(data, keycloakClient)
 
 	err := keycloakClient.UpdateLdapMsadUserAccountControlMapper(ldapMsadUserAccountControlMapper)
 	if err != nil {

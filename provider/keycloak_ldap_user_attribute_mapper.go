@@ -23,7 +23,7 @@ func resourceKeycloakLdapUserAttributeMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm in which the ldap user federation provider exists.",
 			},
@@ -65,11 +65,19 @@ func resourceKeycloakLdapUserAttributeMapper() *schema.Resource {
 	}
 }
 
-func getLdapUserAttributeMapperFromData(data *schema.ResourceData) *keycloak.LdapUserAttributeMapper {
+func getLdapUserAttributeMapperFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapUserAttributeMapper {
+
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
+
 	return &keycloak.LdapUserAttributeMapper{
 		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
-		RealmId:              data.Get("realm_id").(string),
+		RealmId:              realmId,
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
 
 		LdapAttribute:      data.Get("ldap_attribute").(string),
@@ -100,7 +108,7 @@ func setLdapUserAttributeMapperData(data *schema.ResourceData, ldapUserAttribute
 func resourceKeycloakLdapUserAttributeMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapUserAttributeMapper := getLdapUserAttributeMapperFromData(data)
+	ldapUserAttributeMapper := getLdapUserAttributeMapperFromData(data, keycloakClient)
 
 	err := keycloakClient.NewLdapUserAttributeMapper(ldapUserAttributeMapper)
 	if err != nil {
@@ -131,7 +139,7 @@ func resourceKeycloakLdapUserAttributeMapperRead(data *schema.ResourceData, meta
 func resourceKeycloakLdapUserAttributeMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapUserAttributeMapper := getLdapUserAttributeMapperFromData(data)
+	ldapUserAttributeMapper := getLdapUserAttributeMapperFromData(data, keycloakClient)
 
 	err := keycloakClient.UpdateLdapUserAttributeMapper(ldapUserAttributeMapper)
 	if err != nil {

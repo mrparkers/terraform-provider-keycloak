@@ -29,7 +29,7 @@ func resourceKeycloakOpenIdUserPropertyProtocolMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm id where the associated client or client scope exists.",
 			},
@@ -84,11 +84,19 @@ func resourceKeycloakOpenIdUserPropertyProtocolMapper() *schema.Resource {
 	}
 }
 
-func mapFromDataToOpenIdUserPropertyProtocolMapper(data *schema.ResourceData) *keycloak.OpenIdUserPropertyProtocolMapper {
+func mapFromDataToOpenIdUserPropertyProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenIdUserPropertyProtocolMapper {
+
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
+
 	return &keycloak.OpenIdUserPropertyProtocolMapper{
 		Id:               data.Id(),
 		Name:             data.Get("name").(string),
-		RealmId:          data.Get("realm_id").(string),
+		RealmId:          realmId,
 		ClientId:         data.Get("client_id").(string),
 		ClientScopeId:    data.Get("client_scope_id").(string),
 		AddToIdToken:     data.Get("add_to_id_token").(bool),
@@ -123,7 +131,7 @@ func mapFromOpenIdUserPropertyMapperToData(mapper *keycloak.OpenIdUserPropertyPr
 func resourceKeycloakOpenIdUserPropertyProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdUserPropertyMapper := mapFromDataToOpenIdUserPropertyProtocolMapper(data)
+	openIdUserPropertyMapper := mapFromDataToOpenIdUserPropertyProtocolMapper(data, keycloakClient)
 
 	err := openIdUserPropertyMapper.Validate(keycloakClient)
 	if err != nil {
@@ -160,7 +168,7 @@ func resourceKeycloakOpenIdUserPropertyProtocolMapperRead(data *schema.ResourceD
 func resourceKeycloakOpenIdUserPropertyProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdUserPropertyMapper := mapFromDataToOpenIdUserPropertyProtocolMapper(data)
+	openIdUserPropertyMapper := mapFromDataToOpenIdUserPropertyProtocolMapper(data, keycloakClient)
 	err := keycloakClient.UpdateOpenIdUserPropertyProtocolMapper(openIdUserPropertyMapper)
 	if err != nil {
 		return err

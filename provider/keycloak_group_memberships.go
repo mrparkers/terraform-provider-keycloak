@@ -15,7 +15,7 @@ func resourceKeycloakGroupMemberships() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"group_id": {
@@ -35,8 +35,12 @@ func resourceKeycloakGroupMemberships() *schema.Resource {
 
 func resourceKeycloakGroupMembershipsCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	realmId := data.Get("realm_id").(string)
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = keycloakClient.RealmId
+	}
 	groupId := data.Get("group_id").(string)
 
 	err := keycloakClient.AddUsersToGroup(realmId, groupId, data.Get("members").(*schema.Set).List())
@@ -51,8 +55,12 @@ func resourceKeycloakGroupMembershipsCreate(data *schema.ResourceData, meta inte
 
 func resourceKeycloakGroupMembershipsRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	realmId := data.Get("realm_id").(string)
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = keycloakClient.RealmId
+	}
 	groupId := data.Get("group_id").(string)
 
 	usersInGroup, err := keycloakClient.GetGroupMembers(realmId, groupId)
@@ -73,8 +81,12 @@ func resourceKeycloakGroupMembershipsRead(data *schema.ResourceData, meta interf
 
 func resourceKeycloakGroupMembershipsUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	realmId := data.Get("realm_id").(string)
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = keycloakClient.RealmId
+	}
 	groupId := data.Get("group_id").(string)
 
 	tfMembers := data.Get("members").(*schema.Set)
@@ -110,8 +122,12 @@ func resourceKeycloakGroupMembershipsUpdate(data *schema.ResourceData, meta inte
 
 func resourceKeycloakGroupMembershipsDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	realmId := data.Get("realm_id").(string)
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = keycloakClient.RealmId
+	}
 	groupId := data.Get("group_id").(string)
 
 	return keycloakClient.RemoveUsersFromGroup(realmId, groupId, data.Get("members").(*schema.Set).List())

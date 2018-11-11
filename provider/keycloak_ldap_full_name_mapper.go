@@ -24,7 +24,7 @@ func resourceKeycloakLdapFullNameMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm in which the ldap user federation provider exists.",
 			},
@@ -52,11 +52,17 @@ func resourceKeycloakLdapFullNameMapper() *schema.Resource {
 	}
 }
 
-func getLdapFullNameMapperFromData(data *schema.ResourceData) *keycloak.LdapFullNameMapper {
+func getLdapFullNameMapperFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapFullNameMapper {
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
 	return &keycloak.LdapFullNameMapper{
 		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
-		RealmId:              data.Get("realm_id").(string),
+		RealmId:              realmId,
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
 
 		LdapFullNameAttribute: data.Get("ldap_full_name_attribute").(string),
@@ -81,7 +87,7 @@ func setLdapFullNameMapperData(data *schema.ResourceData, ldapFullNameMapper *ke
 func resourceKeycloakLdapFullNameMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
+	ldapFullNameMapper := getLdapFullNameMapperFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateLdapFullNameMapper(ldapFullNameMapper)
 	if err != nil {
@@ -117,7 +123,7 @@ func resourceKeycloakLdapFullNameMapperRead(data *schema.ResourceData, meta inte
 func resourceKeycloakLdapFullNameMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
+	ldapFullNameMapper := getLdapFullNameMapperFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateLdapFullNameMapper(ldapFullNameMapper)
 	if err != nil {

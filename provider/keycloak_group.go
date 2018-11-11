@@ -19,7 +19,7 @@ func resourceKeycloakGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"parent_id": {
@@ -39,10 +39,16 @@ func resourceKeycloakGroup() *schema.Resource {
 	}
 }
 
-func mapFromDataToGroup(data *schema.ResourceData) *keycloak.Group {
+func mapFromDataToGroup(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.Group {
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
 	group := &keycloak.Group{
 		Id:       data.Id(),
-		RealmId:  data.Get("realm_id").(string),
+		RealmId:  realmId,
 		ParentId: data.Get("parent_id").(string),
 		Name:     data.Get("name").(string),
 	}
@@ -65,7 +71,7 @@ func mapFromGroupToData(data *schema.ResourceData, group *keycloak.Group) {
 func resourceKeycloakGroupCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	group := mapFromDataToGroup(data)
+	group := mapFromDataToGroup(data, keycloakClient)
 
 	err := keycloakClient.NewGroup(group)
 	if err != nil {
@@ -96,7 +102,7 @@ func resourceKeycloakGroupRead(data *schema.ResourceData, meta interface{}) erro
 func resourceKeycloakGroupUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	group := mapFromDataToGroup(data)
+	group := mapFromDataToGroup(data, keycloakClient)
 
 	err := keycloakClient.UpdateGroup(group)
 	if err != nil {

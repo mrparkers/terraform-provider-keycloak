@@ -34,7 +34,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm this provider will provide user federation for.",
 			},
@@ -212,8 +212,15 @@ func validateSyncPeriod(i interface{}, k string) (s []string, errs []error) {
 	return
 }
 
-func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUserFederation {
+func getLdapUserFederationFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapUserFederation {
 	var userObjectClasses []string
+
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
 
 	for _, userObjectClass := range data.Get("user_object_classes").([]interface{}) {
 		userObjectClasses = append(userObjectClasses, userObjectClass.(string))
@@ -222,7 +229,7 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 	return &keycloak.LdapUserFederation{
 		Id:      data.Id(),
 		Name:    data.Get("name").(string),
-		RealmId: data.Get("realm_id").(string),
+		RealmId: realmId,
 
 		Enabled:  data.Get("enabled").(bool),
 		Priority: data.Get("priority").(int),
@@ -298,7 +305,7 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 func resourceKeycloakLdapUserFederationCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldap := getLdapUserFederationFromData(data)
+	ldap := getLdapUserFederationFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateLdapUserFederation(ldap)
 	if err != nil {
@@ -334,7 +341,7 @@ func resourceKeycloakLdapUserFederationRead(data *schema.ResourceData, meta inte
 func resourceKeycloakLdapUserFederationUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldap := getLdapUserFederationFromData(data)
+	ldap := getLdapUserFederationFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateLdapUserFederation(ldap)
 	if err != nil {

@@ -25,7 +25,7 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm this provider will provide user federation for.",
 			},
@@ -58,11 +58,18 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 	}
 }
 
-func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.CustomUserFederation {
+func getCustomUserFederationFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.CustomUserFederation {
+
+	var realmId string
+	if v, ok := data.GetOk("realm_id"); ok {
+		realmId = v.(string)
+	} else {
+		realmId = client.RealmId
+	}
 	return &keycloak.CustomUserFederation{
 		Id:         data.Id(),
 		Name:       data.Get("name").(string),
-		RealmId:    data.Get("realm_id").(string),
+		RealmId:    realmId,
 		ProviderId: data.Get("provider_id").(string),
 
 		Enabled:  data.Get("enabled").(bool),
@@ -88,7 +95,7 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 func resourceKeycloakCustomUserFederationCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	custom := getCustomUserFederationFromData(data)
+	custom := getCustomUserFederationFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateCustomUserFederation(custom)
 	if err != nil {
@@ -124,7 +131,7 @@ func resourceKeycloakCustomUserFederationRead(data *schema.ResourceData, meta in
 func resourceKeycloakCustomUserFederationUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	custom := getCustomUserFederationFromData(data)
+	custom := getCustomUserFederationFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateCustomUserFederation(custom)
 	if err != nil {
