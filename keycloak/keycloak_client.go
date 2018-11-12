@@ -128,17 +128,13 @@ func (keycloakClient *KeycloakClient) login() error {
 func (keycloakClient *KeycloakClient) refresh() error {
 	refreshTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	refreshTokenData := url.Values{}
-	if keycloakClient.clientCredentials.Username != "" && keycloakClient.clientCredentials.Password != "" {
-		refreshTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+	refreshTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+	refreshTokenData.Set("grant_type", keycloakClient.clientCredentials.GrantType)
+	if keycloakClient.clientCredentials.GrantType == "password" {
 		refreshTokenData.Set("username", keycloakClient.clientCredentials.Username)
 		refreshTokenData.Set("password", keycloakClient.clientCredentials.Password)
-		refreshTokenData.Set("grant_type", "password")
-	} else if keycloakClient.clientCredentials.ClientSecret != "" {
-		refreshTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+	} else if keycloakClient.clientCredentials.GrantType == "client_credentials" {
 		refreshTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
-		refreshTokenData.Set("grant_type", "refresh_token")
-	} else {
-		return fmt.Errorf("Neither clientSecret nor username&password pair are defined")
 	}
 
 	log.Printf("[DEBUG] Refresh request: %s", refreshTokenData.Encode())
