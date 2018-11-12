@@ -75,12 +75,7 @@ func getOpenidClientFromData(data *schema.ResourceData, client *keycloak.Keycloa
 		}
 	}
 
-	var realmId string
-	if v, ok := data.GetOk("realm_id"); ok {
-		realmId = v.(string)
-	} else {
-		realmId = client.RealmId
-	}
+	realmId := getRealmId(data, client)
 
 	openidClient := &keycloak.OpenidClient{
 		Id:                data.Id(),
@@ -194,9 +189,13 @@ func resourceKeycloakOpenidClientImport(d *schema.ResourceData, meta interface{}
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, id string
+	var err error
 	switch len(parts) {
 	case 1:
-		realmId = keycloakClient.RealmId
+		realmId, err = keycloakClient.GetDefaultRealmId()
+		if err != nil {
+			return nil, err
+		}
 		id = parts[0]
 	case 2:
 		realmId = parts[0]

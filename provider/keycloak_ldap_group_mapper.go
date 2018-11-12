@@ -117,12 +117,7 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 func getLdapGroupMapperFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapGroupMapper {
 	var groupObjectClasses []string
 
-	var realmId string
-	if v, ok := data.GetOk("realm_id"); ok {
-		realmId = v.(string)
-	} else {
-		realmId = client.RealmId
-	}
+	realmId := getRealmId(data, client)
 
 	for _, groupObjectClass := range data.Get("group_object_classes").([]interface{}) {
 		groupObjectClasses = append(groupObjectClasses, groupObjectClass.(string))

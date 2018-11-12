@@ -16,7 +16,6 @@ import (
 type KeycloakClient struct {
 	baseUrl           string
 	realm             string
-	RealmId           string
 	clientCredentials *ClientCredentials
 	httpClient        *http.Client
 }
@@ -26,6 +25,7 @@ type ClientCredentials struct {
 	ClientSecret string
 	Username     string
 	Password     string
+	GrantType    string
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	TokenType    string `json:"token_type"`
@@ -36,31 +36,41 @@ const (
 	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password, grantType string) (*KeycloakClient, error) {
 	httpClient := &http.Client{
 		Timeout: time.Second * 5,
 	}
 	var clientCredentials *ClientCredentials
-	if username != "" && password != "" {
+	if clientId != "" {
 		clientCredentials = &ClientCredentials{
-			ClientId: clientId,
-			Username: username,
-			Password: password,
-		}
-	} else if clientSecret != "" {
-		clientCredentials = &ClientCredentials{
-			ClientId:     clientId,
-			ClientSecret: clientSecret,
+			ClientId:  clientId,
+			GrantType: grantType,
 		}
 	} else {
-		return nil, fmt.Errorf("Neither clientSecret nor username&password pair are defined")
+		return nil, fmt.Errorf("client id is required for both password and client credentials grants")
+	}
+	if grantType == "password" {
+		if password != "" && username != "" {
+			clientCredentials.Username = username
+			clientCredentials.Password = password
+		} else {
+			return nil, fmt.Errorf("both username and password are required for password grant")
+		}
+	} else if grantType == "client_credentials" {
+		if clientSecret != "" {
+			clientCredentials.ClientSecret = clientSecret
+		} else {
+			return nil, fmt.Errorf("client secret is is required for client credentials grant")
+		}
+	} else {
+		return nil, fmt.Errorf("grant type: %s doesn't exist", grantType)
 	}
 
 	keycloakClient := KeycloakClient{
 		baseUrl:           baseUrl,
-		realm:             realm,
 		clientCredentials: clientCredentials,
 		httpClient:        httpClient,
+		realm:             realm,
 	}
 
 	err := keycloakClient.login()
@@ -68,14 +78,7 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 		return nil, err
 	}
 
-	var realmObj Realm
-
-	err = keycloakClient.get(fmt.Sprintf("/realms/%s", realm), &realmObj)
-	if err != nil {
-		return nil, err
-	}
-
-	keycloakClient.RealmId = realmObj.Id
+	keycloakClient.realm = realm
 
 	return &keycloakClient, nil
 }
@@ -83,17 +86,13 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 func (keycloakClient *KeycloakClient) login() error {
 	accessTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	accessTokenData := url.Values{}
-	if keycloakClient.clientCredentials.Username != "" && keycloakClient.clientCredentials.Password != "" {
-		accessTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+	accessTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+	accessTokenData.Set("grant_type", keycloakClient.clientCredentials.GrantType)
+	if keycloakClient.clientCredentials.GrantType == "password" {
 		accessTokenData.Set("username", keycloakClient.clientCredentials.Username)
 		accessTokenData.Set("password", keycloakClient.clientCredentials.Password)
-		accessTokenData.Set("grant_type", "password")
-	} else if keycloakClient.clientCredentials.ClientSecret != "" {
-		accessTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+	} else if keycloakClient.clientCredentials.GrantType == "client_credentials" {
 		accessTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
-		accessTokenData.Set("grant_type", "client_credentials")
-	} else {
-		return fmt.Errorf("Neither clientSecret nor username&password pair are defined")
 	}
 
 	log.Printf("[DEBUG] Login request: %s", accessTokenData.Encode())
@@ -176,6 +175,18 @@ func (keycloakClient *KeycloakClient) refresh() error {
 	keycloakClient.clientCredentials.TokenType = clientCredentials.TokenType
 
 	return nil
+}
+
+func (keycloakClient *KeycloakClient) GetDefaultRealmId() (string, error) {
+	realmObj, err := keycloakClient.GetRealm(keycloakClient.realm)
+	if err != nil {
+		return "", fmt.Errorf("failed to get realm: %s\n %s", keycloakClient.realm, err)
+	}
+	return realmObj.Id, nil
+}
+
+func (keycloakClient *KeycloakClient) GetDefaultRealm() string {
+	return keycloakClient.realm
 }
 
 func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {

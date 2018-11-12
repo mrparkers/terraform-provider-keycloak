@@ -50,7 +50,6 @@ func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
 
 func (keycloakClient *KeycloakClient) GetRealm(id string) (*Realm, error) {
 	var realm Realm
-
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s", id), &realm)
 	if err != nil {
 		return nil, err

@@ -39,6 +39,11 @@ func KeycloakProvider() *schema.Provider {
 				DefaultFunc:   schema.EnvDefaultFunc("KEYCLOAK_CLIENT_SECRET", nil),
 				ConflictsWith: []string{"username", "password"},
 			},
+			"grant_type": {
+				Optional: true,
+				Type:     schema.TypeString,
+				Default:  "client_credentials",
+			},
 			"username": {
 				Optional:      true,
 				Type:          schema.TypeString,
@@ -74,5 +79,6 @@ func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
 	username := data.Get("username").(string)
 	password := data.Get("password").(string)
 	realm := data.Get("realm").(string)
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password)
+	grantType := data.Get("grant_type").(string)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, grantType)
 }

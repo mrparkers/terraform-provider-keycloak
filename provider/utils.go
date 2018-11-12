@@ -56,3 +56,15 @@ func interfaceSliceToStringSlice(iv []interface{}) []string {
 
 	return sv
 }
+
+func getRealmId(data *schema.ResourceData, client *keycloak.KeycloakClient) string {
+	if v, ok := data.GetOk("realm_id"); ok {
+		return v.(string)
+	} else {
+		realmId, err := client.GetDefaultRealmId()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return realmId
+	}
+}

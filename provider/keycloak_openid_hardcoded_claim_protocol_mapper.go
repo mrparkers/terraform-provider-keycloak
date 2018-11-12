@@ -86,12 +86,7 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapper() *schema.Resource {
 
 func mapFromDataToOpenIdHardcodedClaimProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenIdHardcodedClaimProtocolMapper {
 
-	var realmId string
-	if v, ok := data.GetOk("realm_id"); ok {
-		realmId = v.(string)
-	} else {
-		realmId = client.RealmId
-	}
+	realmId := getRealmId(data, client)
 
 	return &keycloak.OpenIdHardcodedClaimProtocolMapper{
 		Id:               data.Id(),
@@ -152,10 +147,14 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapperRead(data *schema.Resourc
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId string
+	var err error
 	if v, ok := data.GetOk("realm_id"); ok {
 		realmId = v.(string)
 	} else {
-		realmId = keycloakClient.RealmId
+		realmId, err = keycloakClient.GetDefaultRealmId()
+		if err != nil {
+			return err
+		}
 	}
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
@@ -204,9 +203,13 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapperImport(data *schema.Resou
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, parentResourceType, parentResourceId, mapperId string
+	var err error
 	switch len(parts) {
 	case 3:
-		realmId = keycloakClient.RealmId
+		realmId, err = keycloakClient.GetDefaultRealmId()
+		if err != nil {
+			return nil, err
+		}
 		parentResourceType = parts[1]
 		parentResourceId = parts[2]
 		mapperId = parts[3]
