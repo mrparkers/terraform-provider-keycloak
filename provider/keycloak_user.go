@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -133,13 +134,23 @@ func resourceKeycloakUserDelete(data *schema.ResourceData, meta interface{}) err
 	return keycloakClient.DeleteUser(realmId, id)
 }
 
-func resourceKeycloakUserImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakUserImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm := parts[0]
-	id := parts[1]
+	var realmId, id string
+	switch len(parts) {
+	case 1:
+		realmId = keycloakClient.RealmId
+		id = parts[0]
+	case 2:
+		realmId = parts[0]
+		id = parts[1]
+	default:
+		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+	}
 
-	d.Set("realm_id", realm)
+	d.Set("realm_id", realmId)
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil

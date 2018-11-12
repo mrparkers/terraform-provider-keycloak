@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -149,14 +150,25 @@ func resourceKeycloakLdapFullNameMapperDelete(data *schema.ResourceData, meta in
 	return keycloakClient.DeleteLdapFullNameMapper(realmId, id)
 }
 
-func resourceKeycloakLdapGenericMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakLdapGenericMapperImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm := parts[0]
-	ldapUserFederationId := parts[1]
-	id := parts[2]
+	var realmId, id, ldapUserFederationId string
+	switch len(parts) {
+	case 2:
+		realmId = keycloakClient.RealmId
+		ldapUserFederationId = parts[0]
+		id = parts[1]
+	case 3:
+		realmId = parts[0]
+		ldapUserFederationId = parts[1]
+		id = parts[2]
+	default:
+		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+	}
 
-	d.Set("realm_id", realm)
+	d.Set("realm_id", realmId)
 	d.Set("ldap_user_federation_id", ldapUserFederationId)
 	d.SetId(id)
 

@@ -182,17 +182,25 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapperDelete(data *schema.Reso
 	return keycloakClient.DeleteOpenIdGroupMembershipProtocolMapper(realmId, clientId, clientScopeId, data.Id())
 }
 
-func resourceKeycloakOpenIdGroupMembershipProtocolMapperImport(data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakOpenIdGroupMembershipProtocolMapperImport(data *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(data.Id(), "/")
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	if len(parts) != 4 {
-		return nil, fmt.Errorf("invalid import. supported import formats: {{realmId}}/client/{{clientId}}/{{protocolMapperId}} or {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}")
+	var realmId, parentResourceType, parentResourceId, mapperId string
+	switch len(parts) {
+	case 3:
+		realmId = keycloakClient.RealmId
+		parentResourceType = parts[1]
+		parentResourceId = parts[2]
+		mapperId = parts[3]
+	case 4:
+		realmId = parts[0]
+		parentResourceType = parts[1]
+		parentResourceId = parts[2]
+		mapperId = parts[3]
+	default:
+		return nil, fmt.Errorf("invalid import. supported import formats: {{realmId}}/client/{{clientId}}/{{protocolMapperId}}, {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}, client-scope/{{clientScopeId}}/{{protocolMapperId}} or client/{{clientId}}/{{protocolMapperId}}")
 	}
-
-	realmId := parts[0]
-	parentResourceType := parts[1]
-	parentResourceId := parts[2]
-	mapperId := parts[3]
 
 	data.Set("realm_id", realmId)
 	data.SetId(mapperId)
