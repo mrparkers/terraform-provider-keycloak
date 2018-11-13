@@ -177,7 +177,6 @@ func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 
 	if request.Method == http.MethodPost || request.Method == http.MethodPut {
 		request.Header.Set("Content-type", "application/json")
-		request.ContentLength = 0
 	}
 }
 
