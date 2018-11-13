@@ -51,7 +51,7 @@ func resourceKeycloakUser() *schema.Resource {
 
 func mapFromDataToUser(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.User {
 
-	realmId := getRealmId(data, client)
+	realmId := realmId(data, client)
 
 	return &keycloak.User{
 		Id:        data.Id(),
@@ -134,13 +134,9 @@ func resourceKeycloakUserImport(d *schema.ResourceData, meta interface{}) ([]*sc
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, id string
-	var err error
 	switch len(parts) {
 	case 1:
-		realmId, err = keycloakClient.GetDefaultRealmId()
-		if err != nil {
-			return nil, err
-		}
+		realmId = keycloakClient.GetDefaultRealm()
 		id = parts[0]
 	case 2:
 		realmId = parts[0]

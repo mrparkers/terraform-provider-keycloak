@@ -41,7 +41,7 @@ func resourceKeycloakGroup() *schema.Resource {
 }
 
 func mapFromDataToGroup(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.Group {
-	realmId := getRealmId(data, client)
+	realmId := realmId(data, client)
 	group := &keycloak.Group{
 		Id:       data.Id(),
 		RealmId:  realmId,
@@ -124,14 +124,10 @@ func resourceKeycloakGroupImport(d *schema.ResourceData, meta interface{}) ([]*s
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, id string
-	var err error
 
 	switch len(parts) {
 	case 1:
-		realmId, err = keycloakClient.GetDefaultRealmId()
-		if err != nil {
-			return nil, err
-		}
+		realmId = keycloakClient.GetDefaultRealm()
 		id = parts[0]
 	case 2:
 		realmId = parts[0]

@@ -92,7 +92,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapper() *schema.Resource {
 
 func mapFromDataToOpenIdUserAttributeProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenIdUserAttributeProtocolMapper {
 
-	realmId := getRealmId(data, client)
+	realmId := realmId(data, client)
 
 	return &keycloak.OpenIdUserAttributeProtocolMapper{
 		Id:               data.Id(),
@@ -201,13 +201,9 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperImport(data *schema.Resour
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, parentResourceType, parentResourceId, mapperId string
-	var err error
 	switch len(parts) {
 	case 3:
-		realmId, err = keycloakClient.GetDefaultRealmId()
-		if err != nil {
-			return nil, err
-		}
+		realmId = keycloakClient.GetDefaultRealm()
 		parentResourceType = parts[1]
 		parentResourceId = parts[2]
 		mapperId = parts[3]

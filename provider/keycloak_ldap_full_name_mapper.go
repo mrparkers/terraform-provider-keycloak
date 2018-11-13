@@ -54,7 +54,7 @@ func resourceKeycloakLdapFullNameMapper() *schema.Resource {
 }
 
 func getLdapFullNameMapperFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapFullNameMapper {
-	realmId := getRealmId(data, client)
+	realmId := realmId(data, client)
 	return &keycloak.LdapFullNameMapper{
 		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
@@ -150,13 +150,9 @@ func resourceKeycloakLdapGenericMapperImport(d *schema.ResourceData, meta interf
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, id, ldapUserFederationId string
-	var err error
 	switch len(parts) {
 	case 2:
-		realmId, err = keycloakClient.GetDefaultRealmId()
-		if err != nil {
-			return nil, err
-		}
+		realmId = keycloakClient.GetDefaultRealm()
 		ldapUserFederationId = parts[0]
 		id = parts[1]
 	case 3:

@@ -215,7 +215,7 @@ func validateSyncPeriod(i interface{}, k string) (s []string, errs []error) {
 func getLdapUserFederationFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapUserFederation {
 	var userObjectClasses []string
 
-	realmId := getRealmId(data, client)
+	realmId := realmId(data, client)
 
 	for _, userObjectClass := range data.Get("user_object_classes").([]interface{}) {
 		userObjectClasses = append(userObjectClasses, userObjectClass.(string))
@@ -367,13 +367,9 @@ func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, meta inter
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, id string
-	var err error
 	switch len(parts) {
 	case 1:
-		realmId, err = keycloakClient.GetDefaultRealmId()
-		if err != nil {
-			return nil, err
-		}
+		realmId = keycloakClient.GetDefaultRealm()
 		id = parts[0]
 	case 2:
 		realmId = parts[0]

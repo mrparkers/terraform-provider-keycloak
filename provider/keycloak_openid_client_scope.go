@@ -41,7 +41,7 @@ func resourceKeycloakOpenidClientScope() *schema.Resource {
 
 func getClientScopeFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenidClientScope {
 
-	realmId := getRealmId(data, client)
+	realmId := realmId(data, client)
 
 	clientScope := &keycloak.OpenidClientScope{
 		Id:          data.Id(),
@@ -132,13 +132,9 @@ func resourceKeycloakOpenidClientScopeImport(d *schema.ResourceData, meta interf
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, id string
-	var err error
 	switch len(parts) {
 	case 1:
-		realmId, err = keycloakClient.GetDefaultRealmId()
-		if err != nil {
-			return nil, err
-		}
+		realmId = keycloakClient.GetDefaultRealm()
 		id = parts[0]
 	case 2:
 		realmId = parts[0]

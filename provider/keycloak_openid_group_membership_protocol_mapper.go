@@ -77,7 +77,7 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapper() *schema.Resource {
 
 func mapFromDataToOpenIdGroupMembershipProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenIdGroupMembershipProtocolMapper {
 
-	realmId := getRealmId(data, client)
+	realmId := realmId(data, client)
 
 	return &keycloak.OpenIdGroupMembershipProtocolMapper{
 		Id:            data.Id(),
@@ -182,13 +182,9 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapperImport(data *schema.Reso
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, parentResourceType, parentResourceId, mapperId string
-	var err error
 	switch len(parts) {
 	case 3:
-		realmId, err = keycloakClient.GetDefaultRealmId()
-		if err != nil {
-			return nil, err
-		}
+		realmId = keycloakClient.GetDefaultRealm()
 		parentResourceType = parts[1]
 		parentResourceId = parts[2]
 		mapperId = parts[3]

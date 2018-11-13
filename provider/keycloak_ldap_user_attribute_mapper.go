@@ -67,7 +67,7 @@ func resourceKeycloakLdapUserAttributeMapper() *schema.Resource {
 
 func getLdapUserAttributeMapperFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapUserAttributeMapper {
 
-	realmId := getRealmId(data, client)
+	realmId := realmId(data, client)
 
 	return &keycloak.LdapUserAttributeMapper{
 		Id:                   data.Id(),

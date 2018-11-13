@@ -44,7 +44,7 @@ func resourceKeycloakLdapMsadUserAccountControlMapper() *schema.Resource {
 
 func getLdapMsadUserAccountControlMapperFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapMsadUserAccountControlMapper {
 
-	realmId := getRealmId(data, client)
+	realmId := realmId(data, client)
 
 	return &keycloak.LdapMsadUserAccountControlMapper{
 		Id:                   data.Id(),

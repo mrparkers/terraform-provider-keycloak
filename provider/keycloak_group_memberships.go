@@ -35,7 +35,7 @@ func resourceKeycloakGroupMemberships() *schema.Resource {
 
 func resourceKeycloakGroupMembershipsCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realmId := getRealmId(data, keycloakClient)
+	realmId := realmId(data, keycloakClient)
 	groupId := data.Get("group_id").(string)
 
 	err := keycloakClient.AddUsersToGroup(realmId, groupId, data.Get("members").(*schema.Set).List())
@@ -50,7 +50,7 @@ func resourceKeycloakGroupMembershipsCreate(data *schema.ResourceData, meta inte
 
 func resourceKeycloakGroupMembershipsRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realmId := getRealmId(data, keycloakClient)
+	realmId := realmId(data, keycloakClient)
 	groupId := data.Get("group_id").(string)
 
 	usersInGroup, err := keycloakClient.GetGroupMembers(realmId, groupId)
@@ -71,7 +71,7 @@ func resourceKeycloakGroupMembershipsRead(data *schema.ResourceData, meta interf
 
 func resourceKeycloakGroupMembershipsUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realmId := getRealmId(data, keycloakClient)
+	realmId := realmId(data, keycloakClient)
 	groupId := data.Get("group_id").(string)
 
 	tfMembers := data.Get("members").(*schema.Set)
@@ -107,7 +107,7 @@ func resourceKeycloakGroupMembershipsUpdate(data *schema.ResourceData, meta inte
 
 func resourceKeycloakGroupMembershipsDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realmId := getRealmId(data, keycloakClient)
+	realmId := realmId(data, keycloakClient)
 	groupId := data.Get("group_id").(string)
 
 	return keycloakClient.RemoveUsersFromGroup(realmId, groupId, data.Get("members").(*schema.Set).List())

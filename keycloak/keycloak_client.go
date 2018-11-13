@@ -36,34 +36,27 @@ const (
 	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password, grantType string) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string) (*KeycloakClient, error) {
 	httpClient := &http.Client{
 		Timeout: time.Second * 5,
 	}
 	var clientCredentials *ClientCredentials
 	if clientId != "" {
 		clientCredentials = &ClientCredentials{
-			ClientId:  clientId,
-			GrantType: grantType,
+			ClientId: clientId,
 		}
 	} else {
 		return nil, fmt.Errorf("client id is required for both password and client credentials grants")
 	}
-	if grantType == "password" {
-		if password != "" && username != "" {
-			clientCredentials.Username = username
-			clientCredentials.Password = password
-		} else {
-			return nil, fmt.Errorf("both username and password are required for password grant")
-		}
-	} else if grantType == "client_credentials" {
-		if clientSecret != "" {
-			clientCredentials.ClientSecret = clientSecret
-		} else {
-			return nil, fmt.Errorf("client secret is is required for client credentials grant")
-		}
+	if password != "" && username != "" {
+		clientCredentials.Username = username
+		clientCredentials.Password = password
+		clientCredentials.GrantType = "password"
+	} else if clientSecret != "" {
+		clientCredentials.ClientSecret = clientSecret
+		clientCredentials.GrantType = "client_credentials"
 	} else {
-		return nil, fmt.Errorf("grant type: %s doesn't exist", grantType)
+		return nil, fmt.Errorf("must specify client id, username and password for password grant, or client id and secret for client credentials grant")
 	}
 
 	keycloakClient := KeycloakClient{
@@ -77,8 +70,6 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 	if err != nil {
 		return nil, err
 	}
-
-	keycloakClient.realm = realm
 
 	return &keycloakClient, nil
 }
@@ -171,14 +162,6 @@ func (keycloakClient *KeycloakClient) refresh() error {
 	keycloakClient.clientCredentials.TokenType = clientCredentials.TokenType
 
 	return nil
-}
-
-func (keycloakClient *KeycloakClient) GetDefaultRealmId() (string, error) {
-	realmObj, err := keycloakClient.GetRealm(keycloakClient.realm)
-	if err != nil {
-		return "", fmt.Errorf("failed to get realm: %s\n %s", keycloakClient.realm, err)
-	}
-	return realmObj.Id, nil
 }
 
 func (keycloakClient *KeycloakClient) GetDefaultRealm() string {
