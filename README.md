@@ -60,3 +60,4 @@ These tests will also run in CI when opening a PR and on master.
 ## License
 
 [MIT](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/LICENSE)
+
