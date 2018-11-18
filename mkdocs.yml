@@ -4,7 +4,8 @@ nav:
   - Installing: index.md
 - Resources:
   - keycloak_realm: resources/keycloak_realm.md
-  - keycloak_client: resources/keycloak_client.md
+  - keycloak_user: resources/keycloak_user.md
+  - keycloak_openid_client: resources/keycloak_openid_client.md
 theme: readthedocs
 markdown_extensions:
 - toc:
