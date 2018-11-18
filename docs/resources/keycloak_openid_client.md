@@ -1,6 +1,7 @@
 # keycloak_openid_client
 
 Allows for creating and managing Keycloak clients that use the OpenID Connect protocol.
+
 Clients are entities that can use Keycloak for user authentication. Typically,
 clients are applications that redirect users to Keycloak for authentication
 in order to take advantage of Keycloak's user sessions for SSO.
