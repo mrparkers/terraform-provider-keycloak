@@ -5,6 +5,7 @@ nav:
 - Resources:
   - keycloak_realm: resources/keycloak_realm.md
   - keycloak_user: resources/keycloak_user.md
+  - keycloak_group: resources/keycloak_group.md
   - keycloak_openid_client: resources/keycloak_openid_client.md
 theme: readthedocs
 markdown_extensions:
