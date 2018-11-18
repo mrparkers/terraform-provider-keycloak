@@ -7,11 +7,11 @@ credentials, roles, and groups. Users log in to realms and can be federated from
 
 ```hcl
 resource "keycloak_realm" "realm" {
-    realm = "test"
-    enabled = true
-    display_name = "test realm"
+    realm                = "test"
+    enabled              = true
+    display_name         = "test realm"
 
-    login_theme = "base"
+    login_theme          = "base"
 
     access_code_lifespan = "1h"
 }
