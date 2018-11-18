@@ -63,10 +63,10 @@ The attributes below should be specified as [Go duration strings](https://golang
 - `access_token_lifespan` - (Optional) The amount of time an access token can be used before it expires.
 - `access_token_lifespan_for_implicit_flow` - (Optional) The amount of time an access token issued with the OpenID Connect Implicit Flow can be used before it expires.
 - `access_code_lifespan` - (Optional) The maximum amount of time a client has to finish the authorization code flow.
-- `access_code_lifespan_login` - (Optional)
-- `access_code_lifespan_user_action` - (Optional)
-- `action_token_generated_by_user_lifespan` - (Optional)
-- `action_token_generated_by_admin_lifespan` - (Optional)
+- `access_code_lifespan_login` - (Optional) The maximum amount of time a user is permitted to stay on the login page before the authentication process must be restarted.
+- `access_code_lifespan_user_action` - (Optional) The maximum amount of time a user has to complete login related actions, such as updating a password.
+- `action_token_generated_by_user_lifespan` - (Optional) The maximum time a user has to use a user-generated permit before it expires.
+- `action_token_generated_by_admin_lifespan` - (Optional) The maximum time a user has to use an admin-generated permit before it expires.
 
 ### Import
 
