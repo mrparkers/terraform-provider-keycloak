@@ -33,7 +33,7 @@ resource "keycloak_group" "child_group" {
 
 The following arguments are supported:
 
-- `realm_id` - (Required) The realm this groups exists in.
+- `realm_id` - (Required) The realm this group exists in.
 - `parent_id` - (Optional) The ID of this group's parent. If omitted, this group will be defined at the root level.
 - `name` - (Required) The name of the group.
 
