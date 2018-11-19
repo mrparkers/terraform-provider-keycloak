@@ -1,9 +1,11 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -55,4 +57,20 @@ func interfaceSliceToStringSlice(iv []interface{}) []string {
 	}
 
 	return sv
+}
+
+func validateEmail(input interface{}, key string) (warnings []string, errors []error) {
+	value, ok := input.(string)
+
+	if !ok {
+		return nil, []error{fmt.Errorf("expected type of %s to be string", key)}
+	}
+
+	splitEmail := strings.Split(value, "@")
+
+	if len(splitEmail) != 2 {
+		return nil, []error{fmt.Errorf("expected exactly one @ in address: %s", value)}
+	}
+
+	return nil, nil
 }

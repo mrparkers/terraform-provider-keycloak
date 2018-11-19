@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -165,8 +166,126 @@ func resourceKeycloakRealm() *schema.Resource {
 				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
+
+			// email
+			"email": {
+				Type: schema.TypeMap,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"from": {
+							Type:         schema.TypeString,
+							ValidateFunc: validateEmail,
+							Required:     true,
+						},
+						"from_display_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"host": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"port": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"reply_to": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateEmail,
+						},
+						"reply_to_display_name": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateEmail,
+						},
+						"envelope_from": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateEmail,
+						},
+						"ssl": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"start_tls": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"username": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"password": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+				Optional: true,
+			},
 		},
 	}
+}
+
+func getEmailFromData(data *schema.ResourceData) (*keycloak.SmtpServer, error) {
+	if email, ok := data.GetOk("email"); ok {
+		emailConfig := email.(map[string]interface{})
+
+		server := keycloak.SmtpServer{}
+
+		if from, ok := emailConfig["from"]; ok {
+			server.From = from.(string)
+		}
+
+		if fromDisplayName, ok := emailConfig["from_display_name"]; ok {
+			server.FromDisplayName = fromDisplayName.(string)
+		}
+
+		if host, ok := emailConfig["host"]; ok {
+			server.Host = host.(string)
+		}
+
+		if replyTo, ok := emailConfig["reply_to"]; ok {
+			server.ReplyTo = replyTo.(string)
+		}
+
+		if replyToDisplayName, ok := emailConfig["reply_to_display_name"]; ok {
+			server.ReplyToDisplayName = replyToDisplayName.(string)
+		}
+
+		if envelopeFrom, ok := emailConfig["envelope_from"]; ok {
+			server.EnvelopeFrom = envelopeFrom.(string)
+		}
+
+		if ssl, ok := emailConfig["ssl"]; ok {
+			server.SSL = ssl.(bool)
+		}
+
+		if startTLS, ok := emailConfig["start_tls"]; ok {
+			server.StartTLS = startTLS.(bool)
+		}
+
+		if port, ok := emailConfig["port"]; ok {
+			server.Port = port.(int)
+		}
+
+		if user, ok := emailConfig["user"]; ok {
+			password, passwordOk := emailConfig["password"]
+
+			if !passwordOk {
+				return nil, fmt.Errorf("SMTP server authentication requires a password")
+			}
+
+			server.User = user.(string)
+			server.Password = password.(string)
+			server.Authentication = true
+		}
+
+		return &server, nil
+	}
+
+	return nil, nil
 }
 
 func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
@@ -300,6 +419,12 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 			return nil, err
 		}
 		realm.ActionTokenGeneratedByAdminLifespan = actionTokenGeneratedByAdminLifespanDurationString
+	}
+
+	if email, err := getEmailFromData(data); email != nil && err == nil {
+		realm.SmtpServer = email
+	} else if err != nil {
+		return nil, err
 	}
 
 	return realm, nil
