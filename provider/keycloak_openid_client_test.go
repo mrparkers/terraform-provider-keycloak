@@ -383,9 +383,9 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client" {
-	client_id           = "%s"
-	realm_id            = "${keycloak_realm.realm.id}"
-	access_type         = "%s"
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "%s"
 }
 	`, realm, clientId, accessType)
 }
@@ -433,21 +433,21 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client" {
-	client_id     = "%s"
-	realm_id      = "${keycloak_realm.realm.id}"
-	name          = "%s"
-	enabled       = %t
-	description   = "%s"
+	client_id                    = "%s"
+	realm_id                     = "${keycloak_realm.realm.id}"
+	name                         = "%s"
+	enabled                      = %t
+	description                  = "%s"
 
-	access_type   = "CONFIDENTIAL"
-	client_secret = "%s"
+	access_type                  = "CONFIDENTIAL"
+	client_secret                = "%s"
 
-	standard_flow_enabled = %t
-	implicit_flow_enabled = %t
+	standard_flow_enabled        = %t
+	implicit_flow_enabled        = %t
 	direct_access_grants_enabled = %t
-	service_accounts_enabled = %t
+	service_accounts_enabled     = %t
 
-	valid_redirect_uris = %s
+	valid_redirect_uris          = %s
 }
 	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.ServiceAccountsEnabled, openidClient.DirectAccessGrantsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris))
 }
@@ -459,10 +459,10 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client" {
-	client_id           = "%s"
-	realm_id            = "${keycloak_realm.realm.id}"
-	access_type         = "CONFIDENTIAL"
-	client_secret       = "%s"
+	client_id     = "%s"
+	realm_id      = "${keycloak_realm.realm.id}"
+	access_type   = "CONFIDENTIAL"
+	client_secret = "%s"
 }
 	`, realm, clientId, clientSecret)
 }
@@ -474,9 +474,9 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client" {
-	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
-	access_type = "%s"
+	client_id             = "%s"
+	realm_id              = "${keycloak_realm.realm.id}"
+	access_type           = "%s"
 
 	standard_flow_enabled = %t
 	implicit_flow_enabled = %t
