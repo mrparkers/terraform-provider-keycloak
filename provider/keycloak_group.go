@@ -18,22 +18,26 @@ func resourceKeycloakGroup() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Description: "The realm this groups exists in.",
+				Required:    true,
+				ForceNew:    true,
 			},
 			"parent_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Description: "The ID of this group's parent. If omitted, this group will be defined at the root level.",
+				Optional:    true,
+				ForceNew:    true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The name of the group.",
+				Required:    true,
 			},
 			"path": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The complete path of the group. For example, the child group's path in the example configuration would be `/parent-group/child-group`.",
+				Computed:    true,
 			},
 		},
 	}

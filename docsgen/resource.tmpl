@@ -1,0 +1,24 @@
+{{ define "base" }}# {{ .Resource.Name }}
+{{ .Meta.Description }}
+### Example usage
+
+```hcl
+{{ .Meta.Example }}
+```
+
+### Argument Reference
+The following arguments are supported:
+
+{{ range .Resource.UserProvidedAttributes}}- `{{.Name}}` - ({{.Type}}) {{.Description}}
+{{ end }}
+{{ if.Resource.ComputedAttributes }}
+### Attributes Reference
+In addition to the arguments listed above, the following computed attributes are exported:
+
+{{ range .Resource.ComputedAttributes}}- `{{.Name}}` - {{.Description}}{{ end }}
+{{end}}
+{{ if .Resource.CanImport }}
+### Import
+{{ .Meta.Import }}
+{{ end }}
+{{ end }}

@@ -1,0 +1,23 @@
+description: |
+    Takes an attribute from a user and adds it as a claim on a JWT
+example: |
+    // client
+    resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_client" {
+        name           = "tf-test-open-id-user-attribute-protocol-mapper-client"
+        realm_id       = "${keycloak_realm.test.id}"
+        client_id      = "${keycloak_openid_client.test_client.id}"
+        user_attribute = "foo"
+        claim_name     = "bar"
+    }
+
+    // client scope
+    resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_client_scope" {
+        name            = "tf-test-open-id-user-attribute-protocol-mapper-client-scope"
+        realm_id        = "${keycloak_realm.test.id}"
+        client_scope_id = "${keycloak_openid_client_scope.test_client_scope.id}"
+        user_attribute  = "foo2"
+        claim_name      = "bar2"
+    }
+import: |
+    To import a mapper tied to a client, use the import command with the format `{{realmId}}/client/{{clientId}}/{{protocolMapperId}}`
+    Importing a mapper for a client scope is similar, `{{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}`
