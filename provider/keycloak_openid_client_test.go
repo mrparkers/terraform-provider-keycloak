@@ -228,6 +228,23 @@ func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_publicClientCredentialsValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenidClient_invalidPublicClientWithClientCredentials(realmName, clientId),
+				ExpectError: regexp.MustCompile("validation error: service accounts \\(client credentials flow\\) cannot be enabled on public clients"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -482,4 +499,20 @@ resource "keycloak_openid_client" "client" {
 	implicit_flow_enabled = %t
 }
 	`, realm, clientId, accessType, standardFlowEnabled, implicitFlowEnabled)
+}
+
+func testKeycloakOpenidClient_invalidPublicClientWithClientCredentials(realm, clientId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id                = "%s"
+	realm_id                 = "${keycloak_realm.realm.id}"
+	access_type              = "PUBLIC"
+
+	service_accounts_enabled = true
+}
+	`, realm, clientId)
 }
