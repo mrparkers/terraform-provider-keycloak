@@ -245,6 +245,35 @@ func TestAccKeycloakOpenidClient_publicClientCredentialsValidation(t *testing.T)
 	})
 }
 
+func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, true, false, false, false),
+				ExpectError: regexp.MustCompile("validation error: bearer-only clients cannot issue tokens; no oauth2 flows can be enabled for this client"),
+			},
+			{
+				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, false, true, false, false),
+				ExpectError: regexp.MustCompile("validation error: bearer-only clients cannot issue tokens; no oauth2 flows can be enabled for this client"),
+			},
+			{
+				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, false, false, true, false),
+				ExpectError: regexp.MustCompile("validation error: bearer-only clients cannot issue tokens; no oauth2 flows can be enabled for this client"),
+			},
+			{
+				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, false, false, false, true),
+				ExpectError: regexp.MustCompile("validation error: bearer-only clients cannot issue tokens; no oauth2 flows can be enabled for this client"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -515,4 +544,23 @@ resource "keycloak_openid_client" "client" {
 	service_accounts_enabled = true
 }
 	`, realm, clientId)
+}
+
+func testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realm, clientId string, standardFlowEnabled, implicitFlowEnabled, directAccessGrantsEnabled, serviceAccountsEnabled bool) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id                    = "%s"
+	realm_id                     = "${keycloak_realm.realm.id}"
+	access_type                  = "BEARER-ONLY"
+
+	standard_flow_enabled        = %t
+	implicit_flow_enabled        = %t
+	direct_access_grants_enabled = %t
+	service_accounts_enabled     = %t
+}
+	`, realm, clientId, standardFlowEnabled, implicitFlowEnabled, directAccessGrantsEnabled, serviceAccountsEnabled)
 }
