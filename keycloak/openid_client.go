@@ -25,12 +25,25 @@ type OpenidClient struct {
 	PublicClient bool `json:"publicClient"`
 	BearerOnly   bool `json:"bearerOnly"`
 
+	StandardFlowEnabled       bool `json:"standardFlowEnabled"`
+	ImplicitFlowEnabled       bool `json:"implicitFlowEnabled"`
+	DirectAccessGrantsEnabled bool `json:"directAccessGrantsEnabled"`
+	ServiceAccountsEnabled    bool `json:"serviceAccountsEnabled"`
+
 	ValidRedirectUris []string `json:"redirectUris"`
 }
 
 func (keycloakClient *KeycloakClient) ValidateOpenidClient(client *OpenidClient) error {
-	if !client.BearerOnly && len(client.ValidRedirectUris) == 0 {
-		return fmt.Errorf("validation error: must specify at least one valid redirect uri if access type is PUBLIC or CONFIDENTIAL")
+	if client.BearerOnly && (client.StandardFlowEnabled || client.ImplicitFlowEnabled || client.DirectAccessGrantsEnabled || client.ServiceAccountsEnabled) {
+		return fmt.Errorf("validation error: Keycloak cannot issue tokens for bearer-only clients; no oauth2 flows can be enabled for this client")
+	}
+
+	if (client.StandardFlowEnabled || client.ImplicitFlowEnabled) && len(client.ValidRedirectUris) == 0 {
+		return fmt.Errorf("validation error: standard (authorization code) and implicit flows require at least one valid redirect uri")
+	}
+
+	if client.ServiceAccountsEnabled && client.PublicClient {
+		return fmt.Errorf("validation error: service accounts (client credentials flow) cannot be enabled on public clients")
 	}
 
 	return nil
