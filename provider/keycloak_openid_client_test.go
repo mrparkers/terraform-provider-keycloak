@@ -218,11 +218,11 @@ func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenidClient_invalidRedirectUris(realmName, clientId, accessType, true, false),
-				ExpectError: regexp.MustCompile("validation error: standard \\(authorization code\\) and implict flows require at least one valid redirect uri"),
+				ExpectError: regexp.MustCompile("validation error: standard \\(authorization code\\) and implicit flows require at least one valid redirect uri"),
 			},
 			{
 				Config:      testKeycloakOpenidClient_invalidRedirectUris(realmName, clientId, accessType, false, true),
-				ExpectError: regexp.MustCompile("validation error: standard \\(authorization code\\) and implict flows require at least one valid redirect uri"),
+				ExpectError: regexp.MustCompile("validation error: standard \\(authorization code\\) and implicit flows require at least one valid redirect uri"),
 			},
 		},
 	})
@@ -256,19 +256,19 @@ func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, true, false, false, false),
-				ExpectError: regexp.MustCompile("validation error: bearer-only clients cannot issue tokens; no oauth2 flows can be enabled for this client"),
+				ExpectError: regexp.MustCompile("validation error: Keycloak cannot issue tokens for bearer-only clients; no oauth2 flows can be enabled for this client"),
 			},
 			{
 				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, false, true, false, false),
-				ExpectError: regexp.MustCompile("validation error: bearer-only clients cannot issue tokens; no oauth2 flows can be enabled for this client"),
+				ExpectError: regexp.MustCompile("validation error: Keycloak cannot issue tokens for bearer-only clients; no oauth2 flows can be enabled for this client"),
 			},
 			{
 				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, false, false, true, false),
-				ExpectError: regexp.MustCompile("validation error: bearer-only clients cannot issue tokens; no oauth2 flows can be enabled for this client"),
+				ExpectError: regexp.MustCompile("validation error: Keycloak cannot issue tokens for bearer-only clients; no oauth2 flows can be enabled for this client"),
 			},
 			{
 				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, false, false, false, true),
-				ExpectError: regexp.MustCompile("validation error: bearer-only clients cannot issue tokens; no oauth2 flows can be enabled for this client"),
+				ExpectError: regexp.MustCompile("validation error: Keycloak cannot issue tokens for bearer-only clients; no oauth2 flows can be enabled for this client"),
 			},
 		},
 	})

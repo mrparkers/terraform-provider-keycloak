@@ -35,11 +35,11 @@ type OpenidClient struct {
 
 func (keycloakClient *KeycloakClient) ValidateOpenidClient(client *OpenidClient) error {
 	if client.BearerOnly && (client.StandardFlowEnabled || client.ImplicitFlowEnabled || client.DirectAccessGrantsEnabled || client.ServiceAccountsEnabled) {
-		return fmt.Errorf("validation error: bearer-only clients cannot issue tokens; no oauth2 flows can be enabled for this client")
+		return fmt.Errorf("validation error: Keycloak cannot issue tokens for bearer-only clients; no oauth2 flows can be enabled for this client")
 	}
 
 	if (client.StandardFlowEnabled || client.ImplicitFlowEnabled) && len(client.ValidRedirectUris) == 0 {
-		return fmt.Errorf("validation error: standard (authorization code) and implict flows require at least one valid redirect uri")
+		return fmt.Errorf("validation error: standard (authorization code) and implicit flows require at least one valid redirect uri")
 	}
 
 	if client.ServiceAccountsEnabled && client.PublicClient {
