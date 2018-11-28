@@ -9,6 +9,7 @@ nav:
   - keycloak_group_memberships: resources/keycloak_group_memberships.md
   - keycloak_openid_client: resources/keycloak_openid_client.md
   - keycloak_openid_client_scope: resources/keycloak_openid_client_scope.md
+  - keycloak_openid_client_default_scopes: resources/keycloak_openid_client_default_scopes.md
 theme: readthedocs
 markdown_extensions:
 - toc:
