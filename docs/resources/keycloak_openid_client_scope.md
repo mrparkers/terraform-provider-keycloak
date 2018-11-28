@@ -27,7 +27,7 @@ resource "keycloak_openid_client_scope" "openid_client_scope" {
 The following arguments are supported:
 
 - `realm_id` - (Required) The realm this client scope belongs to.
-- `name` - (Optional) The display name of this client scope in the GUI.
+- `name` - (Required) The display name of this client scope in the GUI.
 - `description` - (Optional) The description of this client scope in the GUI.
 - `consent_screen_text` - (Optional) When set, a consent screen will be displayed to users
 authenticating to clients with this scope attached. The consent screen will display the string
