@@ -10,6 +10,7 @@ nav:
   - keycloak_openid_client: resources/keycloak_openid_client.md
   - keycloak_openid_client_scope: resources/keycloak_openid_client_scope.md
   - keycloak_openid_client_default_scopes: resources/keycloak_openid_client_default_scopes.md
+  - keycloak_openid_user_attribute_protocol_mapper: resources/keycloak_openid_user_attribute_protocol_mapper.md
 theme: readthedocs
 markdown_extensions:
 - toc:
