@@ -56,17 +56,17 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapper() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
-			"id_token_claim": {
+			"add_to_id_token": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"access_token_claim": {
+			"add_to_access_token": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"userinfo_token_claim": {
+			"add_to_userinfo": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
@@ -85,9 +85,9 @@ func mapFromDataToOpenIdGroupMembershipProtocolMapper(data *schema.ResourceData)
 
 		ClaimName:        data.Get("claim_name").(string),
 		FullPath:         data.Get("full_path").(bool),
-		AddToIdToken:     data.Get("id_token_claim").(bool),
-		AddToAccessToken: data.Get("access_token_claim").(bool),
-		AddToUserinfo:    data.Get("userinfo_token_claim").(bool),
+		AddToIdToken:     data.Get("add_to_id_token").(bool),
+		AddToAccessToken: data.Get("add_to_access_token").(bool),
+		AddToUserinfo:    data.Get("add_to_userinfo").(bool),
 	}
 }
 
@@ -104,9 +104,9 @@ func mapFromOpenIdGroupMembershipMapperToData(mapper *keycloak.OpenIdGroupMember
 
 	data.Set("claim_name", mapper.ClaimName)
 	data.Set("full_path", mapper.FullPath)
-	data.Set("id_token_claim", mapper.AddToIdToken)
-	data.Set("access_token_claim", mapper.AddToAccessToken)
-	data.Set("userinfo_token_claim", mapper.AddToUserinfo)
+	data.Set("add_to_id_token", mapper.AddToIdToken)
+	data.Set("add_to_access_token", mapper.AddToAccessToken)
+	data.Set("add_to_userinfo", mapper.AddToUserinfo)
 }
 
 func resourceKeycloakOpenIdGroupMembershipProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {

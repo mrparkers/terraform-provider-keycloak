@@ -406,13 +406,13 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper" {
-  	name                 = "%s"
-	realm_id             = "${keycloak_realm.realm.id}"
-  	client_id            = "${keycloak_openid_client.openid_client.id}"
+  	name                = "%s"
+	realm_id            = "${keycloak_realm.realm.id}"
+  	client_id           = "${keycloak_openid_client.openid_client.id}"
 
-	id_token_claim       = %t
-	access_token_claim   = %t
-	userinfo_token_claim = %t
+	add_to_id_token     = %t
+	add_to_access_token = %t
+	add_to_userinfo     = %t
 }`, mapper.RealmId, mapper.ClientId, mapper.Name, mapper.AddToIdToken, mapper.AddToAccessToken, mapper.AddToUserInfo)
 }
 

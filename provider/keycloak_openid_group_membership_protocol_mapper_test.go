@@ -384,15 +384,15 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper" {
-  	name                 = "%s"
-	realm_id             = "${keycloak_realm.realm.id}"
-  	client_id            = "${keycloak_openid_client.openid_client.id}"
+  	name                = "%s"
+	realm_id            = "${keycloak_realm.realm.id}"
+  	client_id           = "${keycloak_openid_client.openid_client.id}"
 
-  	claim_name           = "%s"
-	full_path            = %t
-	id_token_claim       = %t
-	access_token_claim   = %t
-	userinfo_token_claim = %t
+  	claim_name          = "%s"
+	full_path           = %t
+	add_to_id_token     = %t
+	add_to_access_token = %t
+	add_to_userinfo     = %t
 }`, mapper.RealmId, mapper.ClientId, mapper.Name, mapper.ClaimName, mapper.FullPath, mapper.AddToIdToken, mapper.AddToAccessToken, mapper.AddToUserinfo)
 }
 

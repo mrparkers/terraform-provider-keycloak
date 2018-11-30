@@ -47,17 +47,17 @@ func resourceKeycloakOpenIdFullNameProtocolMapper() *schema.Resource {
 				Description:   "The mapper's associated client scope. Cannot be used at the same time as client_id.",
 				ConflictsWith: []string{"client_id"},
 			},
-			"id_token_claim": {
+			"add_to_id_token": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"access_token_claim": {
+			"add_to_access_token": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"userinfo_token_claim": {
+			"add_to_userinfo": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
@@ -74,9 +74,9 @@ func mapFromDataToOpenIdFullNameProtocolMapper(data *schema.ResourceData) *keycl
 		ClientId:      data.Get("client_id").(string),
 		ClientScopeId: data.Get("client_scope_id").(string),
 
-		AddToIdToken:     data.Get("id_token_claim").(bool),
-		AddToAccessToken: data.Get("access_token_claim").(bool),
-		AddToUserInfo:    data.Get("userinfo_token_claim").(bool),
+		AddToIdToken:     data.Get("add_to_id_token").(bool),
+		AddToAccessToken: data.Get("add_to_access_token").(bool),
+		AddToUserInfo:    data.Get("add_to_userinfo").(bool),
 	}
 }
 
@@ -91,9 +91,9 @@ func mapFromOpenIdFullNameMapperToData(mapper *keycloak.OpenIdFullNameProtocolMa
 		data.Set("client_scope_id", mapper.ClientScopeId)
 	}
 
-	data.Set("id_token_claim", mapper.AddToIdToken)
-	data.Set("access_token_claim", mapper.AddToAccessToken)
-	data.Set("userinfo_token_claim", mapper.AddToUserInfo)
+	data.Set("add_to_id_token", mapper.AddToIdToken)
+	data.Set("add_to_access_token", mapper.AddToAccessToken)
+	data.Set("add_to_userinfo", mapper.AddToUserInfo)
 }
 
 func resourceKeycloakOpenIdFullNameProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
