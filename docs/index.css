@@ -10,3 +10,11 @@
 	line-height: 23px;
 	margin-bottom: 12px;
 }
+
+.wy-nav-side {
+	width: 410px;
+}
+
+.wy-nav-content-wrap {
+	margin-left: 410px;
+}
