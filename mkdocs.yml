@@ -13,6 +13,7 @@ nav:
   - keycloak_openid_user_attribute_protocol_mapper: resources/keycloak_openid_user_attribute_protocol_mapper.md
   - keycloak_openid_user_property_protocol_mapper: resources/keycloak_openid_user_property_protocol_mapper.md
   - keycloak_openid_group_membership_protocol_mapper: resources/keycloak_openid_group_membership_protocol_mapper.md
+  - keycloak_openid_full_name_protocol_mapper: resources/keycloak_openid_full_name_protocol_mapper.md
 theme: readthedocs
 markdown_extensions:
 - toc:
