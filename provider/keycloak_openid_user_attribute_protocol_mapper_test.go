@@ -316,11 +316,11 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "user_attribute_mapper_client" {
-  	name           = "%s"
+	name           = "%s"
 	realm_id       = "${keycloak_realm.realm.id}"
-  	client_id      = "${keycloak_openid_client.openid_client.id}"
-  	user_attribute = "foo"
-  	claim_name     = "bar"
+	client_id      = "${keycloak_openid_client.openid_client.id}"
+	user_attribute = "foo"
+	claim_name     = "bar"
 }`, realmName, clientId, mapperName)
 }
 
@@ -358,11 +358,11 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "user_attribute_mapper_client" {
-  	name           = "%s"
+	name           = "%s"
 	realm_id       = "${keycloak_realm.realm.id}"
-  	client_id      = "${keycloak_openid_client.openid_client.id}"
-  	user_attribute = "foo"
-  	claim_name     = "bar"
+	client_id      = "${keycloak_openid_client.openid_client.id}"
+	user_attribute = "foo"
+	claim_name     = "bar"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
