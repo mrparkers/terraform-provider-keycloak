@@ -43,7 +43,8 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 
 			"enabled": {
 				Type:        schema.TypeBool,
-				Required:    true,
+				Optional:    true,
+				Default:     true,
 				Description: "When false, this provider will not be used when performing queries for users.",
 			},
 			"priority": {
@@ -64,7 +65,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Optional:     true,
 				Default:      "READ_ONLY",
 				ValidateFunc: validation.StringInSlice(keycloakLdapUserFederationEditModes, false),
-				Description:  "READ_ONLY and WRITABLE are self-explanatory. UNSYNCED allowed user data to be imported but not synced back to LDAP.",
+				Description:  "READ_ONLY and WRITABLE are self-explanatory. UNSYNCED allows user data to be imported but not synced back to LDAP.",
 			},
 			"sync_registrations": {
 				Type:        schema.TypeBool,
