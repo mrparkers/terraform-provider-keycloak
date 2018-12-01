@@ -311,10 +311,10 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper_client" {
-  	name       = "%s"
+	name       = "%s"
 	realm_id   = "${keycloak_realm.realm.id}"
-  	client_id  = "${keycloak_openid_client.openid_client.id}"
-  	claim_name = "bar"
+	client_id  = "${keycloak_openid_client.openid_client.id}"
+	claim_name = "bar"
 }`, realmName, clientId, mapperName)
 }
 
@@ -351,10 +351,10 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper_client" {
-  	name       = "%s"
+	name       = "%s"
 	realm_id   = "${keycloak_realm.realm.id}"
-  	client_id  = "${keycloak_openid_client.openid_client.id}"
-  	claim_name = "bar"
+	client_id  = "${keycloak_openid_client.openid_client.id}"
+	claim_name = "bar"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
@@ -384,15 +384,15 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper" {
-  	name                 = "%s"
-	realm_id             = "${keycloak_realm.realm.id}"
-  	client_id            = "${keycloak_openid_client.openid_client.id}"
+	name                = "%s"
+	realm_id            = "${keycloak_realm.realm.id}"
+	client_id           = "${keycloak_openid_client.openid_client.id}"
 
-  	claim_name           = "%s"
-	full_path            = %t
-	id_token_claim       = %t
-	access_token_claim   = %t
-	userinfo_token_claim = %t
+	claim_name          = "%s"
+	full_path           = %t
+	add_to_id_token     = %t
+	add_to_access_token = %t
+	add_to_userinfo     = %t
 }`, mapper.RealmId, mapper.ClientId, mapper.Name, mapper.ClaimName, mapper.FullPath, mapper.AddToIdToken, mapper.AddToAccessToken, mapper.AddToUserinfo)
 }
 
@@ -417,11 +417,11 @@ resource "keycloak_openid_client" "openid_client_two" {
 }
 
 resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper_client" {
-  	name       = "group-mapper"
+	name       = "group-mapper"
 	realm_id   = "${keycloak_realm.realm.id}"
-  	client_id  = "${keycloak_openid_client.%s.id}"
+	client_id  = "${keycloak_openid_client.%s.id}"
 
-  	claim_name = "foo"
+	claim_name = "foo"
 }`, realmId, clientIdOne, clientIdTwo, currentClient)
 }
 
@@ -442,10 +442,10 @@ resource "keycloak_openid_client_scope" "client_scope_two" {
 }
 
 resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper_client_scope" {
-  	name            = "group-mapper"
+	name            = "group-mapper"
 	realm_id        = "${keycloak_realm.realm.id}"
-  	client_scope_id = "${keycloak_openid_client_scope.%s.id}"
+	client_scope_id = "${keycloak_openid_client_scope.%s.id}"
 
-  	claim_name      = "foo"
+	claim_name      = "foo"
 }`, realmId, clientScopeIdOne, clientScopeIdTwo, currentClientScope)
 }

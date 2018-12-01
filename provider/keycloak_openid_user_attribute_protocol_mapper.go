@@ -59,7 +59,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapper() *schema.Resource {
 				Default:     true,
 				Description: "Indicates if the attribute should be a claim in the access token.",
 			},
-			"add_to_user_info": {
+			"add_to_userinfo": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
@@ -99,7 +99,7 @@ func mapFromDataToOpenIdUserAttributeProtocolMapper(data *schema.ResourceData) *
 		ClientScopeId:    data.Get("client_scope_id").(string),
 		AddToIdToken:     data.Get("add_to_id_token").(bool),
 		AddToAccessToken: data.Get("add_to_access_token").(bool),
-		AddToUserInfo:    data.Get("add_to_user_info").(bool),
+		AddToUserInfo:    data.Get("add_to_userinfo").(bool),
 
 		UserAttribute:  data.Get("user_attribute").(string),
 		ClaimName:      data.Get("claim_name").(string),
@@ -121,7 +121,7 @@ func mapFromOpenIdUserAttributeMapperToData(mapper *keycloak.OpenIdUserAttribute
 
 	data.Set("add_to_id_token", mapper.AddToIdToken)
 	data.Set("add_to_access_token", mapper.AddToAccessToken)
-	data.Set("add_to_user_info", mapper.AddToUserInfo)
+	data.Set("add_to_userinfo", mapper.AddToUserInfo)
 	data.Set("user_attribute", mapper.UserAttribute)
 	data.Set("claim_name", mapper.ClaimName)
 	data.Set("claim_value_type", mapper.ClaimValueType)

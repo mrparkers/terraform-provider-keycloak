@@ -337,9 +337,9 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper_client" {
-  	name       = "%s"
+	name       = "%s"
 	realm_id   = "${keycloak_realm.realm.id}"
-  	client_id  = "${keycloak_openid_client.openid_client.id}"
+	client_id  = "${keycloak_openid_client.openid_client.id}"
 }`, realmName, clientId, mapperName)
 }
 
@@ -375,9 +375,9 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper_client" {
-  	name       = "%s"
+	name       = "%s"
 	realm_id   = "${keycloak_realm.realm.id}"
-  	client_id  = "${keycloak_openid_client.openid_client.id}"
+	client_id  = "${keycloak_openid_client.openid_client.id}"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
@@ -406,13 +406,13 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper" {
-  	name                 = "%s"
-	realm_id             = "${keycloak_realm.realm.id}"
-  	client_id            = "${keycloak_openid_client.openid_client.id}"
+	name                = "%s"
+	realm_id            = "${keycloak_realm.realm.id}"
+	client_id           = "${keycloak_openid_client.openid_client.id}"
 
-	id_token_claim       = %t
-	access_token_claim   = %t
-	userinfo_token_claim = %t
+	add_to_id_token     = %t
+	add_to_access_token = %t
+	add_to_userinfo     = %t
 }`, mapper.RealmId, mapper.ClientId, mapper.Name, mapper.AddToIdToken, mapper.AddToAccessToken, mapper.AddToUserInfo)
 }
 
@@ -437,9 +437,9 @@ resource "keycloak_openid_client" "openid_client_two" {
 }
 
 resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper_client" {
-  	name       = "group-mapper"
+	name       = "group-mapper"
 	realm_id   = "${keycloak_realm.realm.id}"
-  	client_id  = "${keycloak_openid_client.%s.id}"
+	client_id  = "${keycloak_openid_client.%s.id}"
 }`, realmId, clientIdOne, clientIdTwo, currentClient)
 }
 
@@ -460,8 +460,8 @@ resource "keycloak_openid_client_scope" "client_scope_two" {
 }
 
 resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper_client_scope" {
-  	name            = "group-mapper"
+	name            = "group-mapper"
 	realm_id        = "${keycloak_realm.realm.id}"
-  	client_scope_id = "${keycloak_openid_client_scope.%s.id}"
+	client_scope_id = "${keycloak_openid_client_scope.%s.id}"
 }`, realmId, clientScopeIdOne, clientScopeIdTwo, currentClientScope)
 }
