@@ -73,7 +73,7 @@ The following arguments are supported:
 - `full_path` - (Optional) Indicates whether the full path of the group including its parents will be used. Defaults to `true`.
 - `add_to_id_token` - (Optional) Indicates if the property should be added as a claim to the id token. Defaults to `true`.
 - `add_to_access_token` - (Optional) Indicates if the property should be added as a claim to the access token. Defaults to `true`.
-- `add_to_user_info` - (Optional) Indicates if the property should be added as a claim to the UserInfo response body. Defaults to `true`.
+- `add_to_userinfo` - (Optional) Indicates if the property should be added as a claim to the UserInfo response body. Defaults to `true`.
 
 ### Import
 

@@ -67,7 +67,7 @@ The following arguments are supported:
 - `name` - (Required) The display name of this protocol mapper in the GUI.
 - `add_to_id_token` - (Optional) Indicates if the user's full name should be added as a claim to the id token. Defaults to `true`.
 - `add_to_access_token` - (Optional) Indicates if the user's full name should be added as a claim to the access token. Defaults to `true`.
-- `add_to_user_info` - (Optional) Indicates if the user's full name should be added as a claim to the UserInfo response body. Defaults to `true`.
+- `add_to_userinfo` - (Optional) Indicates if the user's full name should be added as a claim to the UserInfo response body. Defaults to `true`.
 
 ### Import
 

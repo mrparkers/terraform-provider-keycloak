@@ -76,7 +76,7 @@ The following arguments are supported:
 - `claim_value_type` - (Optional) The claim type used when serializing JSON tokens. Can be one of `String`, `long`, `int`, or `boolean`. Defaults to `String`.
 - `add_to_id_token` - (Optional) Indicates if the property should be added as a claim to the id token. Defaults to `true`.
 - `add_to_access_token` - (Optional) Indicates if the property should be added as a claim to the access token. Defaults to `true`.
-- `add_to_user_info` - (Optional) Indicates if the property should be added as a claim to the UserInfo response body. Defaults to `true`.
+- `add_to_userinfo` - (Optional) Indicates if the property should be added as a claim to the UserInfo response body. Defaults to `true`.
 
 ### Import
 

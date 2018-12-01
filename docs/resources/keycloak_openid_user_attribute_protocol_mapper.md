@@ -77,7 +77,7 @@ The following arguments are supported:
 - `multivalued` - (Optional) Indicates whether this attribute is a single value or an array of values. Defaults to `false`.
 - `add_to_id_token` - (Optional) Indicates if the attribute should be added as a claim to the id token. Defaults to `true`.
 - `add_to_access_token` - (Optional) Indicates if the attribute should be added as a claim to the access token. Defaults to `true`.
-- `add_to_user_info` - (Optional) Indicates if the attribute should be added as a claim to the UserInfo response body. Defaults to `true`.
+- `add_to_userinfo` - (Optional) Indicates if the attribute should be added as a claim to the UserInfo response body. Defaults to `true`.
 
 ### Import
 
