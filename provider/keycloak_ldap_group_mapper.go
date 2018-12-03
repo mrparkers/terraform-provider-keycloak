@@ -98,7 +98,8 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 			},
 			"memberof_ldap_attribute": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  "memberOf",
 			},
 			"mapped_group_attributes": {
 				Type:     schema.TypeList,
