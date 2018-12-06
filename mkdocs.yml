@@ -17,6 +17,7 @@ nav:
   - keycloak_ldap_user_federation:  resources/keycloak_ldap_user_federation.md
   - keycloak_ldap_full_name_mapper:  resources/keycloak_ldap_full_name_mapper.md
   - keycloak_ldap_group_mapper:  resources/keycloak_ldap_group_mapper.md
+  - keycloak_ldap_msad_user_account_control_mapper:  resources/keycloak_ldap_msad_user_account_control_mapper.md
 theme: readthedocs
 markdown_extensions:
 - toc:
