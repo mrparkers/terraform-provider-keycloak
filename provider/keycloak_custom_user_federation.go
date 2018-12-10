@@ -38,7 +38,8 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 
 			"enabled": {
 				Type:        schema.TypeBool,
-				Required:    true,
+				Optional:    true,
+				Default:     true,
 				Description: "When false, this provider will not be used when performing queries for users.",
 			},
 			"priority": {
