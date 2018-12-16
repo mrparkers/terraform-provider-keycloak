@@ -48,7 +48,8 @@ terraformClient=$(jq -n "{
     secret: \"${KEYCLOAK_CLIENT_SECRET}\",
     clientAuthenticatorType: \"client-secret\",
     enabled: true,
-    serviceAccountsEnabled: true
+    serviceAccountsEnabled: true,
+    standardFlowEnabled: false
 }")
 
 post "/realms/master/clients" "${terraformClient}"
