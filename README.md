@@ -3,34 +3,9 @@ Terraform provider for [Keycloak](https://www.keycloak.org/).
 
 [![CircleCI](https://circleci.com/gh/mrparkers/terraform-provider-keycloak.svg?style=svg)](https://circleci.com/gh/mrparkers/terraform-provider-keycloak)
 
-## Features
+## Docs
 
-This project is a work in progress with a short term goal of supporting all of the Keycloak features that I need to manage at my place of employment.
-
-Long term, I'd like to support as much as I can while I tinker with Keycloak in my spare time.
-
-### Supported Resources
-
-- [`keycloak_realm`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_realm.go)
-- [`keycloak_user`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_user.go)
-- [`keycloak_group`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_group.go)
-- [`keycloak_group_memberships`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_group_memberships.go)
-- [`keycloak_openid_client`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_client.go)
-- [`keycloak_openid_client_scope`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_client_scope.go)
-- [`keycloak_openid_client_default_scopes`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_client_default_scopes.go)
-- [`keycloak_ldap_user_federation`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_ldap_user_federation.go)
-- [`keycloak_ldap_user_attribute_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_ldap_user_attribute_mapper.go)
-- [`keycloak_ldap_group_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_ldap_group_mapper.go)
-- [`keycloak_ldap_full_name_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_ldap_full_name_mapper.go)
-- [`keycloak_ldap_msad_user_account_control_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_ldap_msad_user_account_control_mapper.go)
-- [`keycloak_custom_user_federation`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_custom_user_federation.go)
-- [`keycloak_openid_user_attribute_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_user_attribute_protocol_mapper.go)
-- [`keycloak_openid_user_property_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_user_property_protocol_mapper.go)
-- [`keycloak_openid_group_membership_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_group_membership_protocol_mapper.go)
-- [`keycloak_openid_full_name_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_full_name_protocol_mapper.go)
-- [`keycloak_openid_hardcoded_claim_protocol_mapper`](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/provider/keycloak_openid_hardcoded_claim_protocol_mapper.go)
-
-I will write some docs for each resource once more are supported. For now, please refer to the linked source files.
+https://mrparkers.github.io/terraform-provider-keycloak/
 
 ## Building
 
