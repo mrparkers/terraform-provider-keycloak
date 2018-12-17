@@ -1,7 +1,6 @@
 site_name: "Terraform Provider: Keycloak"
 nav:
-- Getting Started:
-  - Installing: index.md
+- Getting Started: index.md
 - Resources:
   - keycloak_realm: resources/keycloak_realm.md
   - keycloak_user: resources/keycloak_user.md
