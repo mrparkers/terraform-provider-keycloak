@@ -1,0 +1,14 @@
+[
+	{
+		"os": "darwin",
+		"platform": "amd64"
+	},
+	{
+		"os": "linux",
+		"platform": "amd64"
+	},
+	{
+		"os": "windows",
+		"platform": "amd64"
+	}
+]
