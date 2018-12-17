@@ -24,3 +24,6 @@ custom-user-federation-example/build
 
 # docs
 site/
+
+# releases
+*.zip
