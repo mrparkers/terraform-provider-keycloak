@@ -77,7 +77,7 @@ serviceAccountAdminRoleMapping=$(jq -n "[{
 
 post "/realms/master/users/${terraformClientServiceAccountId}/role-mappings/realm" "${serviceAccountAdminRoleMapping}"
 
-echo "Extending access token lifespan"
+echo "Extending access token lifespan (don't do this in production)"
 
 masterRealmExtendAccessToken=$(jq -n "{
     accessTokenLifespan: 86400,
