@@ -21,3 +21,6 @@ terraform.tfstate*
 # custom user federation example
 custom-user-federation-example/build
 !custom-user-federation-example/build/libs
+
+# docs
+site/

@@ -1,0 +1,30 @@
+.section h5 {
+	margin-bottom: 15px;
+}
+
+.section p {
+	margin-bottom: 15px;
+}
+
+.section li {
+	line-height: 23px;
+	margin-bottom: 12px;
+}
+
+h1 {
+	font-size: 150%;
+}
+
+@media (min-width: 769px) {
+	.wy-nav-side, .rst-versions {
+		width: 410px;
+	}
+
+	.wy-nav-content-wrap {
+		margin-left: 410px;
+	}
+
+	h1 {
+		font-size: 175%;
+	}
+}
