@@ -27,3 +27,5 @@ site/
 
 # releases
 *.zip
+
+.DS_Store
