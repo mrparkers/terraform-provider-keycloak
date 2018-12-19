@@ -37,7 +37,7 @@ github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/U
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-cleanhttp v0.5.0 h1:wvCrVc9TjDls6+YGAF2hAifE1E5U1+b4tH6KdvN3Gig=
 github.com/hashicorp/go-cleanhttp v0.5.0/go.mod h1:JpRdi6/HCYpAwUzNwuwqhbovhLtngrth3wmdIIUrZ80=
-github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001 h1:MFPzqpPED05pFyGjNPJEC2sXM6EHTzFyvX+0s0JoZ48=
+github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001 h1:qC+3MHkvfCXb1cA9YDpWZ7np8tPOXZceLrW+xyqOgmk=
 github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001/go.mod h1:6rdJFnhkXnzGOJbvkrdv4t9nLwKcVA+tmbQeUlkIzrU=
 github.com/hashicorp/go-hclog v0.0.0-20180828044259-75ecd6e6d645 h1:remtZEHHwvD+FdeXwJfxO6KzeIslX73xufap8oJzi+0=
 github.com/hashicorp/go-hclog v0.0.0-20180828044259-75ecd6e6d645/go.mod h1:5CU+agLiy3J7N7QjHK5d05KxGsuXiQLrjA0H7acj2lQ=
