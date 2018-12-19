@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-    - image: circleci/golang:1.11
+    - image: circleci/golang:1.11.4
     - image: jboss/keycloak:4.2.1.Final
       environment:
         DB_VENDOR: H2
