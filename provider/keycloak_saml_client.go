@@ -48,22 +48,27 @@ func resourceKeycloakSamlClient() *schema.Resource {
 			"include_authn_statement": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"sign_documents": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"sign_assertions": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"client_signature_required": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"force_post_binding": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"front_channel_logout": {
 				Type:     schema.TypeBool,
@@ -114,6 +119,37 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		}
 	}
 
+	samlAttributes := &keycloak.SamlClientAttributes{
+		NameIdFormat:       data.Get("name_id_format").(string),
+		SigningCertificate: data.Get("signing_certificate").(string),
+		SigningPrivateKey:  data.Get("signing_private_key").(string),
+	}
+
+	if includeAuthnStatement, ok := data.GetOk("include_authn_statement"); ok {
+		includeAuthnStatementString := strconv.FormatBool(includeAuthnStatement.(bool))
+		samlAttributes.IncludeAuthnStatement = &includeAuthnStatementString
+	}
+
+	if signDocuments, ok := data.GetOk("sign_documents"); ok {
+		signDocumentsString := strconv.FormatBool(signDocuments.(bool))
+		samlAttributes.SignDocuments = &signDocumentsString
+	}
+
+	if signAssertions, ok := data.GetOk("sign_assertions"); ok {
+		signAssertionsString := strconv.FormatBool(signAssertions.(bool))
+		samlAttributes.SignAssertions = &signAssertionsString
+	}
+
+	if clientSignatureRequired, ok := data.GetOk("client_signature_required"); ok {
+		clientSignatureRequiredString := strconv.FormatBool(clientSignatureRequired.(bool))
+		samlAttributes.ClientSignatureRequired = &clientSignatureRequiredString
+	}
+
+	if forcePostBinding, ok := data.GetOk("force_post_binding"); ok {
+		forcePostBindingString := strconv.FormatBool(forcePostBinding.(bool))
+		samlAttributes.ForcePostBinding = &forcePostBindingString
+	}
+
 	samlClient := &keycloak.SamlClient{
 		Id:                      data.Id(),
 		ClientId:                data.Get("client_id").(string),
@@ -126,16 +162,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		ValidRedirectUris:       validRedirectUris,
 		BaseUrl:                 data.Get("base_url").(string),
 		MasterSamlProcessingUrl: data.Get("master_saml_processing_url").(string),
-		Attributes: &keycloak.SamlClientAttributes{
-			IncludeAuthnStatement:   strconv.FormatBool(data.Get("include_authn_statement").(bool)),
-			SignDocuments:           strconv.FormatBool(data.Get("sign_documents").(bool)),
-			SignAssertions:          strconv.FormatBool(data.Get("sign_assertions").(bool)),
-			ClientSignatureRequired: strconv.FormatBool(data.Get("client_signature_required").(bool)),
-			ForcePostBinding:        strconv.FormatBool(data.Get("force_post_binding").(bool)),
-			NameIdFormat:            data.Get("name_id_format").(string),
-			SigningCertificate:      data.Get("signing_certificate").(string),
-			SigningPrivateKey:       data.Get("signing_private_key").(string),
-		},
+		Attributes:              samlAttributes,
 	}
 
 	return samlClient
@@ -144,29 +171,49 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlClient) error {
 	data.SetId(client.Id)
 
-	includeAuthnStatement, err := strconv.ParseBool(client.Attributes.IncludeAuthnStatement)
-	if err != nil {
-		return err
+	if client.Attributes.IncludeAuthnStatement != nil {
+		includeAuthnStatement, err := strconv.ParseBool(*client.Attributes.IncludeAuthnStatement)
+		if err != nil {
+			return err
+		}
+
+		data.Set("include_authn_statement", includeAuthnStatement)
 	}
 
-	signDocuments, err := strconv.ParseBool(client.Attributes.SignDocuments)
-	if err != nil {
-		return err
+	if client.Attributes.SignDocuments != nil {
+		signDocuments, err := strconv.ParseBool(*client.Attributes.SignDocuments)
+		if err != nil {
+			return err
+		}
+
+		data.Set("sign_documents", signDocuments)
 	}
 
-	signAssertions, err := strconv.ParseBool(client.Attributes.SignAssertions)
-	if err != nil {
-		return err
+	if client.Attributes.SignAssertions != nil {
+		signAssertions, err := strconv.ParseBool(*client.Attributes.SignAssertions)
+		if err != nil {
+			return err
+		}
+
+		data.Set("sign_assertions", signAssertions)
 	}
 
-	clientSignatureRequired, err := strconv.ParseBool(client.Attributes.ClientSignatureRequired)
-	if err != nil {
-		return err
+	if client.Attributes.ClientSignatureRequired != nil {
+		clientSignatureRequired, err := strconv.ParseBool(*client.Attributes.ClientSignatureRequired)
+		if err != nil {
+			return err
+		}
+
+		data.Set("client_signature_required", clientSignatureRequired)
 	}
 
-	forcePostBinding, err := strconv.ParseBool(client.Attributes.ForcePostBinding)
-	if err != nil {
-		return err
+	if client.Attributes.ForcePostBinding != nil {
+		forcePostBinding, err := strconv.ParseBool(*client.Attributes.ForcePostBinding)
+		if err != nil {
+			return err
+		}
+
+		data.Set("force_post_binding", forcePostBinding)
 	}
 
 	data.Set("client_id", client.ClientId)
@@ -179,11 +226,6 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
 	data.Set("base_url", client.BaseUrl)
 	data.Set("master_saml_processing_url", client.MasterSamlProcessingUrl)
-	data.Set("include_authn_statement", includeAuthnStatement)
-	data.Set("sign_documents", signDocuments)
-	data.Set("sign_assertions", signAssertions)
-	data.Set("client_signature_required", clientSignatureRequired)
-	data.Set("force_post_binding", forcePostBinding)
 	data.Set("name_id_format", client.Attributes.NameIdFormat)
 	data.Set("signing_certificate", client.Attributes.SigningCertificate)
 	data.Set("signing_private_key", client.Attributes.SigningPrivateKey)
@@ -201,10 +243,7 @@ func resourceKeycloakSamlClientCreate(data *schema.ResourceData, meta interface{
 		return err
 	}
 
-	err = mapToDataFromSamlClient(data, client)
-	if err != nil {
-		return err
-	}
+	data.SetId(client.Id)
 
 	return resourceKeycloakSamlClientRead(data, meta)
 }

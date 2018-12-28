@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strconv"
 	"testing"
 )
 
@@ -94,6 +95,28 @@ func TestAccKeycloakSamlClient_updateRealm(t *testing.T) {
 	})
 }
 
+// Keycloak typically sets some values as default if they aren't provided
+// This test asserts that these default values are present if none are provided
+func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakSamlClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlClient_basic(realmName, clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
+					testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes("keycloak_saml_client.saml_client"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakSamlClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getSamlClientFromState(s, resourceName)
@@ -162,6 +185,54 @@ func getSamlClientFromState(s *terraform.State, resourceName string) (*keycloak.
 	}
 
 	return client, nil
+}
+
+func testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		includeAuthnStatement, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["include_authn_statement"])
+		if err != nil {
+			return err
+		}
+
+		signDocuments, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["sign_documents"])
+		if err != nil {
+			return err
+		}
+
+		signAssertions, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["sign_assertions"])
+		if err != nil {
+			return err
+		}
+
+		clientSignatureRequired, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["client_signature_required"])
+		if err != nil {
+			return err
+		}
+
+		forcePostBinding, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["force_post_binding"])
+		if err != nil {
+			return err
+		}
+
+		if !includeAuthnStatement && !signDocuments && !signAssertions && !clientSignatureRequired && !forcePostBinding {
+			return fmt.Errorf("expected saml client with id %s to have some defaults set by Keycloak", rs.Primary.ID)
+		}
+
+		return nil
+	}
+}
+
+func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
+	if b == "" {
+		return false, nil
+	}
+
+	return strconv.ParseBool(b)
 }
 
 func testKeycloakSamlClient_basic(realm, clientId string) string {
