@@ -73,10 +73,10 @@ resource "keycloak_group_memberships" "foo_members" {
 }
 
 resource "keycloak_openid_client" "test_client" {
-	client_id           = "test-client"
-	name                = "test-client"
+	client_id           = "test-openid-client"
+	name                = "test-openid-client"
 	realm_id            = "${keycloak_realm.test.id}"
-	description         = "a test client"
+	description         = "a test openid client"
 
 	access_type         = "CONFIDENTIAL"
 	valid_redirect_uris = [
@@ -93,8 +93,8 @@ resource "keycloak_openid_client_scope" "test_client_scope" {
 }
 
 resource "keycloak_openid_client_default_scopes" "default_client_scopes" {
-	realm_id  = "${keycloak_realm.test.id}"
-	client_id = "${keycloak_openid_client.test_client.id}"
+	realm_id       = "${keycloak_realm.test.id}"
+	client_id      = "${keycloak_openid_client.test_client.id}"
 
 	default_scopes = [
 		"profile",
@@ -247,4 +247,10 @@ resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_clie
 
 	claim_name      = "foo"
 	claim_value     = "bar"
+}
+
+resource "keycloak_saml_client" "saml_client" {
+	realm_id  = "${keycloak_realm.test.id}"
+	client_id = "test-saml-client"
+	name      = "test-saml-client"
 }
