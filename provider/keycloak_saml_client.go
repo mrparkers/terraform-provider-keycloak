@@ -73,11 +73,12 @@ func resourceKeycloakSamlClient() *schema.Resource {
 			"front_channel_logout": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"name_id_format": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "username",
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice(keycloakSamlClientNameIdFormats, false),
 			},
 			"root_url": {
@@ -101,10 +102,12 @@ func resourceKeycloakSamlClient() *schema.Resource {
 			"signing_certificate": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"signing_private_key": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 		},
 	}
