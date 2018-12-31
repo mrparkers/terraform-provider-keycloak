@@ -65,7 +65,7 @@ func (keycloakClient *KeycloakClient) GetSamlClient(realmId, id string) (*SamlCl
 }
 
 func (keycloakClient *KeycloakClient) UpdateSamlClient(client *SamlClient) error {
-	client.Protocol = "openid-connect"
+	client.Protocol = "saml"
 	client.ClientAuthenticatorType = "client-secret"
 
 	return keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s", client.RealmId, client.Id), client)

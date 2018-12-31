@@ -119,6 +119,90 @@ func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+	enabled := randomBool()
+	frontChannelLogout := randomBool()
+	clientSignatureRequired := "true"
+
+	samlClientBefore := &keycloak.SamlClient{
+		RealmId:  realmName,
+		ClientId: clientId,
+		Name:     acctest.RandString(10),
+
+		Enabled:     enabled,
+		Description: acctest.RandString(50),
+
+		FrontChannelLogout: frontChannelLogout,
+
+		RootUrl: acctest.RandString(20),
+		ValidRedirectUris: []string{
+			acctest.RandString(20),
+			acctest.RandString(20),
+			acctest.RandString(20),
+		},
+		BaseUrl:                 acctest.RandString(20),
+		MasterSamlProcessingUrl: acctest.RandString(20),
+
+		Attributes: &keycloak.SamlClientAttributes{
+			IncludeAuthnStatement:   randomBoolAsStringPointer(),
+			SignDocuments:           randomBoolAsStringPointer(),
+			SignAssertions:          randomBoolAsStringPointer(),
+			ClientSignatureRequired: &clientSignatureRequired,
+			ForcePostBinding:        randomBoolAsStringPointer(),
+			NameIdFormat:            randomStringInSlice(keycloakSamlClientNameIdFormats),
+			SigningCertificate:      acctest.RandString(20),
+			SigningPrivateKey:       acctest.RandString(20),
+		},
+	}
+
+	samlClientAfter := &keycloak.SamlClient{
+		RealmId:  realmName,
+		ClientId: clientId,
+		Name:     acctest.RandString(10),
+
+		Enabled:     !enabled,
+		Description: acctest.RandString(50),
+
+		FrontChannelLogout: !frontChannelLogout,
+
+		RootUrl: acctest.RandString(20),
+		ValidRedirectUris: []string{
+			acctest.RandString(20),
+		},
+		BaseUrl:                 acctest.RandString(20),
+		MasterSamlProcessingUrl: acctest.RandString(20),
+
+		Attributes: &keycloak.SamlClientAttributes{
+			IncludeAuthnStatement:   randomBoolAsStringPointer(),
+			SignDocuments:           randomBoolAsStringPointer(),
+			SignAssertions:          randomBoolAsStringPointer(),
+			ClientSignatureRequired: &clientSignatureRequired,
+			ForcePostBinding:        randomBoolAsStringPointer(),
+			NameIdFormat:            randomStringInSlice(keycloakSamlClientNameIdFormats),
+			SigningCertificate:      acctest.RandString(20),
+			SigningPrivateKey:       acctest.RandString(20),
+		},
+	}
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakSamlClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlClient_fromInterface(samlClientBefore),
+				Check:  testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
+			},
+			{
+				Config: testKeycloakSamlClient_fromInterface(samlClientAfter),
+				Check:  testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakSamlClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getSamlClientFromState(s, resourceName)
@@ -237,6 +321,12 @@ func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
 	return strconv.ParseBool(b)
 }
 
+func randomBoolAsStringPointer() *string {
+	s := strconv.FormatBool(randomBool())
+
+	return &s
+}
+
 func testKeycloakSamlClient_basic(realm, clientId string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -244,8 +334,8 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_saml_client" "saml_client" {
-	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	client_id = "%s"
+	realm_id  = "${keycloak_realm.realm.id}"
 }
 	`, realm, clientId)
 }
@@ -261,8 +351,8 @@ resource "keycloak_realm" "realm_2" {
 }
 
 resource "keycloak_saml_client" "saml_client" {
-	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm_1.id}"
+	client_id = "%s"
+	realm_id  = "${keycloak_realm.realm_1.id}"
 }
 	`, realmOne, realmTwo, clientId)
 }
@@ -278,8 +368,41 @@ resource "keycloak_realm" "realm_2" {
 }
 
 resource "keycloak_saml_client" "saml_client" {
-	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm_2.id}"
+	client_id = "%s"
+	realm_id  = "${keycloak_realm.realm_2.id}"
 }
 	`, realmOne, realmTwo, clientId)
+}
+
+func testKeycloakSamlClient_fromInterface(client *keycloak.SamlClient) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_saml_client" "saml_client" {
+	realm_id    = "${keycloak_realm.realm.id}"
+	client_id   = "%s"
+	name        = "%s"
+	description = "%s"
+	enabled     = %t
+
+	# below attributes are bools, but the model (and API) uses strings
+	include_authn_statement    = %s
+	sign_documents             = %s
+	sign_assertions            = %s
+	client_signature_required  = %s
+	force_post_binding         = %s
+
+	front_channel_logout       = %t
+	name_id_format             = "%s"
+	root_url                   = "%s"
+	valid_redirect_uris        = %s
+	base_url                   = "%s"
+	master_saml_processing_url = "%s"
+
+	signing_certificate        = "%s"
+	signing_private_key        = "%s"
+}
+	`, client.RealmId, client.ClientId, client.Name, client.Description, client.Enabled, *client.Attributes.IncludeAuthnStatement, *client.Attributes.SignDocuments, *client.Attributes.SignAssertions, *client.Attributes.ClientSignatureRequired, *client.Attributes.ForcePostBinding, client.FrontChannelLogout, client.Attributes.NameIdFormat, client.RootUrl, arrayOfStringsForTerraformResource(client.ValidRedirectUris), client.BaseUrl, client.MasterSamlProcessingUrl, client.Attributes.SigningCertificate, client.Attributes.SigningPrivateKey)
 }

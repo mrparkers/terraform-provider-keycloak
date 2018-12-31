@@ -128,27 +128,27 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		SigningPrivateKey:  data.Get("signing_private_key").(string),
 	}
 
-	if includeAuthnStatement, ok := data.GetOk("include_authn_statement"); ok {
+	if includeAuthnStatement, ok := data.GetOkExists("include_authn_statement"); ok {
 		includeAuthnStatementString := strconv.FormatBool(includeAuthnStatement.(bool))
 		samlAttributes.IncludeAuthnStatement = &includeAuthnStatementString
 	}
 
-	if signDocuments, ok := data.GetOk("sign_documents"); ok {
+	if signDocuments, ok := data.GetOkExists("sign_documents"); ok {
 		signDocumentsString := strconv.FormatBool(signDocuments.(bool))
 		samlAttributes.SignDocuments = &signDocumentsString
 	}
 
-	if signAssertions, ok := data.GetOk("sign_assertions"); ok {
+	if signAssertions, ok := data.GetOkExists("sign_assertions"); ok {
 		signAssertionsString := strconv.FormatBool(signAssertions.(bool))
 		samlAttributes.SignAssertions = &signAssertionsString
 	}
 
-	if clientSignatureRequired, ok := data.GetOk("client_signature_required"); ok {
+	if clientSignatureRequired, ok := data.GetOkExists("client_signature_required"); ok {
 		clientSignatureRequiredString := strconv.FormatBool(clientSignatureRequired.(bool))
 		samlAttributes.ClientSignatureRequired = &clientSignatureRequiredString
 	}
 
-	if forcePostBinding, ok := data.GetOk("force_post_binding"); ok {
+	if forcePostBinding, ok := data.GetOkExists("force_post_binding"); ok {
 		forcePostBindingString := strconv.FormatBool(forcePostBinding.(bool))
 		samlAttributes.ForcePostBinding = &forcePostBindingString
 	}
