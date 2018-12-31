@@ -111,6 +111,8 @@ func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 					testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes("keycloak_saml_client.saml_client"),
+					TestCheckResourceAttrNot("keycloak_saml_client.saml_client", "signing_certificate", ""),
+					TestCheckResourceAttrNot("keycloak_saml_client.saml_client", "signing_private_key", ""),
 				),
 			},
 		},
