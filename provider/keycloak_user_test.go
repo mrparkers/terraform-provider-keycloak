@@ -260,7 +260,7 @@ func testAccCheckKeycloakUserInitialPasswordLogin(realmName string, username str
 	return func(s *terraform.State) error {
 		httpClient := &http.Client{}
 
-		resourceUrl := os.Getenv("KEYCLOAK_URL") + "/auth/realms/" + realmName + "/protocol/openid-connect/token"
+		resourceUrl := fmt.Sprintf("%s/auth/realms/%s/protocol/openid-connect/token", os.Getenv("KEYCLOAK_URL"), realmName)
 
 		form := url.Values{}
 		form.Add("username", username)
