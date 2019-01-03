@@ -350,22 +350,19 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client" {
-    realm_id            = "${keycloak_realm.realm.id}"
-    client_id           = "%s"
-
-    name                = "test client"
-    enabled             = true
-
-    access_type         = "PUBLIC"
-    direct_access_grants_enabled = true
-    valid_redirect_uris = [
-        "*"
-    ]
+	realm_id                     = "${keycloak_realm.realm.id}"
+	client_id                    = "%s"
+	
+	name                         = "test client"
+	enabled                      = true
+	
+	access_type                  = "PUBLIC"
+	direct_access_grants_enabled = true
 }
 
 resource "keycloak_user" "user" {
-	realm_id = "${keycloak_realm.realm.id}"
-	username = "%s"
+	realm_id         = "${keycloak_realm.realm.id}"
+	username         = "%s"
   initial_password = "%s"
 }
 	`, realm, clientId, username, password)
