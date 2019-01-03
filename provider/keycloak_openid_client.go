@@ -92,10 +92,8 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 }
 
 func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
-	var (
-		validRedirectUris []string
-		webOrigins        []string
-	)
+	validRedirectUris := make([]string, 0)
+	webOrigins := make([]string, 0)
 
 	if v, ok := data.GetOk("valid_redirect_uris"); ok {
 		for _, validRedirectUri := range v.(*schema.Set).List() {

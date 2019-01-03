@@ -176,6 +176,12 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 				),
 			},
+			{
+				Config: testKeycloakOpenidClient_basic(realm, clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
+				),
+			},
 		},
 	})
 }
