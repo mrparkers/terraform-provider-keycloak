@@ -17,11 +17,11 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_user" "user" {
     realm_id   = "${keycloak_realm.realm.id}"
     username   = "bob"
-	enabled    = true
-
-	email      = "bob@domain.com"
-	first_name = "Bob"
-	last_name  = "Bobson"
+    enabled    = true
+    
+    email      = "bob@domain.com"
+    first_name = "Bob"
+    last_name  = "Bobson"
 }
 ```
 
@@ -31,6 +31,7 @@ The following arguments are supported:
 
 - `realm_id` - (Required) The realm this user belongs to.
 - `username` - (Required) The unique username of this user.
+- `initial_password` (Optional) When user needs to be created, set its password to this value. Otherwise, do nothing.
 - `enabled` - (Optional) When false, this user cannot log in. Defaults to `true`.
 - `email` - (Optional) The user's email.
 - `first_name` - (Optional) The user's first name.
