@@ -86,9 +86,9 @@ func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	_, isPasswordSet := data.GetOk("initial_password")
+	initialPassword, isPasswordSet := data.GetOk("initial_password")
 	if isPasswordSet {
-		err := keycloakClient.ResetUserPassword(data.Get("realm_id").(string), user.Id, data.Get("initial_password").(string))
+		err := keycloakClient.ResetUserPassword(data.Get("realm_id").(string), user.Id, initialPassword.(string))
 		if err != nil {
 			return err
 		}
