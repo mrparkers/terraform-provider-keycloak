@@ -31,7 +31,8 @@ The following arguments are supported:
 
 - `realm_id` - (Required) The realm this user belongs to.
 - `username` - (Required) The unique username of this user.
-- `initial_password` (Optional) When user needs to be created, set its password to this value. Otherwise, do nothing.
+- `initial_password` (Optional) When given, the user's initial password will be set to this value.
+   This attribute is only respected during initial user creation.
 - `enabled` - (Optional) When false, this user cannot log in. Defaults to `true`.
 - `email` - (Optional) The user's email.
 - `first_name` - (Optional) The user's first name.
