@@ -46,17 +46,17 @@ func convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper *Ldap
 }
 
 func convertFromComponentToLdapUserAttributeMapper(component *component, realmId string) (*LdapUserAttributeMapper, error) {
-	isMandatoryInLdap, err := strconv.ParseBool(component.getConfig("is.mandatory.in.ldap"))
+	isMandatoryInLdap, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("is.mandatory.in.ldap"))
 	if err != nil {
 		return nil, err
 	}
 
-	readOnly, err := strconv.ParseBool(component.getConfig("read.only"))
+	readOnly, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("read.only"))
 	if err != nil {
 		return nil, err
 	}
 
-	alwaysReadValueFromLdap, err := strconv.ParseBool(component.getConfig("always.read.value.from.ldap"))
+	alwaysReadValueFromLdap, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("always.read.value.from.ldap"))
 	if err != nil {
 		return nil, err
 	}

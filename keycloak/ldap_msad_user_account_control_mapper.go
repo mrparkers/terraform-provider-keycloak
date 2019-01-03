@@ -30,7 +30,7 @@ func convertFromLdapMsadUserAccountControlMapperToComponent(ldapMsadUserAccountC
 }
 
 func convertFromComponentToLdapMsadUserAccountControlMapper(component *component, realmId string) (*LdapMsadUserAccountControlMapper, error) {
-	ldapPasswordPolicyHintsEnabled, err := strconv.ParseBool(component.getConfig("ldap.password.policy.hints.enabled"))
+	ldapPasswordPolicyHintsEnabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("ldap.password.policy.hints.enabled"))
 	if err != nil {
 		return nil, err
 	}
