@@ -39,6 +39,11 @@ func resourceKeycloakUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"initial_password": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -79,6 +84,14 @@ func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) err
 	err := keycloakClient.NewUser(user)
 	if err != nil {
 		return err
+	}
+
+	_, isPasswordSet := data.GetOk("initial_password")
+	if isPasswordSet {
+		err := keycloakClient.ResetUserPassword(data.Get("realm_id").(string), user.Id, data.Get("initial_password").(string))
+		if err != nil {
+			return err
+		}
 	}
 
 	mapFromUserToData(data, user)

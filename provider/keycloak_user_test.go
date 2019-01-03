@@ -6,6 +6,11 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
 	"testing"
 )
 
@@ -23,6 +28,36 @@ func TestAccKeycloakUser_basic(t *testing.T) {
 			{
 				Config: testKeycloakUser_basic(realmName, username),
 				Check:  testAccCheckKeycloakUserExists(resourceName),
+			},
+			{
+				ResourceName:        resourceName,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+		},
+	})
+}
+
+func TestAccKeycloakUser_withInitialPassword(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	username := "terraform-user-" + acctest.RandString(10)
+	password := "terraform-password-" + acctest.RandString(10)
+	clientId := "terraform-client-" + acctest.RandString(10)
+
+	resourceName := "keycloak_user.user"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakUser_initialPassword(realmName, username, password, clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakUserExists(resourceName),
+					testAccCheckKeycloakUserInitialPasswordLogin(realmName, username, password, clientId),
+				),
 			},
 			{
 				ResourceName:        resourceName,
@@ -227,6 +262,38 @@ func testAccCheckKeycloakUserFetch(resourceName string, user *keycloak.User) res
 	}
 }
 
+func testAccCheckKeycloakUserInitialPasswordLogin(realmName string, username string, password string, clientId string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		httpClient := &http.Client{}
+
+		resourceUrl := os.Getenv("KEYCLOAK_URL") + "/auth/realms/" + realmName + "/protocol/openid-connect/token"
+
+		form := url.Values{}
+		form.Add("username", username)
+		form.Add("password", password)
+		form.Add("client_id", clientId)
+		form.Add("grant_type", "password")
+
+		request, err := http.NewRequest(http.MethodPost, resourceUrl, strings.NewReader(form.Encode()))
+		if err != nil {
+			return err
+		}
+		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+		response, err := httpClient.Do(request)
+		if err != nil {
+			return err
+		}
+
+		if response.StatusCode != http.StatusOK {
+			body, _ := ioutil.ReadAll(response.Body)
+			return fmt.Errorf("user with username %s cannot login with password %s\n body: %s", username, password, string(body))
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakUserDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -279,6 +346,34 @@ resource "keycloak_user" "user" {
 	username = "%s"
 }
 	`, realm, username)
+}
+
+func testKeycloakUser_initialPassword(realm, username string, password string, clientId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+    realm_id            = "${keycloak_realm.realm.id}"
+    client_id           = "%s"
+
+    name                = "test client"
+    enabled             = true
+
+    access_type         = "PUBLIC"
+    direct_access_grants_enabled = true
+    valid_redirect_uris = [
+        "*"
+    ]
+}
+
+resource "keycloak_user" "user" {
+	realm_id = "${keycloak_realm.realm.id}"
+	username = "%s"
+  initial_password = "%s"
+}
+	`, realm, clientId, username, password)
 }
 
 func testKeycloakUser_updateRealmBefore(realmOne, realmTwo, username string) string {
