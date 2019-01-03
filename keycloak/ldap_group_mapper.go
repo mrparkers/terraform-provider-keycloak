@@ -93,17 +93,17 @@ func convertFromComponentToLdapGroupMapper(component *component, realmId string)
 		groupObjectClasses[i] = strings.TrimSpace(v)
 	}
 
-	preserveGroupInheritance, err := strconv.ParseBool(component.getConfig("preserve.group.inheritance"))
+	preserveGroupInheritance, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("preserve.group.inheritance"))
 	if err != nil {
 		return nil, err
 	}
 
-	ignoreMissingGroups, err := strconv.ParseBool(component.getConfig("ignore.missing.groups"))
+	ignoreMissingGroups, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("ignore.missing.groups"))
 	if err != nil {
 		return nil, err
 	}
 
-	dropNonExistingGroupsDuringSync, err := strconv.ParseBool(component.getConfig("drop.non.existing.groups.during.sync"))
+	dropNonExistingGroupsDuringSync, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("drop.non.existing.groups.during.sync"))
 	if err != nil {
 		return nil, err
 	}

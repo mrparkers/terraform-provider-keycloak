@@ -162,7 +162,7 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) (*compon
 }
 
 func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFederation, error) {
-	enabled, err := strconv.ParseBool(component.getConfig("enabled"))
+	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("enabled"))
 	if err != nil {
 		return nil, err
 	}
@@ -172,24 +172,24 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		return nil, err
 	}
 
-	importEnabled, err := strconv.ParseBool(component.getConfig("importEnabled"))
+	importEnabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("importEnabled"))
 	if err != nil {
 		return nil, err
 	}
 
-	syncRegistrations, err := strconv.ParseBool(component.getConfig("syncRegistrations"))
+	syncRegistrations, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("syncRegistrations"))
 	if err != nil {
 		return nil, err
 	}
 
 	userObjectClasses := strings.Split(component.getConfig("userObjectClasses"), ", ")
 
-	validatePasswordPolicy, err := strconv.ParseBool(component.getConfig("validatePasswordPolicy"))
+	validatePasswordPolicy, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("validatePasswordPolicy"))
 	if err != nil {
 		return nil, err
 	}
 
-	pagination, err := strconv.ParseBool(component.getConfig("pagination"))
+	pagination, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("pagination"))
 	if err != nil {
 		return nil, err
 	}
