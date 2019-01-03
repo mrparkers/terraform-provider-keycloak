@@ -59,12 +59,6 @@ func TestAccKeycloakUser_withInitialPassword(t *testing.T) {
 					testAccCheckKeycloakUserInitialPasswordLogin(realmName, username, password, clientId),
 				),
 			},
-			{
-				ResourceName:        resourceName,
-				ImportState:         true,
-				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
-			},
 		},
 	})
 }
