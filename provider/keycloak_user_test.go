@@ -278,6 +278,7 @@ func testAccCheckKeycloakUserInitialPasswordLogin(realmName string, username str
 		if err != nil {
 			return err
 		}
+		defer response.Body.Close()
 
 		if response.StatusCode != http.StatusOK {
 			body, _ := ioutil.ReadAll(response.Body)
