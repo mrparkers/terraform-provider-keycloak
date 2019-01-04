@@ -49,13 +49,14 @@ resource "keycloak_user" "another_user" {
 }
 
 resource "keycloak_user" "user_with_password" {
-	realm_id         = "${keycloak_realm.test.id}"
-	username         = "user-with-password"
+	realm_id                   = "${keycloak_realm.test.id}"
+	username                   = "user-with-password"
 
-	email            = "user-with-password@fakedomain.com"
-	first_name       = "Testy"
-	last_name        = "Tester"
-	initial_password = "my password"
+	email                      = "user-with-password@fakedomain.com"
+	first_name                 = "Testy"
+	last_name                  = "Tester"
+	initial_password           = "my password"
+	initial_password_temporary = false
 }
 
 
