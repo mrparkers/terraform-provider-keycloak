@@ -141,6 +141,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		DirectAccessGrantsEnabled: directAccessGrantsEnabled,
 		ServiceAccountsEnabled:    serviceAccountsEnabled,
 		ValidRedirectUris:         []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
+		WebOrigins:                []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 	}
 
 	openidClientAfter := &keycloak.OpenidClient{
@@ -155,6 +156,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		DirectAccessGrantsEnabled: !directAccessGrantsEnabled,
 		ServiceAccountsEnabled:    !serviceAccountsEnabled,
 		ValidRedirectUris:         []string{acctest.RandString(10), acctest.RandString(10)},
+		WebOrigins:                []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -170,6 +172,12 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 			},
 			{
 				Config: testKeycloakOpenidClient_fromInterface(openidClientAfter),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
+				),
+			},
+			{
+				Config: testKeycloakOpenidClient_basic(realm, clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 				),
@@ -494,8 +502,9 @@ resource "keycloak_openid_client" "client" {
 	service_accounts_enabled     = %t
 
 	valid_redirect_uris          = %s
+	web_origins                  = %s
 }
-	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.ServiceAccountsEnabled, openidClient.DirectAccessGrantsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris))
+	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.ServiceAccountsEnabled, openidClient.DirectAccessGrantsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins))
 }
 
 func testKeycloakOpenidClient_secret(realm, clientId, clientSecret string) string {

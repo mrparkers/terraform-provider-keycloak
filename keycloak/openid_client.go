@@ -31,6 +31,7 @@ type OpenidClient struct {
 	ServiceAccountsEnabled    bool `json:"serviceAccountsEnabled"`
 
 	ValidRedirectUris []string `json:"redirectUris"`
+	WebOrigins        []string `json:"webOrigins"`
 }
 
 func (keycloakClient *KeycloakClient) ValidateOpenidClient(client *OpenidClient) error {

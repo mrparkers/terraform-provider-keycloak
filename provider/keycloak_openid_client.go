@@ -81,16 +81,29 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Set:      schema.HashString,
 				Optional: true,
 			},
+			"web_origins": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
-	var validRedirectUris []string
+	validRedirectUris := make([]string, 0)
+	webOrigins := make([]string, 0)
 
 	if v, ok := data.GetOk("valid_redirect_uris"); ok {
 		for _, validRedirectUri := range v.(*schema.Set).List() {
 			validRedirectUris = append(validRedirectUris, validRedirectUri.(string))
+		}
+	}
+
+	if v, ok := data.GetOk("web_origins"); ok {
+		for _, webOrigin := range v.(*schema.Set).List() {
+			webOrigins = append(webOrigins, webOrigin.(string))
 		}
 	}
 
@@ -107,6 +120,7 @@ func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
 		DirectAccessGrantsEnabled: data.Get("direct_access_grants_enabled").(bool),
 		ServiceAccountsEnabled:    data.Get("service_accounts_enabled").(bool),
 		ValidRedirectUris:         validRedirectUris,
+		WebOrigins:                webOrigins,
 	}
 
 	// access type
@@ -133,6 +147,7 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 	data.Set("direct_access_grants_enabled", client.DirectAccessGrantsEnabled)
 	data.Set("service_accounts_enabled", client.ServiceAccountsEnabled)
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
+	data.Set("web_origins", client.WebOrigins)
 
 	// access type
 	if client.PublicClient {
