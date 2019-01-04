@@ -40,9 +40,10 @@ func resourceKeycloakUser() *schema.Resource {
 				Optional: true,
 			},
 			"initial_password": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				Sensitive: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Sensitive:        true,
+				DiffSuppressFunc: onlyDiffOnCreate,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
@@ -51,6 +52,10 @@ func resourceKeycloakUser() *schema.Resource {
 			},
 		},
 	}
+}
+
+func onlyDiffOnCreate(k, old, new string, d *schema.ResourceData) bool {
+	return d.Id() != ""
 }
 
 func mapFromDataToUser(data *schema.ResourceData) *keycloak.User {

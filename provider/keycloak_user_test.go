@@ -159,6 +159,34 @@ func TestAccKeycloakUser_updateUsername(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakUser_updateWithInitialPasswordChangeDoesNotReset(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	username := "terraform-user-" + acctest.RandString(10)
+	passwordOne := "terraform-password1-" + acctest.RandString(10)
+	passwordTwo := "terraform-password2-" + acctest.RandString(10)
+	clientId := "terraform-client-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakUser_initialPassword(realmName, username, passwordOne, clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakUserInitialPasswordLogin(realmName, username, passwordOne, clientId),
+				),
+			},
+			{
+				Config: testKeycloakUser_initialPassword(realmName, username, passwordTwo, clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakUserInitialPasswordLogin(realmName, username, passwordOne, clientId),
+				),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakUser_updateInPlace(t *testing.T) {
 	userOne := &keycloak.User{
 		RealmId:   "terraform-" + acctest.RandString(10),
