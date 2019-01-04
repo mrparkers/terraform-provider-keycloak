@@ -40,15 +40,24 @@ func resourceKeycloakUser() *schema.Resource {
 				Optional: true,
 			},
 			"initial_password": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Sensitive:        true,
-				DiffSuppressFunc: onlyDiffOnCreate,
-			},
-			"initial_password_temporary": {
-				Type:             schema.TypeBool,
+				Type:             schema.TypeList,
 				Optional:         true,
 				DiffSuppressFunc: onlyDiffOnCreate,
+				MaxItems:         1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"value": {
+							Type:      schema.TypeString,
+							Required:  true,
+							Sensitive: true,
+						},
+						"temporary": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+					},
+				},
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
@@ -96,11 +105,12 @@ func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	initialPassword, isPasswordSet := data.GetOk("initial_password")
-	if isPasswordSet {
-		isPasswordTemporary, isTemporaryFlagSet := data.GetOk("initial_password_temporary")
-		isTemporary := isTemporaryFlagSet && isPasswordTemporary.(bool)
-		err := keycloakClient.ResetUserPassword(user.RealmId, user.Id, initialPassword.(string), isTemporary)
+	v, isInitialPasswordSet := data.GetOk("initial_password")
+	if isInitialPasswordSet {
+		passwordBlock := v.([]interface{})[0].(map[string]interface{})
+		passwordValue := passwordBlock["value"].(string)
+		isPasswordTemporary := passwordBlock["temporary"].(bool)
+		err := keycloakClient.ResetUserPassword(user.RealmId, user.Id, passwordValue, isPasswordTemporary)
 		if err != nil {
 			return err
 		}

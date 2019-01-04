@@ -391,7 +391,10 @@ resource "keycloak_openid_client" "client" {
 resource "keycloak_user" "user" {
 	realm_id         = "${keycloak_realm.realm.id}"
 	username         = "%s"
-  initial_password = "%s"
+	initial_password {
+		value = "%s"
+		temporary = false
+	}
 }
 	`, realm, clientId, username, password)
 }

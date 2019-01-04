@@ -55,8 +55,10 @@ resource "keycloak_user" "user_with_password" {
 	email                      = "user-with-password@fakedomain.com"
 	first_name                 = "Testy"
 	last_name                  = "Tester"
-	initial_password           = "my password"
-	initial_password_temporary = false
+	initial_password {
+		value = "my password"
+		temporary = false
+  }
 }
 
 
