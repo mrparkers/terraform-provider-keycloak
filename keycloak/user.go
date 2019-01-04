@@ -33,11 +33,11 @@ func (keycloakClient *KeycloakClient) NewUser(user *User) error {
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) ResetUserPassword(realmId, userId string, newPassword string) error {
+func (keycloakClient *KeycloakClient) ResetUserPassword(realmId, userId string, newPassword string, isTemporary bool) error {
 	resetCredentials := &PasswordCredentials{
 		Value:     newPassword,
 		Type:      "password",
-		Temporary: false,
+		Temporary: isTemporary,
 	}
 
 	err := keycloakClient.put(fmt.Sprintf("/realms/%s/users/%s/reset-password", realmId, userId), resetCredentials)

@@ -45,6 +45,11 @@ func resourceKeycloakUser() *schema.Resource {
 				Sensitive:        true,
 				DiffSuppressFunc: onlyDiffOnCreate,
 			},
+			"initial_password_temporary": {
+				Type:             schema.TypeBool,
+				Optional:         true,
+				DiffSuppressFunc: onlyDiffOnCreate,
+			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -93,7 +98,9 @@ func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) err
 
 	initialPassword, isPasswordSet := data.GetOk("initial_password")
 	if isPasswordSet {
-		err := keycloakClient.ResetUserPassword(data.Get("realm_id").(string), user.Id, initialPassword.(string))
+		isPasswordTemporary, isTemporaryFlagSet := data.GetOk("initial_password_temporary")
+		isTemporary := isTemporaryFlagSet && isPasswordTemporary.(bool)
+		err := keycloakClient.ResetUserPassword(user.RealmId, user.Id, initialPassword.(string), isTemporary)
 		if err != nil {
 			return err
 		}
