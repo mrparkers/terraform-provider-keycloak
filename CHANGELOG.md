@@ -2,7 +2,8 @@
 
 IMPROVEMENTS:
 
-* openid_client: add web_origins attribute
+* openid_client: add web_origins attribute ([#81](https://github.com/mrparkers/terraform-provider-keycloak/pull/81))
+* user: add initial_password attribute ([#77](https://github.com/mrparkers/terraform-provider-keycloak/pull/77))
 
 BUG FIXES:
 
