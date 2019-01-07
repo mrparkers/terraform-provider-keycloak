@@ -16,6 +16,12 @@ type User struct {
 	Enabled   bool   `json:"enabled"`
 }
 
+type PasswordCredentials struct {
+	Value     string `json:"value"`
+	Type      string `json:"type"`
+	Temporary bool   `json:"temporary"`
+}
+
 func (keycloakClient *KeycloakClient) NewUser(user *User) error {
 	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users", user.RealmId), user)
 	if err != nil {
@@ -24,6 +30,20 @@ func (keycloakClient *KeycloakClient) NewUser(user *User) error {
 
 	user.Id = getIdFromLocationHeader(location)
 
+	return nil
+}
+
+func (keycloakClient *KeycloakClient) ResetUserPassword(realmId, userId string, newPassword string, isTemporary bool) error {
+	resetCredentials := &PasswordCredentials{
+		Value:     newPassword,
+		Type:      "password",
+		Temporary: isTemporary,
+	}
+
+	err := keycloakClient.put(fmt.Sprintf("/realms/%s/users/%s/reset-password", realmId, userId), resetCredentials)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

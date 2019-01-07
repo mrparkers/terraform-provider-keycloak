@@ -39,6 +39,26 @@ func resourceKeycloakUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"initial_password": {
+				Type:             schema.TypeList,
+				Optional:         true,
+				DiffSuppressFunc: onlyDiffOnCreate,
+				MaxItems:         1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"value": {
+							Type:      schema.TypeString,
+							Required:  true,
+							Sensitive: true,
+						},
+						"temporary": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+					},
+				},
+			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -46,6 +66,10 @@ func resourceKeycloakUser() *schema.Resource {
 			},
 		},
 	}
+}
+
+func onlyDiffOnCreate(k, old, new string, d *schema.ResourceData) bool {
+	return d.Id() != ""
 }
 
 func mapFromDataToUser(data *schema.ResourceData) *keycloak.User {
@@ -79,6 +103,17 @@ func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) err
 	err := keycloakClient.NewUser(user)
 	if err != nil {
 		return err
+	}
+
+	v, isInitialPasswordSet := data.GetOk("initial_password")
+	if isInitialPasswordSet {
+		passwordBlock := v.([]interface{})[0].(map[string]interface{})
+		passwordValue := passwordBlock["value"].(string)
+		isPasswordTemporary := passwordBlock["temporary"].(bool)
+		err := keycloakClient.ResetUserPassword(user.RealmId, user.Id, passwordValue, isPasswordTemporary)
+		if err != nil {
+			return err
+		}
 	}
 
 	mapFromUserToData(data, user)

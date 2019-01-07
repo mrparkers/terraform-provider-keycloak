@@ -48,6 +48,20 @@ resource "keycloak_user" "another_user" {
 	last_name  = "Tester"
 }
 
+resource "keycloak_user" "user_with_password" {
+	realm_id                   = "${keycloak_realm.test.id}"
+	username                   = "user-with-password"
+
+	email                      = "user-with-password@fakedomain.com"
+	first_name                 = "Testy"
+	last_name                  = "Tester"
+	initial_password {
+		value = "my password"
+		temporary = false
+  }
+}
+
+
 resource "keycloak_group_memberships" "foo_members" {
 	realm_id = "${keycloak_realm.test.id}"
 	group_id = "${keycloak_group.foo.id}"
