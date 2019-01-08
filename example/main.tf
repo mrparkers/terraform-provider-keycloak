@@ -49,16 +49,16 @@ resource "keycloak_user" "another_user" {
 }
 
 resource "keycloak_user" "user_with_password" {
-	realm_id                   = "${keycloak_realm.test.id}"
-	username                   = "user-with-password"
+	realm_id   = "${keycloak_realm.test.id}"
+	username   = "user-with-password"
 
-	email                      = "user-with-password@fakedomain.com"
-	first_name                 = "Testy"
-	last_name                  = "Tester"
+	email      = "user-with-password@fakedomain.com"
+	first_name = "Testy"
+	last_name  = "Tester"
 	initial_password {
-		value = "my password"
+		value     = "my password"
 		temporary = false
-  }
+	}
 }
 
 
@@ -250,7 +250,14 @@ resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_clie
 }
 
 resource "keycloak_saml_client" "saml_client" {
-	realm_id  = "${keycloak_realm.test.id}"
-	client_id = "test-saml-client"
-	name      = "test-saml-client"
+	realm_id                = "${keycloak_realm.test.id}"
+	client_id               = "test-saml-client"
+	name                    = "test-saml-client"
+
+	sign_documents          = false
+	sign_assertions         = true
+	include_authn_statement = true
+
+	signing_certificate = "${file("../provider/misc/saml-cert.pem")}"
+	signing_private_key = "${file("../provider/misc/saml-key.pem")}"
 }

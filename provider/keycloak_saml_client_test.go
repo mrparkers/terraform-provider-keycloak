@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -203,6 +204,27 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakSamlClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlClient_signingCertificateAndKey(realmName, clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
+					testAccCheckKeycloakSamlClientHasCertificate("keycloak_saml_client.saml_client"),
+					testAccCheckKeycloakSamlClientHasPrivateKey("keycloak_saml_client.saml_client"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakSamlClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getSamlClientFromState(s, resourceName)
@@ -212,6 +234,52 @@ func testAccCheckKeycloakSamlClientExistsWithCorrectProtocol(resourceName string
 
 		if client.Protocol != "saml" {
 			return fmt.Errorf("expected saml client to have saml protocol, but got %s", client.Protocol)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakSamlClientHasCertificate(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getSamlClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.SigningCertificate == "" {
+			return fmt.Errorf("expected saml client to have a signing certificate")
+		}
+
+		if strings.Contains(client.Attributes.SigningCertificate, "-----BEGIN CERTIFICATE-----") || strings.Contains(client.Attributes.SigningCertificate, "-----END CERTIFICATE-----") {
+			return fmt.Errorf("expected saml client signing certificate to not contain headers")
+		}
+
+		if strings.ContainsAny(client.Attributes.SigningCertificate, "\n\r ") {
+			return fmt.Errorf("expected saml client signing certificate to not contain whitespace")
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakSamlClientHasPrivateKey(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getSamlClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.SigningPrivateKey == "" {
+			return fmt.Errorf("expected saml client to have a signing private key")
+		}
+
+		if strings.Contains(client.Attributes.SigningPrivateKey, "-----BEGIN PRIVATE KEY-----") || strings.Contains(client.Attributes.SigningPrivateKey, "-----END PRIVATE KEY-----") {
+			return fmt.Errorf("expected saml client signing private key to not contain headers")
+		}
+
+		if strings.ContainsAny(client.Attributes.SigningPrivateKey, "\n\r ") {
+			return fmt.Errorf("expected saml client signing private key to not contain whitespace")
 		}
 
 		return nil
@@ -405,4 +473,25 @@ resource "keycloak_saml_client" "saml_client" {
 	signing_private_key        = "%s"
 }
 	`, client.RealmId, client.ClientId, client.Name, client.Description, client.Enabled, *client.Attributes.IncludeAuthnStatement, *client.Attributes.SignDocuments, *client.Attributes.SignAssertions, *client.Attributes.ClientSignatureRequired, *client.Attributes.ForcePostBinding, client.FrontChannelLogout, client.Attributes.NameIdFormat, client.RootUrl, arrayOfStringsForTerraformResource(client.ValidRedirectUris), client.BaseUrl, client.MasterSamlProcessingUrl, client.Attributes.SigningCertificate, client.Attributes.SigningPrivateKey)
+}
+
+func testKeycloakSamlClient_signingCertificateAndKey(realm, clientId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_saml_client" "saml_client" {
+	client_id               = "%s"
+	realm_id                = "${keycloak_realm.realm.id}"
+	name                    = "test-saml-client"
+
+	sign_documents          = false
+	sign_assertions         = true
+	include_authn_statement = true
+
+	signing_certificate     = "${file("misc/saml-cert.pem")}"
+	signing_private_key     = "${file("misc/saml-key.pem")}"
+}
+	`, realm, clientId)
 }

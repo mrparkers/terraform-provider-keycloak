@@ -103,14 +103,40 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					return old == formatSigningCertificate(new)
+				},
 			},
 			"signing_private_key": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					return old == formatSigningPrivateKey(new)
+				},
 			},
 		},
 	}
+}
+
+func formatSigningCertificate(signingCertificate string) string {
+	r := strings.NewReplacer(
+		"-----BEGIN CERTIFICATE-----", "",
+		"-----END CERTIFICATE-----", "",
+		"\n", "",
+	)
+
+	return r.Replace(signingCertificate)
+}
+
+func formatSigningPrivateKey(signingPrivateKey string) string {
+	r := strings.NewReplacer(
+		"-----BEGIN PRIVATE KEY-----", "",
+		"-----END PRIVATE KEY-----", "",
+		"\n", "",
+	)
+
+	return r.Replace(signingPrivateKey)
 }
 
 func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
@@ -123,9 +149,15 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	}
 
 	samlAttributes := &keycloak.SamlClientAttributes{
-		NameIdFormat:       data.Get("name_id_format").(string),
-		SigningCertificate: data.Get("signing_certificate").(string),
-		SigningPrivateKey:  data.Get("signing_private_key").(string),
+		NameIdFormat: data.Get("name_id_format").(string),
+	}
+
+	if signingCertificate, ok := data.GetOk("signing_certificate"); ok {
+		samlAttributes.SigningCertificate = formatSigningCertificate(signingCertificate.(string))
+	}
+
+	if signingPrivateKey, ok := data.GetOk("signing_private_key"); ok {
+		samlAttributes.SigningPrivateKey = formatSigningPrivateKey(signingPrivateKey.(string))
 	}
 
 	if includeAuthnStatement, ok := data.GetOkExists("include_authn_statement"); ok {
