@@ -102,7 +102,6 @@ func resourceKeycloakSamlClient() *schema.Resource {
 			"signing_certificate": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
 					return old == formatSigningCertificate(new)
 				},
@@ -110,7 +109,6 @@ func resourceKeycloakSamlClient() *schema.Resource {
 			"signing_private_key": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
 					return old == formatSigningPrivateKey(new)
 				},
@@ -152,12 +150,14 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		NameIdFormat: data.Get("name_id_format").(string),
 	}
 
-	if signingCertificate, ok := data.GetOk("signing_certificate"); ok {
-		samlAttributes.SigningCertificate = formatSigningCertificate(signingCertificate.(string))
+	if signingCertificate, ok := data.GetOkExists("signing_certificate"); ok {
+		signingCertificateString := formatSigningCertificate(signingCertificate.(string))
+		samlAttributes.SigningCertificate = &signingCertificateString
 	}
 
-	if signingPrivateKey, ok := data.GetOk("signing_private_key"); ok {
-		samlAttributes.SigningPrivateKey = formatSigningPrivateKey(signingPrivateKey.(string))
+	if signingPrivateKey, ok := data.GetOkExists("signing_private_key"); ok {
+		signingPrivateKeyString := formatSigningPrivateKey(signingPrivateKey.(string))
+		samlAttributes.SigningPrivateKey = &signingPrivateKeyString
 	}
 
 	if includeAuthnStatement, ok := data.GetOkExists("include_authn_statement"); ok {
@@ -251,6 +251,14 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 		data.Set("force_post_binding", forcePostBinding)
 	}
 
+	if _, exists := data.GetOkExists("signing_certificate"); client.Attributes.SigningCertificate != nil && exists {
+		data.Set("signing_certificate", *client.Attributes.SigningCertificate)
+	}
+
+	if _, exists := data.GetOkExists("signing_certificate"); client.Attributes.SigningPrivateKey != nil && exists {
+		data.Set("signing_private_key", *client.Attributes.SigningPrivateKey)
+	}
+
 	data.Set("client_id", client.ClientId)
 	data.Set("realm_id", client.RealmId)
 	data.Set("name", client.Name)
@@ -262,8 +270,6 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("base_url", client.BaseUrl)
 	data.Set("master_saml_processing_url", client.MasterSamlProcessingUrl)
 	data.Set("name_id_format", client.Attributes.NameIdFormat)
-	data.Set("signing_certificate", client.Attributes.SigningCertificate)
-	data.Set("signing_private_key", client.Attributes.SigningPrivateKey)
 
 	return nil
 }

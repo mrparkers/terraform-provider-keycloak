@@ -127,6 +127,11 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 	frontChannelLogout := randomBool()
 	clientSignatureRequired := "true"
 
+	signingCertificateBefore := acctest.RandString(20)
+	signingCertificateAfter := acctest.RandString(20)
+	signingPrivateKeyBefore := acctest.RandString(20)
+	signingPrivateKeyAfter := acctest.RandString(20)
+
 	samlClientBefore := &keycloak.SamlClient{
 		RealmId:  realmName,
 		ClientId: clientId,
@@ -153,8 +158,8 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			ClientSignatureRequired: &clientSignatureRequired,
 			ForcePostBinding:        randomBoolAsStringPointer(),
 			NameIdFormat:            randomStringInSlice(keycloakSamlClientNameIdFormats),
-			SigningCertificate:      acctest.RandString(20),
-			SigningPrivateKey:       acctest.RandString(20),
+			SigningCertificate:      &signingCertificateBefore,
+			SigningPrivateKey:       &signingPrivateKeyBefore,
 		},
 	}
 
@@ -182,8 +187,8 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			ClientSignatureRequired: &clientSignatureRequired,
 			ForcePostBinding:        randomBoolAsStringPointer(),
 			NameIdFormat:            randomStringInSlice(keycloakSamlClientNameIdFormats),
-			SigningCertificate:      acctest.RandString(20),
-			SigningPrivateKey:       acctest.RandString(20),
+			SigningCertificate:      &signingCertificateAfter,
+			SigningPrivateKey:       &signingPrivateKeyAfter,
 		},
 	}
 
@@ -221,6 +226,14 @@ func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
 					testAccCheckKeycloakSamlClientHasPrivateKey("keycloak_saml_client.saml_client"),
 				),
 			},
+			{
+				Config: testKeycloakSamlClient_signingCertificateNoKey(realmName, clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
+					testAccCheckKeycloakSamlClientHasCertificate("keycloak_saml_client.saml_client"),
+					resource.TestCheckResourceAttr("keycloak_saml_client.saml_client", "signing_private_key", ""),
+				),
+			},
 		},
 	})
 }
@@ -247,15 +260,15 @@ func testAccCheckKeycloakSamlClientHasCertificate(resourceName string) resource.
 			return err
 		}
 
-		if client.Attributes.SigningCertificate == "" {
+		if *client.Attributes.SigningCertificate == "" {
 			return fmt.Errorf("expected saml client to have a signing certificate")
 		}
 
-		if strings.Contains(client.Attributes.SigningCertificate, "-----BEGIN CERTIFICATE-----") || strings.Contains(client.Attributes.SigningCertificate, "-----END CERTIFICATE-----") {
+		if strings.Contains(*client.Attributes.SigningCertificate, "-----BEGIN CERTIFICATE-----") || strings.Contains(*client.Attributes.SigningCertificate, "-----END CERTIFICATE-----") {
 			return fmt.Errorf("expected saml client signing certificate to not contain headers")
 		}
 
-		if strings.ContainsAny(client.Attributes.SigningCertificate, "\n\r ") {
+		if strings.ContainsAny(*client.Attributes.SigningCertificate, "\n\r ") {
 			return fmt.Errorf("expected saml client signing certificate to not contain whitespace")
 		}
 
@@ -270,15 +283,15 @@ func testAccCheckKeycloakSamlClientHasPrivateKey(resourceName string) resource.T
 			return err
 		}
 
-		if client.Attributes.SigningPrivateKey == "" {
+		if *client.Attributes.SigningPrivateKey == "" {
 			return fmt.Errorf("expected saml client to have a signing private key")
 		}
 
-		if strings.Contains(client.Attributes.SigningPrivateKey, "-----BEGIN PRIVATE KEY-----") || strings.Contains(client.Attributes.SigningPrivateKey, "-----END PRIVATE KEY-----") {
+		if strings.Contains(*client.Attributes.SigningPrivateKey, "-----BEGIN PRIVATE KEY-----") || strings.Contains(*client.Attributes.SigningPrivateKey, "-----END PRIVATE KEY-----") {
 			return fmt.Errorf("expected saml client signing private key to not contain headers")
 		}
 
-		if strings.ContainsAny(client.Attributes.SigningPrivateKey, "\n\r ") {
+		if strings.ContainsAny(*client.Attributes.SigningPrivateKey, "\n\r ") {
 			return fmt.Errorf("expected saml client signing private key to not contain whitespace")
 		}
 
@@ -472,7 +485,7 @@ resource "keycloak_saml_client" "saml_client" {
 	signing_certificate        = "%s"
 	signing_private_key        = "%s"
 }
-	`, client.RealmId, client.ClientId, client.Name, client.Description, client.Enabled, *client.Attributes.IncludeAuthnStatement, *client.Attributes.SignDocuments, *client.Attributes.SignAssertions, *client.Attributes.ClientSignatureRequired, *client.Attributes.ForcePostBinding, client.FrontChannelLogout, client.Attributes.NameIdFormat, client.RootUrl, arrayOfStringsForTerraformResource(client.ValidRedirectUris), client.BaseUrl, client.MasterSamlProcessingUrl, client.Attributes.SigningCertificate, client.Attributes.SigningPrivateKey)
+	`, client.RealmId, client.ClientId, client.Name, client.Description, client.Enabled, *client.Attributes.IncludeAuthnStatement, *client.Attributes.SignDocuments, *client.Attributes.SignAssertions, *client.Attributes.ClientSignatureRequired, *client.Attributes.ForcePostBinding, client.FrontChannelLogout, client.Attributes.NameIdFormat, client.RootUrl, arrayOfStringsForTerraformResource(client.ValidRedirectUris), client.BaseUrl, client.MasterSamlProcessingUrl, *client.Attributes.SigningCertificate, *client.Attributes.SigningPrivateKey)
 }
 
 func testKeycloakSamlClient_signingCertificateAndKey(realm, clientId string) string {
@@ -492,6 +505,26 @@ resource "keycloak_saml_client" "saml_client" {
 
 	signing_certificate     = "${file("misc/saml-cert.pem")}"
 	signing_private_key     = "${file("misc/saml-key.pem")}"
+}
+	`, realm, clientId)
+}
+
+func testKeycloakSamlClient_signingCertificateNoKey(realm, clientId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_saml_client" "saml_client" {
+	client_id               = "%s"
+	realm_id                = "${keycloak_realm.realm.id}"
+	name                    = "test-saml-client"
+
+	sign_documents          = false
+	sign_assertions         = true
+	include_authn_statement = true
+
+	signing_certificate     = "${file("misc/saml-cert.pem")}"
 }
 	`, realm, clientId)
 }
