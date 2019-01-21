@@ -15,7 +15,7 @@ services:
   openldap:
     image: osixia/openldap:1.2.2
     ports:
-    - 8389:8389
+    - 8389:389
   keycloak:
     image: jboss/keycloak:4.2.1.Final
     depends_on:
