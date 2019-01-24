@@ -250,6 +250,25 @@ func TestAccKeycloakGroupMemberships_noImportNeeded(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakGroupMemberships_validateLowercaseUsernames(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	groupName := "terraform-group-" + acctest.RandString(10)
+	randomString := acctest.RandString(10)
+	username := "terraform-user-" + randomString
+	usernameWithUppercaseCharacters := "terraform-user-" + strings.ToUpper(randomString)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakGroupMemberships_hardcodedUsername(realmName, groupName, username, usernameWithUppercaseCharacters),
+				ExpectError: regexp.MustCompile("expected all usernames within group membership to be lowercase"),
+			},
+		},
+	})
+}
+
 func testAccGetUsersInGroupFromGroupMembershipsState(resourceName string, s *terraform.State) ([]*keycloak.User, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -455,4 +474,31 @@ resource "keycloak_user" "user" {
 	username = "%s"
 }
 	`, realm, group, username)
+}
+
+func testKeycloakGroupMemberships_hardcodedUsername(realm, group, username, hardcodedUsername string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_group" "group" {
+	name     = "%s"
+	realm_id = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_user" "user" {
+	realm_id = "${keycloak_realm.realm.id}"
+	username = "%s"
+}
+
+resource "keycloak_group_memberships" "group_members" {
+	realm_id = "${keycloak_realm.realm.id}"
+	group_id = "${keycloak_group.group.id}"
+
+	members = [
+		"%s"
+	]
+}
+	`, realm, group, username, hardcodedUsername)
 }

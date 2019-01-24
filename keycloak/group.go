@@ -56,6 +56,16 @@ func (keycloakClient *KeycloakClient) groupParentId(group *Group) (string, error
 	return "", fmt.Errorf("unable to determine parent ID for group with path %s", group.Path)
 }
 
+func (keycloakClient *KeycloakClient) ValidateGroupMembers(usernames []interface{}) error {
+	for _, username := range usernames {
+		if username.(string) != strings.ToLower(username.(string)) {
+			return fmt.Errorf("expected all usernames within group membership to be lowercase")
+		}
+	}
+
+	return nil
+}
+
 /*
  * Top level groups are created via POST /realms/${realm_id}/groups
  * Child groups are created via POST /realms/${realm_id}/groups/${parent_id}/children
