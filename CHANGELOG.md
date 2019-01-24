@@ -1,3 +1,13 @@
+## 1.2.0 (January 24, 2019)
+
+FEATURES:
+
+* new resource: keycloak_saml_client ([#82](https://github.com/mrparkers/terraform-provider-keycloak/pull/82))
+
+IMPROVEMENTS:
+
+* add validation for usernames to ensure they are always lowercase ([#83](https://github.com/mrparkers/terraform-provider-keycloak/pull/83))
+
 ## 1.1.0 (January 7, 2019)
 
 IMPROVEMENTS:
