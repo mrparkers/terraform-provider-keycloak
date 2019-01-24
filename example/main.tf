@@ -49,16 +49,16 @@ resource "keycloak_user" "another_user" {
 }
 
 resource "keycloak_user" "user_with_password" {
-	realm_id                   = "${keycloak_realm.test.id}"
-	username                   = "user-with-password"
+	realm_id   = "${keycloak_realm.test.id}"
+	username   = "user-with-password"
 
-	email                      = "user-with-password@fakedomain.com"
-	first_name                 = "Testy"
-	last_name                  = "Tester"
+	email      = "user-with-password@fakedomain.com"
+	first_name = "Testy"
+	last_name  = "Tester"
 	initial_password {
-		value = "my password"
+		value     = "my password"
 		temporary = false
-  }
+	}
 }
 
 
@@ -73,15 +73,19 @@ resource "keycloak_group_memberships" "foo_members" {
 }
 
 resource "keycloak_openid_client" "test_client" {
-	client_id           = "test-client"
-	name                = "test-client"
-	realm_id            = "${keycloak_realm.test.id}"
-	description         = "a test client"
+	client_id             = "test-openid-client"
+	name                  = "test-openid-client"
+	realm_id              = "${keycloak_realm.test.id}"
+	description           = "a test openid client"
 
-	access_type         = "CONFIDENTIAL"
-	valid_redirect_uris = [
-		"http://localhost:8080/callback"
+	standard_flow_enabled = true
+
+	access_type           = "CONFIDENTIAL"
+	valid_redirect_uris   = [
+		"http://localhost:5555/callback"
 	]
+
+	client_secret = "secret"
 }
 
 resource "keycloak_openid_client_scope" "test_client_scope" {
@@ -93,8 +97,8 @@ resource "keycloak_openid_client_scope" "test_client_scope" {
 }
 
 resource "keycloak_openid_client_default_scopes" "default_client_scopes" {
-	realm_id  = "${keycloak_realm.test.id}"
-	client_id = "${keycloak_openid_client.test_client.id}"
+	realm_id       = "${keycloak_realm.test.id}"
+	client_id      = "${keycloak_openid_client.test_client.id}"
 
 	default_scopes = [
 		"profile",
@@ -105,9 +109,10 @@ resource "keycloak_openid_client_default_scopes" "default_client_scopes" {
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "master"
+	realm_id                = "${keycloak_realm.test.id}"
 
 	enabled                 = true
+	import_enabled          = false
 
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -123,15 +128,19 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 	connection_timeout      = "5s"
 	read_timeout            = "10s"
+
+	cache_policy            = "NO_CACHE"
 }
 
-resource "keycloak_ldap_user_attribute_mapper" "attr_mapper" {
-	name                    = "test mapper"
+resource "keycloak_ldap_user_attribute_mapper" "description_attr_mapper" {
+	name                    = "description-mapper"
 	realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
 	ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
 
-	user_model_attribute    = "foo"
-	ldap_attribute          = "bar"
+	user_model_attribute    = "description"
+	ldap_attribute          = "description"
+
+	always_read_value_from_ldap = false
 }
 
 resource "keycloak_ldap_group_mapper" "group_mapper" {
@@ -177,8 +186,8 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_c
 	name           = "tf-test-open-id-user-attribute-protocol-mapper-client"
 	realm_id       = "${keycloak_realm.test.id}"
 	client_id      = "${keycloak_openid_client.test_client.id}"
-	user_attribute = "foo"
-	claim_name     = "bar"
+	user_attribute = "description"
+	claim_name     = "description"
 }
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_client_scope" {
@@ -247,4 +256,17 @@ resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_clie
 
 	claim_name      = "foo"
 	claim_value     = "bar"
+}
+
+resource "keycloak_saml_client" "saml_client" {
+	realm_id                = "${keycloak_realm.test.id}"
+	client_id               = "test-saml-client"
+	name                    = "test-saml-client"
+
+	sign_documents          = false
+	sign_assertions         = true
+	include_authn_statement = true
+
+	signing_certificate = "${file("../provider/misc/saml-cert.pem")}"
+	signing_private_key = "${file("../provider/misc/saml-key.pem")}"
 }
