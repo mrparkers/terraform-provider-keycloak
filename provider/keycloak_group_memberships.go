@@ -38,8 +38,14 @@ func resourceKeycloakGroupMembershipsCreate(data *schema.ResourceData, meta inte
 
 	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
+	members := data.Get("members").(*schema.Set).List()
 
-	err := keycloakClient.AddUsersToGroup(realmId, groupId, data.Get("members").(*schema.Set).List())
+	err := keycloakClient.ValidateGroupMembers(members)
+	if err != nil {
+		return err
+	}
+
+	err = keycloakClient.AddUsersToGroup(realmId, groupId, members)
 	if err != nil {
 		return err
 	}
@@ -76,8 +82,13 @@ func resourceKeycloakGroupMembershipsUpdate(data *schema.ResourceData, meta inte
 
 	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
-
 	tfMembers := data.Get("members").(*schema.Set)
+
+	err := keycloakClient.ValidateGroupMembers(tfMembers.List())
+	if err != nil {
+		return err
+	}
+
 	keycloakMembers, err := keycloakClient.GetGroupMembers(realmId, groupId)
 	if err != nil {
 		return err

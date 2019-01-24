@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -254,6 +255,23 @@ func TestAccKeycloakUser_unsetOptionalAttributes(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "first_name", ""),
 					resource.TestCheckResourceAttr(resourceName, "last_name", ""),
 				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakUser_validateLowercaseUsernames(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	username := "terraform-user-" + strings.ToUpper(acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakUser_basic(realmName, username),
+				ExpectError: regexp.MustCompile("expected username .+ to be all lowercase"),
 			},
 		},
 	})

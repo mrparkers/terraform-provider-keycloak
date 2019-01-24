@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -26,6 +27,15 @@ func resourceKeycloakUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: func(i interface{}, k string) ([]string, []error) {
+					username := i.(string)
+
+					if strings.ToLower(username) != username {
+						return nil, []error{fmt.Errorf("expected username %s to be all lowercase", username)}
+					}
+
+					return nil, nil
+				},
 			},
 			"email": {
 				Type:     schema.TypeString,
@@ -68,7 +78,7 @@ func resourceKeycloakUser() *schema.Resource {
 	}
 }
 
-func onlyDiffOnCreate(k, old, new string, d *schema.ResourceData) bool {
+func onlyDiffOnCreate(_, _, _ string, d *schema.ResourceData) bool {
 	return d.Id() != ""
 }
 
