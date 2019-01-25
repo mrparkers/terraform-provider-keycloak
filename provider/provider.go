@@ -27,6 +27,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_hardcoded_claim_protocol_mapper":  resourceKeycloakOpenIdHardcodedClaimProtocolMapper(),
 			"keycloak_openid_client_default_scopes":            resourceKeycloakOpenidClientDefaultScopes(),
 			"keycloak_saml_client":                             resourceKeycloakSamlClient(),
+			"keycloak_saml_user_attribute_protocol_mapper":     resourceKeycloakSamlUserAttributeProtocolMapper(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {

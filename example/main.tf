@@ -85,7 +85,7 @@ resource "keycloak_openid_client" "test_client" {
 		"http://localhost:5555/callback"
 	]
 
-	client_secret = "secret"
+	client_secret         = "secret"
 }
 
 resource "keycloak_openid_client_scope" "test_client_scope" {
@@ -133,12 +133,12 @@ resource "keycloak_ldap_user_federation" "openldap" {
 }
 
 resource "keycloak_ldap_user_attribute_mapper" "description_attr_mapper" {
-	name                    = "description-mapper"
-	realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
-	ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
+	name                        = "description-mapper"
+	realm_id                    = "${keycloak_ldap_user_federation.openldap.realm_id}"
+	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
-	user_model_attribute    = "description"
-	ldap_attribute          = "description"
+	user_model_attribute        = "description"
+	ldap_attribute              = "description"
 
 	always_read_value_from_ldap = false
 }
@@ -267,6 +267,17 @@ resource "keycloak_saml_client" "saml_client" {
 	sign_assertions         = true
 	include_authn_statement = true
 
-	signing_certificate = "${file("../provider/misc/saml-cert.pem")}"
-	signing_private_key = "${file("../provider/misc/saml-key.pem")}"
+	signing_certificate     = "${file("../provider/misc/saml-cert.pem")}"
+	signing_private_key     = "${file("../provider/misc/saml-key.pem")}"
+}
+
+resource "keycloak_saml_user_attribute_protocol_mapper" "saml_user_attribute_mapper" {
+	realm_id                   = "${keycloak_realm.test.id}"
+	client_id                  = "${keycloak_saml_client.saml_client.id}"
+	name                       = "test-saml-user-attribute-mapper"
+
+	user_attribute             = "user-attribute"
+	friendly_name              = "friendly-name"
+	saml_attribute_name        = "saml-attribute-name"
+	saml_attribute_name_format = "Unspecified"
 }

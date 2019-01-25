@@ -62,7 +62,7 @@ func TestAccKeycloakOpenIdUserAttributeProtocolMapper_import(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		CheckDestroy: testAccKeycloakOpenIdUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdUserAttributeProtocolMapper_import(realmName, clientId, clientScopeId, mapperName),
