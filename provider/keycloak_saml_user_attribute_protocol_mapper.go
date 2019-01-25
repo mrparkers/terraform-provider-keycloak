@@ -32,9 +32,16 @@ func resourceKeycloakSamlUserAttributeProtocolMapper() *schema.Resource {
 				ForceNew: true,
 			},
 			"client_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"client_scope_id"},
+			},
+			"client_scope_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"client_id"},
 			},
 			"user_attribute": {
 				Type:     schema.TypeString,
@@ -59,10 +66,11 @@ func resourceKeycloakSamlUserAttributeProtocolMapper() *schema.Resource {
 
 func mapFromDataToSamlUserAttributeProtocolMapper(data *schema.ResourceData) *keycloak.SamlUserAttributeProtocolMapper {
 	return &keycloak.SamlUserAttributeProtocolMapper{
-		Id:       data.Id(),
-		Name:     data.Get("name").(string),
-		RealmId:  data.Get("realm_id").(string),
-		ClientId: data.Get("client_id").(string),
+		Id:            data.Id(),
+		Name:          data.Get("name").(string),
+		RealmId:       data.Get("realm_id").(string),
+		ClientId:      data.Get("client_id").(string),
+		ClientScopeId: data.Get("client_scope_id").(string),
 
 		UserAttribute:           data.Get("user_attribute").(string),
 		FriendlyName:            data.Get("friendly_name").(string),
@@ -75,7 +83,12 @@ func mapFromSamlUserAttributeMapperToData(mapper *keycloak.SamlUserAttributeProt
 	data.SetId(mapper.Id)
 	data.Set("name", mapper.Name)
 	data.Set("realm_id", mapper.RealmId)
-	data.Set("client_id", mapper.ClientId)
+
+	if mapper.ClientId != "" {
+		data.Set("client_id", mapper.ClientId)
+	} else {
+		data.Set("client_scope_id", mapper.ClientScopeId)
+	}
 
 	data.Set("user_attribute", mapper.UserAttribute)
 	data.Set("friendly_name", mapper.FriendlyName)
@@ -108,8 +121,9 @@ func resourceKeycloakSamlUserAttributeProtocolMapperRead(data *schema.ResourceDa
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
+	clientScopeId := data.Get("client_scope_id").(string)
 
-	samlUserAttributeMapper, err := keycloakClient.GetSamlUserAttributeProtocolMapper(realmId, clientId, data.Id())
+	samlUserAttributeMapper, err := keycloakClient.GetSamlUserAttributeProtocolMapper(realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -142,6 +156,7 @@ func resourceKeycloakSamlUserAttributeProtocolMapperDelete(data *schema.Resource
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
+	clientScopeId := data.Get("client_scope_id").(string)
 
-	return keycloakClient.DeleteSamlUserAttributeProtocolMapper(realmId, clientId, data.Id())
+	return keycloakClient.DeleteSamlUserAttributeProtocolMapper(realmId, clientId, clientScopeId, data.Id())
 }
