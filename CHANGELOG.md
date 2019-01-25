@@ -1,3 +1,9 @@
+## 1.3.0 (January 25, 2019)
+
+FEATURES:
+
+* new resource: keycloak_saml_user_attribute_protocol_mapper ([#84](https://github.com/mrparkers/terraform-provider-keycloak/pull/84))
+
 ## 1.2.0 (January 24, 2019)
 
 FEATURES:
