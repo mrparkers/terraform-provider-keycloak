@@ -1,11 +1,9 @@
 package provider
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 var keycloakSamlUserAttributeProtocolMapperNameFormats = []string{"Basic", "URI Reference", "Unspecified"}
@@ -21,7 +19,7 @@ func resourceKeycloakSamlUserAttributeProtocolMapper() *schema.Resource {
 			// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 			// or a client scope:
 			// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
-			State: resourceKeycloakSamlUserAttributeProtocolMapperImport,
+			State: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -146,28 +144,4 @@ func resourceKeycloakSamlUserAttributeProtocolMapperDelete(data *schema.Resource
 	clientId := data.Get("client_id").(string)
 
 	return keycloakClient.DeleteSamlUserAttributeProtocolMapper(realmId, clientId, data.Id())
-}
-
-func resourceKeycloakSamlUserAttributeProtocolMapperImport(data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(data.Id(), "/")
-
-	if len(parts) != 4 {
-		return nil, fmt.Errorf("invalid import. supported import format: {{realmId}}/client/{{clientId}}/{{protocolMapperId}}")
-	}
-
-	realmId := parts[0]
-	parentResourceType := parts[1]
-	parentResourceId := parts[2]
-	mapperId := parts[3]
-
-	data.Set("realm_id", realmId)
-	data.SetId(mapperId)
-
-	if parentResourceType == "client" {
-		data.Set("client_id", parentResourceId)
-	} else {
-		return nil, fmt.Errorf("the associated parent resource must be a client")
-	}
-
-	return []*schema.ResourceData{data}, nil
 }
