@@ -18,6 +18,7 @@ nav:
   - keycloak_openid_full_name_protocol_mapper:  resources/keycloak_openid_full_name_protocol_mapper.md
   - keycloak_saml_client: resources/keycloak_saml_client.md
   - keycloak_saml_user_attribute_protocol_mapper: resources/keycloak_saml_user_attribute_protocol_mapper.md
+  - keycloak_saml_user_property_protocol_mapper: resources/keycloak_saml_user_property_protocol_mapper.md
   - keycloak_ldap_user_federation:  resources/keycloak_ldap_user_federation.md
   - keycloak_ldap_full_name_mapper:  resources/keycloak_ldap_full_name_mapper.md
   - keycloak_ldap_group_mapper:  resources/keycloak_ldap_group_mapper.md
