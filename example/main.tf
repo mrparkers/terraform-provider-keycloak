@@ -281,3 +281,13 @@ resource "keycloak_saml_user_attribute_protocol_mapper" "saml_user_attribute_map
 	saml_attribute_name        = "saml-attribute-name"
 	saml_attribute_name_format = "Unspecified"
 }
+
+resource "keycloak_saml_user_property_protocol_mapper" "saml_user_property_mapper" {
+	realm_id                   = "${keycloak_realm.test.id}"
+	client_id                  = "${keycloak_saml_client.saml_client.id}"
+	name                       = "test-saml-user-property-mapper"
+
+	user_property              = "email"
+	saml_attribute_name        = "email"
+	saml_attribute_name_format = "Unspecified"
+}
