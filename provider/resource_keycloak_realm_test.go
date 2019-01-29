@@ -150,6 +150,30 @@ func TestAccKeycloakRealm_themesValidation(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_InternationalizationValidation(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakRealm_internationalizationValidationWithoutSupportedLocales(realm, "en"),
+				ExpectError: regexp.MustCompile("validation error: SupportLocales should be set if InternationalizationEnabled is true"),
+			},
+			{
+				Config:      testKeycloakRealm_internationalizationValidation(realm, "en", ""),
+				ExpectError: regexp.MustCompile("validation error: DefaultLocale should be set if InternationalizationEnabled is true"),
+			},
+			{
+				Config:      testKeycloakRealm_internationalizationValidation(realm, "en", "de"),
+				ExpectError: regexp.MustCompile("validation error: DefaultLocale should be in the SupportLocales"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_loginConfigBasic(t *testing.T) {
 	realm := &keycloak.Realm{
 		Realm:                       "terraform-" + acctest.RandString(10),
@@ -454,6 +478,35 @@ resource "keycloak_realm" "realm" {
 	%s_theme     = "%s"
 }
 	`, realm, realm, theme, value)
+}
+
+func testKeycloakRealm_internationalizationValidation(realm, supportedLocale, defaultLocale string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+
+	internationalization_enabled 	= true
+	supported_locales 				= ["%s"]
+	default_locale					= "%s"
+
+}
+	`, realm, realm, supportedLocale, defaultLocale)
+}
+
+func testKeycloakRealm_internationalizationValidationWithoutSupportedLocales(realm, defaultLocale string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+
+	internationalization_enabled 	= true
+	default_locale					= "%s"
+
+}
+	`, realm, realm, defaultLocale)
 }
 
 func testKeycloakRealm_notEnabled(realm, realmDisplayName string) string {

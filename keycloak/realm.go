@@ -40,6 +40,11 @@ type Realm struct {
 	AccessCodeLifespanUserAction        int  `json:"accessCodeLifespanUserAction,omitempty"`
 	ActionTokenGeneratedByUserLifespan  int  `json:"actionTokenGeneratedByUserLifespan,omitempty"`
 	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
+
+	//internationalization
+	InternationalizationEnabled bool     `json:"internationalizationEnabled,omitempty"`
+	SupportLocales              []string `json:"supportedLocales,omitempty"`
+	DefaultLocale               string   `json:"defaultLocale,emitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
@@ -108,5 +113,34 @@ func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
 		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.EmailTheme)
 	}
 
+	if realm.InternationalizationEnabled == false && len(realm.SupportLocales) > 0 {
+		return fmt.Errorf("validation error: SupportLocales cannot be set if InternationalizationEnabled is false")
+	}
+
+	if realm.InternationalizationEnabled == false && len(realm.DefaultLocale) > 0 {
+		return fmt.Errorf("validation error: DefaultLocale cannot be set if InternationalizationEnabled is false")
+	}
+
+	if realm.InternationalizationEnabled == true && len(realm.SupportLocales) <= 0 {
+		return fmt.Errorf("validation error: SupportLocales should be set if InternationalizationEnabled is true")
+	}
+
+	if realm.InternationalizationEnabled == true && len(realm.DefaultLocale) <= 0 {
+		return fmt.Errorf("validation error: DefaultLocale should be set if InternationalizationEnabled is true")
+	}
+
+	if realm.InternationalizationEnabled == true && !contains(realm.SupportLocales, realm.DefaultLocale) {
+		return fmt.Errorf("validation error: DefaultLocale should be in the SupportLocales")
+	}
+
 	return nil
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
