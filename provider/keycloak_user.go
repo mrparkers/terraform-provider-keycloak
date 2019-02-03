@@ -20,7 +20,7 @@ func resourceKeycloakUser() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"username": {
@@ -82,10 +82,11 @@ func onlyDiffOnCreate(_, _, _ string, d *schema.ResourceData) bool {
 	return d.Id() != ""
 }
 
-func mapFromDataToUser(data *schema.ResourceData) *keycloak.User {
+func mapFromDataToUser(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.User {
+	realmId := realmId(data, client)
 	return &keycloak.User{
 		Id:        data.Id(),
-		RealmId:   data.Get("realm_id").(string),
+		RealmId:   realmId,
 		Username:  data.Get("username").(string),
 		Email:     data.Get("email").(string),
 		FirstName: data.Get("first_name").(string),
@@ -108,7 +109,7 @@ func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
 func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	user := mapFromDataToUser(data)
+	user := mapFromDataToUser(data, keycloakClient)
 
 	err := keycloakClient.NewUser(user)
 	if err != nil {
@@ -150,7 +151,7 @@ func resourceKeycloakUserRead(data *schema.ResourceData, meta interface{}) error
 func resourceKeycloakUserUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	user := mapFromDataToUser(data)
+	user := mapFromDataToUser(data, keycloakClient)
 
 	err := keycloakClient.UpdateUser(user)
 	if err != nil {
@@ -171,13 +172,22 @@ func resourceKeycloakUserDelete(data *schema.ResourceData, meta interface{}) err
 	return keycloakClient.DeleteUser(realmId, id)
 }
 
-func resourceKeycloakUserImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakUserImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+	var realmId, id string
+	switch len(parts) {
+	case 1:
+		realmId = keycloakClient.GetDefaultRealm()
+		id = parts[0]
+	case 2:
+		realmId = parts[0]
+		id = parts[1]
+	default:
+		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+	}
 
-	realm := parts[0]
-	id := parts[1]
-
-	d.Set("realm_id", realm)
+	d.Set("realm_id", realmId)
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil

@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -24,7 +25,7 @@ func resourceKeycloakLdapFullNameMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm in which the ldap user federation provider exists.",
 			},
@@ -52,11 +53,12 @@ func resourceKeycloakLdapFullNameMapper() *schema.Resource {
 	}
 }
 
-func getLdapFullNameMapperFromData(data *schema.ResourceData) *keycloak.LdapFullNameMapper {
+func getLdapFullNameMapperFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapFullNameMapper {
+	realmId := realmId(data, client)
 	return &keycloak.LdapFullNameMapper{
 		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
-		RealmId:              data.Get("realm_id").(string),
+		RealmId:              realmId,
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
 
 		LdapFullNameAttribute: data.Get("ldap_full_name_attribute").(string),
@@ -81,7 +83,7 @@ func setLdapFullNameMapperData(data *schema.ResourceData, ldapFullNameMapper *ke
 func resourceKeycloakLdapFullNameMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
+	ldapFullNameMapper := getLdapFullNameMapperFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateLdapFullNameMapper(ldapFullNameMapper)
 	if err != nil {
@@ -117,7 +119,7 @@ func resourceKeycloakLdapFullNameMapperRead(data *schema.ResourceData, meta inte
 func resourceKeycloakLdapFullNameMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
+	ldapFullNameMapper := getLdapFullNameMapperFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateLdapFullNameMapper(ldapFullNameMapper)
 	if err != nil {
@@ -143,14 +145,25 @@ func resourceKeycloakLdapFullNameMapperDelete(data *schema.ResourceData, meta in
 	return keycloakClient.DeleteLdapFullNameMapper(realmId, id)
 }
 
-func resourceKeycloakLdapGenericMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakLdapGenericMapperImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm := parts[0]
-	ldapUserFederationId := parts[1]
-	id := parts[2]
+	var realmId, id, ldapUserFederationId string
+	switch len(parts) {
+	case 2:
+		realmId = keycloakClient.GetDefaultRealm()
+		ldapUserFederationId = parts[0]
+		id = parts[1]
+	case 3:
+		realmId = parts[0]
+		ldapUserFederationId = parts[1]
+		id = parts[2]
+	default:
+		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+	}
 
-	d.Set("realm_id", realm)
+	d.Set("realm_id", realmId)
 	d.Set("ldap_user_federation_id", ldapUserFederationId)
 	d.SetId(id)
 

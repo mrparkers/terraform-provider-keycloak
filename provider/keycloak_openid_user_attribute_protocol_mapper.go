@@ -27,7 +27,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm id where the associated client or client scope exists.",
 			},
@@ -88,11 +88,12 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapper() *schema.Resource {
 	}
 }
 
-func mapFromDataToOpenIdUserAttributeProtocolMapper(data *schema.ResourceData) *keycloak.OpenIdUserAttributeProtocolMapper {
+func mapFromDataToOpenIdUserAttributeProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenIdUserAttributeProtocolMapper {
+	realmId := realmId(data, client)
 	return &keycloak.OpenIdUserAttributeProtocolMapper{
 		Id:               data.Id(),
 		Name:             data.Get("name").(string),
-		RealmId:          data.Get("realm_id").(string),
+		RealmId:          realmId,
 		ClientId:         data.Get("client_id").(string),
 		ClientScopeId:    data.Get("client_scope_id").(string),
 		AddToIdToken:     data.Get("add_to_id_token").(bool),
@@ -129,7 +130,7 @@ func mapFromOpenIdUserAttributeMapperToData(mapper *keycloak.OpenIdUserAttribute
 func resourceKeycloakOpenIdUserAttributeProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdUserAttributeMapper := mapFromDataToOpenIdUserAttributeProtocolMapper(data)
+	openIdUserAttributeMapper := mapFromDataToOpenIdUserAttributeProtocolMapper(data, keycloakClient)
 
 	err := keycloakClient.ValidateOpenIdUserAttributeProtocolMapper(openIdUserAttributeMapper)
 	if err != nil {
@@ -166,7 +167,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperRead(data *schema.Resource
 func resourceKeycloakOpenIdUserAttributeProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdUserAttributeMapper := mapFromDataToOpenIdUserAttributeProtocolMapper(data)
+	openIdUserAttributeMapper := mapFromDataToOpenIdUserAttributeProtocolMapper(data, keycloakClient)
 
 	err := keycloakClient.ValidateOpenIdUserAttributeProtocolMapper(openIdUserAttributeMapper)
 	if err != nil {

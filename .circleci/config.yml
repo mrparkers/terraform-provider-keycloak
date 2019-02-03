@@ -9,6 +9,7 @@ jobs:
         KEYCLOAK_LOGLEVEL: DEBUG
         KEYCLOAK_USER: keycloak
         KEYCLOAK_PASSWORD: password
+        KEYCLOAK_REALM: master
     working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
     environment:
       GO111MODULE: "on"

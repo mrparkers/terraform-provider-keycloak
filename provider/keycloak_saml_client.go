@@ -29,7 +29,7 @@ func resourceKeycloakSamlClient() *schema.Resource {
 			},
 			"realm_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"name": {
@@ -137,7 +137,8 @@ func formatSigningPrivateKey(signingPrivateKey string) string {
 	return r.Replace(signingPrivateKey)
 }
 
-func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
+func mapToSamlClientFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.SamlClient {
+	realmId := realmId(data, client)
 	var validRedirectUris []string
 
 	if v, ok := data.GetOk("valid_redirect_uris"); ok {
@@ -188,7 +189,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	samlClient := &keycloak.SamlClient{
 		Id:                      data.Id(),
 		ClientId:                data.Get("client_id").(string),
-		RealmId:                 data.Get("realm_id").(string),
+		RealmId:                 realmId,
 		Name:                    data.Get("name").(string),
 		Enabled:                 data.Get("enabled").(bool),
 		Description:             data.Get("description").(string),
@@ -277,7 +278,7 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 func resourceKeycloakSamlClientCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client := mapToSamlClientFromData(data)
+	client := mapToSamlClientFromData(data, keycloakClient)
 
 	err := keycloakClient.NewSamlClient(client)
 	if err != nil {
@@ -311,7 +312,7 @@ func resourceKeycloakSamlClientRead(data *schema.ResourceData, meta interface{})
 func resourceKeycloakSamlClientUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client := mapToSamlClientFromData(data)
+	client := mapToSamlClientFromData(data, keycloakClient)
 
 	err := keycloakClient.UpdateSamlClient(client)
 	if err != nil {
@@ -335,13 +336,23 @@ func resourceKeycloakSamlClientDelete(data *schema.ResourceData, meta interface{
 	return keycloakClient.DeleteSamlClient(realmId, id)
 }
 
-func resourceKeycloakSamlClientImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakSamlClientImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm := parts[0]
-	id := parts[1]
+	var realmId, id string
+	switch len(parts) {
+	case 1:
+		realmId = keycloakClient.GetDefaultRealm()
+		id = parts[0]
+	case 2:
+		realmId = parts[0]
+		id = parts[1]
+	default:
+		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+	}
 
-	d.Set("realm_id", realm)
+	d.Set("realm_id", realmId)
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil

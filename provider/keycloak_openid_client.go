@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -28,7 +29,7 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 			},
 			"realm_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"name": {
@@ -91,7 +92,7 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 	}
 }
 
-func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
+func getOpenidClientFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenidClient {
 	validRedirectUris := make([]string, 0)
 	webOrigins := make([]string, 0)
 
@@ -107,10 +108,12 @@ func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
 		}
 	}
 
+	realmId := realmId(data, client)
+
 	openidClient := &keycloak.OpenidClient{
 		Id:                        data.Id(),
 		ClientId:                  data.Get("client_id").(string),
-		RealmId:                   data.Get("realm_id").(string),
+		RealmId:                   realmId,
 		Name:                      data.Get("name").(string),
 		Enabled:                   data.Get("enabled").(bool),
 		Description:               data.Get("description").(string),
@@ -162,7 +165,7 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client := getOpenidClientFromData(data)
+	client := getOpenidClientFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateOpenidClient(client)
 	if err != nil {
@@ -198,7 +201,7 @@ func resourceKeycloakOpenidClientRead(data *schema.ResourceData, meta interface{
 func resourceKeycloakOpenidClientUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client := getOpenidClientFromData(data)
+	client := getOpenidClientFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateOpenidClient(client)
 	if err != nil {
@@ -224,13 +227,22 @@ func resourceKeycloakOpenidClientDelete(data *schema.ResourceData, meta interfac
 	return keycloakClient.DeleteOpenidClient(realmId, id)
 }
 
-func resourceKeycloakOpenidClientImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakOpenidClientImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+	var realmId, id string
+	switch len(parts) {
+	case 1:
+		realmId = keycloakClient.GetDefaultRealm()
+		id = parts[0]
+	case 2:
+		realmId = parts[0]
+		id = parts[1]
+	default:
+		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+	}
 
-	realm := parts[0]
-	id := parts[1]
-
-	d.Set("realm_id", realm)
+	d.Set("realm_id", realmId)
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil

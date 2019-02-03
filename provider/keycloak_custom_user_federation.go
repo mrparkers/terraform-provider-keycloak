@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -25,7 +26,7 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm this provider will provide user federation for.",
 			},
@@ -59,11 +60,12 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 	}
 }
 
-func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.CustomUserFederation {
+func getCustomUserFederationFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.CustomUserFederation {
+	realmId := realmId(data, client)
 	return &keycloak.CustomUserFederation{
 		Id:         data.Id(),
 		Name:       data.Get("name").(string),
-		RealmId:    data.Get("realm_id").(string),
+		RealmId:    realmId,
 		ProviderId: data.Get("provider_id").(string),
 
 		Enabled:  data.Get("enabled").(bool),
@@ -89,7 +91,7 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 func resourceKeycloakCustomUserFederationCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	custom := getCustomUserFederationFromData(data)
+	custom := getCustomUserFederationFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateCustomUserFederation(custom)
 	if err != nil {
@@ -125,7 +127,7 @@ func resourceKeycloakCustomUserFederationRead(data *schema.ResourceData, meta in
 func resourceKeycloakCustomUserFederationUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	custom := getCustomUserFederationFromData(data)
+	custom := getCustomUserFederationFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateCustomUserFederation(custom)
 	if err != nil {
@@ -151,13 +153,23 @@ func resourceKeycloakCustomUserFederationDelete(data *schema.ResourceData, meta 
 	return keycloakClient.DeleteCustomUserFederation(realmId, id)
 }
 
-func resourceKeycloakCustomUserFederationImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakCustomUserFederationImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm := parts[0]
-	id := parts[1]
+	var realmId, id string
+	switch len(parts) {
+	case 1:
+		realmId = keycloakClient.GetDefaultRealm()
+		id = parts[0]
+	case 2:
+		realmId = parts[0]
+		id = parts[1]
+	default:
+		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+	}
 
-	d.Set("realm_id", realm)
+	d.Set("realm_id", realmId)
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil

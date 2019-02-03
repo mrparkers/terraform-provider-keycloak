@@ -36,11 +36,10 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The realm this provider will provide user federation for.",
 			},
-
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -53,7 +52,6 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Default:     0,
 				Description: "Priority of this provider when looking up users. Lower values are first.",
 			},
-
 			"import_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -73,7 +71,6 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Default:     false,
 				Description: "When true, newly created users will be synced back to LDAP.",
 			},
-
 			"vendor": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -215,8 +212,10 @@ func validateSyncPeriod(i interface{}, k string) (s []string, errs []error) {
 	return
 }
 
-func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUserFederation {
+func getLdapUserFederationFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapUserFederation {
 	var userObjectClasses []string
+
+	realmId := realmId(data, client)
 
 	for _, userObjectClass := range data.Get("user_object_classes").([]interface{}) {
 		userObjectClasses = append(userObjectClasses, userObjectClass.(string))
@@ -225,7 +224,7 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 	return &keycloak.LdapUserFederation{
 		Id:      data.Id(),
 		Name:    data.Get("name").(string),
-		RealmId: data.Get("realm_id").(string),
+		RealmId: realmId,
 
 		Enabled:  data.Get("enabled").(bool),
 		Priority: data.Get("priority").(int),
@@ -301,7 +300,7 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 func resourceKeycloakLdapUserFederationCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldap := getLdapUserFederationFromData(data)
+	ldap := getLdapUserFederationFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateLdapUserFederation(ldap)
 	if err != nil {
@@ -338,7 +337,7 @@ func resourceKeycloakLdapUserFederationRead(data *schema.ResourceData, meta inte
 func resourceKeycloakLdapUserFederationUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldap := getLdapUserFederationFromData(data)
+	ldap := getLdapUserFederationFromData(data, keycloakClient)
 
 	err := keycloakClient.ValidateLdapUserFederation(ldap)
 	if err != nil {
@@ -364,13 +363,24 @@ func resourceKeycloakLdapUserFederationDelete(data *schema.ResourceData, meta in
 	return keycloakClient.DeleteLdapUserFederation(realmId, id)
 }
 
-func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	realm := parts[0]
-	id := parts[1]
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	d.Set("realm_id", realm)
+	var realmId, id string
+	switch len(parts) {
+	case 1:
+		realmId = keycloakClient.GetDefaultRealm()
+		id = parts[0]
+	case 2:
+		realmId = parts[0]
+		id = parts[1]
+	default:
+		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+	}
+
+	d.Set("realm_id", realmId)
 	d.SetId(id)
 
 	if len(parts) == 3 { // bind_credential was specified

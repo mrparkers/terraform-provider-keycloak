@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -19,7 +20,7 @@ func resourceKeycloakGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"parent_id": {
@@ -39,10 +40,11 @@ func resourceKeycloakGroup() *schema.Resource {
 	}
 }
 
-func mapFromDataToGroup(data *schema.ResourceData) *keycloak.Group {
+func mapFromDataToGroup(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.Group {
+	realmId := realmId(data, client)
 	group := &keycloak.Group{
 		Id:       data.Id(),
-		RealmId:  data.Get("realm_id").(string),
+		RealmId:  realmId,
 		ParentId: data.Get("parent_id").(string),
 		Name:     data.Get("name").(string),
 	}
@@ -65,7 +67,7 @@ func mapFromGroupToData(data *schema.ResourceData, group *keycloak.Group) {
 func resourceKeycloakGroupCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	group := mapFromDataToGroup(data)
+	group := mapFromDataToGroup(data, keycloakClient)
 
 	err := keycloakClient.NewGroup(group)
 	if err != nil {
@@ -96,7 +98,7 @@ func resourceKeycloakGroupRead(data *schema.ResourceData, meta interface{}) erro
 func resourceKeycloakGroupUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	group := mapFromDataToGroup(data)
+	group := mapFromDataToGroup(data, keycloakClient)
 
 	err := keycloakClient.UpdateGroup(group)
 	if err != nil {
@@ -117,13 +119,24 @@ func resourceKeycloakGroupDelete(data *schema.ResourceData, meta interface{}) er
 	return keycloakClient.DeleteGroup(realmId, id)
 }
 
-func resourceKeycloakGroupImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakGroupImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm := parts[0]
-	id := parts[1]
+	var realmId, id string
 
-	d.Set("realm_id", realm)
+	switch len(parts) {
+	case 1:
+		realmId = keycloakClient.GetDefaultRealm()
+		id = parts[0]
+	case 2:
+		realmId = parts[0]
+		id = parts[1]
+	default:
+		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+	}
+
+	d.Set("realm_id", realmId)
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil

@@ -28,7 +28,7 @@ func resourceKeycloakSamlUserAttributeProtocolMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"client_id": {
@@ -64,11 +64,12 @@ func resourceKeycloakSamlUserAttributeProtocolMapper() *schema.Resource {
 	}
 }
 
-func mapFromDataToSamlUserAttributeProtocolMapper(data *schema.ResourceData) *keycloak.SamlUserAttributeProtocolMapper {
+func mapFromDataToSamlUserAttributeProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.SamlUserAttributeProtocolMapper {
+	realmId := realmId(data, client)
 	return &keycloak.SamlUserAttributeProtocolMapper{
 		Id:            data.Id(),
 		Name:          data.Get("name").(string),
-		RealmId:       data.Get("realm_id").(string),
+		RealmId:       realmId,
 		ClientId:      data.Get("client_id").(string),
 		ClientScopeId: data.Get("client_scope_id").(string),
 
@@ -99,7 +100,7 @@ func mapFromSamlUserAttributeMapperToData(mapper *keycloak.SamlUserAttributeProt
 func resourceKeycloakSamlUserAttributeProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	samlUserAttributeMapper := mapFromDataToSamlUserAttributeProtocolMapper(data)
+	samlUserAttributeMapper := mapFromDataToSamlUserAttributeProtocolMapper(data, keycloakClient)
 
 	err := keycloakClient.ValidateSamlUserAttributeProtocolMapper(samlUserAttributeMapper)
 	if err != nil {
@@ -136,7 +137,7 @@ func resourceKeycloakSamlUserAttributeProtocolMapperRead(data *schema.ResourceDa
 func resourceKeycloakSamlUserAttributeProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	samlUserAttributeMapper := mapFromDataToSamlUserAttributeProtocolMapper(data)
+	samlUserAttributeMapper := mapFromDataToSamlUserAttributeProtocolMapper(data, keycloakClient)
 
 	err := keycloakClient.ValidateSamlUserAttributeProtocolMapper(samlUserAttributeMapper)
 	if err != nil {
