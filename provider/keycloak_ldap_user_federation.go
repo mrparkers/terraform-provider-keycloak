@@ -376,17 +376,16 @@ func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, meta inter
 	case 2:
 		realmId = parts[0]
 		id = parts[1]
+	case 3:
+		realmId = parts[0]
+		id = parts[1]
+		d.Set("bind_credential", parts[2])
 	default:
 		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
 	}
 
 	d.Set("realm_id", realmId)
 	d.SetId(id)
-
-	if len(parts) == 3 { // bind_credential was specified
-		bindCredential := parts[2]
-		d.Set("bind_credential", bindCredential)
-	}
 
 	return []*schema.ResourceData{d}, nil
 }
