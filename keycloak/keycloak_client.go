@@ -68,7 +68,7 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, defaultRealm, use
 		clientCredentials: clientCredentials,
 		httpClient:        httpClient,
 		realm:             realm,
-		defaultRealm:		 defaultRealm,
+		defaultRealm:      defaultRealm,
 	}
 
 	err := keycloakClient.login()
