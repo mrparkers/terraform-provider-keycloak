@@ -59,9 +59,9 @@ func KeycloakProvider() *schema.Provider {
 				Type:        schema.TypeString,
 				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_REALM", "master"),
 			},
-			"default_realm" {
+			"default_realm": {
 				Optional:    true,
-				Type:			 schema.TypeString
+				Type:			 schema.TypeString,
 			},
 			"url": {
 				Type:        schema.TypeString,
