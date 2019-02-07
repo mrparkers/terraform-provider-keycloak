@@ -41,7 +41,7 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, defaultRealm, use
 	httpClient := &http.Client{
 		Timeout: time.Second * 5,
 	}
-	var clientCredentials := &ClientCredentials{
+	clientCredentials := &ClientCredentials{
 		ClientId: clientId,
 	}
 	if password != "" && username != "" {
