@@ -16,6 +16,7 @@ type KeycloakClient struct {
 	baseUrl           string
 	clientCredentials *ClientCredentials
 	httpClient        *http.Client
+	initialLogin      bool
 }
 
 type ClientCredentials struct {
@@ -42,12 +43,8 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret string) (*KeycloakClient,
 			ClientId:     clientId,
 			ClientSecret: clientSecret,
 		},
-		httpClient: httpClient,
-	}
-
-	err := keycloakClient.login()
-	if err != nil {
-		return nil, err
+		httpClient:   httpClient,
+		initialLogin: false,
 	}
 
 	return &keycloakClient, nil
@@ -154,6 +151,13 @@ func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 Sends an HTTP request and refreshes credentials on 403 or 401 errors
 */
 func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte, string, error) {
+	if !keycloakClient.initialLogin {
+		keycloakClient.initialLogin = true
+		err := keycloakClient.login()
+		if err != nil {
+			return nil, "", fmt.Errorf("error logging in: %s", err)
+		}
+	}
 	requestMethod := request.Method
 	requestPath := request.URL.Path
 
