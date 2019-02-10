@@ -41,20 +41,36 @@ jobs:
   client-credentials:
     <<: *test-template
     environment:
+      GO111MODULE: "on"
+      KEYCLOAK_CLIENT_ID: "terraform"
+      KEYCLOAK_URL: "http://localhost:8080"
+      KEYCLOAK_REALM: master
       KEYCLOAK_CLIENT_SECRET: "884e0f95-0f42-4a63-9b1f-94274655669e"
   password:
     <<: *test-template
     environment:
+      GO111MODULE: "on"
+      KEYCLOAK_CLIENT_ID: "terraform"
+      KEYCLOAK_URL: "http://localhost:8080"
+      KEYCLOAK_REALM: master
       KEYCLOAK_USER: keycloak
       KEYCLOAK_PASSWORD: password
   password-default-realm:
     <<: *test-template
     environment:
+      GO111MODULE: "on"
+      KEYCLOAK_CLIENT_ID: "terraform"
+      KEYCLOAK_URL: "http://localhost:8080"
+      KEYCLOAK_REALM: master
       KEYCLOAK_USER: keycloak
       KEYCLOAK_PASSWORD: password
       KEYCLOAK_DEFAULT_REALM: master
   client-credentials-default-realm:
     <<: *test-template
     environment:
+      GO111MODULE: "on"
+      KEYCLOAK_CLIENT_ID: "terraform"
+      KEYCLOAK_URL: "http://localhost:8080"
+      KEYCLOAK_REALM: master
       KEYCLOAK_CLIENT_SECRET: "884e0f95-0f42-4a63-9b1f-94274655669e"
       KEYCLOAK_DEFAULT_REALM: master
