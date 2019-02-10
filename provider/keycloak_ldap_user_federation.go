@@ -374,20 +374,26 @@ func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, meta inter
 		realmId = keycloakClient.GetDefaultRealm()
 		id = parts[0]
 	case len(parts) == 2:
-		if keycloakClient.GetDefaultRealm() != "" {
-			realmId = keycloakClient.GetDefaultRealm()
-			id = parts[0]
-			d.Set("bind_credential", parts[1])
-		} else {
-			realmId = parts[0]
-			id = parts[1]
-		}
-	case len(parts) == 3:
 		realmId = parts[0]
 		id = parts[1]
-		d.Set("bind_credential", parts[2])
+	case len(parts) == 3 && keycloakClient.GetDefaultRealm() != "" {
+		realmId = keycloakClient.GetDefaultRealm()
+		id = parts[0]
+		if parts[1] == "bind_credential" {
+			d.Set("bind_credential", parts[2])
+		} else {
+			return nil, fmt.Errorf("Invalid import. bind_credential word should be before bind_credential value")
+		}
+	case len(parts) == 4:
+		realmId = parts[0]
+		id = parts[1]
+		if parts[2] == "bind_credential" {
+			d.Set("bind_credential", parts[3])
+		} else {
+			return nil, fmt.Errorf("Invalid import. bind_credential word should be before bind_credential value")
+		}
 	default:
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}, {{realmId}}/{{userFederationId}}/{{bindCredentials}} or {{userFederationId}}/{{bindCredentials}}, {{userFederationId}} when default realm is set")
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}, {{realmId}}/{{userFederationId}}/bind_credential/{{bindCredentials}} or {{userFederationId}}/bind_credential/{{bindCredentials}}, {{userFederationId}} when default realm is set")
 	}
 
 	d.Set("realm_id", realmId)
