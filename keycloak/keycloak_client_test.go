@@ -31,7 +31,7 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 
 	if v := os.Getenv("KEYCLOAK_CLIENT_SECRET"); v == "" {
 		if v := os.Getenv("KEYCLOAK_USER"); v == "" {
-			t.Fatal("KEYCLOAK_USERNAME must be set for acceptance tests")
+			t.Fatal("KEYCLOAK_USER must be set for acceptance tests")
 		}
 		if v := os.Getenv("KEYCLOAK_PASSWORD"); v == "" {
 			t.Fatal("KEYCLOAK_PASSWORD must be set for acceptance tests")
@@ -44,7 +44,7 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		defer log.SetOutput(os.Stdout)
 	}
 
-	keycloakClient, err := NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), os.Getenv("KEYCLOAK_REALM"), os.Getenv("KEYCLOAK_USERNAME"), os.Getenv("KEYCLOAK_PASSWORD"))
+	keycloakClient, err := NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), os.Getenv("KEYCLOAK_REALM"), os.Getenv("KEYCLOAK_USER"), os.Getenv("KEYCLOAK_PASSWORD"))
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
