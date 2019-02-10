@@ -45,7 +45,7 @@ func KeycloakProvider() *schema.Provider {
 			"username": {
 				Optional:      true,
 				Type:          schema.TypeString,
-				DefaultFunc:   schema.EnvDefaultFunc("KEYCLOAK_USERNAME", nil),
+				DefaultFunc:   schema.EnvDefaultFunc("KEYCLOAK_USER", nil),
 				ConflictsWith: []string{"client_secret"},
 			},
 			"password": {
@@ -60,8 +60,9 @@ func KeycloakProvider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_REALM", "master"),
 			},
 			"default_realm": {
-				Optional: true,
-				Type:     schema.TypeString,
+				Optional:    true,
+				Type:        schema.TypeString,
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_DEFAULT_REALM", nil),
 			},
 			"url": {
 				Type:        schema.TypeString,
