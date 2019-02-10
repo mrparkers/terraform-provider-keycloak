@@ -60,11 +60,13 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		t.Fatalf("%s", err)
 	}
 
+	var oldAccessToken, oldRefreshToken, oldTokenType string
+
 	// A following GET for this realm will result in a 403, so we should save the current access and refresh token
 	if keycloakClient.clientCredentials.GrantType == "client_credentials" {
-		oldAccessToken := keycloakClient.clientCredentials.AccessToken
-		oldRefreshToken := keycloakClient.clientCredentials.RefreshToken
-		oldTokenType := keycloakClient.clientCredentials.TokenType
+		oldAccessToken = keycloakClient.clientCredentials.AccessToken
+		oldRefreshToken = keycloakClient.clientCredentials.RefreshToken
+		oldTokenType = keycloakClient.clientCredentials.TokenType
 	}
 
 	_, err = keycloakClient.GetRealm(realmName) // This should not fail since it will automatically refresh and try again
@@ -78,11 +80,11 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		t.Fatalf("%s", err)
 	}
 
-	newAccessToken := keycloakClient.clientCredentials.AccessToken
-	newRefreshToken := keycloakClient.clientCredentials.RefreshToken
-	newTokenType := keycloakClient.clientCredentials.TokenType
-
 	if keycloakClient.clientCredentials.GrantType == "client_credentials" {
+		newAccessToken := keycloakClient.clientCredentials.AccessToken
+		newRefreshToken := keycloakClient.clientCredentials.RefreshToken
+		newTokenType := keycloakClient.clientCredentials.TokenType
+
 		if oldAccessToken == newAccessToken {
 			t.Fatalf("expected access token to update after refresh")
 		}
