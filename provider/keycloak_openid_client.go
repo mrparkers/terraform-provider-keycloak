@@ -231,15 +231,15 @@ func resourceKeycloakOpenidClientImport(d *schema.ResourceData, meta interface{}
 	parts := strings.Split(d.Id(), "/")
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	var realmId, id string
-	switch len(parts) {
-	case 1:
+	switch {
+	case len(parts) == 1 && keycloakClient.GetDefaultRealm() != "":
 		realmId = keycloakClient.GetDefaultRealm()
 		id = parts[0]
-	case 2:
+	case len(parts) == 2:
 		realmId = parts[0]
 		id = parts[1]
 	default:
-		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{openidClientId}} or {{openidClientId}} when default realm is set")
 	}
 
 	d.Set("realm_id", realmId)

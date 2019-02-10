@@ -150,17 +150,17 @@ func resourceKeycloakLdapGenericMapperImport(d *schema.ResourceData, meta interf
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, id, ldapUserFederationId string
-	switch len(parts) {
-	case 2:
+	switch {
+	case len(parts) == 2 && keycloakClient.GetDefaultRealm() != "":
 		realmId = keycloakClient.GetDefaultRealm()
 		ldapUserFederationId = parts[0]
 		id = parts[1]
-	case 3:
+	case len(parts) == 3:
 		realmId = parts[0]
 		ldapUserFederationId = parts[1]
 		id = parts[2]
 	default:
-		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}/{{userFederationMapperId}} or {{userFederationId}}/{{userFederationMapperId}} when default realm is set")
 	}
 
 	d.Set("realm_id", realmId)

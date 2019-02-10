@@ -369,19 +369,25 @@ func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, meta inter
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, id string
-	switch len(parts) {
-	case 1:
+	switch {
+	case len(parts) == 1 && keycloakClient.GetDefaultRealm() != "":
 		realmId = keycloakClient.GetDefaultRealm()
 		id = parts[0]
-	case 2:
-		realmId = parts[0]
-		id = parts[1]
-	case 3:
+	case len(parts) == 2:
+		if keycloakClient.GetDefaultRealm() != "" {
+			realmId = keycloakClient.GetDefaultRealm()
+			id = parts[0]
+			d.Set("bind_credential", parts[1])
+		} else {
+			realmId = parts[0]
+			id = parts[1]
+		}
+	case len(parts) == 3:
 		realmId = parts[0]
 		id = parts[1]
 		d.Set("bind_credential", parts[2])
 	default:
-		return nil, fmt.Errorf("Resouce %s cannot be imported", d.Id())
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}, {{realmId}}/{{userFederationId}}/{{bindCredentials}} or {{userFederationId}}/{{bindCredentials}}, {{userFederationId}} when default realm is set")
 	}
 
 	d.Set("realm_id", realmId)
