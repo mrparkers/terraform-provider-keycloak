@@ -376,7 +376,7 @@ func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, meta inter
 	case len(parts) == 2:
 		realmId = parts[0]
 		id = parts[1]
-	case len(parts) == 3 && keycloakClient.GetDefaultRealm() != "" {
+	case len(parts) == 3 && keycloakClient.GetDefaultRealm() != "":
 		realmId = keycloakClient.GetDefaultRealm()
 		id = parts[0]
 		if parts[1] == "bind_credential" {
