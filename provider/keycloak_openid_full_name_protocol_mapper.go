@@ -27,7 +27,7 @@ func resourceKeycloakOpenIdFullNameProtocolMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 				Description: "The realm id where the associated client or client scope exists.",
 			},

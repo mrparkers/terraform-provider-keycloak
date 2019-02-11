@@ -28,7 +28,7 @@ func resourceKeycloakSamlUserAttributeProtocolMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"client_id": {

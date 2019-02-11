@@ -15,7 +15,7 @@ func resourceKeycloakGroupMemberships() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"group_id": {

@@ -31,7 +31,7 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 				Description: "The realm in which the ldap user federation provider exists.",
 			},

@@ -36,7 +36,7 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			},
 			"realm_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 				Description: "The realm this provider will provide user federation for.",
 			},

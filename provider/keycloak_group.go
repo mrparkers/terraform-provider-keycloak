@@ -20,7 +20,7 @@ func resourceKeycloakGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"parent_id": {
@@ -124,7 +124,7 @@ func resourceKeycloakGroupImport(d *schema.ResourceData, _ interface{}) ([]*sche
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{groupId}}")
 	}
-	d.Set("realm_id", parts[1])
-	d.SetId(parts[0])
+	d.Set("realm_id", parts[0])
+	d.SetId(parts[1])
 	return []*schema.ResourceData{d}, nil
 }
