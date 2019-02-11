@@ -53,12 +53,11 @@ func resourceKeycloakLdapFullNameMapper() *schema.Resource {
 	}
 }
 
-func getLdapFullNameMapperFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapFullNameMapper {
-	realmId := realmId(data, client)
+func getLdapFullNameMapperFromData(data *schema.ResourceData) *keycloak.LdapFullNameMapper {
 	return &keycloak.LdapFullNameMapper{
 		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
-		RealmId:              realmId,
+		RealmId:              data.Get("realm_id").(string),
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
 
 		LdapFullNameAttribute: data.Get("ldap_full_name_attribute").(string),
@@ -83,7 +82,7 @@ func setLdapFullNameMapperData(data *schema.ResourceData, ldapFullNameMapper *ke
 func resourceKeycloakLdapFullNameMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapFullNameMapper := getLdapFullNameMapperFromData(data, keycloakClient)
+	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
 
 	err := keycloakClient.ValidateLdapFullNameMapper(ldapFullNameMapper)
 	if err != nil {
@@ -119,7 +118,7 @@ func resourceKeycloakLdapFullNameMapperRead(data *schema.ResourceData, meta inte
 func resourceKeycloakLdapFullNameMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapFullNameMapper := getLdapFullNameMapperFromData(data, keycloakClient)
+	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
 
 	err := keycloakClient.ValidateLdapFullNameMapper(ldapFullNameMapper)
 	if err != nil {
@@ -145,27 +144,16 @@ func resourceKeycloakLdapFullNameMapperDelete(data *schema.ResourceData, meta in
 	return keycloakClient.DeleteLdapFullNameMapper(realmId, id)
 }
 
-func resourceKeycloakLdapGenericMapperImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakLdapGenericMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	var realmId, id, ldapUserFederationId string
-	switch {
-	case len(parts) == 2 && keycloakClient.GetDefaultRealm() != "":
-		realmId = keycloakClient.GetDefaultRealm()
-		ldapUserFederationId = parts[0]
-		id = parts[1]
-	case len(parts) == 3:
-		realmId = parts[0]
-		ldapUserFederationId = parts[1]
-		id = parts[2]
-	default:
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}/{{userFederationMapperId}} or {{userFederationId}}/{{userFederationMapperId}} when default realm is set")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}/{{userFederationMapperId}}")
 	}
 
-	d.Set("realm_id", realmId)
-	d.Set("ldap_user_federation_id", ldapUserFederationId)
-	d.SetId(id)
+	d.Set("realm_id", parts[0])
+	d.Set("ldap_user_federation_id", parts[1])
+	d.SetId(parts[2])
 
 	return []*schema.ResourceData{d}, nil
 }

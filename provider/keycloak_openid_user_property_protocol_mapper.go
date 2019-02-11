@@ -82,12 +82,11 @@ func resourceKeycloakOpenIdUserPropertyProtocolMapper() *schema.Resource {
 	}
 }
 
-func mapFromDataToOpenIdUserPropertyProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenIdUserPropertyProtocolMapper {
-	realmId := realmId(data, client)
+func mapFromDataToOpenIdUserPropertyProtocolMapper(data *schema.ResourceData) *keycloak.OpenIdUserPropertyProtocolMapper {
 	return &keycloak.OpenIdUserPropertyProtocolMapper{
 		Id:               data.Id(),
 		Name:             data.Get("name").(string),
-		RealmId:          realmId,
+		RealmId:          data.Get("realm_id").(string),
 		ClientId:         data.Get("client_id").(string),
 		ClientScopeId:    data.Get("client_scope_id").(string),
 		AddToIdToken:     data.Get("add_to_id_token").(bool),
@@ -122,7 +121,7 @@ func mapFromOpenIdUserPropertyMapperToData(mapper *keycloak.OpenIdUserPropertyPr
 func resourceKeycloakOpenIdUserPropertyProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdUserPropertyMapper := mapFromDataToOpenIdUserPropertyProtocolMapper(data, keycloakClient)
+	openIdUserPropertyMapper := mapFromDataToOpenIdUserPropertyProtocolMapper(data)
 
 	err := openIdUserPropertyMapper.Validate(keycloakClient)
 	if err != nil {
@@ -159,7 +158,7 @@ func resourceKeycloakOpenIdUserPropertyProtocolMapperRead(data *schema.ResourceD
 func resourceKeycloakOpenIdUserPropertyProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdUserPropertyMapper := mapFromDataToOpenIdUserPropertyProtocolMapper(data, keycloakClient)
+	openIdUserPropertyMapper := mapFromDataToOpenIdUserPropertyProtocolMapper(data)
 	err := keycloakClient.UpdateOpenIdUserPropertyProtocolMapper(openIdUserPropertyMapper)
 	if err != nil {
 		return err

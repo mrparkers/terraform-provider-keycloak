@@ -82,11 +82,10 @@ func onlyDiffOnCreate(_, _, _ string, d *schema.ResourceData) bool {
 	return d.Id() != ""
 }
 
-func mapFromDataToUser(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.User {
-	realmId := realmId(data, client)
+func mapFromDataToUser(data *schema.ResourceData) *keycloak.User {
 	return &keycloak.User{
 		Id:        data.Id(),
-		RealmId:   realmId,
+		RealmId:   data.Get("realm_id").(string),
 		Username:  data.Get("username").(string),
 		Email:     data.Get("email").(string),
 		FirstName: data.Get("first_name").(string),
@@ -109,7 +108,7 @@ func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
 func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	user := mapFromDataToUser(data, keycloakClient)
+	user := mapFromDataToUser(data)
 
 	err := keycloakClient.NewUser(user)
 	if err != nil {
@@ -151,7 +150,7 @@ func resourceKeycloakUserRead(data *schema.ResourceData, meta interface{}) error
 func resourceKeycloakUserUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	user := mapFromDataToUser(data, keycloakClient)
+	user := mapFromDataToUser(data)
 
 	err := keycloakClient.UpdateUser(user)
 	if err != nil {
@@ -172,23 +171,14 @@ func resourceKeycloakUserDelete(data *schema.ResourceData, meta interface{}) err
 	return keycloakClient.DeleteUser(realmId, id)
 }
 
-func resourceKeycloakUserImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakUserImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	var realmId, id string
-	switch {
-	case len(parts) == 1 && keycloakClient.GetDefaultRealm() != "":
-		realmId = keycloakClient.GetDefaultRealm()
-		id = parts[0]
-	case len(parts) == 2:
-		realmId = parts[0]
-		id = parts[1]
-	default:
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userId}} or {{userId}} when default realm is set")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userId}}")
 	}
 
-	d.Set("realm_id", realmId)
-	d.SetId(id)
+	d.Set("realm_id", parts[0])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }

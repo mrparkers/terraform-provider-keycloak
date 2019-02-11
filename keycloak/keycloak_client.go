@@ -16,7 +16,6 @@ import (
 type KeycloakClient struct {
 	baseUrl           string
 	realm             string
-	defaultRealm      string
 	clientCredentials *ClientCredentials
 	httpClient        *http.Client
 }
@@ -37,7 +36,7 @@ const (
 	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, defaultRealm, username, password string) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string) (*KeycloakClient, error) {
 	httpClient := &http.Client{
 		Timeout: time.Second * 5,
 	}
@@ -60,7 +59,6 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, defaultRealm, use
 		clientCredentials: clientCredentials,
 		httpClient:        httpClient,
 		realm:             realm,
-		defaultRealm:      defaultRealm,
 	}
 
 	err := keycloakClient.login()
@@ -159,10 +157,6 @@ func (keycloakClient *KeycloakClient) refresh() error {
 	keycloakClient.clientCredentials.TokenType = clientCredentials.TokenType
 
 	return nil
-}
-
-func (keycloakClient *KeycloakClient) GetDefaultRealm() string {
-	return keycloakClient.defaultRealm
 }
 
 func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {

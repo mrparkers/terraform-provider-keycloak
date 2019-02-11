@@ -40,11 +40,10 @@ func resourceKeycloakGroup() *schema.Resource {
 	}
 }
 
-func mapFromDataToGroup(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.Group {
-	realmId := realmId(data, client)
+func mapFromDataToGroup(data *schema.ResourceData) *keycloak.Group {
 	group := &keycloak.Group{
 		Id:       data.Id(),
-		RealmId:  realmId,
+		RealmId:  data.Get("realm_id").(string),
 		ParentId: data.Get("parent_id").(string),
 		Name:     data.Get("name").(string),
 	}
@@ -67,7 +66,7 @@ func mapFromGroupToData(data *schema.ResourceData, group *keycloak.Group) {
 func resourceKeycloakGroupCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	group := mapFromDataToGroup(data, keycloakClient)
+	group := mapFromDataToGroup(data)
 
 	err := keycloakClient.NewGroup(group)
 	if err != nil {
@@ -98,7 +97,7 @@ func resourceKeycloakGroupRead(data *schema.ResourceData, meta interface{}) erro
 func resourceKeycloakGroupUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	group := mapFromDataToGroup(data, keycloakClient)
+	group := mapFromDataToGroup(data)
 
 	err := keycloakClient.UpdateGroup(group)
 	if err != nil {
@@ -119,25 +118,13 @@ func resourceKeycloakGroupDelete(data *schema.ResourceData, meta interface{}) er
 	return keycloakClient.DeleteGroup(realmId, id)
 }
 
-func resourceKeycloakGroupImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakGroupImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	var realmId, id string
-
-	switch {
-	case len(parts) == 1 && keycloakClient.GetDefaultRealm() != "":
-		realmId = keycloakClient.GetDefaultRealm()
-		id = parts[0]
-	case len(parts) == 2:
-		realmId = parts[0]
-		id = parts[1]
-	default:
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{groupId}} or {{groupId}} when default realm is set")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{groupId}}")
 	}
-
-	d.Set("realm_id", realmId)
-	d.SetId(id)
-
+	d.Set("realm_id", parts[1])
+	d.SetId(parts[0])
 	return []*schema.ResourceData{d}, nil
 }

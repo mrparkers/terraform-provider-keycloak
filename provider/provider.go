@@ -59,11 +59,6 @@ func KeycloakProvider() *schema.Provider {
 				Type:        schema.TypeString,
 				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_REALM", "master"),
 			},
-			"default_realm": {
-				Optional:    true,
-				Type:        schema.TypeString,
-				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_DEFAULT_REALM", nil),
-			},
 			"url": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -82,6 +77,5 @@ func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
 	username := data.Get("username").(string)
 	password := data.Get("password").(string)
 	realm := data.Get("realm").(string)
-	defaultRealm := data.Get("default_realm").(string)
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, defaultRealm, username, password)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password)
 }

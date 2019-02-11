@@ -65,12 +65,11 @@ func resourceKeycloakLdapUserAttributeMapper() *schema.Resource {
 	}
 }
 
-func getLdapUserAttributeMapperFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapUserAttributeMapper {
-	realmId := realmId(data, client)
+func getLdapUserAttributeMapperFromData(data *schema.ResourceData) *keycloak.LdapUserAttributeMapper {
 	return &keycloak.LdapUserAttributeMapper{
 		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
-		RealmId:              realmId,
+		RealmId:              data.Get("realm_id").(string),
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
 
 		LdapAttribute:      data.Get("ldap_attribute").(string),
@@ -101,7 +100,7 @@ func setLdapUserAttributeMapperData(data *schema.ResourceData, ldapUserAttribute
 func resourceKeycloakLdapUserAttributeMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapUserAttributeMapper := getLdapUserAttributeMapperFromData(data, keycloakClient)
+	ldapUserAttributeMapper := getLdapUserAttributeMapperFromData(data)
 
 	err := keycloakClient.NewLdapUserAttributeMapper(ldapUserAttributeMapper)
 	if err != nil {
@@ -132,7 +131,7 @@ func resourceKeycloakLdapUserAttributeMapperRead(data *schema.ResourceData, meta
 func resourceKeycloakLdapUserAttributeMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapUserAttributeMapper := getLdapUserAttributeMapperFromData(data, keycloakClient)
+	ldapUserAttributeMapper := getLdapUserAttributeMapperFromData(data)
 
 	err := keycloakClient.UpdateLdapUserAttributeMapper(ldapUserAttributeMapper)
 	if err != nil {

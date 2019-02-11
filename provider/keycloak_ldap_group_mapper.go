@@ -115,10 +115,8 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 	}
 }
 
-func getLdapGroupMapperFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapGroupMapper {
+func getLdapGroupMapperFromData(data *schema.ResourceData) *keycloak.LdapGroupMapper {
 	var groupObjectClasses []string
-
-	realmId := realmId(data, client)
 
 	for _, groupObjectClass := range data.Get("group_object_classes").([]interface{}) {
 		groupObjectClasses = append(groupObjectClasses, groupObjectClass.(string))
@@ -133,7 +131,7 @@ func getLdapGroupMapperFromData(data *schema.ResourceData, client *keycloak.Keyc
 	return &keycloak.LdapGroupMapper{
 		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
-		RealmId:              realmId,
+		RealmId:              data.Get("realm_id").(string),
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
 
 		LdapGroupsDn:                    data.Get("ldap_groups_dn").(string),
@@ -179,7 +177,7 @@ func setLdapGroupMapperData(data *schema.ResourceData, ldapGroupMapper *keycloak
 func resourceKeycloakLdapGroupMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapGroupMapper := getLdapGroupMapperFromData(data, keycloakClient)
+	ldapGroupMapper := getLdapGroupMapperFromData(data)
 
 	err := keycloakClient.ValidateLdapGroupMapper(ldapGroupMapper)
 	if err != nil {
@@ -215,7 +213,7 @@ func resourceKeycloakLdapGroupMapperRead(data *schema.ResourceData, meta interfa
 func resourceKeycloakLdapGroupMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapGroupMapper := getLdapGroupMapperFromData(data, keycloakClient)
+	ldapGroupMapper := getLdapGroupMapperFromData(data)
 
 	err := keycloakClient.ValidateLdapGroupMapper(ldapGroupMapper)
 	if err != nil {

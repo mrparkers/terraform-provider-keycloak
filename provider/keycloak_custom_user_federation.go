@@ -60,12 +60,11 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 	}
 }
 
-func getCustomUserFederationFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.CustomUserFederation {
-	realmId := realmId(data, client)
+func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.CustomUserFederation {
 	return &keycloak.CustomUserFederation{
 		Id:         data.Id(),
 		Name:       data.Get("name").(string),
-		RealmId:    realmId,
+		RealmId:    data.Get("realm_id").(string),
 		ProviderId: data.Get("provider_id").(string),
 
 		Enabled:  data.Get("enabled").(bool),
@@ -91,7 +90,7 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 func resourceKeycloakCustomUserFederationCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	custom := getCustomUserFederationFromData(data, keycloakClient)
+	custom := getCustomUserFederationFromData(data)
 
 	err := keycloakClient.ValidateCustomUserFederation(custom)
 	if err != nil {
@@ -127,7 +126,7 @@ func resourceKeycloakCustomUserFederationRead(data *schema.ResourceData, meta in
 func resourceKeycloakCustomUserFederationUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	custom := getCustomUserFederationFromData(data, keycloakClient)
+	custom := getCustomUserFederationFromData(data)
 
 	err := keycloakClient.ValidateCustomUserFederation(custom)
 	if err != nil {
@@ -153,24 +152,15 @@ func resourceKeycloakCustomUserFederationDelete(data *schema.ResourceData, meta 
 	return keycloakClient.DeleteCustomUserFederation(realmId, id)
 }
 
-func resourceKeycloakCustomUserFederationImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakCustomUserFederationImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	var realmId, id string
-	switch {
-	case len(parts) == 1 && keycloakClient.GetDefaultRealm() != "":
-		realmId = keycloakClient.GetDefaultRealm()
-		id = parts[0]
-	case len(parts) == 2:
-		realmId = parts[0]
-		id = parts[1]
-	default:
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}} or {{userFederationId}} when default realm is set")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}")
 	}
 
-	d.Set("realm_id", realmId)
-	d.SetId(id)
+	d.Set("realm_id", parts[0])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }

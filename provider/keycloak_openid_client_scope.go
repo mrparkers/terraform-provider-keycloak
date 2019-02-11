@@ -39,11 +39,10 @@ func resourceKeycloakOpenidClientScope() *schema.Resource {
 	}
 }
 
-func getClientScopeFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenidClientScope {
-	realmId := realmId(data, client)
+func getClientScopeFromData(data *schema.ResourceData) *keycloak.OpenidClientScope {
 	clientScope := &keycloak.OpenidClientScope{
 		Id:          data.Id(),
-		RealmId:     realmId,
+		RealmId:     data.Get("realm_id").(string),
 		Name:        data.Get("name").(string),
 		Description: data.Get("description").(string),
 	}
@@ -73,7 +72,7 @@ func setClientScopeData(data *schema.ResourceData, clientScope *keycloak.OpenidC
 func resourceKeycloakOpenidClientScopeCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	clientScope := getClientScopeFromData(data, keycloakClient)
+	clientScope := getClientScopeFromData(data)
 
 	err := keycloakClient.NewOpenidClientScope(clientScope)
 	if err != nil {
@@ -104,7 +103,7 @@ func resourceKeycloakOpenidClientScopeRead(data *schema.ResourceData, meta inter
 func resourceKeycloakOpenidClientScopeUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	clientScope := getClientScopeFromData(data, keycloakClient)
+	clientScope := getClientScopeFromData(data)
 
 	err := keycloakClient.UpdateOpenidClientScope(clientScope)
 	if err != nil {
@@ -125,24 +124,14 @@ func resourceKeycloakOpenidClientScopeDelete(data *schema.ResourceData, meta int
 	return keycloakClient.DeleteOpenidClientScope(realmId, id)
 }
 
-func resourceKeycloakOpenidClientScopeImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakOpenidClientScopeImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	var realmId, id string
-	switch {
-	case len(parts) == 1 && keycloakClient.GetDefaultRealm() != "":
-		realmId = keycloakClient.GetDefaultRealm()
-		id = parts[0]
-	case len(parts) == 2:
-		realmId = parts[0]
-		id = parts[1]
-	default:
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{openidClientScopeId}} or {{openidClientScopeId}} when default realm is set")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{openidClientScopeId}}")
 	}
 
-	d.Set("realm_id", realmId)
-	d.SetId(id)
+	d.Set("realm_id", parts[0])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }

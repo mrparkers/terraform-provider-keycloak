@@ -64,12 +64,11 @@ func resourceKeycloakSamlUserAttributeProtocolMapper() *schema.Resource {
 	}
 }
 
-func mapFromDataToSamlUserAttributeProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.SamlUserAttributeProtocolMapper {
-	realmId := realmId(data, client)
+func mapFromDataToSamlUserAttributeProtocolMapper(data *schema.ResourceData) *keycloak.SamlUserAttributeProtocolMapper {
 	return &keycloak.SamlUserAttributeProtocolMapper{
 		Id:            data.Id(),
 		Name:          data.Get("name").(string),
-		RealmId:       realmId,
+		RealmId:       data.Get("realm_id").(string),
 		ClientId:      data.Get("client_id").(string),
 		ClientScopeId: data.Get("client_scope_id").(string),
 
@@ -100,7 +99,7 @@ func mapFromSamlUserAttributeMapperToData(mapper *keycloak.SamlUserAttributeProt
 func resourceKeycloakSamlUserAttributeProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	samlUserAttributeMapper := mapFromDataToSamlUserAttributeProtocolMapper(data, keycloakClient)
+	samlUserAttributeMapper := mapFromDataToSamlUserAttributeProtocolMapper(data)
 
 	err := keycloakClient.ValidateSamlUserAttributeProtocolMapper(samlUserAttributeMapper)
 	if err != nil {
@@ -137,7 +136,7 @@ func resourceKeycloakSamlUserAttributeProtocolMapperRead(data *schema.ResourceDa
 func resourceKeycloakSamlUserAttributeProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	samlUserAttributeMapper := mapFromDataToSamlUserAttributeProtocolMapper(data, keycloakClient)
+	samlUserAttributeMapper := mapFromDataToSamlUserAttributeProtocolMapper(data)
 
 	err := keycloakClient.ValidateSamlUserAttributeProtocolMapper(samlUserAttributeMapper)
 	if err != nil {

@@ -35,13 +35,7 @@ func resourceKeycloakOpenidClientDefaultScopes() *schema.Resource {
 
 func resourceKeycloakOpenidClientDefaultScopesCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	var realmId string
-	if v, ok := data.GetOk("realm_id"); ok {
-		realmId = v.(string)
-	} else {
-		realmId = keycloakClient.GetDefaultRealm()
-	}
+	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	defaultScopes := data.Get("default_scopes").(*schema.Set)
 
@@ -62,7 +56,7 @@ func openidClientDefaultScopesId(realmId string, clientId string) string {
 func resourceKeycloakOpenidClientDefaultScopesRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmId := realmId(data, keycloakClient)
+	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
 	clientScopes, err := keycloakClient.GetOpenidClientDefaultScopes(realmId, clientId)
@@ -84,7 +78,7 @@ func resourceKeycloakOpenidClientDefaultScopesRead(data *schema.ResourceData, me
 func resourceKeycloakOpenidClientDefaultScopesUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmId := realmId(data, keycloakClient)
+	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	tfOpenidClientDefaultScopes := data.Get("default_scopes").(*schema.Set)
 
@@ -125,7 +119,7 @@ func resourceKeycloakOpenidClientDefaultScopesUpdate(data *schema.ResourceData, 
 func resourceKeycloakOpenidClientDefaultScopesDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmId := realmId(data, keycloakClient)
+	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	defaultScopes := data.Get("default_scopes").(*schema.Set)
 

@@ -212,10 +212,8 @@ func validateSyncPeriod(i interface{}, k string) (s []string, errs []error) {
 	return
 }
 
-func getLdapUserFederationFromData(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.LdapUserFederation {
+func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUserFederation {
 	var userObjectClasses []string
-
-	realmId := realmId(data, client)
 
 	for _, userObjectClass := range data.Get("user_object_classes").([]interface{}) {
 		userObjectClasses = append(userObjectClasses, userObjectClass.(string))
@@ -224,7 +222,7 @@ func getLdapUserFederationFromData(data *schema.ResourceData, client *keycloak.K
 	return &keycloak.LdapUserFederation{
 		Id:      data.Id(),
 		Name:    data.Get("name").(string),
-		RealmId: realmId,
+		RealmId: data.Get("realm_id").(string),
 
 		Enabled:  data.Get("enabled").(bool),
 		Priority: data.Get("priority").(int),
@@ -300,7 +298,7 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 func resourceKeycloakLdapUserFederationCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldap := getLdapUserFederationFromData(data, keycloakClient)
+	ldap := getLdapUserFederationFromData(data)
 
 	err := keycloakClient.ValidateLdapUserFederation(ldap)
 	if err != nil {
@@ -337,7 +335,7 @@ func resourceKeycloakLdapUserFederationRead(data *schema.ResourceData, meta inte
 func resourceKeycloakLdapUserFederationUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldap := getLdapUserFederationFromData(data, keycloakClient)
+	ldap := getLdapUserFederationFromData(data)
 
 	err := keycloakClient.ValidateLdapUserFederation(ldap)
 	if err != nil {
@@ -363,37 +361,20 @@ func resourceKeycloakLdapUserFederationDelete(data *schema.ResourceData, meta in
 	return keycloakClient.DeleteLdapUserFederation(realmId, id)
 }
 
-func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-
-	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	var realmId, id string
 	switch {
-	case len(parts) == 1 && keycloakClient.GetDefaultRealm() != "":
-		realmId = keycloakClient.GetDefaultRealm()
-		id = parts[0]
 	case len(parts) == 2:
 		realmId = parts[0]
 		id = parts[1]
-	case len(parts) == 3 && keycloakClient.GetDefaultRealm() != "":
-		realmId = keycloakClient.GetDefaultRealm()
-		id = parts[0]
-		if parts[1] == "bind_credential" {
-			d.Set("bind_credential", parts[2])
-		} else {
-			return nil, fmt.Errorf("Invalid import. bind_credential word should be before bind_credential value")
-		}
-	case len(parts) == 4:
+	case len(parts) == 3:
 		realmId = parts[0]
 		id = parts[1]
-		if parts[2] == "bind_credential" {
-			d.Set("bind_credential", parts[3])
-		} else {
-			return nil, fmt.Errorf("Invalid import. bind_credential word should be before bind_credential value")
-		}
+		d.Set("bind_credential", parts[2])
 	default:
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}, {{realmId}}/{{userFederationId}}/bind_credential/{{bindCredentials}} or {{userFederationId}}/bind_credential/{{bindCredentials}}, {{userFederationId}} when default realm is set")
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}, {{realmId}}/{{userFederationId}}/{{bindCredentials}}")
 	}
 
 	d.Set("realm_id", realmId)

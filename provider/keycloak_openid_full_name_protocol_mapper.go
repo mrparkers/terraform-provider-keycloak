@@ -64,12 +64,11 @@ func resourceKeycloakOpenIdFullNameProtocolMapper() *schema.Resource {
 	}
 }
 
-func mapFromDataToOpenIdFullNameProtocolMapper(data *schema.ResourceData, client *keycloak.KeycloakClient) *keycloak.OpenIdFullNameProtocolMapper {
-	realmId := realmId(data, client)
+func mapFromDataToOpenIdFullNameProtocolMapper(data *schema.ResourceData) *keycloak.OpenIdFullNameProtocolMapper {
 	return &keycloak.OpenIdFullNameProtocolMapper{
 		Id:            data.Id(),
 		Name:          data.Get("name").(string),
-		RealmId:       realmId,
+		RealmId:       data.Get("realm_id").(string),
 		ClientId:      data.Get("client_id").(string),
 		ClientScopeId: data.Get("client_scope_id").(string),
 
@@ -98,7 +97,7 @@ func mapFromOpenIdFullNameMapperToData(mapper *keycloak.OpenIdFullNameProtocolMa
 func resourceKeycloakOpenIdFullNameProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data, keycloakClient)
+	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data)
 
 	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(openIdFullNameMapper)
 	if err != nil {
@@ -135,7 +134,7 @@ func resourceKeycloakOpenIdFullNameProtocolMapperRead(data *schema.ResourceData,
 func resourceKeycloakOpenIdFullNameProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data, keycloakClient)
+	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data)
 
 	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(openIdFullNameMapper)
 	if err != nil {
