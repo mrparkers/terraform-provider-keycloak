@@ -487,7 +487,7 @@ func getLdapUserFederationImportId(resourceName, bindCredential string) resource
 		id := rs.Primary.ID
 		realmId := rs.Primary.Attributes["realm_id"]
 
-		return fmt.Sprintf("%s/%s/bind_credential/%s", realmId, id, bindCredential), nil
+		return fmt.Sprintf("%s/%s/%s", realmId, id, bindCredential), nil
 	}
 }
 
