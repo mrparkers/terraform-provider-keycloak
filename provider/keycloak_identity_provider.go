@@ -39,7 +39,7 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Default:     true,
 				Description: "Enable/disable this identity provider.",
 			},
 			"store_token": {
