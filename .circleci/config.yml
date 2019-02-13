@@ -1,6 +1,12 @@
 version: 2
+workflows:
+  version: 2
+  test:
+    jobs:
+      - client-credentials
+      - password
 jobs:
-  build:
+  test-template: &test-template
     docker:
     - image: circleci/golang:1.11.4
     - image: jboss/keycloak:4.2.1.Final
@@ -10,11 +16,6 @@ jobs:
         KEYCLOAK_USER: keycloak
         KEYCLOAK_PASSWORD: password
     working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
-    environment:
-      GO111MODULE: "on"
-      KEYCLOAK_CLIENT_ID: "terraform"
-      KEYCLOAK_CLIENT_SECRET: "884e0f95-0f42-4a63-9b1f-94274655669e"
-      KEYCLOAK_URL: "http://localhost:8080"
     steps:
     - checkout
     - restore_cache:
@@ -30,3 +31,20 @@ jobs:
           ./scripts/wait-for-local-keycloak.sh
           ./scripts/create-terraform-client.sh
           make testacc
+  client-credentials:
+    <<: *test-template
+    environment:
+      GO111MODULE: "on"
+      KEYCLOAK_CLIENT_ID: terraform
+      KEYCLOAK_URL: http://localhost:8080
+      KEYCLOAK_REALM: master
+      KEYCLOAK_CLIENT_SECRET: 884e0f95-0f42-4a63-9b1f-94274655669e
+  password:
+    <<: *test-template
+    environment:
+      GO111MODULE: "on"
+      KEYCLOAK_CLIENT_ID: admin-cli
+      KEYCLOAK_URL: http://localhost:8080
+      KEYCLOAK_REALM: master
+      KEYCLOAK_USER: keycloak
+      KEYCLOAK_PASSWORD: password

@@ -140,7 +140,6 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapperCreate(data *schema.Resou
 
 func resourceKeycloakOpenIdHardcodedClaimProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)

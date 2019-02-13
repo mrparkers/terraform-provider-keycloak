@@ -10,8 +10,8 @@ import (
 
 var requiredEnvironmentVariables = []string{
 	"KEYCLOAK_CLIENT_ID",
-	"KEYCLOAK_CLIENT_SECRET",
 	"KEYCLOAK_URL",
+	"KEYCLOAK_REALM",
 }
 
 // Some actions, such as creating a realm, require a refresh
@@ -29,13 +29,22 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		}
 	}
 
+	if v := os.Getenv("KEYCLOAK_CLIENT_SECRET"); v == "" {
+		if v := os.Getenv("KEYCLOAK_USER"); v == "" {
+			t.Fatal("KEYCLOAK_USER must be set for acceptance tests")
+		}
+		if v := os.Getenv("KEYCLOAK_PASSWORD"); v == "" {
+			t.Fatal("KEYCLOAK_PASSWORD must be set for acceptance tests")
+		}
+	}
+
 	// Disable [DEBUG] logs which terraform typically handles for you. Re-enable when finished
 	if tfLogLevel := os.Getenv("TF_LOG"); tfLogLevel == "" {
 		log.SetOutput(ioutil.Discard)
 		defer log.SetOutput(os.Stdout)
 	}
 
-	keycloakClient, err := NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"))
+	keycloakClient, err := NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), os.Getenv("KEYCLOAK_USER"), os.Getenv("KEYCLOAK_PASSWORD"))
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
@@ -51,10 +60,14 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		t.Fatalf("%s", err)
 	}
 
+	var oldAccessToken, oldRefreshToken, oldTokenType string
+
 	// A following GET for this realm will result in a 403, so we should save the current access and refresh token
-	oldAccessToken := keycloakClient.clientCredentials.AccessToken
-	oldRefreshToken := keycloakClient.clientCredentials.RefreshToken
-	oldTokenType := keycloakClient.clientCredentials.TokenType
+	if keycloakClient.clientCredentials.GrantType == "client_credentials" {
+		oldAccessToken = keycloakClient.clientCredentials.AccessToken
+		oldRefreshToken = keycloakClient.clientCredentials.RefreshToken
+		oldTokenType = keycloakClient.clientCredentials.TokenType
+	}
 
 	_, err = keycloakClient.GetRealm(realmName) // This should not fail since it will automatically refresh and try again
 	if err != nil {
@@ -67,19 +80,21 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		t.Fatalf("%s", err)
 	}
 
-	newAccessToken := keycloakClient.clientCredentials.AccessToken
-	newRefreshToken := keycloakClient.clientCredentials.RefreshToken
-	newTokenType := keycloakClient.clientCredentials.TokenType
+	if keycloakClient.clientCredentials.GrantType == "client_credentials" {
+		newAccessToken := keycloakClient.clientCredentials.AccessToken
+		newRefreshToken := keycloakClient.clientCredentials.RefreshToken
+		newTokenType := keycloakClient.clientCredentials.TokenType
 
-	if oldAccessToken == newAccessToken {
-		t.Fatalf("expected access token to update after refresh")
-	}
+		if oldAccessToken == newAccessToken {
+			t.Fatalf("expected access token to update after refresh")
+		}
 
-	if oldRefreshToken == newRefreshToken {
-		t.Fatalf("expected refresh token to update after refresh")
-	}
+		if oldRefreshToken == newRefreshToken {
+			t.Fatalf("expected refresh token to update after refresh")
+		}
 
-	if oldTokenType != newTokenType {
-		t.Fatalf("expected token type to remain the same after refresh")
+		if oldTokenType != newTokenType {
+			t.Fatalf("expected token type to remain the same after refresh")
+		}
 	}
 }

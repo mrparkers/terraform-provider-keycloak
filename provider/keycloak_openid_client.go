@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -226,12 +227,11 @@ func resourceKeycloakOpenidClientDelete(data *schema.ResourceData, meta interfac
 
 func resourceKeycloakOpenidClientImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-
-	realm := parts[0]
-	id := parts[1]
-
-	d.Set("realm_id", realm)
-	d.SetId(id)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{openidClientId}}")
+	}
+	d.Set("realm_id", parts[0])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }

@@ -8,18 +8,15 @@ import (
 
 func genericProtocolMapperImport(data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(data.Id(), "/")
-
 	if len(parts) != 4 {
-		return nil, fmt.Errorf("invalid import. supported import formats: {{realmId}}/client/{{clientId}}/{{protocolMapperId}} or {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}")
+		return nil, fmt.Errorf("invalid import. supported import formats: {{realmId}}/client/{{clientId}}/{{protocolMapperId}}, {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}")
 	}
 
-	realmId := parts[0]
 	parentResourceType := parts[1]
 	parentResourceId := parts[2]
-	mapperId := parts[3]
 
-	data.Set("realm_id", realmId)
-	data.SetId(mapperId)
+	data.Set("realm_id", parts[0])
+	data.SetId(parts[3])
 
 	if parentResourceType == "client" {
 		data.Set("client_id", parentResourceId)

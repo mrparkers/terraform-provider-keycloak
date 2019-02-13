@@ -35,7 +35,6 @@ func resourceKeycloakOpenidClientDefaultScopes() *schema.Resource {
 
 func resourceKeycloakOpenidClientDefaultScopesCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	defaultScopes := data.Get("default_scopes").(*schema.Set)

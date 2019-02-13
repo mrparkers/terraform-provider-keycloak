@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -146,13 +147,13 @@ func resourceKeycloakLdapFullNameMapperDelete(data *schema.ResourceData, meta in
 func resourceKeycloakLdapGenericMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	realm := parts[0]
-	ldapUserFederationId := parts[1]
-	id := parts[2]
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}/{{userFederationMapperId}}")
+	}
 
-	d.Set("realm_id", realm)
-	d.Set("ldap_user_federation_id", ldapUserFederationId)
-	d.SetId(id)
+	d.Set("realm_id", parts[0])
+	d.Set("ldap_user_federation_id", parts[1])
+	d.SetId(parts[2])
 
 	return []*schema.ResourceData{d}, nil
 }

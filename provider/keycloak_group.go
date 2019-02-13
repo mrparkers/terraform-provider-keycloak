@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -120,11 +121,10 @@ func resourceKeycloakGroupDelete(data *schema.ResourceData, meta interface{}) er
 func resourceKeycloakGroupImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	realm := parts[0]
-	id := parts[1]
-
-	d.Set("realm_id", realm)
-	d.SetId(id)
-
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{groupId}}")
+	}
+	d.Set("realm_id", parts[0])
+	d.SetId(parts[1])
 	return []*schema.ResourceData{d}, nil
 }

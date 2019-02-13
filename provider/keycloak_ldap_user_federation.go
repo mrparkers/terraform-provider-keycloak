@@ -40,7 +40,6 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				ForceNew:    true,
 				Description: "The realm this provider will provide user federation for.",
 			},
-
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -53,7 +52,6 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Default:     0,
 				Description: "Priority of this provider when looking up users. Lower values are first.",
 			},
-
 			"import_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -73,7 +71,6 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Default:     false,
 				Description: "When true, newly created users will be synced back to LDAP.",
 			},
-
 			"vendor": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -367,16 +364,21 @@ func resourceKeycloakLdapUserFederationDelete(data *schema.ResourceData, meta in
 func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	realm := parts[0]
-	id := parts[1]
-
-	d.Set("realm_id", realm)
-	d.SetId(id)
-
-	if len(parts) == 3 { // bind_credential was specified
-		bindCredential := parts[2]
-		d.Set("bind_credential", bindCredential)
+	var realmId, id string
+	switch {
+	case len(parts) == 2:
+		realmId = parts[0]
+		id = parts[1]
+	case len(parts) == 3:
+		realmId = parts[0]
+		id = parts[1]
+		d.Set("bind_credential", parts[2])
+	default:
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}, {{realmId}}/{{userFederationId}}/{{bindCredentials}}")
 	}
+
+	d.Set("realm_id", realmId)
+	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
 }

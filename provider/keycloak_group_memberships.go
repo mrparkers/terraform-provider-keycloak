@@ -36,9 +36,9 @@ func resourceKeycloakGroupMemberships() *schema.Resource {
 func resourceKeycloakGroupMembershipsCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
 	members := data.Get("members").(*schema.Set).List()
+	realmId := data.Get("realm_id").(string)
 
 	err := keycloakClient.ValidateGroupMembers(members)
 	if err != nil {
