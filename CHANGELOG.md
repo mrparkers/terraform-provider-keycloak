@@ -1,3 +1,9 @@
+## 1.5.0 (Unreleased)
+
+FEATURES:
+
+* adds support for non-master realms and resource owner password grant for Keycloak authentication ([#88](https://github.com/mrparkers/terraform-provider-keycloak/pull/88))
+
 ## 1.4.0 (January 28, 2019)
 
 FEATURES:
