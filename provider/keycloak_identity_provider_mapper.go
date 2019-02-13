@@ -8,7 +8,7 @@ import (
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-func resourceKeycloakIdentityMapperProvider() *schema.Resource {
+func resourceKeycloakIdentityProviderMapper() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceKeycloakIdentityProviderMapperCreate,
 		Read:   resourceKeycloakIdentityProviderMapperRead,

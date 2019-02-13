@@ -29,6 +29,8 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_saml_client":                             resourceKeycloakSamlClient(),
 			"keycloak_saml_user_attribute_protocol_mapper":     resourceKeycloakSamlUserAttributeProtocolMapper(),
 			"keycloak_saml_user_property_protocol_mapper":      resourceKeycloakSamlUserPropertyProtocolMapper(),
+			"keycloak_identity_provider":                       resourceKeycloakIdentityProviderMapper(),
+			"keycloak_identity_provider_mapper":                resourceKeycloakIdentityProvider(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
