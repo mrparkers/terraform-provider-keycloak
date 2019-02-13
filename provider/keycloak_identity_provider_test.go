@@ -243,7 +243,7 @@ func getIdentityProviderFromState(s *terraform.State, resourceName string) (*key
 
 func testKeycloakIdentityProvider_basic(realm, alias string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+resource keycloak_realm realm {
    realm = "%s"
 }
 
@@ -261,11 +261,11 @@ resource keycloak_identity_provider saml {
 
 func testKeycloakIdentityProvider_basicFromInterface(alias *keycloak.IdentityProvider) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource "keycloak_identity_provider" "saml" {
+resource keycloak_identity_provider saml {
    alias   = "%s"
    realm   = "master"
    enabled = %t
@@ -279,11 +279,11 @@ resource "keycloak_identity_provider" "saml" {
 
 func testKeycloakIdentityProvider_basicWithAttrValidation(attr, realm, alias, val string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource "keycloak_identity_provider" "saml" {
+resource keycloak_identity_provider saml {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
   %s      = "%s"
@@ -297,11 +297,11 @@ resource "keycloak_identity_provider" "saml" {
 
 func testKeycloakIdentityProvider_nobindDnValidation(realm, alias string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource "keycloak_identity_provider" "saml" {
+resource keycloak_identity_provider saml {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
   enabled = true
@@ -315,11 +315,11 @@ resource "keycloak_identity_provider" "saml" {
 
 func testKeycloakIdentityProvider_noBindCredentialValidation(realm, alias string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource "keycloak_identity_provider" "saml" {
+resource keycloak_identity_provider saml {
   alias   = %s"
   realm   = "${keycloak_realm.realm.realm}"
   enabled = true
@@ -333,11 +333,11 @@ resource "keycloak_identity_provider" "saml" {
 
 func testKeycloakIdentityProvider_basicWithSyncPeriod(realm, alias string, fullSyncPeriod, changedSyncPeriod int) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource "keycloak_identity_provider" "saml" {
+resource keycloak_identity_provider saml {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
   enabled = true
@@ -351,11 +351,11 @@ resource "keycloak_identity_provider" "saml" {
 
 func testKeycloakIdentityProvider_basicWithTimeouts(realm, alias string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource "keycloak_identity_provider" "saml" {
+resource keycloak_identity_provider saml {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
   enabled = true
