@@ -94,19 +94,17 @@ func TestAccKeycloakIdentityProvider_basicUpdateRealm(t *testing.T) {
 
 func TestAccKeycloakIdentityProvider_basicUpdateAll(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
-	firstEnabled := randomBool()
 
-	firstalias := &keycloak.IdentityProvider{
+	firstAlias := &keycloak.IdentityProvider{
 		Realm:      realmName,
 		Alias:      "terraform-" + acctest.RandString(10),
 		ProviderId: "saml",
-		Enabled:    firstEnabled,
 		Config: &keycloak.IdentityProviderConfig{
 			SingleSignOnServiceUrl: "alias://" + acctest.RandString(10),
 		},
 	}
 
-	secondalias := &keycloak.IdentityProvider{
+	secondAlias := &keycloak.IdentityProvider{
 		Realm:      realmName,
 		Alias:      "terraform-" + acctest.RandString(10),
 		ProviderId: "saml",
@@ -121,11 +119,11 @@ func TestAccKeycloakIdentityProvider_basicUpdateAll(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdentityProvider_basicFromInterface(firstalias),
+				Config: testKeycloakIdentityProvider_basicFromInterface(firstAlias),
 				Check:  testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
 			},
 			{
-				Config: testKeycloakIdentityProvider_basicFromInterface(secondalias),
+				Config: testKeycloakIdentityProvider_basicFromInterface(secondAlias),
 				Check:  testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
 			},
 		},
@@ -148,28 +146,6 @@ func TestAccKeycloakIdentityProvider_unsetTimeoutDurationStrings(t *testing.T) {
 			{
 				Config: testKeycloakIdentityProvider_basic(realmName, aliasName),
 				Check:  testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakIdentityProvider_displayNameValidation(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	aliasName := "terraform-" + acctest.RandString(10)
-	displayName := "terraform-" + acctest.RandString(10)
-
-	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakIdentityProviderDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config:      testKeycloakIdentityProvider_basicWithAttrValidation("display_name", realmName, aliasName, acctest.RandString(10)),
-				ExpectError: regexp.MustCompile("expected edit_mode to be one of .+ got .+"),
-			},
-			{
-				Config: testKeycloakIdentityProvider_basicWithAttrValidation("display_name", realmName, aliasName, displayName),
-				Check:  resource.TestCheckResourceAttr("keycloak_identity_provider.saml", "display_name", displayName),
 			},
 		},
 	})
@@ -275,24 +251,6 @@ resource keycloak_identity_provider saml {
    }
 }
    `, alias.Realm, alias.Alias, alias.Enabled)
-}
-
-func testKeycloakIdentityProvider_basicWithAttrValidation(attr, realm, alias, val string) string {
-	return fmt.Sprintf(`
-resource keycloak_realm realm {
-   realm = "%s"
-}
-
-resource keycloak_identity_provider saml {
-  alias   = "%s"
-  realm   = "${keycloak_realm.realm.realm}"
-  %s      = "%s"
-
-  saml {
-    single_sign_on_service_url = "https://example.com"
-  }
-}
-   `, realm, alias, attr, val)
 }
 
 func testKeycloakIdentityProvider_nobindDnValidation(realm, alias string) string {
