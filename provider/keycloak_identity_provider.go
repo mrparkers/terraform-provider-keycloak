@@ -313,7 +313,7 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 
 func getIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
 	rec := &keycloak.IdentityProvider{
-		InternalId:                data.Id(),
+		InternalId:                data.Get("internal_id").(string),
 		Realm:                     data.Get("realm").(string),
 		Alias:                     data.Get("alias").(string),
 		DisplayName:               data.Get("display_name").(string),
@@ -389,7 +389,7 @@ func getIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityP
 }
 
 func setIdentityProviderData(data *schema.ResourceData, identityProvider *keycloak.IdentityProvider) error {
-	data.SetId(identityProvider.Realm + "/" + identityProvider.Alias)
+	data.SetId(identityProvider.Alias)
 	data.Set("internal_id", identityProvider.InternalId)
 	data.Set("realm", identityProvider.Realm)
 	data.Set("alias", identityProvider.Alias)
@@ -528,7 +528,7 @@ func resourceKeycloakIdentityProviderImport(d *schema.ResourceData, _ interface{
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{identityProviderAlias}}")
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realm}}/{{identityProviderAlias}}")
 	}
 
 	d.Set("realm", parts[0])

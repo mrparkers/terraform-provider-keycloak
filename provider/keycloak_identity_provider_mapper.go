@@ -265,7 +265,16 @@ func configMapperHash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
-func resourceKeycloakIdentityProviderMapperImport(data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	data.Id()
-	return []*schema.ResourceData{data}, nil
+func resourceKeycloakIdentityProviderMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realm}}/{{identityProviderAlias}}/{{identityProviderMapperId}}")
+	}
+
+	d.Set("realm", parts[0])
+	d.Set("identity_provider_alias", parts[1])
+	d.SetId(parts[2])
+
+	return []*schema.ResourceData{d}, nil
 }
