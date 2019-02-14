@@ -97,6 +97,7 @@ func TestAccKeycloakIdentityProvider_basicUpdateAll(t *testing.T) {
 	firstAlias := &keycloak.IdentityProvider{
 		Realm:      realmName,
 		Alias:      "terraform-" + acctest.RandString(10),
+		Enabled:    true,
 		ProviderId: "saml",
 		Config: &keycloak.IdentityProviderConfig{
 			SingleSignOnServiceUrl: "alias://" + acctest.RandString(10),
@@ -106,6 +107,7 @@ func TestAccKeycloakIdentityProvider_basicUpdateAll(t *testing.T) {
 	secondAlias := &keycloak.IdentityProvider{
 		Realm:      realmName,
 		Alias:      "terraform-" + acctest.RandString(10),
+		Enabled:    true,
 		ProviderId: "saml",
 		Config: &keycloak.IdentityProviderConfig{
 			SingleSignOnServiceUrl: "alias://" + acctest.RandString(10),
@@ -225,7 +227,6 @@ resource keycloak_realm realm {
 resource keycloak_identity_provider saml {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
-  enabled = true
 
   saml {
     single_sign_on_service_url = "https://example.com"
@@ -243,13 +244,12 @@ resource keycloak_realm realm {
 resource keycloak_identity_provider saml {
    alias   = "%s"
    realm   = "master"
-   enabled = %t
 
    saml {
       single_sign_on_service_url = "https://example.com"
    }
 }
-   `, alias.Realm, alias.Alias, alias.Enabled)
+   `, alias.Realm, alias.Alias)
 }
 
 func testKeycloakIdentityProvider_nobindDnValidation(realm, alias string) string {
@@ -261,7 +261,6 @@ resource keycloak_realm realm {
 resource keycloak_identity_provider saml {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
-  enabled = true
 
   saml {
     single_sign_on_service_url = "https://example.com"
@@ -279,7 +278,6 @@ resource keycloak_realm realm {
 resource keycloak_identity_provider saml {
   alias   = %s"
   realm   = "${keycloak_realm.realm.realm}"
-  enabled = true
 
   saml {
     single_sign_on_service_url = "https://example.com"
@@ -297,7 +295,6 @@ resource keycloak_realm realm {
 resource keycloak_identity_provider saml {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
-  enabled = true
 
   saml {
     single_sign_on_service_url = "https://example.com"
@@ -315,7 +312,6 @@ resource keycloak_realm realm {
 resource keycloak_identity_provider saml {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
-  enabled = true
 
   saml {
     single_sign_on_service_url = "https://example.com"
