@@ -313,7 +313,6 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 
 func getIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
 	rec := &keycloak.IdentityProvider{
-		InternalId:                data.Get("internal_id").(string),
 		Realm:                     data.Get("realm").(string),
 		Alias:                     data.Get("alias").(string),
 		DisplayName:               data.Get("display_name").(string),
