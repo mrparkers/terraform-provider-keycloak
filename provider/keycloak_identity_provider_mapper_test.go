@@ -11,6 +11,7 @@ import (
 
 func TestAccKeycloakIdentityProviderMapper_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
+	aliasName := "terraform-" + acctest.RandString(10)
 	identityProviderMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -19,7 +20,7 @@ func TestAccKeycloakIdentityProviderMapper_basic(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdentityProviderMapper_basic(realmName, identityProviderMapperName),
+				Config: testKeycloakIdentityProviderMapper_basic(realmName, aliasName, identityProviderMapperName),
 				Check:  testAccCheckKeycloakIdentityProviderMapperExists("keycloak_identity_provider_mapper.saml_mapper"),
 			},
 			{
@@ -36,6 +37,7 @@ func TestAccKeycloakIdentityProviderMapper_createAfterManualDestroy(t *testing.T
 	var mapper = &keycloak.IdentityProviderMapper{}
 
 	realmName := "terraform-" + acctest.RandString(10)
+	aliasName := "terraform-" + acctest.RandString(10)
 	identityProviderMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -44,7 +46,7 @@ func TestAccKeycloakIdentityProviderMapper_createAfterManualDestroy(t *testing.T
 		CheckDestroy: testAccCheckKeycloakIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdentityProviderMapper_basic(realmName, identityProviderMapperName),
+				Config: testKeycloakIdentityProviderMapper_basic(realmName, aliasName, identityProviderMapperName),
 				Check:  testAccCheckKeycloakIdentityProviderMapperFetch("keycloak_identity_provider_mapper.saml_mapper", mapper),
 			},
 			{
@@ -56,7 +58,7 @@ func TestAccKeycloakIdentityProviderMapper_createAfterManualDestroy(t *testing.T
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakIdentityProviderMapper_basic(realmName, identityProviderMapperName),
+				Config: testKeycloakIdentityProviderMapper_basic(realmName, aliasName, identityProviderMapperName),
 				Check:  testAccCheckKeycloakIdentityProviderMapperFetch("keycloak_identity_provider_mapper.saml_mapper", mapper),
 			},
 		},
@@ -66,6 +68,8 @@ func TestAccKeycloakIdentityProviderMapper_createAfterManualDestroy(t *testing.T
 func TestAccKeycloakIdentityProviderMapper_updateUserFederation(t *testing.T) {
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
+	aliasOne := "terraform-" + acctest.RandString(10)
+	aliasTwo := "terraform-" + acctest.RandString(10)
 	mapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -74,11 +78,11 @@ func TestAccKeycloakIdentityProviderMapper_updateUserFederation(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdentityProviderMapper_updateUserFederationBefore(realmOne, realmTwo, mapperName),
+				Config: testKeycloakIdentityProviderMapper_updateUserFederationBefore(realmOne, realmTwo, aliasOne, aliasTwo, mapperName),
 				Check:  testAccCheckKeycloakIdentityProviderMapperExists("keycloak_identity_provider_mapper.saml_mapper"),
 			},
 			{
-				Config: testKeycloakIdentityProviderMapper_updateUserFederationAfter(realmOne, realmTwo, mapperName),
+				Config: testKeycloakIdentityProviderMapper_updateUserFederationAfter(realmOne, realmTwo, aliasOne, aliasTwo, mapperName),
 				Check:  testAccCheckKeycloakIdentityProviderMapperExists("keycloak_identity_provider_mapper.saml_mapper"),
 			},
 		},
@@ -104,6 +108,7 @@ func testAccCheckKeycloakIdentityProviderMapperFetch(resourceName string, mapper
 		}
 
 		mapper.Id = fetchedMapper.Id
+		mapper.IdentityProviderAlias = fetchedMapper.IdentityProviderAlias
 		mapper.Realm = fetchedMapper.Realm
 
 		return nil
@@ -166,14 +171,14 @@ func getGenericMapperImportId(resourceName string) resource.ImportStateIdFunc {
 	}
 }
 
-func testKeycloakIdentityProviderMapper_basic(realm, mapperName string) string {
+func testKeycloakIdentityProviderMapper_basic(realm, alias, mapperName string) string {
 	return fmt.Sprintf(`
 resource keycloak_realm realm {
    realm = "%s"
 }
 
 resource keycloak_identity_provider saml {
-  alias   = "saml"
+  alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
   enabled = true
 
@@ -192,10 +197,10 @@ resource keycloak_identity_provider_mapper saml_mapper {
     template = "asdasdasdadsdad"
   }
 }
-   `, realm, mapperName)
+   `, realm, alias, mapperName)
 }
 
-func testKeycloakIdentityProviderMapper_updateUserFederationBefore(realmOne, realmTwo, mapperName string) string {
+func testKeycloakIdentityProviderMapper_updateUserFederationBefore(realmOne, realmTwo, aliasOne, aliasTwo, mapperName string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm_one" {
    realm = "%s"
@@ -206,7 +211,7 @@ resource "keycloak_realm" "realm_two" {
 }
 
 resource "keycloak_identity_provider" "saml_one" {
-  alias   = "saml"
+  alias   = "%s"
   realm   = "${keycloak_realm.realm_one.realm}"
   enabled = true
 
@@ -216,7 +221,7 @@ resource "keycloak_identity_provider" "saml_one" {
 }
 
 resource "keycloak_identity_provider" "saml_two" {
-  alias   = "saml"
+  alias   = "%s"
   realm   = "${keycloak_realm.realm_two.realm}"
   enabled = true
 
@@ -226,7 +231,7 @@ resource "keycloak_identity_provider" "saml_two" {
 }
 
 resource keycloak_identity_provider_mapper saml_mapper {
-  realm                    = "${keycloak_realm.realm_one.realm"
+  realm                    = "${keycloak_realm.realm_one.realm}"
   name                     = "%s"
   identity_provider_alias  = "${keycloak_identity_provider.saml.alias}"
   identity_provider_mapper = "user-attribute-mapper"
@@ -235,10 +240,10 @@ resource keycloak_identity_provider_mapper saml_mapper {
     template = "asdasdasdadsdad"
   }
 }
-   `, realmOne, realmTwo, mapperName)
+   `, realmOne, realmTwo, aliasOne, aliasTwo, mapperName)
 }
 
-func testKeycloakIdentityProviderMapper_updateUserFederationAfter(realmOne, realmTwo, mapperName string) string {
+func testKeycloakIdentityProviderMapper_updateUserFederationAfter(realmOne, realmTwo, aliasOne, aliasTwo, mapperName string) string {
 	return fmt.Sprintf(`
 resource keycloak_realm realm_one {
    realm = "%s"
@@ -249,7 +254,7 @@ resource keycloak_realm realm_two {
 }
 
 resource keycloak_identity_provider saml_one {
-  alias   = "saml"
+  alias   = "%s"
   realm   = "${keycloak_realm.realm_one.realm}"
   enabled = true
 
@@ -259,7 +264,7 @@ resource keycloak_identity_provider saml_one {
 }
 
 resource keycloak_identity_provider saml_two {
-  alias   = "saml"
+  alias   = "%s"
   realm   = "${keycloak_realm.realm_two.realm}"
   enabled = true
 
@@ -278,5 +283,5 @@ resource keycloak_identity_provider_mapper saml_mapper {
     template = "asdasdasdadsdad"
   }
 }
-   `, realmOne, realmTwo, mapperName)
+   `, realmOne, realmTwo, aliasOne, aliasTwo, mapperName)
 }

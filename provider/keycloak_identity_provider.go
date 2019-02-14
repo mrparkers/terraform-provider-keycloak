@@ -39,7 +39,7 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Default:     true,
 				Description: "Enable/disable this identity provider.",
 			},
 			"store_token": {
@@ -527,11 +527,12 @@ func configHash(v interface{}) int {
 func resourceKeycloakIdentityProviderImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	realm := parts[0]
-	alias := parts[1]
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{identityProviderAlias}}")
+	}
 
-	d.Set("realm", realm)
-	d.Set("alias", alias)
+	d.Set("realm", parts[0])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }

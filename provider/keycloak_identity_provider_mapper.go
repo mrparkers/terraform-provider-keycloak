@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strings"
 )
 
 func resourceKeycloakIdentityProviderMapper() *schema.Resource {
@@ -40,6 +41,14 @@ func resourceKeycloakIdentityProviderMapper() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "IDP Mapper Type",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					alias := d.Get("identity_provider_alias").(string)
+					oldParsed := strings.TrimPrefix(old, fmt.Sprintf("%s-", alias))
+					if strings.ToLower(oldParsed) == strings.ToLower(new) {
+						return true
+					}
+					return false
+				},
 			},
 			"oidc": {
 				Type:          schema.TypeSet,
