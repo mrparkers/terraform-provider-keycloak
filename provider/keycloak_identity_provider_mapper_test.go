@@ -166,8 +166,8 @@ func getGenericMapperImportId(resourceName string) resource.ImportStateIdFunc {
 		}
 
 		id := rs.Primary.ID
-		aliasName := rs.Primary.IdentityProviderAlias
-		realm := rs.Primary.Realm
+		realm := rs.Primary.Attributes["realm"]
+		aliasName := rs.Primary.Attributes["identity_provider_alias"]
 
 		return fmt.Sprintf("%s/%s/%s/", realm, aliasName, id), nil
 	}
