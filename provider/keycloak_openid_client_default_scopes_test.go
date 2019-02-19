@@ -51,6 +51,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_updateClientForceNew(t *testing.T)
 	clientScopes := []string{
 		"profile",
 		"email",
+		"web-origins",
+		"roles",
 		clientScope,
 	}
 
