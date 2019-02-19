@@ -19,6 +19,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_basic(t *testing.T) {
 	clientScopes := []string{
 		"profile",
 		"email",
+		"web-origins",
+		"roles",
 		clientScope,
 	}
 
@@ -49,6 +51,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_updateClientForceNew(t *testing.T)
 	clientScopes := []string{
 		"profile",
 		"email",
+		"web-origins",
+		"roles",
 		clientScope,
 	}
 
@@ -76,6 +80,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_updateInPlace(t *testing.T) {
 	allClientScopes := []string{
 		"profile",
 		"email",
+		"web-origins",
+		"roles",
 		clientScope,
 	}
 
@@ -151,6 +157,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeAdd(t *testing.T) {
 	clientScopes := []string{
 		"profile",
 		"email",
+		"web-origins",
+		"roles",
 		"terraform-client-scope-" + acctest.RandString(10),
 		"terraform-client-scope-" + acctest.RandString(10),
 		"terraform-client-scope-" + acctest.RandString(10),
@@ -194,6 +202,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeRemove(t *testing.T) 
 	clientScopesAttachedByDefault := []string{
 		"profile",
 		"email",
+		"web-origins",
+		"roles",
 	}
 	randomClientScopes := []string{
 		"terraform-client-scope-" + acctest.RandString(10),
@@ -251,6 +261,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_noImportNeeded(t *testing.T) {
 	clientScopes := []string{
 		"profile",
 		"email",
+		"web-origins",
+		"roles",
 		clientScope,
 	}
 
@@ -417,6 +429,8 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 	default_scopes = [
         "profile",
         "email",
+		"roles",
+		"web-origins",
         "${keycloak_openid_client_scope.client_scope.name}"
     ]
 }
@@ -496,6 +510,8 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 	default_scopes = [
         "profile",
         "email",
+		"roles",
+		"web-origins",
         "${keycloak_openid_client_scope.client_scope.name}"
     ]
 }
@@ -529,6 +545,8 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 	default_scopes = [
         "profile",
         "email",
+		"roles",
+		"web-origins",
         "${keycloak_openid_client_scope.client_scope.name}"
     ]
 }
