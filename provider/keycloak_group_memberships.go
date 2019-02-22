@@ -63,7 +63,7 @@ func resourceKeycloakGroupMembershipsRead(data *schema.ResourceData, meta interf
 
 	usersInGroup, err := keycloakClient.GetGroupMembers(realmId, groupId)
 	if err != nil {
-		return err
+		return handleNotFoundError(err, data)
 	}
 
 	var members []string

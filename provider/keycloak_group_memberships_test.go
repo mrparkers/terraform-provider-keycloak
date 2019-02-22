@@ -269,6 +269,51 @@ func TestAccKeycloakGroupMemberships_validateLowercaseUsernames(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakGroupMemberships_createAfterManualDestroy(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	groupName := "terraform-group-" + acctest.RandString(10)
+	username := "terraform-user-" + acctest.RandString(10)
+	resourceName := "keycloak_group_memberships.group_members"
+
+	var groupId *string
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGroupMemberships_basic(realmName, groupName, username),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUserBelongsToGroup(resourceName, username),
+					func(s *terraform.State) error {
+						rs, ok := s.RootModule().Resources[resourceName]
+						if !ok {
+							return fmt.Errorf("resource not found: %s", resourceName)
+						}
+
+						stateGroupId := rs.Primary.Attributes["group_id"]
+						groupId = &stateGroupId
+
+						return nil
+					},
+				),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteGroup(realmName, *groupId)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakGroupMemberships_basic(realmName, groupName, username),
+				Check:  testAccCheckUserBelongsToGroup(resourceName, username),
+			},
+		},
+	})
+}
+
 func testAccGetUsersInGroupFromGroupMembershipsState(resourceName string, s *terraform.State) ([]*keycloak.User, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
