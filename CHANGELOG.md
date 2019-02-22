@@ -1,4 +1,4 @@
-## 1.5.0 (Unreleased)
+## 1.5.0 (February 22, 2019)
 
 FEATURES:
 
@@ -7,6 +7,10 @@ FEATURES:
 IMPROVEMENTS:
 
 * support Keycloak v4.8.3.Final and Terraform v0.11.11 ([#93](https://github.com/mrparkers/terraform-provider-keycloak/pull/93))
+
+BUG FIXES:
+
+* handle 404 errors when reading a group for group memberships ([#95](https://github.com/mrparkers/terraform-provider-keycloak/pull/95))
 
 ## 1.4.0 (January 28, 2019)
 
