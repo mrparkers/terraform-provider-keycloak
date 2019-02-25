@@ -157,7 +157,22 @@ func (keycloakClient *KeycloakClient) attachOpenidClientScopes(realmId, clientId
 		return err
 	}
 
+	var attachedClientScopes []*OpenidClientScope
+	if t == "optional" {
+		attachedDefaultClientScopes, err := keycloakClient.GetOpenidClientDefaultScopes(realmId, clientId)
+		if err != nil {
+			return err
+		}
+		attachedClientScopes = append(attachedClientScopes, attachedDefaultClientScopes...)
+	}
+
 	for _, openidClientScope := range allOpenidClientScopes {
+		for _, attachedClientScope := range attachedClientScopes {
+			if openidClientScope.Id == attachedClientScope.Id {
+				return fmt.Errorf("validation error: scope %s is already attached to client as a default scope", attachedClientScope.Name)
+			}
+		}
+
 		err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, openidClientScope.Id), nil)
 		if err != nil {
 			return err
