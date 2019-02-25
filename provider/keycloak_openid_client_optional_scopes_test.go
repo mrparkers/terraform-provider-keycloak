@@ -423,10 +423,10 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 	realm_id       = "${keycloak_realm.realm.id}"
 	client_id      = "${keycloak_openid_client.client.id}"
 	optional_scopes = [
-        "address",
-        "phone",
+		"address",
+		"phone",
 		"offline_access",
-        "${keycloak_openid_client_scope.client_scope.name}"
+		"${keycloak_openid_client_scope.client_scope.name}"
     ]
 }
 	`, realm, client, clientScope)
@@ -503,10 +503,10 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 	realm_id       = "${keycloak_realm.realm.id}"
 	client_id      = "%s"
 	optional_scopes = [
-        "address",
-        "phone",
+		"address",
+		"phone",
 		"offline_access",
-        "${keycloak_openid_client_scope.client_scope.name}"
+		"${keycloak_openid_client_scope.client_scope.name}"
     ]
 }
 	`, realm, clientScope, client)
@@ -537,10 +537,10 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 	realm_id       = "${keycloak_realm.realm.id}"
 	client_id      = "${keycloak_openid_client.client.id}"
 	optional_scopes = [
-        "address",
-        "phone",
+		"address",
+		"phone",
 		"offline_access",
-        "${keycloak_openid_client_scope.client_scope.name}"
+		"${keycloak_openid_client_scope.client_scope.name}"
     ]
 }
 	`, realm, client, clientScope)
@@ -599,10 +599,10 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 	realm_id       = "${keycloak_realm.realm.id}"
 	client_id      = "${keycloak_openid_client.client.id}"
 	optional_scopes = [
-        "address",
-        "phone",
+		"address",
+		"phone",
 		"offline_access",
-        "${keycloak_openid_client_scope.client_scope.name}"
+		"${keycloak_openid_client_scope.client_scope.name}"
     ]
 }
 	`, testKeycloakOpenidClientDefaultScopes_basic(realm, client, clientScope))
