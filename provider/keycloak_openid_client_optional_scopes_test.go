@@ -427,7 +427,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"phone",
 		"offline_access",
 		"${keycloak_openid_client_scope.client_scope.name}"
-    ]
+	]
 }
 	`, realm, client, clientScope)
 }
@@ -507,7 +507,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"phone",
 		"offline_access",
 		"${keycloak_openid_client_scope.client_scope.name}"
-    ]
+	]
 }
 	`, realm, clientScope, client)
 }
@@ -541,7 +541,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"phone",
 		"offline_access",
 		"${keycloak_openid_client_scope.client_scope.name}"
-    ]
+	]
 }
 	`, realm, client, clientScope)
 }
@@ -603,7 +603,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"phone",
 		"offline_access",
 		"${keycloak_openid_client_scope.client_scope.name}"
-    ]
+	]
 }
 	`, testKeycloakOpenidClientDefaultScopes_basic(realm, client, clientScope))
 }

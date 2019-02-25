@@ -427,7 +427,7 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 		"roles",
 		"web-origins",
         "${keycloak_openid_client_scope.client_scope.name}"
-    ]
+	]
 }
 	`, realm, client, clientScope)
 }
@@ -508,7 +508,7 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 		"roles",
 		"web-origins",
         "${keycloak_openid_client_scope.client_scope.name}"
-    ]
+	]
 }
 	`, realm, clientScope, client)
 }
@@ -543,7 +543,7 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 		"roles",
 		"web-origins",
         "${keycloak_openid_client_scope.client_scope.name}"
-    ]
+	]
 }
 	`, realm, client, clientScope)
 }
@@ -606,7 +606,7 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 		"roles",
 		"web-origins",
 		"${keycloak_openid_client_scope.client_scope.name}"
-    ]
+	]
 }
 	`, testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope))
 }
