@@ -121,15 +121,23 @@ func (keycloakClient *KeycloakClient) DeleteOpenidClient(realmId, id string) err
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s", realmId, id))
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidClientDefaultScopes(realmId, clientId string) ([]*OpenidClientScope, error) {
+func (keycloakClient *KeycloakClient) getOpenidClientScopes(realmId, clientId, t string) ([]*OpenidClientScope, error) {
 	var scopes []*OpenidClientScope
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes", realmId, clientId), &scopes)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes", realmId, clientId, t), &scopes)
 	if err != nil {
 		return nil, err
 	}
 
 	return scopes, nil
+}
+
+func (keycloakClient *KeycloakClient) GetOpenidClientDefaultScopes(realmId, clientId string) ([]*OpenidClientScope, error) {
+	return keycloakClient.getOpenidClientScopes(realmId, clientId, "default")
+}
+
+func (keycloakClient *KeycloakClient) GetOpenidClientOptionalScopes(realmId, clientId string) ([]*OpenidClientScope, error) {
+	return keycloakClient.getOpenidClientScopes(realmId, clientId, "optional")
 }
 
 func (keycloakClient *KeycloakClient) attachOpenidClientScopes(realmId, clientId, t string, scopeNames []string) error {
@@ -163,6 +171,10 @@ func (keycloakClient *KeycloakClient) AttachOpenidClientDefaultScopes(realmId, c
 	return keycloakClient.attachOpenidClientScopes(realmId, clientId, "default", scopeNames)
 }
 
+func (keycloakClient *KeycloakClient) AttachOpenidClientOptionalScopes(realmId, clientId string, scopeNames []string) error {
+	return keycloakClient.attachOpenidClientScopes(realmId, clientId, "optional", scopeNames)
+}
+
 func (keycloakClient *KeycloakClient) detachOpenidClientScopes(realmId, clientId, t string, scopeNames []string) error {
 	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopesWithFilter(realmId, includeOpenidClientScopesMatchingNames(scopeNames))
 	if err != nil {
@@ -181,4 +193,8 @@ func (keycloakClient *KeycloakClient) detachOpenidClientScopes(realmId, clientId
 
 func (keycloakClient *KeycloakClient) DetachOpenidClientDefaultScopes(realmId, clientId string, scopeNames []string) error {
 	return keycloakClient.detachOpenidClientScopes(realmId, clientId, "default", scopeNames)
+}
+
+func (keycloakClient *KeycloakClient) DetachOpenidClientOptionalScopes(realmId, clientId string, scopeNames []string) error {
+	return keycloakClient.detachOpenidClientScopes(realmId, clientId, "optional", scopeNames)
 }
