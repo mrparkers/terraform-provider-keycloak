@@ -158,18 +158,28 @@ func (keycloakClient *KeycloakClient) attachOpenidClientScopes(realmId, clientId
 	}
 
 	var attachedClientScopes []*OpenidClientScope
-	if t == "optional" {
+	var duplicateScopeAssignmentErrorMessage string
+	switch t {
+	case "optional":
 		attachedDefaultClientScopes, err := keycloakClient.GetOpenidClientDefaultScopes(realmId, clientId)
 		if err != nil {
 			return err
 		}
 		attachedClientScopes = append(attachedClientScopes, attachedDefaultClientScopes...)
+		duplicateScopeAssignmentErrorMessage = "validation error: scope %s is already attached to client as a default scope"
+	case "default":
+		attachedOptionalClientScopes, err := keycloakClient.GetOpenidClientOptionalScopes(realmId, clientId)
+		if err != nil {
+			return err
+		}
+		attachedClientScopes = append(attachedClientScopes, attachedOptionalClientScopes...)
+		duplicateScopeAssignmentErrorMessage = "validation error: scope %s is already attached to client as an optional scope"
 	}
 
 	for _, openidClientScope := range allOpenidClientScopes {
 		for _, attachedClientScope := range attachedClientScopes {
 			if openidClientScope.Id == attachedClientScope.Id {
-				return fmt.Errorf("validation error: scope %s is already attached to client as a default scope", attachedClientScope.Name)
+				return fmt.Errorf(duplicateScopeAssignmentErrorMessage, attachedClientScope.Name)
 			}
 		}
 

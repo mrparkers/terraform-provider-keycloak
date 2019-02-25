@@ -287,6 +287,32 @@ func TestAccKeycloakOpenidClientDefaultScopes_profileAndEmailDefaultScopes(t *te
 	})
 }
 
+// Keycloak throws a 500 if you attempt to attach an optional scope that is already attached as an optional scope
+func TestAccKeycloakOpenidClientDefaultScopes_validateDuplicateScopeAssignment(t *testing.T) {
+	realm := "terraform-realm-" + acctest.RandString(10)
+	client := "terraform-client-" + acctest.RandString(10)
+	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+
+	optionalClientScopes := append(preAssignedOptionalClientScopes, clientScope)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			// attach optional scopes, including the custom scope
+			{
+				Config: testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope),
+				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", optionalClientScopes),
+			},
+			// attach default scopes with the custom scope, expect an error since it is already in use
+			{
+				Config:      testKeycloakOpenidClientDefaultScopes_duplicateScopeAssignment(realm, client, clientScope),
+				ExpectError: regexp.MustCompile("validation error: scope .+ is already attached to client as an optional scope"),
+			},
+		},
+	})
+}
+
 func getDefaultClientScopesFromState(resourceName string, s *terraform.State) ([]*keycloak.OpenidClientScope, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -565,4 +591,22 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 	default_scopes = %s
 }
 	`, realm, client, clientScopeResources.String(), arrayOfStringsForTerraformResource(attachedClientScopesInterpolated))
+}
+
+func testKeycloakOpenidClientDefaultScopes_duplicateScopeAssignment(realm, client, clientScope string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "keycloak_openid_client_default_scopes" "default_scopes" {
+	realm_id       = "${keycloak_realm.realm.id}"
+	client_id      = "${keycloak_openid_client.client.id}"
+	default_scopes = [
+        "profile",
+        "email",
+		"roles",
+		"web-origins",
+        "${keycloak_openid_client_scope.client_scope.name}"
+    ]
+}
+	`, testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope))
 }
