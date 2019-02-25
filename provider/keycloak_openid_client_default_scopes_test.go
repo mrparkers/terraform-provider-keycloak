@@ -11,18 +11,15 @@ import (
 	"testing"
 )
 
+// All openid clients in Keycloak will automatically have these scopes listed as "default client scopes".
+var preAssignedDefaultClientScopes = []string{"profile", "email", "web-origins", "roles"}
+
 func TestAccKeycloakOpenidClientDefaultScopes_basic(t *testing.T) {
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	clientScopes := []string{
-		"profile",
-		"email",
-		"web-origins",
-		"roles",
-		clientScope,
-	}
+	clientScopes := append(preAssignedDefaultClientScopes, clientScope)
 
 	resource.Test(t, resource.TestCase{
 		Providers: testAccProviders,
@@ -48,13 +45,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_updateClientForceNew(t *testing.T)
 	clientTwo := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	clientScopes := []string{
-		"profile",
-		"email",
-		"web-origins",
-		"roles",
-		clientScope,
-	}
+	clientScopes := append(preAssignedDefaultClientScopes, clientScope)
 
 	resource.Test(t, resource.TestCase{
 		Providers: testAccProviders,
@@ -77,13 +68,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_updateInPlace(t *testing.T) {
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	allClientScopes := []string{
-		"profile",
-		"email",
-		"web-origins",
-		"roles",
-		clientScope,
-	}
+	allClientScopes := append(preAssignedDefaultClientScopes, clientScope)
 
 	clientScopeToRemove := allClientScopes[acctest.RandIntRange(0, 2)]
 	var subsetOfClientScopes []string
@@ -154,15 +139,11 @@ func TestAccKeycloakOpenidClientDefaultScopes_validateClientAccessType(t *testin
 func TestAccKeycloakOpenidClientDefaultScopes_authoritativeAdd(t *testing.T) {
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
-	clientScopes := []string{
-		"profile",
-		"email",
-		"web-origins",
-		"roles",
-		"terraform-client-scope-" + acctest.RandString(10),
-		"terraform-client-scope-" + acctest.RandString(10),
-		"terraform-client-scope-" + acctest.RandString(10),
-	}
+	clientScopes := append(preAssignedDefaultClientScopes,
+		"terraform-client-scope-"+acctest.RandString(10),
+		"terraform-client-scope-"+acctest.RandString(10),
+		"terraform-client-scope-"+acctest.RandString(10),
+	)
 
 	resource.Test(t, resource.TestCase{
 		Providers: testAccProviders,
@@ -199,18 +180,12 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeRemove(t *testing.T) 
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 
-	clientScopesAttachedByDefault := []string{
-		"profile",
-		"email",
-		"web-origins",
-		"roles",
-	}
 	randomClientScopes := []string{
 		"terraform-client-scope-" + acctest.RandString(10),
 		"terraform-client-scope-" + acctest.RandString(10),
 		"terraform-client-scope-" + acctest.RandString(10),
 	}
-	allClientScopes := append(clientScopesAttachedByDefault, randomClientScopes...)
+	allClientScopes := append(preAssignedDefaultClientScopes, randomClientScopes...)
 
 	clientToManuallyAttach := randomClientScopes[acctest.RandIntRange(0, len(randomClientScopes)-1)]
 	var attachedClientScopes []string
@@ -258,13 +233,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_noImportNeeded(t *testing.T) {
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	clientScopes := []string{
-		"profile",
-		"email",
-		"web-origins",
-		"roles",
-		clientScope,
-	}
+	clientScopes := append(preAssignedDefaultClientScopes, clientScope)
 
 	resource.Test(t, resource.TestCase{
 		Providers: testAccProviders,
