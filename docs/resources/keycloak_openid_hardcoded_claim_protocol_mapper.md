@@ -67,9 +67,8 @@ resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_mapp
 The following arguments are supported:
 
 - `realm_id` - (Required) The realm this protocol mapper exists within.
-- One of the following arguments is required:
-  - `client_id` - The client this protocol mapper is attached to.
-  - `client_scope_id` - The client scope this protocol mapper is attached to.
+- `client_id` - (Required if `client_scope_id` is not specified) The client this protocol mapper is attached to.
+- `client_scope_id` - (Required if `client_id` is not specified) The client scope this protocol mapper is attached to.
 - `name` - (Required) The display name of this protocol mapper in the GUI.
 - `claim_name` - (Required) The name of the claim to insert into a token.
 - `claim_value` - (Required) The hardcoded value of the claim.

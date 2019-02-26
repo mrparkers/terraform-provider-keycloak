@@ -65,9 +65,8 @@ resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_ma
 The following arguments are supported:
 
 - `realm_id` - (Required) The realm this protocol mapper exists within.
-- One of the following arguments is required:
-  - `client_id` - The client this protocol mapper is attached to.
-  - `client_scope_id` - The client scope this protocol mapper is attached to.
+- `client_id` - (Required if `client_scope_id` is not specified) The client this protocol mapper is attached to.
+- `client_scope_id` - (Required if `client_id` is not specified) The client scope this protocol mapper is attached to.
 - `name` - (Required) The display name of this protocol mapper in the GUI.
 - `claim_name` - (Required) The name of the claim to insert into a token.
 - `full_path` - (Optional) Indicates whether the full path of the group including its parents will be used. Defaults to `true`.
