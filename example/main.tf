@@ -5,11 +5,11 @@ provider "keycloak" {
 }
 
 resource "keycloak_realm" "test" {
-	realm                = "test"
-	enabled              = true
-	display_name         = "foo"
+	realm        = "test"
+	enabled      = true
+	display_name = "foo"
 
-	account_theme        = "base"
+	account_theme = "base"
 
 	access_code_lifespan = "30m"
 }
@@ -31,8 +31,8 @@ resource "keycloak_group" "bar" {
 }
 
 resource "keycloak_user" "user" {
-	realm_id   = "${keycloak_realm.test.id}"
-	username   = "test-user"
+	realm_id = "${keycloak_realm.test.id}"
+	username = "test-user"
 
 	email      = "test-user@fakedomain.com"
 	first_name = "Testy"
@@ -40,8 +40,8 @@ resource "keycloak_user" "user" {
 }
 
 resource "keycloak_user" "another_user" {
-	realm_id   = "${keycloak_realm.test.id}"
-	username   = "another-test-user"
+	realm_id = "${keycloak_realm.test.id}"
+	username = "another-test-user"
 
 	email      = "another-test-user@fakedomain.com"
 	first_name = "Testy"
@@ -49,8 +49,8 @@ resource "keycloak_user" "another_user" {
 }
 
 resource "keycloak_user" "user_with_password" {
-	realm_id   = "${keycloak_realm.test.id}"
-	username   = "user-with-password"
+	realm_id = "${keycloak_realm.test.id}"
+	username = "user-with-password"
 
 	email      = "user-with-password@fakedomain.com"
 	first_name = "Testy"
@@ -61,52 +61,51 @@ resource "keycloak_user" "user_with_password" {
 	}
 }
 
-
 resource "keycloak_group_memberships" "foo_members" {
 	realm_id = "${keycloak_realm.test.id}"
 	group_id = "${keycloak_group.foo.id}"
 
-	members  = [
+	members = [
 		"${keycloak_user.user.username}",
 		"${keycloak_user.another_user.username}"
 	]
 }
 
 resource "keycloak_openid_client" "test_client" {
-	client_id             = "test-openid-client"
-	name                  = "test-openid-client"
-	realm_id              = "${keycloak_realm.test.id}"
-	description           = "a test openid client"
+	client_id   = "test-openid-client"
+	name        = "test-openid-client"
+	realm_id    = "${keycloak_realm.test.id}"
+	description = "a test openid client"
 
 	standard_flow_enabled = true
 
-	access_type           = "CONFIDENTIAL"
-	valid_redirect_uris   = [
+	access_type         = "CONFIDENTIAL"
+	valid_redirect_uris = [
 		"http://localhost:5555/callback"
 	]
 
-	client_secret         = "secret"
+	client_secret = "secret"
 }
 
 resource "keycloak_openid_client_scope" "test_default_client_scope" {
-	name                = "test-default-client-scope"
-	realm_id            = "${keycloak_realm.test.id}"
+	name     = "test-default-client-scope"
+	realm_id = "${keycloak_realm.test.id}"
 
 	description         = "test"
 	consent_screen_text = "hello"
 }
 
 resource "keycloak_openid_client_scope" "test_optional_client_scope" {
-	name                = "test-optional-client-scope"
-	realm_id            = "${keycloak_realm.test.id}"
+	name     = "test-optional-client-scope"
+	realm_id = "${keycloak_realm.test.id}"
 
 	description         = "test"
 	consent_screen_text = "hello"
 }
 
 resource "keycloak_openid_client_default_scopes" "default_client_scopes" {
-	realm_id       = "${keycloak_realm.test.id}"
-	client_id      = "${keycloak_openid_client.test_client.id}"
+	realm_id  = "${keycloak_realm.test.id}"
+	client_id = "${keycloak_openid_client.test_client.id}"
 
 	default_scopes = [
 		"profile",
@@ -118,8 +117,8 @@ resource "keycloak_openid_client_default_scopes" "default_client_scopes" {
 }
 
 resource "keycloak_openid_client_optional_scopes" "optional_client_scopes" {
-	realm_id       = "${keycloak_realm.test.id}"
-	client_id      = "${keycloak_openid_client.test_client.id}"
+	realm_id  = "${keycloak_realm.test.id}"
+	client_id = "${keycloak_openid_client.test_client.id}"
 
 	optional_scopes = [
 		"address",
@@ -130,11 +129,11 @@ resource "keycloak_openid_client_optional_scopes" "optional_client_scopes" {
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
-	name                    = "openldap"
-	realm_id                = "${keycloak_realm.test.id}"
+	name     = "openldap"
+	realm_id = "${keycloak_realm.test.id}"
 
-	enabled                 = true
-	import_enabled          = false
+	enabled        = true
+	import_enabled = false
 
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -148,27 +147,27 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_dn                 = "cn=admin,dc=example,dc=org"
 	bind_credential         = "admin"
 
-	connection_timeout      = "5s"
-	read_timeout            = "10s"
+	connection_timeout = "5s"
+	read_timeout       = "10s"
 
-	cache_policy            = "NO_CACHE"
+	cache_policy = "NO_CACHE"
 }
 
 resource "keycloak_ldap_user_attribute_mapper" "description_attr_mapper" {
-	name                        = "description-mapper"
-	realm_id                    = "${keycloak_ldap_user_federation.openldap.realm_id}"
-	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
+	name                    = "description-mapper"
+	realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
+	ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
 
-	user_model_attribute        = "description"
-	ldap_attribute              = "description"
+	user_model_attribute = "description"
+	ldap_attribute       = "description"
 
 	always_read_value_from_ldap = false
 }
 
 resource "keycloak_ldap_group_mapper" "group_mapper" {
-	name                           = "group mapper"
-	realm_id                       = "${keycloak_ldap_user_federation.openldap.realm_id}"
-	ldap_user_federation_id        = "${keycloak_ldap_user_federation.openldap.id}"
+	name                    = "group mapper"
+	realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
+	ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
 
 	ldap_groups_dn                 = "dc=example,dc=org"
 	group_name_ldap_attribute      = "cn"
@@ -188,9 +187,9 @@ resource "keycloak_ldap_msad_user_account_control_mapper" "msad_uac_mapper" {
 }
 
 resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
-	name                     = "full-name-mapper"
-	realm_id                 = "${keycloak_ldap_user_federation.openldap.realm_id}"
-	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
+	name                    = "full-name-mapper"
+	realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
+	ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
 
 	ldap_full_name_attribute = "cn"
 	read_only                = true
@@ -201,7 +200,7 @@ resource "keycloak_custom_user_federation" "custom" {
 	realm_id    = "master"
 	provider_id = "custom"
 
-	enabled     = true
+	enabled = true
 }
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_client" {
@@ -263,9 +262,9 @@ resource "keycloak_openid_user_property_protocol_mapper" "map_user_properties_cl
 }
 
 resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_client" {
-	name        = "tf-test-open-id-hardcoded-claim-protocol-mapper-client"
-	realm_id    = "${keycloak_realm.test.id}"
-	client_id   = "${keycloak_openid_client.test_client.id}"
+	name      = "tf-test-open-id-hardcoded-claim-protocol-mapper-client"
+	realm_id  = "${keycloak_realm.test.id}"
+	client_id = "${keycloak_openid_client.test_client.id}"
 
 	claim_name  = "foo"
 	claim_value = "bar"
@@ -276,27 +275,58 @@ resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_clie
 	realm_id        = "${keycloak_realm.test.id}"
 	client_scope_id = "${keycloak_openid_client_scope.test_default_client_scope.id}"
 
-	claim_name      = "foo"
-	claim_value     = "bar"
+	claim_name  = "foo"
+	claim_value = "bar"
+}
+
+resource "keycloak_openid_client" "bearer_only_client" {
+	client_id   = "test-bearer-only-client"
+	name        = "test-bearer-only-client"
+	realm_id    = "${keycloak_realm.test.id}"
+	description = "a test openid client using bearer-only"
+
+	access_type = "BEARER-ONLY"
+}
+
+resource "keycloak_openid_audience_protocol_mapper" "audience_client_scope" {
+	name            = "tf-test-openid-audience-protocol-mapper-client-scope"
+	realm_id        = "${keycloak_realm.test.id}"
+	client_scope_id = "${keycloak_openid_client_scope.test_default_client_scope.id}"
+
+	add_to_id_token     = true
+	add_to_access_token = false
+
+	included_client_audience = "${keycloak_openid_client.bearer_only_client.client_id}"
+}
+
+resource "keycloak_openid_audience_protocol_mapper" "audience_client" {
+	name      = "tf-test-openid-audience-protocol-mapper-client"
+	realm_id  = "${keycloak_realm.test.id}"
+	client_id = "${keycloak_openid_client.test_client.id}"
+
+	add_to_id_token     = false
+	add_to_access_token = true
+
+	included_custom_audience = "foo"
 }
 
 resource "keycloak_saml_client" "saml_client" {
-	realm_id                = "${keycloak_realm.test.id}"
-	client_id               = "test-saml-client"
-	name                    = "test-saml-client"
+	realm_id  = "${keycloak_realm.test.id}"
+	client_id = "test-saml-client"
+	name      = "test-saml-client"
 
 	sign_documents          = false
 	sign_assertions         = true
 	include_authn_statement = true
 
-	signing_certificate     = "${file("../provider/misc/saml-cert.pem")}"
-	signing_private_key     = "${file("../provider/misc/saml-key.pem")}"
+	signing_certificate = "${file("../provider/misc/saml-cert.pem")}"
+	signing_private_key = "${file("../provider/misc/saml-key.pem")}"
 }
 
 resource "keycloak_saml_user_attribute_protocol_mapper" "saml_user_attribute_mapper" {
-	realm_id                   = "${keycloak_realm.test.id}"
-	client_id                  = "${keycloak_saml_client.saml_client.id}"
-	name                       = "test-saml-user-attribute-mapper"
+	realm_id  = "${keycloak_realm.test.id}"
+	client_id = "${keycloak_saml_client.saml_client.id}"
+	name      = "test-saml-user-attribute-mapper"
 
 	user_attribute             = "user-attribute"
 	friendly_name              = "friendly-name"
@@ -305,9 +335,9 @@ resource "keycloak_saml_user_attribute_protocol_mapper" "saml_user_attribute_map
 }
 
 resource "keycloak_saml_user_property_protocol_mapper" "saml_user_property_mapper" {
-	realm_id                   = "${keycloak_realm.test.id}"
-	client_id                  = "${keycloak_saml_client.saml_client.id}"
-	name                       = "test-saml-user-property-mapper"
+	realm_id  = "${keycloak_realm.test.id}"
+	client_id = "${keycloak_saml_client.saml_client.id}"
+	name      = "test-saml-user-property-mapper"
 
 	user_property              = "email"
 	saml_attribute_name        = "email"
