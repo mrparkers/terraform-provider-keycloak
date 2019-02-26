@@ -114,5 +114,20 @@ func (keycloakClient *KeycloakClient) ValidateOpenIdAudienceProtocolMapper(mappe
 		}
 	}
 
+	if mapper.IncludedClientAudience != "" {
+		clients, err := keycloakClient.listGenericClients(mapper.RealmId)
+		if err != nil {
+			return err
+		}
+
+		for _, client := range clients {
+			if client.ClientId == mapper.IncludedClientAudience {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("validation error: client %s does not exist", mapper.IncludedClientAudience)
+	}
+
 	return nil
 }
