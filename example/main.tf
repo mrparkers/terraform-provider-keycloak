@@ -293,7 +293,7 @@ resource "keycloak_openid_audience_protocol_mapper" "audience_client_scope" {
 	realm_id        = "${keycloak_realm.test.id}"
 	client_scope_id = "${keycloak_openid_client_scope.test_default_client_scope.id}"
 
-	add_to_id_token = true
+	add_to_id_token     = true
 	add_to_access_token = false
 
 	included_client_audience = "${keycloak_openid_client.bearer_only_client.client_id}"
@@ -304,7 +304,7 @@ resource "keycloak_openid_audience_protocol_mapper" "audience_client" {
 	realm_id  = "${keycloak_realm.test.id}"
 	client_id = "${keycloak_openid_client.test_client.id}"
 
-	add_to_id_token = false
+	add_to_id_token     = false
 	add_to_access_token = true
 
 	included_custom_audience = "foo"
