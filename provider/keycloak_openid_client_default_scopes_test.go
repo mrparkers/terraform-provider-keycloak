@@ -422,11 +422,11 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 	realm_id       = "${keycloak_realm.realm.id}"
 	client_id      = "${keycloak_openid_client.client.id}"
 	default_scopes = [
-        "profile",
-        "email",
+		"profile",
+		"email",
 		"roles",
 		"web-origins",
-        "${keycloak_openid_client_scope.client_scope.name}"
+		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
 	`, realm, client, clientScope)
@@ -503,11 +503,11 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 	realm_id       = "${keycloak_realm.realm.id}"
 	client_id      = "%s"
 	default_scopes = [
-        "profile",
-        "email",
+		"profile",
+		"email",
 		"roles",
 		"web-origins",
-        "${keycloak_openid_client_scope.client_scope.name}"
+		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
 	`, realm, clientScope, client)
@@ -538,11 +538,11 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 	realm_id       = "${keycloak_realm.realm.id}"
 	client_id      = "${keycloak_openid_client.client.id}"
 	default_scopes = [
-        "profile",
-        "email",
+		"profile",
+		"email",
 		"roles",
 		"web-origins",
-        "${keycloak_openid_client_scope.client_scope.name}"
+		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
 	`, realm, client, clientScope)
