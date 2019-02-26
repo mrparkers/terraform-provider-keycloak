@@ -67,9 +67,8 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "user_attribute_mapper
 The following arguments are supported:
 
 - `realm_id` - (Required) The realm this protocol mapper exists within.
-- One of the following arguments is required:
-  - `client_id` - The client this protocol mapper is attached to.
-  - `client_scope_id` - The client scope this protocol mapper is attached to.
+- `client_id` - (Required if `client_scope_id` is not specified) The client this protocol mapper is attached to.
+- `client_scope_id` - (Required if `client_id` is not specified) The client scope this protocol mapper is attached to.
 - `name` - (Required) The display name of this protocol mapper in the GUI.
 - `user_attribute` - (Required) The custom user attribute to map a claim for.
 - `claim_name` - (Required) The name of the claim to insert into a token.
