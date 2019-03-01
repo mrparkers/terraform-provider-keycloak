@@ -11,11 +11,13 @@ nav:
   - keycloak_openid_client: resources/keycloak_openid_client.md
   - keycloak_openid_client_scope: resources/keycloak_openid_client_scope.md
   - keycloak_openid_client_default_scopes: resources/keycloak_openid_client_default_scopes.md
+  - keycloak_openid_client_optional_scopes: resources/keycloak_openid_client_optional_scopes.md
   - keycloak_openid_user_attribute_protocol_mapper: resources/keycloak_openid_user_attribute_protocol_mapper.md
   - keycloak_openid_user_property_protocol_mapper: resources/keycloak_openid_user_property_protocol_mapper.md
   - keycloak_openid_group_membership_protocol_mapper: resources/keycloak_openid_group_membership_protocol_mapper.md
   - keycloak_openid_hardcoded_claim_protocol_mapper:  resources/keycloak_openid_hardcoded_claim_protocol_mapper.md
   - keycloak_openid_full_name_protocol_mapper:  resources/keycloak_openid_full_name_protocol_mapper.md
+  - keycloak_openid_audience_protocol_mapper:  resources/keycloak_openid_audience_protocol_mapper.md
   - keycloak_saml_client: resources/keycloak_saml_client.md
   - keycloak_saml_user_attribute_protocol_mapper: resources/keycloak_saml_user_attribute_protocol_mapper.md
   - keycloak_saml_user_property_protocol_mapper: resources/keycloak_saml_user_property_protocol_mapper.md

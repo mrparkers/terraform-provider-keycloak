@@ -1,8 +1,23 @@
-## 1.5.0 (Unreleased)
+## 1.6.0 (Unreleased)
+
+FEATURES:
+
+* new resource: keycloak_openid_client_optional_scopes ([#96](https://github.com/mrparkers/terraform-provider-keycloak/pull/96))
+* new resource: keycloak_openid_audience_protocol_mapper ([#97](https://github.com/mrparkers/terraform-provider-keycloak/pull/97))
+
+## 1.5.0 (February 22, 2019)
 
 FEATURES:
 
 * adds support for non-master realms and resource owner password grant for Keycloak authentication ([#88](https://github.com/mrparkers/terraform-provider-keycloak/pull/88))
+
+IMPROVEMENTS:
+
+* support Keycloak v4.8.3.Final and Terraform v0.11.11 ([#93](https://github.com/mrparkers/terraform-provider-keycloak/pull/93))
+
+BUG FIXES:
+
+* handle 404 errors when reading a group for group memberships ([#95](https://github.com/mrparkers/terraform-provider-keycloak/pull/95))
 
 ## 1.4.0 (January 28, 2019)
 

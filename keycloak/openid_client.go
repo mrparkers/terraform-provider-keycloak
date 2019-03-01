@@ -121,10 +121,10 @@ func (keycloakClient *KeycloakClient) DeleteOpenidClient(realmId, id string) err
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s", realmId, id))
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidClientDefaultScopes(realmId, clientId string) ([]*OpenidClientScope, error) {
+func (keycloakClient *KeycloakClient) getOpenidClientScopes(realmId, clientId, t string) ([]*OpenidClientScope, error) {
 	var scopes []*OpenidClientScope
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes", realmId, clientId), &scopes)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes", realmId, clientId, t), &scopes)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,15 @@ func (keycloakClient *KeycloakClient) GetOpenidClientDefaultScopes(realmId, clie
 	return scopes, nil
 }
 
-func (keycloakClient *KeycloakClient) AttachOpenidClientDefaultScopes(realmId, clientId string, scopeNames []string) error {
+func (keycloakClient *KeycloakClient) GetOpenidClientDefaultScopes(realmId, clientId string) ([]*OpenidClientScope, error) {
+	return keycloakClient.getOpenidClientScopes(realmId, clientId, "default")
+}
+
+func (keycloakClient *KeycloakClient) GetOpenidClientOptionalScopes(realmId, clientId string) ([]*OpenidClientScope, error) {
+	return keycloakClient.getOpenidClientScopes(realmId, clientId, "optional")
+}
+
+func (keycloakClient *KeycloakClient) attachOpenidClientScopes(realmId, clientId, t string, scopeNames []string) error {
 	openidClient, err := keycloakClient.GetOpenidClient(realmId, clientId)
 	if err != nil && ErrorIs404(err) {
 		return fmt.Errorf("validation error: client with id %s does not exist", clientId)
@@ -149,8 +157,57 @@ func (keycloakClient *KeycloakClient) AttachOpenidClientDefaultScopes(realmId, c
 		return err
 	}
 
+	var attachedClientScopes []*OpenidClientScope
+	var duplicateScopeAssignmentErrorMessage string
+	switch t {
+	case "optional":
+		attachedDefaultClientScopes, err := keycloakClient.GetOpenidClientDefaultScopes(realmId, clientId)
+		if err != nil {
+			return err
+		}
+		attachedClientScopes = append(attachedClientScopes, attachedDefaultClientScopes...)
+		duplicateScopeAssignmentErrorMessage = "validation error: scope %s is already attached to client as a default scope"
+	case "default":
+		attachedOptionalClientScopes, err := keycloakClient.GetOpenidClientOptionalScopes(realmId, clientId)
+		if err != nil {
+			return err
+		}
+		attachedClientScopes = append(attachedClientScopes, attachedOptionalClientScopes...)
+		duplicateScopeAssignmentErrorMessage = "validation error: scope %s is already attached to client as an optional scope"
+	}
+
 	for _, openidClientScope := range allOpenidClientScopes {
-		err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes/%s", realmId, clientId, openidClientScope.Id), nil)
+		for _, attachedClientScope := range attachedClientScopes {
+			if openidClientScope.Id == attachedClientScope.Id {
+				return fmt.Errorf(duplicateScopeAssignmentErrorMessage, attachedClientScope.Name)
+			}
+		}
+
+		err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, openidClientScope.Id), nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (keycloakClient *KeycloakClient) AttachOpenidClientDefaultScopes(realmId, clientId string, scopeNames []string) error {
+	return keycloakClient.attachOpenidClientScopes(realmId, clientId, "default", scopeNames)
+}
+
+func (keycloakClient *KeycloakClient) AttachOpenidClientOptionalScopes(realmId, clientId string, scopeNames []string) error {
+	return keycloakClient.attachOpenidClientScopes(realmId, clientId, "optional", scopeNames)
+}
+
+func (keycloakClient *KeycloakClient) detachOpenidClientScopes(realmId, clientId, t string, scopeNames []string) error {
+	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopesWithFilter(realmId, includeOpenidClientScopesMatchingNames(scopeNames))
+	if err != nil {
+		return err
+	}
+
+	for _, openidClientScope := range allOpenidClientScopes {
+		err := keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, openidClientScope.Id))
 		if err != nil {
 			return err
 		}
@@ -160,17 +217,9 @@ func (keycloakClient *KeycloakClient) AttachOpenidClientDefaultScopes(realmId, c
 }
 
 func (keycloakClient *KeycloakClient) DetachOpenidClientDefaultScopes(realmId, clientId string, scopeNames []string) error {
-	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopesWithFilter(realmId, includeOpenidClientScopesMatchingNames(scopeNames))
-	if err != nil {
-		return err
-	}
+	return keycloakClient.detachOpenidClientScopes(realmId, clientId, "default", scopeNames)
+}
 
-	for _, openidClientScope := range allOpenidClientScopes {
-		err := keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes/%s", realmId, clientId, openidClientScope.Id))
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+func (keycloakClient *KeycloakClient) DetachOpenidClientOptionalScopes(realmId, clientId string, scopeNames []string) error {
+	return keycloakClient.detachOpenidClientScopes(realmId, clientId, "optional", scopeNames)
 }
