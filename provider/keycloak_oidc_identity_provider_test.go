@@ -9,21 +9,21 @@ import (
 	"testing"
 )
 
-func TestAccKeycloakIdentityProvider_basic(t *testing.T) {
+func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	aliasName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakIdentityProviderDestroy(),
+		CheckDestroy: testAccCheckKeycloakOidcIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdentityProvider_basic(realmName, aliasName),
-				Check:  testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
+				Config: testKeycloakOidcIdentityProvider_basic(realmName, aliasName),
+				Check:  testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
 			},
 			{
-				ResourceName:        "keycloak_identity_provider.saml",
+				ResourceName:        "keycloak_oidc_identity_provider.oidc",
 				ImportState:         true,
 				ImportStateVerify:   true,
 				ImportStateIdPrefix: realmName + "/",
@@ -32,7 +32,7 @@ func TestAccKeycloakIdentityProvider_basic(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakIdentityProvider_createAfterManualDestroy(t *testing.T) {
+func TestAccKeycloakOidcIdentityProvider_createAfterManualDestroy(t *testing.T) {
 	var idp = &keycloak.IdentityProvider{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -41,11 +41,11 @@ func TestAccKeycloakIdentityProvider_createAfterManualDestroy(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakIdentityProviderDestroy(),
+		CheckDestroy: testAccCheckKeycloakOidcIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdentityProvider_basic(realmName, aliasName),
-				Check:  testAccCheckKeycloakIdentityProviderFetch("keycloak_identity_provider.saml", idp),
+				Config: testKeycloakOidcIdentityProvider_basic(realmName, aliasName),
+				Check:  testAccCheckKeycloakOidcIdentityProviderFetch("keycloak_oidc_identity_provider.oidc", idp),
 			},
 			{
 				PreConfig: func() {
@@ -56,14 +56,14 @@ func TestAccKeycloakIdentityProvider_createAfterManualDestroy(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakIdentityProvider_basic(realmName, aliasName),
-				Check:  testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
+				Config: testKeycloakOidcIdentityProvider_basic(realmName, aliasName),
+				Check:  testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
 			},
 		},
 	})
 }
 
-func TestAccKeycloakIdentityProvider_basicUpdateRealm(t *testing.T) {
+func TestAccKeycloakOidcIdentityProvider_basicUpdateRealm(t *testing.T) {
 	firstRealm := "terraform-" + acctest.RandString(10)
 	secondRealm := "terraform-" + acctest.RandString(10)
 	aliasName := "terraform-" + acctest.RandString(10)
@@ -71,20 +71,20 @@ func TestAccKeycloakIdentityProvider_basicUpdateRealm(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakIdentityProviderDestroy(),
+		CheckDestroy: testAccCheckKeycloakOidcIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdentityProvider_basic(firstRealm, aliasName),
+				Config: testKeycloakOidcIdentityProvider_basic(firstRealm, aliasName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
-					resource.TestCheckResourceAttr("keycloak_identity_provider.saml", "realm", firstRealm),
+					testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
+					resource.TestCheckResourceAttr("keycloak_oidc_identity_provider.oidc", "realm", firstRealm),
 				),
 			},
 			{
 				Config: testKeycloakIdentityProvider_basic(secondRealm, aliasName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
-					resource.TestCheckResourceAttr("keycloak_identity_provider.saml", "realm", secondRealm),
+					testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
+					resource.TestCheckResourceAttr("keycloak_oidc_identity_provider.oidc", "realm", secondRealm),
 				),
 			},
 		},
@@ -117,44 +117,44 @@ func TestAccKeycloakIdentityProvider_basicUpdateAll(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakIdentityProviderDestroy(),
+		CheckDestroy: testAccCheckKeycloakOidcIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdentityProvider_basicFromInterface(firstAlias),
-				Check:  testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
+				Config: testKeycloakOidcIdentityProvider_basicFromInterface(firstAlias),
+				Check:  testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
 			},
 			{
-				Config: testKeycloakIdentityProvider_basicFromInterface(secondAlias),
-				Check:  testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
+				Config: testKeycloakOidcIdentityProvider_basicFromInterface(secondAlias),
+				Check:  testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
 			},
 		},
 	})
 }
 
-func TestAccKeycloakIdentityProvider_unsetTimeoutDurationStrings(t *testing.T) {
+func TestAccKeycloakOidcIdentityProvider_unsetTimeoutDurationStrings(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	aliasName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakIdentityProviderDestroy(),
+		CheckDestroy: testAccCheckKeycloakOidcIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdentityProvider_basicWithTimeouts(realmName, aliasName),
-				Check:  testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
+				Config: testKeycloakOidcIdentityProvider_basicWithTimeouts(realmName, aliasName),
+				Check:  testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
 			},
 			{
-				Config: testKeycloakIdentityProvider_basic(realmName, aliasName),
-				Check:  testAccCheckKeycloakIdentityProviderExists("keycloak_identity_provider.saml"),
+				Config: testKeycloakOidcIdentityProvider_basic(realmName, aliasName),
+				Check:  testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
 			},
 		},
 	})
 }
 
-func testAccCheckKeycloakIdentityProviderExists(resourceName string) resource.TestCheckFunc {
+func testAccCheckKeycloakOidcIdentityProviderExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		_, err := getIdentityProviderFromState(s, resourceName)
+		_, err := getOidcIdentityProviderFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
@@ -163,9 +163,9 @@ func testAccCheckKeycloakIdentityProviderExists(resourceName string) resource.Te
 	}
 }
 
-func testAccCheckKeycloakIdentityProviderFetch(resourceName string, idp *keycloak.IdentityProvider) resource.TestCheckFunc {
+func testAccCheckKeycloakOidcIdentityProviderFetch(resourceName string, idp *keycloak.IdentityProvider) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		fetchedalias, err := getIdentityProviderFromState(s, resourceName)
+		fetchedalias, err := getIdentityOidcProviderFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
@@ -177,7 +177,7 @@ func testAccCheckKeycloakIdentityProviderFetch(resourceName string, idp *keycloa
 	}
 }
 
-func testAccCheckKeycloakIdentityProviderDestroy() resource.TestCheckFunc {
+func testAccCheckKeycloakOidcIdentityProviderDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "keycloak_identity_provider" {
@@ -199,7 +199,7 @@ func testAccCheckKeycloakIdentityProviderDestroy() resource.TestCheckFunc {
 	}
 }
 
-func getIdentityProviderFromState(s *terraform.State, resourceName string) (*keycloak.IdentityProvider, error) {
+func getIdentityOidcProviderFromState(s *terraform.State, resourceName string) (*keycloak.IdentityProvider, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 	rs, ok := s.RootModule().Resources[resourceName]
@@ -218,104 +218,104 @@ func getIdentityProviderFromState(s *terraform.State, resourceName string) (*key
 	return idp, nil
 }
 
-func testKeycloakIdentityProvider_basic(realm, alias string) string {
+func testKeycloakOidcIdentityProvider_basic(realm, alias string) string {
 	return fmt.Sprintf(`
 resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource keycloak_identity_provider saml {
+resource keycloak_oidc_identity_provider oidc {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
-
-  saml {
-    single_sign_on_service_url = "https://example.com"
-  }
+  token_url = "https://example.com"
+  authorization_url = "https://example.com"
+  client_id = "laksjhnlasjdkblakjsbda"
+  client_secret = "asdasdjasdklhasldas"
 }
    `, realm, alias)
 }
 
-func testKeycloakIdentityProvider_basicFromInterface(alias *keycloak.IdentityProvider) string {
+func testKeycloakOidcIdentityProvider_basicFromInterface(alias *keycloak.IdentityProvider) string {
 	return fmt.Sprintf(`
 resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource keycloak_identity_provider saml {
-   alias   = "%s"
-   realm   = "master"
-
-   saml {
-      single_sign_on_service_url = "https://example.com"
-   }
+resource keycloak_oidc_identity_provider oidc {
+  alias   = "%s"
+  realm   = "${keycloak_realm.realm.realm}"
+  token_url = "https://example.com"
+  authorization_url = "https://example.com"
+  client_id = "laksjhnlasjdkblakjsbda"
+  client_secret = "asdasdjasdklhasldas"
 }
    `, alias.Realm, alias.Alias)
 }
 
-func testKeycloakIdentityProvider_nobindDnValidation(realm, alias string) string {
+func testKeycloakOidcIdentityProvider_nobindDnValidation(realm, alias string) string {
 	return fmt.Sprintf(`
 resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource keycloak_identity_provider saml {
+resource keycloak_oidc_identity_provider oidc {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
-
-  saml {
-    single_sign_on_service_url = "https://example.com"
-  }
+  token_url = "https://example.com"
+  authorization_url = "https://example.com"
+  client_id = "laksjhnlasjdkblakjsbda"
+  client_secret = "asdasdjasdklhasldas"
 }
    `, realm, alias)
 }
 
-func testKeycloakIdentityProvider_noBindCredentialValidation(realm, alias string) string {
+func testKeycloakOidcIdentityProvider_noBindCredentialValidation(realm, alias string) string {
 	return fmt.Sprintf(`
 resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource keycloak_identity_provider saml {
-  alias   = %s"
+resource keycloak_oidc_identity_provider oidc {
+  alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
-
-  saml {
-    single_sign_on_service_url = "https://example.com"
-  }
+  token_url = "https://example.com"
+  authorization_url = "https://example.com"
+  client_id = "laksjhnlasjdkblakjsbda"
+  client_secret = "asdasdjasdklhasldas"
 }
    `, realm, alias)
 }
 
-func testKeycloakIdentityProvider_basicWithSyncPeriod(realm, alias string, fullSyncPeriod, changedSyncPeriod int) string {
+func testKeycloakOidcIdentityProvider_basicWithSyncPeriod(realm, alias string, fullSyncPeriod, changedSyncPeriod int) string {
 	return fmt.Sprintf(`
 resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource keycloak_identity_provider saml {
+resource keycloak_oidc_identity_provider oidc {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
-
-  saml {
-    single_sign_on_service_url = "https://example.com"
-  }
+  token_url = "https://example.com"
+  authorization_url = "https://example.com"
+  client_id = "laksjhnlasjdkblakjsbda"
+  client_secret = "asdasdjasdklhasldas"
 }
    `, realm, alias)
 }
 
-func testKeycloakIdentityProvider_basicWithTimeouts(realm, alias string) string {
+func testKeycloakOidcIdentityProvider_basicWithTimeouts(realm, alias string) string {
 	return fmt.Sprintf(`
 resource keycloak_realm realm {
    realm = "%s"
 }
 
-resource keycloak_identity_provider saml {
+resource keycloak_oidc_identity_provider oidc {
   alias   = "%s"
   realm   = "${keycloak_realm.realm.realm}"
-
-  saml {
-    single_sign_on_service_url = "https://example.com"
-  }
+  token_url = "https://example.com"
+  authorization_url = "https://example.com"
+  client_id = "laksjhnlasjdkblakjsbda"
+  client_secret = "asdasdjasdklhasldas"
 }
    `, realm, alias)
 }

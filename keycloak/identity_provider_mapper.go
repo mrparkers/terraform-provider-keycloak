@@ -6,11 +6,14 @@ import (
 )
 
 type IdentityProviderMapperConfig struct {
-	JsonField      string `json:"jsonField,omitempty"`
-	UserAttribute  string `json:"userAttribute,omitempty"`
-	Attribute      string `json:"attribute,omitempty"`
-	AttributeValue string `json:"attribute.value,omitempty"`
-	Template       string `json:"template,omitempty"`
+	UserAttribute         string `json:"user.attribute,omitempty"`
+	Claim                 string `json:"claim,omitempty"`
+	ClaimValue            string `json:"claim.value,omitempty"`
+	Attribute             string `json:"attribute,omitempty"`
+	AttributeValue        string `json:"attribute.value,omitempty"`
+	AttributeFriendlyName string `json:"attribute.friendly.name,omitempty"`
+	Template              string `json:"template,omitempty"`
+	Role                  string `json:"role,omitempty"`
 }
 
 type IdentityProviderMapper struct {

@@ -29,8 +29,9 @@ type IdentityProviderConfig struct {
 	BackchannelSupported             KeycloakBoolQuoted `json:"backchannelSupported,omitempty"`
 	ValidateSignature                KeycloakBoolQuoted `json:"validateSignature,omitempty"`
 	AuthorizationUrl                 string             `json:"authorizationUrl,omitempty"`
-	TokenUrl                         string             `json:"tokeUrl,omitempty"`
+	TokenUrl                         string             `json:"tokenUrl,omitempty"`
 	LoginHint                        string             `json:"loginHint,omitempty"`
+	UILocales                        KeycloakBoolQuoted `json:"uiLocales,omitempty"`
 }
 
 type IdentityProvider struct {
