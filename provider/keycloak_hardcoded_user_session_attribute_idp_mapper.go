@@ -20,9 +20,9 @@ func resourceKeycloakHardcodedUserSessionAttributeIdpMapper() *schema.Resource {
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakHardcodedUserSessionAttributeIdpMapperCreate
-	genericMapperResource.Read = resourceKeycloakHardcodedUserSessionAttributeIdpMapperRead
-	genericMapperResource.Update = resourceKeycloakHardcodedUserSessionAttributeIdpMapperUpdate
+	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate("hardcoded-user-session-attribute-idp-mapper")
+	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead("hardcoded-user-session-attribute-idp-mapper")
+	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate("hardcoded-user-session-attribute-idp-mapper")
 	return genericMapperResource
 }
 
@@ -40,40 +40,5 @@ func setHardcodedUserSessionAttributeIdpMapperData(data *schema.ResourceData, id
 	setHardcodedUserSessionAttributeIdpMapperData(data, identityProviderMapper)
 	data.Set("attribute_name", identityProviderMapper.Config.Attribute)
 	data.Set("attribute_value", identityProviderMapper.Config.AttributeValue)
-	return nil
-}
-
-func resourceKeycloakHardcodedUserSessionAttributeIdpMapperCreate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getHardcodedUserSessionAttributeIdpMapperFromData(data)
-	err = keycloakClient.NewIdentityProviderMapper(identityProvider)
-	if err != nil {
-		return err
-	}
-	setHardcodedUserSessionAttributeIdpMapperData(data, identityProvider)
-	return resourceKeycloakHardcodedUserSessionAttributeIdpMapperRead(data, meta)
-}
-
-func resourceKeycloakHardcodedUserSessionAttributeIdpMapperRead(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realm := data.Get("realm").(string)
-	alias := data.Get("identity_provider_alias").(string)
-	id := data.Id()
-	identityProvider, err := keycloakClient.GetIdentityProviderMapper(realm, alias, id)
-	if err != nil {
-		return handleNotFoundError(err, data)
-	}
-	setHardcodedUserSessionAttributeIdpMapperData(data, identityProvider)
-	return nil
-}
-
-func resourceKeycloakHardcodedUserSessionAttributeIdpMapperUpdate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getHardcodedUserSessionAttributeIdpMapperFromData(data)
-	err = keycloakClient.UpdateIdentityProviderMapper(identityProvider)
-	if err != nil {
-		return err
-	}
-	setHardcodedUserSessionAttributeIdpMapperData(data, identityProvider)
 	return nil
 }

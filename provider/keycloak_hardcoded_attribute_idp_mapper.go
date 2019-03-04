@@ -20,9 +20,9 @@ func resourceKeycloakHardcodedAttributeIdpMapper() *schema.Resource {
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakHardcodedAttributeIdpMapperCreate
-	genericMapperResource.Read = resourceKeycloakHardcodedAttributeIdpMapperRead
-	genericMapperResource.Update = resourceKeycloakHardcodedAttributeIdpMapperUpdate
+	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate("hardcoded-attribute-idp-mapper")
+	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead("hardcoded-attribute-idp-mapper")
+	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate("hardcoded-attribute-idp-mapper")
 	return genericMapperResource
 }
 
@@ -40,40 +40,5 @@ func setHardcodedAttributeIdpMapperData(data *schema.ResourceData, identityProvi
 	setIdentityProviderMapperData(data, identityProviderMapper)
 	data.Set("attribute_name", identityProviderMapper.Config.Attribute)
 	data.Set("attribute_value", identityProviderMapper.Config.AttributeValue)
-	return nil
-}
-
-func resourceKeycloakHardcodedAttributeIdpMapperCreate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getHardcodedAttributeIdpMapperFromData(data)
-	err = keycloakClient.NewIdentityProviderMapper(identityProvider)
-	if err != nil {
-		return err
-	}
-	setHardcodedAttributeIdpMapperData(data, identityProvider)
-	return resourceKeycloakHardcodedAttributeIdpMapperRead(data, meta)
-}
-
-func resourceKeycloakHardcodedAttributeIdpMapperRead(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realm := data.Get("realm").(string)
-	alias := data.Get("identity_provider_alias").(string)
-	id := data.Id()
-	identityProvider, err := keycloakClient.GetIdentityProviderMapper(realm, alias, id)
-	if err != nil {
-		return handleNotFoundError(err, data)
-	}
-	setHardcodedAttributeIdpMapperData(data, identityProvider)
-	return nil
-}
-
-func resourceKeycloakHardcodedAttributeIdpMapperUpdate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getHardcodedAttributeIdpMapperFromData(data)
-	err = keycloakClient.UpdateIdentityProviderMapper(identityProvider)
-	if err != nil {
-		return err
-	}
-	setHardcodedAttributeIdpMapperData(data, identityProvider)
 	return nil
 }

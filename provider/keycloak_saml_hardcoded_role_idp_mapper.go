@@ -15,9 +15,9 @@ func resourceKeycloakSamlHardcodedRoleIdpMapper() *schema.Resource {
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakSamlHardcodedRoleIdpMapperCreate
-	genericMapperResource.Read = resourceKeycloakSamlHardcodedRoleIdpMapperRead
-	genericMapperResource.Update = resourceKeycloakSamlHardcodedRoleIdpMapperUpdate
+	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate("saml-hardcoded-role-idp-mapper")
+	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead("saml-hardcoded-role-idp-mapper")
+	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate("saml-hardcoded-role-idp-mapper")
 	return genericMapperResource
 }
 
@@ -33,40 +33,5 @@ func getSamlHardcodedRoleIdpMapperFromData(data *schema.ResourceData) (*keycloak
 func setSamlHardcodedRoleIdpMapperData(data *schema.ResourceData, identityProviderMapper *keycloak.IdentityProviderMapper) error {
 	setIdentityProviderMapperData(data, identityProviderMapper)
 	data.Set("role", identityProviderMapper.Config.Role)
-	return nil
-}
-
-func resourceKeycloakSamlHardcodedRoleIdpMapperCreate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getSamlHardcodedRoleIdpMapperFromData(data)
-	err = keycloakClient.NewIdentityProviderMapper(identityProvider)
-	if err != nil {
-		return err
-	}
-	setSamlHardcodedRoleIdpMapperData(data, identityProvider)
-	return resourceKeycloakSamlHardcodedRoleIdpMapperRead(data, meta)
-}
-
-func resourceKeycloakSamlHardcodedRoleIdpMapperRead(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realm := data.Get("realm").(string)
-	alias := data.Get("identity_provider_alias").(string)
-	id := data.Id()
-	identityProvider, err := keycloakClient.GetIdentityProviderMapper(realm, alias, id)
-	if err != nil {
-		return handleNotFoundError(err, data)
-	}
-	setSamlHardcodedRoleIdpMapperData(data, identityProvider)
-	return nil
-}
-
-func resourceKeycloakSamlHardcodedRoleIdpMapperUpdate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getSamlHardcodedRoleIdpMapperFromData(data)
-	err = keycloakClient.UpdateIdentityProviderMapper(identityProvider)
-	if err != nil {
-		return err
-	}
-	setSamlHardcodedRoleIdpMapperData(data, identityProvider)
 	return nil
 }

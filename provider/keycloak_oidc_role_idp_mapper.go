@@ -25,9 +25,9 @@ func resourceKeycloakOidcRoleIdpMapper() *schema.Resource {
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakOidcRoleIdpMapperCreate
-	genericMapperResource.Read = resourceKeycloakOidcRoleIdpMapperRead
-	genericMapperResource.Update = resourceKeycloakOidcRoleIdpMapperUpdate
+	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate("oidc-role-idp-mapper")
+	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead("oidc-role-idp-mapper")
+	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate("oidc-role-idp-mapper")
 	return genericMapperResource
 }
 
@@ -47,40 +47,5 @@ func setOidcRoleIdpMapperData(data *schema.ResourceData, identityProviderMapper 
 	data.Set("role", identityProviderMapper.Config.Role)
 	data.Set("claim_name", identityProviderMapper.Config.Claim)
 	data.Set("claim_value", identityProviderMapper.Config.ClaimValue)
-	return nil
-}
-
-func resourceKeycloakOidcRoleIdpMapperCreate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getOidcRoleIdpMapperFromData(data)
-	err = keycloakClient.NewIdentityProviderMapper(identityProvider)
-	if err != nil {
-		return err
-	}
-	setOidcRoleIdpMapperData(data, identityProvider)
-	return resourceKeycloakOidcRoleIdpMapperRead(data, meta)
-}
-
-func resourceKeycloakOidcRoleIdpMapperRead(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realm := data.Get("realm").(string)
-	alias := data.Get("identity_provider_alias").(string)
-	id := data.Id()
-	identityProvider, err := keycloakClient.GetIdentityProviderMapper(realm, alias, id)
-	if err != nil {
-		return handleNotFoundError(err, data)
-	}
-	setOidcRoleIdpMapperData(data, identityProvider)
-	return nil
-}
-
-func resourceKeycloakOidcRoleIdpMapperUpdate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getOidcRoleIdpMapperFromData(data)
-	err = keycloakClient.UpdateIdentityProviderMapper(identityProvider)
-	if err != nil {
-		return err
-	}
-	setOidcRoleIdpMapperData(data, identityProvider)
 	return nil
 }
