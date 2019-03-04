@@ -99,9 +99,9 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	}
 	samlResource := resourceKeycloakIdentityProvider()
 	samlResource.Schema = mergeSchemas(samlResource.Schema, samlSchema)
-	samlResource.Create = resourceKeycloakSamlIdentityProviderCreate
-	samlResource.Read = resourceKeycloakSamlIdentityProviderRead
-	samlResource.Update = resourceKeycloakSamlIdentityProviderUpdate
+	samlResource.Create = resourceKeycloakIdentityProviderCreate("saml")
+	samlResource.Read = resourceKeycloakIdentityProviderRead("saml")
+	samlResource.Update = resourceKeycloakIdentityProviderUpdate("saml")
 	return samlResource
 }
 
@@ -148,39 +148,5 @@ func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("want_authn_requests_signed", identityProvider.Config.WantAuthnRequestsSigned)
 	data.Set("want_assertions_signed", identityProvider.Config.WantAssertionsSigned)
 	data.Set("want_assertions_encrypted", identityProvider.Config.WantAssertionsEncrypted)
-	return nil
-}
-
-func resourceKeycloakSamlIdentityProviderCreate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getSamlIdentityProviderFromData(data)
-	err = keycloakClient.NewIdentityProvider(identityProvider)
-	if err != nil {
-		return err
-	}
-	setSamlIdentityProviderData(data, identityProvider)
-	return resourceKeycloakSamlIdentityProviderRead(data, meta)
-}
-
-func resourceKeycloakSamlIdentityProviderRead(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realm := data.Get("realm").(string)
-	alias := data.Get("alias").(string)
-	identityProvider, err := keycloakClient.GetIdentityProvider(realm, alias)
-	if err != nil {
-		return handleNotFoundError(err, data)
-	}
-	setSamlIdentityProviderData(data, identityProvider)
-	return nil
-}
-
-func resourceKeycloakSamlIdentityProviderUpdate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getSamlIdentityProviderFromData(data)
-	err = keycloakClient.UpdateIdentityProvider(identityProvider)
-	if err != nil {
-		return err
-	}
-	setSamlIdentityProviderData(data, identityProvider)
 	return nil
 }
