@@ -9,20 +9,17 @@ func resourceKeycloakOidcRoleIdpMapper() *schema.Resource {
 	mapperSchema := map[string]*schema.Schema{
 		"claim_name": {
 			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
+			Optional:    true,
 			Description: "Claim Name",
 		},
 		"claim_value": {
 			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
+			Optional:    true,
 			Description: "Claim Value",
 		},
 		"role": {
 			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
+			Optional:    true,
 			Description: "Role To Grant To User",
 		},
 	}

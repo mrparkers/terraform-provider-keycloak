@@ -9,20 +9,17 @@ func resourceKeycloakSamlUserAttributeIdpMapper() *schema.Resource {
 	mapperSchema := map[string]*schema.Schema{
 		"attribute_name": {
 			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
+			Optional:    true,
 			Description: "Attribute Name",
 		},
 		"user_attribute": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			ForceNew:    true,
 			Description: "User Attribute",
 		},
 		"attribute_friendly_name": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			ForceNew:    true,
 			Description: "Attribute Friendly Name",
 		},
 	}

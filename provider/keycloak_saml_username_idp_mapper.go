@@ -9,8 +9,7 @@ func resourceKeycloakSamlUsernameIdpMapper() *schema.Resource {
 	mapperSchema := map[string]*schema.Schema{
 		"template": {
 			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
+			Optional:    true,
 			Description: "Username For Template Import",
 		},
 	}

@@ -9,14 +9,12 @@ func resourceKeycloakOidcUserAttributeImporterMapper() *schema.Resource {
 	mapperSchema := map[string]*schema.Schema{
 		"claim_name": {
 			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
+			Optional:    true,
 			Description: "OIDC Claim Name",
 		},
 		"user_attribute": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			ForceNew:    true,
 			Description: "User Attribute",
 		},
 	}

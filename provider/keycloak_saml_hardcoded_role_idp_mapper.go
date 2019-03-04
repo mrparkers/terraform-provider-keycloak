@@ -9,8 +9,7 @@ func resourceKeycloakSamlHardcodedRoleIdpMapper() *schema.Resource {
 	mapperSchema := map[string]*schema.Schema{
 		"role": {
 			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
+			Optional:    true,
 			Description: "Role To Grant To User",
 		},
 	}

@@ -22,7 +22,7 @@ func resourceKeycloakIdentityProviderMapper() *schema.Resource {
 			},
 			"name": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 				Description: "IDP Mapper Name",
 			},

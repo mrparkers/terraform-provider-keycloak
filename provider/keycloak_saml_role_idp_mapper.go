@@ -9,26 +9,22 @@ func resourceKeycloakSamlRoleIdpMapper() *schema.Resource {
 	mapperSchema := map[string]*schema.Schema{
 		"attribute_name": {
 			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
+			Optional:    true,
 			Description: "Attribute Name",
 		},
 		"attribute_value": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			ForceNew:    true,
 			Description: "Attribute Value",
 		},
 		"role": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			ForceNew:    true,
 			Description: "Role Name",
 		},
 		"attribute_friendly_name": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			ForceNew:    true,
 			Description: "Attribute Friendly Name",
 		},
 	}

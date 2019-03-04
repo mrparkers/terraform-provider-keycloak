@@ -9,14 +9,12 @@ func resourceKeycloakHardcodedAttributeIdpMapper() *schema.Resource {
 	mapperSchema := map[string]*schema.Schema{
 		"attribute_name": {
 			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
+			Optional:    true,
 			Description: "OIDC Claim",
 		},
 		"attribute_value": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			ForceNew:    true,
 			Description: "User Attribute",
 		},
 	}
