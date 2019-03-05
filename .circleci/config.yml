@@ -11,15 +11,9 @@ workflows:
           filters:
             tags:
               only: /\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/ # https://github.com/sindresorhus/semver-regex/blob/master/index.js
-      - build:
+      - build-and-release:
           requires:
             - test-client-credentials
-          filters:
-            tags:
-              only: /\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/ # https://github.com/sindresorhus/semver-regex/blob/master/index.js
-      - release:
-          requires:
-            - build
           filters:
             tags:
               only: /\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/ # https://github.com/sindresorhus/semver-regex/blob/master/index.js
@@ -66,7 +60,7 @@ jobs:
       KEYCLOAK_REALM: master
       KEYCLOAK_USER: keycloak
       KEYCLOAK_PASSWORD: password
-  release:
+  build-and-release:
     docker:
       - image: circleci/golang:1.11.4
     working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
