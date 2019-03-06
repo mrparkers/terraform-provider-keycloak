@@ -25,4 +25,7 @@ else
 		-b "[Release Notes](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/CHANGELOG.md#${releaseVersion}-${releaseDate})" \
 		-replace \
 		${CIRCLE_TAG} ../artifacts
+
+	sudo apt-get update && sudo apt-get install mkdocs
+	mkdocs gh-deploy
 fi
