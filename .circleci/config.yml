@@ -67,6 +67,8 @@ jobs:
   build-and-release:
     docker:
       - image: circleci/golang:1.11.4
+    environment:
+      GO111MODULE: "on"
     working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
     steps:
       - checkout
