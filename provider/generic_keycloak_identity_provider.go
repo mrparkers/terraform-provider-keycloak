@@ -7,6 +7,16 @@ import (
 	"strings"
 )
 
+var getIdentityProviderDataFunctions = map[string]func(data *schema.ResourceData) (*keycloak.IdentityProvider, error){
+	"oidc": getOidcIdentityProviderFromData,
+	"saml": getSamlIdentityProviderFromData,
+}
+
+var setIdentityProviderDataFunctions = map[string]func(data *schema.ResourceData, identityProvider *keycloak.IdentityProvider) error{
+	"oidc": setOidcIdentityProviderData,
+	"saml": setSamlIdentityProviderData,
+}
+
 func resourceKeycloakIdentityProvider() *schema.Resource {
 	return &schema.Resource{
 		Delete: resourceKeycloakIdentityProviderDelete,
@@ -138,4 +148,49 @@ func resourceKeycloakIdentityProviderImport(d *schema.ResourceData, _ interface{
 	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func resourceKeycloakIdentityProviderCreate(providerId string) func(data *schema.ResourceData, meta interface{}) error {
+	getIdentityProviderDataFunction := getIdentityProviderDataFunctions[providerId]
+	setIdentityProviderDataFunction := setIdentityProviderDataFunctions[providerId]
+	return func(data *schema.ResourceData, meta interface{}) error {
+		keycloakClient := meta.(*keycloak.KeycloakClient)
+		identityProvider, err := getIdentityProviderDataFunction(data)
+		err = keycloakClient.NewIdentityProvider(identityProvider)
+		if err != nil {
+			return err
+		}
+		setIdentityProviderDataFunction(data, identityProvider)
+		return resourceKeycloakIdentityProviderRead(providerId)(data, meta)
+	}
+}
+
+func resourceKeycloakIdentityProviderRead(providerId string) func(data *schema.ResourceData, meta interface{}) error {
+	setIdentityProviderDataFunction := setIdentityProviderDataFunctions[providerId]
+	return func(data *schema.ResourceData, meta interface{}) error {
+		keycloakClient := meta.(*keycloak.KeycloakClient)
+		realm := data.Get("realm").(string)
+		alias := data.Get("alias").(string)
+		identityProvider, err := keycloakClient.GetIdentityProvider(realm, alias)
+		if err != nil {
+			return handleNotFoundError(err, data)
+		}
+		setIdentityProviderDataFunction(data, identityProvider)
+		return nil
+	}
+}
+
+func resourceKeycloakIdentityProviderUpdate(providerId string) func(data *schema.ResourceData, meta interface{}) error {
+	getIdentityProviderDataFunction := getIdentityProviderDataFunctions[providerId]
+	setIdentityProviderDataFunction := setIdentityProviderDataFunctions[providerId]
+	return func(data *schema.ResourceData, meta interface{}) error {
+		keycloakClient := meta.(*keycloak.KeycloakClient)
+		identityProvider, err := getIdentityProviderDataFunction(data)
+		err = keycloakClient.UpdateIdentityProvider(identityProvider)
+		if err != nil {
+			return err
+		}
+		setIdentityProviderDataFunction(data, identityProvider)
+		return nil
+	}
 }

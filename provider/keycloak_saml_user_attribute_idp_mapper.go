@@ -25,9 +25,9 @@ func resourceKeycloakSamlUserAttributeIdpMapper() *schema.Resource {
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakSamlUserAttributeIdpMapperCreate
-	genericMapperResource.Read = resourceKeycloakSamlUserAttributeIdpMapperRead
-	genericMapperResource.Update = resourceKeycloakSamlUserAttributeIdpMapperUpdate
+	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate("saml-user-attribute-idp-mapper")
+	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead("saml-user-attribute-idp-mapper")
+	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate("saml-user-attribute-idp-mapper")
 	return genericMapperResource
 }
 
@@ -47,40 +47,5 @@ func setSamlUserAttributeIdpMapperData(data *schema.ResourceData, identityProvid
 	data.Set("attribute_name", identityProviderMapper.Config.Attribute)
 	data.Set("user_attribute", identityProviderMapper.Config.UserAttribute)
 	data.Set("attribute_friendly_name", identityProviderMapper.Config.AttributeFriendlyName)
-	return nil
-}
-
-func resourceKeycloakSamlUserAttributeIdpMapperCreate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getSamlUserAttributeIdpMapperFromData(data)
-	err = keycloakClient.NewIdentityProviderMapper(identityProvider)
-	if err != nil {
-		return err
-	}
-	setSamlUserAttributeIdpMapperData(data, identityProvider)
-	return resourceKeycloakSamlUserAttributeIdpMapperRead(data, meta)
-}
-
-func resourceKeycloakSamlUserAttributeIdpMapperRead(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realm := data.Get("realm").(string)
-	alias := data.Get("identity_provider_alias").(string)
-	id := data.Id()
-	identityProvider, err := keycloakClient.GetIdentityProviderMapper(realm, alias, id)
-	if err != nil {
-		return handleNotFoundError(err, data)
-	}
-	setSamlUserAttributeIdpMapperData(data, identityProvider)
-	return nil
-}
-
-func resourceKeycloakSamlUserAttributeIdpMapperUpdate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	identityProvider, err := getSamlUserAttributeIdpMapperFromData(data)
-	err = keycloakClient.UpdateIdentityProviderMapper(identityProvider)
-	if err != nil {
-		return err
-	}
-	setSamlUserAttributeIdpMapperData(data, identityProvider)
 	return nil
 }

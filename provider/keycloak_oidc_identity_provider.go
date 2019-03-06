@@ -72,9 +72,9 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 	}
 	oidcResource := resourceKeycloakIdentityProvider()
 	oidcResource.Schema = mergeSchemas(oidcResource.Schema, oidcSchema)
-	oidcResource.Create = resourceKeycloakOidcIdentityProviderCreate
-	oidcResource.Read = resourceKeycloakOidcIdentityProviderRead
-	oidcResource.Update = resourceKeycloakOidcIdentityProviderUpdate
+	oidcResource.Create = resourceKeycloakIdentityProviderCreate("oidc")
+	oidcResource.Read = resourceKeycloakIdentityProviderRead("oidc")
+	oidcResource.Update = resourceKeycloakIdentityProviderUpdate("oidc")
 	return oidcResource
 }
 
@@ -110,51 +110,5 @@ func setOidcIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("token_url", identityProvider.Config.TokenUrl)
 	data.Set("login_hint", identityProvider.Config.LoginHint)
 	data.Set("ui_locales", identityProvider.Config.UILocales)
-	return nil
-}
-
-func resourceKeycloakOidcIdentityProviderCreate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	identityProvider, err := getOidcIdentityProviderFromData(data)
-
-	err = keycloakClient.NewIdentityProvider(identityProvider)
-	if err != nil {
-		return err
-	}
-
-	setOidcIdentityProviderData(data, identityProvider)
-
-	return resourceKeycloakOidcIdentityProviderRead(data, meta)
-}
-
-func resourceKeycloakOidcIdentityProviderRead(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	realm := data.Get("realm").(string)
-	alias := data.Get("alias").(string)
-
-	identityProvider, err := keycloakClient.GetIdentityProvider(realm, alias)
-	if err != nil {
-		return handleNotFoundError(err, data)
-	}
-
-	setOidcIdentityProviderData(data, identityProvider)
-
-	return nil
-}
-
-func resourceKeycloakOidcIdentityProviderUpdate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	identityProvider, err := getOidcIdentityProviderFromData(data)
-
-	err = keycloakClient.UpdateIdentityProvider(identityProvider)
-	if err != nil {
-		return err
-	}
-
-	setOidcIdentityProviderData(data, identityProvider)
-
 	return nil
 }
