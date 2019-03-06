@@ -11,12 +11,16 @@ workflows:
           filters:
             tags:
               only: /\d+\.\d+\.\d+(-rc.\d+)?/
+            branches:
+              ignore: /.*/
       - build-and-release:
           requires:
             - test-client-credentials
           filters:
             tags:
               only: /\d+\.\d+\.\d+(-rc.\d+)?/
+            branches:
+              ignore: /.*/
 jobs:
   test-template: &test-template
     docker:
