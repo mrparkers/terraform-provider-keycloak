@@ -10,7 +10,7 @@ workflows:
       - test-client-credentials:
           filters:
             tags:
-              only: /\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/ # https://github.com/sindresorhus/semver-regex/blob/master/index.js
+              only: /^\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/ # https://github.com/sindresorhus/semver-regex/blob/master/index.js
             branches:
               only: master
       - build-and-release:
@@ -18,7 +18,7 @@ workflows:
             - test-client-credentials
           filters:
             tags:
-              only: /\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/ # https://github.com/sindresorhus/semver-regex/blob/master/index.js
+              only: /^\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/ # https://github.com/sindresorhus/semver-regex/blob/master/index.js
             branches:
               only: master
 jobs:
