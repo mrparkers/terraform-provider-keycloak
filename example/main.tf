@@ -343,3 +343,34 @@ resource "keycloak_saml_user_property_protocol_mapper" "saml_user_property_mappe
 	saml_attribute_name        = "email"
 	saml_attribute_name_format = "Unspecified"
 }
+
+resource keycloak_oidc_identity_provider azure_ad {
+	realm = "${keycloak_realm.test.id}"
+	alias = "oidc"
+	authorization_url = "https://example.com/auth"
+	token_url = "https://example.com/token"
+	client_id = "example_id"
+	client_secret = "example_token"
+}
+
+resource keycloak_saml_identity_provider adfs {
+	realm = "${keycloak_realm.test.id}"
+	alias = "adfs"
+	single_sign_on_service_url = "https://example.com/auth"
+}
+
+resource keycloak_saml_user_attribute_idp_mapper email {
+	realm = "${keycloak_realm.test.id}"
+	name = "Attribute: email"
+	attribute_name = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+	identity_provider_alias = "${keycloak_saml_identity_provider.adfs.alias}"
+	user_attribute = "email"
+}
+
+resource keycloak_oidc_user_attribute_idp_mapper email {
+	realm = "${keycloak_realm.test.id}"
+	name = "Attribute: email"
+	claim_name = "upn"
+	identity_provider_alias = "${keycloak_oidc_identity_provider.adfs.alias}"
+	user_attribute = "email"
+}
