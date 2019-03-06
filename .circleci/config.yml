@@ -10,17 +10,13 @@ workflows:
       - test-client-credentials:
           filters:
             tags:
-              only: /^\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/ # https://github.com/sindresorhus/semver-regex/blob/master/index.js
-            branches:
-              only: master
+              only: /\d+\.\d+\.\d+(-rc.\d+)?/
       - build-and-release:
           requires:
             - test-client-credentials
           filters:
             tags:
-              only: /^\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/ # https://github.com/sindresorhus/semver-regex/blob/master/index.js
-            branches:
-              only: master
+              only: /\d+\.\d+\.\d+(-rc.\d+)?/
 jobs:
   test-template: &test-template
     docker:
