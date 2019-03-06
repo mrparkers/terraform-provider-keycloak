@@ -27,5 +27,5 @@ else
 		${CIRCLE_TAG} ../artifacts
 
 	sudo apt-get update && sudo apt-get install mkdocs
-	mkdocs gh-deploy
+	cd .. && mkdocs gh-deploy
 fi
