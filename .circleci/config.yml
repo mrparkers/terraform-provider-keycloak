@@ -3,35 +3,51 @@ workflows:
   version: 2
   test:
     jobs:
-      - client-credentials
-      - password
+      - test-client-credentials
+      - test-password
+  release:
+    jobs:
+      - test-client-credentials:
+          filters:
+            tags:
+              only: /\d+\.\d+\.\d+(-rc.\d+)?/
+            branches:
+              ignore: /.*/
+      - build-and-release:
+          requires:
+            - test-client-credentials
+          filters:
+            tags:
+              only: /\d+\.\d+\.\d+(-rc.\d+)?/
+            branches:
+              ignore: /.*/
 jobs:
   test-template: &test-template
     docker:
-    - image: circleci/golang:1.11.4
-    - image: jboss/keycloak:4.8.3.Final
-      environment:
-        DB_VENDOR: H2
-        KEYCLOAK_LOGLEVEL: DEBUG
-        KEYCLOAK_USER: keycloak
-        KEYCLOAK_PASSWORD: password
+      - image: circleci/golang:1.11.4
+      - image: jboss/keycloak:4.8.3.Final
+        environment:
+          DB_VENDOR: H2
+          KEYCLOAK_LOGLEVEL: DEBUG
+          KEYCLOAK_USER: keycloak
+          KEYCLOAK_PASSWORD: password
     working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
     steps:
-    - checkout
-    - restore_cache:
-        keys:
-        - go-cache
-    - run: go mod download
-    - save_cache:
-        key: go-cache
-        paths:
-        - /go/pkg
-    - run:
-        command: |
-          ./scripts/wait-for-local-keycloak.sh
-          ./scripts/create-terraform-client.sh
-          make testacc
-  client-credentials:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-cache-{{ checksum "go.sum" }}
+      - run: go mod download
+      - save_cache:
+          key: go-cache-{{ checksum "go.sum" }}
+          paths:
+            - /go/pkg
+      - run:
+          command: |
+            ./scripts/wait-for-local-keycloak.sh
+            ./scripts/create-terraform-client.sh
+            make testacc
+  test-client-credentials:
     <<: *test-template
     environment:
       GO111MODULE: "on"
@@ -39,7 +55,7 @@ jobs:
       KEYCLOAK_URL: http://localhost:8080
       KEYCLOAK_REALM: master
       KEYCLOAK_CLIENT_SECRET: 884e0f95-0f42-4a63-9b1f-94274655669e
-  password:
+  test-password:
     <<: *test-template
     environment:
       GO111MODULE: "on"
@@ -48,3 +64,19 @@ jobs:
       KEYCLOAK_REALM: master
       KEYCLOAK_USER: keycloak
       KEYCLOAK_PASSWORD: password
+  build-and-release:
+    docker:
+      - image: circleci/golang:1.11.4
+    environment:
+      GO111MODULE: "on"
+    working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "27:1c:fb:ea:7d:89:93:bb:13:54:5b:3f:b7:cc:1b:09"
+      - run: go mod download
+      - run:
+          command: |
+            ./scripts/build-release.sh
+            ./scripts/publish-release.sh
