@@ -73,5 +73,4 @@ jobs:
       - run:
           command: |
             ./scripts/build-release.sh
-            go get github.com/tcnksm/ghr
-            ghr -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -replace ${CIRCLE_TAG} ./artifacts
+            ./scripts/publish-release.sh
