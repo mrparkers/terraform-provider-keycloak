@@ -68,7 +68,7 @@ func (keycloakClient *KeycloakClient) DeleteUser(realmId, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s", realmId, id))
 }
 
-func (keycloakClient *KeycloakClient) getUserByUsername(realmId, username string) (*User, error) {
+func (keycloakClient *KeycloakClient) GetUserByUsername(realmId, username string) (*User, error) {
 	var users []*User
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users?username=%s", realmId, url.QueryEscape(username)), &users)
@@ -97,7 +97,7 @@ func (keycloakClient *KeycloakClient) addUserToGroup(user *User, groupId string)
 
 func (keycloakClient *KeycloakClient) AddUsersToGroup(realmId, groupId string, users []interface{}) error {
 	for _, username := range users {
-		user, err := keycloakClient.getUserByUsername(realmId, username.(string)) // we need the user's id in order to add them to a group
+		user, err := keycloakClient.GetUserByUsername(realmId, username.(string)) // we need the user's id in order to add them to a group
 		if err != nil {
 			return err
 		}
@@ -120,7 +120,7 @@ func (keycloakClient *KeycloakClient) RemoveUserFromGroup(user *User, groupId st
 
 func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId string, usernames []interface{}) error {
 	for _, username := range usernames {
-		user, err := keycloakClient.getUserByUsername(realmId, username.(string)) // we need the user's id in order to remove them from a group
+		user, err := keycloakClient.GetUserByUsername(realmId, username.(string)) // we need the user's id in order to remove them from a group
 		if err != nil {
 			return err
 		}
