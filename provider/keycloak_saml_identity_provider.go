@@ -99,9 +99,9 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	}
 	samlResource := resourceKeycloakIdentityProvider()
 	samlResource.Schema = mergeSchemas(samlResource.Schema, samlSchema)
-	samlResource.Create = resourceKeycloakIdentityProviderCreate("saml")
-	samlResource.Read = resourceKeycloakIdentityProviderRead("saml")
-	samlResource.Update = resourceKeycloakIdentityProviderUpdate("saml")
+	samlResource.Create = resourceKeycloakIdentityProviderCreate(getSamlIdentityProviderFromData, setSamlIdentityProviderData)
+	samlResource.Read = resourceKeycloakIdentityProviderRead(setSamlIdentityProviderData)
+	samlResource.Update = resourceKeycloakIdentityProviderUpdate(getSamlIdentityProviderFromData, setSamlIdentityProviderData)
 	return samlResource
 }
 
