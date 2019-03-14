@@ -58,8 +58,12 @@ func resourceKeycloakAuthenticationFlow() *schema.Resource {
 				Optional: true,
 			},
 			"execution": {
-				Type:     schema.TypeSet,
-				Set:      schema.HashResource(resourceKeycloakAuthenticationExecution()),
+				Type: schema.TypeSet,
+				// this hash function basically makes this behave like a TypeList
+				// the only exception is that indices can be skipped in tf config and defined manually in Keycloak
+				Set: func(v interface{}) int {
+					return v.(map[string]interface{})["index"].(int)
+				},
 				Optional: true,
 				Elem:     resourceKeycloakAuthenticationExecution(),
 			},
@@ -86,18 +90,21 @@ func mapFromAuthenticationFlowToData(data *schema.ResourceData, authenticationFl
 	data.Set("description", authenticationFlow.Description)
 }
 
+// given the `execution` set from data, return a list of executions, sorted by index
 func mapToAuthenticationExecutionList(v interface{}) keycloak.AuthenticationExecutionList {
 	var executions keycloak.AuthenticationExecutionList
 	for _, ex := range v.(*schema.Set).List() {
-		exMap := ex.(map[string]interface{})
+		execution := ex.(map[string]interface{})
 
 		executions = append(executions, &keycloak.AuthenticationExecution{
-			Id:          exMap["execution_id"].(string),
-			Provider:    exMap["provider"].(string),
-			Requirement: exMap["requirement"].(string),
-			Index:       exMap["index"].(int),
+			Id:          execution["execution_id"].(string),
+			Provider:    execution["provider"].(string),
+			Requirement: execution["requirement"].(string),
+			Index:       execution["index"].(int),
 		})
 	}
+
+	sort.Sort(executions)
 
 	return executions
 }
@@ -116,15 +123,12 @@ func resourceKeycloakAuthenticationFlowCreate(data *schema.ResourceData, meta in
 
 	if v, ok := data.GetOk("execution"); ok {
 		executions := mapToAuthenticationExecutionList(v)
-		sort.Sort(executions)
 
 		for _, execution := range executions {
-			newExecution, err := keycloakClient.NewAuthenticationExecution(authenticationFlow.RealmId, authenticationFlow.Alias, execution.Provider)
+			_, err := keycloakClient.NewAuthenticationExecution(authenticationFlow.RealmId, authenticationFlow.Alias, execution.Provider)
 			if err != nil {
 				return err
 			}
-
-			execution = newExecution
 		}
 	}
 
