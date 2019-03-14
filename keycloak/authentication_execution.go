@@ -15,6 +15,8 @@ type authenticationExecutionCreate struct {
 // another model is used for GET /realms/${realmId}/authentication/executions/${executionId}, but I am going to try to avoid using this API
 type AuthenticationExecution struct {
 	Id                 string   `json:"id"`
+	RealmId            string   `json:"-"`
+	ParentFlowAlias    string   `json:"-"`
 	Provider           string   `json:"providerId"`
 	Requirement        string   `json:"requirement"`
 	RequirementChoices []string `json:"requirementChoices,omitempty"`
@@ -36,26 +38,15 @@ func (list AuthenticationExecutionList) Swap(i, j int) {
 	list[i], list[j] = list[j], list[i]
 }
 
-func (keycloakClient *KeycloakClient) NewAuthenticationExecution(realmId, parentAlias, provider string) (*AuthenticationExecution, error) {
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions/execution", realmId, parentAlias), &authenticationExecutionCreate{Provider: provider})
+func (keycloakClient *KeycloakClient) NewAuthenticationExecution(execution *AuthenticationExecution) error {
+	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions/execution", execution.RealmId, execution.ParentFlowAlias), &authenticationExecutionCreate{Provider: execution.Provider})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	newExecutionId := getIdFromLocationHeader(location)
+	execution.Id = getIdFromLocationHeader(location)
 
-	authenticationExecutions, err := keycloakClient.ListAuthenticationExecutions(realmId, parentAlias)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, execution := range authenticationExecutions {
-		if execution.Id == newExecutionId {
-			return execution, nil
-		}
-	}
-
-	return nil, fmt.Errorf("unable to find newly created execution with id %s (this should never happen)", newExecutionId)
+	return nil
 }
 
 func (keycloakClient *KeycloakClient) ListAuthenticationExecutions(realmId, parentAlias string) (AuthenticationExecutionList, error) {
@@ -67,4 +58,14 @@ func (keycloakClient *KeycloakClient) ListAuthenticationExecutions(realmId, pare
 	}
 
 	return authenticationExecutions, err
+}
+
+// note: only the "requirement" field can be updated this way
+func (keycloakClient *KeycloakClient) UpdateAuthenticationExecution(execution *AuthenticationExecution) error {
+	err := keycloakClient.put(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", execution.RealmId, execution.ParentFlowAlias), execution)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

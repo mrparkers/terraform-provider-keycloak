@@ -91,16 +91,18 @@ func mapFromAuthenticationFlowToData(data *schema.ResourceData, authenticationFl
 }
 
 // given the `execution` set from data, return a list of executions, sorted by index
-func mapToAuthenticationExecutionList(v interface{}) keycloak.AuthenticationExecutionList {
+func mapToAuthenticationExecutionList(v interface{}, realmId, parentFlowAlias string) keycloak.AuthenticationExecutionList {
 	var executions keycloak.AuthenticationExecutionList
 	for _, ex := range v.(*schema.Set).List() {
 		execution := ex.(map[string]interface{})
 
 		executions = append(executions, &keycloak.AuthenticationExecution{
-			Id:          execution["execution_id"].(string),
-			Provider:    execution["provider"].(string),
-			Requirement: execution["requirement"].(string),
-			Index:       execution["index"].(int),
+			Id:              execution["execution_id"].(string),
+			RealmId:         realmId,
+			ParentFlowAlias: parentFlowAlias,
+			Provider:        execution["provider"].(string),
+			Requirement:     execution["requirement"].(string),
+			Index:           execution["index"].(int),
 		})
 	}
 
@@ -122,10 +124,15 @@ func resourceKeycloakAuthenticationFlowCreate(data *schema.ResourceData, meta in
 	mapFromAuthenticationFlowToData(data, authenticationFlow)
 
 	if v, ok := data.GetOk("execution"); ok {
-		executions := mapToAuthenticationExecutionList(v)
+		executions := mapToAuthenticationExecutionList(v, authenticationFlow.RealmId, authenticationFlow.Alias)
 
 		for _, execution := range executions {
-			_, err := keycloakClient.NewAuthenticationExecution(authenticationFlow.RealmId, authenticationFlow.Alias, execution.Provider)
+			err = keycloakClient.NewAuthenticationExecution(execution)
+			if err != nil {
+				return err
+			}
+
+			err = keycloakClient.UpdateAuthenticationExecution(execution)
 			if err != nil {
 				return err
 			}
