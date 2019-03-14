@@ -3,9 +3,36 @@ package provider
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"sort"
 	"strings"
 )
+
+func resourceKeycloakAuthenticationExecution() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"provider": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"requirement": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"REQUIRED", "ALTERNATIVE", "OPTIONAL", "DISABLED"}, false),
+				Default:      "DISABLED",
+			},
+			"index": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
+			"execution_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
 
 func resourceKeycloakAuthenticationFlow() *schema.Resource {
 	return &schema.Resource{
@@ -30,6 +57,12 @@ func resourceKeycloakAuthenticationFlow() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"execution": {
+				Type:     schema.TypeSet,
+				Set:      schema.HashResource(resourceKeycloakAuthenticationExecution()),
+				Optional: true,
+				Elem:     resourceKeycloakAuthenticationExecution(),
+			},
 		},
 	}
 }
@@ -53,6 +86,22 @@ func mapFromAuthenticationFlowToData(data *schema.ResourceData, authenticationFl
 	data.Set("description", authenticationFlow.Description)
 }
 
+func mapToAuthenticationExecutionList(v interface{}) keycloak.AuthenticationExecutionList {
+	var executions keycloak.AuthenticationExecutionList
+	for _, ex := range v.(*schema.Set).List() {
+		exMap := ex.(map[string]interface{})
+
+		executions = append(executions, &keycloak.AuthenticationExecution{
+			Id:          exMap["execution_id"].(string),
+			Provider:    exMap["provider"].(string),
+			Requirement: exMap["requirement"].(string),
+			Index:       exMap["index"].(int),
+		})
+	}
+
+	return executions
+}
+
 func resourceKeycloakAuthenticationFlowCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
@@ -64,6 +113,20 @@ func resourceKeycloakAuthenticationFlowCreate(data *schema.ResourceData, meta in
 	}
 
 	mapFromAuthenticationFlowToData(data, authenticationFlow)
+
+	if v, ok := data.GetOk("execution"); ok {
+		executions := mapToAuthenticationExecutionList(v)
+		sort.Sort(executions)
+
+		for _, execution := range executions {
+			newExecution, err := keycloakClient.NewAuthenticationExecution(authenticationFlow.RealmId, authenticationFlow.Alias, execution.Provider)
+			if err != nil {
+				return err
+			}
+
+			execution = newExecution
+		}
+	}
 
 	return resourceKeycloakAuthenticationFlowRead(data, meta)
 }

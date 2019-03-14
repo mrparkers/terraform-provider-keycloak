@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"sort"
 	"testing"
 )
 
@@ -124,6 +125,32 @@ func TestAccKeycloakAuthenticationFlow_updateRealm(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakAuthenticationFlow_basicExecutions(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
+
+	executions := []string{
+		"auth-cookie",
+		"no-cookie-redirect",
+		"direct-grant-validate-otp",
+	}
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakAuthenticationFlowDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakAuthenticationFlow_basicExecutions(realmName, authFlowAlias, executions),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakAuthenticationFlowExists("keycloak_authentication_flow.flow"),
+					testAccCheckKeycloakAuthenticationFlowExecutionOrder("keycloak_authentication_flow.flow", executions),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakAuthenticationFlowExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getAuthenticationFlowFromState(s, resourceName)
@@ -158,6 +185,32 @@ func testAccCheckKeycloakAuthenticationFlowBelongsToRealm(resourceName, realm st
 
 		if authenticationFlow.RealmId != realm {
 			return fmt.Errorf("expected authentication flow with id %s to have realm_id of %s, but got %s", authenticationFlow.Id, realm, authenticationFlow.RealmId)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakAuthenticationFlowExecutionOrder(resourceName string, tfExecutions []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+		authenticationFlow, err := getAuthenticationFlowFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		keycloakExecutions, err := keycloakClient.ListAuthenticationExecutions(authenticationFlow.RealmId, authenticationFlow.Alias)
+		if err != nil {
+			return err
+		}
+
+		sort.Sort(keycloakExecutions)
+
+		for i, keycloakExecution := range keycloakExecutions {
+			if keycloakExecution.Provider != tfExecutions[i] {
+				return fmt.Errorf("expected execution with provider %s to be index %d, but was %d", keycloakExecution.Provider, i, keycloakExecution.Index)
+			}
 		}
 
 		return nil
@@ -250,4 +303,30 @@ resource "keycloak_authentication_flow" "flow" {
 	realm_id = "${keycloak_realm.realm_2.id}"
 }
 	`, realmOne, realmTwo, alias)
+}
+
+func testKeycloakAuthenticationFlow_basicExecutions(realm, alias string, executions []string) string {
+	executionsString := ""
+
+	for i, execution := range executions {
+		executionsString += fmt.Sprintf(`
+	execution {
+		provider = "%s"
+		index    = %d
+	}
+		`, execution, i)
+	}
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_authentication_flow" "flow" {
+	alias    = "%s"
+	realm_id = "${keycloak_realm.realm.id}"
+
+	%s
+}
+	`, realm, alias, executionsString)
 }
