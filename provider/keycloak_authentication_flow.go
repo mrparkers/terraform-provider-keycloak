@@ -111,6 +111,23 @@ func mapToAuthenticationExecutionList(v interface{}, realmId, parentFlowAlias st
 	return executions
 }
 
+func flattenAuthenticationExecutions(executions []*keycloak.AuthenticationExecution) []map[string]interface{} {
+	state := make([]map[string]interface{}, 0, len(executions))
+
+	for _, execution := range executions {
+		data := make(map[string]interface{})
+
+		data["execution_id"] = execution.Id
+		data["provider"] = execution.Provider
+		data["requirement"] = execution.Requirement
+		data["index"] = execution.Index
+
+		state = append(state, data)
+	}
+
+	return state
+}
+
 func resourceKeycloakAuthenticationFlowCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
@@ -154,6 +171,13 @@ func resourceKeycloakAuthenticationFlowRead(data *schema.ResourceData, meta inte
 	}
 
 	mapFromAuthenticationFlowToData(data, authenticationFlow)
+
+	executions, err := keycloakClient.ListAuthenticationExecutions(authenticationFlow.RealmId, authenticationFlow.Alias)
+	if err != nil {
+		return err
+	}
+
+	data.Set("execution", flattenAuthenticationExecutions(executions))
 
 	return nil
 }

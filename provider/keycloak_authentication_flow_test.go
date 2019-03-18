@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strconv"
 	"testing"
 )
 
@@ -144,6 +145,7 @@ func TestAccKeycloakAuthenticationFlow_basicExecutions(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationFlowExists("keycloak_authentication_flow.flow"),
 					testAccCheckKeycloakAuthenticationFlowExecutionOrder("keycloak_authentication_flow.flow", executions),
+					testAccCheckKeycloakAuthenticationFlowExecutionIds("keycloak_authentication_flow.flow", executions),
 				),
 			},
 		},
@@ -234,6 +236,32 @@ func testAccCheckKeycloakAuthenticationFlowExecutionOrder(resourceName string, e
 		for i, keycloakExecution := range keycloakExecutions {
 			if keycloakExecution.Provider != executions[i].Provider {
 				return fmt.Errorf("expected execution with provider %s to be index %d, but was %d", keycloakExecution.Provider, i, keycloakExecution.Index)
+			}
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakAuthenticationFlowExecutionIds(resourceName string, executions []*keycloak.AuthenticationExecution) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		numberOfExecutionsInState, err := strconv.Atoi(rs.Primary.Attributes["execution.#"])
+		if err != nil {
+			return err
+		}
+
+		if len(executions) != numberOfExecutionsInState {
+			return fmt.Errorf("expected number of executions in state to be %d, got %d", len(executions), numberOfExecutionsInState)
+		}
+
+		for i := 0; i < numberOfExecutionsInState; i++ {
+			if rs.Primary.Attributes[fmt.Sprintf("execution.%d.execution_id", i)] == "" {
+				return fmt.Errorf("expected execution at index %d to have computed attribute execution_id", i)
 			}
 		}
 
