@@ -25,9 +25,9 @@ func resourceKeycloakOidcRoleIdpMapper() *schema.Resource {
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate("oidc-role-idp-mapper")
-	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead("oidc-role-idp-mapper")
-	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate("oidc-role-idp-mapper")
+	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate(getOidcRoleIdpMapperFromData, setOidcRoleIdpMapperData)
+	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead(setOidcRoleIdpMapperData)
+	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate(getOidcRoleIdpMapperFromData, setOidcRoleIdpMapperData)
 	return genericMapperResource
 }
 

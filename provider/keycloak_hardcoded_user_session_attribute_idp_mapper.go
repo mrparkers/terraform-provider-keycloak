@@ -20,9 +20,9 @@ func resourceKeycloakHardcodedUserSessionAttributeIdpMapper() *schema.Resource {
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate("hardcoded-user-session-attribute-idp-mapper")
-	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead("hardcoded-user-session-attribute-idp-mapper")
-	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate("hardcoded-user-session-attribute-idp-mapper")
+	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate(getHardcodedUserSessionAttributeIdpMapperFromData, setHardcodedUserSessionAttributeIdpMapperData)
+	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead(setHardcodedUserSessionAttributeIdpMapperData)
+	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate(getHardcodedUserSessionAttributeIdpMapperFromData, setHardcodedUserSessionAttributeIdpMapperData)
 	return genericMapperResource
 }
 

@@ -7,31 +7,8 @@ import (
 	"strings"
 )
 
-var getIdentityProviderMapperDataFunctions = map[string]func(data *schema.ResourceData) (*keycloak.IdentityProviderMapper, error){
-	"hardcoded-attribute-idp-mapper":              getHardcodedAttributeIdpMapperFromData,
-	"hardcoded-user-session-attribute-idp-mapper": getHardcodedUserSessionAttributeIdpMapperFromData,
-	"oidc-hardcoded-role-idp-mapper":              getOidcHardcodedRoleIdpMapperFromData,
-	"oidc-role-idp-mapper":                        getOidcRoleIdpMapperFromData,
-	"oidc-user-attribute-idp-mapper":              getOidcUserAttributeIdpMapperFromData,
-	"oidc-username-idp-mapper":                    getOidcUsernameIdpMapperFromData,
-	"saml-hardcoded-role-idp-mapper":              getSamlHardcodedRoleIdpMapperFromData,
-	"saml-role-idp-mapper":                        getSamlRoleIdpMapperFromData,
-	"saml-user-attribute-idp-mapper":              getSamlUserAttributeIdpMapperFromData,
-	"saml-username-idp-mapper":                    getSamlUsernameIdpMapperFromData,
-}
-
-var setIdentityProviderMapperDataFunctions = map[string]func(data *schema.ResourceData, identityProviderMapper *keycloak.IdentityProviderMapper) error{
-	"hardcoded-attribute-idp-mapper":              setHardcodedAttributeIdpMapperData,
-	"hardcoded-user-session-attribute-idp-mapper": setHardcodedUserSessionAttributeIdpMapperData,
-	"oidc-hardcoded-role-idp-mapper":              setOidcHardcodedRoleIdpMapperData,
-	"oidc-role-idp-mapper":                        setOidcRoleIdpMapperData,
-	"oidc-user-attribute-idp-mapper":              setOidcUserAttributeIdpMapperData,
-	"oidc-username-idp-mapper":                    setOidcUsernameIdpMapperData,
-	"saml-hardcoded-role-idp-mapper":              setSamlHardcodedRoleIdpMapperData,
-	"saml-role-idp-mapper":                        setSamlRoleIdpMapperData,
-	"saml-user-attribute-idp-mapper":              setSamlUserAttributeIdpMapperData,
-	"saml-username-idp-mapper":                    setSamlUsernameIdpMapperData,
-}
+type identityProviderMapperDataGetterFunc func(data *schema.ResourceData) (*keycloak.IdentityProviderMapper, error)
+type identityProviderMapperDataSetterFunc func(data *schema.ResourceData, identityProviderMapper *keycloak.IdentityProviderMapper) error
 
 func resourceKeycloakIdentityProviderMapper() *schema.Resource {
 	return &schema.Resource{
@@ -105,23 +82,20 @@ func resourceKeycloakIdentityProviderMapperImport(d *schema.ResourceData, _ inte
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceKeycloakIdentityProviderMapperCreate(providerId string) func(data *schema.ResourceData, meta interface{}) error {
-	setIdentityProviderMapperDataFunction := setIdentityProviderMapperDataFunctions[providerId]
-	getIdentityProviderMapperDataFunction := getIdentityProviderMapperDataFunctions[providerId]
+func resourceKeycloakIdentityProviderMapperCreate(getIdentityProviderMapperFromData identityProviderMapperDataGetterFunc, setDataFromIdentityProviderMapper identityProviderMapperDataSetterFunc) func(data *schema.ResourceData, meta interface{}) error {
 	return func(data *schema.ResourceData, meta interface{}) error {
 		keycloakClient := meta.(*keycloak.KeycloakClient)
-		identityProvider, err := getIdentityProviderMapperDataFunction(data)
+		identityProvider, err := getIdentityProviderMapperFromData(data)
 		err = keycloakClient.NewIdentityProviderMapper(identityProvider)
 		if err != nil {
 			return err
 		}
-		setIdentityProviderMapperDataFunction(data, identityProvider)
-		return resourceKeycloakIdentityProviderMapperRead(providerId)(data, meta)
+		setDataFromIdentityProviderMapper(data, identityProvider)
+		return resourceKeycloakIdentityProviderMapperRead(setDataFromIdentityProviderMapper)(data, meta)
 	}
 }
 
-func resourceKeycloakIdentityProviderMapperRead(providerId string) func(data *schema.ResourceData, meta interface{}) error {
-	setIdentityProviderMapperDataFunction := setIdentityProviderMapperDataFunctions[providerId]
+func resourceKeycloakIdentityProviderMapperRead(setDataFromIdentityProviderMapper identityProviderMapperDataSetterFunc) func(data *schema.ResourceData, meta interface{}) error {
 	return func(data *schema.ResourceData, meta interface{}) error {
 		keycloakClient := meta.(*keycloak.KeycloakClient)
 		realm := data.Get("realm").(string)
@@ -131,22 +105,20 @@ func resourceKeycloakIdentityProviderMapperRead(providerId string) func(data *sc
 		if err != nil {
 			return handleNotFoundError(err, data)
 		}
-		setIdentityProviderMapperDataFunction(data, identityProvider)
+		setDataFromIdentityProviderMapper(data, identityProvider)
 		return nil
 	}
 }
 
-func resourceKeycloakIdentityProviderMapperUpdate(providerId string) func(data *schema.ResourceData, meta interface{}) error {
-	setIdentityProviderMapperDataFunction := setIdentityProviderMapperDataFunctions[providerId]
-	getIdentityProviderMapperDataFunction := getIdentityProviderMapperDataFunctions[providerId]
+func resourceKeycloakIdentityProviderMapperUpdate(getIdentityProviderMapperFromData identityProviderMapperDataGetterFunc, setDataFromIdentityProviderMapper identityProviderMapperDataSetterFunc) func(data *schema.ResourceData, meta interface{}) error {
 	return func(data *schema.ResourceData, meta interface{}) error {
 		keycloakClient := meta.(*keycloak.KeycloakClient)
-		identityProvider, err := getIdentityProviderMapperDataFunction(data)
+		identityProvider, err := getIdentityProviderMapperFromData(data)
 		err = keycloakClient.UpdateIdentityProviderMapper(identityProvider)
 		if err != nil {
 			return err
 		}
-		setIdentityProviderMapperDataFunction(data, identityProvider)
+		setDataFromIdentityProviderMapper(data, identityProvider)
 		return nil
 	}
 }

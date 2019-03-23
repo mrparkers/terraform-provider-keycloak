@@ -15,9 +15,9 @@ func resourceKeycloakSamlUsernameIdpMapper() *schema.Resource {
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate("saml-username-idp-mapper")
-	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead("saml-username-idp-mapper")
-	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate("saml-username-idp-mapper")
+	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate(getSamlUsernameIdpMapperFromData, setSamlUsernameIdpMapperData)
+	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead(setSamlUsernameIdpMapperData)
+	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate(getSamlUsernameIdpMapperFromData, setSamlUsernameIdpMapperData)
 	return genericMapperResource
 }
 

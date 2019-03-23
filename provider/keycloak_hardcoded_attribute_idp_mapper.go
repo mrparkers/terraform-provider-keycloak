@@ -20,9 +20,9 @@ func resourceKeycloakHardcodedAttributeIdpMapper() *schema.Resource {
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate("hardcoded-attribute-idp-mapper")
-	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead("hardcoded-attribute-idp-mapper")
-	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate("hardcoded-attribute-idp-mapper")
+	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate(getHardcodedAttributeIdpMapperFromData, setHardcodedAttributeIdpMapperData)
+	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead(setHardcodedAttributeIdpMapperData)
+	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate(getHardcodedAttributeIdpMapperFromData, setHardcodedAttributeIdpMapperData)
 	return genericMapperResource
 }
 

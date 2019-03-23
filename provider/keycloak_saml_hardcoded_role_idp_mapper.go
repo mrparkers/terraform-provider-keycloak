@@ -15,9 +15,9 @@ func resourceKeycloakSamlHardcodedRoleIdpMapper() *schema.Resource {
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate("saml-hardcoded-role-idp-mapper")
-	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead("saml-hardcoded-role-idp-mapper")
-	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate("saml-hardcoded-role-idp-mapper")
+	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate(getSamlHardcodedRoleIdpMapperFromData, setSamlHardcodedRoleIdpMapperData)
+	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead(setSamlHardcodedRoleIdpMapperData)
+	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate(getSamlHardcodedRoleIdpMapperFromData, setSamlHardcodedRoleIdpMapperData)
 	return genericMapperResource
 }
 
