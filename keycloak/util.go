@@ -8,7 +8,6 @@ import (
 )
 
 type KeycloakBoolQuoted bool
-type KeycloakBool bool
 
 func (c KeycloakBoolQuoted) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
@@ -36,31 +35,6 @@ func (c *KeycloakBoolQuoted) UnmarshalJSON(in []byte) error {
 		return err
 	}
 	res := KeycloakBoolQuoted(b)
-	*c = res
-	return nil
-}
-
-func (c KeycloakBool) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	if c == false {
-		buf.WriteString(`""`)
-	} else {
-		buf.WriteString(strconv.FormatBool(bool(c)))
-	}
-	return buf.Bytes(), nil
-}
-
-func (c *KeycloakBool) UnmarshalJSON(in []byte) error {
-	value := string(in)
-	if value == `""` {
-		*c = false
-		return nil
-	}
-	b, err := strconv.ParseBool(value)
-	if err != nil {
-		return err
-	}
-	res := KeycloakBool(b)
 	*c = res
 	return nil
 }

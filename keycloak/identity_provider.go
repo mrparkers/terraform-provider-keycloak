@@ -42,11 +42,11 @@ type IdentityProvider struct {
 	DisplayName                 string                  `json:"displayName,omitempty"`
 	ProviderId                  string                  `json:"providerId,omitempty"`
 	Enabled                     bool                    `json:"enabled,omitempty"`
-	StoreToken                  KeycloakBool            `json:"storeToken"`
-	AddReadTokenRoleOnCreate    KeycloakBool            `json:"addReadTokenRoleOnCreate"`
+	StoreToken                  bool                    `json:"storeToken"`
+	AddReadTokenRoleOnCreate    bool                    `json:"addReadTokenRoleOnCreate"`
 	AuthenticateByDefault       bool                    `json:"authenticateByDefault"`
-	LinkOnly                    KeycloakBool            `json:"linkOnly"`
-	TrustEmail                  KeycloakBool            `json:"trustEmail"`
+	LinkOnly                    bool                    `json:"linkOnly"`
+	TrustEmail                  bool                    `json:"trustEmail"`
 	FirstBrokerLoginFlowAlias   string                  `json:"firstBrokerLoginFlowAlias,omitempty"`
 	PostBrokerLoginFlowAlias    string                  `json:"postBrokerLoginFlowAlias"`
 	Config                      *IdentityProviderConfig `json:"config,omitempty"`

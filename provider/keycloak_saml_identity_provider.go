@@ -12,12 +12,6 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Optional:    true,
 			Description: "Does the external IDP support backchannel logout?",
 		},
-		"use_jwks_url": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     true,
-			Description: "Use JWKS url",
-		},
 		"validate_signature": {
 			Type:        schema.TypeBool,
 			Optional:    true,
@@ -109,7 +103,7 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 	rec, _ := getIdentityProviderFromData(data)
 	rec.ProviderId = "saml"
 	rec.Config = &keycloak.IdentityProviderConfig{
-		UseJwksUrl:                       keycloak.KeycloakBoolQuoted(data.Get("use_jwks_url").(bool)),
+		UseJwksUrl:                       keycloak.KeycloakBoolQuoted(true),
 		ValidateSignature:                keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
 		NameIDPolicyFormat:               data.Get("name_id_policy_format").(string),
