@@ -72,7 +72,7 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 	return oidcResource
 }
 
-func getOidcIdentityProviderFromData(data *schema.ResourceData, onCreate bool) (*keycloak.IdentityProvider, error) {
+func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
 	rec, _ := getIdentityProviderFromData(data)
 	rec.ProviderId = "oidc"
 	rec.Config = &keycloak.IdentityProviderConfig{
@@ -88,10 +88,8 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData, onCreate bool) (
 		LoginHint:            data.Get("login_hint").(string),
 	}
 
-	if onCreate {
-		if data.HasChange("client_secret") {
-			rec.Config.ClientSecret = data.Get("client_secret").(string)
-		}
+	if data.HasChange("client_secret") {
+		rec.Config.ClientSecret = data.Get("client_secret").(string)
 	}
 
 	return rec, nil

@@ -99,7 +99,7 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	return samlResource
 }
 
-func getSamlIdentityProviderFromData(data *schema.ResourceData, onCreate bool) (*keycloak.IdentityProvider, error) {
+func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
 	rec, _ := getIdentityProviderFromData(data)
 	rec.ProviderId = "saml"
 	rec.Config = &keycloak.IdentityProviderConfig{
