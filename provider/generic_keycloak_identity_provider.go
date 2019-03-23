@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type identityProviderDataGetterFunc func(data *schema.ResourceData) (*keycloak.IdentityProvider, error)
+type identityProviderDataGetterFunc func(data *schema.ResourceData, onCreate bool) (*keycloak.IdentityProvider, error)
 type identityProviderDataSetterFunc func(data *schema.ResourceData, identityProvider *keycloak.IdentityProvider) error
 
 func resourceKeycloakIdentityProvider() *schema.Resource {
@@ -146,7 +146,7 @@ func resourceKeycloakIdentityProviderImport(d *schema.ResourceData, _ interface{
 func resourceKeycloakIdentityProviderCreate(getIdentityProviderFromData identityProviderDataGetterFunc, setDataFromIdentityProvider identityProviderDataSetterFunc) func(data *schema.ResourceData, meta interface{}) error {
 	return func(data *schema.ResourceData, meta interface{}) error {
 		keycloakClient := meta.(*keycloak.KeycloakClient)
-		identityProvider, err := getIdentityProviderFromData(data)
+		identityProvider, err := getIdentityProviderFromData(data, true)
 		err = keycloakClient.NewIdentityProvider(identityProvider)
 		if err != nil {
 			return err
@@ -173,7 +173,7 @@ func resourceKeycloakIdentityProviderRead(setDataFromIdentityProvider identityPr
 func resourceKeycloakIdentityProviderUpdate(getIdentityProviderFromData identityProviderDataGetterFunc, setDataFromIdentityProvider identityProviderDataSetterFunc) func(data *schema.ResourceData, meta interface{}) error {
 	return func(data *schema.ResourceData, meta interface{}) error {
 		keycloakClient := meta.(*keycloak.KeycloakClient)
-		identityProvider, err := getIdentityProviderFromData(data)
+		identityProvider, err := getIdentityProviderFromData(data, false)
 		err = keycloakClient.UpdateIdentityProvider(identityProvider)
 		if err != nil {
 			return err

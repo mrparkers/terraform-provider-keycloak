@@ -13,12 +13,6 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 			Default:     true,
 			Description: "Does the external IDP support backchannel logout?",
 		},
-		"use_jwks_url": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     true,
-			Description: "Use JWKS url",
-		},
 		"validate_signature": {
 			Type:        schema.TypeBool,
 			Optional:    true,
@@ -78,22 +72,28 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 	return oidcResource
 }
 
-func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
+func getOidcIdentityProviderFromData(data *schema.ResourceData, onCreate bool) (*keycloak.IdentityProvider, error) {
 	rec, _ := getIdentityProviderFromData(data)
 	rec.ProviderId = "oidc"
 	rec.Config = &keycloak.IdentityProviderConfig{
 		BackchannelSupported: keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
-		UseJwksUrl:           keycloak.KeycloakBoolQuoted(data.Get("use_jwks_url").(bool)),
+		UseJwksUrl:           keycloak.KeycloakBoolQuoted(true),
 		ValidateSignature:    keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		AuthorizationUrl:     data.Get("authorization_url").(string),
 		ClientId:             data.Get("client_id").(string),
-		ClientSecret:         data.Get("client_secret").(string),
 		DisableUserInfo:      keycloak.KeycloakBoolQuoted(data.Get("disable_user_info").(bool)),
 		HideOnLoginPage:      keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
 		TokenUrl:             data.Get("token_url").(string),
 		UILocales:            keycloak.KeycloakBoolQuoted(data.Get("ui_locales").(bool)),
 		LoginHint:            data.Get("login_hint").(string),
 	}
+
+	if onCreate {
+		if data.HasChange("client_secret") {
+			rec.Config.ClientSecret = data.Get("client_secret").(string)
+		}
+	}
+
 	return rec, nil
 }
 
@@ -104,7 +104,6 @@ func setOidcIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("validate_signature", identityProvider.Config.ValidateSignature)
 	data.Set("authorization_url", identityProvider.Config.AuthorizationUrl)
 	data.Set("client_id", identityProvider.Config.ClientId)
-	data.Set("client_secret", identityProvider.Config.ClientSecret)
 	data.Set("disable_user_info", identityProvider.Config.DisableUserInfo)
 	data.Set("hide_on_login_page", identityProvider.Config.HideOnLoginPage)
 	data.Set("token_url", identityProvider.Config.TokenUrl)
