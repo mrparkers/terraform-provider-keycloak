@@ -6,7 +6,7 @@ import (
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-var name_id_policy_formats = map[string]string{
+var nameIdPolicyFormats = map[string]string{
 	"Windows Domain Qualified Name": "urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName",
 	"Persistent":                    "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
 	"Email":                         "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
@@ -45,7 +45,7 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 				"Unspecified",
 			}, false),
 			StateFunc: func(value interface{}) string {
-				return name_id_policy_formats[value.(string)]
+				return nameIdPolicyFormats[value.(string)]
 			},
 			Description: "Name ID Policy Format.",
 		},
@@ -135,7 +135,8 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		UseJwksUrl:                       keycloak.KeycloakBoolQuoted(true),
 		ValidateSignature:                keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
-		NameIDPolicyFormat:               data.Get("name_id_policy_format").(string),
+		BackchannelSupported:             keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
+		NameIDPolicyFormat:               nameIdPolicyFormats[data.Get("name_id_policy_format").(string)],
 		SingleLogoutServiceUrl:           data.Get("single_logout_service_url").(string),
 		SingleSignOnServiceUrl:           data.Get("single_sign_on_service_url").(string),
 		SigningCertificate:               data.Get("signing_certificate").(string),
