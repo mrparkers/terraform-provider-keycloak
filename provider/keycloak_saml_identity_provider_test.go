@@ -104,10 +104,6 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 		Alias:   acctest.RandString(10),
 		Enabled: firstEnabled,
 		Config: &keycloak.IdentityProviderConfig{
-			AuthorizationUrl:                 "https://example.com/auth",
-			TokenUrl:                         "https://example.com/token",
-			ClientId:                         acctest.RandString(10),
-			ClientSecret:                     acctest.RandString(10),
 			SingleSignOnServiceUrl:           "https://example.com/signon/2",
 			BackchannelSupported:             firstBackchannel,
 			ValidateSignature:                firstValidateSignature,
@@ -124,8 +120,6 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			WantAuthnRequestsSigned:          firstWantAuthnRequests,
 			WantAssertionsSigned:             firstAssertionsSigned,
 			WantAssertionsEncrypted:          firstAssertionsEncrypted,
-			AuthorizationUrl:                 "https://example.com/auth/1",
-			TokenUrl:                         "https://example.com/token/1",
 		},
 	}
 
@@ -134,10 +128,6 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 		Alias:   acctest.RandString(10),
 		Enabled: !firstEnabled,
 		Config: &keycloak.IdentityProviderConfig{
-			AuthorizationUrl:                 "https://example.com/auth",
-			TokenUrl:                         "https://example.com/token",
-			ClientId:                         acctest.RandString(10),
-			ClientSecret:                     acctest.RandString(10),
 			SingleSignOnServiceUrl:           "https://example.com/signon/2",
 			BackchannelSupported:             !firstBackchannel,
 			ValidateSignature:                !firstValidateSignature,
