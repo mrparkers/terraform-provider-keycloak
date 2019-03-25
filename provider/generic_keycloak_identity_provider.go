@@ -29,9 +29,15 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 				ForceNew:    true,
 				Description: "Realm Name",
 			},
+			"internal_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Internal Identity Provider Id",
+			},
 			"display_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "",
 				Description: "Friendly name for Identity Providers.",
 			},
 			"enabled": {
@@ -100,6 +106,7 @@ func getIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityP
 		TrustEmail:                data.Get("trust_email").(bool),
 		FirstBrokerLoginFlowAlias: data.Get("first_broker_login_flow_alias").(string),
 		PostBrokerLoginFlowAlias:  data.Get("post_broker_login_flow_alias").(string),
+		InternalId:                data.Get("internal_id").(string),
 	}
 	return rec, nil
 }

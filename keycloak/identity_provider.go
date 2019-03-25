@@ -35,21 +35,20 @@ type IdentityProviderConfig struct {
 }
 
 type IdentityProvider struct {
-	Realm                       string                  `json:"-"`
-	InternalId                  string                  `json:"internalId,omitempty"`
-	UpdateProfileFirstLoginMode string                  `json:"updateProfileFirstLoginMode,omitempty"`
-	Alias                       string                  `json:"alias,omitempty"`
-	DisplayName                 string                  `json:"displayName,omitempty"`
-	ProviderId                  string                  `json:"providerId,omitempty"`
-	Enabled                     bool                    `json:"enabled,omitempty"`
-	StoreToken                  bool                    `json:"storeToken"`
-	AddReadTokenRoleOnCreate    bool                    `json:"addReadTokenRoleOnCreate"`
-	AuthenticateByDefault       bool                    `json:"authenticateByDefault"`
-	LinkOnly                    bool                    `json:"linkOnly"`
-	TrustEmail                  bool                    `json:"trustEmail"`
-	FirstBrokerLoginFlowAlias   string                  `json:"firstBrokerLoginFlowAlias,omitempty"`
-	PostBrokerLoginFlowAlias    string                  `json:"postBrokerLoginFlowAlias"`
-	Config                      *IdentityProviderConfig `json:"config,omitempty"`
+	Realm                     string                  `json:"-"`
+	InternalId                string                  `json:"internalId,omitempty"`
+	Alias                     string                  `json:"alias"`
+	DisplayName               string                  `json:"displayName"`
+	ProviderId                string                  `json:"providerId"`
+	Enabled                   bool                    `json:"enabled"`
+	StoreToken                bool                    `json:"storeToken"`
+	AddReadTokenRoleOnCreate  bool                    `json:"addReadTokenRoleOnCreate"`
+	AuthenticateByDefault     bool                    `json:"authenticateByDefault"`
+	LinkOnly                  bool                    `json:"linkOnly"`
+	TrustEmail                bool                    `json:"trustEmail"`
+	FirstBrokerLoginFlowAlias string                  `json:"firstBrokerLoginFlowAlias"`
+	PostBrokerLoginFlowAlias  string                  `json:"postBrokerLoginFlowAlias"`
+	Config                    *IdentityProviderConfig `json:"config"`
 }
 
 func (keycloakClient *KeycloakClient) NewIdentityProvider(identityProvider *IdentityProvider) error {
