@@ -107,7 +107,7 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			BackchannelSupported:             keycloak.KeycloakBoolQuoted(firstBackchannel),
 			ValidateSignature:                keycloak.KeycloakBoolQuoted(firstValidateSignature),
 			HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(firstHideOnLogin),
-			NameIDPolicyFormat:               "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+			NameIDPolicyFormat:               "Email",
 			SingleLogoutServiceUrl:           "https://example.com/logout/2",
 			SigningCertificate:               acctest.RandString(10),
 			SignatureAlgorithm:               "RSA_SHA512",
@@ -130,7 +130,7 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			BackchannelSupported:             keycloak.KeycloakBoolQuoted(!firstBackchannel),
 			ValidateSignature:                keycloak.KeycloakBoolQuoted(!firstValidateSignature),
 			HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(!firstHideOnLogin),
-			NameIDPolicyFormat:               "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+			NameIDPolicyFormat:               "Persistent",
 			SingleLogoutServiceUrl:           "https://example.com/logout/2",
 			SigningCertificate:               acctest.RandString(10),
 			SignatureAlgorithm:               "RSA_SHA256",
@@ -255,7 +255,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	backchannel_supported      = %t
 	validate_signature         = %t
 	hide_on_login_page         = %t
-	name_id_policy_format      = "urn:oasis:names:tc:SAML:2.0:nameid-format:%s"
+	name_id_policy_format      = "%s"
 	single_logout_service_url  = "%s"
 	signing_certificate        = "%s"
 	signature_algorithm        = "%s",
