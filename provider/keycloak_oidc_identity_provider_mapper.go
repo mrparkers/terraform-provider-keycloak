@@ -28,11 +28,11 @@ func resourceKeycloakOidcIdentityProviderMapper() *schema.Resource {
 			Description: "Identity Provider Mapper Type",
 			ValidateFunc: validation.StringInSlice([]string{
 				"Hardcoded Role",
-				"Hardcoded Attribute",
+				"Claim to Role",
+				"Attribute Importer",
 				"Hardcoded User Session Attribute",
-				"SAML Attribute To Role",
-				"Attribute Mapper",
-				"User Template Importer",
+				"Username Template Importer",
+				"Hardcoded Attribute",
 			}, false),
 		},
 		"claim_name": {
