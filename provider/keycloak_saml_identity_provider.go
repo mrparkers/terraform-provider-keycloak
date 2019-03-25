@@ -2,8 +2,18 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
+
+var name_id_policy_formats = map[string]string{
+	"Windows Domain Qualified Name": "urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName",
+	"Persistent":                    "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+	"Email":                         "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+	"Kerberos":                      "urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos",
+	"X.509 Subject Name":            "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName",
+	"Unspecified":                   "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+}
 
 func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	samlSchema := map[string]*schema.Schema{
@@ -23,9 +33,20 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Description: "Hide On Login Page.",
 		},
 		"name_id_policy_format": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Default:     "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+			Type:     schema.TypeString,
+			Optional: true,
+			Default:  "",
+			ValidateFunc: validation.StringInSlice([]string{
+				"Windows Domain Qualified Name",
+				"Persistent",
+				"Email",
+				"Kerberos",
+				"X.509 Subject Name",
+				"Unspecified",
+			}, false),
+			StateFunc: func(value interface{}) string {
+				return name_id_policy_formats[value.(string)]
+			},
 			Description: "Name ID Policy Format.",
 		},
 		"single_logout_service_url": {
@@ -44,15 +65,28 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Description: "Signing Certificate.",
 		},
 		"signature_algorithm": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Default:     "RSA_SHA256",
+			Type:     schema.TypeString,
+			Optional: true,
+			Default:  "",
+			ValidateFunc: validation.StringInSlice([]string{
+				"",
+				"RSA_SHA1",
+				"RSA_SHA256",
+				"RSA_SHA512",
+				"DSA_SHA1",
+			}, false),
 			Description: "Signing Algorithm.",
 		},
 		"xml_sign_key_info_key_name_transformer": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Default:     "KEY_ID",
+			Type:     schema.TypeString,
+			Optional: true,
+			Default:  "",
+			ValidateFunc: validation.StringInSlice([]string{
+				"",
+				"NONE",
+				"KEY_ID",
+				"CERT_SUBJECT",
+			}, false),
 			Description: "Sign Key Transformer.",
 		},
 		"post_binding_authn_request": {
@@ -74,11 +108,6 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Description: "Require Force Authn.",
-		},
-		"want_authn_requests_signed": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Description: "Require Force Authn Requests Sign.",
 		},
 		"want_assertions_signed": {
 			Type:        schema.TypeBool,
@@ -107,7 +136,7 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		ValidateSignature:                keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
 		NameIDPolicyFormat:               data.Get("name_id_policy_format").(string),
-		SingleLogutServiceUrl:            data.Get("single_logout_service_url").(string),
+		SingleLogoutServiceUrl:           data.Get("single_logout_service_url").(string),
 		SingleSignOnServiceUrl:           data.Get("single_sign_on_service_url").(string),
 		SigningCertificate:               data.Get("signing_certificate").(string),
 		SignatureAlgorithm:               data.Get("signature_algorithm").(string),
@@ -116,9 +145,11 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		PostBindingResponse:              keycloak.KeycloakBoolQuoted(data.Get("post_binding_response").(bool)),
 		PostBindingLogout:                keycloak.KeycloakBoolQuoted(data.Get("post_binding_logout").(bool)),
 		ForceAuthn:                       keycloak.KeycloakBoolQuoted(data.Get("force_authn").(bool)),
-		WantAuthnRequestsSigned:          keycloak.KeycloakBoolQuoted(data.Get("want_authn_requests_signed").(bool)),
 		WantAssertionsSigned:             keycloak.KeycloakBoolQuoted(data.Get("want_assertions_signed").(bool)),
 		WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
+	}
+	if _, ok := data.GetOk("signature_algorithm"); ok {
+		rec.Config.WantAuthnRequestsSigned = true
 	}
 	return rec, nil
 }
@@ -130,7 +161,7 @@ func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("validate_signature", identityProvider.Config.ValidateSignature)
 	data.Set("hide_on_login_page", identityProvider.Config.HideOnLoginPage)
 	data.Set("name_id_policy_format", identityProvider.Config.NameIDPolicyFormat)
-	data.Set("single_logout_service_url", identityProvider.Config.SingleLogutServiceUrl)
+	data.Set("single_logout_service_url", identityProvider.Config.SingleLogoutServiceUrl)
 	data.Set("single_sign_on_service_url", identityProvider.Config.SingleSignOnServiceUrl)
 	data.Set("signing_certificate", identityProvider.Config.SigningCertificate)
 	data.Set("signature_algorithm", identityProvider.Config.SignatureAlgorithm)

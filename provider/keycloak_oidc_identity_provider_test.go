@@ -132,7 +132,7 @@ func TestAccKeycloakOidcIdentityProvider_basicUpdateAll(t *testing.T) {
 
 func testAccCheckKeycloakOidcIdentityProviderExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		_, err := getKeycloakIdentityProviderFromState(s, resourceName)
+		_, err := getKeycloakOidcIdentityProviderFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
@@ -143,7 +143,7 @@ func testAccCheckKeycloakOidcIdentityProviderExists(resourceName string) resourc
 
 func testAccCheckKeycloakOidcIdentityProviderFetch(resourceName string, oidc *keycloak.IdentityProvider) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		fetchedOidc, err := getKeycloakIdentityProviderFromState(s, resourceName)
+		fetchedOidc, err := getKeycloakOidcIdentityProviderFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
@@ -177,7 +177,7 @@ func testAccCheckKeycloakOidcIdentityProviderDestroy() resource.TestCheckFunc {
 	}
 }
 
-func getKeycloakIdentityProviderFromState(s *terraform.State, resourceName string) (*keycloak.IdentityProvider, error) {
+func getKeycloakOidcIdentityProviderFromState(s *terraform.State, resourceName string) (*keycloak.IdentityProvider, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 	rs, ok := s.RootModule().Resources[resourceName]

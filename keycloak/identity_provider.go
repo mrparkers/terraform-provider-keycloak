@@ -14,7 +14,7 @@ type IdentityProviderConfig struct {
 	DisableUserInfo                  KeycloakBoolQuoted `json:"disableUserInfo"`
 	HideOnLoginPage                  KeycloakBoolQuoted `json:"hideOnLoginPage"`
 	NameIDPolicyFormat               string             `json:"nameIDPolicyFormat,omitempty"`
-	SingleLogutServiceUrl            string             `json:"singleLogoutServiceUrl,omitempty"`
+	SingleLogoutServiceUrl           string             `json:"singleLogoutServiceUrl,omitempty"`
 	SingleSignOnServiceUrl           string             `json:"singleSignOnServiceUrl,omitempty"`
 	SigningCertificate               string             `json:"signingCertificate,omitempty"`
 	SignatureAlgorithm               string             `json:"signatureAlgorithm,omitempty"`
