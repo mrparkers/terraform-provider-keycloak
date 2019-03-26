@@ -7,6 +7,14 @@ import (
 	"time"
 )
 
+func keys(data map[string]string) []string {
+	var result = []string{}
+	for k, _ := range data {
+		result = append(result, k)
+	}
+	return result
+}
+
 func mergeSchemas(a map[string]*schema.Schema, b map[string]*schema.Schema) map[string]*schema.Schema {
 	result := a
 	for k, v := range b {

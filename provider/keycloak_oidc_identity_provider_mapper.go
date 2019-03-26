@@ -23,17 +23,11 @@ func resourceKeycloakOidcIdentityProviderMapper() *schema.Resource {
 			Description: "Role To Grant To User",
 		},
 		"type": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Identity Provider Mapper Type",
-			ValidateFunc: validation.StringInSlice([]string{
-				"Hardcoded Role",
-				"Claim to Role",
-				"Attribute Importer",
-				"Hardcoded User Session Attribute",
-				"Username Template Importer",
-				"Hardcoded Attribute",
-			}, false),
+			Type:         schema.TypeString,
+			Required:     true,
+			ForceNew:     true,
+			Description:  "Identity Provider Mapper Type",
+			ValidateFunc: validation.StringInSlice(keys(oidcIdentityProviderMappers), false),
 		},
 		"claim_name": {
 			Type:        schema.TypeString,

@@ -15,6 +15,19 @@ var nameIdPolicyFormats = map[string]string{
 	"Unspecified":                   "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
 }
 
+var signatureAlgorithms = []string{
+	"RSA_SHA1",
+	"RSA_SHA256",
+	"RSA_SHA512",
+	"DSA_SHA1",
+}
+
+var keyNameTransformers = []string{
+	"NONE",
+	"KEY_ID",
+	"CERT_SUBJECT",
+}
+
 func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	samlSchema := map[string]*schema.Schema{
 		"backchannel_supported": {
@@ -33,17 +46,10 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Description: "Hide On Login Page.",
 		},
 		"name_id_policy_format": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "",
-			ValidateFunc: validation.StringInSlice([]string{
-				"Windows Domain Qualified Name",
-				"Persistent",
-				"Email",
-				"Kerberos",
-				"X.509 Subject Name",
-				"Unspecified",
-			}, false),
+			Type:         schema.TypeString,
+			Optional:     true,
+			Default:      "",
+			ValidateFunc: validation.StringInSlice(keys(nameIdPolicyFormats), false),
 			StateFunc: func(value interface{}) string {
 				return nameIdPolicyFormats[value.(string)]
 			},
@@ -65,29 +71,18 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Description: "Signing Certificate.",
 		},
 		"signature_algorithm": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "",
-			ValidateFunc: validation.StringInSlice([]string{
-				"",
-				"RSA_SHA1",
-				"RSA_SHA256",
-				"RSA_SHA512",
-				"DSA_SHA1",
-			}, false),
-			Description: "Signing Algorithm.",
+			Type:         schema.TypeString,
+			Optional:     true,
+			Default:      "",
+			ValidateFunc: validation.StringInSlice(signatureAlgorithms, false),
+			Description:  "Signing Algorithm.",
 		},
 		"xml_sign_key_info_key_name_transformer": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "",
-			ValidateFunc: validation.StringInSlice([]string{
-				"",
-				"NONE",
-				"KEY_ID",
-				"CERT_SUBJECT",
-			}, false),
-			Description: "Sign Key Transformer.",
+			Type:         schema.TypeString,
+			Optional:     true,
+			Default:      "",
+			ValidateFunc: validation.StringInSlice(keyNameTransformers, false),
+			Description:  "Sign Key Transformer.",
 		},
 		"post_binding_authn_request": {
 			Type:        schema.TypeBool,

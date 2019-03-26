@@ -18,17 +18,10 @@ var samlIdentityProviderMappers = map[string]string{
 func resourceKeycloakSamlIdentityProviderMapper() *schema.Resource {
 	mapperSchema := map[string]*schema.Schema{
 		"type": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Identity Provider Mapper Type",
-			ValidateFunc: validation.StringInSlice([]string{
-				"Hardcoded Role",
-				"Hardcoded Attribute",
-				"Hardcoded User Session Attribute",
-				"SAML Attribute To Role",
-				"Attribute Mapper",
-				"User Template Importer",
-			}, false),
+			Type:         schema.TypeString,
+			Required:     true,
+			Description:  "Identity Provider Mapper Type",
+			ValidateFunc: validation.StringInSlice(keys(samlIdentityProviderMappers), false),
 		},
 		"attribute_name": {
 			Type:        schema.TypeString,
