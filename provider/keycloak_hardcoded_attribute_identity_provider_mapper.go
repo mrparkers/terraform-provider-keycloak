@@ -34,14 +34,14 @@ func resourceKeycloakHardcodedAttributeIdentityProviderMapper() *schema.Resource
 
 func getHardcodedAttributeIdentityProviderMapperFromData(data *schema.ResourceData, _ interface{}) (*keycloak.IdentityProviderMapper, error) {
 	rec, _ := getIdentityProviderMapperFromData(data)
-	if value,ok := data.GetOk("user_session"); value.(bool) {
+	if value, _ := data.GetOk("user_session"); value.(bool) {
 		rec.IdentityProviderMapper = "hardcoded-user-session-attribute-idp-mapper"
 	} else {
 		rec.IdentityProviderMapper = "hardcoded-attribute-idp-mapper"
 	}
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
-		Attribute:             data.Get("attribute_name").(string),
-		AttributeValue:        data.Get("attribute_value").(string),
+		Attribute:      data.Get("attribute_name").(string),
+		AttributeValue: data.Get("attribute_value").(string),
 	}
 	return rec, nil
 }

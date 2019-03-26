@@ -31,7 +31,7 @@ func getHardcodedRoleIdentityProviderMapperFromData(data *schema.ResourceData, m
 	}
 	rec.IdentityProviderMapper = fmt.Sprintf("%s-hardcoded-role-idp-mapper", identityProvider.ProviderId)
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
-		Role:                  data.Get("role").(string),
+		Role: data.Get("role").(string),
 	}
 	return rec, nil
 }
