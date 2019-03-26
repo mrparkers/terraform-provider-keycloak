@@ -8,20 +8,27 @@ import (
 
 func resourceKeycloakAttributeImporterIdentityProviderMapper() *schema.Resource {
 	mapperSchema := map[string]*schema.Schema{
-		"attribute_name": {
+		"user_attribute": {
 			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Attribute Name",
+			Required:    true,
+			Description: "User Attribute",
 		},
-		"attribute_value": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Attribute Value",
+		"attribute_name": {
+			Type:          schema.TypeString,
+			Optional:      true,
+			Description:   "Attribute Name",
+			ConflictsWith: []string{"attribute_friendly_name"},
 		},
 		"attribute_friendly_name": {
+			Type:          schema.TypeString,
+			Optional:      true,
+			Description:   "Attribute Friendly Name",
+			ConflictsWith: []string{"attribute_name"},
+		},
+		"claim_name": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "Attribute Friendly Name",
+			Description: "Claim Name",
 		},
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
@@ -41,9 +48,23 @@ func getAttributeImporterIdentityProviderMapperFromData(data *schema.ResourceDat
 	}
 	rec.IdentityProviderMapper = fmt.Sprintf("%s-user-attribute-idp-mapper", identityProvider.ProviderId)
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
-		Attribute:             data.Get("attribute_name").(string),
-		AttributeValue:        data.Get("attribute_value").(string),
-		AttributeFriendlyName: data.Get("attribute_friendly_name").(string),
+		UserAttribute: data.Get("user_attribute").(string),
+	}
+	if identityProvider.ProviderId == "saml" {
+		if attr, ok := data.GetOk("attribute_friendly_name"); ok {
+			rec.Config.AttributeFriendlyName = attr.(string)
+		} else if attr, ok := data.GetOk("attribute_name"); ok {
+			rec.Config.Attribute = attr.(string)
+		} else {
+			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_importer_identity_provider_mapper: %s: neither "attribute_name" nor "attribute_friendly_name" are set`, data.Get("name").(string))
+		}
+	} else if identityProvider.ProviderId == "oidc" {
+		if _, ok := data.GetOk("claim_name"); !ok {
+			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_importer_identity_provider_mapper: %s: "claim_name": required field is not set`, data.Get("name").(string))
+		}
+		rec.Config.Claim = data.Get("claim_name").(string)
+	} else {
+		return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_importer_identity_provider_mapper: %s: "%s" identity provider is not supported yet`, data.Get("name").(string), identityProvider.ProviderId)
 	}
 	return rec, nil
 }
@@ -51,7 +72,8 @@ func getAttributeImporterIdentityProviderMapperFromData(data *schema.ResourceDat
 func setAttributeImporterIdentityProviderMapperData(data *schema.ResourceData, identityProviderMapper *keycloak.IdentityProviderMapper) error {
 	setIdentityProviderMapperData(data, identityProviderMapper)
 	data.Set("attribute_name", identityProviderMapper.Config.Attribute)
-	data.Set("attribute_value", identityProviderMapper.Config.AttributeValue)
+	data.Set("user_attribute", identityProviderMapper.Config.UserAttribute)
 	data.Set("attribute_friendly_name", identityProviderMapper.Config.AttributeFriendlyName)
+	data.Set("claim_name", identityProviderMapper.Config.Claim)
 	return nil
 }

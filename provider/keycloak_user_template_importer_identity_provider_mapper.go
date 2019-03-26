@@ -31,7 +31,7 @@ func getUserTemplateImporterIdentityProviderMapperFromData(data *schema.Resource
 	}
 	rec.IdentityProviderMapper = fmt.Sprintf("%s-username-idp-mapper", identityProvider.ProviderId)
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
-		Template:              data.Get("template").(string),
+		Template: data.Get("template").(string),
 	}
 	return rec, nil
 }
