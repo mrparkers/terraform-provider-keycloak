@@ -22,7 +22,7 @@ func TestAccKeycloakHardcodedRoleIdentityProviderMapper_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakHardcodedRoleIdentityProviderMapper_basic(realmName, alias, mapperName, role),
-				Check:  testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider.oidc"),
+				Check:  testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider_mapper.oidc"),
 			},
 		},
 	})
@@ -43,7 +43,7 @@ func TestAccKeycloakHardcodedRoleIdentityProviderMapper_createAfterManualDestroy
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakHardcodedRoleIdentityProviderMapper_basic(realmName, alias, mapperName, role),
-				Check:  testAccCheckKeycloakHardcodedRoleIdentityProviderMapperFetch("keycloak_hardcoded_role_identity_provider.oidc", mapper),
+				Check:  testAccCheckKeycloakHardcodedRoleIdentityProviderMapperFetch("keycloak_hardcoded_role_identity_provider_mapper.oidc", mapper),
 			},
 			{
 				PreConfig: func() {
@@ -55,7 +55,7 @@ func TestAccKeycloakHardcodedRoleIdentityProviderMapper_createAfterManualDestroy
 					}
 				},
 				Config: testKeycloakHardcodedRoleIdentityProviderMapper_basic(realmName, alias, mapperName, role),
-				Check:  testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider.oidc"),
+				Check:  testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider_mapper.oidc"),
 			},
 		},
 	})
@@ -76,15 +76,15 @@ func TestAccKeycloakHardcodedRoleIdentityProviderMapper_basicUpdateRealm(t *test
 			{
 				Config: testKeycloakHardcodedRoleIdentityProviderMapper_basic(firstRealm, alias, mapperName, role),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider.oidc"),
-					resource.TestCheckResourceAttr("keycloak_hardcoded_role_identity_provider.oidc", "realm", firstRealm),
+					testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider_mapper.oidc"),
+					resource.TestCheckResourceAttr("keycloak_hardcoded_role_identity_provider_mapper.oidc", "realm", firstRealm),
 				),
 			},
 			{
 				Config: testKeycloakHardcodedRoleIdentityProviderMapper_basic(secondRealm, alias, mapperName, role),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider.oidc"),
-					resource.TestCheckResourceAttr("keycloak_hardcoded_role_identity_provider.oidc", "realm", secondRealm),
+					testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider_mapper.oidc"),
+					resource.TestCheckResourceAttr("keycloak_hardcoded_role_identity_provider_mapper.oidc", "realm", secondRealm),
 				),
 			},
 		},
@@ -120,11 +120,11 @@ func TestAccKeycloakHardcodedRoleIdentityProviderMapper_basicUpdateAll(t *testin
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakHardcodedRoleIdentityProviderMapper_basicFromInterface(firstMapper),
-				Check:  testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider.saml"),
+				Check:  testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider_mapper.saml"),
 			},
 			{
 				Config: testKeycloakHardcodedRoleIdentityProviderMapper_basicFromInterface(secondMapper),
-				Check:  testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider.saml"),
+				Check:  testAccCheckKeycloakHardcodedRoleIdentityProviderMapperExists("keycloak_hardcoded_role_identity_provider_mapper.saml"),
 			},
 		},
 	})
