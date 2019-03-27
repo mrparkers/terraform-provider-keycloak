@@ -34,11 +34,7 @@ func resourceKeycloakHardcodedAttributeIdentityProviderMapper() *schema.Resource
 
 func getHardcodedAttributeIdentityProviderMapperFromData(data *schema.ResourceData, _ interface{}) (*keycloak.IdentityProviderMapper, error) {
 	rec, _ := getIdentityProviderMapperFromData(data)
-	if value, _ := data.GetOk("user_session"); value.(bool) {
-		rec.IdentityProviderMapper = "hardcoded-user-session-attribute-idp-mapper"
-	} else {
-		rec.IdentityProviderMapper = "hardcoded-attribute-idp-mapper"
-	}
+	rec.IdentityProviderMapper = getHardcodedAttributeIdentityProviderMapperType(data.Get("user_session").(bool))
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
 		Attribute:      data.Get("attribute_name").(string),
 		AttributeValue: data.Get("attribute_value").(string),
@@ -51,4 +47,12 @@ func setHardcodedAttributeIdentityProviderMapperData(data *schema.ResourceData, 
 	data.Set("attribute_name", identityProviderMapper.Config.Attribute)
 	data.Set("attribute_value", identityProviderMapper.Config.AttributeValue)
 	return nil
+}
+
+func getHardcodedAttributeIdentityProviderMapperType(userSession bool) string {
+	if userSession {
+		return "hardcoded-user-session-attribute-idp-mapper"
+	} else {
+		return "hardcoded-attribute-idp-mapper"
+	}
 }
