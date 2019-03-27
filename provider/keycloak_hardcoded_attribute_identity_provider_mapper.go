@@ -19,8 +19,8 @@ func resourceKeycloakHardcodedAttributeIdentityProviderMapper() *schema.Resource
 		},
 		"user_session": {
 			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     false,
+			Required:    true,
+			ForceNew:    true,
 			Description: "Is Attribute Related To a User Session",
 		},
 	}
