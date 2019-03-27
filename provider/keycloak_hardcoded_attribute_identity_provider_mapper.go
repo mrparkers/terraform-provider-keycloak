@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -46,6 +47,11 @@ func setHardcodedAttributeIdentityProviderMapperData(data *schema.ResourceData, 
 	setIdentityProviderMapperData(data, identityProviderMapper)
 	data.Set("attribute_name", identityProviderMapper.Config.Attribute)
 	data.Set("attribute_value", identityProviderMapper.Config.AttributeValue)
+	mapperType, err := getUserSessionFromHardcodedAttributeIdentityProviderMapperType(identityProviderMapper.IdentityProviderMapper)
+	if err != nil {
+		return err
+	}
+	data.Set("user_session", mapperType)
 	return nil
 }
 
@@ -54,5 +60,15 @@ func getHardcodedAttributeIdentityProviderMapperType(userSession bool) string {
 		return "hardcoded-user-session-attribute-idp-mapper"
 	} else {
 		return "hardcoded-attribute-idp-mapper"
+	}
+}
+
+func getUserSessionFromHardcodedAttributeIdentityProviderMapperType(mapperType string) (bool, error) {
+	if mapperType == "hardcoded-user-session-attribute-idp-mapper" {
+		return true, nil
+	} else if mapperType == "hardcoded-attribute-idp-mapper" {
+		return false, nil
+	} else {
+		return false, fmt.Errorf(`provider.keycloak: keycloak_hardcoded_attribute_identity_provider_mapper: mapper type "%s" is not valid`, mapperType)
 	}
 }
