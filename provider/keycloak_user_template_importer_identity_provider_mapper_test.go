@@ -22,7 +22,7 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUserTemplateIdentityProviderMapper_basic(realmName, alias, mapperName, template),
-				Check:  testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_identity_provider_mapper.oidc"),
+				Check:  testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_importer_identity_provider_mapper.oidc"),
 			},
 		},
 	})
@@ -43,7 +43,7 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_createAfterManualDestroy(
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUserTemplateIdentityProviderMapper_basic(realmName, alias, mapperName, template),
-				Check:  testAccCheckKeycloakUserTemplateIdentityProviderMapperFetch("keycloak_user_template_identity_provider_mapper.oidc", mapper),
+				Check:  testAccCheckKeycloakUserTemplateIdentityProviderMapperFetch("keycloak_user_template_importer_identity_provider_mapper.oidc", mapper),
 			},
 			{
 				PreConfig: func() {
@@ -55,7 +55,7 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_createAfterManualDestroy(
 					}
 				},
 				Config: testKeycloakUserTemplateIdentityProviderMapper_basic(realmName, alias, mapperName, template),
-				Check:  testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_identity_provider_mapper.oidc"),
+				Check:  testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_importer_identity_provider_mapper.oidc"),
 			},
 		},
 	})
@@ -76,15 +76,15 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_basicUpdateRealm(t *testi
 			{
 				Config: testKeycloakUserTemplateIdentityProviderMapper_basic(firstRealm, alias, mapperName, template),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_identity_provider_mapper.oidc"),
-					resource.TestCheckResourceAttr("keycloak_user_template_identity_provider_mapper.oidc", "realm", firstRealm),
+					testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_importer_identity_provider_mapper.oidc"),
+					resource.TestCheckResourceAttr("keycloak_user_template_importer_identity_provider_mapper.oidc", "realm", firstRealm),
 				),
 			},
 			{
 				Config: testKeycloakUserTemplateIdentityProviderMapper_basic(secondRealm, alias, mapperName, template),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_identity_provider_mapper.oidc"),
-					resource.TestCheckResourceAttr("keycloak_user_template_identity_provider_mapper.oidc", "realm", secondRealm),
+					testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_importer_identity_provider_mapper.oidc"),
+					resource.TestCheckResourceAttr("keycloak_user_template_importer_identity_provider_mapper.oidc", "realm", secondRealm),
 				),
 			},
 		},
@@ -120,11 +120,11 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_basicUpdateAll(t *testing
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUserTemplateIdentityProviderMapper_basicFromInterface(firstMapper),
-				Check:  testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_identity_provider_mapper.saml"),
+				Check:  testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_importer_identity_provider_mapper.saml"),
 			},
 			{
 				Config: testKeycloakUserTemplateIdentityProviderMapper_basicFromInterface(secondMapper),
-				Check:  testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_identity_provider_mapper.saml"),
+				Check:  testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_importer_identity_provider_mapper.saml"),
 			},
 		},
 	})
@@ -159,7 +159,7 @@ func testAccCheckKeycloakUserTemplateIdentityProviderMapperFetch(resourceName st
 func testAccCheckKeycloakUserTemplateIdentityProviderMapperDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_user_template_identity_provider_mapper" {
+			if rs.Type != "keycloak_user_template_importer_identity_provider_mapper" {
 				continue
 			}
 
@@ -214,7 +214,7 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	client_secret     = "example_token"
 }
 
-resource keycloak_user_template_identity_provider_mapper oidc {
+resource keycloak_user_template_importer_identity_provider_mapper oidc {
 	realm                   = "${keycloak_realm.realm.id}"
 	name                    = "%s"
 	identity_provider_alias = "${keycloak_oidc_identity_provider.oidc.alias}"
@@ -235,7 +235,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	single_sign_on_service_url = "https://example.com/auth"
 }
 
-resource keycloak_user_template_identity_provider_mapper saml {
+resource keycloak_user_template_importer_identity_provider_mapper saml {
 	realm                   = "${keycloak_realm.realm.id}"
 	name                    = "%s"
 	identity_provider_alias = "${keycloak_saml_identity_provider.saml.alias}"
