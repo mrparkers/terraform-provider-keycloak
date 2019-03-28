@@ -86,11 +86,15 @@ func resourceKeycloakIdentityProviderMapperCreate(getIdentityProviderMapperFromD
 	return func(data *schema.ResourceData, meta interface{}) error {
 		keycloakClient := meta.(*keycloak.KeycloakClient)
 		identityProvider, err := getIdentityProviderMapperFromData(data, meta)
-		err = keycloakClient.NewIdentityProviderMapper(identityProvider)
 		if err != nil {
 			return err
 		}
-		setDataFromIdentityProviderMapper(data, identityProvider)
+		if err = keycloakClient.NewIdentityProviderMapper(identityProvider); err != nil {
+			return err
+		}
+		if err = setDataFromIdentityProviderMapper(data, identityProvider); err != nil {
+			return err
+		}
 		return resourceKeycloakIdentityProviderMapperRead(setDataFromIdentityProviderMapper)(data, meta)
 	}
 }
@@ -105,7 +109,9 @@ func resourceKeycloakIdentityProviderMapperRead(setDataFromIdentityProviderMappe
 		if err != nil {
 			return handleNotFoundError(err, data)
 		}
-		setDataFromIdentityProviderMapper(data, identityProvider)
+		if err = setDataFromIdentityProviderMapper(data, identityProvider); err != nil {
+			return err
+		}
 		return nil
 	}
 }
@@ -114,11 +120,12 @@ func resourceKeycloakIdentityProviderMapperUpdate(getIdentityProviderMapperFromD
 	return func(data *schema.ResourceData, meta interface{}) error {
 		keycloakClient := meta.(*keycloak.KeycloakClient)
 		identityProvider, err := getIdentityProviderMapperFromData(data, meta)
-		err = keycloakClient.UpdateIdentityProviderMapper(identityProvider)
-		if err != nil {
+		if err = keycloakClient.UpdateIdentityProviderMapper(identityProvider); err != nil {
 			return err
 		}
-		setDataFromIdentityProviderMapper(data, identityProvider)
+		if err = setDataFromIdentityProviderMapper(data, identityProvider); err != nil {
+			return err
+		}
 		return nil
 	}
 }
