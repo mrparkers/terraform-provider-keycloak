@@ -2,13 +2,14 @@ package provider
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"testing"
+
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strconv"
-	"strings"
-	"testing"
 )
 
 func TestAccKeycloakSamlClient_basic(t *testing.T) {
@@ -152,14 +153,20 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 		MasterSamlProcessingUrl: acctest.RandString(20),
 
 		Attributes: &keycloak.SamlClientAttributes{
-			IncludeAuthnStatement:   randomBoolAsStringPointer(),
-			SignDocuments:           randomBoolAsStringPointer(),
-			SignAssertions:          randomBoolAsStringPointer(),
-			ClientSignatureRequired: &clientSignatureRequired,
-			ForcePostBinding:        randomBoolAsStringPointer(),
-			NameIdFormat:            randomStringInSlice(keycloakSamlClientNameIdFormats),
-			SigningCertificate:      &signingCertificateBefore,
-			SigningPrivateKey:       &signingPrivateKeyBefore,
+			IncludeAuthnStatement:           randomBoolAsStringPointer(),
+			SignDocuments:                   randomBoolAsStringPointer(),
+			SignAssertions:                  randomBoolAsStringPointer(),
+			ClientSignatureRequired:         &clientSignatureRequired,
+			ForcePostBinding:                randomBoolAsStringPointer(),
+			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
+			SigningCertificate:              &signingCertificateBefore,
+			SigningPrivateKey:               &signingPrivateKeyBefore,
+			IDPInitiatedSSOURLName:          acctest.RandString(20),
+			IDPInitiatedSSORelayState:       acctest.RandString(20),
+			AssertionConsumerPostURL:        acctest.RandString(20),
+			AssertionConsumerRedirectURL:    acctest.RandString(20),
+			LogoutServicePostBindingURL:     acctest.RandString(20),
+			LogoutServiceRedirectBindingURL: acctest.RandString(20),
 		},
 	}
 
@@ -181,14 +188,20 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 		MasterSamlProcessingUrl: acctest.RandString(20),
 
 		Attributes: &keycloak.SamlClientAttributes{
-			IncludeAuthnStatement:   randomBoolAsStringPointer(),
-			SignDocuments:           randomBoolAsStringPointer(),
-			SignAssertions:          randomBoolAsStringPointer(),
-			ClientSignatureRequired: &clientSignatureRequired,
-			ForcePostBinding:        randomBoolAsStringPointer(),
-			NameIdFormat:            randomStringInSlice(keycloakSamlClientNameIdFormats),
-			SigningCertificate:      &signingCertificateAfter,
-			SigningPrivateKey:       &signingPrivateKeyAfter,
+			IncludeAuthnStatement:           randomBoolAsStringPointer(),
+			SignDocuments:                   randomBoolAsStringPointer(),
+			SignAssertions:                  randomBoolAsStringPointer(),
+			ClientSignatureRequired:         &clientSignatureRequired,
+			ForcePostBinding:                randomBoolAsStringPointer(),
+			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
+			SigningCertificate:              &signingCertificateAfter,
+			SigningPrivateKey:               &signingPrivateKeyAfter,
+			IDPInitiatedSSOURLName:          acctest.RandString(20),
+			IDPInitiatedSSORelayState:       acctest.RandString(20),
+			AssertionConsumerPostURL:        acctest.RandString(20),
+			AssertionConsumerRedirectURL:    acctest.RandString(20),
+			LogoutServicePostBindingURL:     acctest.RandString(20),
+			LogoutServiceRedirectBindingURL: acctest.RandString(20),
 		},
 	}
 
@@ -484,8 +497,39 @@ resource "keycloak_saml_client" "saml_client" {
 
 	signing_certificate        = "%s"
 	signing_private_key        = "%s"
+
+	idp_initiated_sso_url_name    = "%s"
+	idp_initiated_sso_relay_state = "%s"
+
+	assertion_consumer_post_url         = "%s"
+	assertion_consumer_redirect_url     = "%s"
+	logout_service_post_binding_url     = "%s"
+	logout_service_redirect_binding_url = "%s"
 }
-	`, client.RealmId, client.ClientId, client.Name, client.Description, client.Enabled, *client.Attributes.IncludeAuthnStatement, *client.Attributes.SignDocuments, *client.Attributes.SignAssertions, *client.Attributes.ClientSignatureRequired, *client.Attributes.ForcePostBinding, client.FrontChannelLogout, client.Attributes.NameIdFormat, client.RootUrl, arrayOfStringsForTerraformResource(client.ValidRedirectUris), client.BaseUrl, client.MasterSamlProcessingUrl, *client.Attributes.SigningCertificate, *client.Attributes.SigningPrivateKey)
+	`, client.RealmId,
+		client.ClientId,
+		client.Name,
+		client.Description,
+		client.Enabled,
+		*client.Attributes.IncludeAuthnStatement,
+		*client.Attributes.SignDocuments,
+		*client.Attributes.SignAssertions,
+		*client.Attributes.ClientSignatureRequired,
+		*client.Attributes.ForcePostBinding,
+		client.FrontChannelLogout,
+		client.Attributes.NameIdFormat,
+		client.RootUrl,
+		arrayOfStringsForTerraformResource(client.ValidRedirectUris),
+		client.BaseUrl, client.MasterSamlProcessingUrl,
+		*client.Attributes.SigningCertificate,
+		*client.Attributes.SigningPrivateKey,
+		client.Attributes.IDPInitiatedSSOURLName,
+		client.Attributes.IDPInitiatedSSORelayState,
+		client.Attributes.AssertionConsumerPostURL,
+		client.Attributes.AssertionConsumerRedirectURL,
+		client.Attributes.LogoutServicePostBindingURL,
+		client.Attributes.LogoutServiceRedirectBindingURL,
+	)
 }
 
 func testKeycloakSamlClient_signingCertificateAndKey(realm, clientId string) string {
