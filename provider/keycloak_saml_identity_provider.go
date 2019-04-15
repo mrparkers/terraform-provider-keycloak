@@ -127,7 +127,6 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 	rec, _ := getIdentityProviderFromData(data)
 	rec.ProviderId = "saml"
 	rec.Config = &keycloak.IdentityProviderConfig{
-		UseJwksUrl:                       keycloak.KeycloakBoolQuoted(true),
 		ValidateSignature:                keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
 		BackchannelSupported:             keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),

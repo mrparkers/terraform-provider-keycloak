@@ -77,7 +77,6 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 	rec.ProviderId = "oidc"
 	rec.Config = &keycloak.IdentityProviderConfig{
 		BackchannelSupported: keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
-		UseJwksUrl:           keycloak.KeycloakBoolQuoted(true),
 		ValidateSignature:    keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		AuthorizationUrl:     data.Get("authorization_url").(string),
 		ClientId:             data.Get("client_id").(string),
