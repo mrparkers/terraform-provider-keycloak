@@ -1,3 +1,9 @@
+## 1.7.0 (Unreleased)
+
+IMPROVEMENTS:
+
+* new attributes added for keycloak_saml_client resource ([#103](https://github.com/mrparkers/terraform-provider-keycloak/pull/103))
+
 ## 1.6.0 (March 6, 2019)
 
 FEATURES:
