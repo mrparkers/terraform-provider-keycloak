@@ -11,9 +11,15 @@ type SamlClientAttributes struct {
 	ClientSignatureRequired *string `json:"saml.client.signature"`
 	ForcePostBinding        *string `json:"saml.force.post.binding"`
 	// attributes above are actually booleans, but the Keycloak API expects strings
-	NameIdFormat       string  `json:"saml_name_id_format"`
-	SigningCertificate *string `json:"saml.signing.certificate,omitempty"`
-	SigningPrivateKey  *string `json:"saml.signing.private.key"`
+	NameIdFormat                    string  `json:"saml_name_id_format"`
+	SigningCertificate              *string `json:"saml.signing.certificate,omitempty"`
+	SigningPrivateKey               *string `json:"saml.signing.private.key"`
+	IDPInitiatedSSOURLName          string  `json:"saml_idp_initiated_sso_url_name"`
+	IDPInitiatedSSORelayState       string  `json:"saml_idp_initiated_sso_relay_state"`
+	AssertionConsumerPostURL        string  `json:"saml_assertion_consumer_url_post"`
+	AssertionConsumerRedirectURL    string  `json:"saml_assertion_consumer_url_redirect"`
+	LogoutServicePostBindingURL     string  `json:"saml_single_logout_service_url_post"`
+	LogoutServiceRedirectBindingURL string  `json:"saml_single_logout_service_url_redirect"`
 }
 
 type SamlClient struct {

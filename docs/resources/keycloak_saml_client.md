@@ -50,7 +50,12 @@ The following arguments are supported:
 - `master_saml_processing_url` - (Optional) When specified, this URL will be used for all SAML requests.
 - `signing_certificate` - (Optional) If documents or assertions from the client are signed, this certificate will be used to verify the signature.
 - `signing_private_key` - (Optional) If documents or assertions from the client are signed, this private key will be used to verify the signature.
-
+- `idp_initiated_sso_url_name` - (Optional) URL fragment name to reference client when you want to do IDP Initiated SSO.
+- `idp_initiated_sso_relay_state` - (Optional) Relay state you want to send with SAML request when you want to do IDP Initiated SSO.
+- `assertion_consumer_post_url` - (Optional) SAML POST Binding URL for the client's assertion consumer service (login responses).
+- `assertion_consumer_redirect_url` - (Optional) SAML Redirect Binding URL for the client's assertion consumer service (login responses).
+- `logout_service_post_binding_url` - (Optional) SAML POST Binding URL for the client's single logout service.
+- `logout_service_redirect_binding_url` - (Optional) SAML Redirect Binding URL for the client's single logout service.
 
 ### Import
 

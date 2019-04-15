@@ -2,11 +2,12 @@ package provider
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strconv"
-	"strings"
 )
 
 var (
@@ -114,6 +115,30 @@ func resourceKeycloakSamlClient() *schema.Resource {
 					return old == formatSigningPrivateKey(new)
 				},
 			},
+			"idp_initiated_sso_url_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"idp_initiated_sso_relay_state": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"assertion_consumer_post_url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"assertion_consumer_redirect_url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"logout_service_post_binding_url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"logout_service_redirect_binding_url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -148,7 +173,13 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	}
 
 	samlAttributes := &keycloak.SamlClientAttributes{
-		NameIdFormat: data.Get("name_id_format").(string),
+		NameIdFormat:                    data.Get("name_id_format").(string),
+		IDPInitiatedSSOURLName:          data.Get("idp_initiated_sso_url_name").(string),
+		IDPInitiatedSSORelayState:       data.Get("idp_initiated_sso_relay_state").(string),
+		AssertionConsumerPostURL:        data.Get("assertion_consumer_post_url").(string),
+		AssertionConsumerRedirectURL:    data.Get("assertion_consumer_redirect_url").(string),
+		LogoutServicePostBindingURL:     data.Get("logout_service_post_binding_url").(string),
+		LogoutServiceRedirectBindingURL: data.Get("logout_service_redirect_binding_url").(string),
 	}
 
 	if signingCertificate, ok := data.GetOkExists("signing_certificate"); ok {
@@ -271,6 +302,12 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("base_url", client.BaseUrl)
 	data.Set("master_saml_processing_url", client.MasterSamlProcessingUrl)
 	data.Set("name_id_format", client.Attributes.NameIdFormat)
+	data.Set("idp_initiated_sso_url_name", client.Attributes.IDPInitiatedSSOURLName)
+	data.Set("idp_initiated_sso_relay_state", client.Attributes.IDPInitiatedSSORelayState)
+	data.Set("assertion_consumer_post_url", client.Attributes.AssertionConsumerPostURL)
+	data.Set("assertion_consumer_redirect_url", client.Attributes.AssertionConsumerRedirectURL)
+	data.Set("logout_service_post_binding_url", client.Attributes.LogoutServicePostBindingURL)
+	data.Set("logout_service_redirect_binding_url", client.Attributes.LogoutServiceRedirectBindingURL)
 
 	return nil
 }
