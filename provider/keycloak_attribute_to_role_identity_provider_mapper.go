@@ -66,18 +66,18 @@ func getAttributeToRoleIdentityProviderMapperFromData(data *schema.ResourceData,
 		} else if attr, ok := data.GetOk("attribute_name"); ok {
 			rec.Config.Attribute = attr.(string)
 		} else {
-			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_to_role_identity_provider_mapper: %s: neither "attribute_name" nor "attribute_friendly_name" are set`, data.Get("name").(string))
+			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_to_role_identity_provider_mapper: %s: either "attribute_name" or "attribute_friendly_name" should be set for %s identity provider`, data.Get("name").(string), identityProvider.ProviderId)
 		}
 		if _, ok := data.GetOk("attribute_value"); !ok {
-			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_to_role_identity_provider_mapper: %s: "attribute_value": required field is not set`, data.Get("name").(string))
+			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_to_role_identity_provider_mapper: %s: "attribute_value": required field for %s identity provider`, data.Get("name").(string), identityProvider.ProviderId)
 		}
 		rec.Config.AttributeValue = data.Get("attribute_value").(string)
 	} else if identityProvider.ProviderId == "oidc" {
 		if _, ok := data.GetOk("claim_name"); !ok {
-			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_to_role_identity_provider_mapper: %s: "claim_name": required field is not set`, data.Get("name").(string))
+			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_to_role_identity_provider_mapper: %s: "claim_name": required field for %s identity provider`, data.Get("name").(string), identityProvider.ProviderId)
 		}
 		if _, ok := data.GetOk("claim_value"); !ok {
-			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_to_role_identity_provider_mapper: %s: "claim_value": required field is not set`, data.Get("name").(string))
+			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_to_role_identity_provider_mapper: %s: "claim_value": required field for %s identity provider`, data.Get("name").(string), identityProvider.ProviderId)
 		}
 		rec.Config.Claim = data.Get("claim_name").(string)
 		rec.Config.ClaimValue = data.Get("claim_value").(string)
