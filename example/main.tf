@@ -376,7 +376,7 @@ resource keycloak_attribute_to_role_identity_provider_mapper oidc {
   role                    = "testRole"
 }
 
-resource keycloak_user_template_identity_provider_mapper oidc {
+resource keycloak_user_template_importer_identity_provider_mapper oidc {
   realm                   = "${keycloak_realm.test.id}"
   name                    = "userTemplate"
   identity_provider_alias = "${keycloak_oidc_identity_provider.oidc.alias}"
@@ -422,7 +422,7 @@ resource keycloak_attribute_to_role_identity_provider_mapper saml {
   role                    = "testRole"
 }
 
-resource keycloak_user_template_identity_provider_mapper saml {
+resource keycloak_user_template_importer_identity_provider_mapper saml {
   realm                   = "${keycloak_realm.test.id}"
   name                    = "userTemplate"
   identity_provider_alias = "${keycloak_saml_identity_provider.saml.alias}"
