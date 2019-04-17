@@ -9,6 +9,7 @@ type IdentityProviderMapperConfig struct {
 	UserAttribute         string `json:"user.attribute,omitempty"`
 	Claim                 string `json:"claim,omitempty"`
 	ClaimValue            string `json:"claim.value,omitempty"`
+	HardcodedAttribute    string `json:"attribute,omitempty"`
 	Attribute             string `json:"attribute.name,omitempty"`
 	AttributeValue        string `json:"attribute.value,omitempty"`
 	AttributeFriendlyName string `json:"attribute.friendly.name,omitempty"`
