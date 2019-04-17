@@ -21,13 +21,8 @@ func resourceKeycloakHardcodedRoleIdentityProviderMapper() *schema.Resource {
 	return genericMapperResource
 }
 
-func getHardcodedRoleIdentityProviderMapperFromData(data *schema.ResourceData, meta interface{}) (*keycloak.IdentityProviderMapper, error) {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
+func getHardcodedRoleIdentityProviderMapperFromData(data *schema.ResourceData, _ interface{}) (*keycloak.IdentityProviderMapper, error) {
 	rec, _ := getIdentityProviderMapperFromData(data)
-	identityProvider, err := keycloakClient.GetIdentityProvider(rec.Realm, rec.IdentityProviderAlias)
-	if err != nil {
-		return nil, handleNotFoundError(err, data)
-	}
 	rec.IdentityProviderMapper = "oidc-hardcoded-role-idp-mapper"
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
 		Role: data.Get("role").(string),
