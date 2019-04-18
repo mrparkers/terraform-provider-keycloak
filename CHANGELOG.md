@@ -1,4 +1,9 @@
-## 1.7.0 (Unreleased)
+## 1.7.0 (April 18, 2019)
+
+FEATURES:
+
+* new resources: keycloak_identity_provider and mappers ([#92](https://github.com/mrparkers/terraform-provider-keycloak/pull/92))
+  - note: docs for these resources will be released at a later date. for now, please refer to the source files.
 
 IMPROVEMENTS:
 
