@@ -7,6 +7,22 @@ import (
 	"time"
 )
 
+func keys(data map[string]string) []string {
+	var result = []string{}
+	for k := range data {
+		result = append(result, k)
+	}
+	return result
+}
+
+func mergeSchemas(a map[string]*schema.Schema, b map[string]*schema.Schema) map[string]*schema.Schema {
+	result := a
+	for k, v := range b {
+		result[k] = v
+	}
+	return result
+}
+
 // Converts duration string to an int representing the number of seconds, which is used by the Keycloak API
 // Ex: "1h" => 3600
 func getSecondsFromDurationString(s string) (int, error) {
