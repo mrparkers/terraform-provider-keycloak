@@ -88,11 +88,51 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Set:      schema.HashString,
 				Optional: true,
 			},
+			"resource": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"display_name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"uris": {
+							Type:     schema.TypeList,
+							Elem: 		&schema.Schema{Type: schema.TypeString},
+							Optional: true,
+						},
+						"icon_uri": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"owner_managed_access": {
+							Type:			schema.TypeBool,
+							Optional: true,
+							Default: false,
+						},
+						"scopes": {
+							Type:     schema.TypeList,
+							Elem: 		&schema.Schema{Type: schema.TypeString},
+							Optional: true,
+						},
+						"attributes": {
+							Type:     schema.TypeMap,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Optional: true,
+						},
+					},
+				},
+		  },
 		},
 	}
 }
 
-func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
+func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient, []keycloak.OpenidClientResource {
 	validRedirectUris := make([]string, 0)
 	webOrigins := make([]string, 0)
 
@@ -124,6 +164,27 @@ func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
 		WebOrigins:                webOrigins,
 	}
 
+	resources := []keycloak.OpenidClientResource{}
+
+	if v, ok := data.GetOk("resource"); ok {
+		openidClient.AuthorizationServicesEnabled = true
+		for resourceData := v.(*schema.Set).List() {
+			resource := keycloak.OpenidClientResource{
+				DisplayName: resourceData.Get("display_name").(string),
+				Name: resourceData.Get("name").(string),
+				IconUri: resourceData.Get("icon_uri").(string),
+				OwnerManagedAccess: resourceData.Get("owner_managed_access").(bool),
+				Uris: resourceData.Get("uris").(map[string]string),
+				Scopes: resourceData.Get("scopes").(map[string]string),
+				Attributes: resourceData.Get("attributes").(map[string][]string),
+			}
+			resources.append(resources, resource)
+		}
+
+	} else {
+		openidClient.AuthorizationServicesEnabled = false
+	}
+
 	// access type
 	if accessType := data.Get("access_type").(string); accessType == "PUBLIC" {
 		openidClient.PublicClient = true
@@ -131,10 +192,10 @@ func getOpenidClientFromData(data *schema.ResourceData) *keycloak.OpenidClient {
 		openidClient.BearerOnly = true
 	}
 
-	return openidClient
+	return openidClient, resources
 }
 
-func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClient) {
+func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClient, resources []keycloak.OpenidClientResource) {
 	data.SetId(client.Id)
 
 	data.Set("client_id", client.ClientId)

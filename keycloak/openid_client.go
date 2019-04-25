@@ -4,9 +4,19 @@ import (
 	"fmt"
 )
 
-type openidClientSecret struct {
+type OpenidClientSecret struct {
 	Type  string `json:"type"`
 	Value string `json:"value"`
+}
+
+type OpenidClientResource struct {
+	DisplayName string `json:"display_name"`
+	Name	string `json:"name"`
+	Uris []string `json:"uris"`
+	IconUri string `json:"icon_uri"`
+	OwnerManagedAccess bool `json:"owner_managed_access"`
+	Scopes []string `json:"scopes"`
+	Attributes map[string][]string `json:"attributes"`
 }
 
 type OpenidClient struct {
@@ -29,6 +39,7 @@ type OpenidClient struct {
 	ImplicitFlowEnabled       bool `json:"implicitFlowEnabled"`
 	DirectAccessGrantsEnabled bool `json:"directAccessGrantsEnabled"`
 	ServiceAccountsEnabled    bool `json:"serviceAccountsEnabled"`
+	AuthorizationServicesEnabled bool `json:"authorizationServicesEnabled"`
 
 	ValidRedirectUris []string `json:"redirectUris"`
 	WebOrigins        []string `json:"webOrigins"`
@@ -66,7 +77,7 @@ func (keycloakClient *KeycloakClient) NewOpenidClient(client *OpenidClient) erro
 
 func (keycloakClient *KeycloakClient) GetOpenidClient(realmId, id string) (*OpenidClient, error) {
 	var client OpenidClient
-	var clientSecret openidClientSecret
+	var clientSecret OpenidClientSecret
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s", realmId, id), &client)
 	if err != nil {
@@ -86,7 +97,7 @@ func (keycloakClient *KeycloakClient) GetOpenidClient(realmId, id string) (*Open
 
 func (keycloakClient *KeycloakClient) GetOpenidClientByClientId(realmId, clientId string) (*OpenidClient, error) {
 	var clients []OpenidClient
-	var clientSecret openidClientSecret
+	var clientSecret OpenidClientSecret
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients?clientId=%s", realmId, clientId), &clients)
 	if err != nil {
