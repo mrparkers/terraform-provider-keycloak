@@ -133,8 +133,8 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 }
 
 func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient, *keycloak.OpenidClientResources) {
-	validRedirectUris := make([]string, 0)
-	webOrigins := make([]string, 0)
+	var validRedirectUris []string
+	var webOrigins []string
 
 	if v, ok := data.GetOk("valid_redirect_uris"); ok {
 		for _, validRedirectUri := range v.(*schema.Set).List() {
@@ -170,14 +170,32 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		openidClient.AuthorizationServicesEnabled = true
 		for _, d := range v.(*schema.Set).List() {
 			resourceData := d.(map[string]interface{})
+			var uris []string
+			var scopes []string
+			var attributes map[string][]string
+			if v, ok := data.GetOk("uris"); ok {
+				for _, uri := range v.(*schema.Set).List() {
+					uris = append(uris, uri.(string))
+				}
+			}
+			if v, ok := data.GetOk("scopes"); ok {
+				for _, scope := range v.(*schema.Set).List() {
+					scopes = append(scopes, scope.(string))
+				}
+			}
+			if v, ok := data.GetOk("attribites"); ok {
+				for key, value := range v.(map[string]string) {
+					attributes[key] = strings.Split(value, ",")
+				}
+			}
 			resource := keycloak.OpenidClientResource{
 				DisplayName:        resourceData["display_name"].(string),
 				Name:               resourceData["name"].(string),
 				IconUri:            resourceData["icon_uri"].(string),
 				OwnerManagedAccess: resourceData["owner_managed_access"].(bool),
-				Uris:               resourceData["uris"].([]string),
-				Scopes:             resourceData["scopes"].([]string),
-				Attributes:         resourceData["attributes"].(map[string][]string),
+				Uris:               uris,
+				Scopes:             scopes,
+				Attributes:         attributes,
 			}
 			resources = append(resources, resource)
 		}

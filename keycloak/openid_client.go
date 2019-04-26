@@ -11,11 +11,11 @@ type OpenidClientSecret struct {
 
 type OpenidClientResource struct {
 	Id                 string              `json:"-"`
-	DisplayName        string              `json:"display_name"`
+	DisplayName        string              `json:"displayName"`
 	Name               string              `json:"name"`
 	Uris               []string            `json:"uris"`
 	IconUri            string              `json:"icon_uri"`
-	OwnerManagedAccess bool                `json:"owner_managed_access"`
+	OwnerManagedAccess bool                `json:"ownerManagedAccess"`
 	Scopes             []string            `json:"scopes"`
 	Attributes         map[string][]string `json:"attributes"`
 }
