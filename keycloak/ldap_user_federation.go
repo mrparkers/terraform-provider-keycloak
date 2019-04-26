@@ -303,7 +303,7 @@ func (keycloakClient *KeycloakClient) NewLdapUserFederation(ldapUserFederation *
 		return err
 	}
 
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), component)
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), component)
 	if err != nil {
 		return err
 	}

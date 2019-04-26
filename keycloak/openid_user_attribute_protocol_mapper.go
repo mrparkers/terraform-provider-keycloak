@@ -99,7 +99,7 @@ func (keycloakClient *KeycloakClient) DeleteOpenIdUserAttributeProtocolMapper(re
 func (keycloakClient *KeycloakClient) NewOpenIdUserAttributeProtocolMapper(mapper *OpenIdUserAttributeProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}

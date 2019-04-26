@@ -65,7 +65,7 @@ func (keycloakClient *KeycloakClient) DeleteSamlUserAttributeProtocolMapper(real
 func (keycloakClient *KeycloakClient) NewSamlUserAttributeProtocolMapper(mapper *SamlUserAttributeProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}

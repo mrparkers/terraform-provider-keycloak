@@ -82,7 +82,7 @@ func (keycloakClient *KeycloakClient) ValidateLdapFullNameMapper(mapper *LdapFul
 }
 
 func (keycloakClient *KeycloakClient) NewLdapFullNameMapper(ldapFullNameMapper *LdapFullNameMapper) error {
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapFullNameMapper.RealmId), convertFromLdapFullNameMapperToComponent(ldapFullNameMapper))
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapFullNameMapper.RealmId), convertFromLdapFullNameMapperToComponent(ldapFullNameMapper))
 	if err != nil {
 		return err
 	}

@@ -90,7 +90,7 @@ func (keycloakClient *KeycloakClient) DeleteOpenIdGroupMembershipProtocolMapper(
 func (keycloakClient *KeycloakClient) NewOpenIdGroupMembershipProtocolMapper(mapper *OpenIdGroupMembershipProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}

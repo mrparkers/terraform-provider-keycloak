@@ -76,7 +76,7 @@ func convertFromComponentToLdapUserAttributeMapper(component *component, realmId
 }
 
 func (keycloakClient *KeycloakClient) NewLdapUserAttributeMapper(ldapUserAttributeMapper *LdapUserAttributeMapper) error {
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserAttributeMapper.RealmId), convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper))
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserAttributeMapper.RealmId), convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper))
 	if err != nil {
 		return err
 	}

@@ -21,7 +21,7 @@ type OpenidClientScopeFilterFunc func(*OpenidClientScope) bool
 func (keycloakClient *KeycloakClient) NewOpenidClientScope(clientScope *OpenidClientScope) error {
 	clientScope.Protocol = "openid-connect"
 
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/client-scopes", clientScope.RealmId), clientScope)
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/client-scopes", clientScope.RealmId), clientScope)
 	if err != nil {
 		return err
 	}

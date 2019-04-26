@@ -85,7 +85,7 @@ func (keycloakClient *KeycloakClient) ValidateCustomUserFederation(custom *Custo
 }
 
 func (keycloakClient *KeycloakClient) NewCustomUserFederation(customUserFederation *CustomUserFederation) error {
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", customUserFederation.RealmId), convertFromCustomUserFederationToComponent(customUserFederation))
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", customUserFederation.RealmId), convertFromCustomUserFederationToComponent(customUserFederation))
 	if err != nil {
 		return err
 	}

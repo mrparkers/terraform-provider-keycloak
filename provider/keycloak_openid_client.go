@@ -110,6 +110,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"owner_managed_access": {
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -193,6 +197,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 				Name:               resourceData["name"].(string),
 				IconUri:            resourceData["icon_uri"].(string),
 				OwnerManagedAccess: resourceData["owner_managed_access"].(bool),
+				Id:                 resourceData["id"].(string),
 				Uris:               uris,
 				Scopes:             scopes,
 				Attributes:         attributes,
@@ -239,7 +244,7 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 		data.Set("access_type", "CONFIDENTIAL")
 	}
 
-	resourcesData := make(map[string]interface{})
+	resourcesData := []interface{}{}
 
 	for _, resource := range *resources {
 		resourceData := map[string]interface{}{
@@ -250,10 +255,11 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 			"owner_managed_access": resource.OwnerManagedAccess,
 			"scopes":               resource.Scopes,
 			"attributes":           resource.Attributes,
+			"id":                   resource.Id,
 		}
-		resourcesData[resource.Id] = resourceData
+		resourcesData = append(resourcesData, resourceData)
 	}
-	data.Set("resources", resourcesData)
+	data.Set("resource", resourcesData)
 }
 
 func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interface{}) error {
@@ -271,8 +277,8 @@ func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interfac
 		return err
 	}
 
-	for _, resource := range *resources {
-		err = keycloakClient.NewOpenidClientResource(client, &resource)
+	for i := 0; i < len(*resources); i++ {
+		err = keycloakClient.NewOpenidClientResource(client, &(*resources)[i])
 		if err != nil {
 			return err
 		}

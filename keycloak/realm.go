@@ -43,7 +43,7 @@ type Realm struct {
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
-	_, err := keycloakClient.post("/realms", realm)
+	_, _, err := keycloakClient.post("/realms", realm)
 
 	return err
 }

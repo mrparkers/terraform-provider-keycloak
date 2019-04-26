@@ -53,7 +53,7 @@ type IdentityProvider struct {
 
 func (keycloakClient *KeycloakClient) NewIdentityProvider(identityProvider *IdentityProvider) error {
 	log.Printf("[WARN] Realm: %s", identityProvider.Realm)
-	_, err := keycloakClient.post(fmt.Sprintf("/realms/%s/identity-provider/instances", identityProvider.Realm), identityProvider)
+	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/identity-provider/instances", identityProvider.Realm), identityProvider)
 	if err != nil {
 		return err
 	}

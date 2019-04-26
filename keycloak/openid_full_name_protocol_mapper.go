@@ -78,7 +78,7 @@ func (keycloakClient *KeycloakClient) DeleteOpenIdFullNameProtocolMapper(realmId
 func (keycloakClient *KeycloakClient) NewOpenIdFullNameProtocolMapper(mapper *OpenIdFullNameProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}

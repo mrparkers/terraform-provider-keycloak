@@ -47,7 +47,7 @@ func (keycloakClient *KeycloakClient) NewSamlClient(client *SamlClient) error {
 	client.Protocol = "saml"
 	client.ClientAuthenticatorType = "client-secret"
 
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients", client.RealmId), client)
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients", client.RealmId), client)
 	if err != nil {
 		return err
 	}

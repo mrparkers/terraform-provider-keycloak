@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -10,7 +11,7 @@ type OpenidClientSecret struct {
 }
 
 type OpenidClientResource struct {
-	Id                 string              `json:"-"`
+	Id                 string              `json:"_id,omitempty"`
 	DisplayName        string              `json:"displayName"`
 	Name               string              `json:"name"`
 	Uris               []string            `json:"uris"`
@@ -49,7 +50,11 @@ type OpenidClient struct {
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientResource(client *OpenidClient, resource *OpenidClientResource) error {
-	_, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource", client.RealmId, client.Id), resource)
+	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource", client.RealmId, client.Id), resource)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(body, &resource)
 	if err != nil {
 		return err
 	}
@@ -106,7 +111,7 @@ func (keycloakClient *KeycloakClient) NewOpenidClient(client *OpenidClient) erro
 	client.Protocol = "openid-connect"
 	client.ClientAuthenticatorType = "client-secret"
 
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients", client.RealmId), client)
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients", client.RealmId), client)
 	if err != nil {
 		return err
 	}

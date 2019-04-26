@@ -263,22 +263,22 @@ func (keycloakClient *KeycloakClient) get(path string, resource interface{}) err
 	return json.Unmarshal(body, resource)
 }
 
-func (keycloakClient *KeycloakClient) post(path string, requestBody interface{}) (string, error) {
+func (keycloakClient *KeycloakClient) post(path string, requestBody interface{}) ([]byte, string, error) {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
 	payload, err := json.Marshal(requestBody)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
 	request, err := http.NewRequest(http.MethodPost, resourceUrl, bytes.NewReader(payload))
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
-	_, location, err := keycloakClient.sendRequest(request)
+	body, location, err := keycloakClient.sendRequest(request)
 
-	return location, err
+	return body, location, err
 }
 
 func (keycloakClient *KeycloakClient) put(path string, requestBody interface{}) error {

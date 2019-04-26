@@ -153,7 +153,7 @@ func (keycloakClient *KeycloakClient) ValidateLdapGroupMapper(ldapGroupMapper *L
 }
 
 func (keycloakClient *KeycloakClient) NewLdapGroupMapper(ldapGroupMapper *LdapGroupMapper) error {
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapGroupMapper.RealmId), convertFromLdapGroupMapperToComponent(ldapGroupMapper))
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapGroupMapper.RealmId), convertFromLdapGroupMapperToComponent(ldapGroupMapper))
 	if err != nil {
 		return err
 	}

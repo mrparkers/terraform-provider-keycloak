@@ -78,7 +78,7 @@ func (keycloakClient *KeycloakClient) DeleteOpenIdAudienceProtocolMapper(realmId
 func (keycloakClient *KeycloakClient) NewOpenIdAudienceProtocolMapper(mapper *OpenIdAudienceProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}

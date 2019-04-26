@@ -79,7 +79,7 @@ func (keycloakClient *KeycloakClient) NewGroup(group *Group) error {
 		createGroupUrl = fmt.Sprintf("/realms/%s/groups/%s/children", group.RealmId, group.ParentId)
 	}
 
-	location, err := keycloakClient.post(createGroupUrl, group)
+	_, location, err := keycloakClient.post(createGroupUrl, group)
 	if err != nil {
 		return err
 	}
