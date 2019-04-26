@@ -89,6 +89,28 @@ resource "keycloak_openid_client" "test_client" {
   client_secret = "secret"
 }
 
+resource "keycloak_openid_client" "test_resource_client" {
+  client_id   = "test-openid-client1"
+  name        = "test-openid-client1"
+  realm_id    = "${keycloak_realm.test.id}"
+  description = "a test openid client"
+
+  access_type = "CONFIDENTIAL"
+  direct_access_grants_enabled = true
+  service_accounts_enabled = true
+
+  valid_redirect_uris = [
+    "http://localhost:5555/callback",
+  ]
+
+  resource {
+    name = "new"
+    display_name = "new"
+  }
+
+  client_secret = "secret"
+}
+
 resource "keycloak_openid_client_scope" "test_default_client_scope" {
   name     = "test-default-client-scope"
   realm_id = "${keycloak_realm.test.id}"
