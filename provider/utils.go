@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -21,6 +22,14 @@ func mergeSchemas(a map[string]*schema.Schema, b map[string]*schema.Schema) map[
 		result[k] = v
 	}
 	return result
+}
+
+func listValueToStr(attributes map[string][]string) map[string]interface{} {
+	output := map[string]interface{}{}
+	for key, value := range attributes {
+		output[key] = strings.Join(value, ",")
+	}
+	return output
 }
 
 // Converts duration string to an int representing the number of seconds, which is used by the Keycloak API

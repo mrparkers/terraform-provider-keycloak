@@ -126,7 +126,6 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 						},
 						"attributes": {
 							Type:     schema.TypeMap,
-							Elem:     &schema.Schema{Type: schema.TypeString},
 							Optional: true,
 						},
 					},
@@ -136,7 +135,7 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 	}
 }
 
-func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient, *keycloak.OpenidClientResources) {
+func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient, *keycloak.OpenidClientResources, *keycloak.OpenidClientResources, *keycloak.OpenidClientResources) {
 	var validRedirectUris []string
 	var webOrigins []string
 
@@ -168,47 +167,6 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		WebOrigins:                webOrigins,
 	}
 
-	var resources keycloak.OpenidClientResources
-
-	if v, ok := data.GetOk("resource"); ok {
-		openidClient.AuthorizationServicesEnabled = true
-		for _, d := range v.(*schema.Set).List() {
-			resourceData := d.(map[string]interface{})
-			var uris []string
-			var scopes []string
-			var attributes map[string][]string
-			if v, ok := data.GetOk("uris"); ok {
-				for _, uri := range v.(*schema.Set).List() {
-					uris = append(uris, uri.(string))
-				}
-			}
-			if v, ok := data.GetOk("scopes"); ok {
-				for _, scope := range v.(*schema.Set).List() {
-					scopes = append(scopes, scope.(string))
-				}
-			}
-			if v, ok := data.GetOk("attribites"); ok {
-				for key, value := range v.(map[string]string) {
-					attributes[key] = strings.Split(value, ",")
-				}
-			}
-			resource := keycloak.OpenidClientResource{
-				DisplayName:        resourceData["display_name"].(string),
-				Name:               resourceData["name"].(string),
-				IconUri:            resourceData["icon_uri"].(string),
-				OwnerManagedAccess: resourceData["owner_managed_access"].(bool),
-				Id:                 resourceData["id"].(string),
-				Uris:               uris,
-				Scopes:             scopes,
-				Attributes:         attributes,
-			}
-			resources = append(resources, resource)
-		}
-
-	} else {
-		openidClient.AuthorizationServicesEnabled = false
-	}
-
 	// access type
 	if accessType := data.Get("access_type").(string); accessType == "PUBLIC" {
 		openidClient.PublicClient = true
@@ -216,7 +174,72 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		openidClient.BearerOnly = true
 	}
 
-	return openidClient, &resources
+	removeResources := &keycloak.OpenidClientResources{}
+	unchangedResources := &keycloak.OpenidClientResources{}
+	addResources := &keycloak.OpenidClientResources{}
+
+	unchangedResourcesData := new(schema.Set)
+	if v, ok := data.GetOk("resource"); ok {
+		openidClient.AuthorizationServicesEnabled = true
+		unchangedResourcesData = v.(*schema.Set)
+	} else {
+		openidClient.AuthorizationServicesEnabled = false
+	}
+	if data.HasChange("resource") {
+		o, n := data.GetChange("resource")
+		if o == nil {
+			o = new(schema.Set)
+		}
+		if n == nil {
+			n = new(schema.Set)
+		}
+		unchangedResourcesData = unchangedResourcesData.Difference(n.(*schema.Set))
+		removeResourcesData := o.(*schema.Set).Difference(n.(*schema.Set)).Difference(unchangedResourcesData).List()
+		removeResources = getOpenidClientResourcesFromData(removeResourcesData)
+		addResourcesData := n.(*schema.Set).Difference(o.(*schema.Set)).Difference(unchangedResourcesData).List()
+		addResources = getOpenidClientResourcesFromData(addResourcesData)
+	}
+
+	unchangedResources = getOpenidClientResourcesFromData(unchangedResourcesData.List())
+
+	return openidClient, unchangedResources, addResources, removeResources
+}
+
+func getOpenidClientResourcesFromData(data []interface{}) *keycloak.OpenidClientResources {
+	var resources keycloak.OpenidClientResources
+	for _, d := range data {
+		resourceData := d.(map[string]interface{})
+		var uris []string
+		var scopes []string
+		attributes := map[string][]string{}
+		if v, ok := resourceData["uris"]; ok {
+			for _, uri := range v.([]interface{}) {
+				uris = append(uris, uri.(string))
+			}
+		}
+		if v, ok := resourceData["scopes"]; ok {
+			for _, scope := range v.([]interface{}) {
+				scopes = append(scopes, scope.(string))
+			}
+		}
+		if v, ok := resourceData["attributes"]; ok {
+			for key, value := range v.(map[string]interface{}) {
+				attributes[key] = strings.Split(value.(string), ",")
+			}
+		}
+		resource := keycloak.OpenidClientResource{
+			DisplayName:        resourceData["display_name"].(string),
+			Name:               resourceData["name"].(string),
+			IconUri:            resourceData["icon_uri"].(string),
+			OwnerManagedAccess: resourceData["owner_managed_access"].(bool),
+			Id:                 resourceData["id"].(string),
+			Uris:               uris,
+			Scopes:             scopes,
+			Attributes:         attributes,
+		}
+		resources = append(resources, resource)
+	}
+	return &resources
 }
 
 func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClient, resources *keycloak.OpenidClientResources) {
@@ -254,7 +277,7 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 			"icon_uri":             resource.IconUri,
 			"owner_managed_access": resource.OwnerManagedAccess,
 			"scopes":               resource.Scopes,
-			"attributes":           resource.Attributes,
+			"attributes":           listValueToStr(resource.Attributes),
 			"id":                   resource.Id,
 		}
 		resourcesData = append(resourcesData, resourceData)
@@ -265,7 +288,7 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client, resources := getOpenidClientFromData(data)
+	client, _, addResources, _ := getOpenidClientFromData(data)
 
 	err := keycloakClient.ValidateOpenidClient(client)
 	if err != nil {
@@ -277,14 +300,14 @@ func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interfac
 		return err
 	}
 
-	for i := 0; i < len(*resources); i++ {
-		err = keycloakClient.NewOpenidClientResource(client, &(*resources)[i])
+	for i := 0; i < len(*addResources); i++ {
+		err = keycloakClient.NewOpenidClientResource(client, &(*addResources)[i])
 		if err != nil {
 			return err
 		}
 	}
 
-	setOpenidClientData(data, client, resources)
+	setOpenidClientData(data, client, addResources)
 
 	return resourceKeycloakOpenidClientRead(data, meta)
 }
@@ -313,7 +336,7 @@ func resourceKeycloakOpenidClientRead(data *schema.ResourceData, meta interface{
 func resourceKeycloakOpenidClientUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client, resources := getOpenidClientFromData(data)
+	client, unchangedResources, addResources, removeResources := getOpenidClientFromData(data)
 
 	err := keycloakClient.ValidateOpenidClient(client)
 	if err != nil {
@@ -325,14 +348,28 @@ func resourceKeycloakOpenidClientUpdate(data *schema.ResourceData, meta interfac
 		return err
 	}
 
-	for _, resource := range *resources {
+	for _, resource := range *unchangedResources {
 		err = keycloakClient.UpdateOpenidClientResource(client, &resource)
 		if err != nil {
 			return err
 		}
 	}
 
-	setOpenidClientData(data, client, resources)
+	for _, resource := range *addResources {
+		err = keycloakClient.NewOpenidClientResource(client, &resource)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, resource := range *removeResources {
+		err = keycloakClient.DeleteOpenidClientResource(client.RealmId, client.Id, resource.Id)
+		if err != nil {
+			return err
+		}
+	}
+
+	setOpenidClientData(data, client, unchangedResources)
 
 	return nil
 }
