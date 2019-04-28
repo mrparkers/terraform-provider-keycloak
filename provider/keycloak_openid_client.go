@@ -142,8 +142,8 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 }
 
 func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient, *keycloak.OpenidClientResourcesDiff, error) {
-	var validRedirectUris []string
-	var webOrigins []string
+	validRedirectUris := make([]string, 0)
+	webOrigins := make([]string, 0)
 
 	if v, ok := data.GetOk("valid_redirect_uris"); ok {
 		for _, validRedirectUri := range v.(*schema.Set).List() {
@@ -172,6 +172,18 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		ServiceAccountsEnabled:       data.Get("service_accounts_enabled").(bool),
 		ValidRedirectUris:            validRedirectUris,
 		WebOrigins:                   webOrigins,
+	}
+
+	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled {
+		if _, ok := data.GetOk("valid_redirect_uris"); ok {
+			return nil, nil, errors.New("valid_redirect_uris cannot be set when standard or implicit flow is not enabled")
+		}
+	}
+
+	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled && !openidClient.DirectAccessGrantsEnabled {
+		if _, ok := data.GetOk("web_origins"); ok {
+			return nil, nil, errors.New("web_origins cannot be set when standard or implicit flow is not enabled")
+		}
 	}
 
 	// access type
