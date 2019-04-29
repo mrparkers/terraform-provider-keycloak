@@ -10,7 +10,8 @@ import (
 )
 
 var (
-	keycloakOpenidClientAccessTypes = []string{"CONFIDENTIAL", "PUBLIC", "BEARER-ONLY"}
+	keycloakOpenidClientAccessTypes                        = []string{"CONFIDENTIAL", "PUBLIC", "BEARER-ONLY"}
+	keycloakOpenidClientAuthorizationPolicyEnforcementMode = []string{"ENFORCING", "PERMISSIVE", "DISABLED"}
 )
 
 func resourceKeycloakOpenidClient() *schema.Resource {
@@ -72,16 +73,6 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"service_accounts_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"authorization_services_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
 			"valid_redirect_uris": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -94,45 +85,26 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Set:      schema.HashString,
 				Optional: true,
 			},
-			"resource": {
+			"service_accounts_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"authorization": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"display_name": {
-							Type:     schema.TypeString,
-							Required: true,
+						"policy_enforcement_mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice(keycloakOpenidClientAuthorizationPolicyEnforcementMode, false),
 						},
-						"name": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"uris": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-						},
-						"icon_uri": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"owner_managed_access": {
+						"allow_remote_resource_management": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
-						},
-						"scopes": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-						},
-						"attributes": {
-							Type:     schema.TypeMap,
-							Optional: true,
 						},
 					},
 				},
@@ -141,9 +113,9 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 	}
 }
 
-func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient, *keycloak.OpenidClientResourcesDiff, error) {
-	var validRedirectUris []string
-	var webOrigins []string
+func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient, error) {
+	validRedirectUris := make([]string, 0)
+	webOrigins := make([]string, 0)
 
 	if v, ok := data.GetOk("valid_redirect_uris"); ok {
 		for _, validRedirectUri := range v.(*schema.Set).List() {
@@ -158,20 +130,43 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	}
 
 	openidClient := &keycloak.OpenidClient{
-		Id:                           data.Id(),
-		ClientId:                     data.Get("client_id").(string),
-		RealmId:                      data.Get("realm_id").(string),
-		Name:                         data.Get("name").(string),
-		Enabled:                      data.Get("enabled").(bool),
-		Description:                  data.Get("description").(string),
-		AuthorizationServicesEnabled: data.Get("authorization_services_enabled").(bool),
-		ClientSecret:                 data.Get("client_secret").(string),
-		StandardFlowEnabled:          data.Get("standard_flow_enabled").(bool),
-		ImplicitFlowEnabled:          data.Get("implicit_flow_enabled").(bool),
-		DirectAccessGrantsEnabled:    data.Get("direct_access_grants_enabled").(bool),
-		ServiceAccountsEnabled:       data.Get("service_accounts_enabled").(bool),
-		ValidRedirectUris:            validRedirectUris,
-		WebOrigins:                   webOrigins,
+		Id:                        data.Id(),
+		ClientId:                  data.Get("client_id").(string),
+		RealmId:                   data.Get("realm_id").(string),
+		Name:                      data.Get("name").(string),
+		Enabled:                   data.Get("enabled").(bool),
+		Description:               data.Get("description").(string),
+		ClientSecret:              data.Get("client_secret").(string),
+		StandardFlowEnabled:       data.Get("standard_flow_enabled").(bool),
+		ImplicitFlowEnabled:       data.Get("implicit_flow_enabled").(bool),
+		DirectAccessGrantsEnabled: data.Get("direct_access_grants_enabled").(bool),
+		ServiceAccountsEnabled:    data.Get("service_accounts_enabled").(bool),
+		ValidRedirectUris:         validRedirectUris,
+		WebOrigins:                webOrigins,
+	}
+
+	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled {
+		if _, ok := data.GetOk("valid_redirect_uris"); ok {
+			return nil, errors.New("valid_redirect_uris cannot be set when standard or implicit flow is not enabled")
+		}
+	}
+
+	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled && !openidClient.DirectAccessGrantsEnabled {
+		if _, ok := data.GetOk("web_origins"); ok {
+			return nil, errors.New("web_origins cannot be set when standard or implicit flow is not enabled")
+		}
+	}
+
+	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled {
+		if _, ok := data.GetOk("valid_redirect_uris"); ok {
+			return nil, nil, errors.New("valid_redirect_uris cannot be set when standard or implicit flow is not enabled")
+		}
+	}
+
+	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled && !openidClient.DirectAccessGrantsEnabled {
+		if _, ok := data.GetOk("web_origins"); ok {
+			return nil, nil, errors.New("web_origins cannot be set when standard or implicit flow is not enabled")
+		}
 	}
 
 	// access type
@@ -181,73 +176,21 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		openidClient.BearerOnly = true
 	}
 
-	resources := &keycloak.OpenidClientResourcesDiff{}
-	unchangedResourcesData := new(schema.Set)
-	if v, ok := data.GetOk("resource"); ok && data.HasChange("resource") {
-		if openidClient.AuthorizationServicesEnabled {
-			unchangedResourcesData = v.(*schema.Set)
-		} else {
-			return nil, nil, errors.New("Resources cannot be managed when aunothiztion is not enabled")
+	if v, ok := data.GetOk("authorization"); ok {
+		openidClient.AuthorizationServicesEnabled = true
+		authorizationSettingsData := v.(*schema.Set).List()[0]
+		authorizationSettings := authorizationSettingsData.(map[string]interface{})
+		openidClient.AuthorizationSettings = keycloak.OpenidClientAuthorizationSettings{
+			PolicyEnforcementMode:         authorizationSettings["policy_enforcement_mode"].(string),
+			AllowRemoteResourceManagement: authorizationSettings["allow_remote_resource_management"].(bool),
 		}
+	} else {
+		openidClient.AuthorizationServicesEnabled = false
 	}
-	if data.HasChange("resource") {
-		o, n := data.GetChange("resource")
-		if o == nil {
-			o = new(schema.Set)
-		}
-		if n == nil {
-			n = new(schema.Set)
-		}
-		unchangedResourcesData = unchangedResourcesData.Difference(n.(*schema.Set))
-		removeResourcesData := o.(*schema.Set).Difference(n.(*schema.Set)).Difference(unchangedResourcesData).List()
-		resources.Remove = *getOpenidClientResourcesFromData(removeResourcesData)
-		addResourcesData := n.(*schema.Set).Difference(o.(*schema.Set)).Difference(unchangedResourcesData).List()
-		resources.Add = *getOpenidClientResourcesFromData(addResourcesData)
-	}
-
-	resources.Unchanged = *getOpenidClientResourcesFromData(unchangedResourcesData.List())
-
-	return openidClient, resources, nil
+	return openidClient, nil
 }
 
-func getOpenidClientResourcesFromData(data []interface{}) *keycloak.OpenidClientResources {
-	var resources keycloak.OpenidClientResources
-	for _, d := range data {
-		resourceData := d.(map[string]interface{})
-		var uris []string
-		var scopes []string
-		attributes := map[string][]string{}
-		if v, ok := resourceData["uris"]; ok {
-			for _, uri := range v.([]interface{}) {
-				uris = append(uris, uri.(string))
-			}
-		}
-		if v, ok := resourceData["scopes"]; ok {
-			for _, scope := range v.([]interface{}) {
-				scopes = append(scopes, scope.(string))
-			}
-		}
-		if v, ok := resourceData["attributes"]; ok {
-			for key, value := range v.(map[string]interface{}) {
-				attributes[key] = strings.Split(value.(string), ",")
-			}
-		}
-		resource := keycloak.OpenidClientResource{
-			DisplayName:        resourceData["display_name"].(string),
-			Name:               resourceData["name"].(string),
-			IconUri:            resourceData["icon_uri"].(string),
-			OwnerManagedAccess: resourceData["owner_managed_access"].(bool),
-			Id:                 resourceData["id"].(string),
-			Uris:               uris,
-			Scopes:             scopes,
-			Attributes:         attributes,
-		}
-		resources = append(resources, resource)
-	}
-	return &resources
-}
-
-func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClient, resources *keycloak.OpenidClientResources) {
+func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClient) {
 	data.SetId(client.Id)
 
 	data.Set("client_id", client.ClientId)
@@ -272,29 +215,12 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 	} else {
 		data.Set("access_type", "CONFIDENTIAL")
 	}
-
-	resourcesData := []interface{}{}
-
-	for _, resource := range *resources {
-		resourceData := map[string]interface{}{
-			"display_name":         resource.DisplayName,
-			"name":                 resource.Name,
-			"uris":                 resource.Uris,
-			"icon_uri":             resource.IconUri,
-			"owner_managed_access": resource.OwnerManagedAccess,
-			"scopes":               resource.Scopes,
-			"attributes":           listValueToStr(resource.Attributes),
-			"id":                   resource.Id,
-		}
-		resourcesData = append(resourcesData, resourceData)
-	}
-	data.Set("resource", resourcesData)
 }
 
 func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client, resources, err := getOpenidClientFromData(data)
+	client, err := getOpenidClientFromData(data)
 	if err != nil {
 		return err
 	}
@@ -309,14 +235,7 @@ func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interfac
 		return err
 	}
 
-	for i := 0; i < len((*resources).Add); i++ {
-		err = keycloakClient.NewOpenidClientResource(client, &((*resources).Add)[i])
-		if err != nil {
-			return err
-		}
-	}
-
-	setOpenidClientData(data, client, &resources.Add)
+	setOpenidClientData(data, client)
 
 	return resourceKeycloakOpenidClientRead(data, meta)
 }
@@ -332,16 +251,7 @@ func resourceKeycloakOpenidClientRead(data *schema.ResourceData, meta interface{
 		return handleNotFoundError(err, data)
 	}
 
-	resources := &keycloak.OpenidClientResources{}
-
-	if client.AuthorizationServicesEnabled {
-		resources, err = keycloakClient.GetOpenidClientResources(realmId, id)
-		if err != nil {
-			return handleNotFoundError(err, data)
-		}
-	}
-
-	setOpenidClientData(data, client, resources)
+	setOpenidClientData(data, client)
 
 	return nil
 }
@@ -349,7 +259,7 @@ func resourceKeycloakOpenidClientRead(data *schema.ResourceData, meta interface{
 func resourceKeycloakOpenidClientUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client, resources, err := getOpenidClientFromData(data)
+	client, err := getOpenidClientFromData(data)
 	if err != nil {
 		return err
 	}
@@ -364,30 +274,7 @@ func resourceKeycloakOpenidClientUpdate(data *schema.ResourceData, meta interfac
 		return err
 	}
 
-	if client.AuthorizationServicesEnabled {
-		for _, resource := range (*resources).Unchanged {
-			err = keycloakClient.UpdateOpenidClientResource(client, &resource)
-			if err != nil {
-				return err
-			}
-		}
-
-		for _, resource := range (*resources).Add {
-			err = keycloakClient.NewOpenidClientResource(client, &resource)
-			if err != nil {
-				return err
-			}
-		}
-
-		for _, resource := range (*resources).Remove {
-			err = keycloakClient.DeleteOpenidClientResource(client.RealmId, client.Id, resource.Id)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	setOpenidClientData(data, client, &resources.Unchanged)
+	setOpenidClientData(data, client)
 
 	return nil
 }

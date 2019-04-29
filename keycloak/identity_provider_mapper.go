@@ -44,7 +44,7 @@ func (keycloakClient *KeycloakClient) GetIdentityProviderMapper(realm, alias, id
 	identityProviderMapper.Realm = realm
 	identityProviderMapper.IdentityProviderAlias = alias
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers/%s", realm, alias, id), &identityProviderMapper)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers/%s", realm, alias, id), &identityProviderMapper, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -57,5 +57,5 @@ func (keycloakClient *KeycloakClient) UpdateIdentityProviderMapper(identityProvi
 }
 
 func (keycloakClient *KeycloakClient) DeleteIdentityProviderMapper(realm, alias, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers/%s", realm, alias, id))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers/%s", realm, alias, id), nil)
 }

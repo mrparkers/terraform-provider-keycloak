@@ -48,7 +48,7 @@ func individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId str
 func (keycloakClient *KeycloakClient) listGenericProtocolMappers(realmId, clientId, clientScopeId string) ([]*protocolMapper, error) {
 	var protocolMappers []*protocolMapper
 
-	err := keycloakClient.get(protocolMapperPath(realmId, clientId, clientScopeId), &protocolMappers)
+	err := keycloakClient.get(protocolMapperPath(realmId, clientId, clientScopeId), &protocolMappers, nil)
 	if err != nil {
 		return nil, err
 	}

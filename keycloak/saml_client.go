@@ -60,7 +60,7 @@ func (keycloakClient *KeycloakClient) NewSamlClient(client *SamlClient) error {
 func (keycloakClient *KeycloakClient) GetSamlClient(realmId, id string) (*SamlClient, error) {
 	var client SamlClient
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s", realmId, id), &client)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s", realmId, id), &client, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -78,5 +78,5 @@ func (keycloakClient *KeycloakClient) UpdateSamlClient(client *SamlClient) error
 }
 
 func (keycloakClient *KeycloakClient) DeleteSamlClient(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s", realmId, id))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s", realmId, id), nil)
 }

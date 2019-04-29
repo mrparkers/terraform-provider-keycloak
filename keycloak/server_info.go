@@ -41,7 +41,7 @@ func (serverInfo *ServerInfo) ComponentTypeIsInstalled(componentType, componentT
 func (keycloakClient *KeycloakClient) GetServerInfo() (*ServerInfo, error) {
 	var serverInfo ServerInfo
 
-	err := keycloakClient.get("/serverinfo", &serverInfo)
+	err := keycloakClient.get("/serverinfo", &serverInfo, nil)
 	if err != nil {
 		return nil, err
 	}

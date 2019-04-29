@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -247,12 +248,20 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 	return body, response.Header.Get("Location"), nil
 }
 
-func (keycloakClient *KeycloakClient) get(path string, resource interface{}) error {
+func (keycloakClient *KeycloakClient) get(path string, resource interface{}, params map[string]string) error {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
 	request, err := http.NewRequest(http.MethodGet, resourceUrl, nil)
 	if err != nil {
 		return err
+	}
+
+	if params != nil {
+		query := url.Values{}
+		for k, v := range params {
+			query.Add(k, v)
+		}
+		request.URL.RawQuery = query.Encode()
 	}
 
 	body, _, err := keycloakClient.sendRequest(request)
@@ -299,10 +308,20 @@ func (keycloakClient *KeycloakClient) put(path string, requestBody interface{}) 
 	return err
 }
 
-func (keycloakClient *KeycloakClient) delete(path string) error {
+func (keycloakClient *KeycloakClient) delete(path string, requestBody interface{}) error {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
-	request, err := http.NewRequest(http.MethodDelete, resourceUrl, nil)
+	var body io.Reader
+
+	if requestBody != nil {
+		payload, err := json.Marshal(requestBody)
+		if err != nil {
+			return err
+		}
+		body = bytes.NewReader(payload)
+	}
+
+	request, err := http.NewRequest(http.MethodDelete, resourceUrl, body)
 	if err != nil {
 		return err
 	}

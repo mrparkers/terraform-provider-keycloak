@@ -50,7 +50,7 @@ func (protocolMapper *protocolMapper) convertToSamlUserAttributeProtocolMapper(r
 func (keycloakClient *KeycloakClient) GetSamlUserAttributeProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*SamlUserAttributeProtocolMapper, error) {
 	var protocolMapper *protocolMapper
 
-	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper)
+	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (keycloakClient *KeycloakClient) GetSamlUserAttributeProtocolMapper(realmId
 }
 
 func (keycloakClient *KeycloakClient) DeleteSamlUserAttributeProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
-	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId))
+	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
 }
 
 func (keycloakClient *KeycloakClient) NewSamlUserAttributeProtocolMapper(mapper *SamlUserAttributeProtocolMapper) error {

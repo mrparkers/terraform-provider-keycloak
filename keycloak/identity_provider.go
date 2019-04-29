@@ -65,7 +65,7 @@ func (keycloakClient *KeycloakClient) GetIdentityProvider(realm, alias string) (
 	var identityProvider IdentityProvider
 	identityProvider.Realm = realm
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), &identityProvider)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), &identityProvider, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -78,5 +78,5 @@ func (keycloakClient *KeycloakClient) UpdateIdentityProvider(identityProvider *I
 }
 
 func (keycloakClient *KeycloakClient) DeleteIdentityProvider(realm, alias string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), nil)
 }
