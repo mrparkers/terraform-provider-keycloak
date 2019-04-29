@@ -5,15 +5,25 @@ import (
 	"net/url"
 )
 
+type FederatedIdentity struct {
+	IdentityProvider string `json:"identityProvider"`
+	UserId           string `json:"userId"`
+	UserName         string `json:"userName"`
+}
+
+type FederatedIdentities []FederatedIdentity
+
 type User struct {
 	Id      string `json:"id,omitempty"`
 	RealmId string `json:"-"`
 
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Enabled   bool   `json:"enabled"`
+	Username            string              `json:"username"`
+	Email               string              `json:"email"`
+	FirstName           string              `json:"firstName"`
+	LastName            string              `json:"lastName"`
+	Enabled             bool                `json:"enabled"`
+	Attributes          map[string][]string `json:"attributes"`
+	FederatedIdentities FederatedIdentities `json:"federatedIdentities"`
 }
 
 type PasswordCredentials struct {
@@ -50,7 +60,7 @@ func (keycloakClient *KeycloakClient) ResetUserPassword(realmId, userId string, 
 func (keycloakClient *KeycloakClient) GetUser(realmId, id string) (*User, error) {
 	var user User
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s", realmId, id), &user)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s", realmId, id), &user, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -65,13 +75,13 @@ func (keycloakClient *KeycloakClient) UpdateUser(user *User) error {
 }
 
 func (keycloakClient *KeycloakClient) DeleteUser(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s", realmId, id))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s", realmId, id), nil)
 }
 
 func (keycloakClient *KeycloakClient) GetUserByUsername(realmId, username string) (*User, error) {
 	var users []*User
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users?username=%s", realmId, url.QueryEscape(username)), &users)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users?username=%s", realmId, url.QueryEscape(username)), &users, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +125,7 @@ func (keycloakClient *KeycloakClient) AddUsersToGroup(realmId, groupId string, u
 }
 
 func (keycloakClient *KeycloakClient) RemoveUserFromGroup(user *User, groupId string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/groups/%s", user.RealmId, user.Id, groupId))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/groups/%s", user.RealmId, user.Id, groupId), nil)
 }
 
 func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId string, usernames []interface{}) error {

@@ -7,6 +7,10 @@ import (
 
 func KeycloakProvider() *schema.Provider {
 	return &schema.Provider{
+		DataSourcesMap: map[string]*schema.Resource{
+			"keycloak_openid_client":                      dataSourceKeycloakOpenidClient(),
+			"keycloak_openid_client_authorization_policy": dataSourceKeycloakOpenidClientAuthorizationPolicy(),
+		},
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_realm":                                           resourceKeycloakRealm(),
 			"keycloak_group":                                           resourceKeycloakGroup(),
@@ -38,6 +42,10 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_user_template_importer_identity_provider_mapper": resourceKeycloakUserTemplateImporterIdentityProviderMapper(),
 			"keycloak_saml_identity_provider":                          resourceKeycloakSamlIdentityProvider(),
 			"keycloak_oidc_identity_provider":                          resourceKeycloakOidcIdentityProvider(),
+			"keycloak_openid_client_authorization_resource":            resourceKeycloakOpenidClientAuthorizationResource(),
+			"keycloak_openid_client_authorization_scope":               resourceKeycloakOpenidClientAuthorizationScope(),
+			"keycloak_openid_client_authorization_permission":          resourceKeycloakOpenidClientAuthorizationPermission(),
+			"keycloak_openid_client_service_account_role":              resourceKeycloakOpenidClientServiceAccountRole(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {

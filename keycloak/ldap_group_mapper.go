@@ -166,7 +166,7 @@ func (keycloakClient *KeycloakClient) NewLdapGroupMapper(ldapGroupMapper *LdapGr
 func (keycloakClient *KeycloakClient) GetLdapGroupMapper(realmId, id string) (*LdapGroupMapper, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -179,5 +179,5 @@ func (keycloakClient *KeycloakClient) UpdateLdapGroupMapper(ldapGroupMapper *Lda
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapGroupMapper(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

@@ -1,0 +1,135 @@
+package provider
+
+import (
+	"fmt"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strings"
+)
+
+func resourceKeycloakOpenidClientAuthorizationScope() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceKeycloakOpenidClientAuthorizationScopeCreate,
+		Read:   resourceKeycloakOpenidClientAuthorizationScopeRead,
+		Delete: resourceKeycloakOpenidClientAuthorizationScopeDelete,
+		Update: resourceKeycloakOpenidClientAuthorizationScopeUpdate,
+		// This resource can be imported using {{realm}}/{{client_id}}. The Client ID is displayed in the GUI
+		Importer: &schema.ResourceImporter{
+			State: resourceKeycloakOpenidClientAuthorizationScopeImport,
+		},
+		Schema: map[string]*schema.Schema{
+			"client_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"realm_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"display_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"icon_uri": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
+	}
+}
+
+func getOpenidClientAuthorizationScopeFromData(data *schema.ResourceData) *keycloak.OpenidClientAuthorizationScope {
+	scope := keycloak.OpenidClientAuthorizationScope{
+		DisplayName: data.Get("display_name").(string),
+		Name:        data.Get("name").(string),
+		IconUri:     data.Get("icon_uri").(string),
+		Id:          data.Id(),
+		ClientId:    data.Get("client_id").(string),
+		RealmId:     data.Get("realm_id").(string),
+	}
+	return &scope
+}
+
+func setOpenidClientAuthorizationScopeData(data *schema.ResourceData, scope *keycloak.OpenidClientAuthorizationScope) {
+	data.SetId(scope.Id)
+	data.Set("client_id", scope.ClientId)
+	data.Set("realm_id", scope.RealmId)
+	data.Set("display_name", scope.DisplayName)
+	data.Set("name", scope.Name)
+	data.Set("icon_uri", scope.IconUri)
+}
+
+func resourceKeycloakOpenidClientAuthorizationScopeCreate(data *schema.ResourceData, meta interface{}) error {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	scope := getOpenidClientAuthorizationScopeFromData(data)
+
+	err := keycloakClient.NewOpenidClientAuthorizationScope(scope)
+	if err != nil {
+		return err
+	}
+
+	setOpenidClientAuthorizationScopeData(data, scope)
+
+	return resourceKeycloakOpenidClientAuthorizationScopeRead(data, meta)
+}
+
+func resourceKeycloakOpenidClientAuthorizationScopeRead(data *schema.ResourceData, meta interface{}) error {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	realmId := data.Get("realm_id").(string)
+	clientId := data.Get("client_id").(string)
+	id := data.Id()
+
+	scope, err := keycloakClient.GetOpenidClientAuthorizationScope(realmId, clientId, id)
+	if err != nil {
+		return handleNotFoundError(err, data)
+	}
+
+	setOpenidClientAuthorizationScopeData(data, scope)
+
+	return nil
+}
+
+func resourceKeycloakOpenidClientAuthorizationScopeUpdate(data *schema.ResourceData, meta interface{}) error {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	scope := getOpenidClientAuthorizationScopeFromData(data)
+
+	err := keycloakClient.UpdateOpenidClientAuthorizationScope(scope)
+	if err != nil {
+		return err
+	}
+
+	setOpenidClientAuthorizationScopeData(data, scope)
+
+	return nil
+}
+
+func resourceKeycloakOpenidClientAuthorizationScopeDelete(data *schema.ResourceData, meta interface{}) error {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	realmId := data.Get("realm_id").(string)
+	clientId := data.Get("client_id").(string)
+	id := data.Id()
+
+	return keycloakClient.DeleteOpenidClientAuthorizationScope(realmId, clientId, id)
+}
+
+func resourceKeycloakOpenidClientAuthorizationScopeImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{clientId}}/{{authorizationScopeId}}")
+	}
+	d.Set("realm_id", parts[0])
+	d.Set("client_id", parts[1])
+	d.SetId(parts[3])
+
+	return []*schema.ResourceData{d}, nil
+}
