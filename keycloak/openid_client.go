@@ -125,7 +125,7 @@ func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationPermission(rea
 		ClientId: clientId,
 		Id:       id,
 	}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource/%s", realm, clientId, id), &permission, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s", realm, clientId, id), &permission, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationPermission(rea
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationPermission(permission *OpenidClientAuthorizationPermission) error {
-	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource", permission.RealmId, permission.ClientId), permission)
+	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission", permission.RealmId, permission.ClientId), permission)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationPermission(per
 }
 
 func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationPermission(permission *OpenidClientAuthorizationPermission) error {
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource/%s", permission.RealmId, permission.ClientId, permission.Id), permission)
+	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s", permission.RealmId, permission.ClientId, permission.Id), permission)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationPermission(
 }
 
 func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationPermission(realmId, clientId, permissionId string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource/%s", realmId, clientId, permissionId), nil)
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s", realmId, clientId, permissionId), nil)
 }
 
 func (keycloakClient *KeycloakClient) GetClientRoleByName(realm, clientId, name string) (*OpenidClientRole, error) {

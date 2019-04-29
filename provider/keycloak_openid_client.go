@@ -157,18 +157,6 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		}
 	}
 
-	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled {
-		if _, ok := data.GetOk("valid_redirect_uris"); ok {
-			return nil, nil, errors.New("valid_redirect_uris cannot be set when standard or implicit flow is not enabled")
-		}
-	}
-
-	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled && !openidClient.DirectAccessGrantsEnabled {
-		if _, ok := data.GetOk("web_origins"); ok {
-			return nil, nil, errors.New("web_origins cannot be set when standard or implicit flow is not enabled")
-		}
-	}
-
 	// access type
 	if accessType := data.Get("access_type").(string); accessType == "PUBLIC" {
 		openidClient.PublicClient = true
