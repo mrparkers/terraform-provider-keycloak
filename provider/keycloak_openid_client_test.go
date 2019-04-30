@@ -502,7 +502,7 @@ resource "keycloak_openid_client" "client" {
 	service_accounts_enabled     = %t
 	web_origins                  = %s
 }
-	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.ServiceAccountsEnabled, openidClient.DirectAccessGrantsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins))
+	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.ServiceAccountsEnabled, openidClient.DirectAccessGrantsEnabled, arrayOfStringsForTerraformResource(openidClient.WebOrigins))
 }
 
 func testKeycloakOpenidClient_secret(realm, clientId, clientSecret string) string {
