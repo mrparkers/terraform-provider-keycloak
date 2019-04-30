@@ -595,6 +595,7 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 		"email",
 		"roles",
 		"web-origins",
+		"microprofile-jwt",
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
