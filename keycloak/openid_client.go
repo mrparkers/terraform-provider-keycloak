@@ -84,25 +84,25 @@ type OpenidClientAuthorizationSettings struct {
 }
 
 type OpenidClient struct {
-	Id                           string                            `json:"id,omitempty"`
-	ClientId                     string                            `json:"clientId"`
-	RealmId                      string                            `json:"-"`
-	Name                         string                            `json:"name"`
-	Protocol                     string                            `json:"protocol"`                // always openid-connect for this resource
-	ClientAuthenticatorType      string                            `json:"clientAuthenticatorType"` // always client-secret for now, don't have a need for JWT here
-	ClientSecret                 string                            `json:"secret,omitempty"`
-	Enabled                      bool                              `json:"enabled"`
-	Description                  string                            `json:"description"`
-	PublicClient                 bool                              `json:"publicClient"`
-	BearerOnly                   bool                              `json:"bearerOnly"`
-	StandardFlowEnabled          bool                              `json:"standardFlowEnabled"`
-	ImplicitFlowEnabled          bool                              `json:"implicitFlowEnabled"`
-	DirectAccessGrantsEnabled    bool                              `json:"directAccessGrantsEnabled"`
-	ServiceAccountsEnabled       bool                              `json:"serviceAccountsEnabled"`
-	AuthorizationServicesEnabled bool                              `json:"authorizationServicesEnabled"`
-	ValidRedirectUris            []string                          `json:"redirectUris"`
-	WebOrigins                   []string                          `json:"webOrigins"`
-	AuthorizationSettings        OpenidClientAuthorizationSettings `json:"authorizationSettings,omitempty"`
+	Id                           string                             `json:"id,omitempty"`
+	ClientId                     string                             `json:"clientId"`
+	RealmId                      string                             `json:"-"`
+	Name                         string                             `json:"name"`
+	Protocol                     string                             `json:"protocol"`                // always openid-connect for this resource
+	ClientAuthenticatorType      string                             `json:"clientAuthenticatorType"` // always client-secret for now, don't have a need for JWT here
+	ClientSecret                 string                             `json:"secret,omitempty"`
+	Enabled                      bool                               `json:"enabled"`
+	Description                  string                             `json:"description"`
+	PublicClient                 bool                               `json:"publicClient"`
+	BearerOnly                   bool                               `json:"bearerOnly"`
+	StandardFlowEnabled          bool                               `json:"standardFlowEnabled"`
+	ImplicitFlowEnabled          bool                               `json:"implicitFlowEnabled"`
+	DirectAccessGrantsEnabled    bool                               `json:"directAccessGrantsEnabled"`
+	ServiceAccountsEnabled       bool                               `json:"serviceAccountsEnabled"`
+	AuthorizationServicesEnabled bool                               `json:"authorizationServicesEnabled"`
+	ValidRedirectUris            []string                           `json:"redirectUris"`
+	WebOrigins                   []string                           `json:"webOrigins"`
+	AuthorizationSettings        *OpenidClientAuthorizationSettings `json:"authorizationSettings,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) GetClientAuthorizationPolicyByName(realmId, clientId, name string) (*OpenidClientAuthorizationPolicy, error) {
