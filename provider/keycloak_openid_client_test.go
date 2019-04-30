@@ -500,8 +500,6 @@ resource "keycloak_openid_client" "client" {
 	implicit_flow_enabled        = %t
 	direct_access_grants_enabled = %t
 	service_accounts_enabled     = %t
-
-	valid_redirect_uris          = %s
 	web_origins                  = %s
 }
 	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.ServiceAccountsEnabled, openidClient.DirectAccessGrantsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins))
