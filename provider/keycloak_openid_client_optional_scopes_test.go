@@ -12,7 +12,7 @@ import (
 )
 
 // All openid clients in Keycloak will automatically have these scopes listed as "optional client scopes".
-var preAssignedOptionalClientScopes = []string{"address", "phone", "offline_access"}
+var preAssignedOptionalClientScopes = []string{"address", "phone", "offline_access", "microprofile-jwt"}
 
 func TestAccKeycloakOpenidClientOptionalScopes_basic(t *testing.T) {
 	realm := "terraform-realm-" + acctest.RandString(10)
