@@ -100,8 +100,8 @@ type OpenidClient struct {
 	DirectAccessGrantsEnabled    bool                              `json:"directAccessGrantsEnabled"`
 	ServiceAccountsEnabled       bool                              `json:"serviceAccountsEnabled"`
 	AuthorizationServicesEnabled bool                              `json:"authorizationServicesEnabled"`
-	ValidRedirectUris            []string                          `json:"redirectUris,omitempty"`
-	WebOrigins                   []string                          `json:"webOrigins,omitempty"`
+	ValidRedirectUris            []string                          `json:"redirectUris"`
+	WebOrigins                   []string                          `json:"webOrigins"`
 	AuthorizationSettings        OpenidClientAuthorizationSettings `json:"authorizationSettings,omitempty"`
 }
 
@@ -125,10 +125,33 @@ func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationPermission(rea
 		ClientId: clientId,
 		Id:       id,
 	}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s", realm, clientId, id), &permission, nil)
+
+	policies := []OpenidClientAuthorizationPolicy{}
+	resources := []OpenidClientAuthorizationResource{}
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource/%s", realm, clientId, id), &permission, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/%s/associatedPolicies", realm, clientId, id), &policies, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s/resources", realm, clientId, id), &resources, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, policy := range policies {
+		permission.Policies = append(permission.Policies, policy.Id)
+	}
+
+	for _, resource := range resources {
+		permission.Resources = append(permission.Resources, resource.Id)
+	}
+
 	return &permission, nil
 }
 
@@ -145,7 +168,7 @@ func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationPermission(per
 }
 
 func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationPermission(permission *OpenidClientAuthorizationPermission) error {
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s", permission.RealmId, permission.ClientId, permission.Id), permission)
+	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource/%s", permission.RealmId, permission.ClientId, permission.Id), permission)
 	if err != nil {
 		return err
 	}
