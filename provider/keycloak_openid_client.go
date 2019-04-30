@@ -130,19 +130,20 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	}
 
 	openidClient := &keycloak.OpenidClient{
-		Id:                        data.Id(),
-		ClientId:                  data.Get("client_id").(string),
-		RealmId:                   data.Get("realm_id").(string),
-		Name:                      data.Get("name").(string),
-		Enabled:                   data.Get("enabled").(bool),
-		Description:               data.Get("description").(string),
-		ClientSecret:              data.Get("client_secret").(string),
-		StandardFlowEnabled:       data.Get("standard_flow_enabled").(bool),
-		ImplicitFlowEnabled:       data.Get("implicit_flow_enabled").(bool),
-		DirectAccessGrantsEnabled: data.Get("direct_access_grants_enabled").(bool),
-		ServiceAccountsEnabled:    data.Get("service_accounts_enabled").(bool),
-		ValidRedirectUris:         validRedirectUris,
-		WebOrigins:                webOrigins,
+		Id:                           data.Id(),
+		ClientId:                     data.Get("client_id").(string),
+		RealmId:                      data.Get("realm_id").(string),
+		Name:                         data.Get("name").(string),
+		Enabled:                      data.Get("enabled").(bool),
+		Description:                  data.Get("description").(string),
+		ClientSecret:                 data.Get("client_secret").(string),
+		StandardFlowEnabled:          data.Get("standard_flow_enabled").(bool),
+		ImplicitFlowEnabled:          data.Get("implicit_flow_enabled").(bool),
+		DirectAccessGrantsEnabled:    data.Get("direct_access_grants_enabled").(bool),
+		ServiceAccountsEnabled:       data.Get("service_accounts_enabled").(bool),
+		ValidRedirectUris:            validRedirectUris,
+		WebOrigins:                   webOrigins,
+		AuthorizationServicesEnabled: true,
 	}
 
 	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled {
@@ -165,15 +166,12 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	}
 
 	if v, ok := data.GetOk("authorization"); ok {
-		openidClient.AuthorizationServicesEnabled = true
 		authorizationSettingsData := v.(*schema.Set).List()[0]
 		authorizationSettings := authorizationSettingsData.(map[string]interface{})
 		openidClient.AuthorizationSettings = keycloak.OpenidClientAuthorizationSettings{
 			PolicyEnforcementMode:         authorizationSettings["policy_enforcement_mode"].(string),
 			AllowRemoteResourceManagement: authorizationSettings["allow_remote_resource_management"].(bool),
 		}
-	} else {
-		openidClient.AuthorizationServicesEnabled = false
 	}
 	return openidClient, nil
 }
