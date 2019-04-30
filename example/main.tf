@@ -464,7 +464,6 @@ resource "keycloak_openid_client" "test_client_auth" {
 
   access_type = "CONFIDENTIAL"
   direct_access_grants_enabled = true
-  service_accounts_enabled = true
   implicit_flow_enabled = true
 
   valid_redirect_uris = [
