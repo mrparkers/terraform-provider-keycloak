@@ -17,9 +17,9 @@ func resourceKeycloakOpenidClientServiceAccountRole() *schema.Resource {
 			State: resourceKeycloakOpenidClientServiceAccountRoleImport,
 		},
 		Schema: map[string]*schema.Schema{
-			"source_client_id": {
+			"service_account_user_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"realm_id": {
@@ -27,7 +27,7 @@ func resourceKeycloakOpenidClientServiceAccountRole() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"target_client_id": {
+			"client_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -43,19 +43,19 @@ func resourceKeycloakOpenidClientServiceAccountRole() *schema.Resource {
 
 func getOpenidClientServiceAccountRoleFromData(data *schema.ResourceData) *keycloak.OpenidClientServiceAccountRole {
 	return &keycloak.OpenidClientServiceAccountRole{
-		Id:          data.Id(),
-		ContainerId: data.Get("source_client_id").(string),
-		Name:        data.Get("role").(string),
-		RealmId:     data.Get("realm_id").(string),
-		ClientId:    data.Get("target_client_id").(string),
+		Id:                   data.Id(),
+		ContainerId:          data.Get("client_id").(string),
+		Name:                 data.Get("role").(string),
+		RealmId:              data.Get("realm_id").(string),
+		ServiceAccountUserId: data.Get("service_account_user_id").(string),
 	}
 }
 
 func setOpenidClientServiceAccountRoleData(data *schema.ResourceData, serviceAccountRole *keycloak.OpenidClientServiceAccountRole) {
 	data.SetId(serviceAccountRole.Id)
 	data.Set("realm_id", serviceAccountRole.RealmId)
-	data.Set("source_client_id", serviceAccountRole.ContainerId)
-	data.Set("target_client_id", serviceAccountRole.ClientId)
+	data.Set("client_id", serviceAccountRole.ContainerId)
+	data.Set("service_account_user_id", serviceAccountRole.ServiceAccountUserId)
 	data.Set("role", serviceAccountRole.Name)
 }
 
@@ -74,11 +74,11 @@ func resourceKeycloakOpenidClientServiceAccountRoleRead(data *schema.ResourceDat
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	sourceClientId := data.Get("source_client_id").(string)
-	targetClientId := data.Get("target_client_id").(string)
+	serviceAccountUserId := data.Get("service_account_user_id").(string)
+	clientId := data.Get("client_id").(string)
 	id := data.Id()
 
-	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRole(realmId, sourceClientId, targetClientId, id)
+	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRole(realmId, serviceAccountUserId, clientId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -92,21 +92,21 @@ func resourceKeycloakOpenidClientServiceAccountRoleDelete(data *schema.ResourceD
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	sourceClientId := data.Get("source_client_id").(string)
-	targetClientId := data.Get("target_client_id").(string)
+	serviceAccountUserId := data.Get("service_account_user_id").(string)
+	clientId := data.Get("client_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteOpenidClientServiceAccountRole(realmId, sourceClientId, targetClientId, id)
+	return keycloakClient.DeleteOpenidClientServiceAccountRole(realmId, serviceAccountUserId, clientId, id)
 }
 
 func resourceKeycloakOpenidClientServiceAccountRoleImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{sourceClientId}}/{{targetClientId}}/{{role}}")
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{serviceAccountUserId}}/{{clientId}}/{{role}}")
 	}
 	d.Set("realm_id", parts[0])
-	d.Set("source_client_id", parts[1])
-	d.Set("target_client_id", parts[2])
+	d.Set("service_account_user_id", parts[1])
+	d.Set("client_id", parts[2])
 	d.SetId(parts[3])
 
 	return []*schema.ResourceData{d}, nil

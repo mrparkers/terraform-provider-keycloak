@@ -69,13 +69,13 @@ type OpenidClientAuthorizationPolicy struct {
 }
 
 type OpenidClientServiceAccountRole struct {
-	Id          string `json:"id"`
-	RealmId     string `json:"-"`
-	ClientId    string `json:"-"`
-	Name        string `json:"name"`
-	ClientRole  bool   `json:"clientRole"`
-	Composite   bool   `json:"composite"`
-	ContainerId string `json:"containerId"`
+	Id                   string `json:"id"`
+	RealmId              string `json:"-"`
+	ServiceAccountUserId string `json:"-"`
+	Name                 string `json:"name"`
+	ClientRole           bool   `json:"clientRole"`
+	Composite            bool   `json:"composite"`
+	ContainerId          string `json:"containerId"`
 }
 
 type OpenidClientAuthorizationSettings struct {
@@ -199,10 +199,6 @@ func (keycloakClient *KeycloakClient) GetClientByName(realm, clientId string) (*
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(serviceAccountRole *OpenidClientServiceAccountRole) error {
-	serviceAccountUser, err := keycloakClient.GetOpenidClientServiceAccountUserId(serviceAccountRole.RealmId, serviceAccountRole.ClientId)
-	if err != nil {
-		return err
-	}
 	role, err := keycloakClient.GetClientRoleByName(serviceAccountRole.RealmId, serviceAccountRole.ContainerId, serviceAccountRole.Name)
 	if err != nil {
 		return err
@@ -210,42 +206,34 @@ func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(serviceA
 	serviceAccountRole.Id = role.Id
 	serviceAccountRoles := []OpenidClientServiceAccountRole{}
 	serviceAccountRoles = append(serviceAccountRoles, *serviceAccountRole)
-	_, _, err = keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", serviceAccountRole.RealmId, serviceAccountUser.Id, serviceAccountRole.ContainerId), serviceAccountRoles)
+	_, _, err = keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId), serviceAccountRoles)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenidClientServiceAccountRole(realm, sourceClientId, targetClientId, roleId string) error {
-	serviceAccountUser, err := keycloakClient.GetOpenidClientServiceAccountUserId(realm, targetClientId)
-	if err != nil {
-		return err
-	}
+func (keycloakClient *KeycloakClient) DeleteOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId string) error {
 	serviceAccountRoles := []OpenidClientServiceAccountRole{}
 	serviceAccountRoles = append(serviceAccountRoles, OpenidClientServiceAccountRole{
 		Id: roleId,
 	})
-	err = keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUser.Id, sourceClientId), &serviceAccountRoles)
+	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(realm, sourceClientId, targetClientId, roleId string) (*OpenidClientServiceAccountRole, error) {
-	serviceAccountUser, err := keycloakClient.GetOpenidClientServiceAccountUserId(realm, targetClientId)
-	if err != nil {
-		return nil, err
-	}
+func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId string) (*OpenidClientServiceAccountRole, error) {
 	serviceAccountRoles := []OpenidClientServiceAccountRole{}
 	serviceAccountRoles = append(serviceAccountRoles, OpenidClientServiceAccountRole{
-		Id:          roleId,
-		RealmId:     realm,
-		ContainerId: sourceClientId,
-		ClientId:    targetClientId,
+		Id:                   roleId,
+		RealmId:              realm,
+		ContainerId:          clientId,
+		ServiceAccountUserId: serviceAccountUserId,
 	})
-	err = keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUser.Id, sourceClientId), &serviceAccountRoles, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles, nil)
 	if err != nil {
 		return nil, err
 	}

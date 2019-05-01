@@ -63,6 +63,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Set:      schema.HashString,
 				Computed: true,
 			},
+			"service_account_user_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"service_accounts_enabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -99,7 +103,17 @@ func dataSourceKeycloakOpenidClientRead(data *schema.ResourceData, meta interfac
 		return handleNotFoundError(err, data)
 	}
 
-	setOpenidClientData(data, client)
+	var serviceAccountUserId string
+
+	if client.ServiceAccountsEnabled {
+		serviceAccountUser, err := keycloakClient.GetOpenidClientServiceAccountUserId(client.RealmId, client.Id)
+		if err != nil {
+			return err
+		}
+		serviceAccountUserId = serviceAccountUser.Id
+	}
+
+	setOpenidClientData(data, client, serviceAccountUserId)
 
 	return nil
 }

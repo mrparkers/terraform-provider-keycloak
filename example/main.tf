@@ -465,6 +465,7 @@ resource "keycloak_openid_client" "test_client_auth" {
   access_type = "CONFIDENTIAL"
   direct_access_grants_enabled = true
   implicit_flow_enabled = true
+  service_accounts_enabled = true
 
   valid_redirect_uris = [
     "http://localhost:5555/callback",
@@ -513,7 +514,7 @@ resource "keycloak_user" "resource" {
 
 resource "keycloak_openid_client_service_account_role" "read_token" {
   realm_id = "${keycloak_realm.test.id}"
-  source_client_id = "${data.keycloak_openid_client.broker.id}"
-  target_client_id = "${keycloak_openid_client.test_client_auth.id}"
+  client_id = "${data.keycloak_openid_client.broker.id}"
+  service_account_user_id = "${keycloak_openid_client.test_client_auth.service_account_user_id}"
   role = "read-token"
 }
