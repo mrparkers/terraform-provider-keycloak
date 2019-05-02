@@ -94,6 +94,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"resource_server_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"authorization": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -198,7 +202,14 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
 	data.Set("web_origins", client.WebOrigins)
 	data.Set("authorization_services_enabled", client.AuthorizationServicesEnabled)
-	data.Set("service_account_user_id", serviceAccountUserId)
+
+	if client.AuthorizationServicesEnabled {
+		data.Set("resource_server_id", client.ClientId)
+	}
+
+	if client.ServiceAccountsEnabled {
+		data.Set("service_account_user_id", serviceAccountUserId)
+	}
 
 	// access type
 	if client.PublicClient {

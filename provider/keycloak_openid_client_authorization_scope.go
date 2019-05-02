@@ -13,12 +13,12 @@ func resourceKeycloakOpenidClientAuthorizationScope() *schema.Resource {
 		Read:   resourceKeycloakOpenidClientAuthorizationScopeRead,
 		Delete: resourceKeycloakOpenidClientAuthorizationScopeDelete,
 		Update: resourceKeycloakOpenidClientAuthorizationScopeUpdate,
-		// This resource can be imported using {{realm}}/{{client_id}}. The Client ID is displayed in the GUI
+		// This resource can be imported using {{realm}}/{{resource_server_id}}. The Client ID is displayed in the GUI
 		Importer: &schema.ResourceImporter{
 			State: resourceKeycloakOpenidClientAuthorizationScopeImport,
 		},
 		Schema: map[string]*schema.Schema{
-			"client_id": {
+			"resource_server_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -46,19 +46,19 @@ func resourceKeycloakOpenidClientAuthorizationScope() *schema.Resource {
 
 func getOpenidClientAuthorizationScopeFromData(data *schema.ResourceData) *keycloak.OpenidClientAuthorizationScope {
 	scope := keycloak.OpenidClientAuthorizationScope{
-		DisplayName: data.Get("display_name").(string),
-		Name:        data.Get("name").(string),
-		IconUri:     data.Get("icon_uri").(string),
-		Id:          data.Id(),
-		ClientId:    data.Get("client_id").(string),
-		RealmId:     data.Get("realm_id").(string),
+		DisplayName:      data.Get("display_name").(string),
+		Name:             data.Get("name").(string),
+		IconUri:          data.Get("icon_uri").(string),
+		Id:               data.Id(),
+		ResourceServerId: data.Get("resource_server_id").(string),
+		RealmId:          data.Get("realm_id").(string),
 	}
 	return &scope
 }
 
 func setOpenidClientAuthorizationScopeData(data *schema.ResourceData, scope *keycloak.OpenidClientAuthorizationScope) {
 	data.SetId(scope.Id)
-	data.Set("client_id", scope.ClientId)
+	data.Set("resource_server_id", scope.ResourceServerId)
 	data.Set("realm_id", scope.RealmId)
 	data.Set("display_name", scope.DisplayName)
 	data.Set("name", scope.Name)
@@ -84,10 +84,10 @@ func resourceKeycloakOpenidClientAuthorizationScopeRead(data *schema.ResourceDat
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	clientId := data.Get("client_id").(string)
+	resourceServerId := data.Get("resource_server_id").(string)
 	id := data.Id()
 
-	scope, err := keycloakClient.GetOpenidClientAuthorizationScope(realmId, clientId, id)
+	scope, err := keycloakClient.GetOpenidClientAuthorizationScope(realmId, resourceServerId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -116,19 +116,19 @@ func resourceKeycloakOpenidClientAuthorizationScopeDelete(data *schema.ResourceD
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	clientId := data.Get("client_id").(string)
+	resourceServerId := data.Get("resource_server_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteOpenidClientAuthorizationScope(realmId, clientId, id)
+	return keycloakClient.DeleteOpenidClientAuthorizationScope(realmId, resourceServerId, id)
 }
 
 func resourceKeycloakOpenidClientAuthorizationScopeImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{clientId}}/{{authorizationScopeId}}")
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{resourceServerId}}/{{authorizationScopeId}}")
 	}
 	d.Set("realm_id", parts[0])
-	d.Set("client_id", parts[1])
+	d.Set("resource_server_id", parts[1])
 	d.SetId(parts[3])
 
 	return []*schema.ResourceData{d}, nil

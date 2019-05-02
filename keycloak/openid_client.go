@@ -20,7 +20,7 @@ type OpenidClientSecret struct {
 }
 
 type OpenidClientAuthorizationResource struct {
-	ClientId           string                           `json:"-"`
+	ResourceServerId   string                           `json:"-"`
 	RealmId            string                           `json:"-"`
 	Id                 string                           `json:"_id,omitempty"`
 	DisplayName        string                           `json:"displayName"`
@@ -34,18 +34,18 @@ type OpenidClientAuthorizationResource struct {
 }
 
 type OpenidClientAuthorizationScope struct {
-	Id          string `json:"id,omitempty"`
-	RealmId     string `json:"-"`
-	ClientId    string `json:"-"`
-	Name        string `json:"name"`
-	DisplayName string `json:"displayName"`
-	IconUri     string `json:"iconUri"`
+	Id               string `json:"id,omitempty"`
+	RealmId          string `json:"-"`
+	ResourceServerId string `json:"-"`
+	Name             string `json:"name"`
+	DisplayName      string `json:"displayName"`
+	IconUri          string `json:"iconUri"`
 }
 
 type OpenidClientAuthorizationPermission struct {
 	Id               string   `json:"id,omitempty"`
 	RealmId          string   `json:"-"`
-	ClientId         string   `json:"-"`
+	ResourceServerId string   `json:"-"`
 	Name             string   `json:"name"`
 	Description      string   `json:"description"`
 	DecisionStrategy string   `json:"decisionStrategy"`
@@ -57,7 +57,7 @@ type OpenidClientAuthorizationPermission struct {
 type OpenidClientAuthorizationPolicy struct {
 	Id               string   `json:"id,omitempty"`
 	RealmId          string   `json:"-"`
-	ClientId         string   `json:"-"`
+	ResourceServerId string   `json:"-"`
 	Name             string   `json:"name"`
 	Owner            string   `json:"owner"`
 	DecisionStrategy string   `json:"decisionStrategy"`
@@ -105,41 +105,41 @@ type OpenidClient struct {
 	AuthorizationSettings        *OpenidClientAuthorizationSettings `json:"authorizationSettings,omitempty"`
 }
 
-func (keycloakClient *KeycloakClient) GetClientAuthorizationPolicyByName(realmId, clientId, name string) (*OpenidClientAuthorizationPolicy, error) {
+func (keycloakClient *KeycloakClient) GetClientAuthorizationPolicyByName(realmId, resourceServerId, name string) (*OpenidClientAuthorizationPolicy, error) {
 	policies := []OpenidClientAuthorizationPolicy{}
 	params := map[string]string{"name": name}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy", realmId, clientId), &policies, params)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy", realmId, resourceServerId), &policies, params)
 	if err != nil {
 		return nil, err
 	}
 	policy := policies[0]
 	policy.RealmId = realmId
-	policy.ClientId = clientId
+	policy.ResourceServerId = resourceServerId
 	policy.Name = name
 	return &policy, nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationPermission(realm, clientId, id string) (*OpenidClientAuthorizationPermission, error) {
+func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationPermission(realm, resourceServerId, id string) (*OpenidClientAuthorizationPermission, error) {
 	permission := OpenidClientAuthorizationPermission{
-		RealmId:  realm,
-		ClientId: clientId,
-		Id:       id,
+		RealmId:          realm,
+		ResourceServerId: resourceServerId,
+		Id:               id,
 	}
 
 	policies := []OpenidClientAuthorizationPolicy{}
 	resources := []OpenidClientAuthorizationResource{}
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource/%s", realm, clientId, id), &permission, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource/%s", realm, resourceServerId, id), &permission, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/%s/associatedPolicies", realm, clientId, id), &policies, nil)
+	err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/%s/associatedPolicies", realm, resourceServerId, id), &policies, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s/resources", realm, clientId, id), &resources, nil)
+	err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s/resources", realm, resourceServerId, id), &resources, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationPermission(rea
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationPermission(permission *OpenidClientAuthorizationPermission) error {
-	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission", permission.RealmId, permission.ClientId), permission)
+	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission", permission.RealmId, permission.ResourceServerId), permission)
 	if err != nil {
 		return err
 	}
@@ -168,15 +168,15 @@ func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationPermission(per
 }
 
 func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationPermission(permission *OpenidClientAuthorizationPermission) error {
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource/%s", permission.RealmId, permission.ClientId, permission.Id), permission)
+	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource/%s", permission.RealmId, permission.ResourceServerId, permission.Id), permission)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationPermission(realmId, clientId, permissionId string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s", realmId, clientId, permissionId), nil)
+func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationPermission(realmId, resourceServerId, permissionId string) error {
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s", realmId, resourceServerId, permissionId), nil)
 }
 
 func (keycloakClient *KeycloakClient) GetClientRoleByName(realm, clientId, name string) (*OpenidClientRole, error) {
@@ -246,7 +246,7 @@ func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(realm, s
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationResource(resource *OpenidClientAuthorizationResource) error {
-	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource", resource.RealmId, resource.ClientId), resource)
+	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource", resource.RealmId, resource.ResourceServerId), resource)
 	if err != nil {
 		return err
 	}
@@ -257,12 +257,12 @@ func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationResource(resou
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationResource(realm, clientId, resourceId string) (*OpenidClientAuthorizationResource, error) {
+func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationResource(realm, resourceServerId, resourceId string) (*OpenidClientAuthorizationResource, error) {
 	resource := OpenidClientAuthorizationResource{
-		RealmId:  realm,
-		ClientId: clientId,
+		RealmId:          realm,
+		ResourceServerId: resourceServerId,
 	}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource/%s", realm, clientId, resourceId), &resource, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource/%s", realm, resourceServerId, resourceId), &resource, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -270,7 +270,7 @@ func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationResource(realm
 }
 
 func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationResource(resource *OpenidClientAuthorizationResource) error {
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource/%s", resource.RealmId, resource.ClientId, resource.Id), resource)
+	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource/%s", resource.RealmId, resource.ResourceServerId, resource.Id), resource)
 	if err != nil {
 		return err
 	}
@@ -282,7 +282,7 @@ func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationResource(re
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationScope(scope *OpenidClientAuthorizationScope) error {
-	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope", scope.RealmId, scope.ClientId), scope)
+	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope", scope.RealmId, scope.ResourceServerId), scope)
 	if err != nil {
 		return err
 	}
@@ -293,12 +293,12 @@ func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationScope(scope *O
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationScope(realm, clientId, scopeId string) (*OpenidClientAuthorizationScope, error) {
+func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationScope(realm, resourceServerId, scopeId string) (*OpenidClientAuthorizationScope, error) {
 	scope := OpenidClientAuthorizationScope{
-		RealmId:  realm,
-		ClientId: clientId,
+		RealmId:          realm,
+		ResourceServerId: resourceServerId,
 	}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope/%s", realm, clientId, scopeId), &scope, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope/%s", realm, resourceServerId, scopeId), &scope, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -306,15 +306,15 @@ func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationScope(realm, c
 }
 
 func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationScope(scope *OpenidClientAuthorizationScope) error {
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope/%s", scope.RealmId, scope.ClientId, scope.Id), scope)
+	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope/%s", scope.RealmId, scope.ResourceServerId, scope.Id), scope)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationScope(realmId, clientId, scopeId string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope/%s", realmId, clientId, scopeId), nil)
+func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationScope(realmId, resourceServerId, scopeId string) error {
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope/%s", realmId, resourceServerId, scopeId), nil)
 }
 
 func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountUserId(realmId, clientId string) (*User, error) {

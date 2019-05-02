@@ -19,12 +19,12 @@ func resourceKeycloakOpenidClientAuthorizationPermission() *schema.Resource {
 		Read:   resourceKeycloakOpenidClientAuthorizationPermissionRead,
 		Delete: resourceKeycloakOpenidClientAuthorizationPermissionDelete,
 		Update: resourceKeycloakOpenidClientAuthorizationPermissionUpdate,
-		// This resource can be imported using {{realm}}/{{client_id}}. The Client ID is displayed in the GUI
+		// This resource can be imported using {{realm}}/{{resource_server_id}}. The Client ID is displayed in the GUI
 		Importer: &schema.ResourceImporter{
 			State: resourceKeycloakOpenidClientAuthorizationPermissionImport,
 		},
 		Schema: map[string]*schema.Schema{
-			"client_id": {
+			"resource_server_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -83,7 +83,7 @@ func getOpenidClientAuthorizationPermissionFromData(data *schema.ResourceData) *
 	}
 	permission := keycloak.OpenidClientAuthorizationPermission{
 		Id:               data.Id(),
-		ClientId:         data.Get("client_id").(string),
+		ResourceServerId: data.Get("resource_server_id").(string),
 		RealmId:          data.Get("realm_id").(string),
 		Description:      data.Get("description").(string),
 		Name:             data.Get("name").(string),
@@ -97,7 +97,7 @@ func getOpenidClientAuthorizationPermissionFromData(data *schema.ResourceData) *
 
 func setOpenidClientAuthorizationPermissionData(data *schema.ResourceData, permission *keycloak.OpenidClientAuthorizationPermission) {
 	data.SetId(permission.Id)
-	data.Set("client_id", permission.ClientId)
+	data.Set("resource_server_id", permission.ResourceServerId)
 	data.Set("realm_id", permission.RealmId)
 	data.Set("description", permission.Description)
 	data.Set("name", permission.Name)
@@ -126,10 +126,10 @@ func resourceKeycloakOpenidClientAuthorizationPermissionRead(data *schema.Resour
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	clientId := data.Get("client_id").(string)
+	resourceServerId := data.Get("resource_server_id").(string)
 	id := data.Id()
 
-	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, clientId, id)
+	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, resourceServerId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -158,19 +158,19 @@ func resourceKeycloakOpenidClientAuthorizationPermissionDelete(data *schema.Reso
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	clientId := data.Get("client_id").(string)
+	resourceServerId := data.Get("resource_server_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteOpenidClientAuthorizationPermission(realmId, clientId, id)
+	return keycloakClient.DeleteOpenidClientAuthorizationPermission(realmId, resourceServerId, id)
 }
 
 func resourceKeycloakOpenidClientAuthorizationPermissionImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{clientId}}/{{permissionId}}")
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{resourceServerId}}/{{permissionId}}")
 	}
 	d.Set("realm_id", parts[0])
-	d.Set("client_id", parts[1])
+	d.Set("resource_server_id", parts[1])
 	d.SetId(parts[3])
 
 	return []*schema.ResourceData{d}, nil

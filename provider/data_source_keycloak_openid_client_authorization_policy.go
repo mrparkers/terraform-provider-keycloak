@@ -10,7 +10,7 @@ func dataSourceKeycloakOpenidClientAuthorizationPolicy() *schema.Resource {
 		Read: dataSourceKeycloakOpenidClientAuthorizationPolicyRead,
 
 		Schema: map[string]*schema.Schema{
-			"client_id": {
+			"resource_server_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -60,7 +60,7 @@ func dataSourceKeycloakOpenidClientAuthorizationPolicy() *schema.Resource {
 func setOpenidClientAuthorizationPolicyData(data *schema.ResourceData, policy *keycloak.OpenidClientAuthorizationPolicy) {
 	data.SetId(policy.Id)
 
-	data.Set("client_id", policy.ClientId)
+	data.Set("resource_server_id", policy.ResourceServerId)
 	data.Set("realm_id", policy.RealmId)
 	data.Set("name", policy.Name)
 	data.Set("decision_strategy", policy.DecisionStrategy)
@@ -76,10 +76,10 @@ func dataSourceKeycloakOpenidClientAuthorizationPolicyRead(data *schema.Resource
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	clientId := data.Get("client_id").(string)
+	resourceServerId := data.Get("resource_server_id").(string)
 	name := data.Get("name").(string)
 
-	client, err := keycloakClient.GetClientAuthorizationPolicyByName(realmId, clientId, name)
+	client, err := keycloakClient.GetClientAuthorizationPolicyByName(realmId, resourceServerId, name)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}

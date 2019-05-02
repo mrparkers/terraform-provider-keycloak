@@ -71,6 +71,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"resource_server_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"authorization": {
 				Type:     schema.TypeSet,
 				Computed: true,
