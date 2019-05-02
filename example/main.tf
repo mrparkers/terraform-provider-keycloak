@@ -491,7 +491,7 @@ resource "keycloak_openid_client_authorization_resource" "resource" {
   name        = "test-openid-client1"
   realm_id    = "${keycloak_realm.test.id}"
   uris = [
-    "/shit/*"
+    "/endpoint/*"
   ]
   attributes = {
     "asdads" = "asdasd"
