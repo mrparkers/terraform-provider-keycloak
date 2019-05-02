@@ -446,14 +446,14 @@ resource keycloak_hardcoded_attribute_identity_provider_mapper saml {
 }
 
 data "keycloak_openid_client" "broker" {
-  realm_id = "${keycloak_realm.test.id}"
+  realm_id  = "${keycloak_realm.test.id}"
   client_id = "broker"
 }
 
 data "keycloak_openid_client_authorization_policy" "default" {
-  realm_id = "${keycloak_realm.test.id}"
-  client_id = "${keycloak_openid_client.test_client_auth.id}"
-  name = "default"
+  realm_id           = "${keycloak_realm.test.id}"
+  resource_server_id = "${keycloak_openid_client.test_client_auth.resource_server_id}"
+  name               = "default"
 }
 
 resource "keycloak_openid_client" "test_client_auth" {
@@ -462,10 +462,10 @@ resource "keycloak_openid_client" "test_client_auth" {
   realm_id    = "${keycloak_realm.test.id}"
   description = "a test openid client"
 
-  access_type = "CONFIDENTIAL"
+  access_type                  = "CONFIDENTIAL"
   direct_access_grants_enabled = true
-  implicit_flow_enabled = true
-  service_accounts_enabled = true
+  implicit_flow_enabled        = true
+  service_accounts_enabled     = true
 
   valid_redirect_uris = [
     "http://localhost:5555/callback",
@@ -479,42 +479,45 @@ resource "keycloak_openid_client" "test_client_auth" {
 }
 
 resource "keycloak_openid_client_authorization_permission" "resource" {
-  client_id = "${keycloak_openid_client.test_client_auth.id}"
-  realm_id    = "${keycloak_realm.test.id}"
-  name = "test"
-  policies = ["${data.keycloak_openid_client_authorization_policy.default.id}"]
-  resources = ["${keycloak_openid_client_authorization_resource.resource.id}"]
+  resource_server_id = "${keycloak_openid_client.test_client_auth.resource_server_id}"
+  realm_id           = "${keycloak_realm.test.id}"
+  name               = "test"
+  policies           = ["${data.keycloak_openid_client_authorization_policy.default.id}"]
+  resources          = ["${keycloak_openid_client_authorization_resource.resource.id}"]
 }
 
 resource "keycloak_openid_client_authorization_resource" "resource" {
-  client_id   = "${keycloak_openid_client.test_client_auth.id}"
-  name        = "test-openid-client1"
-  realm_id    = "${keycloak_realm.test.id}"
+  resource_server_id = "${keycloak_openid_client.test_client_auth.resource_server_id}"
+  name               = "test-openid-client1"
+  realm_id           = "${keycloak_realm.test.id}"
+
   uris = [
     "/endpoint/*"
   ]
+
   attributes = {
     "asdads" = "asdasd"
   }
 }
 
 resource "keycloak_openid_client_authorization_scope" "resource" {
-  client_id   = "${keycloak_openid_client.test_client_auth.id}"
-  name        = "test-openid-client1"
-  realm_id    = "${keycloak_realm.test.id}"
+  resource_server_id = "${keycloak_openid_client.test_client_auth.resource_server_id}"
+  name               = "test-openid-client1"
+  realm_id           = "${keycloak_realm.test.id}"
 }
 
 resource "keycloak_user" "resource" {
   realm_id = "${keycloak_realm.test.id}"
   username = "test"
+
   attributes = {
     "key" = "value"
   }
 }
 
 resource "keycloak_openid_client_service_account_role" "read_token" {
-  realm_id = "${keycloak_realm.test.id}"
-  client_id = "${data.keycloak_openid_client.broker.id}"
+  realm_id                = "${keycloak_realm.test.id}"
+  client_id               = "${data.keycloak_openid_client.broker.id}"
   service_account_user_id = "${keycloak_openid_client.test_client_auth.service_account_user_id}"
-  role = "read-token"
+  role                    = "read-token"
 }
