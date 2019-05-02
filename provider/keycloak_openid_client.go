@@ -204,7 +204,7 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 	data.Set("authorization_services_enabled", client.AuthorizationServicesEnabled)
 
 	if client.AuthorizationServicesEnabled {
-		data.Set("resource_server_id", client.ClientId)
+		data.Set("resource_server_id", client.Id)
 	}
 
 	if client.ServiceAccountsEnabled {
