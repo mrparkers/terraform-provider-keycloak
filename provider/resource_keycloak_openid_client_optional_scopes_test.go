@@ -265,7 +265,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_noImportNeeded(t *testing.T) {
 }
 
 // by optional, keycloak clients have the optional scopes "address", "phone" and
-// "offline_access" attached. if you create this resource with only one scope, it
+// "offline_access" "microprofile-jwt" attached. if you create this resource with only one scope, it
 // won't remove these two scopes, because the creation of a new resource should
 // not result in anything destructive. thus, a following plan will not be empty,
 // as terraform will think it needs to remove these scopes, which is okay to do
