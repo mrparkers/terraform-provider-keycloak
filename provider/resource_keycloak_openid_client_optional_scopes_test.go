@@ -426,7 +426,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"address",
 		"phone",
 		"offline_access",
-      "microprofile-jwt",
+		"microprofile-jwt",
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
@@ -507,7 +507,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"address",
 		"phone",
 		"offline_access",
-      "microprofile-jwt",
+		"microprofile-jwt",
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
@@ -542,7 +542,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"address",
 		"phone",
 		"offline_access",
-      "microprofile-jwt",
+		"microprofile-jwt",
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
@@ -605,7 +605,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"address",
 		"phone",
 		"offline_access",
-      "microprofile-jwt",
+		"microprofile-jwt",
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
