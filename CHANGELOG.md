@@ -1,3 +1,9 @@
+## 1.8.0 (Unreleased)
+
+IMPROVEMENTS:
+
+* chore: support Keycloak v6.0.1 ([#106](https://github.com/mrparkers/terraform-provider-keycloak/pull/106))
+
 ## 1.7.0 (April 18, 2019)
 
 FEATURES:
