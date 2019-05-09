@@ -12,7 +12,7 @@ import (
 )
 
 // All openid clients in Keycloak will automatically have these scopes listed as "optional client scopes".
-var preAssignedOptionalClientScopes = []string{"address", "phone", "offline_access"}
+var preAssignedOptionalClientScopes = []string{"address", "phone", "offline_access", "microprofile-jwt"}
 
 func TestAccKeycloakOpenidClientOptionalScopes_basic(t *testing.T) {
 	realm := "terraform-realm-" + acctest.RandString(10)
@@ -265,7 +265,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_noImportNeeded(t *testing.T) {
 }
 
 // by optional, keycloak clients have the optional scopes "address", "phone" and
-// "offline_access" attached. if you create this resource with only one scope, it
+// "offline_access" "microprofile-jwt" attached. if you create this resource with only one scope, it
 // won't remove these two scopes, because the creation of a new resource should
 // not result in anything destructive. thus, a following plan will not be empty,
 // as terraform will think it needs to remove these scopes, which is okay to do
@@ -426,6 +426,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"address",
 		"phone",
 		"offline_access",
+		"microprofile-jwt",
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
@@ -506,6 +507,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"address",
 		"phone",
 		"offline_access",
+		"microprofile-jwt",
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
@@ -540,6 +542,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"address",
 		"phone",
 		"offline_access",
+		"microprofile-jwt",
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
@@ -602,6 +605,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"address",
 		"phone",
 		"offline_access",
+		"microprofile-jwt",
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
