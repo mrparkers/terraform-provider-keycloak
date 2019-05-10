@@ -195,14 +195,14 @@ func getKeycloakOpenidClientAuthorizationPermissionFromState(s *terraform.State,
 
 func testKeycloakOpenidClientAuthorizationPermission_basic(realm, clientId, resourceName, permissionName string) string {
 	return fmt.Sprintf(`
-resource keycloak_realm realm {
+resource keycloak_realm test {
 	realm = "%s"
 }
 
 resource keycloak_openid_client test {
 	client_id                = "%s"
 	realm_id                 = "${keycloak_realm.realm.id}"
-	access_type              = "PUBLIC"
+	access_type              = "CONFIDENTIAL"
 	service_accounts_enabled = true
 	authorization {
 		policy_enforcement_mode = "ENFORCING"
@@ -244,7 +244,7 @@ resource keycloak_realm test {
 resource keycloak_openid_client test {
 	client_id                = "%s"
 	realm_id                 = "${keycloak_realm.test.id}"
-	access_type              = "PUBLIC"
+	access_type              = "CONFIDENTIAL"
 	service_accounts_enabled = true
 	authorization {
 		policy_enforcement_mode = "ENFORCING"
