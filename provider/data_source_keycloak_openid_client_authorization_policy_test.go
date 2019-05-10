@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
+	"regexp"
 	"testing"
 )
 
@@ -11,7 +12,6 @@ func TestAccKeycloakDataSourceOpenidClientAuthorizationPolicy_basic(t *testing.T
 	realm := acctest.RandomWithPrefix("tf-acc-test")
 	clientId := acctest.RandomWithPrefix("tf-acc-test")
 	dataSourceName := "data.keycloak_openid_client_authorization_policy.test"
-	resourceName := "keycloak_openid_client_authorization_policy.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -20,16 +20,12 @@ func TestAccKeycloakDataSourceOpenidClientAuthorizationPolicy_basic(t *testing.T
 			{
 				Config: testAccKeycloakOpenidClientAuthorizationPolicyConfig(realm, clientId),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttrPair(dataSourceName, "resource_server_id", resourceName, "resource_server_id"),
-					resource.TestCheckResourceAttrPair(dataSourceName, "realm_id", resourceName, "realm_id"),
-					resource.TestCheckResourceAttrPair(dataSourceName, "name", resourceName, "name"),
-					resource.TestCheckResourceAttrPair(dataSourceName, "decision_strategy", resourceName, "decision_strategy"),
-					resource.TestCheckResourceAttrPair(dataSourceName, "owner", resourceName, "owner"),
-					resource.TestCheckResourceAttrPair(dataSourceName, "logic", resourceName, "logic"),
-					resource.TestCheckResourceAttrPair(dataSourceName, "type", resourceName, "type"),
-					resource.TestCheckResourceAttrPair(dataSourceName, "policies", resourceName, "policies"),
-					resource.TestCheckResourceAttrPair(dataSourceName, "resources", resourceName, "resources"),
-					resource.TestCheckResourceAttrPair(dataSourceName, "scopes", resourceName, "scopes"),
+					resource.TestCheckResourceAttr(dataSourceName, "resource_server_id", regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
+					resource.TestCheckResourceAttr(dataSourceName, "realm_id", realm),
+					resource.TestCheckResourceAttr(dataSourceName, "name", clientId),
+					resource.TestCheckResourceAttr(dataSourceName, "decision_strategy", "AFFIRMATIVE"),
+					resource.TestCheckResourceAttr(dataSourceName, "logic", "POSITIVE"),
+					resource.TestCheckResourceAttr(dataSourceName, "type", "js"),
 				),
 			},
 		},

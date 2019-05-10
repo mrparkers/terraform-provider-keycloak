@@ -64,7 +64,9 @@ func (keycloakClient *KeycloakClient) GetClientByName(realm, clientId string) (*
 	if len(clients) == 0 {
 		return nil, fmt.Errorf("no clients with name %s found", clientId)
 	}
-	return &clients[0], nil
+	client := clients[0]
+	client.RealmId = realm
+	return &client, nil
 }
 
 func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountUserId(realmId, clientId string) (*User, error) {
