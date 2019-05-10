@@ -99,8 +99,16 @@ func (keycloakClient *KeycloakClient) ValidateOpenIdAudienceProtocolMapper(mappe
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
 
+	if mapper.ClientId != "" && mapper.ClientScopeId != "" {
+		return fmt.Errorf("validataion error: ClientId and ClientScopeId cannot both be set")
+	}
+
 	if mapper.IncludedClientAudience == "" && mapper.IncludedCustomAudience == "" {
 		return fmt.Errorf("validation error: one of IncludedClientAudience or IncludedCustomAudience must be set")
+	}
+
+	if mapper.IncludedClientAudience != "" && mapper.IncludedCustomAudience != "" {
+		return fmt.Errorf("validataion error: IncludedClientAudience and IncludedCustomAudience cannot both be set")
 	}
 
 	protocolMappers, err := keycloakClient.listGenericProtocolMappers(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)

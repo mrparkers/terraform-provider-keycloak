@@ -2,12 +2,13 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"regexp"
-	"testing"
 )
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClient(t *testing.T) {
@@ -236,7 +237,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_validateClientConflictsWithClie
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdAudienceProtocolMapper_validateClientConflictsWithClientScope(realmName, clientId, clientScopeId, mapperName),
-				ExpectError: regexp.MustCompile(".+ conflicts with .+"),
+				ExpectError: regexp.MustCompile("validataion error: ClientId and ClientScopeId cannot both be set"),
 			},
 		},
 	})
@@ -254,7 +255,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceConflicts
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceConflictsWithCustomAudience(realmName, clientId, mapperName),
-				ExpectError: regexp.MustCompile(".+ conflicts with .+"),
+				ExpectError: regexp.MustCompile("validataion error: IncludedClientAudience and IncludedCustomAudience cannot both be set"),
 			},
 		},
 	})
