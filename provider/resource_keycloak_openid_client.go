@@ -186,9 +186,16 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	return openidClient, nil
 }
 
-func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClient, serviceAccountUserId string) {
+func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData, client *keycloak.OpenidClient) error {
+	var serviceAccountUserId string
+	if client.ServiceAccountsEnabled {
+		serviceAccountUser, err := keycloakClient.GetOpenidClientServiceAccountUserId(client.RealmId, client.Id)
+		if err != nil {
+			return err
+		}
+		serviceAccountUserId = serviceAccountUser.Id
+	}
 	data.SetId(client.Id)
-
 	data.Set("client_id", client.ClientId)
 	data.Set("realm_id", client.RealmId)
 	data.Set("name", client.Name)
@@ -219,6 +226,7 @@ func setOpenidClientData(data *schema.ResourceData, client *keycloak.OpenidClien
 	} else {
 		data.Set("access_type", "CONFIDENTIAL")
 	}
+	return nil
 }
 
 func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interface{}) error {
@@ -239,17 +247,10 @@ func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interfac
 		return err
 	}
 
-	var serviceAccountUserId string
-
-	if client.ServiceAccountsEnabled {
-		serviceAccountUser, err := keycloakClient.GetOpenidClientServiceAccountUserId(client.RealmId, client.Id)
-		if err != nil {
-			return err
-		}
-		serviceAccountUserId = serviceAccountUser.Id
+	err = setOpenidClientData(keycloakClient, data, client)
+	if err != nil {
+		return err
 	}
-
-	setOpenidClientData(data, client, serviceAccountUserId)
 
 	return resourceKeycloakOpenidClientRead(data, meta)
 }
@@ -265,17 +266,10 @@ func resourceKeycloakOpenidClientRead(data *schema.ResourceData, meta interface{
 		return handleNotFoundError(err, data)
 	}
 
-	var serviceAccountUserId string
-
-	if client.ServiceAccountsEnabled {
-		serviceAccountUser, err := keycloakClient.GetOpenidClientServiceAccountUserId(client.RealmId, client.Id)
-		if err != nil {
-			return err
-		}
-		serviceAccountUserId = serviceAccountUser.Id
+	err = setOpenidClientData(keycloakClient, data, client)
+	if err != nil {
+		return err
 	}
-
-	setOpenidClientData(data, client, serviceAccountUserId)
 
 	return nil
 }
@@ -298,17 +292,10 @@ func resourceKeycloakOpenidClientUpdate(data *schema.ResourceData, meta interfac
 		return err
 	}
 
-	var serviceAccountUserId string
-
-	if client.ServiceAccountsEnabled {
-		serviceAccountUser, err := keycloakClient.GetOpenidClientServiceAccountUserId(client.RealmId, client.Id)
-		if err != nil {
-			return err
-		}
-		serviceAccountUserId = serviceAccountUser.Id
+	err = setOpenidClientData(keycloakClient, data, client)
+	if err != nil {
+		return err
 	}
-
-	setOpenidClientData(data, client, serviceAccountUserId)
 
 	return nil
 }

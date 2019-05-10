@@ -107,17 +107,10 @@ func dataSourceKeycloakOpenidClientRead(data *schema.ResourceData, meta interfac
 		return handleNotFoundError(err, data)
 	}
 
-	var serviceAccountUserId string
-
-	if client.ServiceAccountsEnabled {
-		serviceAccountUser, err := keycloakClient.GetOpenidClientServiceAccountUserId(client.RealmId, client.Id)
-		if err != nil {
-			return err
-		}
-		serviceAccountUserId = serviceAccountUser.Id
+	err = setOpenidClientData(keycloakClient, data, client)
+	if err != nil {
+		return err
 	}
-
-	setOpenidClientData(data, client, serviceAccountUserId)
 
 	return nil
 }
