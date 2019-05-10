@@ -31,7 +31,8 @@ func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(serviceA
 func (keycloakClient *KeycloakClient) DeleteOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId string) error {
 	serviceAccountRoles := []OpenidClientServiceAccountRole{
 		{
-			Id: roleId,
+			Id:          roleId,
+			ContainerId: clientId,
 		},
 	}
 	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles)
