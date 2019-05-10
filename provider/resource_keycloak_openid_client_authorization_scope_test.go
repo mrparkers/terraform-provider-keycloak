@@ -74,14 +74,14 @@ func TestAccKeycloakOpenidClientAuthorizationScope_basicUpdateRealm(t *testing.T
 				Config: testKeycloakOpenidClientAuthorizationScope_basic(firstRealm, clientId, scopeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientAuthorizationScopeExists("keycloak_openid_client_authorization_scope.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_scope.test", "realm", firstRealm),
+					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_scope.test", "realm_id", firstRealm),
 				),
 			},
 			{
 				Config: testKeycloakOpenidClientAuthorizationScope_basic(secondRealm, clientId, scopeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientAuthorizationScopeExists("keycloak_openid_client_authorization_scope.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_scope.test", "realm", secondRealm),
+					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_scope.test", "realm_id", secondRealm),
 				),
 			},
 		},

@@ -74,14 +74,14 @@ func TestAccKeycloakOpenidClientAuthorizationResource_basicUpdateRealm(t *testin
 				Config: testKeycloakOpenidClientAuthorizationResource_basic(firstRealm, clientId, resourceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientAuthorizationResourceExists("keycloak_openid_client_authorization_resource.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_resource.test", "realm", firstRealm),
+					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_resource.test", "realm_id", firstRealm),
 				),
 			},
 			{
 				Config: testKeycloakOpenidClientAuthorizationResource_basic(secondRealm, clientId, resourceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientAuthorizationResourceExists("keycloak_openid_client_authorization_resource.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_resource.test", "realm", secondRealm),
+					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_resource.test", "realm_id", secondRealm),
 				),
 			},
 		},
@@ -213,7 +213,7 @@ resource keycloak_openid_client test {
 	}
 }
 
-resource keycloak_openid_client_authorization_resource resource {
+resource keycloak_openid_client_authorization_resource test {
   resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
   name               = "%s"
   realm_id           = "${keycloak_realm.test.id}"
@@ -241,7 +241,7 @@ resource keycloak_openid_client test {
 	}
 }
 
-resource keycloak_openid_client_authorization_resource resource {
+resource keycloak_openid_client_authorization_resource test {
   resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
   name                 = "%s"
   realm_id             = "${keycloak_realm.test.id}"

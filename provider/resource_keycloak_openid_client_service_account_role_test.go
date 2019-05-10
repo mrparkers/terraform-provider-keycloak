@@ -71,14 +71,14 @@ func TestAccKeycloakOpenidClientServiceAccountRole_basicUpdateRealm(t *testing.T
 				Config: testKeycloakOpenidClientServiceAccountRole_basic(firstRealm, clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientServiceAccountRoleExists("keycloak_openid_client_service_account_role.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_service_account_role.test", "realm", firstRealm),
+					resource.TestCheckResourceAttr("keycloak_openid_client_service_account_role.test", "realm_id", firstRealm),
 				),
 			},
 			{
 				Config: testKeycloakOpenidClientServiceAccountRole_basic(secondRealm, clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientServiceAccountRoleExists("keycloak_openid_client_service_account_role.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_service_account_role.test", "realm", secondRealm),
+					resource.TestCheckResourceAttr("keycloak_openid_client_service_account_role.test", "realm_id", secondRealm),
 				),
 			},
 		},

@@ -77,14 +77,14 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_basicUpdateRealm(t *test
 				Config: testKeycloakOpenidClientAuthorizationPermission_basic(firstRealm, clientId, resourceName, permissionName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientAuthorizationPermissionExists("keycloak_openid_client_authorization_permission.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_permission.test", "realm", firstRealm),
+					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_permission.test", "realm_id", firstRealm),
 				),
 			},
 			{
 				Config: testKeycloakOpenidClientAuthorizationPermission_basic(secondRealm, clientId, resourceName, permissionName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientAuthorizationPermissionExists("keycloak_openid_client_authorization_permission.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_permission.test", "realm", secondRealm),
+					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_permission.test", "realm_id", secondRealm),
 				),
 			},
 		},
@@ -201,7 +201,7 @@ resource keycloak_realm test {
 
 resource keycloak_openid_client test {
 	client_id                = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = "${keycloak_realm.test.id}"
 	access_type              = "CONFIDENTIAL"
 	service_accounts_enabled = true
 	authorization {
@@ -227,7 +227,7 @@ resource keycloak_openid_client_authorization_resource test {
 
 resource keycloak_openid_client_authorization_permission test {
 	resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
-	realm_id           = "${keycloak_realm.realm.id}"
+	realm_id           = "${keycloak_realm.test.id}"
 	name               = "%s"
 	policies           = ["${data.keycloak_openid_client_authorization_policy.default.id}"]
    resources          = ["${keycloak_openid_client_authorization_resource.test.id}"]
@@ -253,7 +253,7 @@ resource keycloak_openid_client test {
 
 data keycloak_openid_client_authorization_policy default {
   realm_id           = "${keycloak_realm.test.id}"
-  resource_server_id = "${keycloak_openid_client.test_client_auth.resource_server_id}"
+  resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
   name               = "default"
 }
 
