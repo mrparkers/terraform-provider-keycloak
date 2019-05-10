@@ -66,7 +66,7 @@ resource keycloak_openid_client test {
 data keycloak_openid_client_authorization_policy test {
 	resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
 	realm_id           = "${keycloak_realm.test.id}"
-	name               = "Default Policy"
+	name               = "default"
 }
 `, realm, clientId, clientId)
 }

@@ -61,6 +61,9 @@ func (keycloakClient *KeycloakClient) GetClientByName(realm, clientId string) (*
 	if err != nil {
 		return nil, err
 	}
+	if len(clients) == 0 {
+		return nil, fmt.Errorf("no clients with name %s found", clientId)
+	}
 	return &clients[0], nil
 }
 
