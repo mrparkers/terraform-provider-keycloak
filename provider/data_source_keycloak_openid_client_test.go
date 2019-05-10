@@ -52,16 +52,23 @@ resource keycloak_realm test {
 }
 
 resource keycloak_openid_client test {
-  name                  = "%s"
-  client_id 				= "%s"
-  realm_id              = "${keycloak_realm.test.id}"
-  description           = "a test openid client"
-  standard_flow_enabled = true
-  access_type           = "CONFIDENTIAL"
-  valid_redirect_uris   = [
+  name                  	= "%s"
+  client_id 					= "%s"
+  realm_id              	= "${keycloak_realm.test.id}"
+  description           	= "a test openid client"
+  standard_flow_enabled    = true
+  access_type              = "CONFIDENTIAL"
+  service_accounts_enabled = true
+  client_secret            = "secret"
+  valid_redirect_uris      = [
    	"http://localhost:5555/callback",
   ]
-  client_secret = "secret"
+  authorization {
+  		policy_enforcement_mode = "ENFORCING"
+  }
+  web_origins              = [
+		"http://localhost"
+  ]
 }
 
 data keycloak_openid_client test {

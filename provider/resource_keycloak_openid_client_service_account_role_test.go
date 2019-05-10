@@ -123,11 +123,11 @@ func testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy() resource.TestCh
 			realmId := rs.Primary.Attributes["realm_id"]
 			serviceAccountUserId := rs.Primary.Attributes["service_account_user_id"]
 			clientId := rs.Primary.Attributes["client_id"]
-			role := rs.Primary.Attributes["role"]
+			id := rs.Primary.ID
 
 			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-			serviceAccountRole, _ := keycloakClient.GetOpenidClientServiceAccountRole(realmId, serviceAccountUserId, clientId, role)
+			serviceAccountRole, _ := keycloakClient.GetOpenidClientServiceAccountRole(realmId, serviceAccountUserId, clientId, id)
 			if serviceAccountRole != nil {
 				return fmt.Errorf("service account role exists")
 			}
