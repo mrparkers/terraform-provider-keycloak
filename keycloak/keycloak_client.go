@@ -167,7 +167,7 @@ func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 	request.Header.Set("Authorization", fmt.Sprintf("%s %s", tokenType, accessToken))
 	request.Header.Set("Accept", "application/json")
 
-	if request.Method == http.MethodPost || request.Method == http.MethodPut {
+	if request.Method == http.MethodPost || request.Method == http.MethodPut || request.Method == http.MethodDelete {
 		request.Header.Set("Content-type", "application/json")
 	}
 }
