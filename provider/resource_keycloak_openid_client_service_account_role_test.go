@@ -148,7 +148,6 @@ func getKeycloakOpenidClientServiceAccountRoleFromState(s *terraform.State, reso
 	realmId := rs.Primary.Attributes["realm_id"]
 	serviceAccountUserId := rs.Primary.Attributes["service_account_user_id"]
 	clientId := rs.Primary.Attributes["client_id"]
-	role := rs.Primary.Attributes["role"]
 	id := rs.Primary.ID
 
 	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRole(realmId, serviceAccountUserId, clientId, id)
