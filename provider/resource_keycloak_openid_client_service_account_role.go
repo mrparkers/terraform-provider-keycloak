@@ -12,7 +12,6 @@ func resourceKeycloakOpenidClientServiceAccountRole() *schema.Resource {
 		Create: resourceKeycloakOpenidClientServiceAccountRoleCreate,
 		Read:   resourceKeycloakOpenidClientServiceAccountRoleRead,
 		Delete: resourceKeycloakOpenidClientServiceAccountRoleDelete,
-		// This resource can be imported using {{realm}}/{{client_id}}. The Client ID is displayed in the GUI
 		Importer: &schema.ResourceImporter{
 			State: resourceKeycloakOpenidClientServiceAccountRoleImport,
 		},

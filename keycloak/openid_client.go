@@ -1,7 +1,6 @@
 package keycloak
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -17,65 +16,6 @@ type OpenidClientRole struct {
 type OpenidClientSecret struct {
 	Type  string `json:"type"`
 	Value string `json:"value"`
-}
-
-type OpenidClientAuthorizationResource struct {
-	ResourceServerId   string                           `json:"-"`
-	RealmId            string                           `json:"-"`
-	Id                 string                           `json:"_id,omitempty"`
-	DisplayName        string                           `json:"displayName"`
-	Name               string                           `json:"name"`
-	Uris               []string                         `json:"uris"`
-	IconUri            string                           `json:"icon_uri"`
-	OwnerManagedAccess bool                             `json:"ownerManagedAccess"`
-	Scopes             []OpenidClientAuthorizationScope `json:"scopes"`
-	Type               string                           `json:"type"`
-	Attributes         map[string][]string              `json:"attributes"`
-}
-
-type OpenidClientAuthorizationScope struct {
-	Id               string `json:"id,omitempty"`
-	RealmId          string `json:"-"`
-	ResourceServerId string `json:"-"`
-	Name             string `json:"name"`
-	DisplayName      string `json:"displayName"`
-	IconUri          string `json:"iconUri"`
-}
-
-type OpenidClientAuthorizationPermission struct {
-	Id               string   `json:"id,omitempty"`
-	RealmId          string   `json:"-"`
-	ResourceServerId string   `json:"-"`
-	Name             string   `json:"name"`
-	Description      string   `json:"description"`
-	DecisionStrategy string   `json:"decisionStrategy"`
-	Policies         []string `json:"policies"`
-	Resources        []string `json:"resources"`
-	Type             string   `json:"type"`
-}
-
-type OpenidClientAuthorizationPolicy struct {
-	Id               string   `json:"id,omitempty"`
-	RealmId          string   `json:"-"`
-	ResourceServerId string   `json:"-"`
-	Name             string   `json:"name"`
-	Owner            string   `json:"owner"`
-	DecisionStrategy string   `json:"decisionStrategy"`
-	Logic            string   `json:"logic"`
-	Policies         []string `json:"policies"`
-	Resources        []string `json:"resources"`
-	Scopes           []string `json:"scopes"`
-	Type             string   `json:"type"`
-}
-
-type OpenidClientServiceAccountRole struct {
-	Id                   string `json:"id"`
-	RealmId              string `json:"-"`
-	ServiceAccountUserId string `json:"-"`
-	Name                 string `json:"name"`
-	ClientRole           bool   `json:"clientRole"`
-	Composite            bool   `json:"composite"`
-	ContainerId          string `json:"containerId"`
 }
 
 type OpenidClientAuthorizationSettings struct {
@@ -105,80 +45,6 @@ type OpenidClient struct {
 	AuthorizationSettings        *OpenidClientAuthorizationSettings `json:"authorizationSettings,omitempty"`
 }
 
-func (keycloakClient *KeycloakClient) GetClientAuthorizationPolicyByName(realmId, resourceServerId, name string) (*OpenidClientAuthorizationPolicy, error) {
-	policies := []OpenidClientAuthorizationPolicy{}
-	params := map[string]string{"name": name}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy", realmId, resourceServerId), &policies, params)
-	if err != nil {
-		return nil, err
-	}
-	policy := policies[0]
-	policy.RealmId = realmId
-	policy.ResourceServerId = resourceServerId
-	policy.Name = name
-	return &policy, nil
-}
-
-func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationPermission(realm, resourceServerId, id string) (*OpenidClientAuthorizationPermission, error) {
-	permission := OpenidClientAuthorizationPermission{
-		RealmId:          realm,
-		ResourceServerId: resourceServerId,
-		Id:               id,
-	}
-
-	policies := []OpenidClientAuthorizationPolicy{}
-	resources := []OpenidClientAuthorizationResource{}
-
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource/%s", realm, resourceServerId, id), &permission, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/%s/associatedPolicies", realm, resourceServerId, id), &policies, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s/resources", realm, resourceServerId, id), &resources, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, policy := range policies {
-		permission.Policies = append(permission.Policies, policy.Id)
-	}
-
-	for _, resource := range resources {
-		permission.Resources = append(permission.Resources, resource.Id)
-	}
-
-	return &permission, nil
-}
-
-func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationPermission(permission *OpenidClientAuthorizationPermission) error {
-	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission", permission.RealmId, permission.ResourceServerId), permission)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(body, &permission)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationPermission(permission *OpenidClientAuthorizationPermission) error {
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/resource/%s", permission.RealmId, permission.ResourceServerId, permission.Id), permission)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationPermission(realmId, resourceServerId, permissionId string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/permission/%s", realmId, resourceServerId, permissionId), nil)
-}
-
 func (keycloakClient *KeycloakClient) GetClientRoleByName(realm, clientId, name string) (*OpenidClientRole, error) {
 	var clientRole OpenidClientRole
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/roles/%s", realm, clientId, name), &clientRole, nil)
@@ -196,125 +62,6 @@ func (keycloakClient *KeycloakClient) GetClientByName(realm, clientId string) (*
 		return nil, err
 	}
 	return &clients[0], nil
-}
-
-func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(serviceAccountRole *OpenidClientServiceAccountRole) error {
-	role, err := keycloakClient.GetClientRoleByName(serviceAccountRole.RealmId, serviceAccountRole.ContainerId, serviceAccountRole.Name)
-	if err != nil {
-		return err
-	}
-	serviceAccountRole.Id = role.Id
-	serviceAccountRoles := []OpenidClientServiceAccountRole{}
-	serviceAccountRoles = append(serviceAccountRoles, *serviceAccountRole)
-	_, _, err = keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId), serviceAccountRoles)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (keycloakClient *KeycloakClient) DeleteOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId string) error {
-	serviceAccountRoles := []OpenidClientServiceAccountRole{}
-	serviceAccountRoles = append(serviceAccountRoles, OpenidClientServiceAccountRole{
-		Id: roleId,
-	})
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId string) (*OpenidClientServiceAccountRole, error) {
-	serviceAccountRoles := []OpenidClientServiceAccountRole{}
-	serviceAccountRoles = append(serviceAccountRoles, OpenidClientServiceAccountRole{
-		Id:                   roleId,
-		RealmId:              realm,
-		ContainerId:          clientId,
-		ServiceAccountUserId: serviceAccountUserId,
-	})
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles, nil)
-	if err != nil {
-		return nil, err
-	}
-	for _, serviceAccountRole := range serviceAccountRoles {
-		if serviceAccountRole.Id == roleId {
-			return &serviceAccountRole, nil
-		}
-	}
-	return nil, fmt.Errorf("No role with id %s found", roleId)
-}
-
-func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationResource(resource *OpenidClientAuthorizationResource) error {
-	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource", resource.RealmId, resource.ResourceServerId), resource)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(body, &resource)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationResource(realm, resourceServerId, resourceId string) (*OpenidClientAuthorizationResource, error) {
-	resource := OpenidClientAuthorizationResource{
-		RealmId:          realm,
-		ResourceServerId: resourceServerId,
-	}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource/%s", realm, resourceServerId, resourceId), &resource, nil)
-	if err != nil {
-		return nil, err
-	}
-	return &resource, nil
-}
-
-func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationResource(resource *OpenidClientAuthorizationResource) error {
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource/%s", resource.RealmId, resource.ResourceServerId, resource.Id), resource)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationResource(realmId, clientId, resourceId string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource/%s", realmId, clientId, resourceId), nil)
-}
-
-func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationScope(scope *OpenidClientAuthorizationScope) error {
-	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope", scope.RealmId, scope.ResourceServerId), scope)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(body, &scope)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationScope(realm, resourceServerId, scopeId string) (*OpenidClientAuthorizationScope, error) {
-	scope := OpenidClientAuthorizationScope{
-		RealmId:          realm,
-		ResourceServerId: resourceServerId,
-	}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope/%s", realm, resourceServerId, scopeId), &scope, nil)
-	if err != nil {
-		return nil, err
-	}
-	return &scope, nil
-}
-
-func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationScope(scope *OpenidClientAuthorizationScope) error {
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope/%s", scope.RealmId, scope.ResourceServerId, scope.Id), scope)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationScope(realmId, resourceServerId, scopeId string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/scope/%s", realmId, resourceServerId, scopeId), nil)
 }
 
 func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountUserId(realmId, clientId string) (*User, error) {
@@ -380,7 +127,11 @@ func (keycloakClient *KeycloakClient) GetOpenidClientByClientId(realmId, clientI
 	var clients []OpenidClient
 	var clientSecret OpenidClientSecret
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients?clientId=%s", realmId, clientId), &clients, nil)
+	params := map[string]string{
+		"clientId": clientId,
+	}
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients", realmId), &clients, params)
 	if err != nil {
 		return nil, err
 	}

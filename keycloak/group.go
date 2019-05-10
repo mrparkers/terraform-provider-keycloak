@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"fmt"
-	"net/url"
 	"strings"
 )
 
@@ -120,7 +119,11 @@ func (keycloakClient *KeycloakClient) DeleteGroup(realmId, id string) error {
 func (keycloakClient *KeycloakClient) ListGroupsWithName(realmId, name string) ([]*Group, error) {
 	var groups []*Group
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups?search=%s", realmId, url.QueryEscape(name)), &groups, nil)
+	params := map[string]string{
+		"search": name,
+	}
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups", realmId), &groups, params)
 	if err != nil {
 		return nil, err
 	}

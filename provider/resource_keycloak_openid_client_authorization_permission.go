@@ -19,7 +19,6 @@ func resourceKeycloakOpenidClientAuthorizationPermission() *schema.Resource {
 		Read:   resourceKeycloakOpenidClientAuthorizationPermissionRead,
 		Delete: resourceKeycloakOpenidClientAuthorizationPermissionDelete,
 		Update: resourceKeycloakOpenidClientAuthorizationPermissionUpdate,
-		// This resource can be imported using {{realm}}/{{resource_server_id}}. The Client ID is displayed in the GUI
 		Importer: &schema.ResourceImporter{
 			State: resourceKeycloakOpenidClientAuthorizationPermissionImport,
 		},
@@ -49,12 +48,12 @@ func resourceKeycloakOpenidClientAuthorizationPermission() *schema.Resource {
 				Default:      "UNANIMOUS",
 			},
 			"policies": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
 			"resources": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
@@ -72,12 +71,12 @@ func getOpenidClientAuthorizationPermissionFromData(data *schema.ResourceData) *
 	var policies []string
 	var resources []string
 	if v, ok := data.GetOk("resources"); ok {
-		for _, resource := range v.([]interface{}) {
+		for _, resource := range v.(*schema.Set).List() {
 			resources = append(resources, resource.(string))
 		}
 	}
 	if v, ok := data.GetOk("policies"); ok {
-		for _, policy := range v.([]interface{}) {
+		for _, policy := range v.(*schema.Set).List() {
 			policies = append(policies, policy.(string))
 		}
 	}

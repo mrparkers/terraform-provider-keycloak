@@ -13,7 +13,6 @@ func resourceKeycloakOpenidClientAuthorizationResource() *schema.Resource {
 		Read:   resourceKeycloakOpenidClientAuthorizationResourceRead,
 		Delete: resourceKeycloakOpenidClientAuthorizationResourceDelete,
 		Update: resourceKeycloakOpenidClientAuthorizationResourceUpdate,
-		// This resource can be imported using {{realm}}/{{resource_server_id}}. The Client ID is displayed in the GUI
 		Importer: &schema.ResourceImporter{
 			State: resourceKeycloakOpenidClientAuthorizationResourceImport,
 		},
@@ -37,7 +36,7 @@ func resourceKeycloakOpenidClientAuthorizationResource() *schema.Resource {
 				Optional: true,
 			},
 			"uris": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
@@ -51,7 +50,7 @@ func resourceKeycloakOpenidClientAuthorizationResource() *schema.Resource {
 				Default:  false,
 			},
 			"scopes": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
@@ -72,14 +71,14 @@ func getOpenidClientAuthorizationResourceFromData(data *schema.ResourceData) *ke
 	var scopes []keycloak.OpenidClientAuthorizationScope
 	attributes := map[string][]string{}
 	if v, ok := data.GetOk("uris"); ok {
-		for _, uri := range v.([]interface{}) {
+		for _, uri := range v.(*schema.Set).List() {
 			uris = append(uris, uri.(string))
 		}
 	}
 	if v, ok := data.GetOk("scopes"); ok {
-		for _, scope := range v.([]string) {
+		for _, scope := range v.(*schema.Set).List() {
 			scopes = append(scopes, keycloak.OpenidClientAuthorizationScope{
-				Name: scope,
+				Name: scope.(string),
 			})
 		}
 	}

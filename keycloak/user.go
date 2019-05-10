@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"fmt"
-	"net/url"
 )
 
 type FederatedIdentity struct {
@@ -81,7 +80,11 @@ func (keycloakClient *KeycloakClient) DeleteUser(realmId, id string) error {
 func (keycloakClient *KeycloakClient) GetUserByUsername(realmId, username string) (*User, error) {
 	var users []*User
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users?username=%s", realmId, url.QueryEscape(username)), &users, nil)
+	params := map[string]string{
+		"username": username,
+	}
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users", realmId), &users, params)
 	if err != nil {
 		return nil, err
 	}
