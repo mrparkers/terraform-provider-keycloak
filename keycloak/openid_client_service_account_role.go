@@ -30,7 +30,7 @@ func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(serviceA
 
 func (keycloakClient *KeycloakClient) DeleteOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId string) error {
 	serviceAccountRoles := []OpenidClientServiceAccountRole{
-		OpenidClientServiceAccountRole{
+		{
 			Id: roleId,
 		},
 	}
@@ -43,7 +43,7 @@ func (keycloakClient *KeycloakClient) DeleteOpenidClientServiceAccountRole(realm
 
 func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId string) (*OpenidClientServiceAccountRole, error) {
 	serviceAccountRoles := []OpenidClientServiceAccountRole{
-		OpenidClientServiceAccountRole{
+		{
 			Id:                   roleId,
 			RealmId:              realm,
 			ContainerId:          clientId,
