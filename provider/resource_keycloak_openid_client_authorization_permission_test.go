@@ -237,13 +237,13 @@ resource keycloak_openid_client_authorization_permission test {
 
 func testKeycloakOpenidClientAuthorizationPermission_basicFromInterface(clientId string, authorizationPermission *keycloak.OpenidClientAuthorizationPermission, resourceName string) string {
 	return fmt.Sprintf(`
-resource keycloak_realm realm {
+resource keycloak_realm test {
 	realm = "%s"
 }
 
 resource keycloak_openid_client test {
 	client_id                = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = "${keycloak_realm.test.id}"
 	access_type              = "PUBLIC"
 	service_accounts_enabled = true
 	authorization {
@@ -269,7 +269,7 @@ resource keycloak_openid_client_authorization_resource resource {
 
 resource keycloak_openid_client_authorization_permission test {
 	resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
-	realm_id           = "${keycloak_realm.realm.id}"
+	realm_id           = "${keycloak_realm.test.id}"
 	name               = "%s"
 	policies           = ["${data.keycloak_openid_client_authorization_policy.default.id}"]
    resources          = ["${keycloak_openid_client_authorization_resource.resource.id}"]

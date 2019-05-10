@@ -160,13 +160,13 @@ func getKeycloakOpenidClientServiceAccountRoleFromState(s *terraform.State, reso
 
 func testKeycloakOpenidClientServiceAccountRole_basic(realm, clientId string) string {
 	return fmt.Sprintf(`
-resource keycloak_realm realm {
+resource keycloak_realm test {
 	realm = "%s"
 }
 
 resource keycloak_openid_client test {
 	client_id                = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = "${keycloak_realm.test.id}"
 	access_type              = "PUBLIC"
 	service_accounts_enabled = true
 }
@@ -178,7 +178,7 @@ data keycloak_openid_client broker {
 
 resource keycloak_openid_client_service_account_role test {
 	service_account_user_id = "${keycloak_openid_client.test.service_account_user_id}"
-	realm_id 					= "${keycloak_realm.realm.id}"
+	realm_id 					= "${keycloak_realm.test.id}"
 	client_id 					= "${data.keycloak_openid_client.broker.id}"
 	role 							= "read-token"
 }

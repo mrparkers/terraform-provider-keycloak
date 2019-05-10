@@ -52,6 +52,7 @@ resource keycloak_openid_client test {
   realm_id                       = "${keycloak_realm.test.id}"
   description                    = "a test openid client"
   standard_flow_enabled          = true
+  service_accounts_enabled       = true
   access_type                    = "CONFIDENTIAL"
   client_secret                  = "secret"
   valid_redirect_uris            = [
