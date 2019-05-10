@@ -25,7 +25,7 @@ func TestAccKeycloakDataSourceOpenidClientAuthorizationPolicy_basic(t *testing.T
 					resource.TestCheckResourceAttr(dataSourceName, "name", "default"),
 					resource.TestCheckResourceAttr(dataSourceName, "decision_strategy", "UNANIMOUS"),
 					resource.TestCheckResourceAttr(dataSourceName, "logic", "POSITIVE"),
-					resource.TestCheckResourceAttr(dataSourceName, "type", "js"),
+					resource.TestCheckResourceAttr(dataSourceName, "type", "resource"),
 				),
 			},
 		},

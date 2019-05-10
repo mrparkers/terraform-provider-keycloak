@@ -60,5 +60,5 @@ func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(realm, s
 			return &serviceAccountRole, nil
 		}
 	}
-	return nil, fmt.Errorf("No role with id %s found", roleId)
+	return &OpenidClientServiceAccountRole{}, nil
 }
