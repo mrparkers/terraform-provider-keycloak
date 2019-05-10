@@ -8,10 +8,11 @@ type OpenidClientServiceAccountRole struct {
 	Id                   string `json:"id"`
 	RealmId              string `json:"-"`
 	ServiceAccountUserId string `json:"-"`
-	Name                 string `json:"name"`
+	Name                 string `json:"name,omitempty"`
 	ClientRole           bool   `json:"clientRole"`
 	Composite            bool   `json:"composite"`
 	ContainerId          string `json:"containerId"`
+	Description          string `json:"description"`
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(serviceAccountRole *OpenidClientServiceAccountRole) error {
@@ -29,13 +30,12 @@ func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(serviceA
 }
 
 func (keycloakClient *KeycloakClient) DeleteOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId string) error {
-	serviceAccountRoles := []OpenidClientServiceAccountRole{
-		{
-			Id:          roleId,
-			ContainerId: clientId,
-		},
+	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId)
+	if err != nil {
+		return err
 	}
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles)
+	serviceAccountRoles := []OpenidClientServiceAccountRole{*serviceAccountRole}
+	err = keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles)
 	if err != nil {
 		return err
 	}

@@ -23,7 +23,7 @@ func TestAccKeycloakDataSourceOpenidClientAuthorizationPolicy_basic(t *testing.T
 					resource.TestMatchResourceAttr(dataSourceName, "resource_server_id", regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 					resource.TestCheckResourceAttr(dataSourceName, "realm_id", realm),
 					resource.TestCheckResourceAttr(dataSourceName, "name", "default"),
-					resource.TestCheckResourceAttr(dataSourceName, "decision_strategy", "AFFIRMATIVE"),
+					resource.TestCheckResourceAttr(dataSourceName, "decision_strategy", "UNANIMOUS"),
 					resource.TestCheckResourceAttr(dataSourceName, "logic", "POSITIVE"),
 					resource.TestCheckResourceAttr(dataSourceName, "type", "js"),
 				),
