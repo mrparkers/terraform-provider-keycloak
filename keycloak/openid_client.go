@@ -21,6 +21,7 @@ type OpenidClientSecret struct {
 type OpenidClientAuthorizationSettings struct {
 	PolicyEnforcementMode         string `json:"policyEnforcementMode,omitempty"`
 	AllowRemoteResourceManagement bool   `json:"allowRemoteResourceManagement,omitempty"`
+	KeepDefaults                  bool   `json:"-"`
 }
 
 type OpenidClient struct {
@@ -104,6 +105,19 @@ func (keycloakClient *KeycloakClient) NewOpenidClient(client *OpenidClient) erro
 	}
 
 	client.Id = getIdFromLocationHeader(location)
+
+	if authorizationSettings := client.AuthorizationSettings; authorizationSettings != nil {
+		if !(*authorizationSettings).KeepDefaults {
+			resource, err := keycloakClient.GetOpenidClientAuthorizationResourceByName(client.RealmId, client.Id, "default")
+			if err != nil {
+				return err
+			}
+			err = keycloakClient.DeleteOpenidClientAuthorizationResource(resource.RealmId, resource.ResourceServerId, resource.Id)
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	return nil
 }

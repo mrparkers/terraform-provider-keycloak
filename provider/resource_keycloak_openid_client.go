@@ -114,6 +114,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 							Optional: true,
 							Default:  false,
 						},
+						"keep_defaults": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 					},
 				},
 			},
@@ -179,6 +184,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		openidClient.AuthorizationSettings = &keycloak.OpenidClientAuthorizationSettings{
 			PolicyEnforcementMode:         authorizationSettings["policy_enforcement_mode"].(string),
 			AllowRemoteResourceManagement: authorizationSettings["allow_remote_resource_management"].(bool),
+			KeepDefaults:                  authorizationSettings["keep_defaults"].(bool),
 		}
 	} else {
 		openidClient.AuthorizationServicesEnabled = false

@@ -43,6 +43,20 @@ func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationResource(realm
 	return &resource, nil
 }
 
+func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationResourceByName(realmId, resourceServerId, name string) (*OpenidClientAuthorizationResource, error) {
+	resources := []OpenidClientAuthorizationResource{}
+	params := map[string]string{"name": name}
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource", realmId, resourceServerId), &resources, params)
+	if err != nil {
+		return nil, err
+	}
+	resource := resources[0]
+	resource.RealmId = realmId
+	resource.ResourceServerId = resourceServerId
+	resource.Name = name
+	return &resource, nil
+}
+
 func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationResource(resource *OpenidClientAuthorizationResource) error {
 	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/resource/%s", resource.RealmId, resource.ResourceServerId, resource.Id), resource)
 	if err != nil {
