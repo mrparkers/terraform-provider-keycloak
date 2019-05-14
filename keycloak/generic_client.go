@@ -16,7 +16,7 @@ type GenericClient struct {
 func (keycloakClient *KeycloakClient) listGenericClients(realmId string) ([]*GenericClient, error) {
 	var clients []*GenericClient
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients", realmId), &clients)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients", realmId), &clients, nil)
 	if err != nil {
 		return nil, err
 	}

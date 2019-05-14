@@ -76,7 +76,7 @@ func convertFromComponentToLdapUserAttributeMapper(component *component, realmId
 }
 
 func (keycloakClient *KeycloakClient) NewLdapUserAttributeMapper(ldapUserAttributeMapper *LdapUserAttributeMapper) error {
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserAttributeMapper.RealmId), convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper))
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserAttributeMapper.RealmId), convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper))
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func (keycloakClient *KeycloakClient) NewLdapUserAttributeMapper(ldapUserAttribu
 func (keycloakClient *KeycloakClient) GetLdapUserAttributeMapper(realmId, id string) (*LdapUserAttributeMapper, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -102,5 +102,5 @@ func (keycloakClient *KeycloakClient) UpdateLdapUserAttributeMapper(ldapUserAttr
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapUserAttributeMapper(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

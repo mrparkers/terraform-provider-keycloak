@@ -129,6 +129,10 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	directAccessGrantsEnabled := randomBool()
 	serviceAccountsEnabled := randomBool()
 
+	if !standardFlowEnabled {
+		implicitFlowEnabled = !standardFlowEnabled
+	}
+
 	openidClientBefore := &keycloak.OpenidClient{
 		RealmId:                   realm,
 		ClientId:                  clientId,
@@ -144,6 +148,8 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		WebOrigins:                []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 	}
 
+	standardFlowEnabled, implicitFlowEnabled = implicitFlowEnabled, standardFlowEnabled
+
 	openidClientAfter := &keycloak.OpenidClient{
 		RealmId:                   realm,
 		ClientId:                  clientId,
@@ -151,8 +157,8 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		Enabled:                   !enabled,
 		Description:               acctest.RandString(50),
 		ClientSecret:              acctest.RandString(10),
-		StandardFlowEnabled:       !standardFlowEnabled,
-		ImplicitFlowEnabled:       !implicitFlowEnabled,
+		StandardFlowEnabled:       standardFlowEnabled,
+		ImplicitFlowEnabled:       implicitFlowEnabled,
 		DirectAccessGrantsEnabled: !directAccessGrantsEnabled,
 		ServiceAccountsEnabled:    !serviceAccountsEnabled,
 		ValidRedirectUris:         []string{acctest.RandString(10), acctest.RandString(10)},

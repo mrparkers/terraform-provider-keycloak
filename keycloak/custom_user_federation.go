@@ -85,7 +85,7 @@ func (keycloakClient *KeycloakClient) ValidateCustomUserFederation(custom *Custo
 }
 
 func (keycloakClient *KeycloakClient) NewCustomUserFederation(customUserFederation *CustomUserFederation) error {
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", customUserFederation.RealmId), convertFromCustomUserFederationToComponent(customUserFederation))
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", customUserFederation.RealmId), convertFromCustomUserFederationToComponent(customUserFederation))
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func (keycloakClient *KeycloakClient) NewCustomUserFederation(customUserFederati
 func (keycloakClient *KeycloakClient) GetCustomUserFederation(realmId, id string) (*CustomUserFederation, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -111,5 +111,5 @@ func (keycloakClient *KeycloakClient) UpdateCustomUserFederation(customUserFeder
 }
 
 func (keycloakClient *KeycloakClient) DeleteCustomUserFederation(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }
