@@ -1,8 +1,17 @@
-## 1.8.0 (Unreleased)
+## 1.8.0 (May 14, 2019)
+
+FEATURES:
+
+* new resources: keycloak_openid_client_authorization_resource, keycloak_openid_client_authorization_scope, keycloak_openid_client_authorization_permission, keycloak_openid_client_service_account_role ([#104](https://github.com/mrparkers/terraform-provider-keycloak/pull/104))
+  - note: docs for these resources will be released at a later date. for now, please refer to the source files.
+* new data sources: keycloak_openid_client, keycloak_openid_client_authorization_policy ([#104](https://github.com/mrparkers/terraform-provider-keycloak/pull/104))
+  - note: docs for these data sources will be released at a later date. for now, please refer to the source files.
 
 IMPROVEMENTS:
 
+* chore: update provider SDK to 0.12 ([#107](https://github.com/mrparkers/terraform-provider-keycloak/pull/107))
 * chore: support Keycloak v6.0.1 ([#106](https://github.com/mrparkers/terraform-provider-keycloak/pull/106))
+* chore: renames provider resource/data files ([#105](https://github.com/mrparkers/terraform-provider-keycloak/pull/105))
 
 ## 1.7.0 (April 18, 2019)
 
