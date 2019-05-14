@@ -2,11 +2,12 @@ package provider
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"testing"
 )
 
 func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
@@ -258,7 +259,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	name_id_policy_format      = "%s"
 	single_logout_service_url  = "%s"
 	signing_certificate        = "%s"
-	signature_algorithm        = "%s",
+	signature_algorithm        = "%s"
 	xml_sign_key_info_key_name_transformer = "%s"
 	post_binding_authn_request = %t
 	post_binding_response      = %t
