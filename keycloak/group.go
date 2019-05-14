@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"fmt"
-	"net/url"
 	"strings"
 )
 
@@ -79,7 +78,7 @@ func (keycloakClient *KeycloakClient) NewGroup(group *Group) error {
 		createGroupUrl = fmt.Sprintf("/realms/%s/groups/%s/children", group.RealmId, group.ParentId)
 	}
 
-	location, err := keycloakClient.post(createGroupUrl, group)
+	_, location, err := keycloakClient.post(createGroupUrl, group)
 	if err != nil {
 		return err
 	}
@@ -92,7 +91,7 @@ func (keycloakClient *KeycloakClient) NewGroup(group *Group) error {
 func (keycloakClient *KeycloakClient) GetGroup(realmId, id string) (*Group, error) {
 	var group Group
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s", realmId, id), &group)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s", realmId, id), &group, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -114,13 +113,17 @@ func (keycloakClient *KeycloakClient) UpdateGroup(group *Group) error {
 }
 
 func (keycloakClient *KeycloakClient) DeleteGroup(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/groups/%s", realmId, id))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/groups/%s", realmId, id), nil)
 }
 
 func (keycloakClient *KeycloakClient) ListGroupsWithName(realmId, name string) ([]*Group, error) {
 	var groups []*Group
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups?search=%s", realmId, url.QueryEscape(name)), &groups)
+	params := map[string]string{
+		"search": name,
+	}
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups", realmId), &groups, params)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +134,7 @@ func (keycloakClient *KeycloakClient) ListGroupsWithName(realmId, name string) (
 func (keycloakClient *KeycloakClient) GetGroupMembers(realmId, groupId string) ([]*User, error) {
 	var users []*User
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s/members", realmId, groupId), &users)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s/members", realmId, groupId), &users, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -408,8 +408,6 @@ resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
 	access_type = "PUBLIC"
-
-	valid_redirect_uris = ["foo"]
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
@@ -443,8 +441,6 @@ resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
 	access_type = "PUBLIC"
-
-	valid_redirect_uris = ["foo"]
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
@@ -466,8 +462,6 @@ resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
 	access_type = "PUBLIC"
-
-	valid_redirect_uris = ["foo"]
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
@@ -524,8 +518,6 @@ resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
 	access_type = "BEARER-ONLY"
-
-	valid_redirect_uris = ["foo"]
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
@@ -580,8 +572,6 @@ resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
 	access_type = "PUBLIC"
-
-	valid_redirect_uris = ["foo"]
 }
 
 %s

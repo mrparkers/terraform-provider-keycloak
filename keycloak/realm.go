@@ -43,7 +43,7 @@ type Realm struct {
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
-	_, err := keycloakClient.post("/realms", realm)
+	_, _, err := keycloakClient.post("/realms", realm)
 
 	return err
 }
@@ -51,7 +51,7 @@ func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
 func (keycloakClient *KeycloakClient) GetRealm(id string) (*Realm, error) {
 	var realm Realm
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s", id), &realm)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s", id), &realm, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -64,10 +64,10 @@ func (keycloakClient *KeycloakClient) UpdateRealm(realm *Realm) error {
 }
 
 func (keycloakClient *KeycloakClient) DeleteRealm(id string) error {
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s", id))
+	err := keycloakClient.delete(fmt.Sprintf("/realms/%s", id), nil)
 	if err != nil {
 		// For whatever reason, this fails sometimes with a 500 during acceptance tests. try again
-		return keycloakClient.delete(fmt.Sprintf("/realms/%s", id))
+		return keycloakClient.delete(fmt.Sprintf("/realms/%s", id), nil)
 	}
 
 	return nil

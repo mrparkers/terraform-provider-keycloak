@@ -46,7 +46,7 @@ func convertFromComponentToLdapMsadUserAccountControlMapper(component *component
 }
 
 func (keycloakClient *KeycloakClient) NewLdapMsadUserAccountControlMapper(ldapMsadUserAccountControlMapper *LdapMsadUserAccountControlMapper) error {
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapMsadUserAccountControlMapper.RealmId), convertFromLdapMsadUserAccountControlMapperToComponent(ldapMsadUserAccountControlMapper))
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapMsadUserAccountControlMapper.RealmId), convertFromLdapMsadUserAccountControlMapperToComponent(ldapMsadUserAccountControlMapper))
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (keycloakClient *KeycloakClient) NewLdapMsadUserAccountControlMapper(ldapMs
 func (keycloakClient *KeycloakClient) GetLdapMsadUserAccountControlMapper(realmId, id string) (*LdapMsadUserAccountControlMapper, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -72,5 +72,5 @@ func (keycloakClient *KeycloakClient) UpdateLdapMsadUserAccountControlMapper(lda
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapMsadUserAccountControlMapper(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

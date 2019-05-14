@@ -74,7 +74,7 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserPropertyProtocolMapper(
 func (keycloakClient *KeycloakClient) GetOpenIdUserPropertyProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdUserPropertyProtocolMapper, error) {
 	var protocolMapper *protocolMapper
 
-	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper)
+	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -83,13 +83,13 @@ func (keycloakClient *KeycloakClient) GetOpenIdUserPropertyProtocolMapper(realmI
 }
 
 func (keycloakClient *KeycloakClient) DeleteOpenIdUserPropertyProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
-	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId))
+	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
 }
 
 func (keycloakClient *KeycloakClient) NewOpenIdUserPropertyProtocolMapper(mapper *OpenIdUserPropertyProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}

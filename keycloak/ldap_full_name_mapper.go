@@ -82,7 +82,7 @@ func (keycloakClient *KeycloakClient) ValidateLdapFullNameMapper(mapper *LdapFul
 }
 
 func (keycloakClient *KeycloakClient) NewLdapFullNameMapper(ldapFullNameMapper *LdapFullNameMapper) error {
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapFullNameMapper.RealmId), convertFromLdapFullNameMapperToComponent(ldapFullNameMapper))
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapFullNameMapper.RealmId), convertFromLdapFullNameMapperToComponent(ldapFullNameMapper))
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func (keycloakClient *KeycloakClient) NewLdapFullNameMapper(ldapFullNameMapper *
 func (keycloakClient *KeycloakClient) GetLdapFullNameMapper(realmId, id string) (*LdapFullNameMapper, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -108,5 +108,5 @@ func (keycloakClient *KeycloakClient) UpdateLdapFullNameMapper(ldapFullNameMappe
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapFullNameMapper(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

@@ -63,7 +63,7 @@ func (protocolMapper *protocolMapper) convertToOpenIdAudienceProtocolMapper(real
 func (keycloakClient *KeycloakClient) GetOpenIdAudienceProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdAudienceProtocolMapper, error) {
 	var protocolMapper *protocolMapper
 
-	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper)
+	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -72,13 +72,13 @@ func (keycloakClient *KeycloakClient) GetOpenIdAudienceProtocolMapper(realmId, c
 }
 
 func (keycloakClient *KeycloakClient) DeleteOpenIdAudienceProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
-	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId))
+	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
 }
 
 func (keycloakClient *KeycloakClient) NewOpenIdAudienceProtocolMapper(mapper *OpenIdAudienceProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}

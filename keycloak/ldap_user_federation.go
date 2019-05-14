@@ -303,7 +303,7 @@ func (keycloakClient *KeycloakClient) NewLdapUserFederation(ldapUserFederation *
 		return err
 	}
 
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), component)
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), component)
 	if err != nil {
 		return err
 	}
@@ -316,7 +316,7 @@ func (keycloakClient *KeycloakClient) NewLdapUserFederation(ldapUserFederation *
 func (keycloakClient *KeycloakClient) GetLdapUserFederation(realmId, id string) (*LdapUserFederation, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -334,5 +334,5 @@ func (keycloakClient *KeycloakClient) UpdateLdapUserFederation(ldapUserFederatio
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapUserFederation(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

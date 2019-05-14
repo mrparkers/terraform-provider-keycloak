@@ -21,7 +21,7 @@ type OpenidClientScopeFilterFunc func(*OpenidClientScope) bool
 func (keycloakClient *KeycloakClient) NewOpenidClientScope(clientScope *OpenidClientScope) error {
 	clientScope.Protocol = "openid-connect"
 
-	location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/client-scopes", clientScope.RealmId), clientScope)
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/client-scopes", clientScope.RealmId), clientScope)
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (keycloakClient *KeycloakClient) NewOpenidClientScope(clientScope *OpenidCl
 func (keycloakClient *KeycloakClient) GetOpenidClientScope(realmId, id string) (*OpenidClientScope, error) {
 	var clientScope OpenidClientScope
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id), &clientScope)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id), &clientScope, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -51,14 +51,14 @@ func (keycloakClient *KeycloakClient) UpdateOpenidClientScope(clientScope *Openi
 }
 
 func (keycloakClient *KeycloakClient) DeleteOpenidClientScope(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id))
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id), nil)
 }
 
 func (keycloakClient *KeycloakClient) listOpenidClientScopesWithFilter(realmId string, filter OpenidClientScopeFilterFunc) ([]*OpenidClientScope, error) {
 	var clientScopes []OpenidClientScope
 	var openidClientScopes []*OpenidClientScope
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/client-scopes", realmId), &clientScopes)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/client-scopes", realmId), &clientScopes, nil)
 	if err != nil {
 		return nil, err
 	}
