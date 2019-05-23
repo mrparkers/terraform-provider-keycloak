@@ -29,6 +29,7 @@ services:
     - POSTGRES_PASSWORD=password
     - KEYCLOAK_USER=keycloak
     - KEYCLOAK_PASSWORD=password
+    - KEYCLOAK_HOSTNAME=localhost
     - POSTGRES_PORT_5432_TCP_ADDR=postgres
     - POSTGRES_PORT_5432_TCP_PORT=5432
     ports:
