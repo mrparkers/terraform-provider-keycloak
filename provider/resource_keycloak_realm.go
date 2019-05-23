@@ -192,7 +192,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	}
 
 	if hostname, ok := data.GetOk("hostname"); ok {
-		realm.Hostname = hostname.(string)
+		realm.Attributes.Hostname = hostname.(string)
 	}
 
 	// Themes
@@ -320,7 +320,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("enabled", realm.Enabled)
 	data.Set("display_name", realm.DisplayName)
 
-	data.Set("hostname", realm.Hostname)
+	data.Set("hostname", realm.Attributes.Hostname)
 
 	// Login Config
 	data.Set("registration_allowed", realm.RegistrationAllowed)

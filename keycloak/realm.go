@@ -10,8 +10,6 @@ type Realm struct {
 	Enabled     bool   `json:"enabled"`
 	DisplayName string `json:"displayName"`
 
-	Hostname string `json:"hostname,omitempty"`
-
 	// Login Config
 	RegistrationAllowed         bool `json:"registrationAllowed"`
 	RegistrationEmailAsUsername bool `json:"registrationEmailAsUsername"`
@@ -42,6 +40,10 @@ type Realm struct {
 	AccessCodeLifespanUserAction        int  `json:"accessCodeLifespanUserAction,omitempty"`
 	ActionTokenGeneratedByUserLifespan  int  `json:"actionTokenGeneratedByUserLifespan,omitempty"`
 	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
+
+	Attributes struct {
+		Hostname string `json:"hostname"`
+	} `json:"attributes,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
