@@ -8,6 +8,7 @@ resource "keycloak_realm" "test" {
   realm        = "test"
   enabled      = true
   display_name = "foo"
+  hostname     = "localhost"
 
   account_theme = "base"
 
