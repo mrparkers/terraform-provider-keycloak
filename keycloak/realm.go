@@ -10,6 +10,8 @@ type Realm struct {
 	Enabled     bool   `json:"enabled"`
 	DisplayName string `json:"displayName"`
 
+	Hostname string `json:"hostname,omitempty"`
+
 	// Login Config
 	RegistrationAllowed         bool `json:"registrationAllowed"`
 	RegistrationEmailAsUsername bool `json:"registrationEmailAsUsername"`
