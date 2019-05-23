@@ -10,7 +10,7 @@ https://mrparkers.github.io/terraform-provider-keycloak/
 ## Building
 
 This project uses [Go Modules](https://github.com/golang/go/wiki/Modules) which requires Go 1.11.
-I personally test the provider with version 0.11.11 of Terraform, and version 4.8.3.Final of Keycloak. Other versions may also work.
+I personally test the provider with version 0.11.11 of Terraform, and version 6.0.1 of Keycloak. Other versions may also work.
 
 ```
 GO111MODULE=on go mod download && make build
