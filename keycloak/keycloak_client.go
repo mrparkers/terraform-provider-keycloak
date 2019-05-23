@@ -42,7 +42,7 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 		Timeout: time.Second * 5,
 	}
 	clientCredentials := &ClientCredentials{
-		ClientId: clientId,
+		ClientId:     clientId,
 		ClientSecret: clientSecret,
 	}
 	if password != "" && username != "" {
