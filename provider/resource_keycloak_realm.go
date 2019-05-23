@@ -29,6 +29,10 @@ func resourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"hostname": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 
 			// Login Config
 
@@ -187,6 +191,10 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		DuplicateEmailsAllowed:      data.Get("duplicate_emails_allowed").(bool),
 	}
 
+	if hostname, ok := data.GetOk("hostname"); ok {
+		realm.Hostname = hostname.(string)
+	}
+
 	// Themes
 
 	if loginTheme, ok := data.GetOk("login_theme"); ok {
@@ -311,6 +319,8 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("realm", realm.Realm)
 	data.Set("enabled", realm.Enabled)
 	data.Set("display_name", realm.DisplayName)
+
+	data.Set("hostname", realm.Hostname)
 
 	// Login Config
 	data.Set("registration_allowed", realm.RegistrationAllowed)
