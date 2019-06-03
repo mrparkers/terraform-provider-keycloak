@@ -56,6 +56,7 @@ The following arguments are supported:
 - `assertion_consumer_redirect_url` - (Optional) SAML Redirect Binding URL for the client's assertion consumer service (login responses).
 - `logout_service_post_binding_url` - (Optional) SAML POST Binding URL for the client's single logout service.
 - `logout_service_redirect_binding_url` - (Optional) SAML Redirect Binding URL for the client's single logout service.
+- `full_scope_allowed` - (Optional) - Allow to include all roles mappings in the access token
 
 ### Import
 
