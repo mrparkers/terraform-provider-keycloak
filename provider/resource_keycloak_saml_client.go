@@ -139,6 +139,11 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"full_scope_allowed": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 		},
 	}
 }
@@ -229,6 +234,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		ValidRedirectUris:       validRedirectUris,
 		BaseUrl:                 data.Get("base_url").(string),
 		MasterSamlProcessingUrl: data.Get("master_saml_processing_url").(string),
+		FullScopeAllowed:        data.Get("full_scope_allowed").(bool),
 		Attributes:              samlAttributes,
 	}
 
@@ -308,6 +314,7 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("assertion_consumer_redirect_url", client.Attributes.AssertionConsumerRedirectURL)
 	data.Set("logout_service_post_binding_url", client.Attributes.LogoutServicePostBindingURL)
 	data.Set("logout_service_redirect_binding_url", client.Attributes.LogoutServiceRedirectBindingURL)
+	data.Set("full_scope_allowed", client.FullScopeAllowed)
 
 	return nil
 }
