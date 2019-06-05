@@ -2,14 +2,12 @@ package keycloak
 
 import (
 	"fmt"
-
-	"github.com/google/uuid"
 )
 
 type GenericClientProtocolMapper struct {
 	ClientId       string            `json:"-"`
 	Config         map[string]string `json:"config"`
-	Id             string            `json:"id"`
+	Id             string            `json:"id,omitempty"`
 	Name           string            `json:"name"`
 	Protocol       string            `json:"protocol"`
 	ProtocolMapper string            `json:"protocolMapper"`
@@ -17,15 +15,14 @@ type GenericClientProtocolMapper struct {
 }
 
 func (keycloakClient *KeycloakClient) NewGenericClientProtocolMapper(genericClientProtocolMapper *GenericClientProtocolMapper) error {
-	// Keycloak does not generate an Id when a new protocol mapper is created
-	genericClientProtocolMapper.Id = uuid.New().String()
-
-	_, _, err := keycloakClient.post(
+	_, location, err := keycloakClient.post(
 		fmt.Sprintf("/realms/%s/clients/%s/protocol-mappers/models", genericClientProtocolMapper.RealmId, genericClientProtocolMapper.ClientId),
 		genericClientProtocolMapper)
 	if err != nil {
 		return err
 	}
+
+	genericClientProtocolMapper.Id = getIdFromLocationHeader(location)
 
 	return nil
 }

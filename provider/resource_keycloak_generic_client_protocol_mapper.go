@@ -87,7 +87,6 @@ func setGenericClientProtocolMapperData(data *schema.ResourceData, resource *key
 }
 
 func resourceKeycloakGenericClientProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
-	log.Printf("[DEBUG] creating\n")
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	resource := getGenericClientProtocolMapperFromData(data)
@@ -102,7 +101,6 @@ func resourceKeycloakGenericClientProtocolMapperCreate(data *schema.ResourceData
 }
 
 func resourceKeycloakGenericClientProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
-	log.Printf("[DEBUG] geting\n")
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -136,7 +134,6 @@ func resourceKeycloakGenericClientProtocolMapperUpdate(data *schema.ResourceData
 }
 
 func resourceKeycloakGenericClientProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
-	log.Printf("[DEBUG] deleting\n")
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
