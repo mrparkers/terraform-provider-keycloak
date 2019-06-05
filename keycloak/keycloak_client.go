@@ -42,14 +42,14 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 		Timeout: time.Second * 5,
 	}
 	clientCredentials := &ClientCredentials{
-		ClientId: clientId,
+		ClientId:     clientId,
+		ClientSecret: clientSecret,
 	}
 	if password != "" && username != "" {
 		clientCredentials.Username = username
 		clientCredentials.Password = password
 		clientCredentials.GrantType = "password"
 	} else if clientSecret != "" {
-		clientCredentials.ClientSecret = clientSecret
 		clientCredentials.GrantType = "client_credentials"
 	} else {
 		return nil, fmt.Errorf("must specify client id, username and password for password grant, or client id and secret for client credentials grant")
