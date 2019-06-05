@@ -40,6 +40,8 @@ type SamlClient struct {
 	BaseUrl                 string   `json:"baseUrl"`
 	MasterSamlProcessingUrl string   `json:"adminUrl"`
 
+	FullScopeAllowed bool `json:"fullScopeAllowed"`
+
 	Attributes *SamlClientAttributes `json:"attributes"`
 }
 
