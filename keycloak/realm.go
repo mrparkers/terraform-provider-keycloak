@@ -42,9 +42,9 @@ type Realm struct {
 	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
 
 	//internationalization
-	InternationalizationEnabled bool     `json:"internationalizationEnabled,omitempty"`
-	SupportLocales              []string `json:"supportedLocales,omitempty"`
-	DefaultLocale               string   `json:"defaultLocale,emitempty"`
+	InternationalizationEnabled bool     `json:"internationalizationEnabled"`
+	SupportLocales              []string `json:"supportedLocales"`
+	DefaultLocale               string   `json:"defaultLocale"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
@@ -122,11 +122,11 @@ func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
 	}
 
 	if realm.InternationalizationEnabled == true && len(realm.SupportLocales) <= 0 {
-		return fmt.Errorf("validation error: SupportLocales should be set if InternationalizationEnabled is true")
+		return fmt.Errorf("validation error: SupportLocales should be set if Internationalization is present")
 	}
 
 	if realm.InternationalizationEnabled == true && len(realm.DefaultLocale) <= 0 {
-		return fmt.Errorf("validation error: DefaultLocale should be set if InternationalizationEnabled is true")
+		return fmt.Errorf("validation error: DefaultLocale should be set if Internationalization is present")
 	}
 
 	if realm.InternationalizationEnabled == true && !contains(realm.SupportLocales, realm.DefaultLocale) {
