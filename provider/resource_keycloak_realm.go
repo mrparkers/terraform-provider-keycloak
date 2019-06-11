@@ -167,32 +167,43 @@ func resourceKeycloakRealm() *schema.Resource {
 			},
 
 			//internationalization
-			"internationalization_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"supported_locales": {
+			"internationalization": {
 				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 				Optional: true,
-			},
-			"default_locale": {
-				Type:     schema.TypeString,
-				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"supported_locales": {
+							Type:     schema.TypeSet,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Set:      schema.HashString,
+							Optional: true,
+						},
+						"default_locale": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
 			},
 		},
 	}
 }
 
 func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
+	internationalizationEnabled := false
 	supportLocales := make([]string, 0)
-
-	if v, ok := data.GetOk("supported_locales"); ok {
-		for _, supportLocale := range v.(*schema.Set).List() {
-			supportLocales = append(supportLocales, supportLocale.(string))
+	defaultLocale := ""
+	if v, ok := data.GetOk("internationalization"); ok {
+		internationalizationEnabled = true
+		internationalizationData := v.(*schema.Set).List()[0]
+		internationalizationSettings := internationalizationData.(map[string]interface{})
+		if v, ok := internationalizationSettings["supported_locales"]; ok {
+			for _, supportLocale := range v.(*schema.Set).List() {
+				supportLocales = append(supportLocales, supportLocale.(string))
+			}
 		}
+		defaultLocale = internationalizationSettings["default_locale"].(string)
 	}
 
 	realm := &keycloak.Realm{
@@ -212,9 +223,9 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		DuplicateEmailsAllowed:      data.Get("duplicate_emails_allowed").(bool),
 
 		//internationalization
-		InternationalizationEnabled: data.Get("internationalization_enabled").(bool),
+		InternationalizationEnabled: internationalizationEnabled,
 		SupportLocales:              supportLocales,
-		DefaultLocale:               data.Get("default_locale").(string),
+		DefaultLocale:               defaultLocale,
 	}
 
 	// Themes
@@ -374,9 +385,14 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("action_token_generated_by_admin_lifespan", getDurationStringFromSeconds(realm.ActionTokenGeneratedByAdminLifespan))
 
 	//internationalization
-	data.Set("internationalization_enabled", realm.InternationalizationEnabled)
-	data.Set("supported_locales", realm.SupportLocales)
-	data.Set("default_locale", realm.DefaultLocale)
+	if realm.InternationalizationEnabled {
+		internationalizationSettings := make(map[string]interface{})
+		internationalizationSettings["supported_locales"] = realm.SupportLocales
+		internationalizationSettings["default_locale"] = realm.DefaultLocale
+		data.Set("internationalization", schema.NewSet(func(i interface{}) int { return 1 }, []interface{}{internationalizationSettings}))
+	} else {
+		data.Set("internationalization", nil)
+	}
 }
 
 func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {

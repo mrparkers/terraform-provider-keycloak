@@ -160,15 +160,51 @@ func TestAccKeycloakRealm_InternationalizationValidation(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakRealm_internationalizationValidationWithoutSupportedLocales(realm, "en"),
-				ExpectError: regexp.MustCompile("validation error: SupportLocales should be set if InternationalizationEnabled is true"),
+				ExpectError: regexp.MustCompile("validation error: SupportLocales should be set if Internationalization is present"),
 			},
 			{
 				Config:      testKeycloakRealm_internationalizationValidation(realm, "en", ""),
-				ExpectError: regexp.MustCompile("validation error: DefaultLocale should be set if InternationalizationEnabled is true"),
+				ExpectError: regexp.MustCompile("validation error: DefaultLocale should be set if Internationalization is present"),
 			},
 			{
 				Config:      testKeycloakRealm_internationalizationValidation(realm, "en", "de"),
 				ExpectError: regexp.MustCompile("validation error: DefaultLocale should be in the SupportLocales"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_Internationalization(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_internationalizationValidation(realm, "en", "en"),
+				Check:  testAccCheckKeycloakRealmInternationalizationIsEnabled("keycloak_realm.realm", "en"),
+			},
+			{
+				Config: testKeycloakRealm_basic(realm, realm),
+				Check:  testAccCheckKeycloakRealmInternationalizationIsDisabled("keycloak_realm.realm"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_InternationalizationDisabled(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realm, realm),
+				Check:  testAccCheckKeycloakRealmInternationalizationIsDisabled("keycloak_realm.realm"),
 			},
 		},
 	})
@@ -405,6 +441,51 @@ func testAccCheckKeycloakRealmDisplayName(resourceName string, displayName strin
 	}
 }
 
+func testAccCheckKeycloakRealmInternationalizationIsEnabled(resourceName string, defaultLocale string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if !realm.InternationalizationEnabled {
+			return fmt.Errorf("expected realm %s to have internationalization enabled but was disabled", realm.Realm)
+		}
+
+		if realm.DefaultLocale != defaultLocale {
+			return fmt.Errorf("expected realm %s to have defaultLocale set to %s, but was %s", realm.Realm, defaultLocale, realm.DefaultLocale)
+		}
+
+		if !contains(realm.SupportLocales, defaultLocale) {
+			return fmt.Errorf("expected realm %s to contain defaultLocale %s, but was %s", realm.Realm, defaultLocale, realm.SupportLocales)
+		}
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRealmInternationalizationIsDisabled(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.InternationalizationEnabled {
+			return fmt.Errorf("expected realm %s to have internationalization disabled but was enabled", realm.Realm)
+		}
+		return nil
+	}
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
 func testAccCheckKeycloakRealmDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -501,9 +582,9 @@ resource "keycloak_realm" "realm" {
 	realm        = "%s"
 	enabled      = true
 	display_name = "%s"
-
-	internationalization_enabled 	= true
-	default_locale					= "%s"
+	internationalization {
+		default_locale		= "%s"
+	}
 
 }
 	`, realm, realm, defaultLocale)
