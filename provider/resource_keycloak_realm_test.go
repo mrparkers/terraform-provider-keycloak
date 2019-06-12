@@ -567,11 +567,10 @@ resource "keycloak_realm" "realm" {
 	realm        = "%s"
 	enabled      = true
 	display_name = "%s"
-
-	internationalization_enabled 	= true
-	supported_locales 				= ["%s"]
-	default_locale					= "%s"
-
+	internationalization {
+		supported_locales	= ["%s"]
+		default_locale		= "%s"
+	}
 }
 	`, realm, realm, supportedLocale, defaultLocale)
 }
