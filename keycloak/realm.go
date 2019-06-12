@@ -20,6 +20,9 @@ type Realm struct {
 	LoginWithEmailAllowed       bool `json:"loginWithEmailAllowed"`
 	DuplicateEmailsAllowed      bool `json:"duplicateEmailsAllowed"`
 
+	//SMTP Server
+	SmtpServer SmtpServer `json:"smtpServer"`
+
 	// Themes
 	LoginTheme   string `json:"loginTheme,omitempty"`
 	AccountTheme string `json:"accountTheme,omitempty"`
@@ -40,6 +43,21 @@ type Realm struct {
 	AccessCodeLifespanUserAction        int  `json:"accessCodeLifespanUserAction,omitempty"`
 	ActionTokenGeneratedByUserLifespan  int  `json:"actionTokenGeneratedByUserLifespan,omitempty"`
 	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
+}
+
+type SmtpServer struct {
+	StartTls           string `json:"starttls,omitempty"`
+	Auth               string `json:"auth,omitempty"`
+	Port               string `json:"port,omitempty"`
+	Host               string `json:"host,omitempty"`
+	ReplyTo            string `json:"replyTo,omitempty"`
+	ReplyToDisplayName string `json:"replyToDisplayName,omitempty"`
+	From               string `json:"from,omitempty"`
+	FromDisplayName    string `json:"fromDisplayName,omitempty"`
+	EnvelopeFrom       string `json:"envelopeFrom,omitempty"`
+	Ssl                string `json:"ssl,omitempty"`
+	User               string `json:"user,omitempty"`
+	Password           string `json:"password,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
@@ -90,6 +108,14 @@ func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
 	serverInfo, err := keycloakClient.GetServerInfo()
 	if err != nil {
 		return err
+	}
+
+	if (SmtpServer{}) != realm.SmtpServer && realm.SmtpServer.Host == "" {
+		return fmt.Errorf("validation error: Smtp Server Host is a required field when Smtp Server is being set up")
+	}
+
+	if (SmtpServer{}) != realm.SmtpServer && realm.SmtpServer.From == "" {
+		return fmt.Errorf("validation error: Smtp Server From is a required field when Smtp Server is being set up")
 	}
 
 	if realm.LoginTheme != "" && !serverInfo.ThemeIsInstalled("login", realm.LoginTheme) {

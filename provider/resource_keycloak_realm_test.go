@@ -86,6 +86,46 @@ func TestAccKeycloakRealm_import(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_SmtpServer(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_WithSmtpServer(realm, "myhost.com", "My Host"),
+				Check:  testAccCheckKeycloakRealmSmtp("keycloak_realm.realm", "myhost.com", "My Host"),
+			},
+			{
+				Config: testKeycloakRealm_basic(realm, realm),
+				Check:  testAccCheckKeycloakRealmSmtp("keycloak_realm.realm", "", ""),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_SmtpServerInValid(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakRealm_WithSmtpServer(realm, "", "My Host"),
+				ExpectError: regexp.MustCompile("validation error: Smtp Server Host is a required field when Smtp Server is being set up"),
+			},
+			{
+				Config:      testKeycloakRealm_WithSmtpServer(realm, "myhost.com", ""),
+				ExpectError: regexp.MustCompile("validation error: Smtp Server From is a required field when Smtp Server is being set up"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_themes(t *testing.T) {
 	realmOne := &keycloak.Realm{
 		Realm:        "terraform-" + acctest.RandString(10),
@@ -381,6 +421,25 @@ func testAccCheckKeycloakRealmDisplayName(resourceName string, displayName strin
 	}
 }
 
+func testAccCheckKeycloakRealmSmtp(resourceName string, host string, from string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.SmtpServer.Host != host {
+			return fmt.Errorf("expected realm %s to have smtp host set to %s, but was %s", realm.Realm, host, realm.SmtpServer.Host)
+		}
+
+		if realm.SmtpServer.From != from {
+			return fmt.Errorf("expected realm %s to have smtp from set to %s, but was %s", realm.Realm, from, realm.SmtpServer.From)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakRealmDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -427,6 +486,30 @@ resource "keycloak_realm" "realm" {
 	display_name = "%s"
 }
 	`, realm, realmDisplayName)
+}
+
+func testKeycloakRealm_WithSmtpServer(realm, host string, from string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+	smtp_server {
+      host = "%s"
+	  port = 25
+	  from_display_name = "Tom"
+      from = "%s"
+	  reply_to_display_name = "Tom"
+	  reply_to = "tom@myhost.com"
+	  auth = true
+	  user = "tom"
+	  password = "tom"
+	  ssl = true
+	  starttls = true
+	  envelope_from= "nottom@myhost.com"
+	}
+}
+	`, realm, realm, host, from)
 }
 
 func testKeycloakRealm_themes(realm *keycloak.Realm) string {
