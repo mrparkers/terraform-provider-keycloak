@@ -1,3 +1,15 @@
+## 1.9.0 (Unreleased)
+
+FEATURES:
+
+* add `full_scope_allowed` attribute to `keycloak_saml_client` resource ([#118](https://github.com/mrparkers/terraform-provider-keycloak/pull/118))
+
+IMPROVEMENTS:
+
+* allow the provider to use a confidential client with the password grant ([#114](https://github.com/mrparkers/terraform-provider-keycloak/pull/114))
+* update Terraform SDK to 0.12.1 ([#120](https://github.com/mrparkers/terraform-provider-keycloak/pull/120))
+* bump dependency versions for custom user federation example ([#121](https://github.com/mrparkers/terraform-provider-keycloak/pull/121))
+
 ## 1.8.0 (May 14, 2019)
 
 FEATURES:
