@@ -14,6 +14,17 @@ resource "keycloak_realm" "test" {
   access_code_lifespan = "30m"
 }
 
+resource "keycloak_required_action" "custom-terms-and-conditions" {
+	realm_name		= "${keycloak_realm.test.realm}"
+	alias			= "terms_and_conditions"
+	default_action 	= true
+	enabled			= true
+	name			= "Custom Terms and Conditions"
+	priority		= 38
+
+	depends_on = ["keycloak_realm.test"]
+}
+
 resource "keycloak_group" "foo" {
   realm_id = "${keycloak_realm.test.id}"
   name     = "foo"
