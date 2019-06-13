@@ -129,8 +129,8 @@ func resourceKeycloakRealm() *schema.Resource {
 							Type:      schema.TypeString,
 							Optional:  true,
 							Sensitive: true,
-							DiffSuppressFunc: func(_, remoteBindCredential, _ string, _ *schema.ResourceData) bool {
-								return remoteBindCredential == "**********"
+							DiffSuppressFunc: func(_, smtpServerPassword, _ string, _ *schema.ResourceData) bool {
+								return smtpServerPassword == "**********"
 							},
 						},
 					},
