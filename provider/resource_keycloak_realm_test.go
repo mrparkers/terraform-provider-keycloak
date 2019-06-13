@@ -115,12 +115,12 @@ func TestAccKeycloakRealm_SmtpServerInValid(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakRealm_WithSmtpServer(realm, "", "My Host"),
-				ExpectError: regexp.MustCompile("validation error: Smtp Server Host is a required field when Smtp Server is being set up"),
+				Config:      testKeycloakRealm_WithSmtpServerWithoutHost(realm, "My Host"),
+				ExpectError: regexp.MustCompile("config is invalid: Missing required argument: The argument \"host\" is required, but no definition was found."),
 			},
 			{
-				Config:      testKeycloakRealm_WithSmtpServer(realm, "myhost.com", ""),
-				ExpectError: regexp.MustCompile("validation error: Smtp Server From is a required field when Smtp Server is being set up"),
+				Config:      testKeycloakRealm_WithSmtpServerWithoutFrom(realm, "myhost.com"),
+				ExpectError: regexp.MustCompile("config is invalid: Missing required argument: The argument \"from\" is required, but no definition was found."),
 			},
 		},
 	})
@@ -510,6 +510,52 @@ resource "keycloak_realm" "realm" {
 	}
 }
 	`, realm, realm, host, from)
+}
+
+func testKeycloakRealm_WithSmtpServerWithoutHost(realm, from string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+	smtp_server {
+	  port = 25
+	  from_display_name = "Tom"
+      from = "%s"
+	  reply_to_display_name = "Tom"
+	  reply_to = "tom@myhost.com"
+	  auth = true
+	  user = "tom"
+	  password = "tom"
+	  ssl = true
+	  starttls = true
+	  envelope_from= "nottom@myhost.com"
+	}
+}
+	`, realm, realm, from)
+}
+
+func testKeycloakRealm_WithSmtpServerWithoutFrom(realm, host string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+	smtp_server {
+      host = "%s"	  
+      port = 25
+	  from_display_name = "Tom"
+	  reply_to_display_name = "Tom"
+	  reply_to = "tom@myhost.com"
+	  auth = true
+	  user = "tom"
+	  password = "tom"
+	  ssl = true
+	  starttls = true
+	  envelope_from= "nottom@myhost.com"
+	}
+}
+	`, realm, realm, host)
 }
 
 func testKeycloakRealm_themes(realm *keycloak.Realm) string {

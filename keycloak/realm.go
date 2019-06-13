@@ -110,14 +110,6 @@ func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
 		return err
 	}
 
-	if (SmtpServer{}) != realm.SmtpServer && realm.SmtpServer.Host == "" {
-		return fmt.Errorf("validation error: Smtp Server Host is a required field when Smtp Server is being set up")
-	}
-
-	if (SmtpServer{}) != realm.SmtpServer && realm.SmtpServer.From == "" {
-		return fmt.Errorf("validation error: Smtp Server From is a required field when Smtp Server is being set up")
-	}
-
 	if realm.LoginTheme != "" && !serverInfo.ThemeIsInstalled("login", realm.LoginTheme) {
 		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.LoginTheme)
 	}

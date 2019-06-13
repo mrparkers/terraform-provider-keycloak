@@ -95,7 +95,7 @@ func resourceKeycloakRealm() *schema.Resource {
 						},
 						"host": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 						},
 						"reply_to": {
 							Type:     schema.TypeString,
@@ -107,7 +107,7 @@ func resourceKeycloakRealm() *schema.Resource {
 						},
 						"from": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 						},
 						"from_display_name": {
 							Type:     schema.TypeString,
