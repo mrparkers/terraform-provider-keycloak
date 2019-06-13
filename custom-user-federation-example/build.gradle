@@ -1,7 +1,7 @@
 buildscript {
-    ext.kotlinVersion = '1.2.51'
-    ext.keycloakVersion = '4.2.1.Final'
-    ext.shadowJarVersion = '2.0.4'
+	ext.kotlinVersion = '1.3.31'
+	ext.keycloakVersion = '6.0.1'
+	ext.shadowJarVersion = '4.0.2'
 
     repositories {
         mavenCentral()
