@@ -1,6 +1,6 @@
 # keycloak_generic_client_protocol_mapper
 
-Allows for creating and managing protocol mapper for both types of clients (` and saml) within Keycloak.
+Allows for creating and managing protocol mapper for both types of clients (openid-connect and saml) within Keycloak.
 
 There are two uses cases for using this resource:
 * If you implemented a custom protocol mapper, this resource can be used to configure it
