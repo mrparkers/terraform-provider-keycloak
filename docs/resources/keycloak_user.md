@@ -48,8 +48,8 @@ The following arguments are supported:
 - `username` - (Required) The unique username of this user.
 - `initial_password` (Optional) When given, the user's initial password will be set.
    This attribute is only respected during initial user creation.
-  - `value` (Required) The initial password.
-  - `temporary` (Optional) If set to `true`, the initial password is set up for renewal on first use. Default to `false`.
+    - `value` (Required) The initial password.
+    - `temporary` (Optional) If set to `true`, the initial password is set up for renewal on first use. Default to `false`.
 - `enabled` - (Optional) When false, this user cannot log in. Defaults to `true`.
 - `email` - (Optional) The user's email.
 - `first_name` - (Optional) The user's first name.
