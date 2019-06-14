@@ -113,22 +113,6 @@ func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
 		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.EmailTheme)
 	}
 
-	if realm.InternationalizationEnabled == false && len(realm.SupportLocales) > 0 {
-		return fmt.Errorf("validation error: SupportLocales cannot be set if InternationalizationEnabled is false")
-	}
-
-	if realm.InternationalizationEnabled == false && len(realm.DefaultLocale) > 0 {
-		return fmt.Errorf("validation error: DefaultLocale cannot be set if InternationalizationEnabled is false")
-	}
-
-	if realm.InternationalizationEnabled == true && len(realm.SupportLocales) <= 0 {
-		return fmt.Errorf("validation error: SupportLocales should be set if Internationalization is present")
-	}
-
-	if realm.InternationalizationEnabled == true && len(realm.DefaultLocale) <= 0 {
-		return fmt.Errorf("validation error: DefaultLocale should be set if Internationalization is present")
-	}
-
 	if realm.InternationalizationEnabled == true && !contains(realm.SupportLocales, realm.DefaultLocale) {
 		return fmt.Errorf("validation error: DefaultLocale should be in the SupportLocales")
 	}

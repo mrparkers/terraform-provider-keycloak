@@ -160,11 +160,7 @@ func TestAccKeycloakRealm_InternationalizationValidation(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakRealm_internationalizationValidationWithoutSupportedLocales(realm, "en"),
-				ExpectError: regexp.MustCompile("validation error: SupportLocales should be set if Internationalization is present"),
-			},
-			{
-				Config:      testKeycloakRealm_internationalizationValidation(realm, "en", ""),
-				ExpectError: regexp.MustCompile("validation error: DefaultLocale should be set if Internationalization is present"),
+				ExpectError: regexp.MustCompile("config is invalid: Missing required argument: The argument \"supported_locales\" is required, but no definition was found."),
 			},
 			{
 				Config:      testKeycloakRealm_internationalizationValidation(realm, "en", "de"),
@@ -185,6 +181,10 @@ func TestAccKeycloakRealm_Internationalization(t *testing.T) {
 			{
 				Config: testKeycloakRealm_internationalizationValidation(realm, "en", "en"),
 				Check:  testAccCheckKeycloakRealmInternationalizationIsEnabled("keycloak_realm.realm", "en"),
+			},
+			{
+				Config: testKeycloakRealm_internationalizationValidation(realm, "es", "es"),
+				Check:  testAccCheckKeycloakRealmInternationalizationIsEnabled("keycloak_realm.realm", "es"),
 			},
 			{
 				Config: testKeycloakRealm_basic(realm, realm),
@@ -568,7 +568,7 @@ resource "keycloak_realm" "realm" {
 	enabled      = true
 	display_name = "%s"
 	internationalization {
-		supported_locales	= ["%s"]
+		supported_locales	= ["nl", "%s", "fr"]
 		default_locale		= "%s"
 	}
 }
