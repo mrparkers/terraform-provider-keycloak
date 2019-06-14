@@ -12,6 +12,7 @@ var testAccProvider *schema.Provider
 
 var requiredEnvironmentVariables = []string{
 	"KEYCLOAK_CLIENT_ID",
+	"KEYCLOAK_REALM",
 	"KEYCLOAK_URL",
 }
 
