@@ -20,6 +20,9 @@ type Realm struct {
 	LoginWithEmailAllowed       bool `json:"loginWithEmailAllowed"`
 	DuplicateEmailsAllowed      bool `json:"duplicateEmailsAllowed"`
 
+	//SMTP Server
+	SmtpServer SmtpServer `json:"smtpServer"`
+
 	// Themes
 	LoginTheme   string `json:"loginTheme,omitempty"`
 	AccountTheme string `json:"accountTheme,omitempty"`
@@ -40,6 +43,21 @@ type Realm struct {
 	AccessCodeLifespanUserAction        int  `json:"accessCodeLifespanUserAction,omitempty"`
 	ActionTokenGeneratedByUserLifespan  int  `json:"actionTokenGeneratedByUserLifespan,omitempty"`
 	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
+}
+
+type SmtpServer struct {
+	StartTls           string `json:"starttls,omitempty"`
+	Auth               string `json:"auth,omitempty"`
+	Port               string `json:"port,omitempty"`
+	Host               string `json:"host,omitempty"`
+	ReplyTo            string `json:"replyTo,omitempty"`
+	ReplyToDisplayName string `json:"replyToDisplayName,omitempty"`
+	From               string `json:"from,omitempty"`
+	FromDisplayName    string `json:"fromDisplayName,omitempty"`
+	EnvelopeFrom       string `json:"envelopeFrom,omitempty"`
+	Ssl                string `json:"ssl,omitempty"`
+	User               string `json:"user,omitempty"`
+	Password           string `json:"password,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
