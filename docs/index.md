@@ -17,12 +17,12 @@ sure which to use, the client credentials grant is recommended, as it was design
 
 1. Create a new client using the `openid-connect` protocol. This client can be created in the `master` realm if you would
 like to manage your entire Keycloak instance, or in any other realm if you only want to manage that realm.
-2. Update the client you just created:
-    2a. Set "Access Type" to "confidential".
-    2b. Set "Standard Flow Enabled" to "OFF".
-    2c. Set "Direct Access Grants Enabled" to "OFF"
-    2d. Set "Service Accounts Enabled" to "ON".
-3. Grant required roles for managing Keycloak via the "Service Account Roles" tab in the client you created in step 1.
+1. Update the client you just created:
+    1. Set "Access Type" to "confidential".
+    1. Set "Standard Flow Enabled" to "OFF".
+    1. Set "Direct Access Grants Enabled" to "OFF"
+    1. Set "Service Accounts Enabled" to "ON".
+1. Grant required roles for managing Keycloak via the "Service Account Roles" tab in the client you created in step 1.
 
 ## Password Grant Setup
 
@@ -30,7 +30,7 @@ These steps will assume that you are using the `admin-cli` client, which is alre
 of authentication. Do not follow these steps if you have already followed the steps for the client credentials grant.
 
 1. Create or identify the user who's credentials will be used for authentication.
-2. Edit this user in the "Users" section of the management console and assign roles using the "Role Mappings" tab.
+1. Edit this user in the "Users" section of the management console and assign roles using the "Role Mappings" tab.
 
 ## Assigning Roles
 

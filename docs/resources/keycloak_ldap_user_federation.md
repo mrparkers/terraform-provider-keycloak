@@ -60,13 +60,13 @@ The following arguments are supported:
 - `bind_credential` - (Optional) Password of LDAP admin. This attribute must be set if `bind_dn` is set.
 - `custom_user_search_filter` - (Optional) Additional LDAP filter for filtering searched users. Must begin with `(` and end with `)`.
 - `search_scope` - (Optional) Can be one of `ONE_LEVEL` or `SUBTREE`:
-  - `ONE_LEVEL`: Only search for users in the DN specified by `user_dn`.
-  - `SUBTREE`: Search entire LDAP subtree.
+    - `ONE_LEVEL`: Only search for users in the DN specified by `user_dn`.
+    - `SUBTREE`: Search entire LDAP subtree.
 - `validate_password_policy` - (Optional) When `true`, Keycloak will validate passwords using the realm policy before updating it.
 - `use_truststore_spi` - (Optional) Can be one of `ALWAYS`, `ONLY_FOR_LDAPS`, or `NEVER`:
-  - `ALWAYS` - Always use the truststore SPI for LDAP connections.
-  - `NEVER` - Never use the truststore SPI for LDAP connections.
-  - `ONLY_FOR_LDAPS` - Only use the truststore SPI if your LDAP connection uses the ldaps protocol.
+    - `ALWAYS` - Always use the truststore SPI for LDAP connections.
+    - `NEVER` - Never use the truststore SPI for LDAP connections.
+    - `ONLY_FOR_LDAPS` - Only use the truststore SPI if your LDAP connection uses the ldaps protocol.
 - `connection_timeout` - (Optional) LDAP connection timeout in the format of a [Go duration string](https://golang.org/pkg/time/#Duration.String).
 - `read_timeout` - (Optional) LDAP read timeout in the format of a [Go duration string](https://golang.org/pkg/time/#Duration.String).
 - `pagination` - (Optional) When true, Keycloak assumes the LDAP server supports pagination. Defaults to `true`.
