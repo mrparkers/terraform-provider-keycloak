@@ -51,18 +51,18 @@ type Realm struct {
 }
 
 type SmtpServer struct {
-	StartTls           string `json:"starttls,omitempty"`
-	Auth               string `json:"auth,omitempty"`
-	Port               string `json:"port,omitempty"`
-	Host               string `json:"host,omitempty"`
-	ReplyTo            string `json:"replyTo,omitempty"`
-	ReplyToDisplayName string `json:"replyToDisplayName,omitempty"`
-	From               string `json:"from,omitempty"`
-	FromDisplayName    string `json:"fromDisplayName,omitempty"`
-	EnvelopeFrom       string `json:"envelopeFrom,omitempty"`
-	Ssl                string `json:"ssl,omitempty"`
-	User               string `json:"user,omitempty"`
-	Password           string `json:"password,omitempty"`
+	StartTls           KeycloakBoolQuoted `json:"starttls,omitempty"`
+	Auth               KeycloakBoolQuoted `json:"auth,omitempty"`
+	Port               string             `json:"port,omitempty"`
+	Host               string             `json:"host,omitempty"`
+	ReplyTo            string             `json:"replyTo,omitempty"`
+	ReplyToDisplayName string             `json:"replyToDisplayName,omitempty"`
+	From               string             `json:"from,omitempty"`
+	FromDisplayName    string             `json:"fromDisplayName,omitempty"`
+	EnvelopeFrom       string             `json:"envelopeFrom,omitempty"`
+	Ssl                KeycloakBoolQuoted `json:"ssl,omitempty"`
+	User               string             `json:"user,omitempty"`
+	Password           string             `json:"password,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {

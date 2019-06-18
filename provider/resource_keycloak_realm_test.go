@@ -126,7 +126,7 @@ func TestAccKeycloakRealm_SmtpServerUpdate(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakRealm_SmtpServerInValid(t *testing.T) {
+func TestAccKeycloakRealm_SmtpServerInvalid(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -620,23 +620,24 @@ resource "keycloak_realm" "realm" {
 func testKeycloakRealm_WithSmtpServer(realm, host, from, user string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-  realm = "%s"
-  enabled = true
-  display_name = "%s"
-  smtp_server {
-    host = "%s"
-    port = 25
-    from_display_name = "Tom"
-    from = "%s"
-    reply_to_display_name = "Tom"
-    reply_to = "tom@myhost.com"
-    auth = true
-    user = "%s"
-    password = "tom"
-    ssl = true
-    starttls = true
-    envelope_from = "nottom@myhost.com"
-  }
+	realm = "%s"
+	enabled = true
+	display_name = "%s"
+	smtp_server {
+		host = "%s"
+		port = 25
+		from_display_name = "Tom"
+		from = "%s"
+		reply_to_display_name = "Tom"
+		reply_to = "tom@myhost.com"
+		ssl = true
+		starttls = true
+		envelope_from = "nottom@myhost.com"
+		auth {
+			username = "%s"
+			password = "tom"
+		}
+	}
 }
 	`, realm, realm, host, from, user)
 }
@@ -644,22 +645,23 @@ resource "keycloak_realm" "realm" {
 func testKeycloakRealm_WithSmtpServerWithoutHost(realm, from string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-  realm = "%s"
-  enabled = true
-  display_name = "%s"
-  smtp_server {
-    port = 25
-    from_display_name = "Tom"
-    from = "%s"
-    reply_to_display_name = "Tom"
-    reply_to = "tom@myhost.com"
-    auth = true
-    user = "tom"
-    password = "tom"
-    ssl = true
-    starttls = true
-    envelope_from = "nottom@myhost.com"
-  }
+	realm = "%s"
+	enabled = true
+	display_name = "%s"
+	smtp_server {
+		port = 25
+		from_display_name = "Tom"
+		from = "%s"
+		reply_to_display_name = "Tom"
+		reply_to = "tom@myhost.com"
+		ssl = true
+		starttls = true
+		envelope_from = "nottom@myhost.com"
+		auth {
+			username = "tom"
+			password = "tom"
+		}
+	}
 }
 	`, realm, realm, from)
 }
@@ -667,22 +669,23 @@ resource "keycloak_realm" "realm" {
 func testKeycloakRealm_WithSmtpServerWithoutFrom(realm, host string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-  realm = "%s"
-  enabled = true
-  display_name = "%s"
-  smtp_server {
-    host = "%s"
-    port = 25
-    from_display_name = "Tom"
-    reply_to_display_name = "Tom"
-    reply_to = "tom@myhost.com"
-    auth = true
-    user = "tom"
-    password = "tom"
-    ssl = true
-    starttls = true
-    envelope_from = "nottom@myhost.com"
-  }
+	realm = "%s"
+	enabled = true
+	display_name = "%s"
+	smtp_server {
+		host = "%s"
+		port = 25
+		from_display_name = "Tom"
+		reply_to_display_name = "Tom"
+		reply_to = "tom@myhost.com"
+		ssl = true
+		starttls = true
+		envelope_from = "nottom@myhost.com"
+		auth {
+			username = "tom"
+			password = "tom"
+		}
+	}
 }
 	`, realm, realm, host)
 }
