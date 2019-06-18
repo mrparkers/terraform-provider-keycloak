@@ -11,7 +11,7 @@ import (
 
 func TestAccKeycloakDataSourceRealmKeys_basic(t *testing.T) {
 	realm := acctest.RandomWithPrefix("tf-acc-test")
-	dataSourceName := "keycloak_realm_keys.test_keys"
+	dataSourceName := "data.keycloak_realm_keys.test_keys"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -35,18 +35,12 @@ func getRealmKeysUsingState(state *terraform.State, resourceName string) (*terra
 
 func testKeycloakRealmKeysCheck_basic(dataSourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		return nil
-
 		datasourceState, err := getRealmKeysUsingState(state, dataSourceName)
 		if err != nil {
 			return err
 		}
 
-		// add tests...
-		if len(datasourceState.Primary.Attributes["active"]) == 0 {
-			return fmt.Errorf("no active key exists")
-		}
-		if len(datasourceState.Primary.Attributes["keys"]) == 0 {
+		if len(datasourceState.Primary.Attributes["keys.#"]) == 0 {
 			return fmt.Errorf("no key exists")
 		}
 
@@ -64,11 +58,6 @@ resource "keycloak_realm" "test" {
 
 data "keycloak_realm_keys" "test_keys" {
   realm_id  = keycloak_realm.test.id
-
-  filter {
-     name   = "algorithm"
-     values = ["RS256"]
-  }
 }
 `, realm)
 }
