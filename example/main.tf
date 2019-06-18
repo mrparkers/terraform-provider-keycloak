@@ -9,6 +9,21 @@ resource "keycloak_realm" "test" {
   enabled      = true
   display_name = "foo"
 
+  smtp_server {
+	  host = "mysmtphost.com"
+	  port = 25
+	  from_display_name = "Tom"
+	  from = "tom@myhost.com"
+	  reply_to_display_name = "Tom"
+	  reply_to = "tom@myhost.com"
+	  auth = true
+	  user = "tom"
+	  password = "tom"
+	  ssl = true
+	  starttls = true
+	  envelope_from= "nottom@myhost.com"
+  }
+
   account_theme = "base"
 
   access_code_lifespan = "30m"
