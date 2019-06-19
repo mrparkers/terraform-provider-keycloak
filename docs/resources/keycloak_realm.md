@@ -88,7 +88,7 @@ This block supports the following attributes:
 
 - `host` - (Required) The host of the SMTP server.
 - `port` - (Optional) The port of the SMTP server (defaults to 25).
-- `from` - (Optional) The email address for the sender.
+- `from` - (Required) The email address for the sender.
 - `from_display_name` - (Optional) The display name of the sender email address.
 - `reply_to` - (Optional) The "reply to" email address.
 - `reply_to_display_name` - (Optional) The display name of the "reply to" email address.
