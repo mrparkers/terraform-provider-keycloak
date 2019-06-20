@@ -413,6 +413,35 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	realmDisplayName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmSecurityDefenses("keycloak_realm.realm", "SAMEORIGIN"),
+			},
+			{
+				Config: testKeycloakRealm_securityDefenses(realmName, realmDisplayName, "SAMEORIGIN"),
+				Check:  testAccCheckKeycloakRealmSecurityDefenses("keycloak_realm.realm", "SAMEORIGIN"),
+			},
+			{
+				Config: testKeycloakRealm_securityDefenses(realmName, realmDisplayName, "DENY"),
+				Check:  testAccCheckKeycloakRealmSecurityDefenses("keycloak_realm.realm", "DENY"),
+			},
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmSecurityDefenses("keycloak_realm.realm", "SAMEORIGIN"),
+			},
+		},
+	})
+}
+
 func testKeycloakRealmLoginInfo(resourceName string, realm *keycloak.Realm) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		realmFromState, err := getRealmFromState(s, resourceName)
@@ -605,6 +634,21 @@ func getRealmFromState(s *terraform.State, resourceName string) (*keycloak.Realm
 	}
 
 	return realm, nil
+}
+
+func testAccCheckKeycloakRealmSecurityDefenses(resourceName, xFrameOptions string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.Attributes.BrowserHeaderXFrameOptions != xFrameOptions {
+			return fmt.Errorf("expected realm %s to have attribute _browser_header.xFrameOptions set to %s, but was %s", realm.Realm, xFrameOptions, realm.Attributes.BrowserHeaderXFrameOptions)
+		}
+
+		return nil
+	}
 }
 
 func testKeycloakRealm_basic(realm, realmDisplayName string) string {
@@ -838,4 +882,25 @@ resource "keycloak_realm" "realm" {
 	action_token_generated_by_admin_lifespan = "%s"
 }
 	`, realm, realm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, offlineSessionIdleTimeout, offlineSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
+}
+
+func testKeycloakRealm_securityDefenses(realm, realmDisplayName, xFrameOptions string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+	security_defenses {
+    	headers {
+			x_frame_options = "%s"
+			content_security_policy = "frame-src 'self'; frame-ancestors 'self'; object-src 'none';"
+			content_security_policy_report_only = ""
+			x_content_type_options = "nosniff"
+			x_robots_tag = "none"
+			x_xss_protection = "1; mode=block"
+			strict_transport_security = "max-age=31536000; includeSubDomains"
+		}
+	}
+}
+	`, realm, realmDisplayName, xFrameOptions)
 }
