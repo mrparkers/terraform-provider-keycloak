@@ -27,6 +27,11 @@ resource "keycloak_realm" "test" {
   account_theme = "base"
 
   access_code_lifespan = "30m"
+
+	internationalization {
+		supported_locales = ["en", "de", "es"]
+		default_locale = "es"
+	}
 }
 
 resource "keycloak_group" "foo" {
