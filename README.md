@@ -10,15 +10,21 @@ https://mrparkers.github.io/terraform-provider-keycloak/
 ## Building
 
 This project uses [Go Modules](https://github.com/golang/go/wiki/Modules) which requires Go 1.11.
-I personally test the provider with version 0.11.11 of Terraform, and version 4.8.3.Final of Keycloak. Other versions may also work.
+You can initialize your local development environment and build the provider like so:
 
 ```
 GO111MODULE=on go mod download && make build
 ```
 
+## Supported Versions
+
+Currently, this provider is tested against Terraform v0.12.1 and Keycloak v6.0.1. I personally use this provider with Terraform v0.11.x and Keycloak 4.8.3.Final.
+
+In the future, it would be nice to [run acceptance tests using different versions of Terraform / Keycloak](https://github.com/mrparkers/terraform-provider-keycloak/issues/111). Please feel free to submit a PR if you believe you can help with this.
+
 ## Tests
 
-Every resource supported by this provider will have a reasonable amount of acceptance test coverage.
+Every resource supported by this provider will have a reasonable amount of acceptance test coverage
 
 For local development, you can spin up a local instance of Keycloak, backed by Postgres and OpenLDAP using `make local`.
 Once the environment is ready, you can run the acceptance tests after setting the required environment variables:

@@ -76,17 +76,13 @@ func resourceKeycloakRealm() *schema.Resource {
 			//Smtp server
 
 			"smtp_server": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"starttls": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"auth": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeBool,
 							Optional: true,
 						},
 						"port": {
@@ -118,19 +114,28 @@ func resourceKeycloakRealm() *schema.Resource {
 							Optional: true,
 						},
 						"ssl": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeBool,
 							Optional: true,
 						},
-						"user": {
-							Type:     schema.TypeString,
+						"auth": {
+							Type:     schema.TypeList,
 							Optional: true,
-						},
-						"password": {
-							Type:      schema.TypeString,
-							Optional:  true,
-							Sensitive: true,
-							DiffSuppressFunc: func(_, smtpServerPassword, _ string, _ *schema.ResourceData) bool {
-								return smtpServerPassword == "**********"
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"username": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"password": {
+										Type:      schema.TypeString,
+										Required:  true,
+										Sensitive: true,
+										DiffSuppressFunc: func(_, smtpServerPassword, _ string, _ *schema.ResourceData) bool {
+											return smtpServerPassword == "**********"
+										},
+									},
+								},
 							},
 						},
 					},
@@ -229,11 +234,61 @@ func resourceKeycloakRealm() *schema.Resource {
 				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
+
+			//internationalization
+			"internationalization": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"supported_locales": {
+							Type:     schema.TypeSet,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Set:      schema.HashString,
+							Required: true,
+						},
+						"default_locale": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
 
+func getRealmSMTPPasswordFromData(data *schema.ResourceData) (string, bool) {
+	if v, ok := data.GetOk("smtp_server"); ok {
+		smtpSettings := v.([]interface{})[0].(map[string]interface{})
+		authConfig := smtpSettings["auth"].([]interface{})
+
+		if len(authConfig) == 1 {
+			return authConfig[0].(map[string]interface{})["password"].(string), true
+		}
+
+		return "", false
+	}
+
+	return "", false
+}
+
 func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
+	internationalizationEnabled := false
+	supportLocales := make([]string, 0)
+	defaultLocale := ""
+	if v, ok := data.GetOk("internationalization"); ok {
+		internationalizationEnabled = true
+		internationalizationSettings := v.([]interface{})[0].(map[string]interface{})
+		if v, ok := internationalizationSettings["supported_locales"]; ok {
+			for _, supportLocale := range v.(*schema.Set).List() {
+				supportLocales = append(supportLocales, supportLocale.(string))
+			}
+		}
+		defaultLocale = internationalizationSettings["default_locale"].(string)
+	}
+
 	realm := &keycloak.Realm{
 		Id:          data.Get("realm").(string),
 		Realm:       data.Get("realm").(string),
@@ -249,15 +304,19 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		VerifyEmail:                 data.Get("verify_email").(bool),
 		LoginWithEmailAllowed:       data.Get("login_with_email_allowed").(bool),
 		DuplicateEmailsAllowed:      data.Get("duplicate_emails_allowed").(bool),
+
+		//internationalization
+		InternationalizationEnabled: internationalizationEnabled,
+		SupportLocales:              supportLocales,
+		DefaultLocale:               defaultLocale,
 	}
 
 	//smtp
 	if v, ok := data.GetOk("smtp_server"); ok {
-		smtpSettings := v.(*schema.Set).List()[0].(map[string]interface{})
+		smtpSettings := v.([]interface{})[0].(map[string]interface{})
 
 		smtpServer := keycloak.SmtpServer{
-			StartTls:           smtpSettings["starttls"].(string),
-			Auth:               smtpSettings["auth"].(string),
+			StartTls:           keycloak.KeycloakBoolQuoted(smtpSettings["starttls"].(bool)),
 			Port:               smtpSettings["port"].(string),
 			Host:               smtpSettings["host"].(string),
 			ReplyTo:            smtpSettings["reply_to"].(string),
@@ -265,9 +324,18 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 			From:               smtpSettings["from"].(string),
 			FromDisplayName:    smtpSettings["from_display_name"].(string),
 			EnvelopeFrom:       smtpSettings["envelope_from"].(string),
-			Ssl:                smtpSettings["ssl"].(string),
-			User:               smtpSettings["user"].(string),
-			Password:           smtpSettings["password"].(string),
+			Ssl:                keycloak.KeycloakBoolQuoted(smtpSettings["ssl"].(bool)),
+		}
+
+		authConfig := smtpSettings["auth"].([]interface{})
+		if len(authConfig) == 1 {
+			auth := authConfig[0].(map[string]interface{})
+
+			smtpServer.Auth = true
+			smtpServer.User = auth["username"].(string)
+			smtpServer.Password = auth["password"].(string)
+		} else {
+			smtpServer.Auth = false
 		}
 
 		realm.SmtpServer = smtpServer
@@ -416,7 +484,6 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 		smtpSettings := make(map[string]interface{})
 
 		smtpSettings["starttls"] = realm.SmtpServer.StartTls
-		smtpSettings["auth"] = realm.SmtpServer.Auth
 		smtpSettings["port"] = realm.SmtpServer.Port
 		smtpSettings["host"] = realm.SmtpServer.Host
 		smtpSettings["reply_to"] = realm.SmtpServer.ReplyTo
@@ -425,9 +492,17 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 		smtpSettings["from_display_name"] = realm.SmtpServer.FromDisplayName
 		smtpSettings["envelope_from"] = realm.SmtpServer.EnvelopeFrom
 		smtpSettings["ssl"] = realm.SmtpServer.Ssl
-		smtpSettings["user"] = realm.SmtpServer.User
-		smtpSettings["password"] = realm.SmtpServer.Password
-		data.Set("smtp_server", schema.NewSet(func(i interface{}) int { return 1 }, []interface{}{smtpSettings}))
+
+		if realm.SmtpServer.Auth {
+			auth := make(map[string]interface{})
+
+			auth["username"] = realm.SmtpServer.User
+			auth["password"] = realm.SmtpServer.Password
+
+			smtpSettings["auth"] = []interface{}{auth}
+		}
+
+		data.Set("smtp_server", []interface{}{smtpSettings})
 	}
 
 	// Themes
@@ -449,6 +524,16 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("access_code_lifespan_user_action", getDurationStringFromSeconds(realm.AccessCodeLifespanUserAction))
 	data.Set("action_token_generated_by_user_lifespan", getDurationStringFromSeconds(realm.ActionTokenGeneratedByUserLifespan))
 	data.Set("action_token_generated_by_admin_lifespan", getDurationStringFromSeconds(realm.ActionTokenGeneratedByAdminLifespan))
+
+	//internationalization
+	if realm.InternationalizationEnabled {
+		internationalizationSettings := make(map[string]interface{})
+		internationalizationSettings["supported_locales"] = realm.SupportLocales
+		internationalizationSettings["default_locale"] = realm.DefaultLocale
+		data.Set("internationalization", []interface{}{internationalizationSettings})
+	} else {
+		data.Set("internationalization", nil)
+	}
 }
 
 func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {
@@ -482,11 +567,11 @@ func resourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) erro
 		return handleNotFoundError(err, data)
 	}
 
-	if v, ok := data.GetOk("smtp_server"); ok {
-		// we can't trust the API to set this field correctly since it just responds with "**********" this implies a 'password only' change will not detected
-		smtpSettings := v.(*schema.Set).List()[0].(map[string]interface{})
-		realm.SmtpServer.Password = smtpSettings["password"].(string)
+	// we can't trust the API to set this field correctly since it just responds with "**********" this implies a 'password only' change will not detected
+	if smtpPassword, ok := getRealmSMTPPasswordFromData(data); ok {
+		realm.SmtpServer.Password = smtpPassword
 	}
+
 	setRealmData(data, realm)
 
 	return nil

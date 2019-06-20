@@ -126,7 +126,7 @@ func TestAccKeycloakRealm_SmtpServerUpdate(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakRealm_SmtpServerInValid(t *testing.T) {
+func TestAccKeycloakRealm_SmtpServerInvalid(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -205,6 +205,66 @@ func TestAccKeycloakRealm_themesValidation(t *testing.T) {
 			{
 				Config:      testKeycloakRealm_themesValidation(realm, "email", acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("validation error: theme \".+\" does not exist on the server"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_InternationalizationValidation(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakRealm_internationalizationValidationWithoutSupportedLocales(realm, "en"),
+				ExpectError: regexp.MustCompile("config is invalid: Missing required argument: The argument \"supported_locales\" is required, but no definition was found."),
+			},
+			{
+				Config:      testKeycloakRealm_internationalizationValidation(realm, "en", "de"),
+				ExpectError: regexp.MustCompile("validation error: DefaultLocale should be in the SupportLocales"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_Internationalization(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_internationalizationValidation(realm, "en", "en"),
+				Check:  testAccCheckKeycloakRealmInternationalizationIsEnabled("keycloak_realm.realm", "en"),
+			},
+			{
+				Config: testKeycloakRealm_internationalizationValidation(realm, "es", "es"),
+				Check:  testAccCheckKeycloakRealmInternationalizationIsEnabled("keycloak_realm.realm", "es"),
+			},
+			{
+				Config: testKeycloakRealm_basic(realm, realm),
+				Check:  testAccCheckKeycloakRealmInternationalizationIsDisabled("keycloak_realm.realm"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_InternationalizationDisabled(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realm, realm),
+				Check:  testAccCheckKeycloakRealmInternationalizationIsDisabled("keycloak_realm.realm"),
 			},
 		},
 	})
@@ -464,6 +524,51 @@ func testAccCheckKeycloakRealmSmtp(resourceName, host, from, user string) resour
 	}
 }
 
+func testAccCheckKeycloakRealmInternationalizationIsEnabled(resourceName string, defaultLocale string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if !realm.InternationalizationEnabled {
+			return fmt.Errorf("expected realm %s to have internationalization enabled but was disabled", realm.Realm)
+		}
+
+		if realm.DefaultLocale != defaultLocale {
+			return fmt.Errorf("expected realm %s to have defaultLocale set to %s, but was %s", realm.Realm, defaultLocale, realm.DefaultLocale)
+		}
+
+		if !contains(realm.SupportLocales, defaultLocale) {
+			return fmt.Errorf("expected realm %s to contain defaultLocale %s, but was %s", realm.Realm, defaultLocale, realm.SupportLocales)
+		}
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRealmInternationalizationIsDisabled(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.InternationalizationEnabled {
+			return fmt.Errorf("expected realm %s to have internationalization disabled but was enabled", realm.Realm)
+		}
+		return nil
+	}
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
 func testAccCheckKeycloakRealmDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -515,23 +620,24 @@ resource "keycloak_realm" "realm" {
 func testKeycloakRealm_WithSmtpServer(realm, host, from, user string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-  realm = "%s"
-  enabled = true
-  display_name = "%s"
-  smtp_server {
-    host = "%s"
-    port = 25
-    from_display_name = "Tom"
-    from = "%s"
-    reply_to_display_name = "Tom"
-    reply_to = "tom@myhost.com"
-    auth = true
-    user = "%s"
-    password = "tom"
-    ssl = true
-    starttls = true
-    envelope_from = "nottom@myhost.com"
-  }
+	realm = "%s"
+	enabled = true
+	display_name = "%s"
+	smtp_server {
+		host = "%s"
+		port = 25
+		from_display_name = "Tom"
+		from = "%s"
+		reply_to_display_name = "Tom"
+		reply_to = "tom@myhost.com"
+		ssl = true
+		starttls = true
+		envelope_from = "nottom@myhost.com"
+		auth {
+			username = "%s"
+			password = "tom"
+		}
+	}
 }
 	`, realm, realm, host, from, user)
 }
@@ -539,22 +645,23 @@ resource "keycloak_realm" "realm" {
 func testKeycloakRealm_WithSmtpServerWithoutHost(realm, from string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-  realm = "%s"
-  enabled = true
-  display_name = "%s"
-  smtp_server {
-    port = 25
-    from_display_name = "Tom"
-    from = "%s"
-    reply_to_display_name = "Tom"
-    reply_to = "tom@myhost.com"
-    auth = true
-    user = "tom"
-    password = "tom"
-    ssl = true
-    starttls = true
-    envelope_from = "nottom@myhost.com"
-  }
+	realm = "%s"
+	enabled = true
+	display_name = "%s"
+	smtp_server {
+		port = 25
+		from_display_name = "Tom"
+		from = "%s"
+		reply_to_display_name = "Tom"
+		reply_to = "tom@myhost.com"
+		ssl = true
+		starttls = true
+		envelope_from = "nottom@myhost.com"
+		auth {
+			username = "tom"
+			password = "tom"
+		}
+	}
 }
 	`, realm, realm, from)
 }
@@ -562,22 +669,23 @@ resource "keycloak_realm" "realm" {
 func testKeycloakRealm_WithSmtpServerWithoutFrom(realm, host string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-  realm = "%s"
-  enabled = true
-  display_name = "%s"
-  smtp_server {
-    host = "%s"
-    port = 25
-    from_display_name = "Tom"
-    reply_to_display_name = "Tom"
-    reply_to = "tom@myhost.com"
-    auth = true
-    user = "tom"
-    password = "tom"
-    ssl = true
-    starttls = true
-    envelope_from = "nottom@myhost.com"
-  }
+	realm = "%s"
+	enabled = true
+	display_name = "%s"
+	smtp_server {
+		host = "%s"
+		port = 25
+		from_display_name = "Tom"
+		reply_to_display_name = "Tom"
+		reply_to = "tom@myhost.com"
+		ssl = true
+		starttls = true
+		envelope_from = "nottom@myhost.com"
+		auth {
+			username = "tom"
+			password = "tom"
+		}
+	}
 }
 	`, realm, realm, host)
 }
@@ -607,6 +715,34 @@ resource "keycloak_realm" "realm" {
 	%s_theme     = "%s"
 }
 	`, realm, realm, theme, value)
+}
+
+func testKeycloakRealm_internationalizationValidation(realm, supportedLocale, defaultLocale string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+	internationalization {
+		supported_locales	= ["nl", "%s", "fr"]
+		default_locale		= "%s"
+	}
+}
+	`, realm, realm, supportedLocale, defaultLocale)
+}
+
+func testKeycloakRealm_internationalizationValidationWithoutSupportedLocales(realm, defaultLocale string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+	internationalization {
+		default_locale		= "%s"
+	}
+
+}
+	`, realm, realm, defaultLocale)
 }
 
 func testKeycloakRealm_notEnabled(realm, realmDisplayName string) string {

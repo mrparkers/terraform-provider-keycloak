@@ -8,6 +8,11 @@
 		"platform": "amd64"
 	},
 	{
+		"os": "linux",
+		"platform": "amd64",
+    "static": true
+	},
+	{
 		"os": "windows",
 		"platform": "amd64"
 	}

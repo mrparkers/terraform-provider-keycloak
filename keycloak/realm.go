@@ -58,21 +58,26 @@ type Realm struct {
 	AccessCodeLifespanUserAction        int  `json:"accessCodeLifespanUserAction,omitempty"`
 	ActionTokenGeneratedByUserLifespan  int  `json:"actionTokenGeneratedByUserLifespan,omitempty"`
 	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
+
+	//internationalization
+	InternationalizationEnabled bool     `json:"internationalizationEnabled"`
+	SupportLocales              []string `json:"supportedLocales"`
+	DefaultLocale               string   `json:"defaultLocale"`
 }
 
 type SmtpServer struct {
-	StartTls           string `json:"starttls,omitempty"`
-	Auth               string `json:"auth,omitempty"`
-	Port               string `json:"port,omitempty"`
-	Host               string `json:"host,omitempty"`
-	ReplyTo            string `json:"replyTo,omitempty"`
-	ReplyToDisplayName string `json:"replyToDisplayName,omitempty"`
-	From               string `json:"from,omitempty"`
-	FromDisplayName    string `json:"fromDisplayName,omitempty"`
-	EnvelopeFrom       string `json:"envelopeFrom,omitempty"`
-	Ssl                string `json:"ssl,omitempty"`
-	User               string `json:"user,omitempty"`
-	Password           string `json:"password,omitempty"`
+	StartTls           KeycloakBoolQuoted `json:"starttls,omitempty"`
+	Auth               KeycloakBoolQuoted `json:"auth,omitempty"`
+	Port               string             `json:"port,omitempty"`
+	Host               string             `json:"host,omitempty"`
+	ReplyTo            string             `json:"replyTo,omitempty"`
+	ReplyToDisplayName string             `json:"replyToDisplayName,omitempty"`
+	From               string             `json:"from,omitempty"`
+	FromDisplayName    string             `json:"fromDisplayName,omitempty"`
+	EnvelopeFrom       string             `json:"envelopeFrom,omitempty"`
+	Ssl                KeycloakBoolQuoted `json:"ssl,omitempty"`
+	User               string             `json:"user,omitempty"`
+	Password           string             `json:"password,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
@@ -152,5 +157,18 @@ func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
 		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.EmailTheme)
 	}
 
+	if realm.InternationalizationEnabled == true && !contains(realm.SupportLocales, realm.DefaultLocale) {
+		return fmt.Errorf("validation error: DefaultLocale should be in the SupportLocales")
+	}
+
 	return nil
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
