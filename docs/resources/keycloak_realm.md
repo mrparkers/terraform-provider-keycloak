@@ -26,6 +26,15 @@ resource "keycloak_realm" "realm" {
         	password = "password"
         }
     }
+    
+    internationalization {
+        supported_locales = [
+            "en",
+            "de",
+            "es"
+        ]
+        default_locale    = "en"
+    }
 }
 ```
 
@@ -98,6 +107,13 @@ This block supports the following attributes:
 - `auth` - (Optional) Enables authentication to the SMTP server.  This block supports the following attributes:
     - `username`- (Required) The SMTP server username.
     - `password` - (Required) The SMTP server password.
+    
+##### Internationalization
+
+Internationalization support can be configured by using the `internationalization` block, which supports the following attributes:
+
+- `supported_locales` - (Required) A list of [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) locale codes that the realm should support.
+- `default_locale` - (Required) The locale to use by default. This locale code must be present within the `supported_locales` list.
 
 ### Import
 
