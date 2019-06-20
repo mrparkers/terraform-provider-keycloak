@@ -43,6 +43,11 @@ type Realm struct {
 	AccessCodeLifespanUserAction        int  `json:"accessCodeLifespanUserAction,omitempty"`
 	ActionTokenGeneratedByUserLifespan  int  `json:"actionTokenGeneratedByUserLifespan,omitempty"`
 	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
+
+	//internationalization
+	InternationalizationEnabled bool     `json:"internationalizationEnabled"`
+	SupportLocales              []string `json:"supportedLocales"`
+	DefaultLocale               string   `json:"defaultLocale"`
 }
 
 type SmtpServer struct {
@@ -126,5 +131,18 @@ func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
 		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", realm.EmailTheme)
 	}
 
+	if realm.InternationalizationEnabled == true && !contains(realm.SupportLocales, realm.DefaultLocale) {
+		return fmt.Errorf("validation error: DefaultLocale should be in the SupportLocales")
+	}
+
 	return nil
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
