@@ -232,7 +232,7 @@ func resourceKeycloakRealm() *schema.Resource {
 
 			//internationalization
 			"internationalization": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
@@ -260,8 +260,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	defaultLocale := ""
 	if v, ok := data.GetOk("internationalization"); ok {
 		internationalizationEnabled = true
-		internationalizationData := v.(*schema.Set).List()[0]
-		internationalizationSettings := internationalizationData.(map[string]interface{})
+		internationalizationSettings := v.([]interface{})[0].(map[string]interface{})
 		if v, ok := internationalizationSettings["supported_locales"]; ok {
 			for _, supportLocale := range v.(*schema.Set).List() {
 				supportLocales = append(supportLocales, supportLocale.(string))
@@ -497,7 +496,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 		internationalizationSettings := make(map[string]interface{})
 		internationalizationSettings["supported_locales"] = realm.SupportLocales
 		internationalizationSettings["default_locale"] = realm.DefaultLocale
-		data.Set("internationalization", schema.NewSet(func(i interface{}) int { return 1 }, []interface{}{internationalizationSettings}))
+		data.Set("internationalization", []interface{}{internationalizationSettings})
 	} else {
 		data.Set("internationalization", nil)
 	}
