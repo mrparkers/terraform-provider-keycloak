@@ -16,6 +16,25 @@ resource "keycloak_realm" "realm" {
     login_theme          = "base"
 
     access_code_lifespan = "1h"
+    
+    smtp_server {
+        host = "smtp.example.com"
+        from = "example@example.com"
+        
+        auth {
+        	username = "tom"
+        	password = "password"
+        }
+    }
+    
+    internationalization {
+        supported_locales = [
+            "en",
+            "de",
+            "es"
+        ]
+        default_locale    = "en"
+    }
 }
 ```
 
@@ -70,6 +89,31 @@ The attributes below should be specified as [Go duration strings](https://golang
 - `access_code_lifespan_user_action` - (Optional) The maximum amount of time a user has to complete login related actions, such as updating a password.
 - `action_token_generated_by_user_lifespan` - (Optional) The maximum time a user has to use a user-generated permit before it expires.
 - `action_token_generated_by_admin_lifespan` - (Optional) The maximum time a user has to use an admin-generated permit before it expires.
+
+##### SMTP
+
+The `smtp_server` block can be used to configure the realm's SMTP settings, which can be found in the "Email" tab in the GUI.
+This block supports the following attributes:
+
+- `host` - (Required) The host of the SMTP server.
+- `port` - (Optional) The port of the SMTP server (defaults to 25).
+- `from` - (Required) The email address for the sender.
+- `from_display_name` - (Optional) The display name of the sender email address.
+- `reply_to` - (Optional) The "reply to" email address.
+- `reply_to_display_name` - (Optional) The display name of the "reply to" email address.
+- `envelope_from` - (Optional) The email address uses for bounces.
+- `starttls` - (Optional) When `true`, enables StartTLS. Defaults to `false`.
+- `ssl` - (Optional) When `true`, enables SSL. Defaults to `false`.
+- `auth` - (Optional) Enables authentication to the SMTP server.  This block supports the following attributes:
+    - `username`- (Required) The SMTP server username.
+    - `password` - (Required) The SMTP server password.
+    
+##### Internationalization
+
+Internationalization support can be configured by using the `internationalization` block, which supports the following attributes:
+
+- `supported_locales` - (Required) A list of [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) locale codes that the realm should support.
+- `default_locale` - (Required) The locale to use by default. This locale code must be present within the `supported_locales` list.
 
 ### Import
 
