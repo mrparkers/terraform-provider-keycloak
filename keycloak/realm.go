@@ -43,6 +43,21 @@ type Realm struct {
 	AccessCodeLifespanUserAction        int  `json:"accessCodeLifespanUserAction,omitempty"`
 	ActionTokenGeneratedByUserLifespan  int  `json:"actionTokenGeneratedByUserLifespan,omitempty"`
 	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
+
+	//extra attributes of a realm, contains security defenses browser headers and brute force detection parameters(those still nee to be added)
+	Attributes Attributes `json:"attributes,omitempty"`
+}
+
+type Attributes struct {
+	BrowserHeaderContentSecurityPolicy           string `json:"_browser_header.contentSecurityPolicy,omitempty"`
+	BrowserHeaderContentSecurityPolicyReportOnly string `json:"_browser_header.contentSecurityPolicyReportOnly,omitempty"`
+	BrowserHeaderStrictTransportSecurity         string `json:"_browser_header.strictTransportSecurity,omitempty"`
+	BrowserHeaderXContentTypeOptions             string `json:"_browser_header.xContentTypeOptions,omitempty"`
+	BrowserHeaderXFrameOptions                   string `json:"_browser_header.xFrameOptions,omitempty"`
+	BrowserHeaderXRobotsTag                      string `json:"_browser_header.xRobotsTag,omitempty"`
+	BrowserHeaderXXSSProtection                  string `json:"_browser_header.xXSSProtection,omitempty"`
+
+	//todo add brute force detection
 }
 
 type SmtpServer struct {
