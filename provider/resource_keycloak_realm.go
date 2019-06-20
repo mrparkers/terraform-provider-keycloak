@@ -310,7 +310,7 @@ func resourceKeycloakRealm() *schema.Resource {
 
 						//Todo: add brute force detection
 						//"brute_force_detection": {
-						//	Type:     schema.TypeSet,
+						//	Type:     schema.TypeList,
 						//	Optional: true,
 						//	MaxItems: 1,
 						//	Elem: &schema.Resource{
@@ -541,21 +541,27 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 				BrowserHeaderXXSSProtection:                  headerSettings["x_xss_protection"].(string),
 			}
 		} else {
-			realm.Attributes = keycloak.Attributes{
-				BrowserHeaderContentSecurityPolicy:           "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
-				BrowserHeaderContentSecurityPolicyReportOnly: "",
-				BrowserHeaderStrictTransportSecurity:         "max-age=31536000; includeSubDomains",
-				BrowserHeaderXContentTypeOptions:             "nosniff",
-				BrowserHeaderXFrameOptions:                   "SAMEORIGIN",
-				BrowserHeaderXRobotsTag:                      "none",
-				BrowserHeaderXXSSProtection:                  "1; mode=block",
-			}
+			setDefaultSecuritySettings(realm)
 		}
-
 		//todo bruteforcedetection
+	} else {
+		setDefaultSecuritySettings(realm)
 	}
-
 	return realm, nil
+}
+
+func setDefaultSecuritySettings(realm *keycloak.Realm) {
+	realm.Attributes = keycloak.Attributes{
+		BrowserHeaderContentSecurityPolicy:           "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
+		BrowserHeaderContentSecurityPolicyReportOnly: "",
+		BrowserHeaderStrictTransportSecurity:         "max-age=31536000; includeSubDomains",
+		BrowserHeaderXContentTypeOptions:             "nosniff",
+		BrowserHeaderXFrameOptions:                   "SAMEORIGIN",
+		BrowserHeaderXRobotsTag:                      "none",
+		BrowserHeaderXXSSProtection:                  "1; mode=block",
+
+		//todo add default bruteforce settings
+	}
 }
 
 func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
