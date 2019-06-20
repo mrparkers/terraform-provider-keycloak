@@ -117,7 +117,7 @@ func setRealmKeysData(data *schema.ResourceData, keys *keycloak.Keys) error {
 
 	err := data.Set("keys", flattenRealmKeys(keys.Keys))
 	if err != nil {
-		return fmt.Errorf("could set keys with values '%+v'\n%+v", keys.Keys, err)
+		return fmt.Errorf("could not set 'keys' with values '%+v'\n%+v", keys.Keys, err)
 	}
 
 	return nil
