@@ -47,8 +47,8 @@ func TestAccKeycloakRequiredAction_import(t *testing.T) {
 	requiredActionAlias := "terms_and_conditions"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRequiredAction_import(realmName, requiredActionAlias),
@@ -58,7 +58,23 @@ func TestAccKeycloakRequiredAction_import(t *testing.T) {
 				ResourceName:      "keycloak_required_action.required_action",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateId: realmName + "/" + requiredActionAlias,
+				ImportStateId:     realmName + "/" + requiredActionAlias,
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRequiredAction_disabledDefault(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	requiredActionAlias := "terms_and_conditions"
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakRequiredAction_disabledDefault(realmName, requiredActionAlias),
+				ExpectError: regexp.MustCompile("errors during apply: validation error: a 'default' required action should be enabled, set 'defaultAction' to 'false' or set 'enabled' to 'true'"),
 			},
 		},
 	})
@@ -82,7 +98,7 @@ resource "keycloak_required_action" "required_action" {
 }
 
 func testKeycloakRequiredAction_import(realm, requiredActionAlias string) string {
-return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
@@ -90,6 +106,23 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_required_action" "required_action" {
 	realm_id		= "${keycloak_realm.realm.realm}"
 	alias			= "%s"
+}
+	`, realm, requiredActionAlias)
+}
+
+func testKeycloakRequiredAction_disabledDefault(realm, requiredActionAlias string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_required_action" "required_action" {
+	realm_id		= "${keycloak_realm.realm.realm}"
+	alias			= "%s"
+	default_action 	= true
+	enabled			= false
+	name			= "My required Action"
+	priority		= 56
 }
 	`, realm, requiredActionAlias)
 }

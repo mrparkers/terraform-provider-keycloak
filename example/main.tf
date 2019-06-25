@@ -44,7 +44,7 @@ resource "keycloak_required_action" "custom-terms-and-conditions" {
 	realm_id		= "${keycloak_realm.test.realm}"
 	alias			= "terms_and_conditions"
 	default_action 	= true
-	enabled			= true
+	enabled			= false
 	name			= "Custom Terms and Conditions"
 	priority		= 38
 }

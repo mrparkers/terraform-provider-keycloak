@@ -69,6 +69,10 @@ func (keycloakClient *KeycloakClient) ValidateRequiredAction(requiredAction *Req
 		return err
 	}
 
+	if requiredAction.DefaultAction && !requiredAction.Enabled {
+		return fmt.Errorf("validation error: a 'default' required action should be enabled, set 'defaultAction' to 'false' or set 'enabled' to 'true'")
+	}
+
 	if !serverInfo.providerInstalled("required-action", requiredAction.Alias) {
 		return fmt.Errorf("validation error: required action \"%s\" does not exist on the server, installed providers: %s", requiredAction.Alias, serverInfo.getInstalledProvidersNames("required-action"))
 	}
