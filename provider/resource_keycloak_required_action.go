@@ -17,7 +17,7 @@ func resourceKeycloakRequiredAction() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
-			"realm_name": {
+			"realm_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -47,8 +47,8 @@ func resourceKeycloakRequiredAction() *schema.Resource {
 
 func getRequiredActionFromData(data *schema.ResourceData) (*keycloak.RequiredAction, error) {
 	action := &keycloak.RequiredAction{
-		Id:            fmt.Sprintf("%s/%s", data.Get("realm_name").(string), data.Get("alias").(string)),
-		RealmName:     data.Get("realm_name").(string),
+		Id:            fmt.Sprintf("%s/%s", data.Get("realm_id").(string), data.Get("alias").(string)),
+		RealmId:       data.Get("realm_id").(string),
 		Alias:         data.Get("alias").(string),
 		Name:          data.Get("name").(string),
 		Enabled:       data.Get("enabled").(bool),
@@ -61,8 +61,8 @@ func getRequiredActionFromData(data *schema.ResourceData) (*keycloak.RequiredAct
 }
 
 func setRequiredActionData(data *schema.ResourceData, action *keycloak.RequiredAction) {
-	data.SetId(fmt.Sprintf("%s/%s", action.RealmName, action.Alias))
-	data.Set("realm_name", action.RealmName)
+	data.SetId(fmt.Sprintf("%s/%s", action.RealmId, action.Alias))
+	data.Set("realm_id", action.RealmId)
 	data.Set("alias", action.Alias)
 	data.Set("name", action.Name)
 	data.Set("enabled", action.Enabled)
@@ -91,7 +91,7 @@ func resourceKeycloakRequiredActionsCreate(data *schema.ResourceData, meta inter
 func resourceKeycloakRequiredActionsRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	action, err := keycloakClient.GetRequiredAction(data.Get("realm_name").(string), data.Get("alias").(string))
+	action, err := keycloakClient.GetRequiredAction(data.Get("realm_id").(string), data.Get("alias").(string))
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -122,7 +122,7 @@ func resourceKeycloakRequiredActionsUpdate(data *schema.ResourceData, meta inter
 func resourceKeycloakRequiredActionsDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmName := data.Get("realm_name").(string)
+	realmName := data.Get("realm_id").(string)
 	alias := data.Get("alias").(string)
 
 	return keycloakClient.DeleteRequiredAction(realmName, alias)

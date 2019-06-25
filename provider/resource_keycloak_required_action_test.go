@@ -49,7 +49,7 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_required_action" "custom-terms-and-conditions" {
-	realm_name		= "${keycloak_realm.realm.realm}"
+	realm_id		= "${keycloak_realm.realm.realm}"
 	alias			= "%s"
 	default_action 	= true
 	enabled			= true

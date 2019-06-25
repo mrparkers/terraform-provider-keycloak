@@ -4,7 +4,7 @@ import "fmt"
 
 type RequiredAction struct {
 	Id            string              `json:"-"`
-	RealmName     string              `json:"-"`
+	RealmId       string              `json:"-"`
 	Alias         string              `json:"alias"`
 	Name          string              `json:"name"`
 	Enabled       bool                `json:"enabled"`
@@ -27,19 +27,19 @@ func (requiredActions *RequiredAction) getConfigOk(val string) (string, bool) {
 	return "", false
 }
 
-func (keycloakClient *KeycloakClient) GetRequiredAction(realmName string, alias string) (*RequiredAction, error) {
+func (keycloakClient *KeycloakClient) GetRequiredAction(realmId string, alias string) (*RequiredAction, error) {
 	var requiredAction RequiredAction
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/required-actions/%s", realmName, alias), &requiredAction, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/required-actions/%s", realmId, alias), &requiredAction, nil)
 	if err != nil {
 		return nil, err
 	}
-	requiredAction.RealmName = realmName
+	requiredAction.RealmId = realmId
 	return &requiredAction, nil
 }
 
 func (keycloakClient *KeycloakClient) CreateRequiredAction(requiredAction *RequiredAction) error {
-	requiredAction.Id = fmt.Sprintf("%s/%s", requiredAction.RealmName, requiredAction.Alias)
+	requiredAction.Id = fmt.Sprintf("%s/%s", requiredAction.RealmId, requiredAction.Alias)
 	return keycloakClient.UpdateRequiredAction(requiredAction)
 }
 
@@ -50,7 +50,7 @@ func (keycloakClient *KeycloakClient) UpdateRequiredAction(requiredAction *Requi
 		return err
 	}
 
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/authentication/required-actions/%s", requiredAction.RealmName, requiredAction.Alias), requiredAction)
+	return keycloakClient.put(fmt.Sprintf("/realms/%s/authentication/required-actions/%s", requiredAction.RealmId, requiredAction.Alias), requiredAction)
 }
 
 func (keycloakClient *KeycloakClient) DeleteRequiredAction(realmName string, alias string) error {
@@ -69,8 +69,8 @@ func (keycloakClient *KeycloakClient) ValidateRequiredAction(requiredAction *Req
 		return err
 	}
 
-	if !serverInfo.ProviderInstalled("required-action", requiredAction.Alias) {
-		return fmt.Errorf("validation error: required action \"%s\" does not exist on the server, installed providers: %s", requiredAction.Alias, serverInfo.GetInstalledProvidersNames("required-action"))
+	if !serverInfo.providerInstalled("required-action", requiredAction.Alias) {
+		return fmt.Errorf("validation error: required action \"%s\" does not exist on the server, installed providers: %s", requiredAction.Alias, serverInfo.getInstalledProvidersNames("required-action"))
 	}
 
 	return nil

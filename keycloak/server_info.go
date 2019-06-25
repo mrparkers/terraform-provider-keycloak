@@ -47,7 +47,7 @@ func (serverInfo *ServerInfo) ComponentTypeIsInstalled(componentType, componentT
 	return false
 }
 
-func (serverInfo *ServerInfo) GetInstalledProvidersNames(providerType string) []string {
+func (serverInfo *ServerInfo) getInstalledProvidersNames(providerType string) []string {
 	providers := serverInfo.ProviderTypes[providerType].Providers
 	keys := make([]string, 0, len(providers))
 	for p := range providers {
@@ -56,7 +56,7 @@ func (serverInfo *ServerInfo) GetInstalledProvidersNames(providerType string) []
 	return keys
 }
 
-func (serverInfo *ServerInfo) ProviderInstalled(providerType, providerName string) bool {
+func (serverInfo *ServerInfo) providerInstalled(providerType, providerName string) bool {
 	providers := serverInfo.ProviderTypes[providerType].Providers
 	for p := range providers {
 		if p == providerName {
