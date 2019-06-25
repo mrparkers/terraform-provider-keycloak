@@ -309,16 +309,6 @@ func resourceKeycloakRealm() *schema.Resource {
 						},
 
 						//Todo: add brute force detection
-						//"brute_force_detection": {
-						//	Type:     schema.TypeList,
-						//	Optional: true,
-						//	MaxItems: 1,
-						//	Elem: &schema.Resource{
-						//		Schema: map[string]*schema.Schema{
-						//
-						//		},
-						//	},
-						//},
 					},
 				},
 			},
