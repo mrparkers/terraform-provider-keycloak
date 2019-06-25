@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strings"
 )
 
 func resourceKeycloakRequiredAction() *schema.Resource {
@@ -14,7 +15,8 @@ func resourceKeycloakRequiredAction() *schema.Resource {
 		Delete: resourceKeycloakRequiredActionsDelete,
 		Update: resourceKeycloakRequiredActionsUpdate,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			// This resource can be imported using {{realm}}/{{alias}}. The required action aliases are displayed in the server info or GET realms/{{realm}}/authentication/required-actions
+			State: resourceKeycloakRequiredActionsImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -126,4 +128,16 @@ func resourceKeycloakRequiredActionsDelete(data *schema.ResourceData, meta inter
 	alias := data.Get("alias").(string)
 
 	return keycloakClient.DeleteRequiredAction(realmName, alias)
+}
+
+func resourceKeycloakRequiredActionsImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import. Supported import formats: {{realmId}}/{{alias}}")
+	}
+	d.Set("realm_id", parts[0])
+	d.Set("alias", parts[1])
+	d.SetId(fmt.Sprintf("%s/%s", parts[0], parts[1]))
+
+	return []*schema.ResourceData{d}, nil
 }
