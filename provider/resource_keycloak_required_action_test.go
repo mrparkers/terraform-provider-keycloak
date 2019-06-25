@@ -42,23 +42,56 @@ func TestAccKeycloakRequiredAction_invalidAlias(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRequiredAction_import(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	requiredActionAlias := "terms_and_conditions"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRequiredAction_import(realmName, requiredActionAlias),
+				Check:  testAccCheckKeycloakRequiresActionExists(realmName, requiredActionAlias),
+			},
+			{
+				ResourceName:      "keycloak_required_action.required_action",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateId: realmName + "/" + requiredActionAlias,
+			},
+		},
+	})
+}
+
 func testKeycloakRequiredAction_basic(realm, requiredActionAlias string, priority int) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_required_action" "custom-terms-and-conditions" {
+resource "keycloak_required_action" "required_action" {
 	realm_id		= "${keycloak_realm.realm.realm}"
 	alias			= "%s"
 	default_action 	= true
 	enabled			= true
 	name			= "My required Action"
 	priority		= %d
-
-	depends_on = ["keycloak_realm.realm"]
 }
 	`, realm, requiredActionAlias, priority)
+}
+
+func testKeycloakRequiredAction_import(realm, requiredActionAlias string) string {
+return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_required_action" "required_action" {
+	realm_id		= "${keycloak_realm.realm.realm}"
+	alias			= "%s"
+}
+	`, realm, requiredActionAlias)
 }
 
 func testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realm, requiredActionAlias string, priority int) resource.TestCheckFunc {
@@ -71,6 +104,18 @@ func testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realm, required
 
 		if action.Priority != priority {
 			return fmt.Errorf("expected required action to have priority %d, but got %d", priority, action.Priority)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRequiresActionExists(realm, requiredActionAlias string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+		_, err := keycloakClient.GetRequiredAction(realm, requiredActionAlias)
+		if err != nil {
+			return fmt.Errorf("required action not found: %s", requiredActionAlias)
 		}
 
 		return nil
