@@ -1,3 +1,9 @@
+## 1.10.0 (Unreleased)
+
+FEATURES:
+
+* new resource: `keycloak_required_action` ([#131](https://github.com/mrparkers/terraform-provider-keycloak/pull/131))
+
 ## 1.9.0 (June 20, 2019)
 
 FEATURES:
@@ -17,7 +23,7 @@ IMPROVEMENTS:
 
 FEATURES:
 
-* new resources: keycloak_openid_client_authorization_resource, keycloak_openid_client_authorization_scope, keycloak_openid_client_authorization_permission, keycloak_openid_client_service_account_role ([#104](https://github.com/mrparkers/terraform-provider-keycloak/pull/104))
+* new resources: `keycloak_openid_client_authorization_resource`, `keycloak_openid_client_authorization_scope`, `keycloak_openid_client_authorization_permission`, `keycloak_openid_client_service_account_role` ([#104](https://github.com/mrparkers/terraform-provider-keycloak/pull/104))
   - note: docs for these resources will be released at a later date. for now, please refer to the source files.
 * new data sources: keycloak_openid_client, keycloak_openid_client_authorization_policy ([#104](https://github.com/mrparkers/terraform-provider-keycloak/pull/104))
   - note: docs for these data sources will be released at a later date. for now, please refer to the source files.
@@ -32,19 +38,19 @@ IMPROVEMENTS:
 
 FEATURES:
 
-* new resources: keycloak_identity_provider and mappers ([#92](https://github.com/mrparkers/terraform-provider-keycloak/pull/92))
+* new resources: `keycloak_identity_provider` and mappers ([#92](https://github.com/mrparkers/terraform-provider-keycloak/pull/92))
   - note: docs for these resources will be released at a later date. for now, please refer to the source files.
 
 IMPROVEMENTS:
 
-* new attributes added for keycloak_saml_client resource ([#103](https://github.com/mrparkers/terraform-provider-keycloak/pull/103))
+* new attributes added for `keycloak_saml_client` resource ([#103](https://github.com/mrparkers/terraform-provider-keycloak/pull/103))
 
 ## 1.6.0 (March 6, 2019)
 
 FEATURES:
 
-* new resource: keycloak_openid_client_optional_scopes ([#96](https://github.com/mrparkers/terraform-provider-keycloak/pull/96))
-* new resource: keycloak_openid_audience_protocol_mapper ([#97](https://github.com/mrparkers/terraform-provider-keycloak/pull/97))
+* new resource: `keycloak_openid_client_optional_scopes` ([#96](https://github.com/mrparkers/terraform-provider-keycloak/pull/96))
+* new resource: `keycloak_openid_audience_protocol_mapper` ([#97](https://github.com/mrparkers/terraform-provider-keycloak/pull/97))
 
 ## 1.5.0 (February 22, 2019)
 
@@ -64,19 +70,19 @@ BUG FIXES:
 
 FEATURES:
 
-* new resource: keycloak_saml_user_property_protocol_mapper ([#85](https://github.com/mrparkers/terraform-provider-keycloak/pull/85))
+* new resource: `keycloak_saml_user_property_protocol_mapper` ([#85](https://github.com/mrparkers/terraform-provider-keycloak/pull/85))
 
 ## 1.3.0 (January 25, 2019)
 
 FEATURES:
 
-* new resource: keycloak_saml_user_attribute_protocol_mapper ([#84](https://github.com/mrparkers/terraform-provider-keycloak/pull/84))
+* new resource: `keycloak_saml_user_attribute_protocol_mapper` ([#84](https://github.com/mrparkers/terraform-provider-keycloak/pull/84))
 
 ## 1.2.0 (January 24, 2019)
 
 FEATURES:
 
-* new resource: keycloak_saml_client ([#82](https://github.com/mrparkers/terraform-provider-keycloak/pull/82))
+* new resource: `keycloak_saml_client` ([#82](https://github.com/mrparkers/terraform-provider-keycloak/pull/82))
 
 IMPROVEMENTS:
 
