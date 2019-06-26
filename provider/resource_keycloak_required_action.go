@@ -42,6 +42,7 @@ func resourceKeycloakRequiredAction() *schema.Resource {
 			"priority": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 		},
 	}

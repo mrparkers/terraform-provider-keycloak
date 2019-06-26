@@ -46,7 +46,15 @@ resource "keycloak_required_action" "custom-terms-and-conditions" {
 	default_action 	= true
 	enabled			= true
 	name			= "Custom Terms and Conditions"
-	priority		= 38
+}
+
+resource "keycloak_required_action" "custom-configured_totp" {
+	realm_id		= "${keycloak_realm.test.realm}"
+	alias			= "CONFIGURE_TOTP"
+	default_action 	= true
+	enabled			= true
+	name			= "Custom configure totp"
+	priority		= "${keycloak_required_action.custom-terms-and-conditions.priority+15}"
 }
 
 resource "keycloak_group" "foo" {

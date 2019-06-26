@@ -79,6 +79,22 @@ func TestAccKeycloakRequiredAction_disabledDefault(t *testing.T) {
 		},
 	})
 }
+func TestAccKeycloakRequiredAction_computedPriority(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	requiredActionAlias := "terms_and_conditions"
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRequiredAction_computedpriority(realmName, requiredActionAlias, 37, 14),
+				Check:  testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realmName, requiredActionAlias, 51),
+			},
+		},
+	})
+}
+
 
 func testKeycloakRequiredAction_basic(realm, requiredActionAlias string, priority int) string {
 	return fmt.Sprintf(`
@@ -125,6 +141,28 @@ resource "keycloak_required_action" "required_action" {
 	priority		= 56
 }
 	`, realm, requiredActionAlias)
+}
+
+func testKeycloakRequiredAction_computedpriority(realm, requiredActionAlias string, priority1, priorityPlus int) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_required_action" "required_action" {
+	realm_id		= "${keycloak_realm.realm.realm}"
+	alias			= "VERIFY_EMAIL"
+	name			= "My required Action"
+	priority		= %d
+}
+
+resource "keycloak_required_action" "required_action2" {
+	realm_id		= "${keycloak_realm.realm.realm}"
+	alias			= "%s"
+	name			= "My required Action 2"
+	priority		= "${keycloak_required_action.required_action.priority+%d}"
+}
+	`, realm, priority1, requiredActionAlias, priorityPlus)
 }
 
 func testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realm, requiredActionAlias string, priority int) resource.TestCheckFunc {
