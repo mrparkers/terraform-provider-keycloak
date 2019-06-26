@@ -88,13 +88,12 @@ func TestAccKeycloakRequiredAction_computedPriority(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRequiredAction_computedpriority(realmName, requiredActionAlias, 37, 14),
+				Config: testKeycloakRequiredAction_computedPriority(realmName, requiredActionAlias, 37, 14),
 				Check:  testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realmName, requiredActionAlias, 51),
 			},
 		},
 	})
 }
-
 
 func testKeycloakRequiredAction_basic(realm, requiredActionAlias string, priority int) string {
 	return fmt.Sprintf(`
@@ -143,7 +142,7 @@ resource "keycloak_required_action" "required_action" {
 	`, realm, requiredActionAlias)
 }
 
-func testKeycloakRequiredAction_computedpriority(realm, requiredActionAlias string, priority1, priorityPlus int) string {
+func testKeycloakRequiredAction_computedPriority(realm, requiredActionAlias string, priority1, priorityPlus int) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
