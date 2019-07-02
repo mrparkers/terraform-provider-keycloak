@@ -4,6 +4,21 @@ import (
 	"fmt"
 )
 
+type Key struct {
+	Algorithm        *string `json:"algorithm,omitempty"`
+	Certificate      *string `json:"certificate,omitempty"`
+	ProviderId       *string `json:"providerId,omitempty"`
+	ProviderPriority *int    `json:"providerPriority,omitempty"`
+	PublicKey        *string `json:"publicKey,omitempty"`
+	Kid              *string `json:"kid,omitempty"`
+	Status           *string `json:"status,omitempty"`
+	Type             *string `json:"type,omitempty"`
+}
+
+type Keys struct {
+	Keys []Key `json:"keys"`
+}
+
 type Realm struct {
 	Id          string `json:"id"`
 	Realm       string `json:"realm"`
@@ -80,6 +95,17 @@ func (keycloakClient *KeycloakClient) GetRealm(id string) (*Realm, error) {
 	}
 
 	return &realm, nil
+}
+
+func (keycloakClient *KeycloakClient) GetRealmKeys(id string) (*Keys, error) {
+	var keys Keys
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/keys", id), &keys, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &keys, nil
 }
 
 func (keycloakClient *KeycloakClient) UpdateRealm(realm *Realm) error {

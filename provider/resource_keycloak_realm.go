@@ -512,7 +512,6 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("email_theme", realm.EmailTheme)
 
 	// Tokens
-
 	data.Set("refresh_token_max_reuse", realm.RefreshTokenMaxReuse)
 	data.Set("sso_session_idle_timeout", getDurationStringFromSeconds(realm.SsoSessionIdleTimeout))
 	data.Set("sso_session_max_lifespan", getDurationStringFromSeconds(realm.SsoSessionMaxLifespan))
