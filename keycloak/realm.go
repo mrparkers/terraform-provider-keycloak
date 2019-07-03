@@ -61,8 +61,6 @@ type Attributes struct {
 	BrowserHeaderXFrameOptions                   string `json:"_browser_header.xFrameOptions,omitempty"`
 	BrowserHeaderXRobotsTag                      string `json:"_browser_header.xRobotsTag,omitempty"`
 	BrowserHeaderXXSSProtection                  string `json:"_browser_header.xXSSProtection,omitempty"`
-
-	//todo add brute force detection
 }
 
 type SmtpServer struct {

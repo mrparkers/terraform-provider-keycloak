@@ -307,8 +307,6 @@ func resourceKeycloakRealm() *schema.Resource {
 								},
 							},
 						},
-
-						//Todo: add brute force detection
 					},
 				},
 			},
@@ -533,7 +531,6 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		} else {
 			setDefaultSecuritySettings(realm)
 		}
-		//todo bruteforcedetection
 	} else {
 		setDefaultSecuritySettings(realm)
 	}
@@ -549,8 +546,6 @@ func setDefaultSecuritySettings(realm *keycloak.Realm) {
 		BrowserHeaderXFrameOptions:                   "SAMEORIGIN",
 		BrowserHeaderXRobotsTag:                      "none",
 		BrowserHeaderXXSSProtection:                  "1; mode=block",
-
-		//todo add default bruteforce settings
 	}
 }
 
@@ -636,9 +631,6 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 		if (keycloak.Attributes{}) == realm.Attributes {
 			data.Set("security_defenses", nil)
 		} else {
-
-			//todo take into account brute force detection
-
 			securityDefensesSettings := make(map[string]interface{})
 
 			headersSettings := make(map[string]interface{})

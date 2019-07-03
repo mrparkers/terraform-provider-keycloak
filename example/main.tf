@@ -49,8 +49,6 @@ resource "keycloak_realm" "test" {
 			x_xss_protection = "1; mode=block"
 			strict_transport_security = "max-age=31536000; includeSubDomains"
 		}
-
-		// todo add bruto force detection example
 	}
 }
 
