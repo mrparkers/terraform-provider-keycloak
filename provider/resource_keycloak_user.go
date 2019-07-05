@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const MAX_ATTRIBUTE_VALUE_LEN = 255
+
 func resourceKeycloakUser() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceKeycloakUserCreate,
@@ -110,7 +112,7 @@ func mapFromDataToUser(data *schema.ResourceData) *keycloak.User {
 	attributes := map[string][]string{}
 	if v, ok := data.GetOk("attributes"); ok {
 		for key, value := range v.(map[string]interface{}) {
-			attributes[key] = strings.Split(value.(string), ",")
+			attributes[key] = splitLen(value.(string), MAX_ATTRIBUTE_VALUE_LEN)
 		}
 	}
 
@@ -138,9 +140,9 @@ func getUserFederatedIdentitiesFromData(data []interface{}) *keycloak.FederatedI
 	for _, d := range data {
 		federatedIdentitiesData := d.(map[string]interface{})
 		federatedIdentity := keycloak.FederatedIdentity{
-			IdentityProvider: federatedIdentitiesData["display_name"].(string),
-			UserId:           federatedIdentitiesData["name"].(string),
-			UserName:         federatedIdentitiesData["icon_uri"].(string),
+			IdentityProvider: federatedIdentitiesData["identity_provider"].(string),
+			UserId:           federatedIdentitiesData["user_id"].(string),
+			UserName:         federatedIdentitiesData["user_name"].(string),
 		}
 		federatedIdentities = append(federatedIdentities, federatedIdentity)
 	}
@@ -148,14 +150,28 @@ func getUserFederatedIdentitiesFromData(data []interface{}) *keycloak.FederatedI
 }
 
 func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
+	federatedIdentities := []interface{}{}
+	for _, federatedIdentity := range user.FederatedIdentities {
+		identity := map[string]interface{}{
+			"identity_provider": federatedIdentity.IdentityProvider,
+			"user_id":           federatedIdentity.UserId,
+			"user_name":         federatedIdentity.UserName,
+		}
+		federatedIdentities = append(federatedIdentities, identity)
+	}
+	attributes := map[string]string{}
+	for k, v := range user.Attributes {
+		attributes[k] = strings.Join(v, "")
+	}
 	data.SetId(user.Id)
-
 	data.Set("realm_id", user.RealmId)
 	data.Set("username", user.Username)
 	data.Set("email", user.Email)
 	data.Set("first_name", user.FirstName)
 	data.Set("last_name", user.LastName)
 	data.Set("enabled", user.Enabled)
+	data.Set("attributes", attributes)
+	data.Set("federated_identity", federatedIdentities)
 }
 
 func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) error {
