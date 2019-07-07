@@ -84,7 +84,6 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		ValidateSignature:    keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		AuthorizationUrl:     data.Get("authorization_url").(string),
 		ClientId:             data.Get("client_id").(string),
-		DisableUserInfo:      keycloak.KeycloakBoolQuoted(data.Get("disable_user_info").(bool)),
 		HideOnLoginPage:      keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
 		TokenUrl:             data.Get("token_url").(string),
 		UILocales:            keycloak.KeycloakBoolQuoted(data.Get("ui_locales").(bool)),
