@@ -34,6 +34,7 @@ type IdentityProviderConfig struct {
 	TokenUrl                         string             `json:"tokenUrl,omitempty"`
 	LoginHint                        string             `json:"loginHint,omitempty"`
 	UILocales                        KeycloakBoolQuoted `json:"uiLocales,omitempty"`
+	LogoutUrl                        string             `json:"logoutUrl,omitempty"`
 }
 
 type IdentityProvider struct {
