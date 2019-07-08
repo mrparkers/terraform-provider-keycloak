@@ -255,6 +255,61 @@ func resourceKeycloakRealm() *schema.Resource {
 					},
 				},
 			},
+
+			//Security Defenses
+			"security_defenses": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"headers": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"x_frame_options": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Default:  "SAMEORIGIN",
+									},
+									"content_security_policy": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Default:  "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
+									},
+									"content_security_policy_report_only": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Default:  "",
+									},
+									"x_content_type_options": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Default:  "nosniff",
+									},
+									"x_robots_tag": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Default:  "none",
+									},
+									"x_xss_protection": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Default:  "1; mode=block",
+									},
+									"strict_transport_security": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Default:  "max-age=31536000; includeSubDomains",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -456,7 +511,42 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		realm.ActionTokenGeneratedByAdminLifespan = actionTokenGeneratedByAdminLifespanDurationString
 	}
 
+	//security defenses
+	if v, ok := data.GetOk("security_defenses"); ok {
+		securityDefensesSettings := v.([]interface{})[0].(map[string]interface{})
+
+		headersConfig := securityDefensesSettings["headers"].([]interface{})
+		if len(headersConfig) == 1 {
+			headerSettings := headersConfig[0].(map[string]interface{})
+
+			realm.Attributes = keycloak.Attributes{
+				BrowserHeaderContentSecurityPolicy:           headerSettings["content_security_policy"].(string),
+				BrowserHeaderContentSecurityPolicyReportOnly: headerSettings["content_security_policy_report_only"].(string),
+				BrowserHeaderStrictTransportSecurity:         headerSettings["strict_transport_security"].(string),
+				BrowserHeaderXContentTypeOptions:             headerSettings["x_content_type_options"].(string),
+				BrowserHeaderXFrameOptions:                   headerSettings["x_frame_options"].(string),
+				BrowserHeaderXRobotsTag:                      headerSettings["x_robots_tag"].(string),
+				BrowserHeaderXXSSProtection:                  headerSettings["x_xss_protection"].(string),
+			}
+		} else {
+			setDefaultSecuritySettings(realm)
+		}
+	} else {
+		setDefaultSecuritySettings(realm)
+	}
 	return realm, nil
+}
+
+func setDefaultSecuritySettings(realm *keycloak.Realm) {
+	realm.Attributes = keycloak.Attributes{
+		BrowserHeaderContentSecurityPolicy:           "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
+		BrowserHeaderContentSecurityPolicyReportOnly: "",
+		BrowserHeaderStrictTransportSecurity:         "max-age=31536000; includeSubDomains",
+		BrowserHeaderXContentTypeOptions:             "nosniff",
+		BrowserHeaderXFrameOptions:                   "SAMEORIGIN",
+		BrowserHeaderXRobotsTag:                      "none",
+		BrowserHeaderXXSSProtection:                  "1; mode=block",
+	}
 }
 
 func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
@@ -533,6 +623,29 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 		data.Set("internationalization", []interface{}{internationalizationSettings})
 	} else {
 		data.Set("internationalization", nil)
+	}
+
+	if _, ok := data.GetOk("security_defenses"); ok {
+
+		if (keycloak.Attributes{}) == realm.Attributes {
+			data.Set("security_defenses", nil)
+		} else {
+			securityDefensesSettings := make(map[string]interface{})
+
+			headersSettings := make(map[string]interface{})
+
+			headersSettings["content_security_policy"] = realm.Attributes.BrowserHeaderContentSecurityPolicy
+			headersSettings["content_security_policy_report_only"] = realm.Attributes.BrowserHeaderContentSecurityPolicyReportOnly
+			headersSettings["strict_transport_security"] = realm.Attributes.BrowserHeaderStrictTransportSecurity
+			headersSettings["x_content_type_options"] = realm.Attributes.BrowserHeaderXContentTypeOptions
+			headersSettings["x_frame_options"] = realm.Attributes.BrowserHeaderXFrameOptions
+			headersSettings["x_robots_tag"] = realm.Attributes.BrowserHeaderXRobotsTag
+			headersSettings["x_xss_protection"] = realm.Attributes.BrowserHeaderXXSSProtection
+
+			securityDefensesSettings["headers"] = []interface{}{headersSettings}
+
+			data.Set("security_defenses", []interface{}{securityDefensesSettings})
+		}
 	}
 }
 
