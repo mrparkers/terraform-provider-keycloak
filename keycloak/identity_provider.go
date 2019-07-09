@@ -9,9 +9,11 @@ type IdentityProviderConfig struct {
 	Key                              string             `json:"key,omitempty"`
 	HostIp                           string             `json:"hostIp,omitempty"`
 	UseJwksUrl                       KeycloakBoolQuoted `json:"useJwksUrl,omitempty"`
+	JwksUrl                          string             `json:"jwksUrl,omitempty"`
 	ClientId                         string             `json:"clientId,omitempty"`
 	ClientSecret                     string             `json:"clientSecret,omitempty"`
 	DisableUserInfo                  KeycloakBoolQuoted `json:"disableUserInfo"`
+	UserInfoUrl                      string             `json:"userInfoUrl,omitempty"`
 	HideOnLoginPage                  KeycloakBoolQuoted `json:"hideOnLoginPage"`
 	NameIDPolicyFormat               string             `json:"nameIDPolicyFormat,omitempty"`
 	SingleLogoutServiceUrl           string             `json:"singleLogoutServiceUrl,omitempty"`
@@ -32,6 +34,7 @@ type IdentityProviderConfig struct {
 	TokenUrl                         string             `json:"tokenUrl,omitempty"`
 	LoginHint                        string             `json:"loginHint,omitempty"`
 	UILocales                        KeycloakBoolQuoted `json:"uiLocales,omitempty"`
+	LogoutUrl                        string             `json:"logoutUrl,omitempty"`
 }
 
 type IdentityProvider struct {
