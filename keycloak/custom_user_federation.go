@@ -15,6 +15,8 @@ type CustomUserFederation struct {
 	Priority int
 
 	CachePolicy string
+
+	Config map[string][]string
 }
 
 var (
@@ -22,17 +24,16 @@ var (
 )
 
 func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *component {
-	componentConfig := map[string][]string{
-		"cachePolicy": {
-			custom.CachePolicy,
-		},
-		"enabled": {
-			strconv.FormatBool(custom.Enabled),
-		},
-		"priority": {
-			strconv.Itoa(custom.Priority),
-		},
+	componentConfig := make(map[string][]string)
+
+	if custom.Config != nil {
+		for k, j := range custom.Config {
+			componentConfig[k] = append(componentConfig[k], j[0])
+		}
 	}
+	componentConfig["cachePolicy"] = append(componentConfig["cachePolicy"], custom.CachePolicy)
+	componentConfig["enabled"] = append(componentConfig["enabled"], strconv.FormatBool(custom.Enabled))
+	componentConfig["priority"] = append(componentConfig["priority"], strconv.Itoa(custom.Priority))
 
 	return &component{
 		Id:           custom.Id,
@@ -55,6 +56,13 @@ func convertFromComponentToCustomUserFederation(component *component) (*CustomUs
 		return nil, err
 	}
 
+	config := make(map[string][]string)
+	for k := range component.Config {
+		if k != "enabled" && k != "priority" && k != "cachePolicy" {
+			config[k] = append(config[k], component.getConfig(k))
+		}
+	}
+
 	custom := &CustomUserFederation{
 		Id:         component.Id,
 		Name:       component.Name,
@@ -65,6 +73,8 @@ func convertFromComponentToCustomUserFederation(component *component) (*CustomUs
 		Priority: priority,
 
 		CachePolicy: component.getConfig("cachePolicy"),
+
+		Config: config,
 	}
 
 	return custom, nil
