@@ -41,7 +41,6 @@ func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
 
 	realmName := "terraform-" + acctest.RandString(10)
 	name := "terraform-" + acctest.RandString(10)
-	configKey := "key" //needs to be a key supported by provider `custom`, otherwise it is never returned in the getCustomUserFederation
 	configValue := "value-" + acctest.RandString(10)
 	providerId := "custom"
 
@@ -51,8 +50,8 @@ func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakCustomUserFederation_customConfig(realmName, name, providerId, configKey, configValue),
-				Check:  testAccCheckKeycloakCustomUserFederationExistsWithCustomConfig("keycloak_custom_user_federation.custom", configKey, configValue),
+				Config: testKeycloakCustomUserFederation_customConfig(realmName, name, providerId, configValue),
+				Check:  testAccCheckKeycloakCustomUserFederationExistsWithCustomConfig("keycloak_custom_user_federation.custom", configValue),
 			},
 		},
 	})
@@ -121,16 +120,15 @@ func testAccCheckKeycloakCustomUserFederationExists(resourceName string) resourc
 	}
 }
 
-func testAccCheckKeycloakCustomUserFederationExistsWithCustomConfig(resourceName, customConfigKey, customConfigValue string) resource.TestCheckFunc {
+func testAccCheckKeycloakCustomUserFederationExistsWithCustomConfig(resourceName, customConfigValue string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		fetchedFederation, err := getCustomUserFederationFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
 
-		if len(fetchedFederation.Config[customConfigKey]) <= 0 || fetchedFederation.Config[customConfigKey][0] != customConfigValue {
-			//disabled check because custom provider needs to supported customConfigKey
-			//return fmt.Errorf("expected user federation provider to have config with a custom key '%s' with a value %s", customConfigKey, customConfigValue)
+		if len(fetchedFederation.Config["dummyConfig"]) <= 0 || fetchedFederation.Config["dummyConfig"][0] != customConfigValue {
+			return fmt.Errorf("expected user federation provider to have config with a custom key 'dummyConfig' with a value %s", customConfigValue)
 		}
 
 		return nil
@@ -208,7 +206,7 @@ resource "keycloak_custom_user_federation" "custom" {
 	`, realm, name, providerId)
 }
 
-func testKeycloakCustomUserFederation_customConfig(realm, name, providerId, customConfigKey, customConfigValue string) string {
+func testKeycloakCustomUserFederation_customConfig(realm, name, providerId, customConfigValue string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -222,8 +220,8 @@ resource "keycloak_custom_user_federation" "custom" {
 	enabled     = true
 
 	config 		= {
-		%s = "%s"
+		dummyConfig = "%s"
 	}
 }
-	`, realm, name, providerId, customConfigKey, customConfigValue)
+	`, realm, name, providerId, customConfigValue)
 }
