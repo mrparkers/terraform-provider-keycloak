@@ -90,7 +90,7 @@ func KeycloakProvider() *schema.Provider {
 				Type:        schema.TypeBool,
 				Description: "Whether or not to login to Keycloak instance on provider initialization",
 				Default:     true,
-			},			
+			},
 		},
 		ConfigureFunc: configureKeycloakProvider,
 	}

@@ -69,8 +69,8 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 		if err != nil {
 			return nil, err
 		}
-	}	
-	
+	}
+
 	return &keycloakClient, nil
 }
 
@@ -186,7 +186,7 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 		if err != nil {
 			return nil, "", fmt.Errorf("error logging in: %s", err)
 		}
-	}	
+	}
 	requestMethod := request.Method
 	requestPath := request.URL.Path
 
