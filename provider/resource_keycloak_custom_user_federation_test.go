@@ -36,6 +36,27 @@ func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
+	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
+
+	realmName := "terraform-" + acctest.RandString(10)
+	name := "terraform-" + acctest.RandString(10)
+	configValue := "value-" + acctest.RandString(10)
+	providerId := "custom"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakCustomUserFederation_customConfig(realmName, name, providerId, configValue),
+				Check:  testAccCheckKeycloakCustomUserFederationExistsWithCustomConfig("keycloak_custom_user_federation.custom", configValue),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) {
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
 
@@ -93,6 +114,21 @@ func testAccCheckKeycloakCustomUserFederationExists(resourceName string) resourc
 		_, err := getCustomUserFederationFromState(s, resourceName)
 		if err != nil {
 			return err
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakCustomUserFederationExistsWithCustomConfig(resourceName, customConfigValue string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedFederation, err := getCustomUserFederationFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if len(fetchedFederation.Config["dummyConfig"]) <= 0 || fetchedFederation.Config["dummyConfig"][0] != customConfigValue {
+			return fmt.Errorf("expected user federation provider to have config with a custom key 'dummyConfig' with a value %s", customConfigValue)
 		}
 
 		return nil
@@ -168,4 +204,24 @@ resource "keycloak_custom_user_federation" "custom" {
 	enabled     = true
 }
 	`, realm, name, providerId)
+}
+
+func testKeycloakCustomUserFederation_customConfig(realm, name, providerId, customConfigValue string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_custom_user_federation" "custom" {
+	name        = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	provider_id = "%s"
+
+	enabled     = true
+
+	config 		= {
+		dummyConfig = "%s"
+	}
+}
+	`, realm, name, providerId, customConfigValue)
 }

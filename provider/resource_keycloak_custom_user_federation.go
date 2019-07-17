@@ -56,11 +56,23 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 				Default:      "DEFAULT",
 				ValidateFunc: validation.StringInSlice(keycloakUserFederationCachePolicies, false),
 			},
+
+			"config": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.CustomUserFederation {
+	config := map[string][]string{}
+	if v, ok := data.GetOk("config"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			config[key] = strings.Split(value.(string), ",")
+		}
+	}
+
 	return &keycloak.CustomUserFederation{
 		Id:         data.Id(),
 		Name:       data.Get("name").(string),
@@ -71,6 +83,8 @@ func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.Custom
 		Priority: data.Get("priority").(int),
 
 		CachePolicy: data.Get("cache_policy").(string),
+
+		Config: config,
 	}
 }
 
@@ -85,6 +99,7 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 	data.Set("priority", custom.Priority)
 
 	data.Set("cache_policy", custom.CachePolicy)
+	data.Set("config", custom.Config)
 }
 
 func resourceKeycloakCustomUserFederationCreate(data *schema.ResourceData, meta interface{}) error {
