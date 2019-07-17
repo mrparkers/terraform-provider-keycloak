@@ -67,7 +67,7 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 	if keycloakClient.initialLogin {
 		err := keycloakClient.login()
 		if err != nil {
-			return nil, "", fmt.Errorf("error logging in: %s", err)
+			return nil, err
 		}
 	}	
 	
