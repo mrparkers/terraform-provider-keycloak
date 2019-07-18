@@ -27,7 +27,9 @@ shadowJar {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     compile "org.keycloak:keycloak-core:${keycloakVersion}"
+    compile "org.keycloak:keycloak-services:${keycloakVersion}"
     compile "org.keycloak:keycloak-server-spi:${keycloakVersion}"
+    compile "org.keycloak:keycloak-server-spi-private:${keycloakVersion}"
 }
 
 repositories {

@@ -7,6 +7,12 @@ import (
 
 func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 	oidcSchema := map[string]*schema.Schema{
+		"provider_id": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "oidc",
+			Description: "provider id, is always oidc, unless you have a custom implementation",
+		},
 		"backchannel_supported": {
 			Type:        schema.TypeBool,
 			Optional:    true,
@@ -72,6 +78,10 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 			Default:     false,
 			Description: "Pass current locale to identity provider",
 		},
+		"extra_config": {
+			Type:     schema.TypeMap,
+			Optional: true,
+		},
 	}
 	oidcResource := resourceKeycloakIdentityProvider()
 	oidcResource.Schema = mergeSchemas(oidcResource.Schema, oidcSchema)
@@ -83,7 +93,15 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 
 func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
 	rec, _ := getIdentityProviderFromData(data)
-	rec.ProviderId = "oidc"
+	rec.ProviderId = data.Get("provider_id").(string)
+
+	extraConfig := map[string]interface{}{}
+	if v, ok := data.GetOk("extra_config"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			extraConfig[key] = value
+		}
+	}
+
 	rec.Config = &keycloak.IdentityProviderConfig{
 		BackchannelSupported: keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
 		ValidateSignature:    keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
@@ -96,6 +114,7 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		LoginHint:            data.Get("login_hint").(string),
 		JwksUrl:              data.Get("jwks_url").(string),
 		UserInfoUrl:          data.Get("user_info_url").(string),
+		ExtraConfig:          extraConfig,
 	}
 	_, useJwksUrl := data.GetOk("jwks_url")
 	rec.Config.UseJwksUrl = keycloak.KeycloakBoolQuoted(useJwksUrl)
@@ -124,5 +143,6 @@ func setOidcIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("token_url", identityProvider.Config.TokenUrl)
 	data.Set("login_hint", identityProvider.Config.LoginHint)
 	data.Set("ui_locales", identityProvider.Config.UILocales)
+	data.Set("extra_config", identityProvider.Config.ExtraConfig)
 	return nil
 }
