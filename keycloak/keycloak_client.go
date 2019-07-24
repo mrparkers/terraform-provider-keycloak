@@ -19,6 +19,7 @@ type KeycloakClient struct {
 	realm             string
 	clientCredentials *ClientCredentials
 	httpClient        *http.Client
+	initialLogin      bool
 }
 
 type ClientCredentials struct {
@@ -37,7 +38,7 @@ const (
 	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool) (*KeycloakClient, error) {
 	httpClient := &http.Client{
 		Timeout: time.Second * 5,
 	}
@@ -59,12 +60,15 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 		baseUrl:           baseUrl,
 		clientCredentials: clientCredentials,
 		httpClient:        httpClient,
+		initialLogin:      initialLogin,
 		realm:             realm,
 	}
 
-	err := keycloakClient.login()
-	if err != nil {
-		return nil, err
+	if keycloakClient.initialLogin {
+		err := keycloakClient.login()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &keycloakClient, nil
@@ -176,6 +180,13 @@ func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 Sends an HTTP request and refreshes credentials on 403 or 401 errors
 */
 func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte, string, error) {
+	if !keycloakClient.initialLogin {
+		keycloakClient.initialLogin = true
+		err := keycloakClient.login()
+		if err != nil {
+			return nil, "", fmt.Errorf("error logging in: %s", err)
+		}
+	}
 	requestMethod := request.Method
 	requestPath := request.URL.Path
 

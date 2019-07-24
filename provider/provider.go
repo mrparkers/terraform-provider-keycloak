@@ -85,6 +85,12 @@ func KeycloakProvider() *schema.Provider {
 				Description: "The base URL of the Keycloak instance, before `/auth`",
 				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_URL", nil),
 			},
+			"initial_login": {
+				Optional:    true,
+				Type:        schema.TypeBool,
+				Description: "Whether or not to login to Keycloak instance on provider initialization",
+				Default:     true,
+			},
 		},
 		ConfigureFunc: configureKeycloakProvider,
 	}
@@ -97,5 +103,6 @@ func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
 	username := data.Get("username").(string)
 	password := data.Get("password").(string)
 	realm := data.Get("realm").(string)
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password)
+	initialLogin := data.Get("initial_login").(bool)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin)
 }
