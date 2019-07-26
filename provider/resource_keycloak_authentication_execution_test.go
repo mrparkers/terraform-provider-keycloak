@@ -100,7 +100,6 @@ func TestAccKeycloakAuthenticationExecution_updateAuthenticationExecutionRequire
 	})
 }
 
-
 func testAccCheckKeycloakAuthenticationExecutionExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getAuthenticationExecutionFromState(s, resourceName)
