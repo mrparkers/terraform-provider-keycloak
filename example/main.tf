@@ -414,6 +414,19 @@ resource keycloak_oidc_identity_provider oidc {
 	client_secret     = "example_token"
 }
 
+resource keycloak_oidc_identity_provider custom_oidc_idp {
+	realm             = "${keycloak_realm.test.id}"
+	provider_id		  = "customIdp"
+	alias             = "custom"
+	authorization_url = "https://example.com/auth"
+	token_url         = "https://example.com/token"
+	client_id         = "example_id"
+	client_secret     = "example_token"
+	extra_config = {
+		dummyConfig = "dummyValue"
+	}
+}
+
 resource keycloak_attribute_importer_identity_provider_mapper oidc {
 	realm                   = "${keycloak_realm.test.id}"
 	name                    = "attributeImporter"

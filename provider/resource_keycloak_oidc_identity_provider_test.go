@@ -26,6 +26,27 @@ func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOidcIdentityProvider_custom(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	oidcName := "terraform-" + acctest.RandString(10)
+	customConfigValue := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOidcIdentityProviderDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOidcIdentityProvider_custom(realmName, oidcName, customConfigValue),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
+					testAccCheckKeycloakOidcIdentityProviderHasCustomConfigValue("keycloak_oidc_identity_provider.oidc", customConfigValue),
+				),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOidcIdentityProvider_createAfterManualDestroy(t *testing.T) {
 	var oidc = &keycloak.IdentityProvider{}
 
@@ -155,6 +176,21 @@ func testAccCheckKeycloakOidcIdentityProviderFetch(resourceName string, oidc *ke
 	}
 }
 
+func testAccCheckKeycloakOidcIdentityProviderHasCustomConfigValue(resourceName, customConfigValue string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedOidc, err := getKeycloakOidcIdentityProviderFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if fetchedOidc.Config.ExtraConfig["dummyConfig"].(string) != customConfigValue {
+			return fmt.Errorf("expected custom oidc provider to have config with a custom key 'dummyConfig' with a value %s, but value was %s", customConfigValue, fetchedOidc.Config.ExtraConfig["dummyConfig"].(string))
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakOidcIdentityProviderDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -211,6 +247,27 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	client_secret     = "example_token"
 }
 	`, realm, oidc)
+}
+
+func testKeycloakOidcIdentityProvider_custom(realm, alias, customConfigValue string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_oidc_identity_provider" "oidc" {
+	realm             = "${keycloak_realm.realm.id}"
+	provider_id       = "customIdp"
+	alias             = "%s"
+	authorization_url = "https://example.com/auth"
+	token_url         = "https://example.com/token"
+	client_id         = "example_id"
+	client_secret     = "example_token"
+	extra_config      = {
+		dummyConfig = "%s"    
+	}
+}
+	`, realm, alias, customConfigValue)
 }
 
 func testKeycloakOidcIdentityProvider_basicFromInterface(oidc *keycloak.IdentityProvider) string {
