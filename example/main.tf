@@ -52,41 +52,6 @@ resource "keycloak_realm" "test" {
 	}
 }
 
-resource "keycloak_authentication_flow" "myflow" {
-	alias    = "myTestAliasFlow"
-	realm_id = "${keycloak_realm.test.id}"
-
-}
-
-resource "keycloak_authentication_subflow" "subflow" {
-	realm_id = "${keycloak_realm.test.id}"
-	parent_flow_alias = "${keycloak_authentication_flow.myflow.alias}"
-	alias    = "subTest"
-	requirement = "REQUIRED"
-}
-
-resource "keycloak_authentication_subflow" "subsubflow" {
-	realm_id = "${keycloak_realm.test.id}"
-	parent_flow_alias = "${keycloak_authentication_subflow.subflow.alias}"
-	alias    = "subsubTest"
-	requirement = "REQUIRED"
-}
-
-resource "keycloak_authentication_execution" "execution" {
-	realm_id = "${keycloak_realm.test.id}"
-	parent_flow_alias = "${keycloak_authentication_subflow.subsubflow.alias}"
-	authenticator = "auth-cookie"
-	requirement = "ALTERNATIVE"
-}
-
-resource "keycloak_authentication_subflow" "subflow2" {
-	realm_id = "${keycloak_realm.test.id}"
-	parent_flow_alias = "${keycloak_authentication_flow.myflow.alias}"
-	alias    = "subTest3"
-	requirement = "REQUIRED"
-	provider_id = "form-flow"
-}
-
 resource "keycloak_authentication_flow" "browser-copy-flow" {
 	alias    = "browserCopyFlow"
 	realm_id = "${keycloak_realm.test.id}"
@@ -98,6 +63,7 @@ resource "keycloak_authentication_execution" "browser-copy-cookie" {
 	parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
 	authenticator = "auth-cookie"
 	requirement = "ALTERNATIVE"
+	depends_on = ["keycloak_authentication_execution.browser-copy-kerberos"]
 }
 
 resource "keycloak_authentication_execution" "browser-copy-kerberos" {
@@ -112,6 +78,7 @@ resource "keycloak_authentication_execution" "browser-copy-idp-redirect" {
 	parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
 	authenticator = "identity-provider-redirector"
 	requirement = "ALTERNATIVE"
+	depends_on = ["keycloak_authentication_execution.browser-copy-cookie"]
 }
 
 resource "keycloak_authentication_subflow" "browser-copy-flow-forms" {
@@ -119,6 +86,7 @@ resource "keycloak_authentication_subflow" "browser-copy-flow-forms" {
 	parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
 	alias    = "browser-copy-flow-forms"
 	requirement = "ALTERNATIVE"
+	depends_on = ["keycloak_authentication_execution.browser-copy-idp-redirect"]
 }
 
 resource "keycloak_authentication_execution" "browser-copy-auth-username-password-form" {
@@ -133,6 +101,7 @@ resource "keycloak_authentication_execution" "browser-copy-otp" {
 	parent_flow_alias = "${keycloak_authentication_subflow.browser-copy-flow-forms.alias}"
 	authenticator = "auth-otp-form"
 	requirement = "OPTIONAL"
+	depends_on = ["keycloak_authentication_execution.browser-copy-auth-username-password-form"]
 }
 
 
