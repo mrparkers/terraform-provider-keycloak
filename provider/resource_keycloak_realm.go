@@ -310,6 +310,11 @@ func resourceKeycloakRealm() *schema.Resource {
 					},
 				},
 			},
+			"password_policy": {
+				Type:        schema.TypeString,
+				Description: "String that represents the passwordPolicies that are in place. Each policy is separated with \" and \". Supported policies can be found in the server-info providers page. example: \"upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername(undefined)\"",
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -534,6 +539,10 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	} else {
 		setDefaultSecuritySettings(realm)
 	}
+
+	if passwordPolicy, ok := data.GetOk("password_policy"); ok {
+		realm.PasswordPolicy = passwordPolicy.(string)
+	}
 	return realm, nil
 }
 
@@ -647,6 +656,8 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 			data.Set("security_defenses", []interface{}{securityDefensesSettings})
 		}
 	}
+
+	data.Set("password_policy", realm.PasswordPolicy)
 }
 
 func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {

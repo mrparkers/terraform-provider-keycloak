@@ -442,6 +442,74 @@ func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	realmDisplayName := "terraform-" + acctest.RandString(10)
+	passwordPolicyStringValid1 := "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
+	passwordPolicyStringValid2 := "upperCase(1) and length(8)"
+	passwordPolicyStringValid3 := "lowerCase(2)"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmPasswordPolicy("keycloak_realm.realm", ""),
+			},
+			{
+				Config: testKeycloakRealm_passwordPolicy(realmName, realmDisplayName, passwordPolicyStringValid1),
+				Check:  testAccCheckKeycloakRealmPasswordPolicy("keycloak_realm.realm", passwordPolicyStringValid1),
+			},
+			{
+				Config: testKeycloakRealm_passwordPolicy(realmName, realmDisplayName, passwordPolicyStringValid2),
+				Check:  testAccCheckKeycloakRealmPasswordPolicy("keycloak_realm.realm", passwordPolicyStringValid2),
+			},
+			{
+				Config: testKeycloakRealm_passwordPolicy(realmName, realmDisplayName, passwordPolicyStringValid3),
+				Check:  testAccCheckKeycloakRealmPasswordPolicy("keycloak_realm.realm", passwordPolicyStringValid3),
+			},
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmPasswordPolicy("keycloak_realm.realm", ""),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	realmDisplayName := "terraform-" + acctest.RandString(10)
+	passwordPolicyStringInvalid1 := "unknownpolicy(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
+	passwordPolicyStringInvalid2 := "lowerCase(1) and length(8) and unknownpolicy(365) and notUsername"
+	passwordPolicyStringInvalid3 := "unknownpolicy(2)"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmPasswordPolicy("keycloak_realm.realm", ""),
+			},
+			{
+				Config:      testKeycloakRealm_passwordPolicy(realmName, realmDisplayName, passwordPolicyStringInvalid1),
+				ExpectError: regexp.MustCompile("errors during apply: validation error: password-policy .+ does not exist on the server, installed providers: .+"),
+			},
+			{
+				Config:      testKeycloakRealm_passwordPolicy(realmName, realmDisplayName, passwordPolicyStringInvalid2),
+				ExpectError: regexp.MustCompile("errors during apply: validation error: password-policy .+ does not exist on the server, installed providers: .+"),
+			},
+			{
+				Config:      testKeycloakRealm_passwordPolicy(realmName, realmDisplayName, passwordPolicyStringInvalid3),
+				ExpectError: regexp.MustCompile("errors during apply: validation error: password-policy .+ does not exist on the server, installed providers: .+"),
+			},
+		},
+	})
+}
+
 func testKeycloakRealmLoginInfo(resourceName string, realm *keycloak.Realm) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		realmFromState, err := getRealmFromState(s, resourceName)
@@ -645,6 +713,21 @@ func testAccCheckKeycloakRealmSecurityDefenses(resourceName, xFrameOptions strin
 
 		if realm.Attributes.BrowserHeaderXFrameOptions != xFrameOptions {
 			return fmt.Errorf("expected realm %s to have attribute _browser_header.xFrameOptions set to %s, but was %s", realm.Realm, xFrameOptions, realm.Attributes.BrowserHeaderXFrameOptions)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRealmPasswordPolicy(resourceName, passwordPolicy string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.PasswordPolicy != passwordPolicy {
+			return fmt.Errorf("expected realm %s to have passwordPolicy %s, but was %s", realm.Realm, passwordPolicy, realm.PasswordPolicy)
 		}
 
 		return nil
@@ -903,4 +986,15 @@ resource "keycloak_realm" "realm" {
 	}
 }
 	`, realm, realmDisplayName, xFrameOptions)
+}
+
+func testKeycloakRealm_passwordPolicy(realm, realmDisplayName, passwordPolicy string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+	password_policy = "%s"
+}
+	`, realm, realmDisplayName, passwordPolicy)
 }
