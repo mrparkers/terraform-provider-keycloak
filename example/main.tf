@@ -51,7 +51,7 @@ resource "keycloak_realm" "test" {
 		}
 	}
 
-	password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsernametwo()"
+	password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
 }
 
 resource "keycloak_required_action" "custom-terms-and-conditions" {
