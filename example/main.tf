@@ -9,7 +9,7 @@ resource "keycloak_realm" "test" {
 	enabled      = true
 	display_name = "foo"
 
-	smtp_server {
+	smtp_server = {
 		host                  = "mysmtphost.com"
 		port                  = 25
 		from_display_name     = "Tom"
@@ -20,7 +20,7 @@ resource "keycloak_realm" "test" {
 		starttls              = true
 		envelope_from         = "nottom@myhost.com"
 
-		auth {
+		auth  = {
 			username = "tom"
 			password = "tom"
 		}
@@ -30,7 +30,7 @@ resource "keycloak_realm" "test" {
 
 	access_code_lifespan = "30m"
 
-	internationalization {
+	internationalization = {
 		supported_locales = [
 			"en",
 			"de",
@@ -39,8 +39,8 @@ resource "keycloak_realm" "test" {
 		default_locale    = "en"
 	}
 
-	security_defenses {
-		headers {
+	security_defenses = {
+		headers = {
 			x_frame_options = "DENY"
 			content_security_policy = "frame-src 'self'; frame-ancestors 'self'; object-src 'none';"
 			content_security_policy_report_only = ""
@@ -50,6 +50,8 @@ resource "keycloak_realm" "test" {
 			strict_transport_security = "max-age=31536000; includeSubDomains"
 		}
 	}
+
+	password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
 }
 
 resource "keycloak_required_action" "custom-terms-and-conditions" {

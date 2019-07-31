@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Key struct {
@@ -66,6 +67,8 @@ type Realm struct {
 
 	//extra attributes of a realm, contains security defenses browser headers and brute force detection parameters(those still nee to be added)
 	Attributes Attributes `json:"attributes,omitempty"`
+
+	PasswordPolicy string `json:"passwordPolicy"`
 }
 
 type Attributes struct {
@@ -172,6 +175,16 @@ func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
 
 	if realm.InternationalizationEnabled == true && !contains(realm.SupportLocales, realm.DefaultLocale) {
 		return fmt.Errorf("validation error: DefaultLocale should be in the SupportLocales")
+	}
+
+	if realm.PasswordPolicy != "" {
+		policies := strings.Split(realm.PasswordPolicy, " and ")
+		for _, policyTypeRepresentation := range policies {
+			policy := strings.Split(policyTypeRepresentation, "(")
+			if !serverInfo.providerInstalled("password-policy", policy[0]) {
+				return fmt.Errorf("validation error: password-policy \"%s\" does not exist on the server, installed providers: %s", policy[0], serverInfo.getInstalledProvidersNames("password-policy"))
+			}
+		}
 	}
 
 	return nil
