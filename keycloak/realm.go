@@ -69,6 +69,14 @@ type Realm struct {
 	Attributes Attributes `json:"attributes,omitempty"`
 
 	PasswordPolicy string `json:"passwordPolicy"`
+
+	//flow bindings
+	BrowserFlow              string `json:"browserFlow,omitempty"`
+	RegistrationFlow         string `json:"registrationFlow,omitempty"`
+	DirectGrantFlow          string `json:"directGrantFlow,omitempty"`
+	ResetCredentialsFlow     string `json:"resetCredentialsFlow,omitempty"`
+	ClientAuthenticationFlow string `json:"clientAuthenticationFlow,omitempty"`
+	DockerAuthenticationFlow string `json:"dockerAuthenticationFlow,omitempty"`
 }
 
 type Attributes struct {
@@ -109,7 +117,6 @@ func (keycloakClient *KeycloakClient) GetRealm(id string) (*Realm, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &realm, nil
 }
 

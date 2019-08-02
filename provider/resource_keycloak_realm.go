@@ -315,6 +315,44 @@ func resourceKeycloakRealm() *schema.Resource {
 				Description: "String that represents the passwordPolicies that are in place. Each policy is separated with \" and \". Supported policies can be found in the server-info providers page. example: \"upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername(undefined)\"",
 				Optional:    true,
 			},
+
+			//flow bindings
+			"browser_flow": {
+				Type:        schema.TypeString,
+				Description: "Which flow should be used for BrowserFlow",
+				Optional:    true,
+				Default:     "browser",
+			},
+			"registration_flow": {
+				Type:        schema.TypeString,
+				Description: "Which flow should be used for RegistrationFlow",
+				Optional:    true,
+				Default:     "registration",
+			},
+			"direct_grant_flow": {
+				Type:        schema.TypeString,
+				Description: "Which flow should be used for DirectGrantFlow",
+				Optional:    true,
+				Default:     "direct grant",
+			},
+			"reset_credentials_flow": {
+				Type:        schema.TypeString,
+				Description: "Which flow should be used for ResetCredentialsFlow",
+				Optional:    true,
+				Default:     "registration",
+			},
+			"client_authentication_flow": {
+				Type:        schema.TypeString,
+				Description: "Which flow should be used for ClientAuthenticationFlow",
+				Optional:    true,
+				Default:     "clients",
+			},
+			"docker_authentication_flow": {
+				Type:        schema.TypeString,
+				Description: "Which flow should be used for DockerAuthenticationFlow",
+				Optional:    true,
+				Default:     "docker auth",
+			},
 		},
 	}
 }
@@ -543,6 +581,32 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	if passwordPolicy, ok := data.GetOk("password_policy"); ok {
 		realm.PasswordPolicy = passwordPolicy.(string)
 	}
+
+	//Flow Bindings
+	if flow, ok := data.GetOk("browser_flow"); ok {
+		realm.BrowserFlow = flow.(string)
+	}
+
+	if flow, ok := data.GetOk("registration_flow"); ok {
+		realm.RegistrationFlow = flow.(string)
+	}
+
+	if flow, ok := data.GetOk("direct_grant_flow"); ok {
+		realm.DirectGrantFlow = flow.(string)
+	}
+
+	if flow, ok := data.GetOk("reset_credentials_flow"); ok {
+		realm.ResetCredentialsFlow = flow.(string)
+	}
+
+	if flow, ok := data.GetOk("client_authentication_flow"); ok {
+		realm.ClientAuthenticationFlow = flow.(string)
+	}
+
+	if flow, ok := data.GetOk("docker_authentication_flow"); ok {
+		realm.DockerAuthenticationFlow = flow.(string)
+	}
+
 	return realm, nil
 }
 
@@ -658,6 +722,14 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	}
 
 	data.Set("password_policy", realm.PasswordPolicy)
+
+	//Flow Bindings
+	data.Set("browser_flow", realm.BrowserFlow)
+	data.Set("registration_flow", realm.RegistrationFlow)
+	data.Set("direct_grant_flow", realm.DirectGrantFlow)
+	data.Set("reset_credentials_flow", realm.ResetCredentialsFlow)
+	data.Set("client_authentication_flow", realm.ClientAuthenticationFlow)
+	data.Set("docker_authentication_flow", realm.DockerAuthenticationFlow)
 }
 
 func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {
