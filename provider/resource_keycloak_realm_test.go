@@ -478,6 +478,32 @@ func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_browserFlow(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	realmDisplayName := "terraform-" + acctest.RandString(10)
+	newBrowserFlow := "registration"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", "browser"),
+			},
+			{
+				Config: testKeycloakRealm_browserFlow(realmName, realmDisplayName, newBrowserFlow),
+				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", newBrowserFlow),
+			},
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", "browser"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
@@ -728,6 +754,21 @@ func testAccCheckKeycloakRealmPasswordPolicy(resourceName, passwordPolicy string
 
 		if realm.PasswordPolicy != passwordPolicy {
 			return fmt.Errorf("expected realm %s to have passwordPolicy %s, but was %s", realm.Realm, passwordPolicy, realm.PasswordPolicy)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRealmBrowserFlow(resourceName, browserFlow string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.BrowserFlow != browserFlow {
+			return fmt.Errorf("expected realm %s to have browserFlow binding %s, but was %s", realm.Realm, browserFlow, realm.BrowserFlow)
 		}
 
 		return nil
@@ -997,4 +1038,15 @@ resource "keycloak_realm" "realm" {
 	password_policy = "%s"
 }
 	`, realm, realmDisplayName, passwordPolicy)
+}
+
+func testKeycloakRealm_browserFlow(realm, realmDisplayName, browserFlow string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+	browser_flow = "%s"
+}
+	`, realm, realmDisplayName, browserFlow)
 }
