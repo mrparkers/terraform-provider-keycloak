@@ -145,6 +145,7 @@ func resourceKeycloakIdentityProviderImport(d *schema.ResourceData, _ interface{
 	}
 
 	d.Set("realm", parts[0])
+	d.Set("alias", parts[1])
 	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
