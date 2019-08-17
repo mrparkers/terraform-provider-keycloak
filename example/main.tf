@@ -26,7 +26,7 @@ resource "keycloak_realm" "test" {
     }
   }
 
-  account_theme = "base"
+	account_theme = "base"
 
   access_code_lifespan = "30m"
 
@@ -114,7 +114,7 @@ resource "keycloak_user" "user_with_password" {
   last_name  = "Tester"
 
   initial_password {
-    value     = "my password"
+    value     = "My password"
     temporary = false
   }
 }
@@ -145,7 +145,8 @@ resource "keycloak_openid_client" "test_client" {
   realm_id    = "${keycloak_realm.test.id}"
   description = "a test openid client"
 
-  standard_flow_enabled = true
+  standard_flow_enabled    = true
+	service_accounts_enabled = true
 
   access_type = "CONFIDENTIAL"
 
@@ -434,7 +435,7 @@ resource keycloak_oidc_identity_provider custom_oidc_idp {
   token_url         = "https://example.com/token"
   client_id         = "example_id"
   client_secret     = "example_token"
-  extra_config = {
+  extra_config      = {
     dummyConfig = "dummyValue"
   }
 }
