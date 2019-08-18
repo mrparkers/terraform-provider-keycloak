@@ -19,14 +19,38 @@ func TestAccKeycloakRole_basicRealm(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRole_basic(realmName, roleName),
+				Config: testKeycloakRole_basicRealm(realmName, roleName),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
-				ResourceName:      "keycloak_role.role",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateId:     fmt.Sprintf("%s/%s", realmName, roleName),
+				ResourceName:        "keycloak_role.role",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRole_basicClient(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-client-" + acctest.RandString(10)
+	roleName := "terraform-role-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRoleDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRole_basicClient(realmName, clientId, roleName),
+				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
+			},
+			{
+				ResourceName:        "keycloak_role.role",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
 			},
 		},
 	})
@@ -84,7 +108,7 @@ func getRoleFromState(s *terraform.State, resourceName string) (*keycloak.Role, 
 	return role, nil
 }
 
-func testKeycloakRole_basic(realm, role string) string {
+func testKeycloakRole_basicRealm(realm, role string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -95,4 +119,24 @@ resource "keycloak_role" "role" {
 	realm_id = "${keycloak_realm.realm.id}"
 }
 	`, realm, role)
+}
+
+func testKeycloakRole_basicClient(realm, clientId, role string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "CONFIDENTIAL"
+}
+
+resource "keycloak_role" "role" {
+	name      = "%s"
+	realm_id  = "${keycloak_realm.realm.id}"
+	client_id = "${keycloak_openid_client.client.id}"
+}
+	`, realm, clientId, role)
 }

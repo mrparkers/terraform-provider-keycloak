@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"regexp"
 	"strings"
 )
 
@@ -14,7 +13,7 @@ func resourceKeycloakRole() *schema.Resource {
 		Read:   resourceKeycloakRoleRead,
 		Delete: resourceKeycloakRoleDelete,
 		Update: resourceKeycloakRoleUpdate,
-		// This resource can be imported using {{realm}}/{{role_name}} or {{realm}}/{{client_id}}/{{role_name}}.
+		// This resource can be imported using {{realm}}/{{roleId}}. The role's ID (a GUID) can be found in the URL when viewing the role
 		Importer: &schema.ResourceImporter{
 			State: resourceKeycloakRoleImport,
 		},
@@ -83,17 +82,7 @@ func resourceKeycloakRoleRead(data *schema.ResourceData, meta interface{}) error
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	var role *keycloak.Role
-	var err error
-
-	if ok, _ := regexp.MatchString(`.+/.+(/.+)?`, id); ok { // the ID is set to {{realm}}/{{role}} or {{realm}}/{{client}}/{{role}} during import
-		clientId := data.Get("client_id").(string)
-		name := data.Get("name").(string)
-
-		role, err = keycloakClient.GetRoleByName(realmId, clientId, name)
-	} else {
-		role, err = keycloakClient.GetRole(realmId, id)
-	}
+	role, err := keycloakClient.GetRole(realmId, id)
 
 	if err != nil {
 		return handleNotFoundError(err, data)
@@ -131,16 +120,12 @@ func resourceKeycloakRoleDelete(data *schema.ResourceData, meta interface{}) err
 func resourceKeycloakRoleImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	if len(parts) == 2 {
-		d.Set("realm_id", parts[0])
-		d.Set("name", parts[1])
-	} else if len(parts) == 3 {
-		d.Set("realm_id", parts[0])
-		d.Set("client_id", parts[1])
-		d.Set("name", parts[2])
-	} else {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realm}}/{{role_name}} or {{realm}}/{{client_id}}/{{role_name}}")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("Invalid import. Supported import format: {{realm}}/{{roleId}}.")
 	}
+
+	d.Set("realm_id", parts[0])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }
