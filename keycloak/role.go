@@ -28,6 +28,12 @@ func roleByNameUrl(realmId, clientId string) string {
 
 func (keycloakClient *KeycloakClient) CreateRole(role *Role) error {
 	url := roleByNameUrl(role.RealmId, role.ClientId)
+
+	if role.ClientId != "" {
+		role.ContainerId = role.ClientId
+		role.ClientRole = true
+	}
+
 	_, _, err := keycloakClient.post(url, role)
 	if err != nil {
 		return err
@@ -48,6 +54,23 @@ func (keycloakClient *KeycloakClient) GetRole(realmId, id string) (*Role, error)
 	var role Role
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), &role, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	role.RealmId = realmId
+
+	if role.ClientRole {
+		role.ClientId = role.ContainerId
+	}
+
+	return &role, nil
+}
+
+func (keycloakClient *KeycloakClient) GetRoleByName(realmId, clientId, name string) (*Role, error) {
+	var role Role
+
+	err := keycloakClient.get(fmt.Sprintf("%s/%s", roleByNameUrl(realmId, clientId), name), &role, nil)
 	if err != nil {
 		return nil, err
 	}

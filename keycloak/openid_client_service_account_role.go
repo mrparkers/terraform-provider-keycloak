@@ -16,7 +16,7 @@ type OpenidClientServiceAccountRole struct {
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(serviceAccountRole *OpenidClientServiceAccountRole) error {
-	role, err := keycloakClient.GetClientRoleByName(serviceAccountRole.RealmId, serviceAccountRole.ContainerId, serviceAccountRole.Name)
+	role, err := keycloakClient.GetRoleByName(serviceAccountRole.RealmId, serviceAccountRole.ContainerId, serviceAccountRole.Name)
 	if err != nil {
 		return err
 	}

@@ -46,30 +46,6 @@ type OpenidClient struct {
 	AuthorizationSettings        *OpenidClientAuthorizationSettings `json:"authorizationSettings,omitempty"`
 }
 
-func (keycloakClient *KeycloakClient) GetClientRoleByName(realm, clientId, name string) (*OpenidClientRole, error) {
-	var clientRole OpenidClientRole
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/roles/%s", realm, clientId, name), &clientRole, nil)
-	if err != nil {
-		return nil, err
-	}
-	return &clientRole, nil
-}
-
-func (keycloakClient *KeycloakClient) GetClientByName(realm, clientId string) (*OpenidClient, error) {
-	var clients []OpenidClient
-	params := map[string]string{"clientId": clientId}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients", realm), &clients, params)
-	if err != nil {
-		return nil, err
-	}
-	if len(clients) == 0 {
-		return nil, fmt.Errorf("no clients with name %s found", clientId)
-	}
-	client := clients[0]
-	client.RealmId = realm
-	return &client, nil
-}
-
 func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountUserId(realmId, clientId string) (*User, error) {
 	var serviceAccountUser User
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/service-account-user", realmId, clientId), &serviceAccountUser, nil)
