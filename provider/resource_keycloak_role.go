@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
 	"strings"
 )
 
@@ -85,13 +86,13 @@ func resourceKeycloakRoleRead(data *schema.ResourceData, meta interface{}) error
 	var role *keycloak.Role
 	var err error
 
-	if id == "" {
-		role, err = keycloakClient.GetRole(realmId, id)
-	} else {
+	if ok, _ := regexp.MatchString(`.+/.+(/.+)?`, id); ok { // the ID is set to {{realm}}/{{role}} or {{realm}}/{{client}}/{{role}} during import
 		clientId := data.Get("client_id").(string)
 		name := data.Get("name").(string)
 
 		role, err = keycloakClient.GetRoleByName(realmId, clientId, name)
+	} else {
+		role, err = keycloakClient.GetRole(realmId, id)
 	}
 
 	if err != nil {
