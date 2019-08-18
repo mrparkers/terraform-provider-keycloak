@@ -74,6 +74,15 @@ resource "keycloak_openid_audience_protocol_mapper" "pet_app_pet_api_audience_ma
 	included_client_audience = "${keycloak_openid_client.pet_api.client_id}"
 }
 
+// The app will always need to read / list pets regardless of who is logged in
+resource "keycloak_openid_hardcoded_role_protocol_mapper" "pet_app_pet_api_read_role" {
+	realm_id  = "${keycloak_realm.roles_example.id}"
+	client_id = "${keycloak_openid_client.pet_app.id}"
+	name      = "read-pets-role"
+
+	role_id   = "${keycloak_role.pet_api_read_pet.id}"
+}
+
 // Users and groups
 
 resource "keycloak_group" "pet_api_base" {
