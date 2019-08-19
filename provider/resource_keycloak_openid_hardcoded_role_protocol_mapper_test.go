@@ -30,6 +30,28 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_client(t *t
 	})
 }
 
+func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicClientRole_client(t *testing.T) {
+	realmName := "terraform-realm-" + acctest.RandString(10)
+	clientIdForRole := "terraform-client-" + acctest.RandString(10)
+	role := "terraform-role-" + acctest.RandString(10)
+	clientId := "terraform-client-" + acctest.RandString(10)
+	mapperName := "terraform-openid-connect-hardcoded-role-mapper-" + acctest.RandString(5)
+
+	resourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccKeycloakOpenIdHardcodedRoleProtocolMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenIdHardcodedRoleProtocolMapper_basicClientRole_client(realmName, clientIdForRole, role, clientId, mapperName),
+				Check:  testKeycloakOpenIdHardcodedRoleProtocolMapperExists(resourceName),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_clientScope(t *testing.T) {
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	role := "terraform-role-" + acctest.RandString(10)
@@ -361,4 +383,38 @@ resource "keycloak_openid_hardcoded_role_protocol_mapper" "hardcoded_role_mapper
 	client_id      = "${keycloak_openid_client.openid_client.id}"
 	role_id        = "${keycloak_role.role_two.id}"
 }`, realmName, roleOne, roleTwo, clientId, mapperName)
+}
+
+func testKeycloakOpenIdHardcodedRoleProtocolMapper_basicClientRole_client(realmName, clientIdForRole, role, clientId, mapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "openid_client_for_role" {
+	realm_id  = "${keycloak_realm.realm.id}"
+	client_id = "%s"
+
+	access_type = "BEARER-ONLY"
+}
+
+resource "keycloak_role" "role" {
+	name      = "%s"
+	realm_id  = "${keycloak_realm.realm.id}"
+	client_id = "${keycloak_openid_client.openid_client_for_role.id}"
+}
+
+resource "keycloak_openid_client" "openid_client" {
+	realm_id  = "${keycloak_realm.realm.id}"
+	client_id = "%s"
+
+	access_type = "BEARER-ONLY"
+}
+
+resource "keycloak_openid_hardcoded_role_protocol_mapper" "hardcoded_role_mapper_client" {
+	name           = "%s"
+	realm_id       = "${keycloak_realm.realm.id}"
+	client_id      = "${keycloak_openid_client.openid_client.id}"
+	role_id        = "${keycloak_role.role.id}"
+}`, realmName, clientIdForRole, role, clientId, mapperName)
 }
