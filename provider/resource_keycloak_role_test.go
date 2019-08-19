@@ -111,6 +111,40 @@ func TestAccKeycloakRole_basicClientUpdate(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRole_createAfterManualDestroy(t *testing.T) {
+	var role = &keycloak.Role{}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	roleName := "terraform-role-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRoleDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRole_basicRealm(realmName, roleName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRoleExists("keycloak_role.role"),
+					testAccCheckKeycloakRoleFetch("keycloak_role.role", role),
+				),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteRole(role.RealmId, role.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakRole_basicRealm(realmName, roleName),
+				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakRoleExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getRoleFromState(s, resourceName)
@@ -139,6 +173,21 @@ func testAccCheckKeycloakRoleDestroy() resource.TestCheckFunc {
 				return fmt.Errorf("role with id %s still exists", id)
 			}
 		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRoleFetch(resourceName string, role *keycloak.Role) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		fetchedRole, err := getRoleFromState(state, resourceName)
+		if err != nil {
+			return err
+		}
+
+		role.Id = fetchedRole.Id
+		role.Name = fetchedRole.Name
+		role.RealmId = fetchedRole.RealmId
 
 		return nil
 	}
