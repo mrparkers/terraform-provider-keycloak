@@ -33,6 +33,28 @@ func TestAccKeycloakDefaultGroups_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakDefaultGroups_import(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	groupName := "terraform-group-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakDefaultGroups_basic(realmName, groupName),
+				Check:  testAccCheckGroupsAreDefault("keycloak_default_groups.group_default", []string{groupName}),
+			},
+			{
+				ResourceName:      "keycloak_default_groups.group_default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateId:     realmName,
+			},
+		},
+	})
+}
+
 func TestAccKeycloakDefaultGroups_updateInPlace(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 
