@@ -11,6 +11,9 @@ func resourceKeycloakDefaultGroups() *schema.Resource {
 		Read:   resourceKeycloakDefaultGroupsRead,
 		Update: resourceKeycloakDefaultGroupsUpdate,
 		Delete: resourceKeycloakDefaultGroupsDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceKeycloakDefaultGroupsImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -119,4 +122,10 @@ func resourceKeycloakDefaultGroupsDelete(data *schema.ResourceData, meta interfa
 	}
 
 	return nil
+}
+
+func resourceKeycloakDefaultGroupsImport(data *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	data.Set("realm_id", data.Id())
+	data.SetId(data.Id())
+	return []*schema.ResourceData{data}, nil
 }
