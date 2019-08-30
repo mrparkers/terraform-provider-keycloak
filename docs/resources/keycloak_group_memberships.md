@@ -8,6 +8,9 @@ to the group will be removed, and users that are manually removed from the group
 be added upon the next run of `terraform apply`.  Eventually, a non-authoritative resource
 for group membership will be added to this provider.
 
+Also note that you should not use `keycloak_group_memberships` with a group has been assigned
+as a default group via `keycloak_default_groups`.
+
 This resource **should not** be used to control membership of a group that has its members
 federated from an external source via group mapping.
 
