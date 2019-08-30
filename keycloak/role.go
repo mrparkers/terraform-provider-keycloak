@@ -8,10 +8,12 @@ type Role struct {
 	Id          string `json:"id,omitempty"`
 	RealmId     string `json:"-"`
 	ClientId    string `json:"-"`
+	RoleId      string `json:"-"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	ClientRole  bool   `json:"clientRole"`
 	ContainerId string `json:"containerId"`
+	Composite   bool   `json:"composite"`
 }
 
 /*
@@ -67,6 +69,24 @@ func (keycloakClient *KeycloakClient) GetRole(realmId, id string) (*Role, error)
 	return &role, nil
 }
 
+// role_id uses the format {{role_name}} for a realm role, and {{client_id}}.{{role_name}} for a client role
+func (keycloakClient *KeycloakClient) GetRoleByRoleId(realmId, id string) (*Role, error) {
+	var role Role
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), &role, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	role.RealmId = realmId
+
+	if role.ClientRole {
+		role.ClientId = role.ContainerId
+	}
+
+	return &role, nil
+}
+
 func (keycloakClient *KeycloakClient) GetRoleByName(realmId, clientId, name string) (*Role, error) {
 	var role Role
 
@@ -90,4 +110,33 @@ func (keycloakClient *KeycloakClient) UpdateRole(role *Role) error {
 
 func (keycloakClient *KeycloakClient) DeleteRole(realmId, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), nil)
+}
+
+func (keycloakClient *KeycloakClient) AddCompositesToRole(role *Role, compositeRoles []*Role) error {
+	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/roles-by-id/%s/composites", role.RealmId, role.Id), compositeRoles)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (keycloakClient *KeycloakClient) RemoveCompositesFromRole(role *Role, compositeRoles []*Role) error {
+	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/roles-by-id/%s/composites", role.RealmId, role.Id), compositeRoles)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (keycloakClient *KeycloakClient) GetRoleComposites(role *Role) ([]*Role, error) {
+	var composites []*Role
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/roles-by-id/%s/composites", role.RealmId, role.Id), &composites, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return composites, nil
 }

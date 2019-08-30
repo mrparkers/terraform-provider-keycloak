@@ -43,6 +43,18 @@ resource "keycloak_role" "pet_api_delete_pet" {
 	description = "Ability to delete a pet"
 }
 
+resource "keycloak_role" "pet_api_admin" {
+	name = "admin"
+	realm_id    = "${keycloak_realm.roles_example.id}"
+	client_id   = "${keycloak_openid_client.pet_api.id}"
+
+	composite_roles = [
+		"${keycloak_role.pet_api_create_pet.id}",
+		"${keycloak_role.pet_api_delete_pet.id}",
+		"${keycloak_role.pet_api_update_pet.id}",
+	]
+}
+
 // Consumer client
 
 resource "keycloak_openid_client" "pet_app" {
