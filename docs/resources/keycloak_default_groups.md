@@ -2,7 +2,7 @@
 
 Allows for managing a realm's default groups.
 
-Also note that you should not use `keycloak_default_groups` with a group with memberships managed
+Note that you should not use `keycloak_default_groups` with a group with memberships managed
 by `keycloak_group_memberships`.
 
 ### Example Usage
