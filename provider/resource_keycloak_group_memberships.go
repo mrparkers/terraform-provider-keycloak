@@ -104,7 +104,7 @@ func resourceKeycloakGroupMembershipsUpdate(data *schema.ResourceData, meta inte
 			// if the user exists in keycloak and not in tf state, they need to be removed from the group
 			err = keycloakClient.RemoveUserFromGroup(keycloakMember, groupId)
 			if err != nil {
-				return nil
+				return err
 			}
 		}
 	}
