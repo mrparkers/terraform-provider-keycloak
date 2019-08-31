@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -218,14 +217,14 @@ resource "keycloak_group" "%s" {
 
 	var defaultGroupResources []string
 	for _, defaultGroup := range defaultGroups {
-		defaultGroupResources = append(defaultGroupResources, fmt.Sprintf(`"${keycloak_group.%s.id}"`, defaultGroup))
+		defaultGroupResources = append(defaultGroupResources, fmt.Sprintf(`${keycloak_group.%s.id}`, defaultGroup))
 	}
 
 	out += fmt.Sprintf(`
 resource "keycloak_default_groups" "group_default" {
 	realm_id = "${keycloak_realm.realm.id}"
-	group_ids = [%s]
-}`, strings.Join(defaultGroupResources, ","))
+	group_ids = %s
+}`, arrayOfStringsForTerraformResource(defaultGroupResources))
 
 	return out
 }
