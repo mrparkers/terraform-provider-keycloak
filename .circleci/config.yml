@@ -3,11 +3,10 @@ workflows:
   version: 2
   test:
     jobs:
-      - test-client-credentials
-      - test-password
+      - test
   release:
     jobs:
-      - test-client-credentials:
+      - test:
           filters:
             tags:
               only: /\d+\.\d+\.\d+(-rc.\d+)?/
@@ -15,14 +14,14 @@ workflows:
               ignore: /.*/
       - build-and-release:
           requires:
-            - test-client-credentials
+            - test
           filters:
             tags:
               only: /\d+\.\d+\.\d+(-rc.\d+)?/
             branches:
               ignore: /.*/
 jobs:
-  test-template: &test-template
+  test:
     docker:
       - image: circleci/golang:1.11.4
       - image: jboss/keycloak:6.0.1
@@ -47,23 +46,13 @@ jobs:
             ./scripts/wait-for-local-keycloak.sh
             ./scripts/create-terraform-client.sh
             make testacc
-  test-client-credentials:
-    <<: *test-template
     environment:
       GO111MODULE: "on"
-      KEYCLOAK_CLIENT_ID: terraform
-      KEYCLOAK_URL: http://localhost:8080
-      KEYCLOAK_REALM: master
-      KEYCLOAK_CLIENT_SECRET: 884e0f95-0f42-4a63-9b1f-94274655669e
-  test-password:
-    <<: *test-template
-    environment:
-      GO111MODULE: "on"
-      KEYCLOAK_CLIENT_ID: admin-cli
-      KEYCLOAK_URL: http://localhost:8080
-      KEYCLOAK_REALM: master
-      KEYCLOAK_USER: keycloak
-      KEYCLOAK_PASSWORD: password
+      KEYCLOAK_CLIENT_ID: "terraform"
+      KEYCLOAK_CLIENT_SECRET: "884e0f95-0f42-4a63-9b1f-94274655669e"
+      KEYCLOAK_URL: "http://localhost:8080"
+      KEYCLOAK_REALM: "master"
+      KEYCLOAK_TEST_PASSWORD_GRANT: "true"
   build-and-release:
     docker:
       - image: circleci/golang:1.11.4
