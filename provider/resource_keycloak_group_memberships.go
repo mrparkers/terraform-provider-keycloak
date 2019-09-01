@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -103,7 +104,7 @@ func resourceKeycloakGroupMembershipsUpdate(data *schema.ResourceData, meta inte
 			// if the user exists in keycloak and not in tf state, they need to be removed from the group
 			err = keycloakClient.RemoveUserFromGroup(keycloakMember, groupId)
 			if err != nil {
-				return nil
+				return err
 			}
 		}
 	}

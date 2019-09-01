@@ -145,3 +145,30 @@ func (keycloakClient *KeycloakClient) GetGroupMembers(realmId, groupId string) (
 
 	return users, nil
 }
+
+func defaultGroupURL(realmName, groupId string) string {
+	return fmt.Sprintf("/realms/%s/default-groups/%s", realmName, groupId)
+}
+
+// PutDefaultGroup will PUT a new group ID to the realm default groups. This is effectively
+// an "upsert".
+func (keycloakClient *KeycloakClient) PutDefaultGroup(realmName, groupId string) error {
+	url := defaultGroupURL(realmName, groupId)
+	return keycloakClient.put(url, nil)
+}
+
+// DeleteDefaultGroup deletes a group ID from the realm default groups.
+func (keycloakClient *KeycloakClient) DeleteDefaultGroup(realmName, groupId string) error {
+	url := defaultGroupURL(realmName, groupId)
+	return keycloakClient.delete(url, nil)
+}
+
+// GetDefaultGroups returns all the default groups for a realm.
+func (keycloakClient *KeycloakClient) GetDefaultGroups(realmName string) ([]Group, error) {
+	url := fmt.Sprintf("/realms/%s/default-groups", realmName)
+
+	var defaultGroups []Group
+	err := keycloakClient.get(url, &defaultGroups, nil)
+
+	return defaultGroups, err
+}
