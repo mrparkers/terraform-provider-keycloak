@@ -44,6 +44,14 @@ func skipIfEnvSet(t *testing.T, envs ...string) {
 	}
 }
 
+func skipIfEnvNotSet(t *testing.T, envs ...string) {
+	for _, k := range envs {
+		if os.Getenv(k) == "" {
+			t.Skipf("Environment variable %s is not set, skipping...", k)
+		}
+	}
+}
+
 func TestCheckResourceAttrNot(name, key, value string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		err := resource.TestCheckResourceAttr(name, key, value)(s)
