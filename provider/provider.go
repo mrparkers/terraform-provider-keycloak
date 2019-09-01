@@ -11,6 +11,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_client":                      dataSourceKeycloakOpenidClient(),
 			"keycloak_openid_client_authorization_policy": dataSourceKeycloakOpenidClientAuthorizationPolicy(),
 			"keycloak_realm_keys":                         dataSourceKeycloakRealmKeys(),
+			"keycloak_role":                               dataSourceKeycloakRole(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_realm":                                           resourceKeycloakRealm(),
