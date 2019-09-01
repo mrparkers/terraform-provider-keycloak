@@ -83,6 +83,11 @@ func (keycloakClient *KeycloakClient) login() error {
 	if keycloakClient.clientCredentials.GrantType == "password" {
 		accessTokenData.Set("username", keycloakClient.clientCredentials.Username)
 		accessTokenData.Set("password", keycloakClient.clientCredentials.Password)
+
+		if keycloakClient.clientCredentials.ClientSecret != "" {
+			accessTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
+		}
+
 	} else if keycloakClient.clientCredentials.GrantType == "client_credentials" {
 		accessTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
 	}
