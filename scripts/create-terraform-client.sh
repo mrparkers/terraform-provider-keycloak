@@ -49,6 +49,7 @@ terraformClient=$(jq -n "{
     clientAuthenticatorType: \"client-secret\",
     enabled: true,
     serviceAccountsEnabled: true,
+    directAccessGrantsEnabled: true,
     standardFlowEnabled: false
 }")
 

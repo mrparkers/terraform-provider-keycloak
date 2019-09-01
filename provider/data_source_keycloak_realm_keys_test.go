@@ -13,7 +13,7 @@ func TestAccKeycloakDataSourceRealmKeys_basic(t *testing.T) {
 	realm := acctest.RandomWithPrefix("tf-acc-test")
 	dataSourceName := "data.keycloak_realm_keys.test_keys"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -29,7 +29,7 @@ func TestAccKeycloakDataSourceRealmKeys_filterByAlgorithms(t *testing.T) {
 	realm := acctest.RandomWithPrefix("tf-acc-test")
 	dataSourceName := "data.keycloak_realm_keys.test_keys"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
