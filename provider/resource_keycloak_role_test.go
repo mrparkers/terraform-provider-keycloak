@@ -56,6 +56,30 @@ func TestAccKeycloakRole_basicClient(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRole_basicSamlClient(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-client-" + acctest.RandString(10)
+	roleName := "terraform-role-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRoleDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRole_basicSamlClient(realmName, clientId, roleName),
+				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
+			},
+			{
+				ResourceName:        "keycloak_role.role",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRole_basicRealmUpdate(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
@@ -382,6 +406,25 @@ resource "keycloak_role" "role" {
 	name      = "%s"
 	realm_id  = "${keycloak_realm.realm.id}"
 	client_id = "${keycloak_openid_client.client.id}"
+}
+	`, realm, clientId, role)
+}
+
+func testKeycloakRole_basicSamlClient(realm, clientId, role string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_saml_client" "client" {
+	client_id = "%s"
+	realm_id  = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_role" "role" {
+	name      = "%s"
+	realm_id  = "${keycloak_realm.realm.id}"
+	client_id = "${keycloak_saml_client.client.id}"
 }
 	`, realm, clientId, role)
 }
