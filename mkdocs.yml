@@ -11,6 +11,7 @@ nav:
   - keycloak_generic_client_protocol_mapper: resources/keycloak_generic_client_protocol_mapper.md
   - keycloak_group: resources/keycloak_group.md
   - keycloak_group_memberships: resources/keycloak_group_memberships.md
+  - keycloak_default_groups: resources/keycloak_default_groups.md
   - keycloak_openid_client: resources/keycloak_openid_client.md
   - keycloak_openid_client_scope: resources/keycloak_openid_client_scope.md
   - keycloak_openid_client_default_scopes: resources/keycloak_openid_client_default_scopes.md
