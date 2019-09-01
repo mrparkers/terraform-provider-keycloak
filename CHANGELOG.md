@@ -3,6 +3,7 @@
 FEATURES:
 
 * new resource: `keycloak_required_action` ([#131](https://github.com/mrparkers/terraform-provider-keycloak/pull/131))
+* new resource: `keycloak_default_groups` ([#146](https://github.com/mrparkers/terraform-provider-keycloak/pull/146))
 
 ## 1.9.0 (June 20, 2019)
 
