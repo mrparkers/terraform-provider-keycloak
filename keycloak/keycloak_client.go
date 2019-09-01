@@ -79,6 +79,7 @@ func (keycloakClient *KeycloakClient) login() error {
 	accessTokenData := url.Values{}
 	accessTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
 	accessTokenData.Set("grant_type", keycloakClient.clientCredentials.GrantType)
+
 	if keycloakClient.clientCredentials.GrantType == "password" {
 		accessTokenData.Set("username", keycloakClient.clientCredentials.Username)
 		accessTokenData.Set("password", keycloakClient.clientCredentials.Password)
@@ -121,6 +122,7 @@ func (keycloakClient *KeycloakClient) refresh() error {
 	refreshTokenData := url.Values{}
 	refreshTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
 	refreshTokenData.Set("grant_type", keycloakClient.clientCredentials.GrantType)
+
 	if keycloakClient.clientCredentials.GrantType == "password" {
 		refreshTokenData.Set("username", keycloakClient.clientCredentials.Username)
 		refreshTokenData.Set("password", keycloakClient.clientCredentials.Password)
