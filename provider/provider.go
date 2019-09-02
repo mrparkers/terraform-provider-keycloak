@@ -19,6 +19,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_group":                                           resourceKeycloakGroup(),
 			"keycloak_group_memberships":                               resourceKeycloakGroupMemberships(),
 			"keycloak_default_groups":                                  resourceKeycloakDefaultGroups(),
+			"keycloak_group_roles":                                     resourceKeycloakGroupRoles(),
 			"keycloak_user":                                            resourceKeycloakUser(),
 			"keycloak_openid_client":                                   resourceKeycloakOpenidClient(),
 			"keycloak_openid_client_scope":                             resourceKeycloakOpenidClientScope(),

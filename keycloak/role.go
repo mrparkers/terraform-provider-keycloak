@@ -69,24 +69,6 @@ func (keycloakClient *KeycloakClient) GetRole(realmId, id string) (*Role, error)
 	return &role, nil
 }
 
-// role_id uses the format {{role_name}} for a realm role, and {{client_id}}.{{role_name}} for a client role
-func (keycloakClient *KeycloakClient) GetRoleByRoleId(realmId, id string) (*Role, error) {
-	var role Role
-
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), &role, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	role.RealmId = realmId
-
-	if role.ClientRole {
-		role.ClientId = role.ContainerId
-	}
-
-	return &role, nil
-}
-
 func (keycloakClient *KeycloakClient) GetRoleByName(realmId, clientId, name string) (*Role, error) {
 	var role Role
 
