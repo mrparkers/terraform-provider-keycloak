@@ -32,6 +32,11 @@ func TestAccKeycloakGroupRoles_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// check destroy
+			{
+				Config: testKeycloakGroupRoles_noGroupRoles(realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName),
+				Check:  testAccCheckKeycloakGroupHasNoRoles("keycloak_group.group"),
+			},
 		},
 	})
 }
@@ -176,6 +181,31 @@ func testAccCheckKeycloakGroupHasRoles(resourceName string) resource.TestCheckFu
 	}
 }
 
+func testAccCheckKeycloakGroupHasNoRoles(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		realm := rs.Primary.Attributes["realm_id"]
+		id := rs.Primary.ID
+
+		group, err := keycloakClient.GetGroup(realm, id)
+		if err != nil {
+			return err
+		}
+
+		if len(group.RealmRoles) != 0 || len(group.ClientRoles) != 0 {
+			return fmt.Errorf("expected group %s to have no roles", group.Name)
+		}
+
+		return nil
+	}
+}
+
 func testKeycloakGroupRoles_basic(realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -230,6 +260,52 @@ resource "keycloak_group_roles" "group_roles" {
 		"${keycloak_role.saml_client_role.id}",
 		"${data.keycloak_role.offline_access.id}",
 	]
+}
+	`, realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName)
+}
+
+func testKeycloakGroupRoles_noGroupRoles(realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "openid_client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "CONFIDENTIAL"
+}
+
+resource "keycloak_saml_client" "saml_client" {
+	client_id = "%s"
+	realm_id  = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_role" "realm_role" {
+	name     = "%s"
+	realm_id = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_role" "openid_client_role" {
+	name      = "%s"
+	realm_id  = "${keycloak_realm.realm.id}"
+	client_id = "${keycloak_openid_client.openid_client.id}"
+}
+
+resource "keycloak_role" "saml_client_role" {
+	name      = "%s"
+	realm_id  = "${keycloak_realm.realm.id}"
+	client_id = "${keycloak_saml_client.saml_client.id}"
+}
+
+data "keycloak_role" "offline_access" {
+	realm_id  = "${keycloak_realm.realm.id}"
+	name      = "offline_access"
+}
+
+resource "keycloak_group" "group" {
+	realm_id = "${keycloak_realm.realm.id}"
+	name = "%s"
 }
 	`, realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName)
 }
