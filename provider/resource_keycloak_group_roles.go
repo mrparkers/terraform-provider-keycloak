@@ -330,17 +330,12 @@ func resourceKeycloakGroupRolesImport(d *schema.ResourceData, _ interface{}) ([]
 	return []*schema.ResourceData{d}, nil
 }
 
-func removeDuplicateRoles(one, two *map[string][]*keycloak.Role) {
-	removeDuplicateRolesFromSrc(one, two)
-	removeDuplicateRolesFromSrc(two, one)
-}
-
 func removeRoleFromSlice(slice []*keycloak.Role, index int) []*keycloak.Role {
 	slice[index] = slice[len(slice)-1]
 	return slice[:len(slice)-1]
 }
 
-func removeDuplicateRolesFromSrc(one, two *map[string][]*keycloak.Role) {
+func removeDuplicateRoles(one, two *map[string][]*keycloak.Role) {
 	for k := range *one {
 		for i1 := 0; i1 < len((*one)[k]); i1++ {
 			s1 := (*one)[k][i1]
@@ -353,7 +348,6 @@ func removeDuplicateRolesFromSrc(one, two *map[string][]*keycloak.Role) {
 					(*two)[k] = removeRoleFromSlice((*two)[k], i2)
 
 					i1--
-					i2--
 					break
 				}
 			}
