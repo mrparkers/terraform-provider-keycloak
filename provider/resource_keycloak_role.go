@@ -39,6 +39,7 @@ func resourceKeycloakRole() *schema.Resource {
 			"composite_roles": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				MinItems: 1,
 				Set:      schema.HashString,
 				Optional: true,
 			},

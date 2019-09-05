@@ -8,7 +8,7 @@ nav:
 - Resources:
   - keycloak_realm: resources/keycloak_realm.md
   - keycloak_user: resources/keycloak_user.md
-  - keycloak_generic_client_protocol_mapper: resources/keycloak_generic_client_protocol_mapper.md
+  - keycloak_role: resources/keycloak_role.md
   - keycloak_group: resources/keycloak_group.md
   - keycloak_group_memberships: resources/keycloak_group_memberships.md
   - keycloak_default_groups: resources/keycloak_default_groups.md
@@ -25,6 +25,7 @@ nav:
   - keycloak_saml_client: resources/keycloak_saml_client.md
   - keycloak_saml_user_attribute_protocol_mapper: resources/keycloak_saml_user_attribute_protocol_mapper.md
   - keycloak_saml_user_property_protocol_mapper: resources/keycloak_saml_user_property_protocol_mapper.md
+  - keycloak_generic_client_protocol_mapper: resources/keycloak_generic_client_protocol_mapper.md
   - keycloak_ldap_user_federation: resources/keycloak_ldap_user_federation.md
   - keycloak_ldap_full_name_mapper: resources/keycloak_ldap_full_name_mapper.md
   - keycloak_ldap_group_mapper: resources/keycloak_ldap_group_mapper.md
