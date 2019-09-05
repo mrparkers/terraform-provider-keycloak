@@ -131,3 +131,14 @@ resource "keycloak_group_roles" "admin_roles" {
     "${data.keycloak_role.realm_offline_access.id}",
   ]
 }
+
+resource "keycloak_group_roles" "front_desk_roles" {
+  realm_id = "${keycloak_realm.roles_example.id}"
+  group_id = "${keycloak_group.pet_api_front_desk.id}"
+
+  role_ids = [
+    "${keycloak_role.pet_api_read_pet.id}",
+    "${keycloak_role.pet_api_create_pet.id}",
+    "${data.keycloak_role.realm_offline_access.id}",
+  ]
+}

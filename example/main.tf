@@ -195,6 +195,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_client_scopes" {
     "address",
     "phone",
     "offline_access",
+    "microprofile-jwt",
     "${keycloak_openid_client_scope.test_optional_client_scope.name}",
   ]
 }
