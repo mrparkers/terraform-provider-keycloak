@@ -19,7 +19,7 @@ func TestAccKeycloakUser_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	username := "terraform-user-" + acctest.RandString(10)
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
-	attributeValue := acctest.RandString(300)
+	attributeValue := acctest.RandString(250)
 
 	resourceName := "keycloak_user.user"
 
@@ -72,7 +72,7 @@ func TestAccKeycloakUser_createAfterManualDestroy(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	username := "terraform-user-" + acctest.RandString(10)
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
-	attributeValue := acctest.RandString(300)
+	attributeValue := acctest.RandString(250)
 	resourceName := "keycloak_user.user"
 
 	resource.Test(t, resource.TestCase{
@@ -138,7 +138,7 @@ func TestAccKeycloakUser_updateUsername(t *testing.T) {
 	usernameOne := "terraform-user-" + acctest.RandString(10)
 	usernameTwo := "terraform-user-" + acctest.RandString(10)
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
-	attributeValue := acctest.RandString(300)
+	attributeValue := acctest.RandString(250)
 
 	resourceName := "keycloak_user.user"
 
@@ -242,7 +242,7 @@ func TestAccKeycloakUser_unsetOptionalAttributes(t *testing.T) {
 		Enabled:   randomBool(),
 		Attributes: map[string][]string{
 			attributeName: {
-				acctest.RandString(255),
+				acctest.RandString(230),
 				acctest.RandString(12),
 			},
 		},
@@ -276,7 +276,7 @@ func TestAccKeycloakUser_validateLowercaseUsernames(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	username := "terraform-user-" + strings.ToUpper(acctest.RandString(10))
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
-	attributeValue := acctest.RandString(300)
+	attributeValue := acctest.RandString(250)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,

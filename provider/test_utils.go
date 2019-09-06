@@ -21,6 +21,18 @@ func randomStringInSlice(slice []string) string {
 	return slice[acctest.RandIntRange(0, len(slice)-1)]
 }
 
+func randomStringSliceSubset(slice []string) []string {
+	var result []string
+
+	for _, s := range slice {
+		if randomBool() {
+			result = append(result, s)
+		}
+	}
+
+	return result
+}
+
 // Returns a slice of strings in the format ["foo", "bar"] for
 // use within terraform resource definitions for acceptance tests
 func arrayOfStringsForTerraformResource(parts []string) string {

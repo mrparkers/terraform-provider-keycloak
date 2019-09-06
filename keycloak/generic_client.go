@@ -27,3 +27,26 @@ func (keycloakClient *KeycloakClient) listGenericClients(realmId string) ([]*Gen
 
 	return clients, nil
 }
+
+func (keycloakClient *KeycloakClient) GetGenericClientByClientId(realmId, clientId string) (*GenericClient, error) {
+	var clients []GenericClient
+
+	params := map[string]string{
+		"clientId": clientId,
+	}
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients", realmId), &clients, params)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(clients) == 0 {
+		return nil, fmt.Errorf("generic client with name %s does not exist", clientId)
+	}
+
+	client := clients[0]
+
+	client.RealmId = realmId
+
+	return &client, nil
+}
