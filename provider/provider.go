@@ -11,6 +11,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_client":                      dataSourceKeycloakOpenidClient(),
 			"keycloak_openid_client_authorization_policy": dataSourceKeycloakOpenidClientAuthorizationPolicy(),
 			"keycloak_realm_keys":                         dataSourceKeycloakRealmKeys(),
+			"keycloak_role":                               dataSourceKeycloakRole(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_realm":                                           resourceKeycloakRealm(),
@@ -18,6 +19,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_group":                                           resourceKeycloakGroup(),
 			"keycloak_group_memberships":                               resourceKeycloakGroupMemberships(),
 			"keycloak_default_groups":                                  resourceKeycloakDefaultGroups(),
+			"keycloak_group_roles":                                     resourceKeycloakGroupRoles(),
 			"keycloak_user":                                            resourceKeycloakUser(),
 			"keycloak_openid_client":                                   resourceKeycloakOpenidClient(),
 			"keycloak_openid_client_scope":                             resourceKeycloakOpenidClientScope(),
@@ -33,6 +35,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_full_name_protocol_mapper":                resourceKeycloakOpenIdFullNameProtocolMapper(),
 			"keycloak_openid_hardcoded_claim_protocol_mapper":          resourceKeycloakOpenIdHardcodedClaimProtocolMapper(),
 			"keycloak_openid_audience_protocol_mapper":                 resourceKeycloakOpenIdAudienceProtocolMapper(),
+			"keycloak_openid_hardcoded_role_protocol_mapper":           resourceKeycloakOpenIdHardcodedRoleProtocolMapper(),
 			"keycloak_openid_client_default_scopes":                    resourceKeycloakOpenidClientDefaultScopes(),
 			"keycloak_openid_client_optional_scopes":                   resourceKeycloakOpenidClientOptionalScopes(),
 			"keycloak_saml_client":                                     resourceKeycloakSamlClient(),
@@ -50,6 +53,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_client_authorization_scope":               resourceKeycloakOpenidClientAuthorizationScope(),
 			"keycloak_openid_client_authorization_permission":          resourceKeycloakOpenidClientAuthorizationPermission(),
 			"keycloak_openid_client_service_account_role":              resourceKeycloakOpenidClientServiceAccountRole(),
+			"keycloak_role":                                            resourceKeycloakRole(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {

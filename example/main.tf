@@ -9,7 +9,7 @@ resource "keycloak_realm" "test" {
   enabled      = true
   display_name = "foo"
 
-  smtp_server = {
+  smtp_server {
     host                  = "mysmtphost.com"
     port                  = 25
     from_display_name     = "Tom"
@@ -20,7 +20,7 @@ resource "keycloak_realm" "test" {
     starttls              = true
     envelope_from         = "nottom@myhost.com"
 
-    auth = {
+    auth {
       username = "tom"
       password = "tom"
     }
@@ -30,17 +30,18 @@ resource "keycloak_realm" "test" {
 
   access_code_lifespan = "30m"
 
-  internationalization = {
+  internationalization {
     supported_locales = [
       "en",
       "de",
-      "es"
+      "es",
     ]
+
     default_locale = "en"
   }
 
-  security_defenses = {
-    headers = {
+  security_defenses {
+    headers {
       x_frame_options                     = "DENY"
       content_security_policy             = "frame-src 'self'; frame-ancestors 'self'; object-src 'none';"
       content_security_policy_report_only = ""
@@ -114,7 +115,7 @@ resource "keycloak_user" "user_with_password" {
   last_name  = "Tester"
 
   initial_password {
-    value     = "my password"
+    value     = "My password"
     temporary = false
   }
 }
@@ -145,7 +146,8 @@ resource "keycloak_openid_client" "test_client" {
   realm_id    = "${keycloak_realm.test.id}"
   description = "a test openid client"
 
-  standard_flow_enabled = true
+  standard_flow_enabled    = true
+  service_accounts_enabled = true
 
   access_type = "CONFIDENTIAL"
 
@@ -193,6 +195,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_client_scopes" {
     "address",
     "phone",
     "offline_access",
+    "microprofile-jwt",
     "${keycloak_openid_client_scope.test_optional_client_scope.name}",
   ]
 }
@@ -434,6 +437,7 @@ resource keycloak_oidc_identity_provider custom_oidc_idp {
   token_url         = "https://example.com/token"
   client_id         = "example_id"
   client_secret     = "example_token"
+
   extra_config = {
     dummyConfig = "dummyValue"
   }
@@ -562,10 +566,14 @@ resource "keycloak_openid_client_authorization_permission" "resource" {
   resource_server_id = "${keycloak_openid_client.test_client_auth.resource_server_id}"
   realm_id           = "${keycloak_realm.test.id}"
   name               = "test"
+
   policies = [
-  "${data.keycloak_openid_client_authorization_policy.default.id}"]
+    "${data.keycloak_openid_client_authorization_policy.default.id}",
+  ]
+
   resources = [
-  "${keycloak_openid_client_authorization_resource.resource.id}"]
+    "${keycloak_openid_client_authorization_resource.resource.id}",
+  ]
 }
 
 resource "keycloak_openid_client_authorization_resource" "resource" {
@@ -574,7 +582,7 @@ resource "keycloak_openid_client_authorization_resource" "resource" {
   realm_id           = "${keycloak_realm.test.id}"
 
   uris = [
-    "/endpoint/*"
+    "/endpoint/*",
   ]
 
   attributes = {

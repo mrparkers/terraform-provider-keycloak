@@ -102,7 +102,7 @@ func dataSourceKeycloakOpenidClientRead(data *schema.ResourceData, meta interfac
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
-	client, err := keycloakClient.GetClientByName(realmId, clientId)
+	client, err := keycloakClient.GetOpenidClientByClientId(realmId, clientId)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}

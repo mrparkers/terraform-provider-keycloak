@@ -6,12 +6,14 @@ import (
 )
 
 type Group struct {
-	Id        string   `json:"id,omitempty"`
-	RealmId   string   `json:"-"`
-	ParentId  string   `json:"-"`
-	Name      string   `json:"name"`
-	Path      string   `json:"path,omitempty"`
-	SubGroups []*Group `json:"subGroups,omitempty"`
+	Id          string              `json:"id,omitempty"`
+	RealmId     string              `json:"-"`
+	ParentId    string              `json:"-"`
+	Name        string              `json:"name"`
+	Path        string              `json:"path,omitempty"`
+	SubGroups   []*Group            `json:"subGroups,omitempty"`
+	RealmRoles  []string            `json:"realmRoles,omitempty"`
+	ClientRoles map[string][]string `json:"clientRoles,omitempty"`
 }
 
 /*
@@ -171,4 +173,28 @@ func (keycloakClient *KeycloakClient) GetDefaultGroups(realmName string) ([]Grou
 	err := keycloakClient.get(url, &defaultGroups, nil)
 
 	return defaultGroups, err
+}
+
+func (keycloakClient *KeycloakClient) AddRealmRolesToGroup(realmId, groupId string, roles []*Role) error {
+	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/groups/%s/role-mappings/realm", realmId, groupId), roles)
+
+	return err
+}
+
+func (keycloakClient *KeycloakClient) AddClientRolesToGroup(realmId, groupId, clientId string, roles []*Role) error {
+	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/groups/%s/role-mappings/clients/%s", realmId, groupId, clientId), roles)
+
+	return err
+}
+
+func (keycloakClient *KeycloakClient) RemoveRealmRolesFromGroup(realmId, groupId string, roles []*Role) error {
+	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/groups/%s/role-mappings/realm", realmId, groupId), roles)
+
+	return err
+}
+
+func (keycloakClient *KeycloakClient) RemoveClientRolesFromGroup(realmId, groupId, clientId string, roles []*Role) error {
+	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/groups/%s/role-mappings/clients/%s", realmId, groupId, clientId), roles)
+
+	return err
 }
