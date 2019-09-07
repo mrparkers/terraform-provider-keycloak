@@ -52,7 +52,7 @@ resource "keycloak_group_roles" "group_roles" {
   realm_id = "${keycloak_realm.realm.id}"
   group_id = "${keycloak_group.group.id}"
   
-  roles = [
+  role_ids = [
     "${keycloak_role.realm_role.id}",
     "${keycloak_role.client_role.id}",
   ]
@@ -66,7 +66,7 @@ The following arguments are supported:
 - `realm_id` - (Required) The realm this group exists in.
 - `group_id` - (Required) The ID of the group this resource should
   manage roles for.
-- `roles` - (Required) A list of role IDs to map to the group
+- `role_ids` - (Required) A list of role IDs to map to the group
 
 ### Import
 
