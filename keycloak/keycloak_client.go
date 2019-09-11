@@ -38,9 +38,9 @@ const (
 	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int) (*KeycloakClient, error) {
 	httpClient := &http.Client{
-		Timeout: time.Second * 5,
+		Timeout: time.Second * time.Duration(clientTimeout),
 	}
 	clientCredentials := &ClientCredentials{
 		ClientId:     clientId,

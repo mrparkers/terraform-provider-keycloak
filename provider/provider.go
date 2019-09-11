@@ -93,6 +93,12 @@ func KeycloakProvider() *schema.Provider {
 				Description: "Whether or not to login to Keycloak instance on provider initialization",
 				Default:     true,
 			},
+			"client_timeout": {
+				Optional:    true,
+				Type:        schema.TypeInt,
+				Description: "Timeout (in seconds) of the Keycloak client",
+				Default:     5,
+			},
 		},
 		ConfigureFunc: configureKeycloakProvider,
 	}
@@ -106,6 +112,7 @@ func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
 	password := data.Get("password").(string)
 	realm := data.Get("realm").(string)
 	initialLogin := data.Get("initial_login").(bool)
+	clientTimeout := data.Get("client_timeout").(int)
 
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout)
 }

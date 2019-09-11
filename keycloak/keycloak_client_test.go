@@ -44,7 +44,7 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		defer log.SetOutput(os.Stdout)
 	}
 
-	keycloakClient, err := NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), os.Getenv("KEYCLOAK_USER"), os.Getenv("KEYCLOAK_PASSWORD"), true)
+	keycloakClient, err := NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), os.Getenv("KEYCLOAK_USER"), os.Getenv("KEYCLOAK_PASSWORD"), true, 5)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
