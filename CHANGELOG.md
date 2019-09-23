@@ -1,5 +1,7 @@
 ## 1.10.0 (September 6, 2019)
 
+note: this release contains a [bug](https://github.com/mrparkers/terraform-provider-keycloak/issues/156) in the `keycloak_realm` resource that incorrectly sets the default attribute for `reset_credentials_flow` to `"registration"`. Please ensure that you set this attribute manually to override the incorrect default until a future release fixes this issue.
+
 FEATURES:
 
 * new resource: `keycloak_required_action` ([#131](https://github.com/mrparkers/terraform-provider-keycloak/pull/131))
