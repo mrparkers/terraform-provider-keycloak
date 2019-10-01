@@ -339,7 +339,7 @@ func resourceKeycloakRealm() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for ResetCredentialsFlow",
 				Optional:    true,
-				Default:     "registration",
+				Default:     "reset credentials",
 			},
 			"client_authentication_flow": {
 				Type:        schema.TypeString,
