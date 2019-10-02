@@ -4,6 +4,9 @@ repo_url: https://github.com/mrparkers/terraform-provider-keycloak
 nav:
 - Getting Started: index.md
 - Data Sources:
+  - keycloak_openid_client: data_sources/keycloak_openid_client.md
+  - keycloak_openid_client_authorization_policy: data_sources/keycloak_openid_client_authorization_policy.md
+  - keycloak_realm: data_sources/keycloak_realm.md
   - keycloak_realm_keys: data_sources/keycloak_realm_keys.md
   - keycloak_role: data_sources/keycloak_role.md
 - Resources:
