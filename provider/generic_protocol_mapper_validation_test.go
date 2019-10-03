@@ -2,10 +2,11 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform/helper/acctest"
+	"github.com/hashicorp/terraform/helper/resource"
 )
 
 /*
@@ -256,6 +257,30 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_clientScopeDuplicateNameV
 	})
 }
 
+func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_clientScopeDuplicateNameValidation(t *testing.T) {
+	realmName := "terraform-realm-" + acctest.RandString(10)
+	clientId := "terraform-client-" + acctest.RandString(10)
+	mapperName := "terraform-user-realm-role-mapper-" + acctest.RandString(5)
+
+	fullNameProtocolMapperResourceName := "keycloak_openid_user_realm_role_protocol_mapper.user_realm_role_mapper_client_scope"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccKeycloakOpenIdUserRealmRoleProtocolMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testGenericProtocolMapperValidation_clientScopeUserRealmRoleMapper(realmName, clientId, mapperName),
+				Check:  testKeycloakOpenIdUserRealmRoleProtocolMapperExists(fullNameProtocolMapperResourceName),
+			},
+			{
+				Config:      testGenericProtocolMapperValidation_clientScopeUserRealmRoleAndHardcodedClaimMapper(realmName, clientId, mapperName),
+				ExpectError: regexp.MustCompile("validation error: a protocol mapper with name .+ already exists for this client"),
+			},
+		},
+	})
+}
+
 /*
  * Protocol mappers must be attached to either a client or client scope.  The following tests assert that errors are raised
  * if neither are specified.
@@ -335,6 +360,22 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_validateClientOrClientSco
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdHardcodedClaimProtocolMapper_parentResourceValidation(realmName, mapperName),
+				ExpectError: regexp.MustCompile("validation error: one of ClientId or ClientScopeId must be set"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_validateClientOrClientScopeSet(t *testing.T) {
+	realmName := "terraform-realm-" + acctest.RandString(10)
+	mapperName := "terraform-openid-connect-user-realm-role-mapper-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenIdUserRealmRoleProtocolMapper_parentResourceValidation(realmName, mapperName),
 				ExpectError: regexp.MustCompile("validation error: one of ClientId or ClientScopeId must be set"),
 			},
 		},
@@ -566,6 +607,29 @@ resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_ma
 }`, realmName, clientScopeId, mapperName)
 }
 
+func testGenericProtocolMapperValidation_clientUserRealmRoleMapper(realmName, clientId, mapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "openid_client" {
+	realm_id    = "${keycloak_realm.realm.id}"
+	client_id   = "%s"
+
+	access_type = "BEARER-ONLY"
+}
+
+resource "keycloak_openid_user_realm_role_protocol_mapper" "user_realm_role_mapper_client" {
+	name             = "%s"
+	realm_id         = "${keycloak_realm.realm.id}"
+	client_id        = "${keycloak_openid_client.openid_client.id}"
+
+	claim_name       = "foo"
+	claim_value_type = "String"
+}`, realmName, clientId, mapperName)
+}
+
 func testGenericProtocolMapperValidation_clientScopeFullNameMapper(realmName, clientId, mapperName string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -624,6 +688,25 @@ resource "keycloak_openid_user_property_protocol_mapper" "user_property_mapper_c
 }`, realmName, clientId, mapperName)
 }
 
+func testGenericProtocolMapperValidation_clientScopeUserRealmRoleMapper(realmName, clientId, mapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name     = "%s"
+	realm_id = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_openid_user_realm_role_protocol_mapper" "user_realm_role_mapper_client_scope" {
+	name            = "%s"
+	realm_id        = "${keycloak_realm.realm.id}"
+	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
+	claim_name      = "bar-property"
+}`, realmName, clientId, mapperName)
+
+}
 func testGenericProtocolMapperValidation_clientScopeFullNameAndGroupMembershipMapper(realmName, clientScopeId, mapperName string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -734,6 +817,35 @@ resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_mapp
 }`, realmName, clientId, mapperName, mapperName)
 }
 
+func testGenericProtocolMapperValidation_clientScopeUserRealmRoleAndHardcodedClaimMapper(realmName, clientId, mapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name     = "%s"
+	realm_id = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_openid_user_realm_role_protocol_mapper" "user_realm_role_mapper_client_scope" {
+	name            = "%s"
+	realm_id        = "${keycloak_realm.realm.id}"
+	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
+	claim_name      = "bar-property"
+}
+
+resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_mapper_client_scope" {
+	name             = "%s"
+	realm_id         = "${keycloak_realm.realm.id}"
+	client_scope_id  = "${keycloak_openid_client_scope.client_scope.id}"
+
+	claim_name       = "foo"
+	claim_value      = "bar"
+	claim_value_type = "String"
+}`, realmName, clientId, mapperName, mapperName)
+}
+
 func testKeycloakOpenIdFullNameProtocolMapper_parentResourceValidation(realmName, mapperName string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -799,6 +911,21 @@ resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_mapp
 
 	claim_name       = "foo"
 	claim_value      = "bar"
+	claim_value_type = "String"
+}`, realmName, mapperName)
+}
+
+func testKeycloakOpenIdUserRealmRoleProtocolMapper_parentResourceValidation(realmName, mapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_user_realm_role_protocol_mapper" "user_realm_role_mapper_client_scope" {
+	name             = "%s"
+	realm_id         = "${keycloak_realm.realm.id}"
+
+	claim_name       = "foo"
 	claim_value_type = "String"
 }`, realmName, mapperName)
 }
