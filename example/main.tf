@@ -355,6 +355,22 @@ resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_clie
   claim_value = "bar"
 }
 
+resource "keycloak_openid_user_realm_role_protocol_mapper" "user_realm_role_client" {
+  name      = "tf-test-open-id-user-realm-role-claim-protocol-mapper-client"
+  realm_id  = "${keycloak_realm.test.id}"
+  client_id = "${keycloak_openid_client.test_client.id}"
+
+  claim_name  = "foo"
+}
+
+resource "keycloak_openid_user_realm_role_protocol_mapper" "user_realm_role_client_scope" {
+  name            = "tf-test-open-id-user-realm-role-protocol-mapper-client-scope"
+  realm_id        = "${keycloak_realm.test.id}"
+  client_scope_id = "${keycloak_openid_client_scope.test_default_client_scope.id}"
+
+  claim_name  = "foo"
+}
+
 resource "keycloak_openid_client" "bearer_only_client" {
   client_id   = "test-bearer-only-client"
   name        = "test-bearer-only-client"
