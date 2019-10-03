@@ -27,4 +27,4 @@ The following arguments are supported:
 
 ### Attributes Reference
 
-See the [Realm](../resources/keycloak_realm.md) for details on the returned attributes.
+See the docs for the [`keycloak_realm` resource](../resources/keycloak_realm.md) for details on the exported attributes.
