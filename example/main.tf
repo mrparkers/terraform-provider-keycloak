@@ -53,7 +53,105 @@ resource "keycloak_realm" "test" {
   }
 
   password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
+	realm        = "test"
+	enabled      = true
+	display_name = "foo"
+
+	smtp_server = {
+		host                  = "mysmtphost.com"
+		port                  = 25
+		from_display_name     = "Tom"
+		from                  = "tom@myhost.com"
+		reply_to_display_name = "Tom"
+		reply_to              = "tom@myhost.com"
+		ssl                   = true
+		starttls              = true
+		envelope_from         = "nottom@myhost.com"
+
+		auth = {
+			username = "tom"
+			password = "tom"
+		}
+	}
+
+  	account_theme = "base"
+
+	access_code_lifespan = "30m"
+
+	internationalization = {
+		supported_locales = [
+			"en",
+			"de",
+			"es"
+		]
+		default_locale    = "en"
+	}
+
+	security_defenses = {
+		headers = {
+			x_frame_options = "DENY"
+			content_security_policy = "frame-src 'self'; frame-ancestors 'self'; object-src 'none';"
+			content_security_policy_report_only = ""
+			x_content_type_options = "nosniff"
+			x_robots_tag = "none"
+			x_xss_protection = "1; mode=block"
+			strict_transport_security = "max-age=31536000; includeSubDomains"
+		}
+	}
 }
+
+resource "keycloak_authentication_flow" "browser-copy-flow" {
+	alias    = "browserCopyFlow"
+	realm_id = "${keycloak_realm.test.id}"
+	description = "browser based authentication"
+}
+
+resource "keycloak_authentication_execution" "browser-copy-cookie" {
+	realm_id = "${keycloak_realm.test.id}"
+	parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+	authenticator = "auth-cookie"
+	requirement = "ALTERNATIVE"
+	depends_on = ["keycloak_authentication_execution.browser-copy-kerberos"]
+}
+
+resource "keycloak_authentication_execution" "browser-copy-kerberos" {
+	realm_id = "${keycloak_realm.test.id}"
+	parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+	authenticator = "auth-spnego"
+	requirement = "DISABLED"
+}
+
+resource "keycloak_authentication_execution" "browser-copy-idp-redirect" {
+	realm_id = "${keycloak_realm.test.id}"
+	parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+	authenticator = "identity-provider-redirector"
+	requirement = "ALTERNATIVE"
+	depends_on = ["keycloak_authentication_execution.browser-copy-cookie"]
+}
+
+resource "keycloak_authentication_subflow" "browser-copy-flow-forms" {
+	realm_id = "${keycloak_realm.test.id}"
+	parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+	alias    = "browser-copy-flow-forms"
+	requirement = "ALTERNATIVE"
+	depends_on = ["keycloak_authentication_execution.browser-copy-idp-redirect"]
+}
+
+resource "keycloak_authentication_execution" "browser-copy-auth-username-password-form" {
+	realm_id = "${keycloak_realm.test.id}"
+	parent_flow_alias = "${keycloak_authentication_subflow.browser-copy-flow-forms.alias}"
+	authenticator = "auth-username-password-form"
+	requirement = "REQUIRED"
+}
+
+resource "keycloak_authentication_execution" "browser-copy-otp" {
+	realm_id = "${keycloak_realm.test.id}"
+	parent_flow_alias = "${keycloak_authentication_subflow.browser-copy-flow-forms.alias}"
+	authenticator = "auth-otp-form"
+	requirement = "OPTIONAL"
+	depends_on = ["keycloak_authentication_execution.browser-copy-auth-username-password-form"]
+}
+
 
 resource "keycloak_required_action" "custom-terms-and-conditions" {
   realm_id       = "${keycloak_realm.test.realm}"
