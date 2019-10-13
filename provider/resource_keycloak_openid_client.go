@@ -3,10 +3,11 @@ package provider
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 var (
@@ -122,6 +123,25 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 					},
 				},
 			},
+			"authentication_flow_binding_overrides": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"browser": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "",
+						},
+						"direct_grant": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "",
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -189,6 +209,15 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	} else {
 		openidClient.AuthorizationServicesEnabled = false
 	}
+
+	if v, ok := data.GetOk("authentication_flow_binding_overrides"); ok {
+		authFlowOverrides := v.(map[string]interface{})
+		openidClient.AuthenticationFlowBindingOverrides = &keycloak.OpenidClientAuthenticationFlowBindingOverrides{
+			Browser:     authFlowOverrides["browser"].(string),
+			DirectGrant: authFlowOverrides["direct_grant"].(string),
+		}
+	}
+
 	return openidClient, nil
 }
 

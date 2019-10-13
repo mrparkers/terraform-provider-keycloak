@@ -92,6 +92,22 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 					},
 				},
 			},
+			"authentication_flow_binding_overrides": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"browser": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"direct_grant": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
