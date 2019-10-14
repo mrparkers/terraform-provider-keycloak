@@ -40,6 +40,10 @@ resource "keycloak_realm" "test" {
     default_locale = "en"
   }
 
+  browser_security_headers {
+
+  }
+
   security_defenses {
     headers {
       x_frame_options                     = "DENY"
