@@ -1,3 +1,19 @@
+## 1.11.0 (October 14, 2019)
+
+FEATURES:
+
+* new resource: `keycloak_openid_user_realm_role_protocol_mapper` ([#159](https://github.com/mrparkers/terraform-provider-keycloak/pull/159))
+* new data source: `keycloak_realm` ([#160](https://github.com/mrparkers/terraform-provider-keycloak/pull/160))
+
+IMPROVEMENTS:
+
+* added `timeout` provider attribute ([#155](https://github.com/mrparkers/terraform-provider-keycloak/pull/155))
+* always export `serviceAccountId` for `keycloak_openid_client` resource ([#162](https://github.com/mrparkers/terraform-provider-keycloak/pull/162))
+
+BUG FIXES:
+
+* fix default value for `reset_credentials_flow` attribute in `keycloak_realm` resource ([#158](https://github.com/mrparkers/terraform-provider-keycloak/pull/158))
+
 ## 1.10.0 (September 6, 2019)
 
 note: this release contains a [bug](https://github.com/mrparkers/terraform-provider-keycloak/issues/156) in the `keycloak_realm` resource that incorrectly sets the default attribute for `reset_credentials_flow` to `"registration"`. Please ensure that you set this attribute manually to override the incorrect default until a future release fixes this issue.
