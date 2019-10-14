@@ -222,6 +222,8 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 
 	if client.ServiceAccountsEnabled {
 		data.Set("service_account_user_id", serviceAccountUserId)
+	} else {
+		data.Set("service_account_user_id", "")
 	}
 
 	// access type
