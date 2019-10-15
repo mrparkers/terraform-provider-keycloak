@@ -11,7 +11,7 @@ func dataSourceKeycloakRealm() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"realm": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Required: true,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
