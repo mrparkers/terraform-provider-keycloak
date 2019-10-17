@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"fmt"
+	"log"
 )
 
 type Role struct {
@@ -91,7 +92,14 @@ func (keycloakClient *KeycloakClient) UpdateRole(role *Role) error {
 }
 
 func (keycloakClient *KeycloakClient) DeleteRole(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), nil)
+	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), nil)
+	if err != nil {
+		log.Printf("[DEBUG] Failed to delete role with id %s. Trying again...", id)
+
+		return keycloakClient.delete(fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), nil)
+	}
+
+	return nil
 }
 
 func (keycloakClient *KeycloakClient) AddCompositesToRole(role *Role, compositeRoles []*Role) error {
