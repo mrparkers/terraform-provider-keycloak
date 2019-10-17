@@ -1,3 +1,10 @@
+## 1.11.1 (October 17, 2019)
+
+BUG FIXES:
+
+* fix required attribute for `keycloak_realm` data source ([#166](https://github.com/mrparkers/terraform-provider-keycloak/pull/166))
+* automatically retry role deletion if the first attempt fails ([#168](https://github.com/mrparkers/terraform-provider-keycloak/pull/168))
+
 ## 1.11.0 (October 14, 2019)
 
 FEATURES:
