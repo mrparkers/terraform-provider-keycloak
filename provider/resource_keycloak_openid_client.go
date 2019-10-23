@@ -12,6 +12,7 @@ import (
 var (
 	keycloakOpenidClientAccessTypes                        = []string{"CONFIDENTIAL", "PUBLIC", "BEARER-ONLY"}
 	keycloakOpenidClientAuthorizationPolicyEnforcementMode = []string{"ENFORCING", "PERMISSIVE", "DISABLED"}
+	keycloakOpenidClientPkceCodeChallengeMethod            = []string{"plain", "S256"}
 )
 
 func resourceKeycloakOpenidClient() *schema.Resource {
@@ -90,6 +91,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"pkce_code_challenge_method": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice(keycloakOpenidClientPkceCodeChallengeMethod, false),
+			},
 			"service_account_user_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -154,8 +160,11 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		ImplicitFlowEnabled:       data.Get("implicit_flow_enabled").(bool),
 		DirectAccessGrantsEnabled: data.Get("direct_access_grants_enabled").(bool),
 		ServiceAccountsEnabled:    data.Get("service_accounts_enabled").(bool),
-		ValidRedirectUris:         validRedirectUris,
-		WebOrigins:                webOrigins,
+		Attributes: keycloak.OpenidClientAttributes{
+			PkceCodeChallengeMethod: data.Get("pkce_code_challenge_method").(string),
+		},
+		ValidRedirectUris: validRedirectUris,
+		WebOrigins:        webOrigins,
 	}
 
 	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled {
