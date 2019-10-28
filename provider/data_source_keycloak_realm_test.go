@@ -6,12 +6,13 @@ import (
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func TestAccKeycloakDataSourceRealm_basic(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
+
+	resourceName := "keycloak_realm.realm"
+	dataSourceName := "data.keycloak_realm.realm"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -21,36 +22,13 @@ func TestAccKeycloakDataSourceRealm_basic(t *testing.T) {
 			{
 				Config: testDataSourceKeycloakRealm_basic(realm),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "realm", resourceName, "realm"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "enabled", resourceName, "enabled"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "display_name", resourceName, "display_name"),
 				),
 			},
 		},
 	})
-}
-
-func testAccCheckDataKeycloakRealm(resourceName string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("resource not found: %s", resourceName)
-		}
-
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
-		realmId := rs.Primary.Attributes["realm_id"]
-		name := rs.Primary.Attributes["display_name"]
-
-		realm, err := keycloakClient.GetRealm(realmId)
-		if err != nil {
-			return err
-		}
-
-		if realm.DisplayName != name {
-			return fmt.Errorf("expected realm with ID %s to have display_name %s, but got %s", realmId, name, realm.DisplayName)
-		}
-
-		return nil
-	}
 }
 
 func testDataSourceKeycloakRealm_basic(realm string) string {
@@ -58,5 +36,9 @@ func testDataSourceKeycloakRealm_basic(realm string) string {
 resource "keycloak_realm" "realm" {
 	realm        = "%s"
 	display_name = "foo"
+}
+
+data "keycloak_realm" "realm" {
+	realm = "${keycloak_realm.realm.realm}"
 }`, realm)
 }

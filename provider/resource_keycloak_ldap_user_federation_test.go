@@ -128,10 +128,10 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 	firstValidatePasswordPolicy := randomBool()
 	firstPagination := randomBool()
 
-	firstConnectionTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1000, 3600000)))
-	secondConnectionTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1000, 3600000)))
-	firstReadTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1000, 3600000)))
-	secondReadTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1000, 3600000)))
+	firstConnectionTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
+	secondConnectionTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
+	firstReadTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
+	secondReadTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
 
 	firstLdap := &keycloak.LdapUserFederation{
 		RealmId:                realmName,
