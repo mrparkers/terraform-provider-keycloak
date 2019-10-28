@@ -124,7 +124,7 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 	if data.HasChange("client_secret") {
 		rec.Config.ClientSecret = data.Get("client_secret").(string)
 	} else {
-		rec.Confog.ClientSecret = "**********"
+		rec.Config.ClientSecret = "**********"
 	}
 
 	return rec, nil
