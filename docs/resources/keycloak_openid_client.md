@@ -53,6 +53,14 @@ should be treated with the same care as a password. If omitted, Keycloak will ge
 wildcards in the form of an asterisk can be used here. This attribute must be set if either `standard_flow_enabled` or `implicit_flow_enabled`
 is set to `true`.
 - `web_origins` - (Optional) A list of allowed CORS origins. `+` can be used to permit all valid redirect URIs, and `*` can be used to permit all origins.
+- `pkce_code_challenge_method` - (Optional) The challenge method to use for Proof Key for Code Exchange. Can be either `plain` or `S256`.
+
+### Attributes Reference
+
+In addition to the arguments listed above, the following computed attributes are exported:
+
+- `service_account_user_id` - When service accounts are enabled for this client, this attribute is the unique ID for the Keycloak user that represents this service account.
+ 
 
 ### Import
 
