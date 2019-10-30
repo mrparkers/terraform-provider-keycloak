@@ -40,10 +40,6 @@ resource "keycloak_realm" "test" {
     default_locale = "en"
   }
 
-  browser_security_headers {
-
-  }
-
   security_defenses {
     headers {
       x_frame_options                     = "DENY"
@@ -160,6 +156,8 @@ resource "keycloak_openid_client" "test_client" {
   ]
 
   client_secret = "secret"
+
+  pkce_code_challenge_method = "plain"
 }
 
 resource "keycloak_openid_client_scope" "test_default_client_scope" {

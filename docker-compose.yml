@@ -17,7 +17,7 @@ services:
     ports:
     - 8389:389
   keycloak:
-    image: jboss/keycloak:6.0.1
+    image: jboss/keycloak:7.0.0
     depends_on:
     - postgres
     - openldap
