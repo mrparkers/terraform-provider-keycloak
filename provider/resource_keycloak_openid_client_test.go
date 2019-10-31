@@ -288,6 +288,35 @@ func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, "invalidMethod"),
+				ExpectError: regexp.MustCompile(`config is invalid: expected pkce_code_challenge_method to be one of \[plain S256\], got invalidMethod`),
+			},
+			{
+				Config: testKeycloakOpenidClient_omitPkceChallengeMethod(realmName, clientId),
+				Check:  testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
+			},
+			{
+				Config: testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, "plain"),
+				Check:  testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", "plain"),
+			},
+			{
+				Config: testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, "S256"),
+				Check:  testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", "S256"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -403,6 +432,21 @@ func testAccCheckKeycloakOpenidClientDestroy() resource.TestCheckFunc {
 	}
 }
 
+func testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod(resourceName, pkceCodeChallengeMethod string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.PkceCodeChallengeMethod != pkceCodeChallengeMethod {
+			return fmt.Errorf("expected openid client %s to have pkce code challenge method value of %s, but got %s", client.ClientId, pkceCodeChallengeMethod, client.ClientSecret)
+		}
+
+		return nil
+	}
+}
+
 func getOpenidClientFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClient, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -448,6 +492,37 @@ resource "keycloak_openid_client" "client" {
 	access_type = "%s"
 }
 	`, realm, clientId, accessType)
+}
+
+func testKeycloakOpenidClient_pkceChallengeMethod(realm, clientId, pkceChallengeMethod string) string {
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "CONFIDENTIAL"
+	pkce_code_challenge_method = "%s"
+}
+	`, realm, clientId, pkceChallengeMethod)
+}
+
+func testKeycloakOpenidClient_omitPkceChallengeMethod(realm, clientId string) string {
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "CONFIDENTIAL"
+}
+	`, realm, clientId)
 }
 
 func testKeycloakOpenidClient_updateRealmBefore(realmOne, realmTwo, clientId string) string {

@@ -43,7 +43,12 @@ type OpenidClient struct {
 	AuthorizationServicesEnabled bool                               `json:"authorizationServicesEnabled"`
 	ValidRedirectUris            []string                           `json:"redirectUris"`
 	WebOrigins                   []string                           `json:"webOrigins"`
+	Attributes                   OpenidClientAttributes             `json:"attributes"`
 	AuthorizationSettings        *OpenidClientAuthorizationSettings `json:"authorizationSettings,omitempty"`
+}
+
+type OpenidClientAttributes struct {
+	PkceCodeChallengeMethod string `json:"pkce.code.challenge.method"`
 }
 
 func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountUserId(realmId, clientId string) (*User, error) {

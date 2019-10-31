@@ -18,7 +18,7 @@ GO111MODULE=on go mod download && make build
 
 ## Supported Versions
 
-Currently, this provider is tested against Terraform v0.12.1 and Keycloak v6.0.1. I personally use this provider with Terraform v0.11.x and Keycloak 4.8.3.Final.
+Currently, this provider is tested against Terraform v0.12.1 and Keycloak v7.0.0. I personally use this provider with Terraform v0.11.x and Keycloak 4.8.3.Final.
 
 In the future, it would be nice to [run acceptance tests using different versions of Terraform / Keycloak](https://github.com/mrparkers/terraform-provider-keycloak/issues/111). Please feel free to submit a PR if you believe you can help with this.
 
