@@ -48,8 +48,16 @@ func getOpenidClientServiceAccountRoleFromData(data *schema.ResourceData, keyclo
 
 	role, err := keycloakClient.GetRoleByName(realmId, containerId, roleName)
 	if err != nil {
-		return nil, err
+		switch e := err.(type) {
+		case *keycloak.ApiError:
+			if e.Code == 404 {
+				role = &keycloak.Role{Id: ""}
+			}
+		default:
+			return nil, err
+		}
 	}
+
 	return &keycloak.OpenidClientServiceAccountRole{
 		Id:                   role.Id,
 		ContainerId:          containerId,
