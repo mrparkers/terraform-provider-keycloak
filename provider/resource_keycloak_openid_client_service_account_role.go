@@ -48,7 +48,7 @@ func getOpenidClientServiceAccountRoleFromData(data *schema.ResourceData, keyclo
 
 	role, err := keycloakClient.GetRoleByName(realmId, containerId, roleName)
 	if err != nil {
-		if keycloak.ErrorIs404(err) {
+		if handleNotFoundError(err, data) == nil {
 			role = &keycloak.Role{Id: ""}
 		} else {
 			return nil, err
@@ -113,7 +113,10 @@ func resourceKeycloakOpenidClientServiceAccountRoleDelete(data *schema.ResourceD
 		return err
 	}
 
-	return keycloakClient.DeleteOpenidClientServiceAccountRole(serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId, serviceAccountRole.Id)
+	err = keycloakClient.DeleteOpenidClientServiceAccountRole(serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId, serviceAccountRole.Id)
+	if err != nil {
+		return handleNotFoundError(err, data)
+	}
 }
 
 func resourceKeycloakOpenidClientServiceAccountRoleImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
