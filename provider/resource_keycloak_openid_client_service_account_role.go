@@ -57,8 +57,6 @@ func getOpenidClientServiceAccountRoleFromData(data *schema.ResourceData, keyclo
 		RealmId:              realmId,
 		ServiceAccountUserId: serviceAccountRoleId,
 	}, nil
-
-	return nil, nil
 }
 
 func setOpenidClientServiceAccountRoleData(data *schema.ResourceData, serviceAccountRole *keycloak.OpenidClientServiceAccountRole) {
