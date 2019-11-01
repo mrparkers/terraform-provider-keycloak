@@ -117,6 +117,7 @@ func resourceKeycloakOpenidClientServiceAccountRoleDelete(data *schema.ResourceD
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
+	return nil
 }
 
 func resourceKeycloakOpenidClientServiceAccountRoleImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
