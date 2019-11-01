@@ -118,7 +118,7 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		JwksUrl:              data.Get("jwks_url").(string),
 		UserInfoUrl:          data.Get("user_info_url").(string),
 		ExtraConfig:          extraConfig,
-		UseJwksUrl:						keycloak.KeycloakBoolQuoted(useJwksUrl),
+		UseJwksUrl:           keycloak.KeycloakBoolQuoted(useJwksUrl),
 		DisableUserInfo:      keycloak.KeycloakBoolQuoted(!enableUserInfo),
 	}
 
