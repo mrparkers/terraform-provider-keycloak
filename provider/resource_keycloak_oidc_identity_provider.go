@@ -94,6 +94,8 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
 	rec, _ := getIdentityProviderFromData(data)
 	rec.ProviderId = data.Get("provider_id").(string)
+	_, useJwksUrl := data.GetOk("jwks_url")
+	_, enableUserInfo := data.GetOk("user_info_url")
 
 	extraConfig := map[string]interface{}{}
 	if v, ok := data.GetOk("extra_config"); ok {
@@ -107,6 +109,7 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		ValidateSignature:    keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		AuthorizationUrl:     data.Get("authorization_url").(string),
 		ClientId:             data.Get("client_id").(string),
+		ClientSecret:         data.Get("client_secret").(string),
 		HideOnLoginPage:      keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
 		TokenUrl:             data.Get("token_url").(string),
 		LogoutUrl:            data.Get("logout_url").(string),
@@ -115,14 +118,8 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		JwksUrl:              data.Get("jwks_url").(string),
 		UserInfoUrl:          data.Get("user_info_url").(string),
 		ExtraConfig:          extraConfig,
-	}
-	_, useJwksUrl := data.GetOk("jwks_url")
-	rec.Config.UseJwksUrl = keycloak.KeycloakBoolQuoted(useJwksUrl)
-	_, enableUserInfo := data.GetOk("user_info_url")
-	rec.Config.DisableUserInfo = keycloak.KeycloakBoolQuoted(!enableUserInfo)
-
-	if data.HasChange("client_secret") {
-		rec.Config.ClientSecret = data.Get("client_secret").(string)
+		UseJwksUrl:           keycloak.KeycloakBoolQuoted(useJwksUrl),
+		DisableUserInfo:      keycloak.KeycloakBoolQuoted(!enableUserInfo),
 	}
 
 	return rec, nil

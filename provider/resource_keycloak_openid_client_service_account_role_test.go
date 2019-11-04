@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strings"
 	"testing"
 )
 
@@ -123,7 +124,7 @@ func testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy() resource.TestCh
 			realmId := rs.Primary.Attributes["realm_id"]
 			serviceAccountUserId := rs.Primary.Attributes["service_account_user_id"]
 			clientId := rs.Primary.Attributes["client_id"]
-			id := rs.Primary.ID
+			id := strings.Split(rs.Primary.ID, "/")[1]
 
 			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -148,7 +149,7 @@ func getKeycloakOpenidClientServiceAccountRoleFromState(s *terraform.State, reso
 	realmId := rs.Primary.Attributes["realm_id"]
 	serviceAccountUserId := rs.Primary.Attributes["service_account_user_id"]
 	clientId := rs.Primary.Attributes["client_id"]
-	id := rs.Primary.ID
+	id := strings.Split(rs.Primary.ID, "/")[1]
 
 	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRole(realmId, serviceAccountUserId, clientId, id)
 	if err != nil {
