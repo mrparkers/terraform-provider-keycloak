@@ -1,3 +1,14 @@
+## 1.12.0 (November 4, 2019)
+
+IMPROVEMENTS:
+
+* add `pkce_code_challenge_method` attribute for `keycloak_openid_client` resource ([#170](https://github.com/mrparkers/terraform-provider-keycloak/pull/170))
+
+BUG FIXES:
+
+* always use valid client secret for `keycloak_oidc_identity_provider` resource ([#171](https://github.com/mrparkers/terraform-provider-keycloak/pull/171))
+* fix state issues for `keycloak_openid_client_service_account_role` resource ([#171](https://github.com/mrparkers/terraform-provider-keycloak/pull/171))
+
 ## 1.11.1 (October 17, 2019)
 
 BUG FIXES:
