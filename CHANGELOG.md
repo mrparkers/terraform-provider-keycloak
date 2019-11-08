@@ -1,3 +1,9 @@
+## 1.13.0 (November 8, 2019)
+
+IMPROVEMENTS:
+
+* use cookiejar for Keycloak API requests ([#173](https://github.com/mrparkers/terraform-provider-keycloak/pull/173))
+
 ## 1.12.0 (November 4, 2019)
 
 IMPROVEMENTS:
