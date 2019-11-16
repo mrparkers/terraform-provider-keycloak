@@ -3,6 +3,7 @@ package keycloak
 import (
 	"fmt"
 	"log"
+	"strings"
 )
 
 type Role struct {
@@ -43,7 +44,9 @@ func (keycloakClient *KeycloakClient) CreateRole(role *Role) error {
 	}
 
 	var createdRole Role
-	err = keycloakClient.get(fmt.Sprintf("%s/%s", url, role.Name), &createdRole, nil)
+	var roleName = strings.Replace(role.Name, "/", "%2F", -2)
+
+	err = keycloakClient.get(fmt.Sprintf("%s/%s", url, roleName), &createdRole, nil)
 	if err != nil {
 		return err
 	}
@@ -55,7 +58,6 @@ func (keycloakClient *KeycloakClient) CreateRole(role *Role) error {
 
 func (keycloakClient *KeycloakClient) GetRole(realmId, id string) (*Role, error) {
 	var role Role
-
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), &role, nil)
 	if err != nil {
 		return nil, err
@@ -72,8 +74,9 @@ func (keycloakClient *KeycloakClient) GetRole(realmId, id string) (*Role, error)
 
 func (keycloakClient *KeycloakClient) GetRoleByName(realmId, clientId, name string) (*Role, error) {
 	var role Role
+	var roleName = strings.Replace(name, "/", "%2F", -2)
 
-	err := keycloakClient.get(fmt.Sprintf("%s/%s", roleByNameUrl(realmId, clientId), name), &role, nil)
+	err := keycloakClient.get(fmt.Sprintf("%s/%s", roleByNameUrl(realmId, clientId), roleName), &role, nil)
 	if err != nil {
 		return nil, err
 	}
