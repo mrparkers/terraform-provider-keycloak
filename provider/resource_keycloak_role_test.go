@@ -32,6 +32,29 @@ func TestAccKeycloakRole_basicRealm(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRole_basicRealmForwardSlashRole(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	roleName := "terraform-role-/-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRoleDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRole_basicRealm(realmName, roleName),
+				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
+			},
+			{
+				ResourceName:        "keycloak_role.role",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRole_basicClient(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
