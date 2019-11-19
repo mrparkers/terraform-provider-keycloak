@@ -1,4 +1,4 @@
-## 1.31.1 (November 19, 2019)
+## 1.13.1 (November 19, 2019)
 
 BUG FIXES:
 
