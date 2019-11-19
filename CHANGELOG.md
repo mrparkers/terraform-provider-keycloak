@@ -1,3 +1,9 @@
+## 1.31.1 (November 19, 2019)
+
+BUG FIXES:
+
+* correctly handle Keycloak role names that contain a forward slash ([#175](https://github.com/mrparkers/terraform-provider-keycloak/pull/175))
+
 ## 1.13.0 (November 8, 2019)
 
 IMPROVEMENTS:
