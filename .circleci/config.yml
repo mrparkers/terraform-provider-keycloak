@@ -24,7 +24,7 @@ jobs:
   test:
     docker:
       - image: circleci/golang:1.11.4
-      - image: jboss/keycloak:7.0.0
+      - image: jboss/keycloak:8.0.0
         environment:
           DB_VENDOR: H2
           KEYCLOAK_LOGLEVEL: DEBUG

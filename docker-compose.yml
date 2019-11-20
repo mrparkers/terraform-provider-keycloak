@@ -17,7 +17,7 @@ services:
     ports:
     - 8389:389
   keycloak:
-    image: jboss/keycloak:7.0.0
+    image: jboss/keycloak:8.0.0
     depends_on:
     - postgres
     - openldap
@@ -29,8 +29,8 @@ services:
     - DB_PASSWORD=password
     - KEYCLOAK_USER=keycloak
     - KEYCLOAK_PASSWORD=password
-    - POSTGRES_PORT_5432_TCP_ADDR=postgres
-    - POSTGRES_PORT_5432_TCP_PORT=5432
+    - DB_ADDR=postgres
+    - DB_PORT=5432
     ports:
     - 8080:8080
     volumes:
