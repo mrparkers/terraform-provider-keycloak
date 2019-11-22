@@ -14,6 +14,11 @@ type GenericClientProtocolMapper struct {
 	RealmId        string            `json:"-"`
 }
 
+type OpenidClientWithGenericClientProtocolMappers struct {
+	OpenidClient
+	ProtocolMappers []*GenericClientProtocolMapper
+}
+
 func (keycloakClient *KeycloakClient) NewGenericClientProtocolMapper(genericClientProtocolMapper *GenericClientProtocolMapper) error {
 	_, location, err := keycloakClient.post(
 		fmt.Sprintf("/realms/%s/clients/%s/protocol-mappers/models", genericClientProtocolMapper.RealmId, genericClientProtocolMapper.ClientId),
@@ -25,6 +30,26 @@ func (keycloakClient *KeycloakClient) NewGenericClientProtocolMapper(genericClie
 	genericClientProtocolMapper.Id = getIdFromLocationHeader(location)
 
 	return nil
+}
+
+func (keycloakClient *KeycloakClient) GetGenericClientProtocolMappers(realmId string, clientId string) (*OpenidClientWithGenericClientProtocolMappers, error) {
+	var openidClientWithGenericClientProtocolMappers OpenidClientWithGenericClientProtocolMappers
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s", realmId, clientId), &openidClientWithGenericClientProtocolMappers, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	openidClientWithGenericClientProtocolMappers.RealmId = realmId
+	openidClientWithGenericClientProtocolMappers.ClientId = clientId
+
+	for _, protocolMapper := range openidClientWithGenericClientProtocolMappers.ProtocolMappers {
+		protocolMapper.RealmId = realmId
+		protocolMapper.ClientId = clientId
+	}
+
+	return &openidClientWithGenericClientProtocolMappers, nil
+
 }
 
 func (keycloakClient *KeycloakClient) GetGenericClientProtocolMapper(realmId string, clientId string, id string) (*GenericClientProtocolMapper, error) {

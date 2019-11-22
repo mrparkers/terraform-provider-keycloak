@@ -18,6 +18,11 @@ type Role struct {
 	Composite   bool   `json:"composite"`
 }
 
+type UsersInRole struct {
+	Role  *Role
+	Users *[]User
+}
+
 /*
  * Realm roles: /realms/${realm_id}/roles
  * Client roles: /realms/${realm_id}/clients/${client_id}/roles
@@ -54,6 +59,64 @@ func (keycloakClient *KeycloakClient) CreateRole(role *Role) error {
 	role.Id = createdRole.Id
 
 	return nil
+}
+
+func (keycloakClient *KeycloakClient) GetRealmRoles(realmId string) ([]*Role, error) {
+	var roles []*Role
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/roles", realmId), &roles, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, role := range roles {
+		role.RealmId = realmId
+	}
+
+	return roles, nil
+}
+
+func (keycloakClient *KeycloakClient) GetClientRoles(realmId string, clients []*OpenidClient) ([]*Role, error) {
+	var roles []*Role
+
+	for _, client := range clients {
+		var rolesClient []*Role
+
+		err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/roles", realmId, client.Id), &rolesClient, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, roleClient := range rolesClient {
+			roleClient.RealmId = realmId
+			roleClient.ClientId = client.Id
+		}
+
+		roles = append(roles, rolesClient...)
+	}
+
+	return roles, nil
+}
+
+func (keycloakClient *KeycloakClient) GetClientRoleUsers(realmId string, roles []*Role) (*[]UsersInRole, error) {
+	var usersInRoles []UsersInRole
+
+	for _, role := range roles {
+		var usersInRole UsersInRole
+
+		usersInRole.Role = role
+		err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/roles/%s/users", realmId, role.ClientId, role.Name), &usersInRole.Users, nil)
+		if usersInRole.Users == nil {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		usersInRoles = append(usersInRoles, usersInRole)
+	}
+
+	return &usersInRoles, nil
 }
 
 func (keycloakClient *KeycloakClient) GetRole(realmId, id string) (*Role, error) {
