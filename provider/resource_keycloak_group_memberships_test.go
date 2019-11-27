@@ -45,7 +45,6 @@ func TestAccKeycloakGroupMemberships_moreThan100members(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroupMemberships_moreThan100members(realmName, groupName),
-				Check:  testAccCheckUserBelongsToGroup("keycloak_group_memberships.group_members", username),
 			},
 		},
 	})
@@ -430,10 +429,6 @@ resource "keycloak_group_memberships" "group_members" {
 
 func testKeycloakGroupMemberships_moreThan100members(realm, group string) string {
 	count := 110
-	var usersInGroupInterpolated []string
-	for i := 0; i < count; i++ {
-		usersInGroupInterpolated = append(usersInGroupInterpolated, fmt.Sprintf("${keycloak_user.users.%d.username}", i))
-	}
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
         realm = "%s"
@@ -454,10 +449,10 @@ resource "keycloak_group_memberships" "group_members" {
         realm_id = "${keycloak_realm.realm.id}"
         group_id = "${keycloak_group.group.id}"
 
-        members = %s
+        members = "${keycloak_user.users.*.username}"
 }
 
-        `, realm, group, count, arrayOfStringsForTerraformResource(usersInGroupInterpolated))
+        `, realm, group, count)
 }
 
 func testKeycloakGroupMemberships_updateGroupForceNew(realm, groupOne, groupTwo, username, currentGroup string) string {
