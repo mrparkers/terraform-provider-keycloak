@@ -34,6 +34,23 @@ func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakGroupMemberships_moreThan100members(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	groupName := "terraform-group-" + acctest.RandString(10)
+	username := "terraform-user-101"
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGroupMemberships_moreThan100members(realmName, groupName),
+				Check:  testAccCheckUserBelongsToGroup("keycloak_group_memberships.group_members", username),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakGroupMemberships_updateGroupForceNew(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 
@@ -409,6 +426,38 @@ resource "keycloak_group_memberships" "group_members" {
 	]
 }
 	`, realm, group, username)
+}
+
+func testKeycloakGroupMemberships_moreThan100members(realm, group string) string {
+	count := 200
+	var usersInGroupInterpolated []string
+	for i := 0; i < count; i++ {
+		usersInGroupInterpolated = append(usersInGroupInterpolated, fmt.Sprintf("${keycloak_user.users.%d.username}", i))
+	}
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+        realm = "%s"
+}
+
+resource "keycloak_group" "group" {
+        name     = "%s"
+        realm_id = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_user" "users" {
+	count = %d
+        realm_id = "${keycloak_realm.realm.id}"
+        username = "terraform-user-${count.index}"
+}
+
+resource "keycloak_group_memberships" "group_members" {
+        realm_id = "${keycloak_realm.realm.id}"
+        group_id = "${keycloak_group.group.id}"
+
+        members = %s
+}
+
+        `, realm, group, count, arrayOfStringsForTerraformResource(usersInGroupInterpolated))
 }
 
 func testKeycloakGroupMemberships_updateGroupForceNew(realm, groupOne, groupTwo, username, currentGroup string) string {

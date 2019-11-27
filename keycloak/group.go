@@ -135,14 +135,8 @@ func (keycloakClient *KeycloakClient) ListGroupsWithName(realmId, name string) (
 
 func (keycloakClient *KeycloakClient) GetGroupMembers(realmId, groupId string) ([]*User, error) {
 	var users []*User
-	var max int
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/count", realmId), &max, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	err = keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s/members?max=%d", realmId, groupId, max), &users, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s/members?max=-1", realmId, groupId), &users, nil)
 	if err != nil {
 		return nil, err
 	}
