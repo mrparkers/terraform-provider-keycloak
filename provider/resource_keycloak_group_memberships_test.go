@@ -37,7 +37,6 @@ func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
 func TestAccKeycloakGroupMemberships_moreThan100members(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	groupName := "terraform-group-" + acctest.RandString(10)
-	username := "terraform-user-101"
 
 	resource.Test(t, resource.TestCase{
 		Providers: testAccProviders,
