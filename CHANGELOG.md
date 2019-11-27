@@ -1,3 +1,9 @@
+## 1.13.2 (November 27, 2019)
+
+BUG FIXES:
+
+* fix: update Keycloak API call to handle groups with more than 100 members ([#179](https://github.com/mrparkers/terraform-provider-keycloak/pull/179))
+
 ## 1.13.1 (November 19, 2019)
 
 BUG FIXES:
