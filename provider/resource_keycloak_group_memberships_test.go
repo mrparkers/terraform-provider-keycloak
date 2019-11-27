@@ -429,7 +429,7 @@ resource "keycloak_group_memberships" "group_members" {
 }
 
 func testKeycloakGroupMemberships_moreThan100members(realm, group string) string {
-	count := 200
+	count := 110
 	var usersInGroupInterpolated []string
 	for i := 0; i < count; i++ {
 		usersInGroupInterpolated = append(usersInGroupInterpolated, fmt.Sprintf("${keycloak_user.users.%d.username}", i))
