@@ -53,10 +53,14 @@ type OpenidClientAttributes struct {
 
 func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountUserId(realmId, clientId string) (*User, error) {
 	var serviceAccountUser User
+
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/service-account-user", realmId, clientId), &serviceAccountUser, nil)
 	if err != nil {
 		return &serviceAccountUser, err
 	}
+
+	serviceAccountUser.RealmId = realmId
+
 	return &serviceAccountUser, nil
 }
 
