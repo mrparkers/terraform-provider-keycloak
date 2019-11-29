@@ -72,7 +72,7 @@ provider "keycloak" {
 
 ```hcl
 provider "keycloak" {
-	client_id     = "terraform"
+	client_id     = "admin-cli"
 	username      = "keycloak"
 	password      = "password"
 	url           = "http://localhost:8080"
