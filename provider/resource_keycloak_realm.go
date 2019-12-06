@@ -171,12 +171,12 @@ func resourceKeycloakRealm() *schema.Resource {
 			"revoke_refresh_token": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default: false,
+				Default:  false,
 			},
 			"refresh_token_max_reuse": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default: 0,
+				Default:  0,
 			},
 			"sso_session_idle_timeout": {
 				Type:             schema.TypeString,
@@ -517,11 +517,11 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	}
 
 	// Tokens
-	if revokeRefreshToken, ok := data.GetOk("revoke_refresh_token"); ok  {
+	if revokeRefreshToken, ok := data.GetOk("revoke_refresh_token"); ok {
 		realm.RevokeRefreshToken = revokeRefreshToken.(bool)
 	}
 
-	if refreshTokenMaxReuse, ok := data.GetOk("refresh_token_max_reuse"); ok  {
+	if refreshTokenMaxReuse, ok := data.GetOk("refresh_token_max_reuse"); ok {
 		realm.RefreshTokenMaxReuse = refreshTokenMaxReuse.(int)
 	}
 
