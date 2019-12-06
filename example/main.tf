@@ -27,7 +27,6 @@ resource "keycloak_realm" "test" {
   }
 
   account_theme = "base"
-
   access_code_lifespan = "30m"
 
   internationalization {

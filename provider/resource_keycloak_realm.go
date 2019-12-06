@@ -168,11 +168,15 @@ func resourceKeycloakRealm() *schema.Resource {
 			},
 
 			// Tokens
-
+			"revoke_refresh_token": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default: false,
+			},
 			"refresh_token_max_reuse": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
+				Default: 0,
 			},
 			"sso_session_idle_timeout": {
 				Type:             schema.TypeString,
@@ -513,12 +517,12 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	}
 
 	// Tokens
-	if refreshTokenMaxReuse := data.Get("refresh_token_max_reuse").(int); refreshTokenMaxReuse >= 0 {
-		realm.RevokeRefreshToken = true
-		realm.RefreshTokenMaxReuse = refreshTokenMaxReuse
-	} else {
-		realm.RevokeRefreshToken = false
-		realm.RefreshTokenMaxReuse = 0
+	if revokeRefreshToken, ok := data.GetOk("revoke_refresh_token"); ok  {
+		realm.RevokeRefreshToken = revokeRefreshToken.(bool)
+	}
+
+	if refreshTokenMaxReuse, ok := data.GetOk("refresh_token_max_reuse"); ok  {
+		realm.RefreshTokenMaxReuse = refreshTokenMaxReuse.(int)
 	}
 
 	if ssoSessionIdleTimeout := data.Get("sso_session_idle_timeout").(string); ssoSessionIdleTimeout != "" {
@@ -766,6 +770,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("email_theme", realm.EmailTheme)
 
 	// Tokens
+	data.Set("revoke_refresh_token", realm.RevokeRefreshToken)
 	data.Set("refresh_token_max_reuse", realm.RefreshTokenMaxReuse)
 	data.Set("sso_session_idle_timeout", getDurationStringFromSeconds(realm.SsoSessionIdleTimeout))
 	data.Set("sso_session_max_lifespan", getDurationStringFromSeconds(realm.SsoSessionMaxLifespan))

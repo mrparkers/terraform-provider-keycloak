@@ -47,8 +47,8 @@ type Realm struct {
 	EmailTheme   string `json:"emailTheme,omitempty"`
 
 	// Tokens
-	RevokeRefreshToken                  bool `json:"revokeRefreshToken,omitempty"`
-	RefreshTokenMaxReuse                int  `json:"refreshTokenMaxReuse,omitempty"`
+	RevokeRefreshToken                  bool `json:"revokeRefreshToken"`
+	RefreshTokenMaxReuse                int  `json:"refreshTokenMaxReuse"`
 	SsoSessionIdleTimeout               int  `json:"ssoSessionIdleTimeout,omitempty"`
 	SsoSessionMaxLifespan               int  `json:"ssoSessionMaxLifespan,omitempty"`
 	OfflineSessionIdleTimeout           int  `json:"offlineSessionIdleTimeout,omitempty"`

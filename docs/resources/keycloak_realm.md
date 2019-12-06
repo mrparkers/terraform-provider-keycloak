@@ -101,7 +101,8 @@ If any of these attributes are not specified, they will default to Keycloak's de
 
 The following attributes can be found in the "Tokens" tab within the realm settings.
 
-- `refresh_token_max_reuse` - (Optional) Maximum number of times a refresh token can be reused before they are revoked. If unspecified, refresh tokens can be reused.
+- `revoke_refresh_token` - (Optional) If enabled a refresh token can only be used number of times specified in 'refresh_token_max_reuse' before they are revoked. If unspecified, refresh tokens can be reused.
+- `refresh_token_max_reuse` - (Optional) Maximum number of times a refresh token can be reused before they are revoked. If unspecified and 'revoke_refresh_token' is enabled the default value is 0 and refresh tokens can not be reused.
 
 The attributes below should be specified as [Go duration strings](https://golang.org/pkg/time/#Duration.String). They will default to Keycloak's default settings.
 
