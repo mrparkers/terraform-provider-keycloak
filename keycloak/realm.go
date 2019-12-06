@@ -35,7 +35,7 @@ type Realm struct {
 	VerifyEmail                 bool   `json:"verifyEmail"`
 	LoginWithEmailAllowed       bool   `json:"loginWithEmailAllowed"`
 	DuplicateEmailsAllowed      bool   `json:"duplicateEmailsAllowed"`
-	SslRequired                 string `json:"sslRequired"`
+	SslRequired                 string `json:"sslRequired,omitempty"`
 
 	//SMTP Server
 	SmtpServer SmtpServer `json:"smtpServer"`
