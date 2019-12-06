@@ -281,6 +281,7 @@ func TestAccKeycloakRealm_loginConfigBasic(t *testing.T) {
 		VerifyEmail:                 randomBool(),
 		LoginWithEmailAllowed:       randomBool(),
 		DuplicateEmailsAllowed:      false,
+		SslRequired:                 "external",
 	}
 
 	updatedRealm := &keycloak.Realm{
@@ -293,6 +294,7 @@ func TestAccKeycloakRealm_loginConfigBasic(t *testing.T) {
 		VerifyEmail:                 randomBool(),
 		LoginWithEmailAllowed:       false,
 		DuplicateEmailsAllowed:      true,
+		SslRequired:                 "all",
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -331,6 +333,10 @@ func TestAccKeycloakRealm_loginConfigValidation(t *testing.T) {
 			{
 				Config:      testKeycloakRealm_invalidLoginWithEmailAllowedAndDuplicateEmailsAllowed(realmName),
 				ExpectError: regexp.MustCompile("validation error: DuplicateEmailsAllowed cannot be true if LoginWithEmailAllowed is true"),
+			},
+			{
+				Config:      testKeycloakRealm_invalidLoginWithSSLRequiredOnInvalidValue(realmName),
+				ExpectError: regexp.MustCompile("validation error: SslRequired should be 'none', 'external' or 'all'"),
 			},
 		},
 	})
@@ -413,6 +419,69 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_securityDefensesHeaders(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	realmDisplayName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "SAMEORIGIN"),
+			},
+			{
+				Config: testKeycloakRealm_securityDefensesHeaders(realmName, realmDisplayName, "SAMEORIGIN"),
+				Check:  testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "SAMEORIGIN"),
+			},
+			{
+				Config: testKeycloakRealm_securityDefensesHeaders(realmName, realmDisplayName, "DENY"),
+				Check:  testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "DENY"),
+			},
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check:  testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "SAMEORIGIN"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_securityDefensesBruteForceDetection(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	realmDisplayName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", false),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor("keycloak_realm.realm", 30),
+				),
+			},
+			{
+				Config: testKeycloakRealm_securityDefensesBruteForceDetection(realmName, realmDisplayName, 33),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", true),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor("keycloak_realm.realm", 33),
+				),
+			},
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", false),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor("keycloak_realm.realm", 30),
+				),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
@@ -424,19 +493,51 @@ func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
-				Check:  testAccCheckKeycloakRealmSecurityDefenses("keycloak_realm.realm", "SAMEORIGIN"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "SAMEORIGIN"),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", false),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor("keycloak_realm.realm", 30),
+				),
 			},
 			{
-				Config: testKeycloakRealm_securityDefenses(realmName, realmDisplayName, "SAMEORIGIN"),
-				Check:  testAccCheckKeycloakRealmSecurityDefenses("keycloak_realm.realm", "SAMEORIGIN"),
+				Config: testKeycloakRealm_securityDefenses(realmName, realmDisplayName, "DENY", 33),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "DENY"),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", true),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor("keycloak_realm.realm", 33),
+				),
 			},
 			{
-				Config: testKeycloakRealm_securityDefenses(realmName, realmDisplayName, "DENY"),
-				Check:  testAccCheckKeycloakRealmSecurityDefenses("keycloak_realm.realm", "DENY"),
+				Config: testKeycloakRealm_securityDefensesHeaders(realmName, realmDisplayName, "SAMEORIGIN"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "SAMEORIGIN"),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", false),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor("keycloak_realm.realm", 30),
+				),
+			},
+			{
+				Config: testKeycloakRealm_securityDefensesBruteForceDetection(realmName, realmDisplayName, 31),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "SAMEORIGIN"),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", true),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor("keycloak_realm.realm", 31),
+				),
+			},
+			{
+				Config: testKeycloakRealm_securityDefenses(realmName, realmDisplayName, "DENY", 37),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "DENY"),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", true),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor("keycloak_realm.realm", 37),
+				),
 			},
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
-				Check:  testAccCheckKeycloakRealmSecurityDefenses("keycloak_realm.realm", "SAMEORIGIN"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "SAMEORIGIN"),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", false),
+					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor("keycloak_realm.realm", 30),
+				),
 			},
 		},
 	})
@@ -499,6 +600,29 @@ func TestAccKeycloakRealm_browserFlow(t *testing.T) {
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
 				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", "browser"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_customAttribute(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	key := "terraform-" + acctest.RandString(10)
+	value := "terraform-" + acctest.RandString(10)
+	value2 := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_withCustomAttribute(realmName, key, value),
+				Check:  testAccCheckKeycloakRealmCustomAttribute("keycloak_realm.realm", key, value),
+			},
+			{
+				Config: testKeycloakRealm_withCustomAttribute(realmName, key, value2),
+				Check:  testAccCheckKeycloakRealmCustomAttribute("keycloak_realm.realm", key, value2),
 			},
 		},
 	})
@@ -577,6 +701,10 @@ func testKeycloakRealmLoginInfo(resourceName string, realm *keycloak.Realm) reso
 
 		if realmFromState.DuplicateEmailsAllowed != realm.DuplicateEmailsAllowed {
 			return fmt.Errorf("expected realm %s to have duplicate_emails_allowed set to %t, but was %t", realm.Realm, realm.DuplicateEmailsAllowed, realmFromState.DuplicateEmailsAllowed)
+		}
+
+		if realmFromState.SslRequired != realm.SslRequired {
+			return fmt.Errorf("expected realm %s to have ssl_required set to %s, but was %s", realm.Realm, realm.SslRequired, realmFromState.SslRequired)
 		}
 
 		return nil
@@ -730,15 +858,45 @@ func getRealmFromState(s *terraform.State, resourceName string) (*keycloak.Realm
 	return realm, nil
 }
 
-func testAccCheckKeycloakRealmSecurityDefenses(resourceName, xFrameOptions string) resource.TestCheckFunc {
+func testAccCheckKeycloakRealmSecurityDefensesHeaders(resourceName, xFrameOptions string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		realm, err := getRealmFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
 
-		if realm.Attributes.BrowserHeaderXFrameOptions != xFrameOptions {
-			return fmt.Errorf("expected realm %s to have attribute _browser_header.xFrameOptions set to %s, but was %s", realm.Realm, xFrameOptions, realm.Attributes.BrowserHeaderXFrameOptions)
+		if realm.BrowserSecurityHeaders.XFrameOptions != xFrameOptions {
+			return fmt.Errorf("expected realm %s to have BrowserSecurityHeaders xFrameOptions set to %s, but was %s", realm.Realm, xFrameOptions, realm.BrowserSecurityHeaders.XFrameOptions)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection(resourceName string, enabled bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.BruteForceProtected != enabled {
+			return fmt.Errorf("expected realm %s to have BruteForceProtection set to %t, but was %t", realm.Realm, enabled, realm.BruteForceProtected)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor(resourceName string, maxLoginFailures int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.FailureFactor != maxLoginFailures {
+			return fmt.Errorf("expected realm %s to have FailureFactor set to %d, but was %d", realm.Realm, maxLoginFailures, realm.FailureFactor)
 		}
 
 		return nil
@@ -769,6 +927,21 @@ func testAccCheckKeycloakRealmBrowserFlow(resourceName, browserFlow string) reso
 
 		if realm.BrowserFlow != browserFlow {
 			return fmt.Errorf("expected realm %s to have browserFlow binding %s, but was %s", realm.Realm, browserFlow, realm.BrowserFlow)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRealmCustomAttribute(resourceName, key, value string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.Attributes[key] != value {
+			return fmt.Errorf("expected realm %s to have an attribute %s with value %s but was %s", realm.Realm, key, value, realm.Attributes[key])
 		}
 
 		return nil
@@ -936,8 +1109,9 @@ resource "keycloak_realm" "realm" {
 	verify_email                   = "%t"
 	login_with_email_allowed       = "%t"
 	duplicate_emails_allowed       = "%t"
+	ssl_required       			   = "%s"
 }
-	`, realm.Realm, realm.RegistrationAllowed, realm.RegistrationEmailAsUsername, realm.EditUsernameAllowed, realm.ResetPasswordAllowed, realm.RememberMe, realm.VerifyEmail, realm.LoginWithEmailAllowed, realm.DuplicateEmailsAllowed)
+	`, realm.Realm, realm.RegistrationAllowed, realm.RegistrationEmailAsUsername, realm.EditUsernameAllowed, realm.ResetPasswordAllowed, realm.RememberMe, realm.VerifyEmail, realm.LoginWithEmailAllowed, realm.DuplicateEmailsAllowed, realm.SslRequired)
 }
 
 func testKeycloakRealm_invalidRegistrationEmailAsUsernameWithoutRegistrationAllowed(realm string) string {
@@ -970,6 +1144,15 @@ resource "keycloak_realm" "realm" {
 
 	login_with_email_allowed       = true
 	duplicate_emails_allowed       = true
+}
+	`, realm)
+}
+
+func testKeycloakRealm_invalidLoginWithSSLRequiredOnInvalidValue(realm string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm         = "%s"
+	ssl_required  = "somethingElse"
 }
 	`, realm)
 }
@@ -1008,7 +1191,7 @@ resource "keycloak_realm" "realm" {
 	`, realm, realm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, offlineSessionIdleTimeout, offlineSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
 }
 
-func testKeycloakRealm_securityDefenses(realm, realmDisplayName, xFrameOptions string) string {
+func testKeycloakRealm_securityDefensesHeaders(realm, realmDisplayName, xFrameOptions string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm        = "%s"
@@ -1027,6 +1210,57 @@ resource "keycloak_realm" "realm" {
 	}
 }
 	`, realm, realmDisplayName, xFrameOptions)
+}
+
+func testKeycloakRealm_securityDefensesBruteForceDetection(realm, realmDisplayName string, maxLoginFailures int) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+	security_defenses {
+    	brute_force_detection {
+            permanent_lockout                 = false
+      		max_login_failures                = %d
+      		wait_increment_seconds            = 60
+      		quick_login_check_milli_seconds   = 1000
+      		minimum_quick_login_wait_seconds  = 60
+      		max_failure_wait_seconds          = 900
+      		failure_reset_time_seconds        = 43200
+        }
+	}
+}
+	`, realm, realmDisplayName, maxLoginFailures)
+}
+
+func testKeycloakRealm_securityDefenses(realm, realmDisplayName, xFrameOptions string, maxLoginFailures int) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	display_name = "%s"
+	security_defenses {
+    	headers {
+			x_frame_options = "%s"
+			content_security_policy = "frame-src 'self'; frame-ancestors 'self'; object-src 'none';"
+			content_security_policy_report_only = ""
+			x_content_type_options = "nosniff"
+			x_robots_tag = "none"
+			x_xss_protection = "1; mode=block"
+			strict_transport_security = "max-age=31536000; includeSubDomains"
+		}
+		brute_force_detection {
+            permanent_lockout                 = false
+      		max_login_failures                = %d
+      		wait_increment_seconds            = 60
+      		quick_login_check_milli_seconds   = 1000
+      		minimum_quick_login_wait_seconds  = 60
+      		max_failure_wait_seconds          = 900
+      		failure_reset_time_seconds        = 43200
+        }
+	}
+}
+	`, realm, realmDisplayName, xFrameOptions, maxLoginFailures)
 }
 
 func testKeycloakRealm_passwordPolicy(realm, realmDisplayName, passwordPolicy string) string {
@@ -1049,4 +1283,16 @@ resource "keycloak_realm" "realm" {
 	browser_flow = "%s"
 }
 	`, realm, realmDisplayName, browserFlow)
+}
+
+func testKeycloakRealm_withCustomAttribute(realm, key, value string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        = "%s"
+	enabled      = true
+	attributes   = {
+		%s = "%s"
+	}
+}
+	`, realm, key, value)
 }
