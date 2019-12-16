@@ -56,6 +56,46 @@ func (keycloakClient *KeycloakClient) ResetUserPassword(realmId, userId string, 
 	return nil
 }
 
+func (keycloakClient *KeycloakClient) GetUsers(realmId string) ([]*User, error) {
+	var users []*User
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users", realmId), &users, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, user := range users {
+		user.RealmId = realmId
+	}
+
+	return users, nil
+}
+
+func (keycloakClient *KeycloakClient) GetUsersRoles(realmId string) ([]*Role, error) {
+	var roles []*Role
+	var users []*User
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users", realmId), &users, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, user := range users {
+		var roles_user []*Role
+		err = keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/roles", realmId, user.Id), &roles_user, nil)
+		if err != nil {
+			return nil, err
+		}
+		roles = append(roles, roles_user...)
+	}
+
+	for _, role := range roles {
+		role.RealmId = realmId
+	}
+
+	return roles, nil
+}
+
 func (keycloakClient *KeycloakClient) GetUser(realmId, id string) (*User, error) {
 	var user User
 

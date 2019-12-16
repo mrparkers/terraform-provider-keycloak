@@ -120,6 +120,17 @@ func (keycloakClient *KeycloakClient) GetRealm(id string) (*Realm, error) {
 	return &realm, nil
 }
 
+func (keycloakClient *KeycloakClient) GetRealms() ([]*Realm, error) {
+	var realms []*Realm
+
+	err := keycloakClient.get("/realms", &realms, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return realms, nil
+}
+
 func (keycloakClient *KeycloakClient) GetRealmKeys(id string) (*Keys, error) {
 	var keys Keys
 
