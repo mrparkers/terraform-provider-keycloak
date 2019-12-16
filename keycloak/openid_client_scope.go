@@ -44,6 +44,36 @@ func (keycloakClient *KeycloakClient) GetOpenidClientScope(realmId, id string) (
 	return &clientScope, nil
 }
 
+func (keycloakClient *KeycloakClient) GetOpenidDefaultClientScopes(realmId, clientId string) (*[]OpenidClientScope, error) {
+	var clientScopes []OpenidClientScope
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes", realmId, clientId), &clientScopes, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, clientScope := range clientScopes {
+		clientScope.RealmId = realmId
+	}
+
+	return &clientScopes, nil
+}
+
+func (keycloakClient *KeycloakClient) GetOpenidOptionalClientScopes(realmId, clientId string) (*[]OpenidClientScope, error) {
+	var clientScopes []OpenidClientScope
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/optional-client-scopes", realmId, clientId), &clientScopes, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, clientScope := range clientScopes {
+		clientScope.RealmId = realmId
+	}
+
+	return &clientScopes, nil
+}
+
 func (keycloakClient *KeycloakClient) UpdateOpenidClientScope(clientScope *OpenidClientScope) error {
 	clientScope.Protocol = "openid-connect"
 
@@ -54,7 +84,7 @@ func (keycloakClient *KeycloakClient) DeleteOpenidClientScope(realmId, id string
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id), nil)
 }
 
-func (keycloakClient *KeycloakClient) listOpenidClientScopesWithFilter(realmId string, filter OpenidClientScopeFilterFunc) ([]*OpenidClientScope, error) {
+func (keycloakClient *KeycloakClient) ListOpenidClientScopesWithFilter(realmId string, filter OpenidClientScopeFilterFunc) ([]*OpenidClientScope, error) {
 	var clientScopes []OpenidClientScope
 	var openidClientScopes []*OpenidClientScope
 

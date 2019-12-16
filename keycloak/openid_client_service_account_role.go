@@ -59,3 +59,35 @@ func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(realm, s
 	}
 	return &OpenidClientServiceAccountRole{}, nil
 }
+
+func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRealmRoles(realm, serviceAccountUserId string) ([]*OpenidClientServiceAccountRole, error) {
+	var serviceAccountRoles []*OpenidClientServiceAccountRole
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm/composite", realm, serviceAccountUserId), &serviceAccountRoles, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, serviceAccountRole := range serviceAccountRoles {
+		serviceAccountRole.RealmId = realm
+		serviceAccountRole.ServiceAccountUserId = serviceAccountUserId
+	}
+
+	return serviceAccountRoles, nil
+}
+
+func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountClientRoles(realm, serviceAccountUserId, clientId string) ([]*OpenidClientServiceAccountRole, error) {
+	var serviceAccountRoles []*OpenidClientServiceAccountRole
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, serviceAccountRole := range serviceAccountRoles {
+		serviceAccountRole.RealmId = realm
+		serviceAccountRole.ServiceAccountUserId = serviceAccountUserId
+	}
+
+	return serviceAccountRoles, nil
+}

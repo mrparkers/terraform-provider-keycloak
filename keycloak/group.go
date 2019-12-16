@@ -90,6 +90,21 @@ func (keycloakClient *KeycloakClient) NewGroup(group *Group) error {
 	return nil
 }
 
+func (keycloakClient *KeycloakClient) GetGroups(realmId string) ([]*Group, error) {
+	var groups []*Group
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups", realmId), &groups, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, group := range groups {
+		group.RealmId = realmId
+	}
+
+	return groups, nil
+}
+
 func (keycloakClient *KeycloakClient) GetGroup(realmId, id string) (*Group, error) {
 	var group Group
 
