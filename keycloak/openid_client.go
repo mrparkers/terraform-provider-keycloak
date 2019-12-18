@@ -107,6 +107,32 @@ func (keycloakClient *KeycloakClient) NewOpenidClient(client *OpenidClient) erro
 	return nil
 }
 
+func (keycloakClient *KeycloakClient) GetOpenidClients(realmId string, withSecrets bool) ([]*OpenidClient, error) {
+	var clients []*OpenidClient
+	var clientSecret OpenidClientSecret
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients", realmId), &clients, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, client := range clients {
+		client.RealmId = realmId
+		if !withSecrets {
+			continue
+		}
+
+		err = keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/client-secret", realmId, client.Id), &clientSecret, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		client.ClientSecret = clientSecret.Value
+	}
+
+	return clients, nil
+}
+
 func (keycloakClient *KeycloakClient) GetOpenidClient(realmId, id string) (*OpenidClient, error) {
 	var client OpenidClient
 	var clientSecret OpenidClientSecret
@@ -187,6 +213,25 @@ func (keycloakClient *KeycloakClient) GetOpenidClientOptionalScopes(realmId, cli
 	return keycloakClient.getOpenidClientScopes(realmId, clientId, "optional")
 }
 
+func (keycloakClient *KeycloakClient) getRealmClientScopes(realmId, t string) ([]*OpenidClientScope, error) {
+	var scopes []*OpenidClientScope
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/default-%s-client-scopes", realmId, t), &scopes, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return scopes, nil
+}
+
+func (keycloakClient *KeycloakClient) GetRealmDefaultClientScopes(realmId string) ([]*OpenidClientScope, error) {
+	return keycloakClient.getRealmClientScopes(realmId, "default")
+}
+
+func (keycloakClient *KeycloakClient) GetRealmOptionalClientScopes(realmId string) ([]*OpenidClientScope, error) {
+	return keycloakClient.getRealmClientScopes(realmId, "optional")
+}
+
 func (keycloakClient *KeycloakClient) attachOpenidClientScopes(realmId, clientId, t string, scopeNames []string) error {
 	openidClient, err := keycloakClient.GetOpenidClient(realmId, clientId)
 	if err != nil && ErrorIs404(err) {
@@ -199,7 +244,7 @@ func (keycloakClient *KeycloakClient) attachOpenidClientScopes(realmId, clientId
 		return fmt.Errorf("validation error: client with id %s uses access type BEARER-ONLY which does not use scopes", clientId)
 	}
 
-	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopesWithFilter(realmId, includeOpenidClientScopesMatchingNames(scopeNames))
+	allOpenidClientScopes, err := keycloakClient.ListOpenidClientScopesWithFilter(realmId, includeOpenidClientScopesMatchingNames(scopeNames))
 	if err != nil {
 		return err
 	}
@@ -248,7 +293,7 @@ func (keycloakClient *KeycloakClient) AttachOpenidClientOptionalScopes(realmId, 
 }
 
 func (keycloakClient *KeycloakClient) detachOpenidClientScopes(realmId, clientId, t string, scopeNames []string) error {
-	allOpenidClientScopes, err := keycloakClient.listOpenidClientScopesWithFilter(realmId, includeOpenidClientScopesMatchingNames(scopeNames))
+	allOpenidClientScopes, err := keycloakClient.ListOpenidClientScopesWithFilter(realmId, includeOpenidClientScopesMatchingNames(scopeNames))
 	if err != nil {
 		return err
 	}
