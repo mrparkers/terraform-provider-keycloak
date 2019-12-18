@@ -23,7 +23,6 @@ func TestAccKeycloakDataSourceOpenidClientServiceAccountUser_basic(t *testing.T)
 					resource.TestCheckResourceAttr(dataSourceName, "realm_id", realm),
 					resource.TestMatchResourceAttr(dataSourceName, "client_id", regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 					resource.TestCheckResourceAttr(dataSourceName, "username", "service-account-"+clientId),
-					resource.TestCheckResourceAttr(dataSourceName, "email", "service-account-"+clientId+"@placeholder.org"),
 				),
 			},
 		},
