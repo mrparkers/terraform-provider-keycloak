@@ -27,7 +27,6 @@ resource "keycloak_realm" "test" {
   }
 
   account_theme = "base"
-
   access_code_lifespan = "30m"
 
   internationalization {
@@ -50,9 +49,23 @@ resource "keycloak_realm" "test" {
       x_xss_protection                    = "1; mode=block"
       strict_transport_security           = "max-age=31536000; includeSubDomains"
     }
+
+    brute_force_detection {
+      permanent_lockout                 = false
+      max_login_failures                = 31
+      wait_increment_seconds            = 61
+      quick_login_check_milli_seconds   = 1000
+      minimum_quick_login_wait_seconds  = 120
+      max_failure_wait_seconds          = 900
+      failure_reset_time_seconds        = 43200
+    }
   }
 
+  ssl_required  = "external"
   password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
+  attributes = {
+    mycustomAttribute = "myCustomValue"
+  }
 }
 
 resource "keycloak_required_action" "custom-terms-and-conditions" {

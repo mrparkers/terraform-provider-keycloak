@@ -7,6 +7,9 @@ require (
 	github.com/hashicorp/hil v0.0.0-20190212132231-97b3a9cdfa93 // indirect
 	github.com/hashicorp/terraform v0.12.1
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	golang.org/x/net v0.0.0-20190502183928-7f726cade0ab
 )
 
 replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999
+
+go 1.13

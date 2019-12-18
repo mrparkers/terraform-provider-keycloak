@@ -16,6 +16,11 @@ resource "keycloak_realm" "realm" {
     login_theme          = "base"
 
     access_code_lifespan = "1h"
+    ssl_required  = "external"
+    password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
+    attributes = {
+      mycustomAttribute = "myCustomValue"
+    }
 
     smtp_server {
         host = "smtp.example.com"
@@ -46,6 +51,15 @@ resource "keycloak_realm" "realm" {
             x_xss_protection                    = "1; mode=block"
             strict_transport_security           = "max-age=31536000; includeSubDomains"
         }
+        brute_force_detection {
+            permanent_lockout                 = false
+            max_login_failures                = 30
+            wait_increment_seconds            = 60
+            quick_login_check_milli_seconds   = 1000
+            minimum_quick_login_wait_seconds  = 60
+            max_failure_wait_seconds          = 900
+            failure_reset_time_seconds        = 43200
+        }
     }
 }
 ```
@@ -71,6 +85,7 @@ If any of these attributes are not specified, they will default to Keycloak's de
 - `verify_email` - (Optional) When true, users are required to verify their email address after registration and after email address changes.
 - `login_with_email_allowed` - (Optional) When true, users may log in with their email address.
 - `duplicate_emails_allowed` - (Optional) When true, multiple users will be allowed to have the same email address. This attribute must be set to `false` if `login_with_email_allowed` is set to `true`.
+- `ssl_required` - (Optional) Can be one of following values: 'none, 'external' or 'all'
 
 ##### Themes
 
@@ -86,7 +101,8 @@ If any of these attributes are not specified, they will default to Keycloak's de
 
 The following attributes can be found in the "Tokens" tab within the realm settings.
 
-- `refresh_token_max_reuse` - (Optional) Maximum number of times a refresh token can be reused before they are revoked. If unspecified, refresh tokens will only be revoked when a different token is used.
+- `revoke_refresh_token` - (Optional) If enabled a refresh token can only be used number of times specified in 'refresh_token_max_reuse' before they are revoked. If unspecified, refresh tokens can be reused.
+- `refresh_token_max_reuse` - (Optional) Maximum number of times a refresh token can be reused before they are revoked. If unspecified and 'revoke_refresh_token' is enabled the default value is 0 and refresh tokens can not be reused.
 
 The attributes below should be specified as [Go duration strings](https://golang.org/pkg/time/#Duration.String). They will default to Keycloak's default settings.
 
@@ -129,7 +145,10 @@ Internationalization support can be configured by using the `internationalizatio
 
 ##### Security Defenses Headers
 
-Header configuration support for browser security settings.
+Header configuration support for browser security settings and brute force detection
+
+#### Atributes
+Map, can be used to add custom attributes to a realm. Or perhaps influence a certain attribute that is not supported in this terraform-provider
 
 ### Import
 

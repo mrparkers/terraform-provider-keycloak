@@ -72,6 +72,12 @@ func resourceKeycloakRealm() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"ssl_required": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "SSL Required: Values can be 'none', 'external' or 'all'.",
+				Default:     "external",
+			},
 
 			//Smtp server
 
@@ -162,11 +168,15 @@ func resourceKeycloakRealm() *schema.Resource {
 			},
 
 			// Tokens
-
+			"revoke_refresh_token": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"refresh_token_max_reuse": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
+				Default:  0,
 			},
 			"sso_session_idle_timeout": {
 				Type:             schema.TypeString,
@@ -307,6 +317,50 @@ func resourceKeycloakRealm() *schema.Resource {
 								},
 							},
 						},
+						"brute_force_detection": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"permanent_lockout": { //Permanent Lockout
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  false,
+									},
+									"max_login_failures": { //failureFactor
+										Type:     schema.TypeInt,
+										Optional: true,
+										Default:  30,
+									},
+									"wait_increment_seconds": { //Wait Increment
+										Type:     schema.TypeInt,
+										Optional: true,
+										Default:  60,
+									},
+									"quick_login_check_milli_seconds": { //Quick Login Check Milli Seconds
+										Type:     schema.TypeInt,
+										Optional: true,
+										Default:  1000,
+									},
+									"minimum_quick_login_wait_seconds": { //Minimum Quick Login Wait
+										Type:     schema.TypeInt,
+										Optional: true,
+										Default:  60,
+									},
+									"max_failure_wait_seconds": { //Max Wait
+										Type:     schema.TypeInt,
+										Optional: true,
+										Default:  900,
+									},
+									"failure_reset_time_seconds": { //maxDeltaTimeSeconds
+										Type:     schema.TypeInt,
+										Optional: true,
+										Default:  43200,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -352,6 +406,10 @@ func resourceKeycloakRealm() *schema.Resource {
 				Description: "Which flow should be used for DockerAuthenticationFlow",
 				Optional:    true,
 				Default:     "docker auth",
+			},
+			"attributes": {
+				Type:     schema.TypeMap,
+				Optional: true,
 			},
 		},
 	}
@@ -402,6 +460,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		VerifyEmail:                 data.Get("verify_email").(bool),
 		LoginWithEmailAllowed:       data.Get("login_with_email_allowed").(bool),
 		DuplicateEmailsAllowed:      data.Get("duplicate_emails_allowed").(bool),
+		SslRequired:                 data.Get("ssl_required").(string),
 
 		//internationalization
 		InternationalizationEnabled: internationalizationEnabled,
@@ -458,12 +517,12 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	}
 
 	// Tokens
+	if revokeRefreshToken, ok := data.GetOk("revoke_refresh_token"); ok {
+		realm.RevokeRefreshToken = revokeRefreshToken.(bool)
+	}
 
-	if refreshTokenMaxReuse := data.Get("refresh_token_max_reuse").(int); refreshTokenMaxReuse > 0 {
-		realm.RevokeRefreshToken = true
-		realm.RefreshTokenMaxReuse = refreshTokenMaxReuse
-	} else {
-		realm.RevokeRefreshToken = false
+	if refreshTokenMaxReuse, ok := data.GetOk("refresh_token_max_reuse"); ok {
+		realm.RefreshTokenMaxReuse = refreshTokenMaxReuse.(int)
 	}
 
 	if ssoSessionIdleTimeout := data.Get("sso_session_idle_timeout").(string); ssoSessionIdleTimeout != "" {
@@ -562,20 +621,36 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		if len(headersConfig) == 1 {
 			headerSettings := headersConfig[0].(map[string]interface{})
 
-			realm.Attributes = keycloak.Attributes{
-				BrowserHeaderContentSecurityPolicy:           headerSettings["content_security_policy"].(string),
-				BrowserHeaderContentSecurityPolicyReportOnly: headerSettings["content_security_policy_report_only"].(string),
-				BrowserHeaderStrictTransportSecurity:         headerSettings["strict_transport_security"].(string),
-				BrowserHeaderXContentTypeOptions:             headerSettings["x_content_type_options"].(string),
-				BrowserHeaderXFrameOptions:                   headerSettings["x_frame_options"].(string),
-				BrowserHeaderXRobotsTag:                      headerSettings["x_robots_tag"].(string),
-				BrowserHeaderXXSSProtection:                  headerSettings["x_xss_protection"].(string),
+			realm.BrowserSecurityHeaders = keycloak.BrowserSecurityHeaders{
+				ContentSecurityPolicy:           headerSettings["content_security_policy"].(string),
+				ContentSecurityPolicyReportOnly: headerSettings["content_security_policy_report_only"].(string),
+				StrictTransportSecurity:         headerSettings["strict_transport_security"].(string),
+				XContentTypeOptions:             headerSettings["x_content_type_options"].(string),
+				XFrameOptions:                   headerSettings["x_frame_options"].(string),
+				XRobotsTag:                      headerSettings["x_robots_tag"].(string),
+				XXSSProtection:                  headerSettings["x_xss_protection"].(string),
 			}
 		} else {
-			setDefaultSecuritySettings(realm)
+			setDefaultSecuritySettingHeaders(realm)
+		}
+
+		bruteForceDetectionConfig := securityDefensesSettings["brute_force_detection"].([]interface{})
+		if len(bruteForceDetectionConfig) == 1 {
+			bruteForceDetectionSettings := bruteForceDetectionConfig[0].(map[string]interface{})
+			realm.BruteForceProtected = true
+			realm.PermanentLockout = bruteForceDetectionSettings["permanent_lockout"].(bool)
+			realm.FailureFactor = bruteForceDetectionSettings["max_login_failures"].(int)
+			realm.WaitIncrementSeconds = bruteForceDetectionSettings["wait_increment_seconds"].(int)
+			realm.QuickLoginCheckMilliSeconds = bruteForceDetectionSettings["quick_login_check_milli_seconds"].(int)
+			realm.MinimumQuickLoginWaitSeconds = bruteForceDetectionSettings["minimum_quick_login_wait_seconds"].(int)
+			realm.MaxFailureWaitSeconds = bruteForceDetectionSettings["max_failure_wait_seconds"].(int)
+			realm.MaxDeltaTimeSeconds = bruteForceDetectionSettings["failure_reset_time_seconds"].(int)
+		} else {
+			setDefaultSecuritySettingsBruteForceDetection(realm)
 		}
 	} else {
-		setDefaultSecuritySettings(realm)
+		setDefaultSecuritySettingHeaders(realm)
+		setDefaultSecuritySettingsBruteForceDetection(realm)
 	}
 
 	if passwordPolicy, ok := data.GetOk("password_policy"); ok {
@@ -607,19 +682,38 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		realm.DockerAuthenticationFlow = flow.(string)
 	}
 
+	attributes := map[string]interface{}{}
+	if v, ok := data.GetOk("attributes"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			attributes[key] = value
+		}
+	}
+	realm.Attributes = attributes
+
 	return realm, nil
 }
 
-func setDefaultSecuritySettings(realm *keycloak.Realm) {
-	realm.Attributes = keycloak.Attributes{
-		BrowserHeaderContentSecurityPolicy:           "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
-		BrowserHeaderContentSecurityPolicyReportOnly: "",
-		BrowserHeaderStrictTransportSecurity:         "max-age=31536000; includeSubDomains",
-		BrowserHeaderXContentTypeOptions:             "nosniff",
-		BrowserHeaderXFrameOptions:                   "SAMEORIGIN",
-		BrowserHeaderXRobotsTag:                      "none",
-		BrowserHeaderXXSSProtection:                  "1; mode=block",
+func setDefaultSecuritySettingHeaders(realm *keycloak.Realm) {
+	realm.BrowserSecurityHeaders = keycloak.BrowserSecurityHeaders{
+		ContentSecurityPolicy:           "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
+		ContentSecurityPolicyReportOnly: "",
+		StrictTransportSecurity:         "max-age=31536000; includeSubDomains",
+		XContentTypeOptions:             "nosniff",
+		XFrameOptions:                   "SAMEORIGIN",
+		XRobotsTag:                      "none",
+		XXSSProtection:                  "1; mode=block",
 	}
+}
+
+func setDefaultSecuritySettingsBruteForceDetection(realm *keycloak.Realm) {
+	realm.BruteForceProtected = false
+	realm.PermanentLockout = false
+	realm.FailureFactor = 30
+	realm.WaitIncrementSeconds = 60
+	realm.QuickLoginCheckMilliSeconds = 1000
+	realm.MinimumQuickLoginWaitSeconds = 60
+	realm.MaxFailureWaitSeconds = 900
+	realm.MaxDeltaTimeSeconds = 43200
 }
 
 func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
@@ -638,6 +732,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("verify_email", realm.VerifyEmail)
 	data.Set("login_with_email_allowed", realm.LoginWithEmailAllowed)
 	data.Set("duplicate_emails_allowed", realm.DuplicateEmailsAllowed)
+	data.Set("ssl_required", realm.SslRequired)
 
 	// Smtp Config
 
@@ -675,6 +770,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("email_theme", realm.EmailTheme)
 
 	// Tokens
+	data.Set("revoke_refresh_token", realm.RevokeRefreshToken)
 	data.Set("refresh_token_max_reuse", realm.RefreshTokenMaxReuse)
 	data.Set("sso_session_idle_timeout", getDurationStringFromSeconds(realm.SsoSessionIdleTimeout))
 	data.Set("sso_session_max_lifespan", getDurationStringFromSeconds(realm.SsoSessionMaxLifespan))
@@ -698,25 +794,22 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 		data.Set("internationalization", nil)
 	}
 
-	if _, ok := data.GetOk("security_defenses"); ok {
-
-		if (keycloak.Attributes{}) == realm.Attributes {
+	if v, ok := data.GetOk("security_defenses"); ok {
+		oldHeadersConfig := v.([]interface{})[0].(map[string]interface{})["headers"].([]interface{})
+		if len(oldHeadersConfig) == 0 && !realm.BruteForceProtected {
 			data.Set("security_defenses", nil)
-		} else {
+		} else if len(oldHeadersConfig) == 1 && realm.BruteForceProtected {
 			securityDefensesSettings := make(map[string]interface{})
-
-			headersSettings := make(map[string]interface{})
-
-			headersSettings["content_security_policy"] = realm.Attributes.BrowserHeaderContentSecurityPolicy
-			headersSettings["content_security_policy_report_only"] = realm.Attributes.BrowserHeaderContentSecurityPolicyReportOnly
-			headersSettings["strict_transport_security"] = realm.Attributes.BrowserHeaderStrictTransportSecurity
-			headersSettings["x_content_type_options"] = realm.Attributes.BrowserHeaderXContentTypeOptions
-			headersSettings["x_frame_options"] = realm.Attributes.BrowserHeaderXFrameOptions
-			headersSettings["x_robots_tag"] = realm.Attributes.BrowserHeaderXRobotsTag
-			headersSettings["x_xss_protection"] = realm.Attributes.BrowserHeaderXXSSProtection
-
-			securityDefensesSettings["headers"] = []interface{}{headersSettings}
-
+			securityDefensesSettings["headers"] = []interface{}{getHeaderSettings(realm)}
+			securityDefensesSettings["brute_force_detection"] = []interface{}{getBruteForceDetectionSettings(realm)}
+			data.Set("security_defenses", []interface{}{securityDefensesSettings})
+		} else if len(oldHeadersConfig) == 1 {
+			securityDefensesSettings := make(map[string]interface{})
+			securityDefensesSettings["headers"] = []interface{}{getHeaderSettings(realm)}
+			data.Set("security_defenses", []interface{}{securityDefensesSettings})
+		} else if realm.BruteForceProtected {
+			securityDefensesSettings := make(map[string]interface{})
+			securityDefensesSettings["brute_force_detection"] = []interface{}{getBruteForceDetectionSettings(realm)}
 			data.Set("security_defenses", []interface{}{securityDefensesSettings})
 		}
 	}
@@ -730,6 +823,39 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("reset_credentials_flow", realm.ResetCredentialsFlow)
 	data.Set("client_authentication_flow", realm.ClientAuthenticationFlow)
 	data.Set("docker_authentication_flow", realm.DockerAuthenticationFlow)
+
+	attributes := map[string]interface{}{}
+	if v, ok := data.GetOk("attributes"); ok {
+		for key := range v.(map[string]interface{}) {
+			attributes[key] = realm.Attributes[key]
+			//We are only interested in attributes managed in terraform (Keycloak returns a lot of doubles values in the attributes...)
+		}
+	}
+	data.Set("attributes", attributes)
+}
+
+func getBruteForceDetectionSettings(realm *keycloak.Realm) map[string]interface{} {
+	bruteForceDetectionSettings := make(map[string]interface{})
+	bruteForceDetectionSettings["permanent_lockout"] = realm.PermanentLockout
+	bruteForceDetectionSettings["max_login_failures"] = realm.FailureFactor
+	bruteForceDetectionSettings["wait_increment_seconds"] = realm.WaitIncrementSeconds
+	bruteForceDetectionSettings["quick_login_check_milli_seconds"] = realm.QuickLoginCheckMilliSeconds
+	bruteForceDetectionSettings["minimum_quick_login_wait_seconds"] = realm.MinimumQuickLoginWaitSeconds
+	bruteForceDetectionSettings["max_failure_wait_seconds"] = realm.MaxFailureWaitSeconds
+	bruteForceDetectionSettings["failure_reset_time_seconds"] = realm.MaxDeltaTimeSeconds
+	return bruteForceDetectionSettings
+}
+
+func getHeaderSettings(realm *keycloak.Realm) map[string]interface{} {
+	headersSettings := make(map[string]interface{})
+	headersSettings["content_security_policy"] = realm.BrowserSecurityHeaders.ContentSecurityPolicy
+	headersSettings["content_security_policy_report_only"] = realm.BrowserSecurityHeaders.ContentSecurityPolicyReportOnly
+	headersSettings["strict_transport_security"] = realm.BrowserSecurityHeaders.StrictTransportSecurity
+	headersSettings["x_content_type_options"] = realm.BrowserSecurityHeaders.XContentTypeOptions
+	headersSettings["x_frame_options"] = realm.BrowserSecurityHeaders.XFrameOptions
+	headersSettings["x_robots_tag"] = realm.BrowserSecurityHeaders.XRobotsTag
+	headersSettings["x_xss_protection"] = realm.BrowserSecurityHeaders.XXSSProtection
+	return headersSettings
 }
 
 func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {
