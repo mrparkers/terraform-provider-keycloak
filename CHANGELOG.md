@@ -1,3 +1,17 @@
+## 1.14.0 (December 18, 2019)
+
+FEATURES:
+
+* add `keycloak_openid_client_service_account_user` data source ([#181](https://github.com/mrparkers/terraform-provider-keycloak/pull/181))
+* add `keycloak_group` data source ([#185](https://github.com/mrparkers/terraform-provider-keycloak/pull/185))
+
+IMPROVEMENTS:
+
+* support Keycloak v8.0.0 ([#183](https://github.com/mrparkers/terraform-provider-keycloak/pull/183))
+* new functionality for `keycloak_realm`: brute_force_detection, ssl_required, and custom attributes ([#183](https://github.com/mrparkers/terraform-provider-keycloak/pull/183))
+* allow you to prevent refresh token reuse with a new `revoke_refresh_token` attribute for the `keycloak_realm` resource ([#183](https://github.com/mrparkers/terraform-provider-keycloak/pull/183))
+  * **note: please refer to the [docs](https://mrparkers.github.io/terraform-provider-keycloak/resources/keycloak_realm/#tokens) for the new configuration values if you currently use `refresh_token_max_reuse`**
+
 ## 1.13.2 (November 27, 2019)
 
 BUG FIXES:
