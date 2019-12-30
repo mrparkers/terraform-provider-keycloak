@@ -96,6 +96,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(keycloakOpenidClientPkceCodeChallengeMethod, false),
 			},
+			"exclude_session_state_from_auth_response": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"service_account_user_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -161,7 +166,8 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		DirectAccessGrantsEnabled: data.Get("direct_access_grants_enabled").(bool),
 		ServiceAccountsEnabled:    data.Get("service_accounts_enabled").(bool),
 		Attributes: keycloak.OpenidClientAttributes{
-			PkceCodeChallengeMethod: data.Get("pkce_code_challenge_method").(string),
+			PkceCodeChallengeMethod:             data.Get("pkce_code_challenge_method").(string),
+			ExcludeSessionStateFromAuthResponse: data.Get("exclude_session_state_from_auth_response").(bool),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
