@@ -357,6 +357,13 @@ func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.
 					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
 				),
 			},
+			{
+				Config: testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(realmName, clientId, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
+					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
+				),
+			},
 		},
 	})
 }
@@ -491,7 +498,7 @@ func testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod(resourceName, pk
 	}
 }
 
-func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(resourceName string, excludeSessionStateFromAuthResponse bool) resource.TestCheckFunc {
+func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(resourceName string, excludeSessionStateFromAuthResponse keycloak.KeycloakBoolQuoted) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
 		if err != nil {

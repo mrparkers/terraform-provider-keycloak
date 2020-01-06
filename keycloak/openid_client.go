@@ -48,8 +48,8 @@ type OpenidClient struct {
 }
 
 type OpenidClientAttributes struct {
-	PkceCodeChallengeMethod             string `json:"pkce.code.challenge.method"`
-	ExcludeSessionStateFromAuthResponse bool   `json:"exclude.session.state.from.auth.response,string"`
+	PkceCodeChallengeMethod             string             `json:"pkce.code.challenge.method"`
+	ExcludeSessionStateFromAuthResponse KeycloakBoolQuoted `json:"exclude.session.state.from.auth.response"`
 }
 
 func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountUserId(realmId, clientId string) (*User, error) {

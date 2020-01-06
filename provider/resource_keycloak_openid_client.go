@@ -167,7 +167,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		ServiceAccountsEnabled:    data.Get("service_accounts_enabled").(bool),
 		Attributes: keycloak.OpenidClientAttributes{
 			PkceCodeChallengeMethod:             data.Get("pkce_code_challenge_method").(string),
-			ExcludeSessionStateFromAuthResponse: data.Get("exclude_session_state_from_auth_response").(bool),
+			ExcludeSessionStateFromAuthResponse: keycloak.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
