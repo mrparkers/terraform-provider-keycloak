@@ -138,7 +138,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -155,11 +155,16 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_credential         = "admin"
 }
 
+resource "keycloak_role" "hardcoded_role_mapper_test" {
+    realm_id    = keycloak_realm.realm.id
+    name        = "hardcoded-role-test"
+}
+
 resource "keycloak_ldap_hardcoded_role_mapper" "hardcoded_role_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm.id}"
-	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
-	role                        = "admin"
+	realm_id                    = keycloak_realm.realm.id
+	ldap_user_federation_id     = keycloak_ldap_user_federation.openldap.id
+	role                        = keycloak_role.hardcoded_role_mapper_test.name
 }
 	`, realm, roleMapperName)
 }
