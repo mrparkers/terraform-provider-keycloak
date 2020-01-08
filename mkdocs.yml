@@ -5,6 +5,7 @@ nav:
 - Getting Started: index.md
 - Data Sources:
   - keycloak_group: data_sources/keycloak_group.md
+  - keycloak_openid_client: data_sources/keycloak_openid_client.md
   - keycloak_realm: data_sources/keycloak_realm.md
   - keycloak_realm_keys: data_sources/keycloak_realm_keys.md
   - keycloak_role: data_sources/keycloak_role.md
@@ -39,5 +40,7 @@ nav:
   - keycloak_ldap_msad_user_account_control_mapper: resources/keycloak_ldap_msad_user_account_control_mapper.md
   - keycloak_ldap_user_attribute_mapper: resources/keycloak_ldap_user_attribute_mapper.md
   - keycloak_custom_user_federation: resources/keycloak_custom_user_federation.md
+  - keycloak_saml_identity_provider: resources/keycloak_saml_identity_provider.md
+  - keycloak_attribute_importer_identity_provider_mapper: resources/keycloak_attribute_importer_identity_provider_mapper.md
 theme: readthedocs
 extra_css: [index.css]
