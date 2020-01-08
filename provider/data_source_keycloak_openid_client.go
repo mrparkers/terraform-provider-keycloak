@@ -92,6 +92,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 					},
 				},
 			},
+			"full_scope_allowed": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 	}
 }
