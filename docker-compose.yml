@@ -7,7 +7,7 @@ services:
     - POSTGRES_DB=keycloak
     - POSTGRES_USER=keycloak
     - POSTGRES_PASSWORD=password
-    image: postgres:9.6
+    image: postgres:12
     ports:
     - 5432:5432
     volumes:
