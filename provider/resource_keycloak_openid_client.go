@@ -133,6 +133,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 					},
 				},
 			},
+			"full_scope_allowed": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 		},
 	}
 }
@@ -165,6 +170,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		ImplicitFlowEnabled:       data.Get("implicit_flow_enabled").(bool),
 		DirectAccessGrantsEnabled: data.Get("direct_access_grants_enabled").(bool),
 		ServiceAccountsEnabled:    data.Get("service_accounts_enabled").(bool),
+		FullScopeAllowed:          data.Get("full_scope_allowed").(bool),
 		Attributes: keycloak.OpenidClientAttributes{
 			PkceCodeChallengeMethod:             data.Get("pkce_code_challenge_method").(string),
 			ExcludeSessionStateFromAuthResponse: keycloak.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
@@ -230,6 +236,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
 	data.Set("web_origins", client.WebOrigins)
 	data.Set("authorization_services_enabled", client.AuthorizationServicesEnabled)
+	data.Set("full_scope_allowed", client.FullScopeAllowed)
 
 	if client.AuthorizationServicesEnabled {
 		data.Set("resource_server_id", client.Id)

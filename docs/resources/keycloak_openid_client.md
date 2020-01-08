@@ -54,6 +54,7 @@ wildcards in the form of an asterisk can be used here. This attribute must be se
 is set to `true`.
 - `web_origins` - (Optional) A list of allowed CORS origins. `+` can be used to permit all valid redirect URIs, and `*` can be used to permit all origins.
 - `pkce_code_challenge_method` - (Optional) The challenge method to use for Proof Key for Code Exchange. Can be either `plain` or `S256`.
+- `full_scope_allowed` - (Optional) - Allow to include all roles mappings in the access token.
 
 ### Attributes Reference
 
