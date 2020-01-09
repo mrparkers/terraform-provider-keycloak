@@ -3,7 +3,8 @@ workflows:
   version: 2
   test:
     jobs:
-      - test
+      - test-7.0.1
+      - test-8.0.1
   release:
     jobs:
       - test:
@@ -20,16 +21,19 @@ workflows:
               only: /\d+\.\d+\.\d+(-rc.\d+)?/
             branches:
               ignore: /.*/
-jobs:
-  test:
-    docker:
-      - image: circleci/golang:1.13.5
-      - image: jboss/keycloak:8.0.1
-        environment:
-          DB_VENDOR: H2
-          KEYCLOAK_LOGLEVEL: DEBUG
-          KEYCLOAK_USER: keycloak
-          KEYCLOAK_PASSWORD: password
+
+defaults:
+  go_image: &go_image
+    - image: circleci/golang:1.13.5
+
+  keycloak_env: &keycloak_env
+    environment:
+      DB_VENDOR: H2
+      KEYCLOAK_LOGLEVEL: DEBUG
+      KEYCLOAK_USER: keycloak
+      KEYCLOAK_PASSWORD: password
+
+  testacc_job: &testacc_job
     working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
     steps:
       - checkout
@@ -53,9 +57,25 @@ jobs:
       KEYCLOAK_URL: "http://localhost:8080"
       KEYCLOAK_REALM: "master"
       KEYCLOAK_TEST_PASSWORD_GRANT: "true"
+
+jobs:
+  test-7.0.1:
+    docker:
+      - <<: *go_image
+      - image: jboss/keycloak:7.0.1
+        <<: *keycloak_env
+    <<: *testacc_job
+
+  test-8.0.1:
+    docker:
+      - <<: *go_image
+      - image: jboss/keycloak:8.0.1
+        <<: *keycloak_env
+    <<: *testacc_job
+
   build-and-release:
     docker:
-      - image: circleci/golang:1.13.5
+      - <<: *go_image
     environment:
       GO111MODULE: "on"
     working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
@@ -69,3 +89,4 @@ jobs:
           command: |
             ./scripts/build-release.sh
             ./scripts/publish-release.sh
+
