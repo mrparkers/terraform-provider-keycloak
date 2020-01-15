@@ -12,7 +12,7 @@ import (
 var (
 	keycloakOpenidClientAccessTypes                        = []string{"CONFIDENTIAL", "PUBLIC", "BEARER-ONLY"}
 	keycloakOpenidClientAuthorizationPolicyEnforcementMode = []string{"ENFORCING", "PERMISSIVE", "DISABLED"}
-	keycloakOpenidClientPkceCodeChallengeMethod            = []string{"plain", "S256"}
+	keycloakOpenidClientPkceCodeChallengeMethod            = []string{"", "plain", "S256"}
 )
 
 func resourceKeycloakOpenidClient() *schema.Resource {
