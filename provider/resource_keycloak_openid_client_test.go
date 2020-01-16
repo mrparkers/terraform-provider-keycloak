@@ -300,7 +300,7 @@ func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, "invalidMethod"),
-				ExpectError: regexp.MustCompile(`config is invalid: expected pkce_code_challenge_method to be one of \[plain S256\], got invalidMethod`),
+				ExpectError: regexp.MustCompile(`config is invalid: expected pkce_code_challenge_method to be one of \[\ plain S256\], got invalidMethod`),
 			},
 			{
 				Config: testKeycloakOpenidClient_omitPkceChallengeMethod(realmName, clientId),
@@ -320,6 +320,13 @@ func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
 				Config: testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, "S256"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", "S256"),
+					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
+				),
+			},
+			{
+				Config: testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
 					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
 				),
 			},
