@@ -6,8 +6,8 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"testing"
 	"strings"
+	"testing"
 )
 
 func TestAccKeycloakGroup_basic(t *testing.T) {
@@ -64,7 +64,7 @@ func TestAccKeycloakGroup_createAfterManualDestroy(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-			   Config: testKeycloakGroup_basic(realmName, groupName, attributeName, attributeValue),
+				Config: testKeycloakGroup_basic(realmName, groupName, attributeName, attributeValue),
 				Check:  testAccCheckKeycloakGroupExists("keycloak_group.group"),
 			},
 		},
@@ -177,8 +177,8 @@ func TestAccKeycloakGroup_nested(t *testing.T) {
 func TestAccKeycloakGroup_unsetOptionalAttributes(t *testing.T) {
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
 	groupWithOptionalAttributes := &keycloak.Group{
-		RealmId:   "terraform-" + acctest.RandString(10),
-		Name:  "terraform-group-" + acctest.RandString(10),
+		RealmId: "terraform-" + acctest.RandString(10),
+		Name:    "terraform-group-" + acctest.RandString(10),
 		Attributes: map[string][]string{
 			attributeName: {
 				acctest.RandString(230),
@@ -192,20 +192,20 @@ func TestAccKeycloakGroup_unsetOptionalAttributes(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-				  CheckDestroy: testAccCheckKeycloakUserDestroy(),
-				  Steps: []resource.TestStep{
-					  {
-						  Config: testKeycloakGroup_fromInterface(groupWithOptionalAttributes),
-				  Check:  testAccCheckKeycloakGroupExists(resourceName),
-					  },
-			   {
-				   Config: testKeycloakGroup_basic(groupWithOptionalAttributes.RealmId, groupWithOptionalAttributes.Name, attributeName, strings.Join(groupWithOptionalAttributes.Attributes[attributeName], "")),
-				  Check: resource.ComposeTestCheckFunc(
-					  testAccCheckKeycloakGroupExists(resourceName),
-													   resource.TestCheckResourceAttr(resourceName, "name", groupWithOptionalAttributes.Name),
-				  ),
-			   },
-				  },
+		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGroup_fromInterface(groupWithOptionalAttributes),
+				Check:  testAccCheckKeycloakGroupExists(resourceName),
+			},
+			{
+				Config: testKeycloakGroup_basic(groupWithOptionalAttributes.RealmId, groupWithOptionalAttributes.Name, attributeName, strings.Join(groupWithOptionalAttributes.Attributes[attributeName], "")),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakGroupExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", groupWithOptionalAttributes.Name),
+				),
+			},
+		},
 	})
 }
 
