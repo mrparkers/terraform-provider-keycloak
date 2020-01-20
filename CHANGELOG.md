@@ -1,3 +1,17 @@
+## 1.15.0 (January 20, 2020)
+
+FEATURES:
+
+* new resource: keycloak_ldap_hardcoded_role_mapper ([#195](https://github.com/mrparkers/terraform-provider-keycloak/pull/195))
+
+IMPROVEMENTS:
+
+* add `full_scope_allowed` attribute to `keycloak_openid_client` resource ([#193](https://github.com/mrparkers/terraform-provider-keycloak/pull/193))
+* add `exclude_session_state_from_auth_response` attribute to `keycloak_openid_client` resource ([#191](https://github.com/mrparkers/terraform-provider-keycloak/pull/191))
+* allow empty value for `pkce_code_challenge_method` attribute on `keycloak_openid_client` resource ([#198](https://github.com/mrparkers/terraform-provider-keycloak/pull/198))
+* support attributes for `keycloak_group` resource ([#199](https://github.com/mrparkers/terraform-provider-keycloak/pull/199))
+
+
 ## 1.14.0 (December 18, 2019)
 
 FEATURES:
