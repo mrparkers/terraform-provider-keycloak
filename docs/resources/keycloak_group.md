@@ -6,6 +6,8 @@ Groups provide a logical wrapping for users within Keycloak. Users within a
 group can share attributes and roles, and group membership can be mapped
 to a claim.
 
+Attributes can also be defined on Groups.
+
 Groups can also be federated from external data sources, such as LDAP or Active Directory.
 This resource **should not** be used to manage groups that were created this way.
 
@@ -27,6 +29,16 @@ resource "keycloak_group" "child_group" {
     parent_id = "${keycloak_group.parent_group.id}"
     name      = "child-group"
 }
+
+resource "keycloak_group" "child_group_with_optional_attributes" {
+    realm_id  = "${keycloak_realm.realm.id}"
+    parent_id = "${keycloak_group.parent_group.id}"
+    name      = "child-group-with-optional-attributes"
+    attributes = {
+		"key1" = "value1"
+		"key2" = "value2"
+    }
+}
 ```
 
 ### Argument Reference
@@ -36,6 +48,7 @@ The following arguments are supported:
 - `realm_id` - (Required) The realm this group exists in.
 - `parent_id` - (Optional) The ID of this group's parent. If omitted, this group will be defined at the root level.
 - `name` - (Required) The name of the group.
+- `attributes` - (Optional) A dict of key/value pairs to set as custom attributes for the group.
 
 ### Attributes Reference
 
