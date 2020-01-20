@@ -237,7 +237,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_validateClientConflictsWithClie
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdAudienceProtocolMapper_validateClientConflictsWithClientScope(realmName, clientId, clientScopeId, mapperName),
-				ExpectError: regexp.MustCompile("validataion error: ClientId and ClientScopeId cannot both be set"),
+				ExpectError: regexp.MustCompile("validation error: ClientId and ClientScopeId cannot both be set"),
 			},
 		},
 	})
@@ -255,7 +255,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceConflicts
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceConflictsWithCustomAudience(realmName, clientId, mapperName),
-				ExpectError: regexp.MustCompile("validataion error: IncludedClientAudience and IncludedCustomAudience cannot both be set"),
+				ExpectError: regexp.MustCompile("validation error: IncludedClientAudience and IncludedCustomAudience cannot both be set"),
 			},
 		},
 	})

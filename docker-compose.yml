@@ -7,17 +7,17 @@ services:
     - POSTGRES_DB=keycloak
     - POSTGRES_USER=keycloak
     - POSTGRES_PASSWORD=password
-    image: postgres:9.6
+    image: postgres:12
     ports:
     - 5432:5432
     volumes:
     - postgres:/var/lib/postgresql
   openldap:
-    image: osixia/openldap:1.2.2
+    image: osixia/openldap:1.3.0
     ports:
     - 8389:389
   keycloak:
-    image: jboss/keycloak:8.0.0
+    image: jboss/keycloak:8.0.1
     depends_on:
     - postgres
     - openldap
