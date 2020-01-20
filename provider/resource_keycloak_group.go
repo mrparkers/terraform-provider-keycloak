@@ -36,28 +36,43 @@ func resourceKeycloakGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"attributes": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func mapFromDataToGroup(data *schema.ResourceData) *keycloak.Group {
+	attributes := map[string][]string{}
+	if v, ok := data.GetOk("attributes"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			attributes[key] = splitLen(value.(string), MAX_ATTRIBUTE_VALUE_LEN)
+		}
+	}
+
 	group := &keycloak.Group{
-		Id:       data.Id(),
-		RealmId:  data.Get("realm_id").(string),
-		ParentId: data.Get("parent_id").(string),
-		Name:     data.Get("name").(string),
+		Id:         data.Id(),
+		RealmId:    data.Get("realm_id").(string),
+		ParentId:   data.Get("parent_id").(string),
+		Name:       data.Get("name").(string),
+		Attributes: attributes,
 	}
 
 	return group
 }
 
 func mapFromGroupToData(data *schema.ResourceData, group *keycloak.Group) {
+	attributes := map[string]string{}
+	for k, v := range group.Attributes {
+		attributes[k] = strings.Join(v, "")
+	}
 	data.SetId(group.Id)
-
 	data.Set("realm_id", group.RealmId)
 	data.Set("name", group.Name)
 	data.Set("path", group.Path)
-
+	data.Set("attributes", attributes)
 	if group.ParentId != "" {
 		data.Set("parent_id", group.ParentId)
 	}
