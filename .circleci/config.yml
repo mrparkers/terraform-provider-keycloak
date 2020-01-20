@@ -7,7 +7,7 @@ workflows:
       - test-8.0.1
   release:
     jobs:
-      - test:
+      - test-8.0.1:
           filters:
             tags:
               only: /\d+\.\d+\.\d+(-rc.\d+)?/
@@ -15,7 +15,7 @@ workflows:
               ignore: /.*/
       - build-and-release:
           requires:
-            - test
+            - test-8.0.1
           filters:
             tags:
               only: /\d+\.\d+\.\d+(-rc.\d+)?/
