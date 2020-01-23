@@ -17,16 +17,7 @@ type OpenidClientServiceAccountRole struct {
 
 func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(serviceAccountRole *OpenidClientServiceAccountRole) error {
 	serviceAccountRoles := []OpenidClientServiceAccountRole{*serviceAccountRole}
-	var err error
-	var _ []byte
-	var _ string
-
-	if serviceAccountRole.ContainerId != "" {
-		_, _, err = keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId), serviceAccountRoles)
-	} else {
-		_, _, err = keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId), serviceAccountRoles)
-	}
-
+	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId), serviceAccountRoles)
 	if err != nil {
 		return err
 	}
