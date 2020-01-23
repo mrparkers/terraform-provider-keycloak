@@ -121,6 +121,24 @@ func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+	baseUrl := "https://www.example.com"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_baseUrl(realmName, clientId, baseUrl),
+				Check:  testAccCheckKeycloakOpenidClientBaseUrl("keycloak_openid_client.client", baseUrl),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
@@ -425,6 +443,21 @@ func testAccCheckKeycloakOpenidClientAccessType(resourceName string, public, bea
 	}
 }
 
+func testAccCheckKeycloakOpenidClientBaseUrl(resourceName string, baseUrl string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.BaseUrl != baseUrl {
+			return fmt.Errorf("expected openid client to have baseUrl set to %s, but got %s", baseUrl, client.BaseUrl)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakOpenidClientBelongsToRealm(resourceName, realm string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -567,6 +600,21 @@ resource "keycloak_openid_client" "client" {
 	access_type = "%s"
 }
 	`, realm, clientId, accessType)
+}
+
+func testKeycloakOpenidClient_baseUrl(realm, clientId, baseUrl string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	base_url = "%s"
+	access_type = "PUBLIC"
+}
+	`, realm, clientId, baseUrl)
 }
 
 func testKeycloakOpenidClient_pkceChallengeMethod(realm, clientId, pkceChallengeMethod string) string {
