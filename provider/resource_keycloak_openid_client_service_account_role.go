@@ -28,7 +28,7 @@ func resourceKeycloakOpenidClientServiceAccountRole() *schema.Resource {
 			},
 			"client_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"role": {
