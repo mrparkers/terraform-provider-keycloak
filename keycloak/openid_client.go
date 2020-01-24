@@ -40,6 +40,7 @@ type OpenidClient struct {
 	ImplicitFlowEnabled          bool                               `json:"implicitFlowEnabled"`
 	DirectAccessGrantsEnabled    bool                               `json:"directAccessGrantsEnabled"`
 	ServiceAccountsEnabled       bool                               `json:"serviceAccountsEnabled"`
+	AccessTokenLifespan          int                                `json:"accessTokenLifespan,omitempty"`
 	AuthorizationServicesEnabled bool                               `json:"authorizationServicesEnabled"`
 	ValidRedirectUris            []string                           `json:"redirectUris"`
 	WebOrigins                   []string                           `json:"webOrigins"`

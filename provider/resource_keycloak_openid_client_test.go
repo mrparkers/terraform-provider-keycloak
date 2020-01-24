@@ -289,6 +289,29 @@ func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_accessTokenLifespan(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenidClient_accessTokenLifespan(realmName, clientId, "invalidValue"),
+				ExpectError: regexp.MustCompile(`errors during apply: time: invalid duration invalidValue`),
+			},
+			{
+				Config: testKeycloakOpenidClient_accessTokenLifespan(realmName, clientId, "0s"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientAccessTokenLifespan("keycloak_openid_client.client", "0s"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
@@ -490,6 +513,19 @@ func testAccCheckKeycloakOpenidClientDestroy() resource.TestCheckFunc {
 	}
 }
 
+func testAccCheckKeycloakOpenidClientAccessTokenLifespan(resourceName, accessTokenLifespan string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+		if getDurationStringFromSeconds(client.AccessTokenLifespan) == accessTokenLifespan {
+			return nil
+		}
+		return fmt.Errorf("errors during apply: time: invalid duration %s", accessTokenLifespan)
+	}
+}
+
 func testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod(resourceName, pkceCodeChallengeMethod string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -565,6 +601,21 @@ resource "keycloak_openid_client" "client" {
 	access_type = "%s"
 }
 	`, realm, clientId, accessType)
+}
+
+func testKeycloakOpenidClient_accessTokenLifespan(realm, clientId, accessTokenLifespan string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "CONFIDENTIAL"
+	access_token_lifespan = "%s"
+}
+	`, realm, clientId, accessTokenLifespan)
 }
 
 func testKeycloakOpenidClient_pkceChallengeMethod(realm, clientId, pkceChallengeMethod string) string {

@@ -91,6 +91,12 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"access_token_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
 			"pkce_code_challenge_method": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -198,6 +204,15 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		openidClient.BearerOnly = true
 	}
 
+	// access_token_lifespan
+	if accessTokenLifespan := data.Get("access_token_lifespan").(string); accessTokenLifespan != "" {
+		accessTokenLifespanDurationString, err := getSecondsFromDurationString(accessTokenLifespan)
+		if err != nil {
+			return nil, err
+		}
+		openidClient.AccessTokenLifespan = accessTokenLifespanDurationString
+	}
+
 	if v, ok := data.GetOk("authorization"); ok {
 		openidClient.AuthorizationServicesEnabled = true
 		authorizationSettingsData := v.(*schema.Set).List()[0]
@@ -236,6 +251,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
 	data.Set("web_origins", client.WebOrigins)
 	data.Set("authorization_services_enabled", client.AuthorizationServicesEnabled)
+	data.Set("access_code_lifespan", getDurationStringFromSeconds(client.AccessTokenLifespan))
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
 
 	if client.AuthorizationServicesEnabled {
