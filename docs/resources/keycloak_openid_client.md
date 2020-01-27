@@ -53,6 +53,7 @@ should be treated with the same care as a password. If omitted, Keycloak will ge
 wildcards in the form of an asterisk can be used here. This attribute must be set if either `standard_flow_enabled` or `implicit_flow_enabled`
 is set to `true`.
 - `web_origins` - (Optional) A list of allowed CORS origins. `+` can be used to permit all valid redirect URIs, and `*` can be used to permit all origins.
+- `base_url` - (Optional) Default URL to use when the auth server needs to redirect or link back to the client.
 - `pkce_code_challenge_method` - (Optional) The challenge method to use for Proof Key for Code Exchange. Can be either `plain` or `S256` or set to empty value ``.
 - `full_scope_allowed` - (Optional) - Allow to include all roles mappings in the access token.
 
