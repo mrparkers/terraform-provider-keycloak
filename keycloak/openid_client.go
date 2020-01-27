@@ -44,6 +44,7 @@ type OpenidClient struct {
 	ValidRedirectUris            []string                           `json:"redirectUris"`
 	WebOrigins                   []string                           `json:"webOrigins"`
 	AdminUrl                     string                             `json:"adminUrl"`
+	BaseUrl                      string                             `json:"baseUrl"`
 	FullScopeAllowed             bool                               `json:"fullScopeAllowed"`
 	Attributes                   OpenidClientAttributes             `json:"attributes"`
 	AuthorizationSettings        *OpenidClientAuthorizationSettings `json:"authorizationSettings,omitempty"`

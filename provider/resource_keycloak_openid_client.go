@@ -90,6 +90,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"base_url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"service_accounts_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -182,6 +186,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
 		AdminUrl:          data.Get("admin_url").(string),
+		BaseUrl:           data.Get("base_url").(string),
 	}
 
 	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled {
@@ -241,6 +246,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
 	data.Set("web_origins", client.WebOrigins)
 	data.Set("admin_url", client.AdminUrl)
+	data.Set("base_url", client.BaseUrl)
 	data.Set("authorization_services_enabled", client.AuthorizationServicesEnabled)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
 
