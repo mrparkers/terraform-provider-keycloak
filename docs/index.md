@@ -56,7 +56,7 @@ The following provider attributes are supported:
 - `password` (Optional) - The password of the user used by the provider for authentication via the password grant. Defaults to environment variable `KEYCLOAK_PASSWORD`. This attribute is required when using the password grant, and cannot be set when using the client credentials grant.
 - `realm` (Optional) - The realm used by the provider for authentication. Defaults to environment variable `KEYCLOAK_REALM`, or `master` if the environment variable is not specified.
 - `initial_login` (Optional) - Optionally avoid Keycloak login during provider setup, for when Keycloak itself is being provisioned by terraform. Defaults to true, which is the original method.
-- `client_timeout` (Optional) - Sets the timeout of the client when addressing Keycloak, in seconds. Defaults to 5.
+- `client_timeout` (Optional) - Sets the timeout of the client when addressing Keycloak, in seconds. Defaults to environment variable `KEYCLOAK_CLIENT_TIMEOUT`, or 5 is the environment variable is not specified.
 
 #### Example (client credentials)
 

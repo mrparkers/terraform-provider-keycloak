@@ -103,7 +103,7 @@ func KeycloakProvider() *schema.Provider {
 				Optional:    true,
 				Type:        schema.TypeInt,
 				Description: "Timeout (in seconds) of the Keycloak client",
-				Default:     5,
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_TIMEOUT", 5),
 			},
 		},
 		ConfigureFunc: configureKeycloakProvider,
