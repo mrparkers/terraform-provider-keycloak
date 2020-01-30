@@ -149,7 +149,7 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 			"consent_required": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Default:  false,
 			},
 		},
 	}
