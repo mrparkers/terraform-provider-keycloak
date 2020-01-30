@@ -13,6 +13,7 @@ import (
 func TestAccKeycloakRealm_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -20,7 +21,7 @@ func TestAccKeycloakRealm_basic(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
 			},
 			{
@@ -28,8 +29,12 @@ func TestAccKeycloakRealm_basic(t *testing.T) {
 				Check:  testAccCheckKeycloakRealmEnabled("keycloak_realm.realm", false),
 			},
 			{
-				Config: testKeycloakRealm_basic(realmName, fmt.Sprintf("%s-changed", realmDisplayName)),
+				Config: testKeycloakRealm_basic(realmName, fmt.Sprintf("%s-changed", realmDisplayName), realmDisplayName),
 				Check:  testAccCheckKeycloakRealmDisplayName("keycloak_realm.realm", fmt.Sprintf("%s-changed", realmDisplayName)),
+			},
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
+				Check:  testAccCheckKeycloakRealmDisplayNameHtml("keycloak_realm.realm", realmDisplayNameHtml),
 			},
 		},
 	})
@@ -38,6 +43,7 @@ func TestAccKeycloakRealm_basic(t *testing.T) {
 func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -45,7 +51,7 @@ func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
 			},
 			{
@@ -57,7 +63,7 @@ func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
 			},
 		},
@@ -67,6 +73,7 @@ func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 func TestAccKeycloakRealm_import(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -74,7 +81,7 @@ func TestAccKeycloakRealm_import(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
 			},
 			{
@@ -88,6 +95,7 @@ func TestAccKeycloakRealm_import(t *testing.T) {
 
 func TestAccKeycloakRealm_SmtpServer(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -99,7 +107,7 @@ func TestAccKeycloakRealm_SmtpServer(t *testing.T) {
 				Check:  testAccCheckKeycloakRealmSmtp("keycloak_realm.realm", "myhost.com", "My Host", "user"),
 			},
 			{
-				Config: testKeycloakRealm_basic(realm, realm),
+				Config: testKeycloakRealm_basic(realm, realm, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmSmtp("keycloak_realm.realm", "", "", ""),
 			},
 		},
@@ -232,6 +240,7 @@ func TestAccKeycloakRealm_InternationalizationValidation(t *testing.T) {
 
 func TestAccKeycloakRealm_Internationalization(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -247,7 +256,7 @@ func TestAccKeycloakRealm_Internationalization(t *testing.T) {
 				Check:  testAccCheckKeycloakRealmInternationalizationIsEnabled("keycloak_realm.realm", "es"),
 			},
 			{
-				Config: testKeycloakRealm_basic(realm, realm),
+				Config: testKeycloakRealm_basic(realm, realm, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmInternationalizationIsDisabled("keycloak_realm.realm"),
 			},
 		},
@@ -256,6 +265,7 @@ func TestAccKeycloakRealm_Internationalization(t *testing.T) {
 
 func TestAccKeycloakRealm_InternationalizationDisabled(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -263,7 +273,7 @@ func TestAccKeycloakRealm_InternationalizationDisabled(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realm, realm),
+				Config: testKeycloakRealm_basic(realm, realm, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmInternationalizationIsDisabled("keycloak_realm.realm"),
 			},
 		},
@@ -344,6 +354,7 @@ func TestAccKeycloakRealm_loginConfigValidation(t *testing.T) {
 
 func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -351,7 +362,7 @@ func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realmName, realmName),
+				Config: testKeycloakRealm_basic(realmName, realmName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
 			},
 			{
@@ -370,6 +381,7 @@ func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
 func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -377,7 +389,7 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
 
@@ -422,6 +434,7 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 func TestAccKeycloakRealm_securityDefensesHeaders(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -429,7 +442,7 @@ func TestAccKeycloakRealm_securityDefensesHeaders(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "SAMEORIGIN"),
 			},
 			{
@@ -441,7 +454,7 @@ func TestAccKeycloakRealm_securityDefensesHeaders(t *testing.T) {
 				Check:  testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "DENY"),
 			},
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "SAMEORIGIN"),
 			},
 		},
@@ -451,6 +464,7 @@ func TestAccKeycloakRealm_securityDefensesHeaders(t *testing.T) {
 func TestAccKeycloakRealm_securityDefensesBruteForceDetection(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -458,7 +472,7 @@ func TestAccKeycloakRealm_securityDefensesBruteForceDetection(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", false),
 					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor("keycloak_realm.realm", 30),
@@ -472,7 +486,7 @@ func TestAccKeycloakRealm_securityDefensesBruteForceDetection(t *testing.T) {
 				),
 			},
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", false),
 					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetectionFailureFactor("keycloak_realm.realm", 30),
@@ -485,6 +499,7 @@ func TestAccKeycloakRealm_securityDefensesBruteForceDetection(t *testing.T) {
 func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -492,7 +507,7 @@ func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "SAMEORIGIN"),
 					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", false),
@@ -532,7 +547,7 @@ func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
 				),
 			},
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakRealmSecurityDefensesHeaders("keycloak_realm.realm", "SAMEORIGIN"),
 					testAccCheckKeycloakRealmSecurityDefensesBruteForceDetection("keycloak_realm.realm", false),
@@ -546,6 +561,7 @@ func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
 func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 	passwordPolicyStringValid1 := "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
 	passwordPolicyStringValid2 := "upperCase(1) and length(8)"
 	passwordPolicyStringValid3 := "lowerCase(2)"
@@ -556,7 +572,7 @@ func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmPasswordPolicy("keycloak_realm.realm", ""),
 			},
 			{
@@ -572,7 +588,7 @@ func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
 				Check:  testAccCheckKeycloakRealmPasswordPolicy("keycloak_realm.realm", passwordPolicyStringValid3),
 			},
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmPasswordPolicy("keycloak_realm.realm", ""),
 			},
 		},
@@ -582,6 +598,7 @@ func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
 func TestAccKeycloakRealm_browserFlow(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 	newBrowserFlow := "registration"
 
 	resource.Test(t, resource.TestCase{
@@ -590,7 +607,7 @@ func TestAccKeycloakRealm_browserFlow(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", "browser"),
 			},
 			{
@@ -598,7 +615,7 @@ func TestAccKeycloakRealm_browserFlow(t *testing.T) {
 				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", newBrowserFlow),
 			},
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", "browser"),
 			},
 		},
@@ -631,6 +648,7 @@ func TestAccKeycloakRealm_customAttribute(t *testing.T) {
 func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 	passwordPolicyStringInvalid1 := "unknownpolicy(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
 	passwordPolicyStringInvalid2 := "lowerCase(1) and length(8) and unknownpolicy(365) and notUsername"
 	passwordPolicyStringInvalid3 := "unknownpolicy(2)"
@@ -641,7 +659,7 @@ func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealm_basic(realmName, realmDisplayName),
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
 				Check:  testAccCheckKeycloakRealmPasswordPolicy("keycloak_realm.realm", ""),
 			},
 			{
@@ -746,6 +764,21 @@ func testAccCheckKeycloakRealmDisplayName(resourceName string, displayName strin
 
 		if realm.DisplayName != displayName {
 			return fmt.Errorf("expected realm %s to have display name set to %s, but was %s", realm.Realm, displayName, realm.DisplayName)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRealmDisplayNameHtml(resourceName string, displayNameHtml string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.DisplayNameHtml != displayNameHtml {
+			return fmt.Errorf("expected realm %s to have display name html set to %s, but was %s", realm.Realm, displayNameHtml, realm.DisplayNameHtml)
 		}
 
 		return nil
@@ -948,14 +981,15 @@ func testAccCheckKeycloakRealmCustomAttribute(resourceName, key, value string) r
 	}
 }
 
-func testKeycloakRealm_basic(realm, realmDisplayName string) string {
+func testKeycloakRealm_basic(realm, realmDisplayName, realmDisplayNameHtml string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-	realm        = "%s"
-	enabled      = true
-	display_name = "%s"
+	realm        		= "%s"
+	enabled     	 	= true
+	display_name 		= "%s"
+	display_name_html 	= "%s"
 }
-	`, realm, realmDisplayName)
+	`, realm, realmDisplayName, realmDisplayNameHtml)
 }
 
 func testKeycloakRealm_WithSmtpServer(realm, host, from, user string) string {
