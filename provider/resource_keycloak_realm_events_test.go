@@ -31,7 +31,7 @@ func TestAccKeycloakRealmEvents_update(t *testing.T) {
 	before := &keycloak.RealmEventsConfig{
 		AdminEventsDetailsEnabled: true,
 		AdminEventsEnabled:        true,
-		EnabledEventTypes:         []string{"LOGIN","LOGOUT"},
+		EnabledEventTypes:         []string{"LOGIN", "LOGOUT"},
 		EventsEnabled:             true,
 		EventsExpiration:          1234,
 		EventsListeners:           []string{"jboss-logging"},
@@ -43,7 +43,7 @@ func TestAccKeycloakRealmEvents_update(t *testing.T) {
 		EnabledEventTypes:         []string{"LOGIN"},
 		EventsEnabled:             false,
 		EventsExpiration:          12345,
-		EventsListeners:           []string{"jboss-logging","example-listener"},
+		EventsListeners:           []string{"jboss-logging", "example-listener"},
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -57,7 +57,7 @@ func TestAccKeycloakRealmEvents_update(t *testing.T) {
 			},
 			{
 				Config: testKeycloakRealmEvents_basicFromInterface(realmName, after),
-				Check:  resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakRealmEventsExists("keycloak_realm_events.realm_events"),
 					func(state *terraform.State) error {
 						realmEventsConfig, err := getRealmEventsFromState(state, "keycloak_realm_events.realm_events")
@@ -103,7 +103,7 @@ func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
 	before := &keycloak.RealmEventsConfig{
 		AdminEventsDetailsEnabled: true,
 		AdminEventsEnabled:        true,
-		EnabledEventTypes:         []string{"LOGIN","LOGOUT"},
+		EnabledEventTypes:         []string{"LOGIN", "LOGOUT"},
 		EventsEnabled:             true,
 		EventsExpiration:          1234,
 		EventsListeners:           []string{"jboss-logging"},
@@ -129,7 +129,7 @@ func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
 			},
 			{
 				Config: testKeycloakRealmEvents_basicFromInterface(realmName, after),
-				Check:  resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakRealmEventsExists("keycloak_realm_events.realm_events"),
 					func(state *terraform.State) error {
 						realmEventsConfig, err := getRealmEventsFromState(state, "keycloak_realm_events.realm_events")
