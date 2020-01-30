@@ -9,9 +9,10 @@ Users log in to realms and can be federated from multiple sources.
 
 ```hcl
 resource "keycloak_realm" "realm" {
-    realm                = "test"
-    enabled              = true
-    display_name         = "test realm"
+    realm                   = "test"
+    enabled                 = true
+    display_name            = "test realm"
+    display_name_html       = "<b>test realm</b>"
 
     login_theme          = "base"
 
@@ -71,6 +72,7 @@ The following arguments are supported:
 - `realm` - (Required) The name of the realm. This is unique across Keycloak.
 - `enabled` - (Optional) When false, users and clients will not be able to access this realm. Defaults to `true`.
 - `display_name` - (Optional) The display name for the realm that is shown when logging in to the admin console.
+- `display_name_html` - (Optional) The display name for the realm that is rendered as HTML on the screen when logging in to the admin console.
 
 ##### Login Settings
 
