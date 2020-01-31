@@ -11,6 +11,7 @@ nav:
   - keycloak_role: data_sources/keycloak_role.md
 - Resources:
   - keycloak_realm: resources/keycloak_realm.md
+  - keycloak_realm_events: resources/keycloak_realm_events.md
   - keycloak_user: resources/keycloak_user.md
   - keycloak_role: resources/keycloak_role.md
   - keycloak_group: resources/keycloak_group.md
