@@ -27,19 +27,11 @@ func resourceKeycloakRealmEvents() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
-			//"enable_all_event_types": {
-			//	Type: schema.TypeBool,
-			//	Optional: true,
-			//	ConflictsWith: []string{"enabled_event_types"},
-			//	ForceNew: false,
-			//},
 			"enabled_event_types": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
-				//ConflictsWith: []string{"enable_all_event_types"},
 				ForceNew: false,
-				//MinItems: 1,
 			},
 			"events_enabled": {
 				Type:     schema.TypeBool,
