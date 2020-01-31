@@ -77,10 +77,6 @@ func getRealmEventsConfigFromData(data *schema.ResourceData) *keycloak.RealmEven
 		EventsExpiration:          data.Get("events_expiration").(int),
 		EventsListeners:           eventsListeners,
 	}
-	//
-	//if !data.Get("enable_all_event_types").(bool) {
-	//	data.Set("enabled_event_types", realmEventsConfig.EnabledEventTypes)
-	//}
 
 	return realmEventsConfig
 }
@@ -125,8 +121,16 @@ func resourceKeycloakRealmEventsRead(data *schema.ResourceData, meta interface{}
 }
 
 func resourceKeycloakRealmEventsDelete(data *schema.ResourceData, meta interface{}) error {
-	// TODO: Do we want to do nothing here since the realm events config cannot be deleted? Or do we want to set all the zero values?
-	// Note the zero values are different than what keycloak's defaults are when a realm is created.
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+	realmId := data.Get("realm_id").(string)
+
+	// The realm events config cannot be deleted, so instead we set it back to its "zero" values.
+	realmEventsConfig := &keycloak.RealmEventsConfig{}
+
+	err := keycloakClient.UpdateRealmEventsConfig(realmId, realmEventsConfig)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

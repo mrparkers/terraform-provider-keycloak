@@ -13,13 +13,55 @@ func TestAccKeycloakRealmEvents_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmEventsDestroy(),
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmEvents_basic(realmName),
 				Check:  testAccCheckKeycloakRealmEventsExists("keycloak_realm_events.realm_events"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealmEvents_destroy(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealmEvents_basic(realmName),
+				Check:  testAccCheckKeycloakRealmEventsExists("keycloak_realm_events.realm_events"),
+			},
+			{
+				Config: testKeycloakRealmEvents_realmOnly(realmName),
+				Check: func(state *terraform.State) error {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+					realmEventsConfig, err := keycloakClient.GetRealmEventsConfig(realmName)
+					if err != nil {
+						return err
+					}
+
+					if realmEventsConfig.AdminEventsDetailsEnabled {
+						return fmt.Errorf("expected admin_events_details_enabled to be false after destroy")
+					}
+
+					if realmEventsConfig.AdminEventsEnabled {
+						return fmt.Errorf("expected admin_events_enabled to be false after destroy")
+					}
+
+					if realmEventsConfig.EventsEnabled {
+						return fmt.Errorf("expected events_enabled to be false after destroy")
+					}
+
+					if realmEventsConfig.EventsExpiration != 0 {
+						return fmt.Errorf("expected admin_events_details_enabled to be `0` after destroy, but was %d", realmEventsConfig.EventsExpiration)
+					}
+
+					return nil
+				},
 			},
 		},
 	})
@@ -49,7 +91,6 @@ func TestAccKeycloakRealmEvents_update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmEventsDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmEvents_basicFromInterface(realmName, before),
@@ -59,26 +100,14 @@ func TestAccKeycloakRealmEvents_update(t *testing.T) {
 				Config: testKeycloakRealmEvents_basicFromInterface(realmName, after),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakRealmEventsExists("keycloak_realm_events.realm_events"),
+					resource.TestCheckResourceAttr("keycloak_realm_events.realm_events", "admin_events_details_enabled", "false"),
+					resource.TestCheckResourceAttr("keycloak_realm_events.realm_events", "admin_events_enabled", "false"),
+					resource.TestCheckResourceAttr("keycloak_realm_events.realm_events", "events_enabled", "false"),
+					resource.TestCheckResourceAttr("keycloak_realm_events.realm_events", "events_expiration", "12345"),
 					func(state *terraform.State) error {
 						realmEventsConfig, err := getRealmEventsFromState(state, "keycloak_realm_events.realm_events")
 						if err != nil {
 							return err
-						}
-
-						if realmEventsConfig.AdminEventsDetailsEnabled {
-							return fmt.Errorf("exptected admin_event_details_enabled to be false")
-						}
-
-						if realmEventsConfig.AdminEventsEnabled {
-							return fmt.Errorf("exptected admin_events_enabled to be false")
-						}
-
-						if realmEventsConfig.EventsEnabled {
-							return fmt.Errorf("exptected events_enabled to be false")
-						}
-
-						if realmEventsConfig.EventsExpiration != 12345 {
-							return fmt.Errorf("exptected events_expiration to be 12345")
 						}
 
 						if len(realmEventsConfig.EnabledEventTypes) != 1 {
@@ -178,37 +207,11 @@ func testAccCheckKeycloakRealmEventsExists(resourceName string) resource.TestChe
 	}
 }
 
-func testAccCheckKeycloakRealmEventsDestroy() resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_ldap_user_attribute_mapper" {
-				continue
-			}
-
-			realm := rs.Primary.Attributes["realm_id"]
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
-			realmEventsConfig, err := keycloakClient.GetRealmEventsConfig(realm)
-			if err != nil {
-				return err
-			}
-
-			if len(realmEventsConfig.EnabledEventTypes) < 1 {
-				return fmt.Errorf("Expected enabled_event_types to be greater than zero after destroy")
-			}
-
-		}
-
-		return nil
-	}
-}
-
 func testKeycloakRealmEvents_basic(realm string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-	realm = "%s"
+  realm = "%s"
 }
-
 resource "keycloak_realm_events" "realm_events" {
   realm_id = "${keycloak_realm.realm.id}"
 
@@ -226,6 +229,14 @@ resource "keycloak_realm_events" "realm_events" {
     "jboss-logging",
 	"example-listener",
   ]
+}
+	`, realm)
+}
+
+func testKeycloakRealmEvents_realmOnly(realm string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+  realm = "%s"
 }
 	`, realm)
 }
