@@ -148,9 +148,8 @@ func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmEventsDestroy(),
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmEvents_basicFromInterface(realmName, before),
