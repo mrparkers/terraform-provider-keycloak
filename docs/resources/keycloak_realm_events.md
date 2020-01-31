@@ -2,9 +2,6 @@
 
 Allows for managing Realm Events settings within Keycloak.
 
-A realm manages a logical collection of users, credentials, roles, and groups.
-Users log in to realms and can be federated from multiple sources.
-
 ### Example Usage
 
 ```hcl
