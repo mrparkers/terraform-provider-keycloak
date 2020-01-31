@@ -89,8 +89,8 @@ func TestAccKeycloakRealmEvents_update(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmEvents_basicFromInterface(realmName, before),
