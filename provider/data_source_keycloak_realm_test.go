@@ -25,6 +25,7 @@ func TestAccKeycloakDataSourceRealm_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceName, "realm", resourceName, "realm"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "enabled", resourceName, "enabled"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "display_name", resourceName, "display_name"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "display_name_html", resourceName, "display_name_html"),
 				),
 			},
 		},
@@ -36,6 +37,7 @@ func testDataSourceKeycloakRealm_basic(realm string) string {
 resource "keycloak_realm" "realm" {
 	realm        = "%s"
 	display_name = "foo"
+	display_name_html = "<b>foo</b>"
 }
 
 data "keycloak_realm" "realm" {

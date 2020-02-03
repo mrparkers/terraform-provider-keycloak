@@ -5,9 +5,10 @@ provider "keycloak" {
 }
 
 resource "keycloak_realm" "test" {
-  realm        = "test"
-  enabled      = true
-  display_name = "foo"
+  realm             = "test"
+  enabled           = true
+  display_name      = "foo"
+  display_name_html = "<b>foo</b>"
 
   smtp_server {
     host                  = "mysmtphost.com"
@@ -26,7 +27,7 @@ resource "keycloak_realm" "test" {
     }
   }
 
-  account_theme = "base"
+  account_theme        = "base"
   access_code_lifespan = "30m"
 
   internationalization {
@@ -51,17 +52,17 @@ resource "keycloak_realm" "test" {
     }
 
     brute_force_detection {
-      permanent_lockout                 = false
-      max_login_failures                = 31
-      wait_increment_seconds            = 61
-      quick_login_check_milli_seconds   = 1000
-      minimum_quick_login_wait_seconds  = 120
-      max_failure_wait_seconds          = 900
-      failure_reset_time_seconds        = 43200
+      permanent_lockout                = false
+      max_login_failures               = 31
+      wait_increment_seconds           = 61
+      quick_login_check_milli_seconds  = 1000
+      minimum_quick_login_wait_seconds = 120
+      max_failure_wait_seconds         = 900
+      failure_reset_time_seconds       = 43200
     }
   }
 
-  ssl_required  = "external"
+  ssl_required    = "external"
   password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
   attributes = {
     mycustomAttribute = "myCustomValue"
@@ -375,7 +376,7 @@ resource "keycloak_openid_user_realm_role_protocol_mapper" "user_realm_role_clie
   realm_id  = "${keycloak_realm.test.id}"
   client_id = "${keycloak_openid_client.test_client.id}"
 
-  claim_name  = "foo"
+  claim_name = "foo"
 }
 
 resource "keycloak_openid_user_realm_role_protocol_mapper" "user_realm_role_client_scope" {
@@ -383,7 +384,7 @@ resource "keycloak_openid_user_realm_role_protocol_mapper" "user_realm_role_clie
   realm_id        = "${keycloak_realm.test.id}"
   client_scope_id = "${keycloak_openid_client_scope.test_default_client_scope.id}"
 
-  claim_name  = "foo"
+  claim_name = "foo"
 }
 
 resource "keycloak_openid_client" "bearer_only_client" {

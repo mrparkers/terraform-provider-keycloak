@@ -21,6 +21,10 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"display_name_html": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 
 			// Login Config
 

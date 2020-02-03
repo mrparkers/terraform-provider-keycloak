@@ -29,6 +29,10 @@ func resourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"display_name_html": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 
 			// Login Config
 
@@ -446,10 +450,11 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	}
 
 	realm := &keycloak.Realm{
-		Id:          data.Get("realm").(string),
-		Realm:       data.Get("realm").(string),
-		Enabled:     data.Get("enabled").(bool),
-		DisplayName: data.Get("display_name").(string),
+		Id:              data.Get("realm").(string),
+		Realm:           data.Get("realm").(string),
+		Enabled:         data.Get("enabled").(bool),
+		DisplayName:     data.Get("display_name").(string),
+		DisplayNameHtml: data.Get("display_name_html").(string),
 
 		// Login Config
 		RegistrationAllowed:         data.Get("registration_allowed").(bool),
@@ -722,6 +727,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("realm", realm.Realm)
 	data.Set("enabled", realm.Enabled)
 	data.Set("display_name", realm.DisplayName)
+	data.Set("display_name_html", realm.DisplayNameHtml)
 
 	// Login Config
 	data.Set("registration_allowed", realm.RegistrationAllowed)
