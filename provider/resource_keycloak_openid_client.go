@@ -146,6 +146,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"consent_required": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -187,6 +192,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		WebOrigins:        webOrigins,
 		AdminUrl:          data.Get("admin_url").(string),
 		BaseUrl:           data.Get("base_url").(string),
+		ConsentRequired:   data.Get("consent_required").(bool),
 	}
 
 	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled {
@@ -249,6 +255,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("base_url", client.BaseUrl)
 	data.Set("authorization_services_enabled", client.AuthorizationServicesEnabled)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
+	data.Set("consent_required", client.ConsentRequired)
 
 	if client.AuthorizationServicesEnabled {
 		data.Set("resource_server_id", client.Id)

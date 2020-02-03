@@ -48,6 +48,7 @@ type OpenidClient struct {
 	FullScopeAllowed             bool                               `json:"fullScopeAllowed"`
 	Attributes                   OpenidClientAttributes             `json:"attributes"`
 	AuthorizationSettings        *OpenidClientAuthorizationSettings `json:"authorizationSettings,omitempty"`
+	ConsentRequired              bool                               `json:"consentRequired"`
 }
 
 type OpenidClientAttributes struct {
