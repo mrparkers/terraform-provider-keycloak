@@ -32,9 +32,9 @@ func TestAccKeycloakRole_basicRealm(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakRole_basicRealmForwardSlashRole(t *testing.T) {
+func TestAccKeycloakRole_basicRealmUrlRoleName(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
-	roleName := "terraform-role-/-" + acctest.RandString(10)
+	roleName := "terraform-role-http://foo.bar?a=1&b=2#" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
