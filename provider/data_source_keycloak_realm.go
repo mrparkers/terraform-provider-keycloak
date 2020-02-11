@@ -60,6 +60,10 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"ssl_required": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 
 			//Smtp server
 
@@ -262,6 +266,43 @@ func dataSourceKeycloakRealm() *schema.Resource {
 								},
 							},
 						},
+						"brute_force_detection": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"permanent_lockout": { //Permanent Lockout
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"max_login_failures": { //failureFactor
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"wait_increment_seconds": { //Wait Increment
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"quick_login_check_milli_seconds": { //Quick Login Check Milli Seconds
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"minimum_quick_login_wait_seconds": { //Minimum Quick Login Wait
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"max_failure_wait_seconds": { //Max Wait
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"failure_reset_time_seconds": { //maxDeltaTimeSeconds
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -301,6 +342,11 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for DockerAuthenticationFlow",
 				Computed:    true,
+			},
+			"attributes": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Computed: true,
 			},
 		},
 	}
