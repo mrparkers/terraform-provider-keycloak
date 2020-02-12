@@ -6,21 +6,24 @@ import (
 )
 
 type OpenidClientAuthorizationRolePolicy struct {
-	Id               string   `json:"id,omitempty"`
-	RealmId          string   `json:"-"`
-	ResourceServerId string   `json:"-"`
-	Name             string   `json:"name"`
-	Owner            string   `json:"owner"`
-	DecisionStrategy string   `json:"decisionStrategy"`
-	Logic            string   `json:"logic"`
-	Policies         []string `json:"policies"`
-	Resources        []string `json:"resources"`
-	Scopes           []string `json:"scopes"`
-	Type             string   `json:"type"`
-	// id:string
-	// required:boolean
-	Roles       []map[string]interface{} `json:"roles,omitempty"`
-	Description string                   `json:"description"`
+	Id               string                          `json:"id,omitempty"`
+	RealmId          string                          `json:"-"`
+	ResourceServerId string                          `json:"-"`
+	Name             string                          `json:"name"`
+	Owner            string                          `json:"owner"`
+	DecisionStrategy string                          `json:"decisionStrategy"`
+	Logic            string                          `json:"logic"`
+	Policies         []string                        `json:"policies"`
+	Resources        []string                        `json:"resources"`
+	Scopes           []string                        `json:"scopes"`
+	Type             string                          `json:"type"`
+	Roles            []OpenidClientAuthorizationRole `json:"roles,omitempty"`
+	Description      string                          `json:"description"`
+}
+
+type OpenidClientAuthorizationRole struct {
+	Id       string `json:"id,omitempty"`
+	Required bool   `json:"required"`
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationRolePolicy(policy *OpenidClientAuthorizationRolePolicy) error {

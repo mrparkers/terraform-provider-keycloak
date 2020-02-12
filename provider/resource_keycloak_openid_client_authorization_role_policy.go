@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 func resourceKeycloakOpenidClientAuthorizationRolePolicy() *schema.Resource {
@@ -78,7 +79,7 @@ func getOpenidClientAuthorizationRolePolicyResourceFromData(data *schema.Resourc
 	var policies []string
 	var resources []string
 	var scopes []string
-	var roles []map[string]interface{}
+	var roles []keycloak.OpenidClientAuthorizationRole
 	if v, ok := data.GetOk("resources"); ok {
 		for _, resource := range v.(*schema.Set).List() {
 			resources = append(resources, resource.(string))
@@ -95,12 +96,8 @@ func getOpenidClientAuthorizationRolePolicyResourceFromData(data *schema.Resourc
 		}
 	}
 	if v, ok := data.GetOk("roles"); ok {
-		for _, role := range v.(*schema.Set).List() {
-			attributes := map[string]interface{}{}
-			for key, value := range role.(map[string]interface{}) {
-				attributes[key] = strings.Split(value.(string), ",")
-			}
-			roles = append(roles, attributes)
+		for _, role := range v.([]keycloak.OpenidClientAuthorizationRole) {
+			roles = append(roles, role)
 		}
 	}
 

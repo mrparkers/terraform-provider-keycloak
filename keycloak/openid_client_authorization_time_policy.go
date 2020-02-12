@@ -17,18 +17,18 @@ type OpenidClientAuthorizationTimePolicy struct {
 	Resources        []string `json:"resources"`
 	Scopes           []string `json:"scopes"`
 	Type             string   `json:"type"`
-	NotBefore        string   `json:"string"`
-	NotOnOrAfter     string   `json:"string"`
-	DayMonth         string   `json:"string"`
-	DayMonthEnd      string   `json:"string"`
-	Month            string   `json:"string"`
-	MonthEnd         string   `json:"string"`
-	Year             string   `json:"string"`
-	YearEnd          string   `json:"string"`
-	Hour             string   `json:"string"`
-	HourEnd          string   `json:"string"`
-	Minute           string   `json:"string"`
-	MinuteEnd        string   `json:"string"`
+	NotBefore        string   `json:"notBefore"`
+	NotOnOrAfter     string   `json:"notOnOrAfter"`
+	DayMonth         string   `json:"dayMonth"`
+	DayMonthEnd      string   `json:"dayMonthEnd"`
+	Month            string   `json:"month"`
+	MonthEnd         string   `json:"monthEnd"`
+	Year             string   `json:"year"`
+	YearEnd          string   `json:"yearEnd"`
+	Hour             string   `json:"hour"`
+	HourEnd          string   `json:"hourEnd"`
+	Minute           string   `json:"minute"`
+	MinuteEnd        string   `json:"minuteEnd"`
 	Description      string   `json:"description"`
 }
 
