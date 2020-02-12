@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 func resourceKeycloakOpenidClientAuthorizationGroupPolicy() *schema.Resource {
@@ -81,7 +82,7 @@ func getOpenidClientAuthorizationGroupPolicyResourceFromData(data *schema.Resour
 	var policies []string
 	var resources []string
 	var scopes []string
-	var groups []map[string]interface{}
+	var groups []keycloak.OpenidClientAuthorizationGroup
 	if v, ok := data.GetOk("resources"); ok {
 		for _, resource := range v.(*schema.Set).List() {
 			resources = append(resources, resource.(string))
@@ -98,12 +99,8 @@ func getOpenidClientAuthorizationGroupPolicyResourceFromData(data *schema.Resour
 		}
 	}
 	if v, ok := data.GetOk("groups"); ok {
-		for _, group := range v.(*schema.Set).List() {
-			attributes := map[string]interface{}{}
-			for key, value := range group.(map[string]interface{}) {
-				attributes[key] = strings.Split(value.(string), ",")
-			}
-			groups = append(groups, attributes)
+		for _, group := range v.([]keycloak.OpenidClientAuthorizationGroup) {
+			groups = append(groups, group)
 		}
 	}
 
@@ -120,7 +117,7 @@ func getOpenidClientAuthorizationGroupPolicyResourceFromData(data *schema.Resour
 		Resources:        resources,
 		Scopes:           scopes,
 		GroupsClaim:      data.Get("groups_claim").(string),
-		Groups:           groups,
+		Groups:           data.Get("groups").([]keycloak.OpenidClientAuthorizationGroup),
 		Description:      data.Get("description").(string),
 	}
 	return &resource

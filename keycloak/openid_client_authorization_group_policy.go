@@ -6,23 +6,26 @@ import (
 )
 
 type OpenidClientAuthorizationGroupPolicy struct {
-	Id               string   `json:"id,omitempty"`
-	RealmId          string   `json:"-"`
-	ResourceServerId string   `json:"-"`
-	Name             string   `json:"name"`
-	Owner            string   `json:"owner"`
-	DecisionStrategy string   `json:"decisionStrategy"`
-	Logic            string   `json:"logic"`
-	Policies         []string `json:"policies"`
-	Resources        []string `json:"resources"`
-	Scopes           []string `json:"scopes"`
-	Type             string   `json:"type"`
-	GroupsClaim      string   `json:"groupsClaim"`
-	// id: string
-	// path: string
-	// extendChildren: bool
-	Groups      []map[string]interface{} `json:"groups,omitempty"`
-	Description string                   `json:"description"`
+	Id               string                           `json:"id,omitempty"`
+	RealmId          string                           `json:"-"`
+	ResourceServerId string                           `json:"-"`
+	Name             string                           `json:"name"`
+	Owner            string                           `json:"owner"`
+	DecisionStrategy string                           `json:"decisionStrategy"`
+	Logic            string                           `json:"logic"`
+	Policies         []string                         `json:"policies"`
+	Resources        []string                         `json:"resources"`
+	Scopes           []string                         `json:"scopes"`
+	Type             string                           `json:"type"`
+	GroupsClaim      string                           `json:"groupsClaim"`
+	Groups           []OpenidClientAuthorizationGroup `json:"groups,omitempty"`
+	Description      string                           `json:"description"`
+}
+
+type OpenidClientAuthorizationGroup struct {
+	Id             string `json:"id,omitempty"`
+	Path           string `json:"path,omitempty"`
+	ExtendChildren bool   `json:"extendChildren,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationGroupPolicy(policy *OpenidClientAuthorizationGroupPolicy) error {
