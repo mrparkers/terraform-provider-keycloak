@@ -75,6 +75,12 @@ func resourceKeycloakUser() *schema.Resource {
 					},
 				},
 			},
+			"assigned_realm_role_names": {
+				Type:     schema.TypeList,
+				Required: false,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 			"initial_password": {
 				Type:             schema.TypeList,
 				Optional:         true,
@@ -149,7 +155,7 @@ func getUserFederatedIdentitiesFromData(data []interface{}) *keycloak.FederatedI
 	return &federatedIdentities
 }
 
-func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
+func mapFromUserToData(data *schema.ResourceData, user *keycloak.User, roleNames []string) {
 	federatedIdentities := []interface{}{}
 	for _, federatedIdentity := range user.FederatedIdentities {
 		identity := map[string]interface{}{
@@ -172,6 +178,9 @@ func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
 	data.Set("enabled", user.Enabled)
 	data.Set("attributes", attributes)
 	data.Set("federated_identity", federatedIdentities)
+	if len(roleNames) > 0 {
+		data.Set("role_names", roleNames)
+	}
 }
 
 func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) error {
@@ -195,7 +204,11 @@ func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	mapFromUserToData(data, user)
+	roleNames, err := manageRoleAssignments(data, user, meta)
+	if err != nil {
+		return err
+	}
+	mapFromUserToData(data, user, roleNames)
 
 	return resourceKeycloakUserRead(data, meta)
 }
@@ -211,7 +224,14 @@ func resourceKeycloakUserRead(data *schema.ResourceData, meta interface{}) error
 		return handleNotFoundError(err, data)
 	}
 
-	mapFromUserToData(data, user)
+	var roleNames []string
+	_, areRolesSet := data.GetOk("assigned_realm_role_names")
+	if areRolesSet {
+		for _, roleName := range data.Get("assigned_realm_role_names").([]interface{}) {
+			roleNames = append(roleNames, roleName.(string))
+		}
+	}
+	mapFromUserToData(data, user, roleNames)
 
 	return nil
 }
@@ -226,7 +246,11 @@ func resourceKeycloakUserUpdate(data *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	mapFromUserToData(data, user)
+	roleNames, err := manageRoleAssignments(data, user, meta)
+	if err != nil {
+		return err
+	}
+	mapFromUserToData(data, user, roleNames)
 
 	return nil
 }
@@ -250,4 +274,80 @@ func resourceKeycloakUserImport(d *schema.ResourceData, _ interface{}) ([]*schem
 	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func difference(a, b []*keycloak.Role) (diff []*keycloak.Role) {
+	m := make(map[string]bool)
+
+	for _, item := range b {
+		m[item.Name] = true
+	}
+
+	for _, item := range a {
+		if _, ok := m[item.Name]; !ok {
+			diff = append(diff, item)
+		}
+	}
+	return
+}
+
+func updateRealmRoleAssignments(keycloakClient *keycloak.KeycloakClient, user *keycloak.User, roleNames []string) error {
+	allRealmRoles, err := keycloakClient.GetRealmRoles(user.RealmId)
+	if err != nil {
+		return err
+	}
+
+	rolesToAssign, err := getRolesToAssignFromRoleNames(allRealmRoles, roleNames)
+	if err != nil {
+		return err
+	}
+
+	rolesToDelete := difference(allRealmRoles, rolesToAssign)
+	err = keycloakClient.RemoveRealmLevelRoleMappings(user, rolesToDelete)
+	if err != nil {
+		return err
+	}
+
+	err = keycloakClient.AddRealmLevelRoleMapping(user, rolesToAssign)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getRolesToAssignFromRoleNames(allRealmRoles []*keycloak.Role, roleNames []string) ([]*keycloak.Role, error) {
+	var rolesToAssign []*keycloak.Role
+
+	for _, roleName := range roleNames {
+		for _, realmRole := range allRealmRoles {
+			if roleName == realmRole.Name {
+				rolesToAssign = append(rolesToAssign, realmRole)
+			}
+		}
+	}
+
+	if len(rolesToAssign) != len(roleNames) {
+		return nil, fmt.Errorf("User role mapping assignment is not possible. Some roles are not available")
+	}
+
+	return rolesToAssign, nil
+}
+
+func manageRoleAssignments(data *schema.ResourceData, user *keycloak.User, meta interface{}) ([]string, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	var roleNames []string
+
+	_, areRolesSet := data.GetOk("assigned_realm_role_names")
+	if areRolesSet {
+		for _, roleName := range data.Get("assigned_realm_role_names").([]interface{}) {
+			roleNames = append(roleNames, roleName.(string))
+		}
+
+		err := updateRealmRoleAssignments(keycloakClient, user, roleNames)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return roleNames, nil
 }

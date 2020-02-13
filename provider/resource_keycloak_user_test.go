@@ -291,9 +291,42 @@ func TestAccKeycloakUser_validateLowercaseUsernames(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakUser_withRealmRoleMapping(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	username := "terraform-user-" + acctest.RandString(10)
+	clientId := "terraform-client-" + acctest.RandString(10)
+
+	resourceName := "keycloak_user.user"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakUser_mapRealmRoles(realmName, username, clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakUserHasRealmRoleAssignment(resourceName),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakUserExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getUserFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakUserHasRealmRoleAssignment(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		_, err := getRealmRolesFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
@@ -390,6 +423,37 @@ func getUserFromState(s *terraform.State, resourceName string) (*keycloak.User, 
 	return user, nil
 }
 
+func getRealmRolesFromState(s *terraform.State, resourceName string) ([]string, error) {
+	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+	rs, ok := s.RootModule().Resources[resourceName]
+	if !ok {
+		return nil, fmt.Errorf("resource not found: %s", resourceName)
+	}
+
+	id := rs.Primary.ID
+	realm := rs.Primary.Attributes["realm_id"]
+
+	user, err := keycloakClient.GetUser(realm, id)
+	if err != nil {
+		return nil, fmt.Errorf("error getting user with id %s: %s", id, err)
+	}
+
+	roleMappings, err := keycloakClient.GetRealmLevelRoleMappings(user)
+	if err != nil {
+		return nil, fmt.Errorf("error getting roles for user with id %s: %s", id, err)
+
+	}
+
+	var roleMappingNames []string
+
+	for _, role := range roleMappings {
+		roleMappingNames = append(roleMappingNames, role.Name)
+	}
+
+	return roleMappingNames, nil
+}
+
 func testKeycloakUser_basic(realm, username, attributeName, attributeValue string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -484,4 +548,36 @@ resource "keycloak_user" "user" {
 	enabled    = %t
 }
 	`, user.RealmId, user.Username, user.Email, user.FirstName, user.LastName, user.Enabled)
+}
+
+func testKeycloakUser_mapRealmRoles(realm, username string, clientId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	realm_id                     = "${keycloak_realm.realm.id}"
+	client_id                    = "%s"
+
+	name                         = "test client"
+	enabled                      = true
+
+	access_type                  = "PUBLIC"
+	direct_access_grants_enabled = true
+}
+
+resource "keycloak_role" "frontend_user" {
+  realm_id = keycloak_realm.realm.id
+  name = "frontend_user"
+  description = "Frontend User Role"
+}
+
+resource "keycloak_user" "user" {
+	username         = "%s"
+	realm_id         = "${keycloak_realm.realm.id}"
+	assigned_realm_role_names = [keycloak_role.frontend_user.name]
+
+}
+	`, realm, clientId, username)
 }

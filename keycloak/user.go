@@ -189,3 +189,27 @@ func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId stri
 
 	return nil
 }
+
+func (keycloakClient *KeycloakClient) AddRealmLevelRoleMapping(user *User, roles []*Role) error {
+	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", user.RealmId, user.Id), roles)
+	return err
+}
+
+func (keycloakClient *KeycloakClient) RemoveRealmLevelRoleMappings(user *User, roles []*Role) error {
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", user.RealmId, user.Id), roles)
+}
+
+func (keycloakClient *KeycloakClient) GetRealmLevelRoleMappings(user *User) ([]*Role, error) {
+	var roles []*Role
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", user.RealmId, user.Id), &roles, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, role := range roles {
+		role.RealmId = user.RealmId
+	}
+
+	return roles, nil
+}
