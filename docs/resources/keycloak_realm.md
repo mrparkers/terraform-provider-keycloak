@@ -147,9 +147,30 @@ Internationalization support can be configured by using the `internationalizatio
 
 ##### Security Defenses Headers
 
-Header configuration support for browser security settings and brute force detection
+Header configuration support for browser security settings and brute force detection. It can be configured trough the`security_defenses` block using the `headers` and the `brute_force_detection` subblocks. 
+
+The `headers` block supports the following attributes:
+
+- `x_frame_options` - (Optional) Sets the x-frame-option, could be used for prevent pages from being included by non-origin iframes. More Infos could be found in the [RFC7034](https://tools.ietf.org/html/rfc7034)
+- `content_security_policy` - (Optional) Sets the Content Security Policy, could be used for prevent pages from being included by non-origin iframes. More Infos could be found in the [W3C-CSP](https://www.w3.org/TR/CSP/) Abstract.
+- `content_security_policy_report_only` - (Optional) For testing Content Security Policies.
+- `x_content_type_options` - (Optional) Sets the X-Content-Type-Options,  could be used for prevent MIME-sniffing a respone away from the declared content-type
+- `x_robots_tag` - (Optional) Prevent pages from appearing in search engines.
+- `x_xss_protection` - (Optional) This header configures the Cross-site scripting (XSS) filter in your browser.
+- `strict_transport_security` - (Optional) The Script-Transport-Security HTTP header tells browsers to always use HTTPS. Maxage could be set and subdomains could be also included.
+
+The `brute_force_detection` block supports the following attributes:
+
+- `permanent_lockout` - (Optional) Lock the user permanently when the user exceeds the maximum login failures.
+- `max_login_failures` - (Optional) How many failures before wait is triggered.
+- `wait_increment_seconds` - (Optional) When failure threshold has been met, how much time should the user be locked out?
+- `quick_login_check_milli_seconds` - (Optional) If a failure happens concurrently too quickly, lock out the user.
+- `minimum_quick_login_wait_seconds` - (Optional) How long to wait after a quick login failure.
+- `max_failure_wait_seconds ` - (Optional) Max. time a user will be locked out.
+- `failure_reset_time_seconds` - (Optional) When will failure count be reset?
 
 #### Atributes
+
 Map, can be used to add custom attributes to a realm. Or perhaps influence a certain attribute that is not supported in this terraform-provider
 
 ### Import
