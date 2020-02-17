@@ -80,17 +80,12 @@ func (keycloakClient *KeycloakClient) getExecutionId(authenticationSubFlow *Auth
 		return "", err
 	}
 
-	var executionId = ""
 	for _, ex := range list {
 		if ex.FlowId == authenticationSubFlow.Id {
-			executionId = ex.Id
-			break
+			return ex.Id, nil
 		}
 	}
-	if executionId == "" {
-		return "", errors.New("no execution id found for subflow")
-	}
-	return executionId, nil
+	return "", errors.New("no execution id found for subflow")
 }
 
 func (keycloakClient *KeycloakClient) UpdateAuthenticationSubFlow(authenticationSubFlow *AuthenticationSubFlow) error {
@@ -147,7 +142,7 @@ func (keycloakClient *KeycloakClient) RaiseAuthenticationSubFlowPriority(realmId
 	return keycloakClient.RaiseAuthenticationExecutionPriority(authenticationSubFlow.RealmId, executionId)
 }
 
-func (keycloakClient *KeycloakClient) lowerAuthenticationSubFlowPriority(realmId, parentFlowAlias, id string) error {
+func (keycloakClient *KeycloakClient) LowerAuthenticationSubFlowPriority(realmId, parentFlowAlias, id string) error {
 	authenticationSubFlow := AuthenticationSubFlow{
 		Id:              id,
 		ParentFlowAlias: parentFlowAlias,
