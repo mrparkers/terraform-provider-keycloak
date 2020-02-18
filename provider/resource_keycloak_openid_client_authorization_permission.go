@@ -1,11 +1,13 @@
 package provider
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 var (
@@ -87,10 +89,15 @@ func getOpenidClientAuthorizationPermissionFromData(data *schema.ResourceData) *
 		}
 	}
 	if v, ok := data.GetOk("scopes"); ok {
+		fmt.Println("im a cowowowowowowoowow i can do this")
 		for _, scope := range v.(*schema.Set).List() {
 			scopes = append(scopes, scope.(string))
 		}
 	}
+
+	da, _ := json.Marshal(scopes)
+	fmt.Println(string(da), "im hererhe", string(data.Id()))
+
 	permission := keycloak.OpenidClientAuthorizationPermission{
 		Id:               data.Id(),
 		ResourceServerId: data.Get("resource_server_id").(string),

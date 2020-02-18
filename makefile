@@ -22,7 +22,7 @@ fmt:
 	gofmt -w -s $(GOFMT_FILES)
 
 test: fmtcheck vet
-	go test $(TEST)
+	go test $(TEST) -v -run TestAccKeycloakOpenidClientAuthorizationPermission*
 
 testacc: fmtcheck vet
 	TF_ACC=1 go test -timeout 20m $(TEST) -v $(TESTARGS)

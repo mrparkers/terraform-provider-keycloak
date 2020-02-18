@@ -2,11 +2,12 @@ package provider
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"testing"
 )
 
 func TestAccKeycloakOpenidClientAuthorizationPermission_basic(t *testing.T) {
@@ -31,10 +32,10 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_basic(t *testing.T) {
 func TestAccKeycloakOpenidClientAuthorizationPermission_createAfterManualDestroy(t *testing.T) {
 	var authorizationPermission = &keycloak.OpenidClientAuthorizationPermission{}
 
-	realmName := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
-	resourceName := "terraform-" + acctest.RandString(10)
-	permissionName := "terraform-" + acctest.RandString(10)
+	realmName := "terraform-cow-" + acctest.RandString(10)
+	clientId := "terraform-cow-" + acctest.RandString(10)
+	resourceName := "terraform-cow-" + acctest.RandString(10)
+	permissionName := "terraform-cow-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -190,6 +191,9 @@ func getKeycloakOpenidClientAuthorizationPermissionFromState(s *terraform.State,
 		return nil, fmt.Errorf("error getting authorization permission config with id %s: %s", id, err)
 	}
 
+	// fmap, _ := json.Marshal(authorizationPermission)
+	// fmt.Println(string(fmap))
+
 	return authorizationPermission, nil
 }
 
@@ -230,7 +234,9 @@ resource keycloak_openid_client_authorization_permission test {
 	realm_id           = "${keycloak_realm.test.id}"
 	name               = "%s"
 	policies           = ["${data.keycloak_openid_client_authorization_policy.default.id}"]
-   resources          = ["${keycloak_openid_client_authorization_resource.test.id}"]
+	resources          = ["${keycloak_openid_client_authorization_resource.test.id}"]
+	scopes = ["ff251544-cdbf-4ba4-b473-fca63e54e95d"]
+
 }
 	`, realm, clientId, resourceName, permissionName)
 }
@@ -260,7 +266,8 @@ data keycloak_openid_client_authorization_policy default {
 resource keycloak_openid_client_authorization_resource resource {
   resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
   name               = "%s"
-  realm_id           = "${keycloak_realm.test.id}"
+	realm_id           = "${keycloak_realm.test.id}"
+	scopes = ["email", "admin"]
 
   uris = [
     "/endpoint/*"
