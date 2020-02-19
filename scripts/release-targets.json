@@ -10,7 +10,7 @@
 	{
 		"os": "linux",
 		"platform": "amd64",
-    "static": true
+		"static": true
 	},
 	{
 		"os": "windows",
