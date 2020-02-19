@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -89,14 +88,10 @@ func getOpenidClientAuthorizationPermissionFromData(data *schema.ResourceData) *
 		}
 	}
 	if v, ok := data.GetOk("scopes"); ok {
-		fmt.Println("im a cowowowowowowoowow i can do this")
 		for _, scope := range v.(*schema.Set).List() {
 			scopes = append(scopes, scope.(string))
 		}
 	}
-
-	da, _ := json.Marshal(scopes)
-	fmt.Println(string(da), "im hererhe", string(data.Id()))
 
 	permission := keycloak.OpenidClientAuthorizationPermission{
 		Id:               data.Id(),

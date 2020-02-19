@@ -15,6 +15,7 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_basic(t *testing.T) {
 	clientId := "terraform-" + acctest.RandString(10)
 	resourceName := "terraform-" + acctest.RandString(10)
 	permissionName := "terraform-" + acctest.RandString(10)
+	scopeName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -22,7 +23,7 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_basic(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakOpenidClientAuthorizationPermissionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientAuthorizationPermission_basic(realmName, clientId, resourceName, permissionName),
+				Config: testKeycloakOpenidClientAuthorizationPermission_basic(realmName, clientId, resourceName, permissionName, scopeName),
 				Check:  testAccCheckKeycloakOpenidClientAuthorizationPermissionExists("keycloak_openid_client_authorization_permission.test"),
 			},
 		},
@@ -32,10 +33,11 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_basic(t *testing.T) {
 func TestAccKeycloakOpenidClientAuthorizationPermission_createAfterManualDestroy(t *testing.T) {
 	var authorizationPermission = &keycloak.OpenidClientAuthorizationPermission{}
 
-	realmName := "terraform-cow-" + acctest.RandString(10)
-	clientId := "terraform-cow-" + acctest.RandString(10)
-	resourceName := "terraform-cow-" + acctest.RandString(10)
-	permissionName := "terraform-cow-" + acctest.RandString(10)
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+	resourceName := "terraform-" + acctest.RandString(10)
+	permissionName := "terraform-" + acctest.RandString(10)
+	scopeName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -43,7 +45,7 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_createAfterManualDestroy
 		CheckDestroy: testAccCheckKeycloakOpenidClientAuthorizationPermissionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientAuthorizationPermission_basic(realmName, clientId, resourceName, permissionName),
+				Config: testKeycloakOpenidClientAuthorizationPermission_basic(realmName, clientId, resourceName, permissionName, scopeName),
 				Check:  testAccCheckKeycloakOpenidClientAuthorizationPermissionFetch("keycloak_openid_client_authorization_permission.test", authorizationPermission),
 			},
 			{
@@ -55,7 +57,7 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_createAfterManualDestroy
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakOpenidClientAuthorizationPermission_basic(realmName, clientId, resourceName, permissionName),
+				Config: testKeycloakOpenidClientAuthorizationPermission_basic(realmName, clientId, resourceName, permissionName, scopeName),
 				Check:  testAccCheckKeycloakOpenidClientAuthorizationPermissionExists("keycloak_openid_client_authorization_permission.test"),
 			},
 		},
@@ -68,6 +70,7 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_basicUpdateRealm(t *test
 	clientId := "terraform-" + acctest.RandString(10)
 	resourceName := "terraform-" + acctest.RandString(10)
 	permissionName := "terraform-" + acctest.RandString(10)
+	scopeName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -75,14 +78,14 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_basicUpdateRealm(t *test
 		CheckDestroy: testAccCheckKeycloakOpenidClientAuthorizationPermissionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientAuthorizationPermission_basic(firstRealm, clientId, resourceName, permissionName),
+				Config: testKeycloakOpenidClientAuthorizationPermission_basic(firstRealm, clientId, resourceName, permissionName, scopeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientAuthorizationPermissionExists("keycloak_openid_client_authorization_permission.test"),
 					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_permission.test", "realm_id", firstRealm),
 				),
 			},
 			{
-				Config: testKeycloakOpenidClientAuthorizationPermission_basic(secondRealm, clientId, resourceName, permissionName),
+				Config: testKeycloakOpenidClientAuthorizationPermission_basic(secondRealm, clientId, resourceName, permissionName, scopeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientAuthorizationPermissionExists("keycloak_openid_client_authorization_permission.test"),
 					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_permission.test", "realm_id", secondRealm),
@@ -95,6 +98,7 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_basicUpdateRealm(t *test
 func TestAccKeycloakOpenidClientAuthorizationPermission_basicUpdateAll(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
+	scopeName := "terraform-" + acctest.RandString(10)
 
 	firstAuthrorizationPermission := &keycloak.OpenidClientAuthorizationPermission{
 		RealmId:     realmName,
@@ -114,11 +118,11 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_basicUpdateAll(t *testin
 		CheckDestroy: testAccCheckKeycloakOpenidClientAuthorizationPermissionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientAuthorizationPermission_basicFromInterface(clientId, firstAuthrorizationPermission, acctest.RandString(10)),
+				Config: testKeycloakOpenidClientAuthorizationPermission_basicFromInterface(clientId, firstAuthrorizationPermission, acctest.RandString(10), scopeName),
 				Check:  testAccCheckKeycloakOpenidClientAuthorizationPermissionExists("keycloak_openid_client_authorization_permission.test"),
 			},
 			{
-				Config: testKeycloakOpenidClientAuthorizationPermission_basicFromInterface(clientId, secondAuthrorizationPermission, acctest.RandString(10)),
+				Config: testKeycloakOpenidClientAuthorizationPermission_basicFromInterface(clientId, secondAuthrorizationPermission, acctest.RandString(10), scopeName),
 				Check:  testAccCheckKeycloakOpenidClientAuthorizationPermissionExists("keycloak_openid_client_authorization_permission.test"),
 			},
 		},
@@ -191,13 +195,10 @@ func getKeycloakOpenidClientAuthorizationPermissionFromState(s *terraform.State,
 		return nil, fmt.Errorf("error getting authorization permission config with id %s: %s", id, err)
 	}
 
-	// fmap, _ := json.Marshal(authorizationPermission)
-	// fmt.Println(string(fmap))
-
 	return authorizationPermission, nil
 }
 
-func testKeycloakOpenidClientAuthorizationPermission_basic(realm, clientId, resourceName, permissionName string) string {
+func testKeycloakOpenidClientAuthorizationPermission_basic(realm, clientId, resourceName, permissionName, scopeName string) string {
 	return fmt.Sprintf(`
 resource keycloak_realm test {
 	realm = "%s"
@@ -229,19 +230,24 @@ resource keycloak_openid_client_authorization_resource test {
   ]
 }
 
+resource keycloak_openid_client_authorization_scope test {
+  resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
+  name               = "%s"
+  realm_id           = "${keycloak_realm.test.id}"
+}
+
 resource keycloak_openid_client_authorization_permission test {
 	resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
 	realm_id           = "${keycloak_realm.test.id}"
 	name               = "%s"
 	policies           = ["${data.keycloak_openid_client_authorization_policy.default.id}"]
 	resources          = ["${keycloak_openid_client_authorization_resource.test.id}"]
-	scopes = ["ff251544-cdbf-4ba4-b473-fca63e54e95d"]
 
 }
-	`, realm, clientId, resourceName, permissionName)
+	`, realm, clientId, resourceName, scopeName, permissionName)
 }
 
-func testKeycloakOpenidClientAuthorizationPermission_basicFromInterface(clientId string, authorizationPermission *keycloak.OpenidClientAuthorizationPermission, resourceName string) string {
+func testKeycloakOpenidClientAuthorizationPermission_basicFromInterface(clientId string, authorizationPermission *keycloak.OpenidClientAuthorizationPermission, resourceName, scopeName string) string {
 	return fmt.Sprintf(`
 resource keycloak_realm test {
 	realm = "%s"
@@ -267,11 +273,16 @@ resource keycloak_openid_client_authorization_resource resource {
   resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
   name               = "%s"
 	realm_id           = "${keycloak_realm.test.id}"
-	scopes = ["email", "admin"]
 
   uris = [
     "/endpoint/*"
   ]
+}
+
+resource keycloak_openid_client_authorization_scope test {
+  resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
+  name               = "%s"
+  realm_id           = "${keycloak_realm.test.id}"
 }
 
 resource keycloak_openid_client_authorization_permission test {
@@ -280,7 +291,8 @@ resource keycloak_openid_client_authorization_permission test {
 	name               = "%s"
 	policies           = ["${data.keycloak_openid_client_authorization_policy.default.id}"]
    resources          = ["${keycloak_openid_client_authorization_resource.resource.id}"]
-   description        = "%s"
+	 description        = "%s"
+	scopes = ["${keycloak_openid_client_authorization_scope.test.id}"]
 }
-	`, authorizationPermission.RealmId, clientId, resourceName, authorizationPermission.Name, authorizationPermission.Description)
+	`, authorizationPermission.RealmId, clientId, resourceName, scopeName, authorizationPermission.Name, authorizationPermission.Description)
 }
