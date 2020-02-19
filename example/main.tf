@@ -606,6 +606,10 @@ resource "keycloak_openid_client_authorization_permission" "resource" {
   resources = [
     "${keycloak_openid_client_authorization_resource.resource.id}",
   ]
+
+  scopes = [
+    "${keycloak_openid_client_authorization_scope.resource.id}"
+  ]
 }
 
 resource "keycloak_openid_client_authorization_resource" "resource" {
