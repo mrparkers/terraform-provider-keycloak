@@ -35,6 +35,26 @@ func TestAccKeycloakGenericClientProtocolMapper_basicClient(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakGenericClientProtocolMapper_basicClientScope(t *testing.T) {
+	realmName := "terraform-realm-" + acctest.RandString(10)
+	clientScopeId := "terraform-client-" + acctest.RandString(10)
+	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)
+
+	resourceName := "keycloak_generic_client_protocol_mapper." + TF_RESOURCE_NAME
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccKeycloakGenericClientProtocolMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGenericClientProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
+				Check:  testKeycloakGenericClientProtocolMapperExists(resourceName),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakGenericClientProtocolMapper_import(t *testing.T) {
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
@@ -154,6 +174,30 @@ resource "keycloak_generic_client_protocol_mapper" "%s" {
     "friendly.name"        = "%s"
   }
 }`, realmName, clientId, TF_RESOURCE_NAME, mapperName, mapperName)
+}
+
+func testKeycloakGenericClientProtocolMapper_basic_clientScope(realmName string, clientScopeId string, mapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+  realm = "%s"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name     = "%s"
+	realm_id = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_generic_client_protocol_mapper" "%s" {
+	name            = "%s"
+	realm_id        = "${keycloak_realm.realm.id}"
+	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
+	protocol        = "openid-connect"
+	protocol_mapper = "oidc-usermodel-property-mapper"
+	config = {
+		"user.attribute" = "foo"
+		"claim.name"     = "bar"
+	}
+}`, realmName, clientScopeId, TF_RESOURCE_NAME, mapperName)
 }
 
 func testKeycloakGenericClientProtocolMapper_import(realmName string, clientId string, mapperName string) string {
