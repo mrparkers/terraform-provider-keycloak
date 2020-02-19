@@ -2,8 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"testing"
+
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -119,13 +120,14 @@ func getGenericClientProtocolMapperUsingState(state *terraform.State, resourceNa
 		return nil, fmt.Errorf("resource not found in TF state: %s ", resourceName)
 	}
 
-	id := rs.Primary.ID
+	mapperId := rs.Primary.ID
 	realmId := rs.Primary.Attributes["realm_id"]
 	clientId := rs.Primary.Attributes["client_id"]
+	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-	return keycloakClient.GetGenericClientProtocolMapper(realmId, clientId, id)
+	return keycloakClient.GetGenericClientProtocolMapper(realmId, clientId, clientScopeId, mapperId)
 }
 
 func testKeycloakGenericClientProtocolMapper_basic_client(realmName string, clientId string, mapperName string) string {
