@@ -1,8 +1,28 @@
+## 1.16.0 (February 13, 2020)
+
+FEATURES:
+
+* new resource: `keycloak_realm_events` ([#211](https://github.com/mrparkers/terraform-provider-keycloak/pull/211))
+* new resource: `resource_keycloak_openid_client_service_account_role` ([#202](https://github.com/mrparkers/terraform-provider-keycloak/pull/202))
+
+IMPROVEMENTS:
+
+* add base_url attribute to `keycloak_openid_client` resource ([#201](https://github.com/mrparkers/terraform-provider-keycloak/pull/201))
+* allow configuration of the client timeout by an environment variable ([#206](https://github.com/mrparkers/terraform-provider-keycloak/pull/206))
+* adds consent_required attribute to `keycloak_openid_client` resource ([#207](https://github.com/mrparkers/terraform-provider-keycloak/pull/207))
+* adds admin_url attribute to `keycloak_openid_client` resource ([#203](https://github.com/mrparkers/terraform-provider-keycloak/pull/203))
+* adds display_name_html attribute to `keycloak_realm` resource and data source ([#209](https://github.com/mrparkers/terraform-provider-keycloak/pull/209))
+* switch to terraform-plugin-sdk ([#214](https://github.com/mrparkers/terraform-provider-keycloak/pull/214))
+
+BUG FIXES:
+
+* URL encode role names to allow for special characters ([#213](https://github.com/mrparkers/terraform-provider-keycloak/pull/213))
+
 ## 1.15.0 (January 20, 2020)
 
 FEATURES:
 
-* new resource: keycloak_ldap_hardcoded_role_mapper ([#195](https://github.com/mrparkers/terraform-provider-keycloak/pull/195))
+* new resource: `keycloak_ldap_hardcoded_role_mapper` ([#195](https://github.com/mrparkers/terraform-provider-keycloak/pull/195))
 
 IMPROVEMENTS:
 
