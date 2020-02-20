@@ -643,3 +643,55 @@ resource "keycloak_openid_client_service_account_role" "read_token" {
   service_account_user_id = "${keycloak_openid_client.test_client_auth.service_account_user_id}"
   role                    = "read-token"
 }
+
+resource "keycloak_authentication_flow" "browser-copy-flow" {
+  alias    = "browserCopyFlow"
+  realm_id = "${keycloak_realm.test.id}"
+  description = "browser based authentication"
+}
+
+resource "keycloak_authentication_execution" "browser-copy-cookie" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+  authenticator = "auth-cookie"
+  requirement = "ALTERNATIVE"
+  depends_on = ["keycloak_authentication_execution.browser-copy-kerberos"]
+}
+
+resource "keycloak_authentication_execution" "browser-copy-kerberos" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+  authenticator = "auth-spnego"
+  requirement = "DISABLED"
+}
+
+resource "keycloak_authentication_execution" "browser-copy-idp-redirect" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+  authenticator = "identity-provider-redirector"
+  requirement = "ALTERNATIVE"
+  depends_on = ["keycloak_authentication_execution.browser-copy-cookie"]
+}
+
+resource "keycloak_authentication_subflow" "browser-copy-flow-forms" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+  alias    = "browser-copy-flow-forms"
+  requirement = "ALTERNATIVE"
+  depends_on = ["keycloak_authentication_execution.browser-copy-idp-redirect"]
+}
+
+resource "keycloak_authentication_execution" "browser-copy-auth-username-password-form" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_subflow.browser-copy-flow-forms.alias}"
+  authenticator = "auth-username-password-form"
+  requirement = "REQUIRED"
+}
+
+resource "keycloak_authentication_execution" "browser-copy-otp" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_subflow.browser-copy-flow-forms.alias}"
+  authenticator = "auth-otp-form"
+  requirement = "REQUIRED"
+  depends_on = ["keycloak_authentication_execution.browser-copy-auth-username-password-form"]
+}
