@@ -444,6 +444,21 @@ func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName stri
 	}
 }
 
+func testAccCheckKeycloakOpenidClientExistsWithCorrectLifespan(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.AccessTokenLifespan != "1800" {
+			return fmt.Errorf("expected openid client to have openid-connect protocol, but got %s", client.Protocol)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakOpenidClientFetch(resourceName string, client *keycloak.OpenidClient) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		fetchedClient, err := getOpenidClientFromState(s, resourceName)
@@ -618,6 +633,21 @@ resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
 	access_type = "CONFIDENTIAL"
+}
+	`, realm, clientId)
+}
+
+func testKeycloakOpenidClient_AccessToken_basic(realm, clientId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   		  = "%s"
+	realm_id    		  = "${keycloak_realm.realm.id}"
+	access_type 		  = "CONFIDENTIAL"
+	access_token_lifespan = "1800"
 }
 	`, realm, clientId)
 }
@@ -858,4 +888,28 @@ resource "keycloak_openid_client" "client" {
 	service_accounts_enabled     = %t
 }
 	`, realm, clientId, standardFlowEnabled, implicitFlowEnabled, directAccessGrantsEnabled, serviceAccountsEnabled)
+}
+
+func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_AccessToken_basic(realmName, clientId),
+				Check:  testAccCheckKeycloakOpenidClientExistsWithCorrectLifespan("keycloak_openid_client.client"),
+			},
+			{
+				ResourceName:            "keycloak_openid_client.client",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     realmName + "/",
+				ImportStateVerifyIgnore: []string{"exclude_session_state_from_auth_response"},
+			},
+		},
+	})
 }
