@@ -714,3 +714,12 @@ resource "keycloak_authentication_execution" "browser-copy-otp" {
   requirement = "REQUIRED"
   depends_on = ["keycloak_authentication_execution.browser-copy-auth-username-password-form"]
 }
+
+resource "keycloak_authentication_execution_config" "config" {
+  realm_id     = "${keycloak_realm.test.id}"
+  execution_id = "${keycloak_authentication_execution.browser-copy-idp-redirect.id}"
+  alias        = "idp-XXX-config"
+  config = {
+    defaultProvider = "idp-XXX"
+  }
+}
