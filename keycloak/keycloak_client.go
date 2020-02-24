@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"golang.org/x/net/publicsuffix"
@@ -12,7 +13,6 @@ import (
 	"net/http/cookiejar"
 	"net/http/httputil"
 	"net/url"
-	"crypto/tls"
 	"strings"
 	"time"
 )
@@ -51,13 +51,13 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 	}
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifyTls},
-		Proxy: http.ProxyFromEnvironment,
+		Proxy:           http.ProxyFromEnvironment,
 	}
 
 	httpClient := &http.Client{
-		Timeout: time.Second * time.Duration(clientTimeout),
+		Timeout:   time.Second * time.Duration(clientTimeout),
 		Transport: transport,
-		Jar:     cookieJar,
+		Jar:       cookieJar,
 	}
 	clientCredentials := &ClientCredentials{
 		ClientId:     clientId,
