@@ -12,6 +12,7 @@ import (
 	"net/http/cookiejar"
 	"net/http/httputil"
 	"net/url"
+	"crypto/tls"
 	"strings"
 	"time"
 )
@@ -40,7 +41,7 @@ const (
 	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, verifyTls bool) (*KeycloakClient, error) {
 	cookieJar, err := cookiejar.New(&cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	})
@@ -48,9 +49,14 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 	if err != nil {
 		return nil, err
 	}
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifyTls},
+		Proxy: http.ProxyFromEnvironment,
+	}
 
 	httpClient := &http.Client{
 		Timeout: time.Second * time.Duration(clientTimeout),
+		Transport: transport,
 		Jar:     cookieJar,
 	}
 	clientCredentials := &ClientCredentials{
