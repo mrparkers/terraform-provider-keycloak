@@ -23,7 +23,7 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     false,
-			Description: "Enable/disable signature validation of SAML responses.",
+			Description: "Enable/disable signature validation of external IDP signatures.",
 		},
 		"authorization_url": {
 			Type:        schema.TypeString,
