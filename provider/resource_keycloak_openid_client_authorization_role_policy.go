@@ -32,25 +32,12 @@ func resourceKeycloakOpenidClientAuthorizationRolePolicy() *schema.Resource {
 			},
 			"decision_strategy": {
 				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"owner": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"logic": {
 				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"policies": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-			},
-			"resources": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Optional: true,
+				Default:  "POSITIVE",
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
@@ -59,45 +46,48 @@ func resourceKeycloakOpenidClientAuthorizationRolePolicy() *schema.Resource {
 			},
 			"type": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Required: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
-			"roles": {
+			"role": {
 				Type:     schema.TypeList,
 				Required: true,
 				MinItems: 1,
-				Elem:     &schema.Schema{Type: schema.TypeMap},
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"id": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"required": {
+						Type:     schema.TypeBool,
+						Required: true,
+					},
+				},
+				},
 			},
 		},
 	}
 }
 
 func getOpenidClientAuthorizationRolePolicyResourceFromData(data *schema.ResourceData) *keycloak.OpenidClientAuthorizationRolePolicy {
-	var policies []string
-	var resources []string
 	var scopes []string
-	var roles []keycloak.OpenidClientAuthorizationRole
-	if v, ok := data.GetOk("resources"); ok {
-		for _, resource := range v.(*schema.Set).List() {
-			resources = append(resources, resource.(string))
-		}
-	}
-	if v, ok := data.GetOk("policies"); ok {
-		for _, policy := range v.(*schema.Set).List() {
-			policies = append(policies, policy.(string))
-		}
-	}
+	var rolesList []keycloak.OpenidClientAuthorizationRole
 	if v, ok := data.GetOk("scopes"); ok {
 		for _, scope := range v.(*schema.Set).List() {
 			scopes = append(scopes, scope.(string))
 		}
 	}
-	if v, ok := data.GetOk("roles"); ok {
-		for _, role := range v.([]keycloak.OpenidClientAuthorizationRole) {
-			roles = append(roles, role)
+	if v, ok := data.Get("role").([]interface{}); ok {
+		for _, role := range v {
+			roleMap := role.(map[string]interface{})
+			tempRole := keycloak.OpenidClientAuthorizationRole{
+				Id:       roleMap["id"].(string),
+				Required: roleMap["required"].(bool),
+			}
+			rolesList = append(rolesList, tempRole)
 		}
 	}
 
@@ -105,17 +95,15 @@ func getOpenidClientAuthorizationRolePolicyResourceFromData(data *schema.Resourc
 		Id:               data.Id(),
 		ResourceServerId: data.Get("resource_server_id").(string),
 		RealmId:          data.Get("realm_id").(string),
-		Owner:            data.Get("owner").(string),
 		DecisionStrategy: data.Get("decision_strategy").(string),
 		Logic:            data.Get("logic").(string),
 		Name:             data.Get("name").(string),
 		Type:             "role",
-		Policies:         policies,
-		Resources:        resources,
 		Scopes:           scopes,
-		Roles:            roles,
+		Roles:            rolesList,
 		Description:      data.Get("description").(string),
 	}
+
 	return &resource
 }
 
@@ -126,9 +114,7 @@ func setOpenidClientAuthorizationRolePolicyResourceData(data *schema.ResourceDat
 	data.Set("realm_id", policy.RealmId)
 	data.Set("name", policy.Name)
 	data.Set("decision_strategy", policy.DecisionStrategy)
-	data.Set("owner", policy.Owner)
 	data.Set("logic", policy.Logic)
-	data.Set("policies", policy.Policies)
 	data.Set("resources", policy.Resources)
 	data.Set("scopes", policy.Scopes)
 	data.Set("type", policy.Type)
@@ -148,7 +134,7 @@ func resourceKeycloakOpenidClientAuthorizationRolePolicyCreate(data *schema.Reso
 
 	setOpenidClientAuthorizationRolePolicyResourceData(data, resource)
 
-	return resourceKeycloakOpenidClientAuthorizationResourceRead(data, meta)
+	return resourceKeycloakOpenidClientAuthorizationRolePolicyRead(data, meta)
 }
 
 func resourceKeycloakOpenidClientAuthorizationRolePolicyRead(data *schema.ResourceData, meta interface{}) error {
