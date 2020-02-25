@@ -61,6 +61,9 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_client_service_account_role":              resourceKeycloakOpenidClientServiceAccountRole(),
 			"keycloak_openid_client_service_account_realm_role":        resourceKeycloakOpenidClientServiceAccountRealmRole(),
 			"keycloak_role":                                            resourceKeycloakRole(),
+			"keycloak_authentication_flow":                             resourceKeycloakAuthenticationFlow(),
+			"keycloak_authentication_subflow":                          resourceKeycloakAuthenticationSubFlow(),
+			"keycloak_authentication_execution":                        resourceKeycloakAuthenticationExecution(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
