@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 func resourceKeycloakOpenidClientAuthorizationUserPolicy() *schema.Resource {
@@ -31,43 +32,39 @@ func resourceKeycloakOpenidClientAuthorizationUserPolicy() *schema.Resource {
 			},
 			"decision_strategy": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"owner": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"logic": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Required: true,
 			},
 			"policies": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Optional: true,
 			},
 			"resources": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Optional: true,
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-			},
-			"type": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"users": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Required: true,
 			},
 		},
 	}
@@ -107,7 +104,7 @@ func getOpenidClientAuthorizationUserPolicyResourceFromData(data *schema.Resourc
 		DecisionStrategy: data.Get("decision_strategy").(string),
 		Logic:            data.Get("logic").(string),
 		Name:             data.Get("name").(string),
-		Type:             "client",
+		Type:             "user",
 		Policies:         policies,
 		Resources:        resources,
 		Scopes:           scopes,
@@ -129,7 +126,6 @@ func setOpenidClientAuthorizationUserPolicyResourceData(data *schema.ResourceDat
 	data.Set("policies", policy.Policies)
 	data.Set("resources", policy.Resources)
 	data.Set("scopes", policy.Scopes)
-	data.Set("type", policy.Type)
 	data.Set("description", policy.Description)
 	data.Set("users", policy.Users)
 }
@@ -146,7 +142,7 @@ func resourceKeycloakOpenidClientAuthorizationUserPolicyCreate(data *schema.Reso
 
 	setOpenidClientAuthorizationUserPolicyResourceData(data, resource)
 
-	return resourceKeycloakOpenidClientAuthorizationResourceRead(data, meta)
+	return resourceKeycloakOpenidClientAuthorizationUserPolicyRead(data, meta)
 }
 
 func resourceKeycloakOpenidClientAuthorizationUserPolicyRead(data *schema.ResourceData, meta interface{}) error {
