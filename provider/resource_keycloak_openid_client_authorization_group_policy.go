@@ -32,47 +32,59 @@ func resourceKeycloakOpenidClientAuthorizationGroupPolicy() *schema.Resource {
 			},
 			"decision_strategy": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Required: true,
 			},
 			"owner": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"logic": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"policies": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Optional: true,
 			},
 			"resources": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Optional: true,
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-			},
-			"type": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"groups_claim": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"groups": {
 				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeMap},
+				Required: true,
+				MinItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"path": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"extend_children": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -98,9 +110,15 @@ func getOpenidClientAuthorizationGroupPolicyResourceFromData(data *schema.Resour
 			scopes = append(scopes, scope.(string))
 		}
 	}
-	if v, ok := data.GetOk("groups"); ok {
-		for _, group := range v.([]keycloak.OpenidClientAuthorizationGroup) {
-			groups = append(groups, group)
+	if v, ok := data.Get("groups").([]interface{}); ok {
+		for _, group := range v {
+			groupMap := group.(map[string]interface{})
+			tempGroup := keycloak.OpenidClientAuthorizationGroup{
+				Id:             groupMap["id"].(string),
+				Path:           groupMap["path"].(string),
+				ExtendChildren: groupMap["extend_children"].(bool),
+			}
+			groups = append(groups, tempGroup)
 		}
 	}
 
@@ -117,9 +135,10 @@ func getOpenidClientAuthorizationGroupPolicyResourceFromData(data *schema.Resour
 		Resources:        resources,
 		Scopes:           scopes,
 		GroupsClaim:      data.Get("groups_claim").(string),
-		Groups:           data.Get("groups").([]keycloak.OpenidClientAuthorizationGroup),
+		Groups:           groups,
 		Description:      data.Get("description").(string),
 	}
+
 	return &resource
 }
 
@@ -135,7 +154,6 @@ func setOpenidClientAuthorizationGroupPolicyResourceData(data *schema.ResourceDa
 	data.Set("policies", policy.Policies)
 	data.Set("resources", policy.Resources)
 	data.Set("scopes", policy.Scopes)
-	data.Set("type", policy.Type)
 	data.Set("description", policy.Description)
 	data.Set("groups_claim", policy.GroupsClaim)
 	data.Set("groups", policy.Groups)
@@ -153,7 +171,7 @@ func resourceKeycloakOpenidClientAuthorizationGroupPolicyCreate(data *schema.Res
 
 	setOpenidClientAuthorizationGroupPolicyResourceData(data, resource)
 
-	return resourceKeycloakOpenidClientAuthorizationResourceRead(data, meta)
+	return resourceKeycloakOpenidClientAuthorizationGroupPolicyRead(data, meta)
 }
 
 func resourceKeycloakOpenidClientAuthorizationGroupPolicyRead(data *schema.ResourceData, meta interface{}) error {

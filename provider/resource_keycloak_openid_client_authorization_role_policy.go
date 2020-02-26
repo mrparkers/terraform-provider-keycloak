@@ -56,16 +56,17 @@ func resourceKeycloakOpenidClientAuthorizationRolePolicy() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				MinItems: 1,
-				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
-					"id": {
-						Type:     schema.TypeString,
-						Required: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"required": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
 					},
-					"required": {
-						Type:     schema.TypeBool,
-						Required: true,
-					},
-				},
 				},
 			},
 		},
