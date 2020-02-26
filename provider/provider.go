@@ -109,6 +109,12 @@ func KeycloakProvider() *schema.Provider {
 				Description: "Timeout (in seconds) of the Keycloak client",
 				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_TIMEOUT", 5),
 			},
+			"root_ca_certificate": {
+				Optional:    true,
+				Type:        schema.TypeString,
+				Description: "Allows x509 calls using an unknown CA certificate (for development purposes)",
+				Default:     "",
+			},
 		},
 		ConfigureFunc: configureKeycloakProvider,
 	}
@@ -123,6 +129,7 @@ func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
 	realm := data.Get("realm").(string)
 	initialLogin := data.Get("initial_login").(bool)
 	clientTimeout := data.Get("client_timeout").(int)
+	rootCaCertificate := data.Get("root_ca_certificate").(string)
 
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate)
 }
