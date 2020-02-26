@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 func resourceKeycloakOpenidClientAuthorizationTimePolicy() *schema.Resource {
@@ -31,86 +32,82 @@ func resourceKeycloakOpenidClientAuthorizationTimePolicy() *schema.Resource {
 			},
 			"decision_strategy": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Required: true,
 			},
 			"owner": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"logic": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"policies": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Optional: true,
 			},
 			"resources": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Optional: true,
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-			},
-			"type": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"not_before": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"not_on_or_after": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"day_month": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"day_month_end": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"month": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"month_end": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"year": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"year_end": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"hour": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"hour_end": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"minute": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"minute_end": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 		},
 	}
@@ -205,7 +202,7 @@ func resourceKeycloakOpenidClientAuthorizationTimePolicyCreate(data *schema.Reso
 
 	setOpenidClientAuthorizationTimePolicyResourceData(data, resource)
 
-	return resourceKeycloakOpenidClientAuthorizationResourceRead(data, meta)
+	return resourceKeycloakOpenidClientAuthorizationTimePolicyRead(data, meta)
 }
 
 func resourceKeycloakOpenidClientAuthorizationTimePolicyRead(data *schema.ResourceData, meta interface{}) error {
