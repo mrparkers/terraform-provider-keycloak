@@ -28,7 +28,6 @@ func TestResourceKeycloakOpenidClientAuthorizationAggregatePolicy(t *testing.T) 
 }
 
 func testResourceKeycloakOpenidClientAuthorizationAggregatePolicy_basic(realm, clientId string) string {
-	fmt.Println(realm, "ima relamy realm")
 	return fmt.Sprintf(`
 	resource keycloak_realm test {
 		realm = "%s"
@@ -68,7 +67,6 @@ func testResourceKeycloakOpenidClientAuthorizationAggregatePolicy_basic(realm, c
 		name = "keycloak_openid_client_aggregate_policy"
 		decision_strategy = "UNANIMOUS"
 		logic = "POSITIVE"
-		description = "ima cow"
 		policies = ["${keycloak_openid_client_role_policy.test.id}"]
 	}
 	`, realm, clientId)

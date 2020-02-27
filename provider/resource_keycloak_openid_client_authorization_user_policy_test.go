@@ -58,6 +58,7 @@ func testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(realm, client
 		name = "client_user_policy_test"
 		users = ["${keycloak_user.test.id}"]
 		logic = "POSITIVE"
+		decision_strategy = "UNANIMOUS"
 	}
 	`, realm, clientId)
 }

@@ -32,7 +32,7 @@ func resourceKeycloakOpenidClientAuthorizationAggregatePolicy() *schema.Resource
 			},
 			"decision_strategy": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"owner": {
 				Type:     schema.TypeString,
@@ -84,9 +84,6 @@ func getOpenidClientAuthorizationAggregatePolicyResourceFromData(data *schema.Re
 			scopes = append(scopes, scope.(string))
 		}
 	}
-
-	fmt.Println("get")
-	fmt.Println(policies)
 
 	resource := keycloak.OpenidClientAuthorizationAggregatePolicy{
 		Id:               data.Id(),
