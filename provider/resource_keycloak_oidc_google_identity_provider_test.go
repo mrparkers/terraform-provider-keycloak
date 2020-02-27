@@ -270,7 +270,7 @@ resource "keycloak_oidc_google_identity_provider" "google" {
 	realm             						= "${keycloak_realm.realm.id}"
 	enabled           						= %t
 	hosted_domain	  						= "%s"
-	accepts_prompt_none_forward_from_client = %t
+	accepts_prompt_none_forward_from_client	= %t
 	client_id         						= "%s"
 	client_secret     						= "%s"
 }
