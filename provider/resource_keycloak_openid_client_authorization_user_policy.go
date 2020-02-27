@@ -32,7 +32,7 @@ func resourceKeycloakOpenidClientAuthorizationUserPolicy() *schema.Resource {
 			},
 			"decision_strategy": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"owner": {
 				Type:     schema.TypeString,
