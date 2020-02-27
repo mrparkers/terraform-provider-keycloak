@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 func resourceKeycloakOpenidClientAuthorizationAggregatePolicy() *schema.Resource {
@@ -31,43 +32,34 @@ func resourceKeycloakOpenidClientAuthorizationAggregatePolicy() *schema.Resource
 			},
 			"decision_strategy": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"owner": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"logic": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"policies": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Required: true,
 			},
 			"resources": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Optional: true,
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-			},
-			"type": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"clients": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Optional: true,
 			},
 		},
 	}
@@ -77,7 +69,6 @@ func getOpenidClientAuthorizationAggregatePolicyResourceFromData(data *schema.Re
 	var policies []string
 	var resources []string
 	var scopes []string
-	var clients []string
 	if v, ok := data.GetOk("resources"); ok {
 		for _, resource := range v.(*schema.Set).List() {
 			resources = append(resources, resource.(string))
@@ -93,11 +84,9 @@ func getOpenidClientAuthorizationAggregatePolicyResourceFromData(data *schema.Re
 			scopes = append(scopes, scope.(string))
 		}
 	}
-	if v, ok := data.GetOk("clients"); ok {
-		for _, client := range v.(*schema.Set).List() {
-			clients = append(clients, client.(string))
-		}
-	}
+
+	fmt.Println("get")
+	fmt.Println(policies)
 
 	resource := keycloak.OpenidClientAuthorizationAggregatePolicy{
 		Id:               data.Id(),
@@ -107,7 +96,7 @@ func getOpenidClientAuthorizationAggregatePolicyResourceFromData(data *schema.Re
 		DecisionStrategy: data.Get("decision_strategy").(string),
 		Logic:            data.Get("logic").(string),
 		Name:             data.Get("name").(string),
-		Type:             "aggregated",
+		Type:             "aggregate",
 		Policies:         policies,
 		Resources:        resources,
 		Scopes:           scopes,
@@ -128,7 +117,6 @@ func setOpenidClientAuthorizationAggregatePolicyResourceData(data *schema.Resour
 	data.Set("policies", policy.Policies)
 	data.Set("resources", policy.Resources)
 	data.Set("scopes", policy.Scopes)
-	data.Set("type", policy.Type)
 	data.Set("description", policy.Description)
 }
 
@@ -136,7 +124,6 @@ func resourceKeycloakOpenidClientAuthorizationAggregatePolicyCreate(data *schema
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	resource := getOpenidClientAuthorizationAggregatePolicyResourceFromData(data)
-
 	err := keycloakClient.NewOpenidClientAuthorizationAggregatePolicy(resource)
 	if err != nil {
 		return err
@@ -144,7 +131,7 @@ func resourceKeycloakOpenidClientAuthorizationAggregatePolicyCreate(data *schema
 
 	setOpenidClientAuthorizationAggregatePolicyResourceData(data, resource)
 
-	return resourceKeycloakOpenidClientAuthorizationResourceRead(data, meta)
+	return resourceKeycloakOpenidClientAuthorizationAggregatePolicyRead(data, meta)
 }
 
 func resourceKeycloakOpenidClientAuthorizationAggregatePolicyRead(data *schema.ResourceData, meta interface{}) error {
@@ -166,7 +153,6 @@ func resourceKeycloakOpenidClientAuthorizationAggregatePolicyRead(data *schema.R
 
 func resourceKeycloakOpenidClientAuthorizationAggregatePolicyUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-
 	resource := getOpenidClientAuthorizationAggregatePolicyResourceFromData(data)
 
 	err := keycloakClient.UpdateOpenidClientAuthorizationAggregatePolicy(resource)

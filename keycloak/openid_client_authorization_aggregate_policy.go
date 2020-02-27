@@ -51,9 +51,20 @@ func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationAggregatePolic
 		ResourceServerId: resourceServerId,
 		RealmId:          realmId,
 	}
+
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/aggregate/%s", realmId, resourceServerId, policyId), &policy, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	var keycloakPolicies []map[string]interface{}
+	errTwo := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/%s/associatedPolicies", realmId, resourceServerId, policyId), &keycloakPolicies, nil)
+	if errTwo != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(keycloakPolicies); i++ {
+		policy.Policies = append(policy.Policies, keycloakPolicies[i]["id"].(string))
 	}
 
 	return &policy, nil
