@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/publicsuffix"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,6 +15,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"golang.org/x/net/publicsuffix"
 )
 
 type KeycloakClient struct {
@@ -320,7 +321,7 @@ func (keycloakClient *KeycloakClient) post(path string, requestBody interface{})
 	if err != nil {
 		return nil, "", err
 	}
-
+	fmt.Println(string(payload))
 	request, err := http.NewRequest(http.MethodPost, resourceUrl, bytes.NewReader(payload))
 	if err != nil {
 		return nil, "", err
