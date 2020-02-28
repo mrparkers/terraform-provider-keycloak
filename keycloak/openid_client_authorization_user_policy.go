@@ -22,7 +22,6 @@ type OpenidClientAuthorizationUserPolicy struct {
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationUserPolicy(policy *OpenidClientAuthorizationUserPolicy) error {
-	fmt.Println(policy)
 	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/user", policy.RealmId, policy.ResourceServerId), policy)
 	if err != nil {
 		return err
@@ -31,7 +30,6 @@ func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationUserPolicy(pol
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(body))
 	return nil
 }
 
