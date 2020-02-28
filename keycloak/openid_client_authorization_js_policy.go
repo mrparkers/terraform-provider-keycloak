@@ -17,7 +17,7 @@ type OpenidClientAuthorizationJSPolicy struct {
 	Resources        []string `json:"resources"`
 	Scopes           []string `json:"scopes"`
 	Type             string   `json:"type"`
-	Code             string   `json:"string"`
+	Code             string   `json:"code"`
 	Description      string   `json:"description"`
 }
 
