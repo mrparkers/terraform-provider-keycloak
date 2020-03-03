@@ -32,6 +32,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_ldap_group_mapper":                               resourceKeycloakLdapGroupMapper(),
 			"keycloak_ldap_hardcoded_role_mapper":                      resourceKeycloakLdapHardcodedRoleMapper(),
 			"keycloak_ldap_msad_user_account_control_mapper":           resourceKeycloakLdapMsadUserAccountControlMapper(),
+			"keycloak_ldap_msad_lds_user_account_control_mapper":       resourceKeycloakLdapMsadLdsUserAccountControlMapper(),
 			"keycloak_ldap_full_name_mapper":                           resourceKeycloakLdapFullNameMapper(),
 			"keycloak_custom_user_federation":                          resourceKeycloakCustomUserFederation(),
 			"keycloak_openid_user_attribute_protocol_mapper":           resourceKeycloakOpenIdUserAttributeProtocolMapper(),
