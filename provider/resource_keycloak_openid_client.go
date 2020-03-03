@@ -3,8 +3,8 @@ package provider
 import (
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
 )
@@ -12,7 +12,7 @@ import (
 var (
 	keycloakOpenidClientAccessTypes                        = []string{"CONFIDENTIAL", "PUBLIC", "BEARER-ONLY"}
 	keycloakOpenidClientAuthorizationPolicyEnforcementMode = []string{"ENFORCING", "PERMISSIVE", "DISABLED"}
-	keycloakOpenidClientPkceCodeChallengeMethod            = []string{"plain", "S256"}
+	keycloakOpenidClientPkceCodeChallengeMethod            = []string{"", "plain", "S256"}
 )
 
 func resourceKeycloakOpenidClient() *schema.Resource {
@@ -86,6 +86,14 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Set:      schema.HashString,
 				Optional: true,
 			},
+			"admin_url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"base_url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"service_accounts_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -95,6 +103,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(keycloakOpenidClientPkceCodeChallengeMethod, false),
+			},
+			"exclude_session_state_from_auth_response": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"service_account_user_id": {
 				Type:     schema.TypeString,
@@ -128,6 +141,16 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 					},
 				},
 			},
+			"full_scope_allowed": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"consent_required": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -160,11 +183,16 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		ImplicitFlowEnabled:       data.Get("implicit_flow_enabled").(bool),
 		DirectAccessGrantsEnabled: data.Get("direct_access_grants_enabled").(bool),
 		ServiceAccountsEnabled:    data.Get("service_accounts_enabled").(bool),
+		FullScopeAllowed:          data.Get("full_scope_allowed").(bool),
 		Attributes: keycloak.OpenidClientAttributes{
-			PkceCodeChallengeMethod: data.Get("pkce_code_challenge_method").(string),
+			PkceCodeChallengeMethod:             data.Get("pkce_code_challenge_method").(string),
+			ExcludeSessionStateFromAuthResponse: keycloak.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
+		AdminUrl:          data.Get("admin_url").(string),
+		BaseUrl:           data.Get("base_url").(string),
+		ConsentRequired:   data.Get("consent_required").(bool),
 	}
 
 	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled {
@@ -223,7 +251,11 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("service_accounts_enabled", client.ServiceAccountsEnabled)
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
 	data.Set("web_origins", client.WebOrigins)
+	data.Set("admin_url", client.AdminUrl)
+	data.Set("base_url", client.BaseUrl)
 	data.Set("authorization_services_enabled", client.AuthorizationServicesEnabled)
+	data.Set("full_scope_allowed", client.FullScopeAllowed)
+	data.Set("consent_required", client.ConsentRequired)
 
 	if client.AuthorizationServicesEnabled {
 		data.Set("resource_server_id", client.Id)

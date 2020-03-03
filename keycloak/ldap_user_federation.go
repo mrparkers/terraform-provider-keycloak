@@ -324,6 +324,49 @@ func (keycloakClient *KeycloakClient) GetLdapUserFederation(realmId, id string) 
 	return convertFromComponentToLdapUserFederation(component)
 }
 
+func (keycloakClient *KeycloakClient) GetLdapUserFederationMappers(realmId, id string) (*[]interface{}, error) {
+	var components []*component
+	var ldapUserFederationMappers []interface{}
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components?parent=%s&type=org.keycloak.storage.ldap.mappers.LDAPStorageMapper", realmId, id), &components, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, component := range components {
+		switch component.ProviderId {
+		case "full-name-ldap-mapper":
+			mapper, err := convertFromComponentToLdapFullNameMapper(component, realmId)
+			if err != nil {
+				return nil, err
+			}
+			ldapUserFederationMappers = append(ldapUserFederationMappers, mapper)
+		case "group-ldap-mapper":
+			mapper, err := convertFromComponentToLdapGroupMapper(component, realmId)
+			if err != nil {
+				return nil, err
+			}
+			ldapUserFederationMappers = append(ldapUserFederationMappers, mapper)
+		case "msad-user-account-control-mapper":
+			mapper, err := convertFromComponentToLdapMsadUserAccountControlMapper(component, realmId)
+			if err != nil {
+				return nil, err
+			}
+			ldapUserFederationMappers = append(ldapUserFederationMappers, mapper)
+		case "user-attribute-ldap-mapper":
+			mapper, err := convertFromComponentToLdapUserAttributeMapper(component, realmId)
+			if err != nil {
+				return nil, err
+			}
+			ldapUserFederationMappers = append(ldapUserFederationMappers, mapper)
+		case "role-ldap-mapper":
+			// Not supported
+		}
+	}
+
+	return &ldapUserFederationMappers, nil
+}
+
 func (keycloakClient *KeycloakClient) UpdateLdapUserFederation(ldapUserFederation *LdapUserFederation) error {
 	component, err := convertFromLdapUserFederationToComponent(ldapUserFederation)
 	if err != nil {

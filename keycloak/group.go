@@ -14,6 +14,7 @@ type Group struct {
 	SubGroups   []*Group            `json:"subGroups,omitempty"`
 	RealmRoles  []string            `json:"realmRoles,omitempty"`
 	ClientRoles map[string][]string `json:"clientRoles,omitempty"`
+	Attributes  map[string][]string `json:"attributes"`
 }
 
 /*
@@ -90,6 +91,21 @@ func (keycloakClient *KeycloakClient) NewGroup(group *Group) error {
 	return nil
 }
 
+func (keycloakClient *KeycloakClient) GetGroups(realmId string) ([]*Group, error) {
+	var groups []*Group
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups", realmId), &groups, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, group := range groups {
+		group.RealmId = realmId
+	}
+
+	return groups, nil
+}
+
 func (keycloakClient *KeycloakClient) GetGroup(realmId, id string) (*Group, error) {
 	var group Group
 
@@ -108,6 +124,43 @@ func (keycloakClient *KeycloakClient) GetGroup(realmId, id string) (*Group, erro
 	group.ParentId = parentId
 
 	return &group, nil
+}
+
+func (keycloakClient *KeycloakClient) GetGroupByName(realmId, name string) (*Group, error) {
+	var groups []Group
+
+	// We can't get a group by name, so we have to search for it
+	params := map[string]string{
+		"search": name,
+	}
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups", realmId), &groups, params)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(groups) == 0 {
+		return nil, fmt.Errorf("no group with name " + name + " found")
+	}
+
+	// The search may return more than 1 result even if there is a group exactly matching the search string
+	for _, group := range groups {
+		if group.Name == name {
+
+			group.RealmId = realmId // it's important to set RealmId here because fetching the ParentId depends on it
+
+			parentId, err := keycloakClient.groupParentId(&group)
+			if err != nil {
+				return nil, err
+			}
+
+			group.ParentId = parentId
+
+			return &group, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no group with name " + name + " found")
 }
 
 func (keycloakClient *KeycloakClient) UpdateGroup(group *Group) error {
@@ -136,7 +189,7 @@ func (keycloakClient *KeycloakClient) ListGroupsWithName(realmId, name string) (
 func (keycloakClient *KeycloakClient) GetGroupMembers(realmId, groupId string) ([]*User, error) {
 	var users []*User
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s/members", realmId, groupId), &users, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s/members?max=-1", realmId, groupId), &users, nil)
 	if err != nil {
 		return nil, err
 	}

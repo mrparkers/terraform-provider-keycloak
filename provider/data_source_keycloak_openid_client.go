@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -91,6 +91,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 						},
 					},
 				},
+			},
+			"full_scope_allowed": {
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
 		},
 	}

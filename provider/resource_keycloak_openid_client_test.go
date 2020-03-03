@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 	"testing"
@@ -24,10 +24,11 @@ func TestAccKeycloakOpenidClient_basic(t *testing.T) {
 				Check:  testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 			},
 			{
-				ResourceName:        "keycloak_openid_client.client",
-				ImportState:         true,
-				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ResourceName:            "keycloak_openid_client.client",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     realmName + "/",
+				ImportStateVerifyIgnore: []string{"exclude_session_state_from_auth_response"},
 			},
 		},
 	})
@@ -119,6 +120,41 @@ func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 		},
 	})
 }
+func TestAccKeycloakOpenidClient_adminUrl(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+	adminUrl := "https://www.example.com/admin"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_adminUrl(realmName, clientId, adminUrl),
+				Check:  testAccCheckKeycloakOpenidClientAdminUrl("keycloak_openid_client.client", adminUrl),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+	baseUrl := "https://www.example.com"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_baseUrl(realmName, clientId, baseUrl),
+				Check:  testAccCheckKeycloakOpenidClientBaseUrl("keycloak_openid_client.client", baseUrl),
+			},
+		},
+	})
+}
 
 func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
@@ -146,6 +182,8 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		ServiceAccountsEnabled:    serviceAccountsEnabled,
 		ValidRedirectUris:         []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 		WebOrigins:                []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
+		AdminUrl:                  acctest.RandString(20),
+		BaseUrl:                   acctest.RandString(20),
 	}
 
 	standardFlowEnabled, implicitFlowEnabled = implicitFlowEnabled, standardFlowEnabled
@@ -163,6 +201,8 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		ServiceAccountsEnabled:    !serviceAccountsEnabled,
 		ValidRedirectUris:         []string{acctest.RandString(10), acctest.RandString(10)},
 		WebOrigins:                []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
+		AdminUrl:                  acctest.RandString(20),
+		BaseUrl:                   acctest.RandString(20),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -190,6 +230,21 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckKeycloakOpenidClientAdminUrl(resourceName string, adminUrl string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.AdminUrl != adminUrl {
+			return fmt.Errorf("expected openid client to have adminUrl set to %s, but got %s", adminUrl, client.AdminUrl)
+		}
+
+		return nil
+	}
 }
 
 func TestAccKeycloakOpenidClient_secret(t *testing.T) {
@@ -299,19 +354,76 @@ func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, "invalidMethod"),
-				ExpectError: regexp.MustCompile(`config is invalid: expected pkce_code_challenge_method to be one of \[plain S256\], got invalidMethod`),
+				ExpectError: regexp.MustCompile(`config is invalid: expected pkce_code_challenge_method to be one of \[\ plain S256\], got invalidMethod`),
 			},
 			{
 				Config: testKeycloakOpenidClient_omitPkceChallengeMethod(realmName, clientId),
-				Check:  testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
+					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
+				),
 			},
 			{
 				Config: testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, "plain"),
-				Check:  testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", "plain"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", "plain"),
+					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
+				),
 			},
 			{
 				Config: testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, "S256"),
-				Check:  testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", "S256"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", "S256"),
+					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
+				),
+			},
+			{
+				Config: testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
+					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_omitExcludeSessionStateFromAuthResponse(realmName, clientId, "plain"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
+					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", "plain"),
+				),
+			},
+			{
+				Config: testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(realmName, clientId, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
+					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
+				),
+			},
+			{
+				Config: testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(realmName, clientId, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", true),
+					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
+				),
+			},
+			{
+				Config: testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(realmName, clientId, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
+					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
+				),
 			},
 		},
 	})
@@ -359,6 +471,21 @@ func testAccCheckKeycloakOpenidClientAccessType(resourceName string, public, bea
 
 		if client.BearerOnly != bearer {
 			return fmt.Errorf("expected openid client to have bearer set to %t, but got %t", bearer, client.BearerOnly)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientBaseUrl(resourceName string, baseUrl string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.BaseUrl != baseUrl {
+			return fmt.Errorf("expected openid client to have baseUrl set to %s, but got %s", baseUrl, client.BaseUrl)
 		}
 
 		return nil
@@ -440,7 +567,22 @@ func testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod(resourceName, pk
 		}
 
 		if client.Attributes.PkceCodeChallengeMethod != pkceCodeChallengeMethod {
-			return fmt.Errorf("expected openid client %s to have pkce code challenge method value of %s, but got %s", client.ClientId, pkceCodeChallengeMethod, client.ClientSecret)
+			return fmt.Errorf("expected openid client %s to have pkce code challenge method value of %s, but got %s", client.ClientId, pkceCodeChallengeMethod, client.Attributes.PkceCodeChallengeMethod)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(resourceName string, excludeSessionStateFromAuthResponse keycloak.KeycloakBoolQuoted) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.ExcludeSessionStateFromAuthResponse != excludeSessionStateFromAuthResponse {
+			return fmt.Errorf("expected openid client %s to have exclude_session_state_from_auth_response value of %t, but got %t", client.ClientId, excludeSessionStateFromAuthResponse, client.Attributes.ExcludeSessionStateFromAuthResponse)
 		}
 
 		return nil
@@ -494,6 +636,35 @@ resource "keycloak_openid_client" "client" {
 	`, realm, clientId, accessType)
 }
 
+func testKeycloakOpenidClient_adminUrl(realm, clientId, adminUrl string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	admin_url = "%s"
+	access_type = "PUBLIC"
+}
+	`, realm, clientId, adminUrl)
+}
+
+func testKeycloakOpenidClient_baseUrl(realm, clientId, baseUrl string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	base_url = "%s"
+	access_type = "PUBLIC"
+}
+	`, realm, clientId, baseUrl)
+}
+
 func testKeycloakOpenidClient_pkceChallengeMethod(realm, clientId, pkceChallengeMethod string) string {
 
 	return fmt.Sprintf(`
@@ -510,6 +681,22 @@ resource "keycloak_openid_client" "client" {
 	`, realm, clientId, pkceChallengeMethod)
 }
 
+func testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(realm, clientId string, excludeSessionStateFromAuthResponse bool) string {
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "CONFIDENTIAL"
+	exclude_session_state_from_auth_response = %t
+}
+	`, realm, clientId, excludeSessionStateFromAuthResponse)
+}
+
 func testKeycloakOpenidClient_omitPkceChallengeMethod(realm, clientId string) string {
 
 	return fmt.Sprintf(`
@@ -523,6 +710,22 @@ resource "keycloak_openid_client" "client" {
 	access_type = "CONFIDENTIAL"
 }
 	`, realm, clientId)
+}
+
+func testKeycloakOpenidClient_omitExcludeSessionStateFromAuthResponse(realm, clientId, pkceChallengeMethod string) string {
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "CONFIDENTIAL"
+    pkce_code_challenge_method = "%s"
+}
+	`, realm, clientId, pkceChallengeMethod)
 }
 
 func testKeycloakOpenidClient_updateRealmBefore(realmOne, realmTwo, clientId string) string {
@@ -584,8 +787,10 @@ resource "keycloak_openid_client" "client" {
 
 	valid_redirect_uris          = %s
 	web_origins                  = %s
+	admin_url					 = "%s"
+	base_url                     = "%s"
 }
-	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.ServiceAccountsEnabled, openidClient.DirectAccessGrantsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins))
+	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl)
 }
 
 func testKeycloakOpenidClient_secret(realm, clientId, clientSecret string) string {

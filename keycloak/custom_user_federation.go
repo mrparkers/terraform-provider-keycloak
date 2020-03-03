@@ -116,6 +116,26 @@ func (keycloakClient *KeycloakClient) GetCustomUserFederation(realmId, id string
 	return convertFromComponentToCustomUserFederation(component)
 }
 
+func (keycloakClient *KeycloakClient) GetCustomUserFederations(realmId string) (*[]CustomUserFederation, error) {
+	var components []*component
+	var customUserFederations []CustomUserFederation
+	var customUserFederation *CustomUserFederation
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components?parent=%s&type=%s", realmId, realmId, userStorageProviderType), &components, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, component := range components {
+		customUserFederation, err = convertFromComponentToCustomUserFederation(component)
+		if err != nil {
+			return nil, err
+		}
+		customUserFederations = append(customUserFederations, *customUserFederation)
+	}
+	return &customUserFederations, nil
+}
+
 func (keycloakClient *KeycloakClient) UpdateCustomUserFederation(customUserFederation *CustomUserFederation) error {
 	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", customUserFederation.RealmId, customUserFederation.Id), convertFromCustomUserFederationToComponent(customUserFederation))
 }

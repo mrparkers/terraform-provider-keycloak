@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -219,43 +219,6 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateRealmIdForceNew(t *testin
 			{
 				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(newRealmName, clientId, mapperName, customAudience),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakOpenIdAudienceProtocolMapper_validateClientConflictsWithClientScope(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
-
-	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config:      testKeycloakOpenIdAudienceProtocolMapper_validateClientConflictsWithClientScope(realmName, clientId, clientScopeId, mapperName),
-				ExpectError: regexp.MustCompile("validataion error: ClientId and ClientScopeId cannot both be set"),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceConflictsWithCustomAudience(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
-
-	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config:      testKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceConflictsWithCustomAudience(realmName, clientId, mapperName),
-				ExpectError: regexp.MustCompile("validataion error: IncludedClientAudience and IncludedCustomAudience cannot both be set"),
 			},
 		},
 	})

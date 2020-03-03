@@ -16,13 +16,8 @@ type OpenidClientServiceAccountRole struct {
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(serviceAccountRole *OpenidClientServiceAccountRole) error {
-	role, err := keycloakClient.GetRoleByName(serviceAccountRole.RealmId, serviceAccountRole.ContainerId, serviceAccountRole.Name)
-	if err != nil {
-		return err
-	}
-	serviceAccountRole.Id = role.Id
 	serviceAccountRoles := []OpenidClientServiceAccountRole{*serviceAccountRole}
-	_, _, err = keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId), serviceAccountRoles)
+	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId), serviceAccountRoles)
 	if err != nil {
 		return err
 	}
@@ -57,8 +52,42 @@ func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(realm, s
 	}
 	for _, serviceAccountRole := range serviceAccountRoles {
 		if serviceAccountRole.Id == roleId {
+			serviceAccountRole.RealmId = realm
+			serviceAccountRole.ServiceAccountUserId = serviceAccountUserId
 			return &serviceAccountRole, nil
 		}
 	}
 	return &OpenidClientServiceAccountRole{}, nil
+}
+
+func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRealmRoles(realm, serviceAccountUserId string) ([]*OpenidClientServiceAccountRole, error) {
+	var serviceAccountRoles []*OpenidClientServiceAccountRole
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm/composite", realm, serviceAccountUserId), &serviceAccountRoles, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, serviceAccountRole := range serviceAccountRoles {
+		serviceAccountRole.RealmId = realm
+		serviceAccountRole.ServiceAccountUserId = serviceAccountUserId
+	}
+
+	return serviceAccountRoles, nil
+}
+
+func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountClientRoles(realm, serviceAccountUserId, clientId string) ([]*OpenidClientServiceAccountRole, error) {
+	var serviceAccountRoles []*OpenidClientServiceAccountRole
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, serviceAccountRole := range serviceAccountRoles {
+		serviceAccountRole.RealmId = realm
+		serviceAccountRole.ServiceAccountUserId = serviceAccountUserId
+	}
+
+	return serviceAccountRoles, nil
 }

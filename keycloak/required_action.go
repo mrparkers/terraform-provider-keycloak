@@ -27,6 +27,21 @@ func (requiredActions *RequiredAction) getConfigOk(val string) (string, bool) {
 	return "", false
 }
 
+func (keycloakClient *KeycloakClient) GetRequiredActions(realmId string) ([]*RequiredAction, error) {
+	var requiredActions []*RequiredAction
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/required-actions", realmId), &requiredActions, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, requiredAction := range requiredActions {
+		requiredAction.RealmId = realmId
+	}
+
+	return requiredActions, nil
+}
+
 func (keycloakClient *KeycloakClient) GetRequiredAction(realmId string, alias string) (*RequiredAction, error) {
 	var requiredAction RequiredAction
 

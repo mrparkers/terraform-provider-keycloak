@@ -1,21 +1,24 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func KeycloakProvider() *schema.Provider {
 	return &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{
+			"keycloak_group":                              dataSourceKeycloakGroup(),
 			"keycloak_openid_client":                      dataSourceKeycloakOpenidClient(),
 			"keycloak_openid_client_authorization_policy": dataSourceKeycloakOpenidClientAuthorizationPolicy(),
+			"keycloak_openid_client_service_account_user": dataSourceKeycloakOpenidClientServiceAccountUser(),
 			"keycloak_realm":                              dataSourceKeycloakRealm(),
 			"keycloak_realm_keys":                         dataSourceKeycloakRealmKeys(),
 			"keycloak_role":                               dataSourceKeycloakRole(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_realm":                                           resourceKeycloakRealm(),
+			"keycloak_realm_events":                                    resourceKeycloakRealmEvents(),
 			"keycloak_required_action":                                 resourceKeycloakRequiredAction(),
 			"keycloak_group":                                           resourceKeycloakGroup(),
 			"keycloak_group_memberships":                               resourceKeycloakGroupMemberships(),
@@ -27,6 +30,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_ldap_user_federation":                            resourceKeycloakLdapUserFederation(),
 			"keycloak_ldap_user_attribute_mapper":                      resourceKeycloakLdapUserAttributeMapper(),
 			"keycloak_ldap_group_mapper":                               resourceKeycloakLdapGroupMapper(),
+			"keycloak_ldap_hardcoded_role_mapper":                      resourceKeycloakLdapHardcodedRoleMapper(),
 			"keycloak_ldap_msad_user_account_control_mapper":           resourceKeycloakLdapMsadUserAccountControlMapper(),
 			"keycloak_ldap_full_name_mapper":                           resourceKeycloakLdapFullNameMapper(),
 			"keycloak_custom_user_federation":                          resourceKeycloakCustomUserFederation(),
@@ -55,7 +59,11 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_client_authorization_scope":               resourceKeycloakOpenidClientAuthorizationScope(),
 			"keycloak_openid_client_authorization_permission":          resourceKeycloakOpenidClientAuthorizationPermission(),
 			"keycloak_openid_client_service_account_role":              resourceKeycloakOpenidClientServiceAccountRole(),
+			"keycloak_openid_client_service_account_realm_role":        resourceKeycloakOpenidClientServiceAccountRealmRole(),
 			"keycloak_role":                                            resourceKeycloakRole(),
+			"keycloak_authentication_flow":                             resourceKeycloakAuthenticationFlow(),
+			"keycloak_authentication_subflow":                          resourceKeycloakAuthenticationSubFlow(),
+			"keycloak_authentication_execution":                        resourceKeycloakAuthenticationExecution(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -99,7 +107,13 @@ func KeycloakProvider() *schema.Provider {
 				Optional:    true,
 				Type:        schema.TypeInt,
 				Description: "Timeout (in seconds) of the Keycloak client",
-				Default:     5,
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_TIMEOUT", 5),
+			},
+			"root_ca_certificate": {
+				Optional:    true,
+				Type:        schema.TypeString,
+				Description: "Allows x509 calls using an unknown CA certificate (for development purposes)",
+				Default:     "",
 			},
 		},
 		ConfigureFunc: configureKeycloakProvider,
@@ -115,6 +129,7 @@ func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
 	realm := data.Get("realm").(string)
 	initialLogin := data.Get("initial_login").(bool)
 	clientTimeout := data.Get("client_timeout").(int)
+	rootCaCertificate := data.Get("root_ca_certificate").(string)
 
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate)
 }

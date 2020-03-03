@@ -2,8 +2,8 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"testing"
 )
 
@@ -32,6 +32,7 @@ func TestAccKeycloakDataSourceOpenidClient_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceName, "service_account_user_id", resourceName, "service_account_user_id"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "service_accounts_enabled", resourceName, "service_accounts_enabled"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "resource_server_id", resourceName, "resource_server_id"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "full_scope_allowed", resourceName, "full_scope_allowed"),
 				),
 			},
 		},
@@ -66,6 +67,7 @@ resource keycloak_openid_client test {
   web_origins              = [
 		"http://localhost"
   ]
+  full_scope_allowed       = false
 }
 
 data keycloak_openid_client test {

@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"testing"
 )
@@ -12,6 +12,29 @@ import (
 func TestAccKeycloakRole_basicRealm(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRoleDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRole_basicRealm(realmName, roleName),
+				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
+			},
+			{
+				ResourceName:        "keycloak_role.role",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRole_basicRealmUrlRoleName(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	roleName := "terraform-role-http://foo.bar?a=1&b=2#" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
