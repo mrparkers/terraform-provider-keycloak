@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -89,5 +90,3 @@ func resourceKeycloakGenericClientRoleMapperDelete(data *schema.ResourceData, me
 
 	return keycloakClient.DeleteRoleScopeMapping(realmId, clientId, role)
 }
-
-
