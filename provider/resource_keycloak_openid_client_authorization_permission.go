@@ -2,10 +2,11 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 var (
@@ -57,6 +58,11 @@ func resourceKeycloakOpenidClientAuthorizationPermission() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
+			"scopes": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+			},
 			"type": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -70,6 +76,7 @@ func resourceKeycloakOpenidClientAuthorizationPermission() *schema.Resource {
 func getOpenidClientAuthorizationPermissionFromData(data *schema.ResourceData) *keycloak.OpenidClientAuthorizationPermission {
 	var policies []string
 	var resources []string
+	var scopes []string
 	if v, ok := data.GetOk("resources"); ok {
 		for _, resource := range v.(*schema.Set).List() {
 			resources = append(resources, resource.(string))
@@ -80,6 +87,12 @@ func getOpenidClientAuthorizationPermissionFromData(data *schema.ResourceData) *
 			policies = append(policies, policy.(string))
 		}
 	}
+	if v, ok := data.GetOk("scopes"); ok {
+		for _, scope := range v.(*schema.Set).List() {
+			scopes = append(scopes, scope.(string))
+		}
+	}
+
 	permission := keycloak.OpenidClientAuthorizationPermission{
 		Id:               data.Id(),
 		ResourceServerId: data.Get("resource_server_id").(string),
@@ -89,6 +102,7 @@ func getOpenidClientAuthorizationPermissionFromData(data *schema.ResourceData) *
 		DecisionStrategy: data.Get("decision_strategy").(string),
 		Type:             data.Get("type").(string),
 		Policies:         policies,
+		Scopes:           scopes,
 		Resources:        resources,
 	}
 	return &permission
@@ -103,6 +117,7 @@ func setOpenidClientAuthorizationPermissionData(data *schema.ResourceData, permi
 	data.Set("decision_strategy", permission.DecisionStrategy)
 	data.Set("type", permission.Type)
 	data.Set("policies", permission.Policies)
+	data.Set("scopes", permission.Scopes)
 	data.Set("resources", permission.Resources)
 }
 
