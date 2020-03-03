@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"fmt"
-	"strconv"
 )
 
 type LdapMsadLdsUserAccountControlMapper struct {
