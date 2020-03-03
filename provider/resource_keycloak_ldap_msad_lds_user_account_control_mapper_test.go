@@ -57,7 +57,7 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy
 					}
 				},
 				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_basic(realmName, msadLdsUacMapperName),
-				Check:  testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperExists("keycloak_ldap_msad_lsd_user_account_control_mapper.uac_mapper"),
+				Check:  testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperExists("keycloak_ldap_msad_lds_user_account_control_mapper.uac_mapper"),
 			},
 		},
 	})
