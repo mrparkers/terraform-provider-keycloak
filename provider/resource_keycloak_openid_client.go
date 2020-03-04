@@ -104,6 +104,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(keycloakOpenidClientPkceCodeChallengeMethod, false),
 			},
+			"access_token_lifespan": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"exclude_session_state_from_auth_response": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -187,6 +191,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		Attributes: keycloak.OpenidClientAttributes{
 			PkceCodeChallengeMethod:             data.Get("pkce_code_challenge_method").(string),
 			ExcludeSessionStateFromAuthResponse: keycloak.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
+			AccessTokenLifespan:                 data.Get("access_token_lifespan").(string),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
@@ -256,6 +261,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("authorization_services_enabled", client.AuthorizationServicesEnabled)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
 	data.Set("consent_required", client.ConsentRequired)
+	data.Set("access_token_lifespan", client.Attributes.AccessTokenLifespan)
 
 	if client.AuthorizationServicesEnabled {
 		data.Set("resource_server_id", client.Id)
