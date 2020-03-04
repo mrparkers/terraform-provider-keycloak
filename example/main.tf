@@ -278,6 +278,12 @@ resource "keycloak_ldap_msad_user_account_control_mapper" "msad_uac_mapper" {
   ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
 }
 
+resource "keycloak_ldap_msad_lds_user_account_control_mapper" "msad_lds_uac_mapper" {
+  name                    = "msad-lds-uac-mapper"
+  realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
+  ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
+}
+
 resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
   name                    = "full-name-mapper"
   realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
