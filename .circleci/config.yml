@@ -32,7 +32,6 @@ defaults:
       KEYCLOAK_LOGLEVEL: DEBUG
       KEYCLOAK_USER: keycloak
       KEYCLOAK_PASSWORD: password
-    command: ["-b", "0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled"]
 
   testacc_job: &testacc_job
     working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
@@ -65,6 +64,7 @@ jobs:
     docker:
       - <<: *go_image
       - image: jboss/keycloak:7.0.1
+        command: ["-b", "0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled"]
         <<: *keycloak_env
     <<: *testacc_job
 
@@ -73,6 +73,7 @@ jobs:
     docker:
       - <<: *go_image
       - image: jboss/keycloak:8.0.1
+        command: ["-b", "0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled"]
         <<: *keycloak_env
     <<: *testacc_job
 
