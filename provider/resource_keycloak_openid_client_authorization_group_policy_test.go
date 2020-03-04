@@ -27,42 +27,6 @@ func TestResourceKeycloakOpenidClientAuthorizationGroupPolicy(t *testing.T) {
 	})
 }
 
-func testResourceKeycloakOpenidClientAuthorizationGroupPolicy_basic(realm, clientId string) string {
-	return fmt.Sprintf(`
-	resource keycloak_realm test {
-		realm = "%s"
-	}
-	
-	resource keycloak_openid_client test {
-		client_id                = "%s"
-		realm_id                 = "${keycloak_realm.test.id}"
-		access_type              = "CONFIDENTIAL"
-		service_accounts_enabled = true
-		authorization {
-			policy_enforcement_mode = "ENFORCING"
-		}
-	}
-
-	resource "keycloak_group" "test" {
-		realm_id = "${keycloak_realm.test.id}"
-		name     = "foo"
-	}
-
-	resource keycloak_openid_client_group_policy test {
-		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
-		realm_id = "${keycloak_realm.test.id}"
-		name = "client_group_policy_test"
-		groups {
-			id = "${keycloak_group.test.id}"
-			path = "${keycloak_group.test.path}"
-			extend_children = false
-		}
-		logic = "POSITIVE"
-		decision_strategy = "UNANIMOUS"
-	}
-	`, realm, clientId)
-}
-
 func getResourceKeycloakOpenidClientAuthorizationGroupPolicyFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClientAuthorizationGroupPolicy, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -116,4 +80,40 @@ func testResourceKeycloakOpenidClientAuthorizationGroupPolicyExists(resourceName
 
 		return nil
 	}
+}
+
+func testResourceKeycloakOpenidClientAuthorizationGroupPolicy_basic(realm, clientId string) string {
+	return fmt.Sprintf(`
+	resource keycloak_realm test {
+		realm = "%s"
+	}
+	
+	resource keycloak_openid_client test {
+		client_id                = "%s"
+		realm_id                 = "${keycloak_realm.test.id}"
+		access_type              = "CONFIDENTIAL"
+		service_accounts_enabled = true
+		authorization {
+			policy_enforcement_mode = "ENFORCING"
+		}
+	}
+
+	resource "keycloak_group" "test" {
+		realm_id = "${keycloak_realm.test.id}"
+		name     = "foo"
+	}
+
+	resource keycloak_openid_client_group_policy test {
+		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
+		realm_id = "${keycloak_realm.test.id}"
+		name = "client_group_policy_test"
+		groups {
+			id = "${keycloak_group.test.id}"
+			path = "${keycloak_group.test.path}"
+			extend_children = false
+		}
+		logic = "POSITIVE"
+		decision_strategy = "UNANIMOUS"
+	}
+	`, realm, clientId)
 }

@@ -27,42 +27,6 @@ func TestResourceKeycloakOpenidClientAuthorizationUserPolicy(t *testing.T) {
 	})
 }
 
-func testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(realm, clientId string) string {
-	return fmt.Sprintf(`
-	resource keycloak_realm test {
-		realm = "%s"
-	}
-	
-	resource keycloak_openid_client test {
-		client_id                = "%s"
-		realm_id                 = "${keycloak_realm.test.id}"
-		access_type              = "CONFIDENTIAL"
-		service_accounts_enabled = true
-		authorization {
-			policy_enforcement_mode = "ENFORCING"
-		}
-	}
-
-	resource keycloak_user test {
-		realm_id = "${keycloak_realm.test.id}"
-		username = "test-user"
-	
-		email      = "test-user@fakedomain.com"
-		first_name = "Testy"
-		last_name  = "Tester"
-	}
-
-	resource keycloak_openid_client_user_policy test {
-		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
-		realm_id = "${keycloak_realm.test.id}"
-		name = "client_user_policy_test"
-		users = ["${keycloak_user.test.id}"]
-		logic = "POSITIVE"
-		decision_strategy = "UNANIMOUS"
-	}
-	`, realm, clientId)
-}
-
 func getResourceKeycloakOpenidClientAuthorizationUserPolicyFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClientAuthorizationUserPolicy, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -116,4 +80,40 @@ func testResourceKeycloakOpenidClientAuthorizationUserPolicyExists(resourceName 
 
 		return nil
 	}
+}
+
+func testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(realm, clientId string) string {
+	return fmt.Sprintf(`
+	resource keycloak_realm test {
+		realm = "%s"
+	}
+	
+	resource keycloak_openid_client test {
+		client_id                = "%s"
+		realm_id                 = "${keycloak_realm.test.id}"
+		access_type              = "CONFIDENTIAL"
+		service_accounts_enabled = true
+		authorization {
+			policy_enforcement_mode = "ENFORCING"
+		}
+	}
+
+	resource keycloak_user test {
+		realm_id = "${keycloak_realm.test.id}"
+		username = "test-user"
+	
+		email      = "test-user@fakedomain.com"
+		first_name = "Testy"
+		last_name  = "Tester"
+	}
+
+	resource keycloak_openid_client_user_policy test {
+		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
+		realm_id = "${keycloak_realm.test.id}"
+		name = "client_user_policy_test"
+		users = ["${keycloak_user.test.id}"]
+		logic = "POSITIVE"
+		decision_strategy = "UNANIMOUS"
+	}
+	`, realm, clientId)
 }

@@ -28,45 +28,6 @@ func TestResourceKeycloakOpenidClientAuthorizationTimePolicy(t *testing.T) {
 	})
 }
 
-func testResourceKeycloakOpenidClientAuthorizationTimePolicy_basic(realm, policyName, clientId string) string {
-
-	return fmt.Sprintf(`
-	resource keycloak_realm test {
-		realm = "%s"
-	}
-	
-	resource keycloak_openid_client test {
-		client_id                = "%s"
-		realm_id                 = "${keycloak_realm.test.id}"
-		access_type              = "CONFIDENTIAL"
-		service_accounts_enabled = true
-		authorization {
-			policy_enforcement_mode = "ENFORCING"
-		}
-	}
-
-	resource keycloak_openid_client_time_policy test {
-		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
-		realm_id = "${keycloak_realm.test.id}"
-		name = "%s"
-		not_on_or_after = "2500-12-12 01:01:11"
-		not_before = "2400-12-12 01:01:11"
-		day_month = "1"
-		day_month_end = "2"
-		year = "2500"
-		year_end = "2501"
-		month = "1"
-		month_end = "5"
-		hour = "1"
-		hour_end = "5"
-		minute = "10"
-		minute_end = "30"
-		logic = "POSITIVE"
-		decision_strategy = "UNANIMOUS"
-	}
-	`, realm, clientId, policyName)
-}
-
 func getResourceKeycloakOpenidClientAuthorizationTimePolicyFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClientAuthorizationTimePolicy, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -120,4 +81,43 @@ func testResourceKeycloakOpenidClientAuthorizationTimePolicyExists(resourceName 
 
 		return nil
 	}
+}
+
+func testResourceKeycloakOpenidClientAuthorizationTimePolicy_basic(realm, policyName, clientId string) string {
+
+	return fmt.Sprintf(`
+	resource keycloak_realm test {
+		realm = "%s"
+	}
+	
+	resource keycloak_openid_client test {
+		client_id                = "%s"
+		realm_id                 = "${keycloak_realm.test.id}"
+		access_type              = "CONFIDENTIAL"
+		service_accounts_enabled = true
+		authorization {
+			policy_enforcement_mode = "ENFORCING"
+		}
+	}
+
+	resource keycloak_openid_client_time_policy test {
+		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
+		realm_id = "${keycloak_realm.test.id}"
+		name = "%s"
+		not_on_or_after = "2500-12-12 01:01:11"
+		not_before = "2400-12-12 01:01:11"
+		day_month = "1"
+		day_month_end = "2"
+		year = "2500"
+		year_end = "2501"
+		month = "1"
+		month_end = "5"
+		hour = "1"
+		hour_end = "5"
+		minute = "10"
+		minute_end = "30"
+		logic = "POSITIVE"
+		decision_strategy = "UNANIMOUS"
+	}
+	`, realm, clientId, policyName)
 }

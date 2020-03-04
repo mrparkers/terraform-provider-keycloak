@@ -27,34 +27,6 @@ func TestResourceKeycloakOpenidClientAuthorizationJSPolicy(t *testing.T) {
 	})
 }
 
-func testResourceKeycloakOpenidClientAuthorizationJSPolicy_basic(realm, clientId string) string {
-	return fmt.Sprintf(`
-	resource keycloak_realm test {
-		realm = "%s"
-	}
-	
-	resource keycloak_openid_client test {
-		client_id                = "%s"
-		realm_id                 = "${keycloak_realm.test.id}"
-		access_type              = "CONFIDENTIAL"
-		service_accounts_enabled = true
-		authorization {
-			policy_enforcement_mode = "ENFORCING"
-		}
-	}
-
-	resource keycloak_openid_client_js_policy test {
-		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
-		realm_id = "${keycloak_realm.test.id}"
-		name = "client_js_policy_test"
-		logic = "POSITIVE"
-		decision_strategy = "UNANIMOUS"
-		code = "test"
-		description = "description"
-	}
-	`, realm, clientId)
-}
-
 func getResourceKeycloakOpenidClientAuthorizationJSPolicyFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClientAuthorizationJSPolicy, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -108,4 +80,32 @@ func testResourceKeycloakOpenidClientAuthorizationJSPolicyExists(resourceName st
 
 		return nil
 	}
+}
+
+func testResourceKeycloakOpenidClientAuthorizationJSPolicy_basic(realm, clientId string) string {
+	return fmt.Sprintf(`
+	resource keycloak_realm test {
+		realm = "%s"
+	}
+	
+	resource keycloak_openid_client test {
+		client_id                = "%s"
+		realm_id                 = "${keycloak_realm.test.id}"
+		access_type              = "CONFIDENTIAL"
+		service_accounts_enabled = true
+		authorization {
+			policy_enforcement_mode = "ENFORCING"
+		}
+	}
+
+	resource keycloak_openid_client_js_policy test {
+		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
+		realm_id = "${keycloak_realm.test.id}"
+		name = "client_js_policy_test"
+		logic = "POSITIVE"
+		decision_strategy = "UNANIMOUS"
+		code = "test"
+		description = "description"
+	}
+	`, realm, clientId)
 }
