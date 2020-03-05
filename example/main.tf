@@ -461,6 +461,15 @@ resource keycloak_oidc_identity_provider oidc {
   client_secret     = "example_token"
 }
 
+resource keycloak_oidc_google_identity_provider google {
+  realm                                   = "${keycloak_realm.test.id}"
+  client_id                               = "myclientid.apps.googleusercontent.com"
+  client_secret                           = "myclientsecret"
+  hosted_domain                           = "mycompany.com"
+  request_refresh_token                   = true
+  accepts_prompt_none_forward_from_client = false
+}
+
 resource keycloak_oidc_identity_provider custom_oidc_idp {
   realm             = "${keycloak_realm.test.id}"
   provider_id       = "customIdp"
@@ -605,6 +614,10 @@ resource "keycloak_openid_client_authorization_permission" "resource" {
 
   resources = [
     "${keycloak_openid_client_authorization_resource.resource.id}",
+  ]
+
+  scopes = [
+    "${keycloak_openid_client_authorization_scope.resource.id}"
   ]
 }
 
