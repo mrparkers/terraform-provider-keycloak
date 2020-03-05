@@ -155,7 +155,7 @@ func getUserFederatedIdentitiesFromData(data []interface{}) *keycloak.FederatedI
 	return &federatedIdentities
 }
 
-func mapFromUserToData(data *schema.ResourceData, user *keycloak.User, roleNames []string) {
+func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
 	federatedIdentities := []interface{}{}
 	for _, federatedIdentity := range user.FederatedIdentities {
 		identity := map[string]interface{}{
@@ -178,9 +178,6 @@ func mapFromUserToData(data *schema.ResourceData, user *keycloak.User, roleNames
 	data.Set("enabled", user.Enabled)
 	data.Set("attributes", attributes)
 	data.Set("federated_identity", federatedIdentities)
-	if len(roleNames) > 0 {
-		data.Set("role_names", roleNames)
-	}
 }
 
 func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) error {
@@ -204,11 +201,7 @@ func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	roleNames, err := manageRoleAssignments(data, user, meta)
-	if err != nil {
-		return err
-	}
-	mapFromUserToData(data, user, roleNames)
+	mapFromUserToData(data, user)
 
 	return resourceKeycloakUserRead(data, meta)
 }
@@ -231,7 +224,7 @@ func resourceKeycloakUserRead(data *schema.ResourceData, meta interface{}) error
 			roleNames = append(roleNames, roleName.(string))
 		}
 	}
-	mapFromUserToData(data, user, roleNames)
+	mapFromUserToData(data, user)
 
 	return nil
 }
@@ -246,11 +239,7 @@ func resourceKeycloakUserUpdate(data *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	roleNames, err := manageRoleAssignments(data, user, meta)
-	if err != nil {
-		return err
-	}
-	mapFromUserToData(data, user, roleNames)
+	mapFromUserToData(data, user)
 
 	return nil
 }
@@ -303,7 +292,7 @@ func updateRealmRoleAssignments(keycloakClient *keycloak.KeycloakClient, user *k
 	}
 
 	rolesToDelete := difference(allRealmRoles, rolesToAssign)
-	err = keycloakClient.RemoveRealmLevelRoleMappings(user, rolesToDelete)
+	err = keycloakClient.RemoveRealmRolesFromUser(user, rolesToDelete)
 	if err != nil {
 		return err
 	}

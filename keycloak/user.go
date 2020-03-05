@@ -23,6 +23,7 @@ type User struct {
 	Enabled             bool                `json:"enabled"`
 	Attributes          map[string][]string `json:"attributes"`
 	FederatedIdentities FederatedIdentities `json:"federatedIdentities"`
+	RealmRoles          []string            `json:"realmRoles"`
 }
 
 type PasswordCredentials struct {
@@ -195,7 +196,7 @@ func (keycloakClient *KeycloakClient) AddRealmLevelRoleMapping(user *User, roles
 	return err
 }
 
-func (keycloakClient *KeycloakClient) RemoveRealmLevelRoleMappings(user *User, roles []*Role) error {
+func (keycloakClient *KeycloakClient) RemoveRealmRolesFromUser(user *User, roles []*Role) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", user.RealmId, user.Id), roles)
 }
 
