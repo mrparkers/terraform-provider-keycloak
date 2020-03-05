@@ -1,10 +1,12 @@
 package provider
 
 import (
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"log"
 )
 
 func resourceKeycloakGenericClientProtocolMapper() *schema.Resource {
@@ -13,7 +15,10 @@ func resourceKeycloakGenericClientProtocolMapper() *schema.Resource {
 		Read:   resourceKeycloakGenericClientProtocolMapperRead,
 		Delete: resourceKeycloakGenericClientProtocolMapperDelete,
 		Update: resourceKeycloakGenericClientProtocolMapperUpdate,
-		// This resource can be imported using {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
+		//  import a mapper tied to a client:
+		// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
+		// or a client scope:
+		// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
 		Importer: &schema.ResourceImporter{
 			State: genericProtocolMapperImport,
 		},
@@ -28,13 +33,21 @@ func resourceKeycloakGenericClientProtocolMapper() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The realm id where the associated client exists.",
+				Description: "The realm id where the associated client or client scope exists.",
 			},
 			"client_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The mapper's associated client.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Description:   "The mapper's associated client. Cannot be used at the same time as client_scope_id.",
+				ConflictsWith: []string{"client_scope_id"},
+			},
+			"client_scope_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Description:   "The mapper's associated client scope. Cannot be used at the same time as client_id.",
+				ConflictsWith: []string{"client_id"},
 			},
 			"protocol": {
 				Type:         schema.TypeString,
@@ -57,7 +70,7 @@ func resourceKeycloakGenericClientProtocolMapper() *schema.Resource {
 	}
 }
 
-func getGenericClientProtocolMapperFromData(data *schema.ResourceData) *keycloak.GenericClientProtocolMapper {
+func mapFromDataToGenericClientProtocolMapper(data *schema.ResourceData) *keycloak.GenericClientProtocolMapper {
 	config := make(map[string]string)
 	if v, ok := data.GetOk("config"); ok {
 		for key, value := range v.(map[string]interface{}) {
@@ -67,6 +80,7 @@ func getGenericClientProtocolMapperFromData(data *schema.ResourceData) *keycloak
 
 	return &keycloak.GenericClientProtocolMapper{
 		ClientId:       data.Get("client_id").(string),
+		ClientScopeId:  data.Get("client_scope_id").(string),
 		Config:         config,
 		Id:             data.Id(),
 		Name:           data.Get("name").(string),
@@ -76,26 +90,35 @@ func getGenericClientProtocolMapperFromData(data *schema.ResourceData) *keycloak
 	}
 }
 
-func setGenericClientProtocolMapperData(data *schema.ResourceData, resource *keycloak.GenericClientProtocolMapper) {
-	data.SetId(resource.Id)
-	data.Set("client_id", resource.ClientId)
-	data.Set("config", resource.Config)
-	data.Set("name", resource.Name)
-	data.Set("protocol", resource.Protocol)
-	data.Set("protocol_mapper", resource.ProtocolMapper)
-	data.Set("realm_id", resource.RealmId)
+func mapFromGenericClientProtocolMapperToData(data *schema.ResourceData, mapper *keycloak.GenericClientProtocolMapper) {
+	data.SetId(mapper.Id)
+	if mapper.ClientId != "" {
+		data.Set("client_id", mapper.ClientId)
+	} else {
+		data.Set("client_scope_id", mapper.ClientScopeId)
+	}
+	data.Set("config", mapper.Config)
+	data.Set("name", mapper.Name)
+	data.Set("protocol", mapper.Protocol)
+	data.Set("protocol_mapper", mapper.ProtocolMapper)
+	data.Set("realm_id", mapper.RealmId)
 }
 
 func resourceKeycloakGenericClientProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	resource := getGenericClientProtocolMapperFromData(data)
+	genericClientProtocolMapper := mapFromDataToGenericClientProtocolMapper(data)
 
-	err := keycloakClient.NewGenericClientProtocolMapper(resource)
+	err := genericClientProtocolMapper.Validate(keycloakClient)
 	if err != nil {
 		return err
 	}
-	setGenericClientProtocolMapperData(data, resource)
+
+	err = keycloakClient.NewGenericClientProtocolMapper(genericClientProtocolMapper)
+	if err != nil {
+		return err
+	}
+	mapFromGenericClientProtocolMapperToData(data, genericClientProtocolMapper)
 
 	return resourceKeycloakGenericClientProtocolMapperRead(data, meta)
 }
@@ -105,14 +128,15 @@ func resourceKeycloakGenericClientProtocolMapperRead(data *schema.ResourceData, 
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
+	clientScopeId := data.Get("client_scope_id").(string)
 	id := data.Id()
 
-	resource, err := keycloakClient.GetGenericClientProtocolMapper(realmId, clientId, id)
+	resource, err := keycloakClient.GetGenericClientProtocolMapper(realmId, clientId, clientScopeId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
-	setGenericClientProtocolMapperData(data, resource)
+	mapFromGenericClientProtocolMapperToData(data, resource)
 
 	return nil
 }
@@ -121,14 +145,14 @@ func resourceKeycloakGenericClientProtocolMapperUpdate(data *schema.ResourceData
 	log.Printf("[DEBUG] updating\n")
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	resource := getGenericClientProtocolMapperFromData(data)
+	resource := mapFromDataToGenericClientProtocolMapper(data)
 
 	err := keycloakClient.UpdateGenericClientProtocolMapper(resource)
 	if err != nil {
 		return err
 	}
 
-	setGenericClientProtocolMapperData(data, resource)
+	mapFromGenericClientProtocolMapperToData(data, resource)
 
 	return nil
 }
@@ -138,7 +162,8 @@ func resourceKeycloakGenericClientProtocolMapperDelete(data *schema.ResourceData
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
+	clientScopeId := data.Get("client_scope_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteGenericClientProtocolMapper(realmId, clientId, id)
+	return keycloakClient.DeleteGenericClientProtocolMapper(realmId, clientId, clientScopeId, id)
 }

@@ -232,6 +232,32 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	accessTokenLifespan := "1800"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_AccessToken_basic(realmName, clientId, accessTokenLifespan),
+				Check:  testAccCheckKeycloakOpenidClientExistsWithCorrectLifespan("keycloak_openid_client.client", accessTokenLifespan),
+			},
+			{
+				ResourceName:            "keycloak_openid_client.client",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     realmName + "/",
+				ImportStateVerifyIgnore: []string{"exclude_session_state_from_auth_response"},
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientAdminUrl(resourceName string, adminUrl string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -444,6 +470,21 @@ func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName stri
 	}
 }
 
+func testAccCheckKeycloakOpenidClientExistsWithCorrectLifespan(resourceName string, accessTokenLifespan string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.AccessTokenLifespan != accessTokenLifespan {
+			return fmt.Errorf("expected openid client to have access token lifespan set to %s, but got %s", accessTokenLifespan, client.Attributes.AccessTokenLifespan)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakOpenidClientFetch(resourceName string, client *keycloak.OpenidClient) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		fetchedClient, err := getOpenidClientFromState(s, resourceName)
@@ -620,6 +661,21 @@ resource "keycloak_openid_client" "client" {
 	access_type = "CONFIDENTIAL"
 }
 	`, realm, clientId)
+}
+
+func testKeycloakOpenidClient_AccessToken_basic(realm, clientId, accessTokenLifespan string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   		  = "%s"
+	realm_id    		  = "${keycloak_realm.realm.id}"
+	access_type 		  = "CONFIDENTIAL"
+	access_token_lifespan = "%s"
+}
+	`, realm, clientId, accessTokenLifespan)
 }
 
 func testKeycloakOpenidClient_accessType(realm, clientId, accessType string) string {

@@ -2,6 +2,8 @@ package keycloak
 
 import (
 	"bytes"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"golang.org/x/net/publicsuffix"
@@ -40,7 +42,7 @@ const (
 	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string) (*KeycloakClient, error) {
 	cookieJar, err := cookiejar.New(&cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	})
@@ -52,6 +54,16 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 	httpClient := &http.Client{
 		Timeout: time.Second * time.Duration(clientTimeout),
 		Jar:     cookieJar,
+	}
+
+	if caCert != "" {
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM([]byte(caCert))
+		httpClient.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs: caCertPool,
+			},
+		}
 	}
 	clientCredentials := &ClientCredentials{
 		ClientId:     clientId,
