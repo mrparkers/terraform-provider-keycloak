@@ -13,7 +13,6 @@ type OpenidClientAuthorizationClientPolicy struct {
 	Owner            string   `json:"owner"`
 	DecisionStrategy string   `json:"decisionStrategy"`
 	Logic            string   `json:"logic"`
-	Policies         []string `json:"policies"`
 	Resources        []string `json:"resources"`
 	Scopes           []string `json:"scopes"`
 	Type             string   `json:"type"`

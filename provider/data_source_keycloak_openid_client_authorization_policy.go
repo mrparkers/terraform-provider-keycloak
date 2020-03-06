@@ -31,8 +31,9 @@ func dataSourceKeycloakOpenidClientAuthorizationPolicy() *schema.Resource {
 				Computed: true,
 			},
 			"logic": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: logicKeyValidation,
 			},
 			"policies": {
 				Type:     schema.TypeSet,

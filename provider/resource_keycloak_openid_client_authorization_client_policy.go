@@ -15,7 +15,7 @@ func resourceKeycloakOpenidClientAuthorizationClientPolicy() *schema.Resource {
 		Delete: resourceKeycloakOpenidClientAuthorizationClientPolicyDelete,
 		Update: resourceKeycloakOpenidClientAuthorizationClientPolicyUpdate,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakOpenidClientAuthorizationClientPolicyImport,
+			State: genericResourcePolicyImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"resource_server_id": {
@@ -39,13 +39,9 @@ func resourceKeycloakOpenidClientAuthorizationClientPolicy() *schema.Resource {
 				Optional: true,
 			},
 			"logic": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"policies": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: logicKeyValidation,
 			},
 			"resources": {
 				Type:     schema.TypeSet,
@@ -71,18 +67,12 @@ func resourceKeycloakOpenidClientAuthorizationClientPolicy() *schema.Resource {
 }
 
 func getOpenidClientAuthorizationClientAuthorizationClientPolicyResourceFromData(data *schema.ResourceData) *keycloak.OpenidClientAuthorizationClientPolicy {
-	var policies []string
 	var resources []string
 	var scopes []string
 	var clients []string
 	if v, ok := data.GetOk("resources"); ok {
 		for _, resource := range v.(*schema.Set).List() {
 			resources = append(resources, resource.(string))
-		}
-	}
-	if v, ok := data.GetOk("policies"); ok {
-		for _, policy := range v.(*schema.Set).List() {
-			policies = append(policies, policy.(string))
 		}
 	}
 	if v, ok := data.GetOk("scopes"); ok {
@@ -105,7 +95,6 @@ func getOpenidClientAuthorizationClientAuthorizationClientPolicyResourceFromData
 		Logic:            data.Get("logic").(string),
 		Name:             data.Get("name").(string),
 		Type:             "client",
-		Policies:         policies,
 		Resources:        resources,
 		Scopes:           scopes,
 		Clients:          clients,
@@ -123,7 +112,6 @@ func setOpenidClientAuthorizationClientAuthorizationClientPolicyResourceData(dat
 	data.Set("decision_strategy", policy.DecisionStrategy)
 	data.Set("owner", policy.Owner)
 	data.Set("logic", policy.Logic)
-	data.Set("policies", policy.Policies)
 	data.Set("resources", policy.Resources)
 	data.Set("scopes", policy.Scopes)
 	data.Set("description", policy.Description)

@@ -15,7 +15,7 @@ func resourceKeycloakOpenidClientAuthorizationRolePolicy() *schema.Resource {
 		Delete: resourceKeycloakOpenidClientAuthorizationRolePolicyDelete,
 		Update: resourceKeycloakOpenidClientAuthorizationRolePolicyUpdate,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakOpenidClientAuthorizationRolePolicyImport,
+			State: genericResourcePolicyImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"resource_server_id": {
@@ -35,9 +35,9 @@ func resourceKeycloakOpenidClientAuthorizationRolePolicy() *schema.Resource {
 				Optional: true,
 			},
 			"logic": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "POSITIVE",
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: logicKeyValidation,
 			},
 			"scopes": {
 				Type:     schema.TypeSet,

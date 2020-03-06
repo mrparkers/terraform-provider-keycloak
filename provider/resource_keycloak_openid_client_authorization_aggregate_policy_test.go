@@ -55,8 +55,8 @@ func testResourceKeycloakOpenidClientAuthorizationAggregatePolicyDestroy() resou
 			}
 
 			realm := rs.Primary.Attributes["realm"]
-			resourceServerId := rs.Primary.Attributes["resourceServerId"]
-			policyId := rs.Primary.Attributes["policyId"]
+			resourceServerId := rs.Primary.Attributes["resource_server_id"]
+			policyId := rs.Primary.ID
 
 			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 

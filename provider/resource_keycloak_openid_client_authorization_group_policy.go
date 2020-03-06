@@ -15,7 +15,7 @@ func resourceKeycloakOpenidClientAuthorizationGroupPolicy() *schema.Resource {
 		Delete: resourceKeycloakOpenidClientAuthorizationGroupPolicyDelete,
 		Update: resourceKeycloakOpenidClientAuthorizationGroupPolicyUpdate,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakOpenidClientAuthorizationGroupPolicyImport,
+			State: genericResourcePolicyImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"resource_server_id": {
@@ -39,8 +39,9 @@ func resourceKeycloakOpenidClientAuthorizationGroupPolicy() *schema.Resource {
 				Optional: true,
 			},
 			"logic": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: logicKeyValidation,
 			},
 			"policies": {
 				Type:     schema.TypeSet,
