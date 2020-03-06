@@ -6,12 +6,10 @@ import (
 
 func logicKeyValidation(val interface{}, key string) (warns []string, errs []error) {
 	v := val.(string)
-	errMsg := fmt.Errorf("%q must 'POSITIVE' or 'NEGATIVE' %d", key, val)
-	if v != "POSITIVE" {
-		errs = append(errs, errMsg)
-	}
-	if v != "NEGATIVE" {
-		errs = append(errs, errMsg)
+	isNotPositive := v != "POSITIVE"
+	isNotNegative := v != "NEGATIVE"
+	if isNotPositive || isNotNegative {
+		errs = append(errs, fmt.Errorf("%q must 'POSITIVE' or 'NEGATIVE' %d", key, val))
 	}
 	return
 }
