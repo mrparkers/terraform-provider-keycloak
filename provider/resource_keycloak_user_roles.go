@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -50,7 +49,6 @@ func resourceKeycloakUserRolesCreate(data *schema.ResourceData, meta interface{}
 	}
 
 	keycloakClient.AddRealmLevelRoleMapping(user, roles)
-	fmt.Println(roles)
 	if err != nil {
 		return err
 	}
@@ -87,7 +85,6 @@ func resourceKeycloakUserRolesDelete(data *schema.ResourceData, meta interface{}
 		if err != nil {
 			return err
 		}
-		fmt.Println(role)
 		roles = append(roles, role)
 	}
 	return keycloakClient.RemoveRealmRolesFromUser(user, roles)
