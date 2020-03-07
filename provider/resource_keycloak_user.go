@@ -296,11 +296,6 @@ func updateRealmRoleAssignments(keycloakClient *keycloak.KeycloakClient, user *k
 	if err != nil {
 		return err
 	}
-
-	err = keycloakClient.AddRealmLevelRoleMapping(user, rolesToAssign)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 

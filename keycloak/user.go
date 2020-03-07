@@ -191,16 +191,47 @@ func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId stri
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) AddRealmLevelRoleMapping(user *User, roles []*Role) error {
-	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", user.RealmId, user.Id), roles)
+func (keycloakClient *KeycloakClient) addRealmRolesToUser(user *User, role []*Role) error {
+	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", user.RealmId, user.Id), role)
 	return err
+}
+
+func (keycloakClient *KeycloakClient) AddRealmRolesToUser(realmId, username string, roles []interface{}) error {
+
+	user, err := keycloakClient.GetUser(realmId, username)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return fmt.Errorf("User with username %s does not exist", username)
+	}
+
+	keycloakRoles, err := keycloakClient.GetRealmRoleMappings(user)
+
+	for _, rolename := range roles {
+		role, err := keycloakClient.GetRoleByName(realmId, "", rolename.(string))
+		if err != nil {
+			return err
+		}
+		if role == nil {
+			return fmt.Errorf("Role with roleid %s does not exist", rolename)
+		}
+
+		keycloakRoles = append(keycloakRoles, role)
+	}
+	err = keycloakClient.addRealmRolesToUser(user, keycloakRoles)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (keycloakClient *KeycloakClient) RemoveRealmRolesFromUser(user *User, roles []*Role) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", user.RealmId, user.Id), roles)
 }
 
-func (keycloakClient *KeycloakClient) GetRealmLevelRoleMappings(user *User) ([]*Role, error) {
+func (keycloakClient *KeycloakClient) GetRealmRoleMappings(user *User) ([]*Role, error) {
 	var roles []*Role
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", user.RealmId, user.Id), &roles, nil)

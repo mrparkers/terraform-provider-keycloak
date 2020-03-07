@@ -439,7 +439,7 @@ func getRealmRolesFromState(s *terraform.State, resourceName string) ([]string, 
 		return nil, fmt.Errorf("error getting user with id %s: %s", id, err)
 	}
 
-	roleMappings, err := keycloakClient.GetRealmLevelRoleMappings(user)
+	roleMappings, err := keycloakClient.GetRealmRoleMappings(user)
 	if err != nil {
 		return nil, fmt.Errorf("error getting roles for user with id %s: %s", id, err)
 

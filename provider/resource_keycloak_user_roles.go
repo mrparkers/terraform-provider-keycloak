@@ -19,8 +19,9 @@ func resourceKeyCloakUserRoles() *schema.Resource {
 				ForceNew: true,
 			},
 			"roles": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
+				Set:      schema.HashString,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
@@ -34,27 +35,25 @@ func resourceKeyCloakUserRoles() *schema.Resource {
 func resourceKeycloakUserRolesCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm_id := data.Get("realm_id").(string)
-	user_id := data.Get("user_id").(string)
-	user, err := keycloakClient.GetUser(realm_id, user_id)
+	realmId := data.Get("realm_id").(string)
+	userId := data.Get("user_id").(string)
+	roles := data.Get("roles").(*schema.Set)
 
-	roles, err := keycloakClient.GetRealmLevelRoleMappings(user)
+	//for _, realmRole := range data.Get("roles").([]interface{}) {
+	//	role, err := keycloakClient.GetRoleByName(realmId, "", realmRole.(string))
+	//	if err != nil {
+	//		return err
+	//	}
+	//	roles = append(roles, role)
+	//}
 
-	for _, realmRole := range data.Get("roles").([]interface{}) {
-		role, err := keycloakClient.GetRoleByName(realm_id, "", realmRole.(string))
-		if err != nil {
-			return err
-		}
-		roles = append(roles, role)
-	}
-
-	keycloakClient.AddRealmLevelRoleMapping(user, roles)
+	err := keycloakClient.AddRealmRolesToUser(realmId, userId, roles.List())
 	if err != nil {
 		return err
 	}
 
 	data.Set("roles", roles)
-	data.SetId(user_id)
+	data.SetId(userId)
 
 	return resourceKeycloakUserRolesRead(data, meta)
 }
@@ -65,7 +64,43 @@ func resourceKeycloakUserRolesRead(data *schema.ResourceData, meta interface{}) 
 }
 
 func resourceKeycloakUserRolesUpdate(data *schema.ResourceData, meta interface{}) error {
-	return nil
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	realmId := data.Get("realm_id").(string)
+	userId := data.Get("user_id").(string)
+	tfRoles := data.Get("roles").(*schema.Set)
+
+	user, err := keycloakClient.GetUser(realmId, userId)
+
+	if err != nil {
+		return err
+	}
+
+	roles, err := keycloakClient.GetRealmRoleMappings(user)
+
+	if err != nil {
+		return err
+	}
+
+	for _, role := range roles {
+		if tfRoles.Contains(role.Name) {
+			tfRoles.Remove(role.Name)
+		} else {
+			err = keycloakClient.RemoveRealmRolesFromUser(user, []*keycloak.Role{role})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	err = keycloakClient.AddRealmRolesToUser(realmId, userId, tfRoles.List())
+	if err != nil {
+		return err
+	}
+
+	data.SetId(userId)
+
+	return resourceKeycloakUserRolesRead(data, meta)
 }
 
 func resourceKeycloakUserRolesDelete(data *schema.ResourceData, meta interface{}) error {
@@ -80,7 +115,7 @@ func resourceKeycloakUserRolesDelete(data *schema.ResourceData, meta interface{}
 	}
 
 	var roles []*keycloak.Role
-	for _, realmRole := range data.Get("roles").([]interface{}) {
+	for _, realmRole := range data.Get("roles").(*schema.Set).List() {
 		role, err := keycloakClient.GetRoleByName(realm_id, "", realmRole.(string))
 		if err != nil {
 			return err
