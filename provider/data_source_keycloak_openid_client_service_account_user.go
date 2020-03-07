@@ -75,7 +75,7 @@ func dataSourceKeycloakOpenidClientServiceAccountUserRead(data *schema.ResourceD
 	if err != nil {
 		return err
 	}
-	mapFromUserToData(data, user, []string{})
+	mapFromUserToData(data, user)
 
 	return nil
 }

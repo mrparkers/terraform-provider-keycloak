@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -52,13 +53,32 @@ func resourceKeycloakUserRolesCreate(data *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	data.Set("roles", roles)
-	data.SetId(userId)
+	data.SetId(userRealmRolesId(userId, realmId))
 
 	return resourceKeycloakUserRolesRead(data, meta)
 }
 
 func resourceKeycloakUserRolesRead(data *schema.ResourceData, meta interface{}) error {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	realmId := data.Get("realm_id").(string)
+	userId := data.Get("user_id").(string)
+
+	user, err := keycloakClient.GetUser(realmId, userId)
+
+	if err != nil {
+		return err
+	}
+
+	rolesInUser, err := keycloakClient.GetRealmRoleMappings(user)
+
+	var roles []string
+	for _, roleInUser := range rolesInUser {
+		roles = append(roles, roleInUser.Name)
+	}
+
+	data.Set("roles", roles)
+	data.SetId(userRealmRolesId(userId, realmId))
 
 	return nil
 }
@@ -98,7 +118,7 @@ func resourceKeycloakUserRolesUpdate(data *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	data.SetId(userId)
+	data.SetId(userRealmRolesId(userId, realmId))
 
 	return resourceKeycloakUserRolesRead(data, meta)
 }
@@ -123,4 +143,8 @@ func resourceKeycloakUserRolesDelete(data *schema.ResourceData, meta interface{}
 		roles = append(roles, role)
 	}
 	return keycloakClient.RemoveRealmRolesFromUser(user, roles)
+}
+
+func userRealmRolesId(realmId, userId string) string {
+	return fmt.Sprintf("%s/userRealmRoles/%s", realmId, userId)
 }
