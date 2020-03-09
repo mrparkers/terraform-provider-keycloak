@@ -278,6 +278,12 @@ resource "keycloak_ldap_msad_user_account_control_mapper" "msad_uac_mapper" {
   ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
 }
 
+resource "keycloak_ldap_msad_lds_user_account_control_mapper" "msad_lds_uac_mapper" {
+  name                    = "msad-lds-uac-mapper"
+  realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
+  ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
+}
+
 resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
   name                    = "full-name-mapper"
   realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
@@ -459,6 +465,15 @@ resource keycloak_oidc_identity_provider oidc {
   token_url         = "https://example.com/token"
   client_id         = "example_id"
   client_secret     = "example_token"
+}
+
+resource keycloak_oidc_google_identity_provider google {
+  realm                                   = "${keycloak_realm.test.id}"
+  client_id                               = "myclientid.apps.googleusercontent.com"
+  client_secret                           = "myclientsecret"
+  hosted_domain                           = "mycompany.com"
+  request_refresh_token                   = true
+  accepts_prompt_none_forward_from_client = false
 }
 
 resource keycloak_oidc_identity_provider custom_oidc_idp {
