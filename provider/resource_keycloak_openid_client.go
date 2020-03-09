@@ -94,6 +94,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"root_url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"service_accounts_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -180,15 +184,34 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	validRedirectUris := make([]string, 0)
 	webOrigins := make([]string, 0)
 
-	if v, ok := data.GetOk("valid_redirect_uris"); ok {
-		for _, validRedirectUri := range v.(*schema.Set).List() {
+	rootUrlData, rootUrlOk := data.GetOkExists("root_url")
+	validRedirectUrisData, validRedirectUrisOk := data.GetOk("valid_redirect_uris")
+	webOriginsData, webOriginsOk := data.GetOk("web_origins")
+
+	rootUrlString := rootUrlData.(string)
+
+	if validRedirectUrisOk {
+		for _, validRedirectUri := range validRedirectUrisData.(*schema.Set).List() {
 			validRedirectUris = append(validRedirectUris, validRedirectUri.(string))
 		}
 	}
 
-	if v, ok := data.GetOk("web_origins"); ok {
-		for _, webOrigin := range v.(*schema.Set).List() {
+	if webOriginsOk {
+		for _, webOrigin := range webOriginsData.(*schema.Set).List() {
 			webOrigins = append(webOrigins, webOrigin.(string))
+		}
+	}
+
+	// Keycloak uses the root URL for web origins if not specified otherwise
+	if rootUrlOk && rootUrlString != "" {
+		if !validRedirectUrisOk {
+			return nil, errors.New("valid_redirect_uris is required when root_url is given1")
+		}
+		if !webOriginsOk {
+			return nil, errors.New("web_origins is required when root_url is given")
+		}
+		if _, adminOk := data.GetOk("admin_url"); !adminOk {
+			return nil, errors.New("admin_url is required when root_url is given")
 		}
 	}
 
@@ -215,6 +238,10 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		AdminUrl:          data.Get("admin_url").(string),
 		BaseUrl:           data.Get("base_url").(string),
 		ConsentRequired:   data.Get("consent_required").(bool),
+	}
+
+	if rootUrlOk {
+		openidClient.RootUrl = &rootUrlString
 	}
 
 	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled {
@@ -285,6 +312,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("web_origins", client.WebOrigins)
 	data.Set("admin_url", client.AdminUrl)
 	data.Set("base_url", client.BaseUrl)
+	data.Set("root_url", &client.RootUrl)
 	data.Set("authorization_services_enabled", client.AuthorizationServicesEnabled)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
 	data.Set("consent_required", client.ConsentRequired)
