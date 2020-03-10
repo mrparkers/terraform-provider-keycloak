@@ -6,30 +6,26 @@ import (
 )
 
 type OpenidClientAuthorizationTimePolicy struct {
-	Id               string   `json:"id,omitempty"`
-	RealmId          string   `json:"-"`
-	ResourceServerId string   `json:"-"`
-	Name             string   `json:"name"`
-	Owner            string   `json:"owner"`
-	DecisionStrategy string   `json:"decisionStrategy"`
-	Logic            string   `json:"logic"`
-	Policies         []string `json:"policies"`
-	Resources        []string `json:"resources"`
-	Scopes           []string `json:"scopes"`
-	Type             string   `json:"type"`
-	NotBefore        string   `json:"notBefore"`
-	NotOnOrAfter     string   `json:"notOnOrAfter"`
-	DayMonth         string   `json:"dayMonth"`
-	DayMonthEnd      string   `json:"dayMonthEnd"`
-	Month            string   `json:"month"`
-	MonthEnd         string   `json:"monthEnd"`
-	Year             string   `json:"year"`
-	YearEnd          string   `json:"yearEnd"`
-	Hour             string   `json:"hour"`
-	HourEnd          string   `json:"hourEnd"`
-	Minute           string   `json:"minute"`
-	MinuteEnd        string   `json:"minuteEnd"`
-	Description      string   `json:"description"`
+	Id               string `json:"id,omitempty"`
+	RealmId          string `json:"-"`
+	ResourceServerId string `json:"-"`
+	Name             string `json:"name"`
+	DecisionStrategy string `json:"decisionStrategy"`
+	Logic            string `json:"logic"`
+	Type             string `json:"type"`
+	NotBefore        string `json:"notBefore"`
+	NotOnOrAfter     string `json:"notOnOrAfter"`
+	DayMonth         string `json:"dayMonth"`
+	DayMonthEnd      string `json:"dayMonthEnd"`
+	Month            string `json:"month"`
+	MonthEnd         string `json:"monthEnd"`
+	Year             string `json:"year"`
+	YearEnd          string `json:"yearEnd"`
+	Hour             string `json:"hour"`
+	HourEnd          string `json:"hourEnd"`
+	Minute           string `json:"minute"`
+	MinuteEnd        string `json:"minuteEnd"`
+	Description      string `json:"description"`
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationTimePolicy(policy *OpenidClientAuthorizationTimePolicy) error {

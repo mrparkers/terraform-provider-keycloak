@@ -32,24 +32,10 @@ func resourceKeycloakOpenidClientAuthorizationClientPolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"owner": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"logic": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(keycloakPolicyLogicTypes, false),
-			},
-			"resources": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-			},
-			"scopes": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -65,19 +51,8 @@ func resourceKeycloakOpenidClientAuthorizationClientPolicy() *schema.Resource {
 }
 
 func getOpenidClientAuthorizationClientAuthorizationClientPolicyResourceFromData(data *schema.ResourceData) *keycloak.OpenidClientAuthorizationClientPolicy {
-	var resources []string
-	var scopes []string
 	var clients []string
-	if v, ok := data.GetOk("resources"); ok {
-		for _, resource := range v.(*schema.Set).List() {
-			resources = append(resources, resource.(string))
-		}
-	}
-	if v, ok := data.GetOk("scopes"); ok {
-		for _, scope := range v.(*schema.Set).List() {
-			scopes = append(scopes, scope.(string))
-		}
-	}
+
 	if v, ok := data.GetOk("clients"); ok {
 		for _, client := range v.(*schema.Set).List() {
 			clients = append(clients, client.(string))
@@ -88,13 +63,10 @@ func getOpenidClientAuthorizationClientAuthorizationClientPolicyResourceFromData
 		Id:               data.Id(),
 		ResourceServerId: data.Get("resource_server_id").(string),
 		RealmId:          data.Get("realm_id").(string),
-		Owner:            data.Get("owner").(string),
 		DecisionStrategy: data.Get("decision_strategy").(string),
 		Logic:            data.Get("logic").(string),
 		Name:             data.Get("name").(string),
 		Type:             "client",
-		Resources:        resources,
-		Scopes:           scopes,
 		Clients:          clients,
 		Description:      data.Get("description").(string),
 	}
@@ -108,10 +80,7 @@ func setOpenidClientAuthorizationClientAuthorizationClientPolicyResourceData(dat
 	data.Set("realm_id", policy.RealmId)
 	data.Set("name", policy.Name)
 	data.Set("decision_strategy", policy.DecisionStrategy)
-	data.Set("owner", policy.Owner)
 	data.Set("logic", policy.Logic)
-	data.Set("resources", policy.Resources)
-	data.Set("scopes", policy.Scopes)
 	data.Set("description", policy.Description)
 	data.Set("clients", policy.Clients)
 }

@@ -28,34 +28,6 @@ func TestResourceKeycloakOpenidClientAuthorizationClientPolicy(t *testing.T) {
 	})
 }
 
-func testResourceKeycloakOpenidClientAuthorizationClientPolicy_basic(realm, roleName, clientId string) string {
-
-	return fmt.Sprintf(`
-	resource keycloak_realm test {
-		realm = "%s"
-	}
-	
-	resource keycloak_openid_client test {
-		client_id                = "%s"
-		realm_id                 = "${keycloak_realm.test.id}"
-		access_type              = "CONFIDENTIAL"
-		service_accounts_enabled = true
-		authorization {
-			policy_enforcement_mode = "ENFORCING"
-		}
-	}
-	
-	resource keycloak_openid_client_client_policy test {
-		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
-		realm_id = "${keycloak_realm.test.id}"
-		name = "keycloak_openid_client_client_policy"
-		decision_strategy = "AFFIRMATIVE"
-		logic = "POSITIVE"
-		clients = ["${keycloak_openid_client.test.resource_server_id}"]
-	}
-	`, realm, clientId)
-}
-
 func getResourceKeycloakOpenidClientAuthorizationClientPolicyFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClientAuthorizationClientPolicy, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -109,4 +81,32 @@ func testResourceKeycloakOpenidClientAuthorizationClientPolicyExists(resourceNam
 
 		return nil
 	}
+}
+
+func testResourceKeycloakOpenidClientAuthorizationClientPolicy_basic(realm, roleName, clientId string) string {
+
+	return fmt.Sprintf(`
+	resource keycloak_realm test {
+		realm = "%s"
+	}
+	
+	resource keycloak_openid_client test {
+		client_id                = "%s"
+		realm_id                 = "${keycloak_realm.test.id}"
+		access_type              = "CONFIDENTIAL"
+		service_accounts_enabled = true
+		authorization {
+			policy_enforcement_mode = "ENFORCING"
+		}
+	}
+	
+	resource keycloak_openid_client_client_policy test {
+		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
+		realm_id = "${keycloak_realm.test.id}"
+		name = "keycloak_openid_client_client_policy"
+		decision_strategy = "AFFIRMATIVE"
+		logic = "POSITIVE"
+		clients = ["${keycloak_openid_client.test.resource_server_id}"]
+	}
+	`, realm, clientId)
 }

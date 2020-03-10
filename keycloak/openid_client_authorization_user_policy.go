@@ -10,12 +10,8 @@ type OpenidClientAuthorizationUserPolicy struct {
 	RealmId          string   `json:"-"`
 	ResourceServerId string   `json:"-"`
 	Name             string   `json:"name"`
-	Owner            string   `json:"owner"`
 	DecisionStrategy string   `json:"decisionStrategy"`
 	Logic            string   `json:"logic"`
-	Policies         []string `json:"policies"`
-	Resources        []string `json:"resources"`
-	Scopes           []string `json:"scopes"`
 	Type             string   `json:"type"`
 	Users            []string `json:"users"`
 	Description      string   `json:"description"`

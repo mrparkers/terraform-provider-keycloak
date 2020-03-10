@@ -32,29 +32,10 @@ func resourceKeycloakOpenidClientAuthorizationUserPolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"owner": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"logic": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(keycloakPolicyLogicTypes, false),
-			},
-			"policies": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-			},
-			"resources": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-			},
-			"scopes": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -70,25 +51,7 @@ func resourceKeycloakOpenidClientAuthorizationUserPolicy() *schema.Resource {
 }
 
 func getOpenidClientAuthorizationUserPolicyResourceFromData(data *schema.ResourceData) *keycloak.OpenidClientAuthorizationUserPolicy {
-	var policies []string
-	var resources []string
-	var scopes []string
 	var users []string
-	if v, ok := data.GetOk("resources"); ok {
-		for _, resource := range v.(*schema.Set).List() {
-			resources = append(resources, resource.(string))
-		}
-	}
-	if v, ok := data.GetOk("policies"); ok {
-		for _, policy := range v.(*schema.Set).List() {
-			policies = append(policies, policy.(string))
-		}
-	}
-	if v, ok := data.GetOk("scopes"); ok {
-		for _, scope := range v.(*schema.Set).List() {
-			scopes = append(scopes, scope.(string))
-		}
-	}
 	if v, ok := data.GetOk("users"); ok {
 		for _, user := range v.(*schema.Set).List() {
 			users = append(users, user.(string))
@@ -99,14 +62,10 @@ func getOpenidClientAuthorizationUserPolicyResourceFromData(data *schema.Resourc
 		Id:               data.Id(),
 		ResourceServerId: data.Get("resource_server_id").(string),
 		RealmId:          data.Get("realm_id").(string),
-		Owner:            data.Get("owner").(string),
 		DecisionStrategy: data.Get("decision_strategy").(string),
 		Logic:            data.Get("logic").(string),
 		Name:             data.Get("name").(string),
 		Type:             "user",
-		Policies:         policies,
-		Resources:        resources,
-		Scopes:           scopes,
 		Users:            users,
 		Description:      data.Get("description").(string),
 	}
@@ -120,11 +79,7 @@ func setOpenidClientAuthorizationUserPolicyResourceData(data *schema.ResourceDat
 	data.Set("realm_id", policy.RealmId)
 	data.Set("name", policy.Name)
 	data.Set("decision_strategy", policy.DecisionStrategy)
-	data.Set("owner", policy.Owner)
 	data.Set("logic", policy.Logic)
-	data.Set("policies", policy.Policies)
-	data.Set("resources", policy.Resources)
-	data.Set("scopes", policy.Scopes)
 	data.Set("description", policy.Description)
 	data.Set("users", policy.Users)
 }

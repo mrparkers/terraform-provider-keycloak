@@ -6,19 +6,15 @@ import (
 )
 
 type OpenidClientAuthorizationJSPolicy struct {
-	Id               string   `json:"id,omitempty"`
-	RealmId          string   `json:"-"`
-	ResourceServerId string   `json:"-"`
-	Name             string   `json:"name"`
-	Owner            string   `json:"owner"`
-	DecisionStrategy string   `json:"decisionStrategy"`
-	Logic            string   `json:"logic"`
-	Policies         []string `json:"policies"`
-	Resources        []string `json:"resources"`
-	Scopes           []string `json:"scopes"`
-	Type             string   `json:"type"`
-	Code             string   `json:"code"`
-	Description      string   `json:"description"`
+	Id               string `json:"id,omitempty"`
+	RealmId          string `json:"-"`
+	ResourceServerId string `json:"-"`
+	Name             string `json:"name"`
+	DecisionStrategy string `json:"decisionStrategy"`
+	Logic            string `json:"logic"`
+	Type             string `json:"type"`
+	Code             string `json:"code"`
+	Description      string `json:"description"`
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationJSPolicy(policy *OpenidClientAuthorizationJSPolicy) error {

@@ -37,11 +37,6 @@ func resourceKeycloakOpenidClientAuthorizationRolePolicy() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(keycloakPolicyLogicTypes, false),
 			},
-			"scopes": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-			},
 			"type": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -72,13 +67,7 @@ func resourceKeycloakOpenidClientAuthorizationRolePolicy() *schema.Resource {
 }
 
 func getOpenidClientAuthorizationRolePolicyResourceFromData(data *schema.ResourceData) *keycloak.OpenidClientAuthorizationRolePolicy {
-	var scopes []string
 	var rolesList []keycloak.OpenidClientAuthorizationRole
-	if v, ok := data.GetOk("scopes"); ok {
-		for _, scope := range v.(*schema.Set).List() {
-			scopes = append(scopes, scope.(string))
-		}
-	}
 	if v, ok := data.Get("role").([]interface{}); ok {
 		for _, role := range v {
 			roleMap := role.(map[string]interface{})
@@ -98,7 +87,6 @@ func getOpenidClientAuthorizationRolePolicyResourceFromData(data *schema.Resourc
 		Logic:            data.Get("logic").(string),
 		Name:             data.Get("name").(string),
 		Type:             "role",
-		Scopes:           scopes,
 		Roles:            rolesList,
 		Description:      data.Get("description").(string),
 	}
@@ -114,8 +102,6 @@ func setOpenidClientAuthorizationRolePolicyResourceData(data *schema.ResourceDat
 	data.Set("name", policy.Name)
 	data.Set("decision_strategy", policy.DecisionStrategy)
 	data.Set("logic", policy.Logic)
-	data.Set("resources", policy.Resources)
-	data.Set("scopes", policy.Scopes)
 	data.Set("type", policy.Type)
 	data.Set("description", policy.Description)
 	data.Set("roles", policy.Roles)
