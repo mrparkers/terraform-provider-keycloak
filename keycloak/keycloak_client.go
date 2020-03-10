@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/publicsuffix"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,6 +15,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"golang.org/x/net/publicsuffix"
 )
 
 type KeycloakClient struct {
