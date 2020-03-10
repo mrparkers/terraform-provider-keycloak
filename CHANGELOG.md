@@ -1,3 +1,21 @@
+## 1.17.0 (March 10, 2020)
+
+FEATURES:
+
+* new resources: `keycloak_authentication_flow`, `keycloak_authentication_subflow`, `keycloak_authentication_execution` ([#215](https://github.com/mrparkers/terraform-provider-keycloak/pull/215))
+* new resource: `keycloak_authentication_execution_config` ([#241](https://github.com/mrparkers/terraform-provider-keycloak/pull/241))
+* new resource: `keycloak_oidc_google_identity_provider` ([#240](https://github.com/mrparkers/terraform-provider-keycloak/pull/240))
+* new resource: `keycloak_ldap_msad_user_account_control_mapper` ([#244](https://github.com/mrparkers/terraform-provider-keycloak/pull/244))
+* new resources: `keycloak_openid_client_group_policy`, `keycloak_openid_client_role_policy`, `keycloak_openid_client_aggregate_policy`, `keycloak_openid_client_js_policy`, `keycloak_openid_client_time_policy`, `keycloak_openid_client_user_policy`, `keycloak_openid_client_client_policy` ([#246](https://github.com/mrparkers/terraform-provider-keycloak/pull/246))
+* new resource: `keycloak_generic_client_role_mapper` ([#242](https://github.com/mrparkers/terraform-provider-keycloak/pull/242))
+
+IMPROVEMENTS:
+
+* add `client_scope_id` attribute to `keycloak_generic_client_protocol_mapper` resource ([#229](https://github.com/mrparkers/terraform-provider-keycloak/pull/229))
+* add `root_ca_certificate` attribute to provider config ([#227](https://github.com/mrparkers/terraform-provider-keycloak/pull/227))
+* add `scopes` attribute to `keycloak_openid_client_authorization_permission` resource ([#220](https://github.com/mrparkers/terraform-provider-keycloak/pull/220))
+* add `access_token_lifespan` attribute to `keycloak_openid_client` resource ([#233](https://github.com/mrparkers/terraform-provider-keycloak/pull/233))
+
 ## 1.16.0 (February 13, 2020)
 
 FEATURES:
