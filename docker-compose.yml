@@ -17,7 +17,8 @@ services:
     ports:
     - 8389:389
   keycloak:
-    image: jboss/keycloak:8.0.1
+    image:  jboss/keycloak:8.0.1
+    command: -b 0.0.0.0 -Dkeycloak.profile.feature.upload_scripts=enabled
     depends_on:
     - postgres
     - openldap
@@ -35,3 +36,4 @@ services:
     - 8080:8080
     volumes:
     - ./custom-user-federation-example/build/libs:/opt/jboss/keycloak/providers/
+

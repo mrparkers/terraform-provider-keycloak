@@ -278,6 +278,12 @@ resource "keycloak_ldap_msad_user_account_control_mapper" "msad_uac_mapper" {
   ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
 }
 
+resource "keycloak_ldap_msad_lds_user_account_control_mapper" "msad_lds_uac_mapper" {
+  name                    = "msad-lds-uac-mapper"
+  realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
+  ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
+}
+
 resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
   name                    = "full-name-mapper"
   realm_id                = "${keycloak_ldap_user_federation.openldap.realm_id}"
@@ -461,6 +467,15 @@ resource keycloak_oidc_identity_provider oidc {
   client_secret     = "example_token"
 }
 
+resource keycloak_oidc_google_identity_provider google {
+  realm                                   = "${keycloak_realm.test.id}"
+  client_id                               = "myclientid.apps.googleusercontent.com"
+  client_secret                           = "myclientsecret"
+  hosted_domain                           = "mycompany.com"
+  request_refresh_token                   = true
+  accepts_prompt_none_forward_from_client = false
+}
+
 resource keycloak_oidc_identity_provider custom_oidc_idp {
   realm             = "${keycloak_realm.test.id}"
   provider_id       = "customIdp"
@@ -606,6 +621,10 @@ resource "keycloak_openid_client_authorization_permission" "resource" {
   resources = [
     "${keycloak_openid_client_authorization_resource.resource.id}",
   ]
+
+  scopes = [
+    "${keycloak_openid_client_authorization_scope.resource.id}"
+  ]
 }
 
 resource "keycloak_openid_client_authorization_resource" "resource" {
@@ -642,4 +661,65 @@ resource "keycloak_openid_client_service_account_role" "read_token" {
   client_id               = "${data.keycloak_openid_client.broker.id}"
   service_account_user_id = "${keycloak_openid_client.test_client_auth.service_account_user_id}"
   role                    = "read-token"
+}
+
+resource "keycloak_authentication_flow" "browser-copy-flow" {
+  alias    = "browserCopyFlow"
+  realm_id = "${keycloak_realm.test.id}"
+  description = "browser based authentication"
+}
+
+resource "keycloak_authentication_execution" "browser-copy-cookie" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+  authenticator = "auth-cookie"
+  requirement = "ALTERNATIVE"
+  depends_on = ["keycloak_authentication_execution.browser-copy-kerberos"]
+}
+
+resource "keycloak_authentication_execution" "browser-copy-kerberos" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+  authenticator = "auth-spnego"
+  requirement = "DISABLED"
+}
+
+resource "keycloak_authentication_execution" "browser-copy-idp-redirect" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+  authenticator = "identity-provider-redirector"
+  requirement = "ALTERNATIVE"
+  depends_on = ["keycloak_authentication_execution.browser-copy-cookie"]
+}
+
+resource "keycloak_authentication_subflow" "browser-copy-flow-forms" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_flow.browser-copy-flow.alias}"
+  alias    = "browser-copy-flow-forms"
+  requirement = "ALTERNATIVE"
+  depends_on = ["keycloak_authentication_execution.browser-copy-idp-redirect"]
+}
+
+resource "keycloak_authentication_execution" "browser-copy-auth-username-password-form" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_subflow.browser-copy-flow-forms.alias}"
+  authenticator = "auth-username-password-form"
+  requirement = "REQUIRED"
+}
+
+resource "keycloak_authentication_execution" "browser-copy-otp" {
+  realm_id = "${keycloak_realm.test.id}"
+  parent_flow_alias = "${keycloak_authentication_subflow.browser-copy-flow-forms.alias}"
+  authenticator = "auth-otp-form"
+  requirement = "REQUIRED"
+  depends_on = ["keycloak_authentication_execution.browser-copy-auth-username-password-form"]
+}
+
+resource "keycloak_authentication_execution_config" "config" {
+  realm_id     = "${keycloak_realm.test.id}"
+  execution_id = "${keycloak_authentication_execution.browser-copy-idp-redirect.id}"
+  alias        = "idp-XXX-config"
+  config = {
+    defaultProvider = "idp-XXX"
+  }
 }
