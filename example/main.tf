@@ -465,6 +465,7 @@ resource keycloak_oidc_identity_provider oidc {
   token_url         = "https://example.com/token"
   client_id         = "example_id"
   client_secret     = "example_token"
+  default_scopes    = "openid random profile"
 }
 
 resource keycloak_oidc_google_identity_provider google {
@@ -473,6 +474,7 @@ resource keycloak_oidc_google_identity_provider google {
   client_secret                           = "myclientsecret"
   hosted_domain                           = "mycompany.com"
   request_refresh_token                   = true
+  default_scopes                          = "openid random profile"
   accepts_prompt_none_forward_from_client = false
 }
 
