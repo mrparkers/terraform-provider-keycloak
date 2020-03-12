@@ -57,6 +57,7 @@ is set to `true`.
 - `base_url` - (Optional) Default URL to use when the auth server needs to redirect or link back to the client.
 - `pkce_code_challenge_method` - (Optional) The challenge method to use for Proof Key for Code Exchange. Can be either `plain` or `S256` or set to empty value ``.
 - `full_scope_allowed` - (Optional) - Allow to include all roles mappings in the access token.
+- `access_token_lifespan` - (Optional) - Allow to set the lifespan of the access token
 
 ### Attributes Reference
 

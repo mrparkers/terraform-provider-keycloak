@@ -58,6 +58,7 @@ The following provider attributes are supported:
 - `initial_login` (Optional) - Optionally avoid Keycloak login during provider setup, for when Keycloak itself is being provisioned by terraform. Defaults to true, which is the original method.
 - `client_timeout` (Optional) - Sets the timeout of the client when addressing Keycloak, in seconds. Defaults to environment variable `KEYCLOAK_CLIENT_TIMEOUT`, or 5 is the environment variable is not specified.
 - `tls_insecure_skip_verify` (Optional) - Allows ignoring insecure certificates when set to true. Defaults to false. Disabling security check is dangerous and should be avoided.
+- `root_ca_certificate` (Optional) - Allows x509 calls using an unknown CA certificate (for development purposes)
 
 #### Example (client credentials)
 
@@ -67,7 +68,7 @@ provider "keycloak" {
 	client_secret = "884e0f95-0f42-4a63-9b1f-94274655669e"
 	url           = "http://localhost:8080"
 }
-``` 
+```
 
 #### Example (password)
 

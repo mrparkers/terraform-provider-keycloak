@@ -96,6 +96,13 @@ resource "keycloak_openid_hardcoded_role_protocol_mapper" "pet_app_pet_api_read_
   role_id = "${keycloak_role.pet_api_read_pet.id}"
 }
 
+// Map a role from the "pet_api" api client to the "pet_app" consumer client
+resource "keycloak_generic_client_role_mapper" "pet_app_pet_api_read_role_mapping" {
+  realm_id  = "${keycloak_realm.roles_example.id}"
+  client_id = "${keycloak_openid_client.pet_app.id}"
+  role_id   = "${keycloak_role.pet_api_read_pet.id}"
+}
+
 // Users and groups
 
 resource "keycloak_group" "pet_api_base" {

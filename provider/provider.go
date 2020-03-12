@@ -32,6 +32,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_ldap_group_mapper":                               resourceKeycloakLdapGroupMapper(),
 			"keycloak_ldap_hardcoded_role_mapper":                      resourceKeycloakLdapHardcodedRoleMapper(),
 			"keycloak_ldap_msad_user_account_control_mapper":           resourceKeycloakLdapMsadUserAccountControlMapper(),
+			"keycloak_ldap_msad_lds_user_account_control_mapper":       resourceKeycloakLdapMsadLdsUserAccountControlMapper(),
 			"keycloak_ldap_full_name_mapper":                           resourceKeycloakLdapFullNameMapper(),
 			"keycloak_custom_user_federation":                          resourceKeycloakCustomUserFederation(),
 			"keycloak_openid_user_attribute_protocol_mapper":           resourceKeycloakOpenIdUserAttributeProtocolMapper(),
@@ -46,6 +47,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_client_optional_scopes":                   resourceKeycloakOpenidClientOptionalScopes(),
 			"keycloak_saml_client":                                     resourceKeycloakSamlClient(),
 			"keycloak_generic_client_protocol_mapper":                  resourceKeycloakGenericClientProtocolMapper(),
+			"keycloak_generic_client_role_mapper":                      resourceKeycloakGenericClientRoleMapper(),
 			"keycloak_saml_user_attribute_protocol_mapper":             resourceKeycloakSamlUserAttributeProtocolMapper(),
 			"keycloak_saml_user_property_protocol_mapper":              resourceKeycloakSamlUserPropertyProtocolMapper(),
 			"keycloak_hardcoded_attribute_identity_provider_mapper":    resourceKeycloakHardcodedAttributeIdentityProviderMapper(),
@@ -54,8 +56,16 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_attribute_to_role_identity_provider_mapper":      resourceKeycloakAttributeToRoleIdentityProviderMapper(),
 			"keycloak_user_template_importer_identity_provider_mapper": resourceKeycloakUserTemplateImporterIdentityProviderMapper(),
 			"keycloak_saml_identity_provider":                          resourceKeycloakSamlIdentityProvider(),
+			"keycloak_oidc_google_identity_provider":                   resourceKeycloakOidcGoogleIdentityProvider(),
 			"keycloak_oidc_identity_provider":                          resourceKeycloakOidcIdentityProvider(),
 			"keycloak_openid_client_authorization_resource":            resourceKeycloakOpenidClientAuthorizationResource(),
+			"keycloak_openid_client_group_policy":                      resourceKeycloakOpenidClientAuthorizationGroupPolicy(),
+			"keycloak_openid_client_role_policy":                       resourceKeycloakOpenidClientAuthorizationRolePolicy(),
+			"keycloak_openid_client_aggregate_policy":                  resourceKeycloakOpenidClientAuthorizationAggregatePolicy(),
+			"keycloak_openid_client_js_policy":                         resourceKeycloakOpenidClientAuthorizationJSPolicy(),
+			"keycloak_openid_client_time_policy":                       resourceKeycloakOpenidClientAuthorizationTimePolicy(),
+			"keycloak_openid_client_user_policy":                       resourceKeycloakOpenidClientAuthorizationUserPolicy(),
+			"keycloak_openid_client_client_policy":                     resourceKeycloakOpenidClientAuthorizationClientPolicy(),
 			"keycloak_openid_client_authorization_scope":               resourceKeycloakOpenidClientAuthorizationScope(),
 			"keycloak_openid_client_authorization_permission":          resourceKeycloakOpenidClientAuthorizationPermission(),
 			"keycloak_openid_client_service_account_role":              resourceKeycloakOpenidClientServiceAccountRole(),
@@ -64,6 +74,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_authentication_flow":                             resourceKeycloakAuthenticationFlow(),
 			"keycloak_authentication_subflow":                          resourceKeycloakAuthenticationSubFlow(),
 			"keycloak_authentication_execution":                        resourceKeycloakAuthenticationExecution(),
+			"keycloak_authentication_execution_config":                 resourceKeycloakAuthenticationExecutionConfig(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -109,6 +120,12 @@ func KeycloakProvider() *schema.Provider {
 				Description: "Timeout (in seconds) of the Keycloak client",
 				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_TIMEOUT", 5),
 			},
+			"root_ca_certificate": {
+				Optional:    true,
+				Type:        schema.TypeString,
+				Description: "Allows x509 calls using an unknown CA certificate (for development purposes)",
+				Default:     "",
+			},
 			"tls_insecure_skip_verify": {
 				Optional:    true,
 				Type:        schema.TypeBool,
@@ -130,6 +147,7 @@ func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
 	initialLogin := data.Get("initial_login").(bool)
 	clientTimeout := data.Get("client_timeout").(int)
 	tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
+	rootCaCertificate := data.Get("root_ca_certificate").(string)
 
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, tlsInsecureSkipVerify)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify)
 }

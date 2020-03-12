@@ -27,6 +27,7 @@ defaults:
     - image: circleci/golang:1.13.5
 
   keycloak_env: &keycloak_env
+    command: ["-b", "0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled"]
     environment:
       DB_VENDOR: H2
       KEYCLOAK_LOGLEVEL: DEBUG
@@ -67,12 +68,14 @@ jobs:
         <<: *keycloak_env
     <<: *testacc_job
 
+
   test-8.0.1:
     docker:
       - <<: *go_image
       - image: jboss/keycloak:8.0.1
         <<: *keycloak_env
     <<: *testacc_job
+
 
   build-and-release:
     docker:

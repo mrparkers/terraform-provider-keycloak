@@ -308,6 +308,7 @@ func testAccCheckKeycloakRoleFetch(resourceName string, role *keycloak.Role) res
 		role.Id = fetchedRole.Id
 		role.Name = fetchedRole.Name
 		role.RealmId = fetchedRole.RealmId
+		role.ClientId = fetchedRole.ClientId
 
 		return nil
 	}
