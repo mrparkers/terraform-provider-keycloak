@@ -41,7 +41,7 @@ const (
 	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, verifyTls bool) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, tlsInsecureSkipVerify bool) (*KeycloakClient, error) {
 	cookieJar, err := cookiejar.New(&cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	})
@@ -50,7 +50,7 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 		return nil, err
 	}
 	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifyTls},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: tlsInsecureSkipVerify},
 		Proxy:           http.ProxyFromEnvironment,
 	}
 

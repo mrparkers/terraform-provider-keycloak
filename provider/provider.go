@@ -109,11 +109,11 @@ func KeycloakProvider() *schema.Provider {
 				Description: "Timeout (in seconds) of the Keycloak client",
 				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_TIMEOUT", 5),
 			},
-			"verify_tls": {
+			"tls_insecure_skip_verify": {
 				Optional:    true,
 				Type:        schema.TypeBool,
-				Description: "Allows ignoring insecure certificates when set to false. Defaults to true. Disabling security check is dangerous and should be avoided.",
-				Default:     true,
+				Description: "Allows ignoring insecure certificates when set to true. Defaults to false. Disabling security check is dangerous and should be avoided.",
+				Default:     false,
 			},
 		},
 		ConfigureFunc: configureKeycloakProvider,
@@ -129,7 +129,7 @@ func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
 	realm := data.Get("realm").(string)
 	initialLogin := data.Get("initial_login").(bool)
 	clientTimeout := data.Get("client_timeout").(int)
-	verifyTls := data.Get("verify_tls").(bool)
+	tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
 
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, verifyTls)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, tlsInsecureSkipVerify)
 }
