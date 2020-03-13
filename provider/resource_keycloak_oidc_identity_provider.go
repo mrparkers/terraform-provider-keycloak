@@ -78,6 +78,18 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 			Default:     false,
 			Description: "Pass current locale to identity provider",
 		},
+		"default_scopes": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "openid",
+			Description: "The scopes to be sent when asking for authorization. It can be a space-separated list of scopes. Defaults to 'openid'.",
+		},
+		"accepts_prompt_none_forward_from_client": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "This is just used together with Identity Provider Authenticator or when kc_idp_hint points to this identity provider. In case that client sends a request with prompt=none and user is not yet authenticated, the error will not be directly returned to client, but the request with prompt=none will be forwarded to this identity provider.",
+		},
 		"extra_config": {
 			Type:     schema.TypeMap,
 			Optional: true,
@@ -105,21 +117,23 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 	}
 
 	rec.Config = &keycloak.IdentityProviderConfig{
-		BackchannelSupported: keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
-		ValidateSignature:    keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
-		AuthorizationUrl:     data.Get("authorization_url").(string),
-		ClientId:             data.Get("client_id").(string),
-		ClientSecret:         data.Get("client_secret").(string),
-		HideOnLoginPage:      keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
-		TokenUrl:             data.Get("token_url").(string),
-		LogoutUrl:            data.Get("logout_url").(string),
-		UILocales:            keycloak.KeycloakBoolQuoted(data.Get("ui_locales").(bool)),
-		LoginHint:            data.Get("login_hint").(string),
-		JwksUrl:              data.Get("jwks_url").(string),
-		UserInfoUrl:          data.Get("user_info_url").(string),
-		ExtraConfig:          extraConfig,
-		UseJwksUrl:           keycloak.KeycloakBoolQuoted(useJwksUrl),
-		DisableUserInfo:      keycloak.KeycloakBoolQuoted(!enableUserInfo),
+		BackchannelSupported:        keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
+		ValidateSignature:           keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
+		AuthorizationUrl:            data.Get("authorization_url").(string),
+		ClientId:                    data.Get("client_id").(string),
+		ClientSecret:                data.Get("client_secret").(string),
+		HideOnLoginPage:             keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
+		TokenUrl:                    data.Get("token_url").(string),
+		LogoutUrl:                   data.Get("logout_url").(string),
+		UILocales:                   keycloak.KeycloakBoolQuoted(data.Get("ui_locales").(bool)),
+		LoginHint:                   data.Get("login_hint").(string),
+		JwksUrl:                     data.Get("jwks_url").(string),
+		UserInfoUrl:                 data.Get("user_info_url").(string),
+		ExtraConfig:                 extraConfig,
+		UseJwksUrl:                  keycloak.KeycloakBoolQuoted(useJwksUrl),
+		DisableUserInfo:             keycloak.KeycloakBoolQuoted(!enableUserInfo),
+		DefaultScope:                data.Get("default_scopes").(string),
+		AcceptsPromptNoneForwFrmClt: keycloak.KeycloakBoolQuoted(data.Get("accepts_prompt_none_forward_from_client").(bool)),
 	}
 
 	return rec, nil

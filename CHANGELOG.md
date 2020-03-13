@@ -1,3 +1,9 @@
+## 1.17.1 (March 12, 2020)
+
+BUG FIXES:
+
+* fix: allow `defaultScope` and `acceptsPromptNoneForwardFromClient` attributes to be set for `keycloak_oidc_identity_provider`. Previously, these attributes could only be set via `extra_config`, which stopped working as of v1.17.0. This release introduces these attributes as top-level attributes for the `keycloak_oidc_identity_provider` resource.
+
 ## 1.17.0 (March 10, 2020)
 
 FEATURES:
