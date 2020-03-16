@@ -61,7 +61,7 @@ func resourceKeycloakOpenidClientDefaultScopesRead(data *schema.ResourceData, me
 
 	clientScopes, err := keycloakClient.GetOpenidClientDefaultScopes(realmId, clientId)
 	if err != nil {
-		return err
+		return handleNotFoundError(err, data)
 	}
 
 	var defaultScopes []string
