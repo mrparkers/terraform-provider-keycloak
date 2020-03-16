@@ -144,6 +144,12 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Default:     false,
 				Description: "When true, Keycloak will validate passwords using the realm policy before updating it.",
 			},
+			"trust_email": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If enabled, email provided by this provider is not verified even if verification is enabled for the realm.",
+			},
 			"use_truststore_spi": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -323,6 +329,7 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 		SearchScope:            data.Get("search_scope").(string),
 
 		ValidatePasswordPolicy: data.Get("validate_password_policy").(bool),
+		TrustEmail:             data.Get("trust_email").(bool),
 		UseTruststoreSpi:       data.Get("use_truststore_spi").(string),
 		ConnectionTimeout:      data.Get("connection_timeout").(string),
 		ReadTimeout:            data.Get("read_timeout").(string),
@@ -393,6 +400,7 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 	data.Set("search_scope", ldap.SearchScope)
 
 	data.Set("validate_password_policy", ldap.ValidatePasswordPolicy)
+	data.Set("trust_email", ldap.TrustEmail)
 	data.Set("use_truststore_spi", ldap.UseTruststoreSpi)
 	data.Set("connection_timeout", ldap.ConnectionTimeout)
 	data.Set("read_timeout", ldap.ReadTimeout)

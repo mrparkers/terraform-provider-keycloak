@@ -31,6 +31,7 @@ type LdapUserFederation struct {
 	SearchScope            string // api expects "1" or "2", but that means "One Level" or "Subtree"
 
 	ValidatePasswordPolicy bool
+	TrustEmail             bool
 	UseTruststoreSpi       string // can be "ldapsOnly", "always", or "never"
 	ConnectionTimeout      string // duration string (ex: 1h30m)
 	ReadTimeout            string // duration string (ex: 1h30m)
@@ -99,6 +100,9 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) (*compon
 		},
 		"validatePasswordPolicy": {
 			strconv.FormatBool(ldap.ValidatePasswordPolicy),
+		},
+		"trustEmail": {
+			strconv.FormatBool(ldap.TrustEmail),
 		},
 		"pagination": {
 			strconv.FormatBool(ldap.Pagination),
@@ -240,6 +244,11 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		return nil, err
 	}
 
+	trustEmail, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("trustEmail"))
+	if err != nil {
+		return nil, err
+	}
+
 	pagination, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("pagination"))
 	if err != nil {
 		return nil, err
@@ -295,6 +304,7 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		SearchScope:            component.getConfig("searchScope"),
 
 		ValidatePasswordPolicy: validatePasswordPolicy,
+		TrustEmail:             trustEmail,
 		UseTruststoreSpi:       component.getConfig("useTruststoreSpi"),
 		Pagination:             pagination,
 
