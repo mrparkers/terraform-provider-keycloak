@@ -15,6 +15,13 @@ resource "keycloak_openid_client" "pet_api" {
   access_type = "BEARER-ONLY"
 }
 
+// Optional client scope for mapping additional client role
+resource "keycloak_openid_client_scope" "extended_pet_details" {
+  realm_id  = "${keycloak_realm.roles_example.id}"
+  name      = "extended-pet-details"
+  description = "Optional scope offering additional information when getting pets"
+}
+
 resource "keycloak_role" "pet_api_create_pet" {
   name        = "create-pet"
   realm_id    = "${keycloak_realm.roles_example.id}"
@@ -41,6 +48,20 @@ resource "keycloak_role" "pet_api_delete_pet" {
   realm_id    = "${keycloak_realm.roles_example.id}"
   client_id   = "${keycloak_openid_client.pet_api.id}"
   description = "Ability to delete a pet"
+}
+
+resource "keycloak_role" "pet_api_read_pet_details" {
+  name        = "read-pet-with-details"
+  realm_id    = "${keycloak_realm.roles_example.id}"
+  client_id   = "${keycloak_openid_client.pet_api.id}"
+  description = "Ability to read / list pets with further details"
+}
+
+// Map a role from the "pet_api" api client to the "extended_pet_details" client scope
+resource "keycloak_generic_client_role_mapper" "pet_api_read_pet_details_role_mapping" {
+  realm_id  = "${keycloak_realm.roles_example.id}"
+  client_scope_id = "${keycloak_openid_client_scope.extended_pet_details.id}"
+  role_id   = "${keycloak_role.pet_api_read_pet_details.id}"
 }
 
 resource "keycloak_role" "pet_api_admin" {
@@ -76,6 +97,18 @@ resource "keycloak_openid_client" "pet_app" {
   valid_redirect_uris = [
     "http://localhost:5555/openid-callback",
   ]
+
+  // disable full scope, roles are assigned via keycloak_generic_client_role_mapper
+  full_scope_allowed = false
+}
+
+resource "keycloak_openid_client_optional_scopes" "pet_app_optional_scopes" {
+  realm_id       = "${keycloak_realm.roles_example.id}"
+  client_id      = "${keycloak_openid_client.pet_app.id}"
+
+  optional_scopes = [
+    "${keycloak_openid_client_scope.extended_pet_details.name}"
+  ]
 }
 
 // The app will always need access to the API, so this audience should be used regardless of auth type
@@ -96,11 +129,35 @@ resource "keycloak_openid_hardcoded_role_protocol_mapper" "pet_app_pet_api_read_
   role_id = "${keycloak_role.pet_api_read_pet.id}"
 }
 
-// Map a role from the "pet_api" api client to the "pet_app" consumer client
+// Map all roles from the "pet_api" api client to the "pet_app" consumer client, read_pet_details comes via client scope
 resource "keycloak_generic_client_role_mapper" "pet_app_pet_api_read_role_mapping" {
   realm_id  = "${keycloak_realm.roles_example.id}"
   client_id = "${keycloak_openid_client.pet_app.id}"
   role_id   = "${keycloak_role.pet_api_read_pet.id}"
+}
+
+resource "keycloak_generic_client_role_mapper" "pet_app_pet_api_delete_role_mapping" {
+  realm_id  = "${keycloak_realm.roles_example.id}"
+  client_id = "${keycloak_openid_client.pet_app.id}"
+  role_id   = "${keycloak_role.pet_api_delete_pet.id}"
+}
+
+resource "keycloak_generic_client_role_mapper" "pet_app_pet_api_create_role_mapping" {
+  realm_id  = "${keycloak_realm.roles_example.id}"
+  client_id = "${keycloak_openid_client.pet_app.id}"
+  role_id   = "${keycloak_role.pet_api_create_pet.id}"
+}
+
+resource "keycloak_generic_client_role_mapper" "pet_app_pet_api_update_role_mapping" {
+  realm_id  = "${keycloak_realm.roles_example.id}"
+  client_id = "${keycloak_openid_client.pet_app.id}"
+  role_id   = "${keycloak_role.pet_api_update_pet.id}"
+}
+
+resource "keycloak_generic_client_role_mapper" "pet_app_pet_api_admin_role_mapping" {
+  realm_id  = "${keycloak_realm.roles_example.id}"
+  client_id = "${keycloak_openid_client.pet_app.id}"
+  role_id   = "${keycloak_role.pet_api_admin.id}"
 }
 
 // Users and groups
@@ -133,6 +190,7 @@ resource "keycloak_group_roles" "admin_roles" {
 
   role_ids = [
     "${keycloak_role.pet_api_read_pet.id}",
+    "${keycloak_role.pet_api_read_pet_details.id}",
     "${keycloak_role.pet_api_delete_pet.id}",
     "${keycloak_role.pet_api_create_pet.id}",
     "${data.keycloak_role.realm_offline_access.id}",
@@ -145,6 +203,7 @@ resource "keycloak_group_roles" "front_desk_roles" {
 
   role_ids = [
     "${keycloak_role.pet_api_read_pet.id}",
+    "${keycloak_role.pet_api_read_pet_details.id}",
     "${keycloak_role.pet_api_create_pet.id}",
     "${data.keycloak_role.realm_offline_access.id}",
   ]

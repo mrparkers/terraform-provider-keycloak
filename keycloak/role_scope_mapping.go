@@ -4,12 +4,16 @@ import (
 	"fmt"
 )
 
-func roleScopeMappingUrl(realmId, clientId string, role *Role) string {
-	return fmt.Sprintf("/realms/%s/clients/%s/scope-mappings/clients/%s", realmId, clientId, role.ClientId)
+func roleScopeMappingUrl(realmId, clientId string, clientScopeId string, role *Role) string {
+	if clientId != "" {
+		return fmt.Sprintf("/realms/%s/clients/%s/scope-mappings/clients/%s", realmId, clientId, role.ClientId)
+	} else {
+		return fmt.Sprintf("/realms/%s/client-scopes/%s/scope-mappings/clients/%s", realmId, clientScopeId, role.ClientId)
+	}
 }
 
-func (keycloakClient *KeycloakClient) CreateRoleScopeMapping(realmId string, clientId string, role *Role) error {
-	roleUrl := roleScopeMappingUrl(realmId, clientId, role)
+func (keycloakClient *KeycloakClient) CreateRoleScopeMapping(realmId string, clientId string, clientScopeId string, role *Role) error {
+	roleUrl := roleScopeMappingUrl(realmId, clientId, clientScopeId, role)
 
 	_, _, err := keycloakClient.post(roleUrl, []Role{*role})
 	if err != nil {
@@ -19,8 +23,8 @@ func (keycloakClient *KeycloakClient) CreateRoleScopeMapping(realmId string, cli
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetRoleScopeMapping(realmId string, clientId string, role *Role) (*Role, error) {
-	roleUrl := roleScopeMappingUrl(realmId, clientId, role)
+func (keycloakClient *KeycloakClient) GetRoleScopeMapping(realmId string, clientId string, clientScopeId string, role *Role) (*Role, error) {
+	roleUrl := roleScopeMappingUrl(realmId, clientId, clientScopeId, role)
 	var roles []Role
 
 	err := keycloakClient.get(roleUrl, &roles, nil)
@@ -37,7 +41,7 @@ func (keycloakClient *KeycloakClient) GetRoleScopeMapping(realmId string, client
 	return nil, nil
 }
 
-func (keycloakClient *KeycloakClient) DeleteRoleScopeMapping(realmId string, clientId string, role *Role) error {
-	roleUrl := roleScopeMappingUrl(realmId, clientId, role)
+func (keycloakClient *KeycloakClient) DeleteRoleScopeMapping(realmId string, clientId string, clientScopeId string, role *Role) error {
+	roleUrl := roleScopeMappingUrl(realmId, clientId, clientScopeId, role)
 	return keycloakClient.delete(roleUrl, nil)
 }
