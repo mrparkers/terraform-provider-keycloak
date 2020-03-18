@@ -126,6 +126,12 @@ func KeycloakProvider() *schema.Provider {
 				Description: "Allows x509 calls using an unknown CA certificate (for development purposes)",
 				Default:     "",
 			},
+			"tls_insecure_skip_verify": {
+				Optional:    true,
+				Type:        schema.TypeBool,
+				Description: "Allows ignoring insecure certificates when set to true. Defaults to false. Disabling security check is dangerous and should be avoided.",
+				Default:     false,
+			},
 		},
 		ConfigureFunc: configureKeycloakProvider,
 	}
@@ -140,7 +146,8 @@ func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
 	realm := data.Get("realm").(string)
 	initialLogin := data.Get("initial_login").(bool)
 	clientTimeout := data.Get("client_timeout").(int)
+	tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
 	rootCaCertificate := data.Get("root_ca_certificate").(string)
 
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify)
 }

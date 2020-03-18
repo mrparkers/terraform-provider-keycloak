@@ -57,6 +57,7 @@ The following provider attributes are supported:
 - `realm` (Optional) - The realm used by the provider for authentication. Defaults to environment variable `KEYCLOAK_REALM`, or `master` if the environment variable is not specified.
 - `initial_login` (Optional) - Optionally avoid Keycloak login during provider setup, for when Keycloak itself is being provisioned by terraform. Defaults to true, which is the original method.
 - `client_timeout` (Optional) - Sets the timeout of the client when addressing Keycloak, in seconds. Defaults to environment variable `KEYCLOAK_CLIENT_TIMEOUT`, or 5 is the environment variable is not specified.
+- `tls_insecure_skip_verify` (Optional) - Allows ignoring insecure certificates when set to true. Defaults to false. Disabling security check is dangerous and should be avoided.
 - `root_ca_certificate` (Optional) - Allows x509 calls using an unknown CA certificate (for development purposes)
 
 #### Example (client credentials)
