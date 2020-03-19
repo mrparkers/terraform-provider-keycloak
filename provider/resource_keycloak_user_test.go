@@ -195,21 +195,23 @@ func TestAccKeycloakUser_updateWithInitialPasswordChangeDoesNotReset(t *testing.
 
 func TestAccKeycloakUser_updateInPlace(t *testing.T) {
 	userOne := &keycloak.User{
-		RealmId:   "terraform-" + acctest.RandString(10),
-		Username:  "terraform-user-" + acctest.RandString(10),
-		Email:     fmt.Sprintf("%s@gmail.com", acctest.RandString(10)),
-		FirstName: acctest.RandString(10),
-		LastName:  acctest.RandString(10),
-		Enabled:   randomBool(),
+		RealmId:       "terraform-" + acctest.RandString(10),
+		Username:      "terraform-user-" + acctest.RandString(10),
+		Email:         fmt.Sprintf("%s@gmail.com", acctest.RandString(10)),
+		FirstName:     acctest.RandString(10),
+		LastName:      acctest.RandString(10),
+		Enabled:       randomBool(),
+		EmailVerified: randomBool(),
 	}
 
 	userTwo := &keycloak.User{
-		RealmId:   userOne.RealmId,
-		Username:  userOne.Username,
-		Email:     fmt.Sprintf("%s@gmail.com", acctest.RandString(10)),
-		FirstName: acctest.RandString(10),
-		LastName:  acctest.RandString(10),
-		Enabled:   randomBool(),
+		RealmId:       userOne.RealmId,
+		Username:      userOne.Username,
+		Email:         fmt.Sprintf("%s@gmail.com", acctest.RandString(10)),
+		FirstName:     acctest.RandString(10),
+		LastName:      acctest.RandString(10),
+		Enabled:       randomBool(),
+		EmailVerified: !userOne.EmailVerified,
 	}
 
 	resourceName := "keycloak_user.user"
@@ -475,13 +477,14 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_user" "user" {
-	realm_id   = "${keycloak_realm.realm.id}"
-	username   = "%s"
+	realm_id       = "${keycloak_realm.realm.id}"
+	username       = "%s"
 
-	email      = "%s"
-	first_name = "%s"
-	last_name  = "%s"
-	enabled    = %t
+	email          = "%s"
+	first_name     = "%s"
+	last_name      = "%s"
+	enabled        = %t
+	email_verified = "%t"
 }
-	`, user.RealmId, user.Username, user.Email, user.FirstName, user.LastName, user.Enabled)
+	`, user.RealmId, user.Username, user.Email, user.FirstName, user.LastName, user.Enabled, user.EmailVerified)
 }

@@ -18,7 +18,7 @@ resource "keycloak_user" "user" {
     realm_id   = "${keycloak_realm.realm.id}"
     username   = "bob"
     enabled    = true
-    
+
     email      = "bob@domain.com"
     first_name = "Bob"
     last_name  = "Bobson"
@@ -28,7 +28,7 @@ resource "keycloak_user" "user_with_initial_password" {
     realm_id   = "${keycloak_realm.realm.id}"
     username   = "alice"
     enabled    = true
-    
+
     email      = "alice@domain.com"
     first_name = "Alice"
     last_name  = "Aliceberg"
@@ -52,6 +52,7 @@ The following arguments are supported:
     - `temporary` (Optional) If set to `true`, the initial password is set up for renewal on first use. Default to `false`.
 - `enabled` - (Optional) When false, this user cannot log in. Defaults to `true`.
 - `email` - (Optional) The user's email.
+- `email_verified` - (Optional) Whether the email address was validated or not. Default to `false`.
 - `first_name` - (Optional) The user's first name.
 - `last_name` - (Optional) The user's last name.
 

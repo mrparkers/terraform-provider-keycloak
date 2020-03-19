@@ -43,6 +43,11 @@ func resourceKeycloakUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"email_verified": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"first_name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -127,6 +132,7 @@ func mapFromDataToUser(data *schema.ResourceData) *keycloak.User {
 		RealmId:             data.Get("realm_id").(string),
 		Username:            data.Get("username").(string),
 		Email:               data.Get("email").(string),
+		EmailVerified:       data.Get("email_verified").(bool),
 		FirstName:           data.Get("first_name").(string),
 		LastName:            data.Get("last_name").(string),
 		Enabled:             data.Get("enabled").(bool),
@@ -167,6 +173,7 @@ func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
 	data.Set("realm_id", user.RealmId)
 	data.Set("username", user.Username)
 	data.Set("email", user.Email)
+	data.Set("email_verified", user.EmailVerified)
 	data.Set("first_name", user.FirstName)
 	data.Set("last_name", user.LastName)
 	data.Set("enabled", user.Enabled)
