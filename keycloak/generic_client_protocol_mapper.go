@@ -33,10 +33,10 @@ func (keycloakClient *KeycloakClient) NewGenericClientProtocolMapper(genericClie
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetGenericClientProtocolMappers(realmId string, clientId string, clientScopeId string, mapperId string) (*OpenidClientWithGenericClientProtocolMappers, error) {
+func (keycloakClient *KeycloakClient) GetGenericClientProtocolMappers(realmId string, clientId string) (*OpenidClientWithGenericClientProtocolMappers, error) {
 	var openidClientWithGenericClientProtocolMappers OpenidClientWithGenericClientProtocolMappers
 
-	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &openidClientWithGenericClientProtocolMappers, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s", realmId, clientId), &openidClientWithGenericClientProtocolMappers, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,6 @@ func (keycloakClient *KeycloakClient) GetGenericClientProtocolMappers(realmId st
 	for _, protocolMapper := range openidClientWithGenericClientProtocolMappers.ProtocolMappers {
 		protocolMapper.RealmId = realmId
 		protocolMapper.ClientId = clientId
-		protocolMapper.ClientScopeId = clientScopeId
 	}
 
 	return &openidClientWithGenericClientProtocolMappers, nil
