@@ -27,6 +27,24 @@ func TestGenericRoleMapper_basic(t *testing.T) {
 	})
 }
 
+func TestGenericRoleMapperClientScope_basic(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientName := "client-" + acctest.RandString(10)
+	roleName := "role-" + acctest.RandString(10)
+	clientScopeName := "clientscope-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGenericRoleMappingClientScope_basic(realmName, clientName, roleName, clientScopeName),
+				Check:  testAccCheckKeycloakScopeMappingExists("keycloak_generic_client_role_mapper.clientscope-with-client-role"),
+			},
+		},
+	})
+}
+
 func TestGenericRoleMapper_createAfterManualDestroy(t *testing.T) {
 	var role = &keycloak.Role{}
 	var childClient = &keycloak.GenericClient{}
@@ -52,13 +70,50 @@ func TestGenericRoleMapper_createAfterManualDestroy(t *testing.T) {
 				PreConfig: func() {
 					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-					err := keycloakClient.DeleteRoleScopeMapping(childClient.RealmId, childClient.Id, role)
+					err := keycloakClient.DeleteRoleScopeMapping(childClient.RealmId, childClient.Id, "", role)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
 				Config: testKeycloakGenericRoleMapping_basic(realmName, parentClientName, parentRoleName, childClientName),
 				Check:  testAccCheckKeycloakScopeMappingExists("keycloak_generic_client_role_mapper.child-client-with-parent-client-role"),
+			},
+		},
+	})
+}
+
+func TestGenericRoleMapperClientScope_createAfterManualDestroy(t *testing.T) {
+	var role = &keycloak.Role{}
+	var clientScope = &keycloak.OpenidClientScope{}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	clientName := "client-" + acctest.RandString(10)
+	roleName := "role-" + acctest.RandString(10)
+	clientScopeName := "clientscope-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGenericRoleMappingClientScope_basic(realmName, clientName, roleName, clientScopeName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakScopeMappingExists("keycloak_generic_client_role_mapper.clientscope-with-client-role"),
+					testAccCheckKeycloakRoleFetch("keycloak_role.role", role),
+					testAccCheckKeycloakOpenidClientScopeFetch("keycloak_openid_client_scope.clientscope", clientScope),
+				),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteRoleScopeMapping(clientScope.RealmId, "", clientScope.Id, role)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakGenericRoleMappingClientScope_basic(realmName, clientName, roleName, clientScopeName),
+				Check:  testAccCheckKeycloakScopeMappingExists("keycloak_generic_client_role_mapper.clientscope-with-client-role"),
 			},
 		},
 	})
@@ -96,6 +151,37 @@ resource "keycloak_generic_client_role_mapper" "child-client-with-parent-client-
 	`, realmName, parentClientName, parentRoleName, childClientName)
 }
 
+func testKeycloakGenericRoleMappingClientScope_basic(realmName, clientName, roleName, clientScopeName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	realm_id    = "${keycloak_realm.realm.id}"
+	client_id   = "%s"
+	access_type = "PUBLIC"
+}
+
+resource "keycloak_role" "role" {
+  realm_id  = "${keycloak_realm.realm.id}"
+  client_id = "${keycloak_openid_client.client.id}"
+  name      = "%s"
+}
+
+resource "keycloak_openid_client_scope" "clientscope" {
+	realm_id    = "${keycloak_realm.realm.id}"
+	name        = "%s"
+}
+
+resource "keycloak_generic_client_role_mapper" "clientscope-with-client-role" {
+  realm_id  = "${keycloak_realm.realm.id}"
+  client_scope_id = "${keycloak_openid_client_scope.clientscope.id}"
+  role_id   = "${keycloak_role.role.id}"
+}
+	`, realmName, clientName, roleName, clientScopeName)
+}
+
 func testAccCheckKeycloakScopeMappingExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, ok := s.RootModule().Resources[resourceName]
@@ -122,6 +208,20 @@ func testAccCheckKeycloakGenericClientFetch(resourceName string, client *keycloa
 	}
 }
 
+func testAccCheckKeycloakOpenidClientScopeFetch(resourceName string, clientScope *keycloak.OpenidClientScope) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedClientScope, err := getOpenidClientScopeFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		clientScope.Id = fetchedClientScope.Id
+		clientScope.RealmId = fetchedClientScope.RealmId
+
+		return nil
+	}
+}
+
 func getGenericClientFromState(s *terraform.State, resourceName string) (*keycloak.GenericClient, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -136,6 +236,25 @@ func getGenericClientFromState(s *terraform.State, resourceName string) (*keyclo
 	client, err := keycloakClient.GetGenericClient(realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting generic client %s: %s", id, err)
+	}
+
+	return client, nil
+}
+
+func getOpenidClientScopeFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClientScope, error) {
+	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+	rs, ok := s.RootModule().Resources[resourceName]
+	if !ok {
+		return nil, fmt.Errorf("resource not found: %s", resourceName)
+	}
+
+	id := rs.Primary.ID
+	realm := rs.Primary.Attributes["realm_id"]
+
+	client, err := keycloakClient.GetOpenidClientScope(realm, id)
+	if err != nil {
+		return nil, fmt.Errorf("error getting client scope %s: %s", id, err)
 	}
 
 	return client, nil
