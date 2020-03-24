@@ -76,7 +76,7 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapper() *schema.Resource {
 				Optional:     true,
 				Description:  "Claim type used when serializing tokens.",
 				Default:      "String",
-				ValidateFunc: validation.StringInSlice([]string{"String", "long", "int", "boolean"}, true),
+				ValidateFunc: validation.StringInSlice([]string{"JSON", "String", "long", "int", "boolean"}, true),
 			},
 		},
 	}

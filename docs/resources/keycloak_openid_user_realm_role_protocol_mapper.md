@@ -69,7 +69,7 @@ The following arguments are supported:
 - `client_scope_id` - (Required if `client_id` is not specified) The client scope this protocol mapper is attached to.
 - `name` - (Required) The display name of this protocol mapper in the GUI.
 - `claim_name` - (Required) The name of the claim to insert into a token.
-- `claim_value_type` - (Optional) The claim type used when serializing JSON tokens. Can be one of `String`, `long`, `int`, or `boolean`. Defaults to `String`.
+- `claim_value_type` - (Optional) The claim type used when serializing JSON tokens. Can be one of `String`, `JSON`, `long`, `int`, or `boolean`. Defaults to `String`.
 - `multivalued` - (Optional) Indicates if attribute supports multiple values. If true, then the list of all values of this attribute will be set as claim. If false, then just first value will be set as claim. Defaults to `true`.
 - `realm_role_prefix` - (Optional) A prefix for each Realm Role.
 - `add_to_id_token` - (Optional) Indicates if the property should be added as a claim to the id token. Defaults to `true`.

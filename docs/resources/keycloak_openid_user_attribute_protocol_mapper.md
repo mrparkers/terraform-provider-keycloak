@@ -72,7 +72,7 @@ The following arguments are supported:
 - `name` - (Required) The display name of this protocol mapper in the GUI.
 - `user_attribute` - (Required) The custom user attribute to map a claim for.
 - `claim_name` - (Required) The name of the claim to insert into a token.
-- `claim_value_type` - (Optional) The claim type used when serializing JSON tokens. Can be one of `String`, `long`, `int`, or `boolean`. Defaults to `String`.
+- `claim_value_type` - (Optional) The claim type used when serializing JSON tokens. Can be one of `String`, `JSON`, `long`, `int`, or `boolean`. Defaults to `String`.
 - `multivalued` - (Optional) Indicates whether this attribute is a single value or an array of values. Defaults to `false`.
 - `add_to_id_token` - (Optional) Indicates if the attribute should be added as a claim to the id token. Defaults to `true`.
 - `add_to_access_token` - (Optional) Indicates if the attribute should be added as a claim to the access token. Defaults to `true`.
