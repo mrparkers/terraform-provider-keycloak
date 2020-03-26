@@ -296,11 +296,19 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 }
 
 func (keycloakClient *KeycloakClient) get(path string, resource interface{}, params map[string]string) error {
+	body, err := keycloakClient.getRaw(path, params)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(body, resource)
+}
+
+func (keycloakClient *KeycloakClient) getRaw(path string, params map[string]string) ([]byte, error) {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
 	request, err := http.NewRequest(http.MethodGet, resourceUrl, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if params != nil {
@@ -312,11 +320,7 @@ func (keycloakClient *KeycloakClient) get(path string, resource interface{}, par
 	}
 
 	body, _, err := keycloakClient.sendRequest(request)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(body, resource)
+	return body, err
 }
 
 func (keycloakClient *KeycloakClient) post(path string, requestBody interface{}) ([]byte, string, error) {
