@@ -77,6 +77,11 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"force_name_id_format": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 			"name_id_format": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -202,6 +207,11 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		samlAttributes.IncludeAuthnStatement = &includeAuthnStatementString
 	}
 
+	if forceNameIdFormat, ok := data.GetOkExists("force_name_id_format"); ok {
+		forceNameIdFormatString := strconv.FormatBool(forceNameIdFormat.(bool))
+		samlAttributes.ForceNameIdFormat = &forceNameIdFormatString
+	}
+
 	if signDocuments, ok := data.GetOkExists("sign_documents"); ok {
 		signDocumentsString := strconv.FormatBool(signDocuments.(bool))
 		samlAttributes.SignDocuments = &signDocumentsString
@@ -251,6 +261,14 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 		}
 
 		data.Set("include_authn_statement", includeAuthnStatement)
+	}
+	if client.Attributes.ForceNameIdFormat != nil {
+		forceNameIdFormat, err := strconv.ParseBool(*client.Attributes.ForceNameIdFormat)
+		if err != nil {
+			return err
+		}
+
+		data.Set("force_name_id_format", forceNameIdFormat)
 	}
 
 	if client.Attributes.SignDocuments != nil {
