@@ -155,6 +155,23 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"authentication_flow_binding_overrides": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"browser_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"direct_grant_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -231,6 +248,16 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	} else {
 		openidClient.AuthorizationServicesEnabled = false
 	}
+
+	if v, ok := data.GetOk("authentication_flow_binding_overrides"); ok {
+		authenticationFlowBindingOverridesData := v.(*schema.Set).List()[0]
+		authenticationFlowBindingOverrides := authenticationFlowBindingOverridesData.(map[string]interface{})
+		openidClient.AuthenticationFlowBindingOverrides = keycloak.OpenidAuthenticationFlowBindingOverrides{
+			BrowserId:     authenticationFlowBindingOverrides["browser_id"].(string),
+			DirectGrantId: authenticationFlowBindingOverrides["direct_grant_id"].(string),
+		}
+	}
+
 	return openidClient, nil
 }
 
@@ -281,6 +308,16 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	} else {
 		data.Set("access_type", "CONFIDENTIAL")
 	}
+
+	if (keycloak.OpenidAuthenticationFlowBindingOverrides{}) == client.AuthenticationFlowBindingOverrides {
+		data.Set("authentication_flow_binding_overrides", nil)
+	} else {
+		authenticationFlowBindingOverridesSettings := make(map[string]interface{})
+		authenticationFlowBindingOverridesSettings["browser_id"] = client.AuthenticationFlowBindingOverrides.BrowserId
+		authenticationFlowBindingOverridesSettings["direct_grant_id"] = client.AuthenticationFlowBindingOverrides.DirectGrantId
+		data.Set("authentication_flow_binding_overrides", []interface{}{authenticationFlowBindingOverridesSettings})
+	}
+
 	return nil
 }
 

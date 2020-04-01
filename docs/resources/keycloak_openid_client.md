@@ -58,6 +58,10 @@ is set to `true`.
 - `pkce_code_challenge_method` - (Optional) The challenge method to use for Proof Key for Code Exchange. Can be either `plain` or `S256` or set to empty value ``.
 - `full_scope_allowed` - (Optional) - Allow to include all roles mappings in the access token.
 - `access_token_lifespan` - (Optional) - Allow to set the lifespan of the access token
+- `consent_required` - (Optional) - Consent Required: If enabled, users have to consent to client access.
+- `authentication_flow_binding_overrides` - (Optional) - Override realm authentication flow bindings
+    - `browers_id` - (Optional) - Browser flow id, (flow needs to exist)
+    - `direct_grant_id` - (Optional) - Direct grant flow id (flow needs to exist)
 
 ### Attributes Reference
 
