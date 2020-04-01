@@ -58,7 +58,6 @@ type OpenidClientAttributes struct {
 	AccessTokenLifespan                 string             `json:"access.token.lifespan"`
 }
 
-// //{"authenticationFlowBindingOverrides":{"browser":"70abdea2-181a-4d5d-8778-64241eea4479","direct_grant":"0ba43080-6530-4dd6-81f5-000abd88f3ee"}}
 type OpenidAuthenticationFlowBindingOverrides struct {
 	BrowserId     string `json:"browser"`
 	DirectGrantId string `json:"direct_grant"`
