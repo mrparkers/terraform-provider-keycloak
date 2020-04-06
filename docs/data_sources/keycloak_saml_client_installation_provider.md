@@ -5,6 +5,9 @@ of a SAML Client.
 
 ### Example Usage
 
+In the example below, we extract the SAML metadata IDPSSODescriptor 
+to pass it to the AWS IAM SAML Provider.
+
 ```hcl
 resource "keycloak_realm" "realm" {
     realm   = "my-realm"
@@ -30,10 +33,11 @@ data "keycloak_saml_client_installation_provider" "saml_idp_descriptor" {
   provider_id = "saml-idp-descriptor"
 }
 
-output "xml"{
-  value = data.keycloak_saml_client_installation_provider.saml_idp_descriptor.value
-}
 
+resource "aws_iam_saml_provider" "default" {
+  name                   = "myprovider"
+  saml_metadata_document = data.keycloak_saml_client_installation_provider.saml_idp_descriptor.value
+}
 ```
 
 ### Argument Reference
@@ -49,4 +53,4 @@ The following arguments are supported:
 In addition to the arguments listed above, the following computed attributes are exported:
 
 - `id` - The hash of the value
-- `value` The returned document needed for SAML installation
+- `value` The returned XML document needed for SAML installation
