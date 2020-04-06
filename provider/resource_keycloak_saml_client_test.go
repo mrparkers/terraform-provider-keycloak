@@ -158,6 +158,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			SignAssertions:                  randomBoolAsStringPointer(),
 			ClientSignatureRequired:         &clientSignatureRequired,
 			ForcePostBinding:                randomBoolAsStringPointer(),
+			ForceNameIdFormat:               randomBoolAsStringPointer(),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
 			SigningCertificate:              &signingCertificateBefore,
 			SigningPrivateKey:               &signingPrivateKeyBefore,
@@ -193,6 +194,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			SignAssertions:                  randomBoolAsStringPointer(),
 			ClientSignatureRequired:         &clientSignatureRequired,
 			ForcePostBinding:                randomBoolAsStringPointer(),
+			ForceNameIdFormat:               randomBoolAsStringPointer(),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
 			SigningCertificate:              &signingCertificateAfter,
 			SigningPrivateKey:               &signingPrivateKeyAfter,
@@ -399,7 +401,12 @@ func testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes(resourceName stri
 			return err
 		}
 
-		if !includeAuthnStatement && !signDocuments && !signAssertions && !clientSignatureRequired && !forcePostBinding {
+		forceNameIdFormat, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["force_name_id_format"])
+		if err != nil {
+			return err
+		}
+
+		if !includeAuthnStatement && !signDocuments && !signAssertions && !clientSignatureRequired && !forcePostBinding && !forceNameIdFormat {
 			return fmt.Errorf("expected saml client with id %s to have some defaults set by Keycloak", rs.Primary.ID)
 		}
 
@@ -487,6 +494,7 @@ resource "keycloak_saml_client" "saml_client" {
 	sign_assertions            = %s
 	client_signature_required  = %s
 	force_post_binding         = %s
+	force_name_id_format       = %s
 
 	front_channel_logout       = %t
 	name_id_format             = "%s"
@@ -516,6 +524,7 @@ resource "keycloak_saml_client" "saml_client" {
 		*client.Attributes.SignAssertions,
 		*client.Attributes.ClientSignatureRequired,
 		*client.Attributes.ForcePostBinding,
+		*client.Attributes.ForceNameIdFormat,
 		client.FrontChannelLogout,
 		client.Attributes.NameIdFormat,
 		client.RootUrl,
