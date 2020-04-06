@@ -45,7 +45,7 @@ resource "aws_iam_saml_provider" "default" {
 The following arguments are supported:
 
 - `realm_id` - (Required) The realm this group exists within.
-- `client_id` - (Required) The name of the saml client
+- `client_id` - (Required) The name of the saml client. Not the id of the client.
 - `provider_id` - (Required) Could be one of `saml-idp-descriptor`, `keycloak-saml`, `saml-sp-descriptor`, `keycloak-saml-subsystem`, `mod-auth-mellon`
 
 ### Attributes Reference
