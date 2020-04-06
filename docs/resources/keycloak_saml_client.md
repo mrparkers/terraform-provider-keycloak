@@ -44,6 +44,7 @@ The following arguments are supported:
 - `force_post_binding` - (Optional) When `true`, Keycloak will always respond to an authentication request via the SAML POST Binding.
 - `front_channel_logout` - (Optional) When `true`, this client will require a browser redirect in order to perform a logout.
 - `name_id_format` - (Optional) Sets the Name ID format for the subject.
+- `force_name_id_format` - (Optional) Ignore requested NameID subject format and use the one defined in `name_id_format` instead.
 - `root_url` - (Optional) When specified, this value is prepended to all relative URLs.
 - `valid_redirect_uris` - (Optional) When specified, Keycloak will use this list to validate given Assertion Consumer URLs specified in the authentication request.
 - `base_url` - (Optional) When specified, this URL will be used whenever Keycloak needs to link to this client.

@@ -725,3 +725,12 @@ resource "keycloak_authentication_execution_config" "config" {
     defaultProvider = "idp-XXX"
   }
 }
+
+resource "keycloak_openid_client" "client" {
+  client_id   = "my-override-flow-binding-client"
+  realm_id    = "${keycloak_realm.test.id}"
+  access_type = "PUBLIC"
+  authentication_flow_binding_overrides {
+    browser_id = "${keycloak_authentication_flow.browser-copy-flow.id}"
+  }
+}
