@@ -15,7 +15,7 @@ func TestAccKeycloakSamlClientInstallationProvider_basic(t *testing.T) {
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resourceName := "keycloak_saml_client.saml_client"
-	dataSourceName := "data.keycloak_saml_client_installation_provider.saml_idp_descriptor"
+	dataSourceName := "data.keycloak_saml_client_installation_provider.saml_sp_descriptor"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -27,7 +27,7 @@ func TestAccKeycloakSamlClientInstallationProvider_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceName, "realm_id", resourceName, "realm_id"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "client_id", resourceName, "id"),
-					resource.TestCheckResourceAttr(dataSourceName, "provider_id", "saml-idp-descriptor"),
+					resource.TestCheckResourceAttr(dataSourceName, "provider_id", "saml-sp-descriptor"),
 					testAccCheckDataKeycloakSamlClientInstallationProvider(dataSourceName),
 				),
 			},
@@ -64,10 +64,10 @@ resource "keycloak_saml_client" "saml_client" {
 	realm_id  = "${keycloak_realm.realm.id}"
 }
 
-data "keycloak_saml_client_installation_provider" "saml_idp_descriptor" {
+data "keycloak_saml_client_installation_provider" "saml_sp_descriptor" {
   realm_id    = "${keycloak_realm.realm.id}"
   client_id   = "${keycloak_saml_client.saml_client.id}"
-  provider_id = "saml-idp-descriptor"
+  provider_id = "saml-sp-descriptor"
 }
 	`, realm, clientId)
 }
