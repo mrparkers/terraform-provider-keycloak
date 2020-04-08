@@ -105,10 +105,10 @@ func mapFromDataToOpenIdUserAttributeProtocolMapper(data *schema.ResourceData) *
 		AddToAccessToken: data.Get("add_to_access_token").(bool),
 		AddToUserInfo:    data.Get("add_to_userinfo").(bool),
 
-		UserAttribute:  data.Get("user_attribute").(string),
-		ClaimName:      data.Get("claim_name").(string),
-		ClaimValueType: data.Get("claim_value_type").(string),
-		Multivalued:    data.Get("multivalued").(bool),
+		UserAttribute:            data.Get("user_attribute").(string),
+		ClaimName:                data.Get("claim_name").(string),
+		ClaimValueType:           data.Get("claim_value_type").(string),
+		Multivalued:              data.Get("multivalued").(bool),
 		AggregateAttributeValues: data.Get("aggregate_attrs").(bool),
 	}
 }

@@ -20,7 +20,7 @@ type OpenIdUserAttributeProtocolMapper struct {
 	ClaimName      string
 	ClaimValueType string
 
-	Multivalued bool // indicates whether is this an array of attributes or a single attribute
+	Multivalued              bool // indicates whether is this an array of attributes or a single attribute
 	AggregateAttributeValues bool
 }
 
@@ -31,13 +31,13 @@ func (mapper *OpenIdUserAttributeProtocolMapper) convertToGenericProtocolMapper(
 		Protocol:       "openid-connect",
 		ProtocolMapper: "oidc-usermodel-attribute-mapper",
 		Config: map[string]string{
-			addToIdTokenField:     strconv.FormatBool(mapper.AddToIdToken),
-			addToAccessTokenField: strconv.FormatBool(mapper.AddToAccessToken),
-			addToUserInfoField:    strconv.FormatBool(mapper.AddToUserInfo),
-			userAttributeField:    mapper.UserAttribute,
-			claimNameField:        mapper.ClaimName,
-			claimValueTypeField:   mapper.ClaimValueType,
-			multivaluedField:      strconv.FormatBool(mapper.Multivalued),
+			addToIdTokenField:             strconv.FormatBool(mapper.AddToIdToken),
+			addToAccessTokenField:         strconv.FormatBool(mapper.AddToAccessToken),
+			addToUserInfoField:            strconv.FormatBool(mapper.AddToUserInfo),
+			userAttributeField:            mapper.UserAttribute,
+			claimNameField:                mapper.ClaimName,
+			claimValueTypeField:           mapper.ClaimValueType,
+			multivaluedField:              strconv.FormatBool(mapper.Multivalued),
 			aggregateAttributeValuesField: strconv.FormatBool(mapper.AggregateAttributeValues),
 		},
 	}
@@ -81,10 +81,10 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper
 		AddToAccessToken: addToAccessToken,
 		AddToUserInfo:    addToUserInfo,
 
-		UserAttribute:  protocolMapper.Config[userAttributeField],
-		ClaimName:      protocolMapper.Config[claimNameField],
-		ClaimValueType: protocolMapper.Config[claimValueTypeField],
-		Multivalued:    multivalued,
+		UserAttribute:            protocolMapper.Config[userAttributeField],
+		ClaimName:                protocolMapper.Config[claimNameField],
+		ClaimValueType:           protocolMapper.Config[claimValueTypeField],
+		Multivalued:              multivalued,
 		AggregateAttributeValues: aggregateAttributeValues,
 	}, nil
 }
