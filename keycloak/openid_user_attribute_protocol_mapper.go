@@ -21,6 +21,7 @@ type OpenIdUserAttributeProtocolMapper struct {
 	ClaimValueType string
 
 	Multivalued bool // indicates whether is this an array of attributes or a single attribute
+	AggregateAttributeValues bool
 }
 
 func (mapper *OpenIdUserAttributeProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
@@ -37,6 +38,7 @@ func (mapper *OpenIdUserAttributeProtocolMapper) convertToGenericProtocolMapper(
 			claimNameField:        mapper.ClaimName,
 			claimValueTypeField:   mapper.ClaimValueType,
 			multivaluedField:      strconv.FormatBool(mapper.Multivalued),
+			aggregateAttributeValuesField: strconv.FormatBool(mapper.AggregateAttributeValues),
 		},
 	}
 }
@@ -63,6 +65,11 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper
 		return nil, err
 	}
 
+	aggregateAttributeValues, err := strconv.ParseBool(protocolMapper.Config[aggregateAttributeValuesField])
+	if err != nil {
+		return nil, err
+	}
+
 	return &OpenIdUserAttributeProtocolMapper{
 		Id:            protocolMapper.Id,
 		Name:          protocolMapper.Name,
@@ -78,6 +85,7 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper
 		ClaimName:      protocolMapper.Config[claimNameField],
 		ClaimValueType: protocolMapper.Config[claimValueTypeField],
 		Multivalued:    multivalued,
+		AggregateAttributeValues: aggregateAttributeValues,
 	}, nil
 }
 
