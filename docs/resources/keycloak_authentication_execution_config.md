@@ -39,7 +39,10 @@ The following arguments are supported:
 - `execution_id` - (Required) The authentication execution this configuration is attached to.
 - `alias` - (Required) The name of the configuration.
 - `config` - (Optional) The configuration. Keys are specific to each configurable authentication execution and not checked when applying.
-
+- `requirement`- (Optional) The requirement setting, which can be one of the following:
+	- `REQUIRED`
+	- `ALTERNATIVE`
+	- `DISABLED`
 ### Import
 
 Configurations can be imported using the format `{{realm}}/{{authenticationExecutionId}}/{{authenticationExecutionConfigId}}`.
