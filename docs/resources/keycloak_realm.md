@@ -174,6 +174,12 @@ The `brute_force_detection` block supports the following attributes:
 
 Map, can be used to add custom attributes to a realm. Or perhaps influence a certain attribute that is not supported in this terraform-provider
 
+### Attributes Reference
+
+In addition to the arguments listed above, the following computed attributes are exported:
+
+- `internal_id` - When importing realms created outside of this terraform provider, they could use generated arbitrary IDs for the technical realm id. Realms created by this provider always use the realm's name for its technical id.
+
 ### Import
 
 Realms can be imported using their name:

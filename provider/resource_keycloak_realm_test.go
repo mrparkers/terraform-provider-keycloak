@@ -678,6 +678,37 @@ func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_internalId(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	internalId := acctest.RandString(10)
+	realm := &keycloak.Realm{
+		Realm: realmName,
+		Id:    internalId,
+	}
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				ResourceName:  "keycloak_realm.realm",
+				ImportStateId: realmName,
+				ImportState:   true,
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.NewRealm(realm)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Check: testAccCheckKeycloakRealmWithInternalId(realmName, internalId),
+			},
+		},
+	})
+}
+
 func testKeycloakRealmLoginInfo(resourceName string, realm *keycloak.Realm) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		realmFromState, err := getRealmFromState(s, resourceName)
@@ -975,6 +1006,21 @@ func testAccCheckKeycloakRealmCustomAttribute(resourceName, key, value string) r
 
 		if realm.Attributes[key] != value {
 			return fmt.Errorf("expected realm %s to have an attribute %s with value %s but was %s", realm.Realm, key, value, realm.Attributes[key])
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRealmWithInternalId(resourceName, id string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.Id != id {
+			return fmt.Errorf("expected realm %s to have an internal id with value %s but was %s", realm.Realm, id, realm.Id)
 		}
 
 		return nil
