@@ -371,7 +371,11 @@ func (keycloakClient *KeycloakClient) GetLdapUserFederationMappers(realmId, id s
 			}
 			ldapUserFederationMappers = append(ldapUserFederationMappers, mapper)
 		case "role-ldap-mapper":
-			// Not supported
+			mapper, err := convertFromComponentToLdapRoleMapper(component, realmId)
+			if err != nil {
+				return nil, err
+			}
+			ldapUserFederationMappers = append(ldapUserFederationMappers, mapper)
 		}
 	}
 
