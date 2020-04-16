@@ -40,6 +40,13 @@ func (keycloakClient *KeycloakClient) NewUser(user *User) error {
 
 	user.Id = getIdFromLocationHeader(location)
 
+	for _, federatedIdentity := range user.FederatedIdentities {
+		_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/federated-identity/%s", user.RealmId, user.Id, federatedIdentity.IdentityProvider), federatedIdentity)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -111,7 +118,29 @@ func (keycloakClient *KeycloakClient) GetUser(realmId, id string) (*User, error)
 }
 
 func (keycloakClient *KeycloakClient) UpdateUser(user *User) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/users/%s", user.RealmId, user.Id), user)
+	err := keycloakClient.put(fmt.Sprintf("/realms/%s/users/%s", user.RealmId, user.Id), user)
+	if err != nil {
+		return err
+	}
+
+	var federatedIdentities []*FederatedIdentity
+	err = keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/federated-identity", user.RealmId, user.Id), &federatedIdentities, nil)
+	if err != nil {
+		return err
+	}
+
+	for _, federatedIdentity := range federatedIdentities {
+		keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/federated-identity/%s", user.RealmId, user.Id, federatedIdentity.IdentityProvider), nil)
+	}
+
+	for _, federatedIdentity := range user.FederatedIdentities {
+		_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/federated-identity/%s", user.RealmId, user.Id, federatedIdentity.IdentityProvider), federatedIdentity)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (keycloakClient *KeycloakClient) DeleteUser(realmId, id string) error {
