@@ -26,6 +26,15 @@ defaults:
   go_image: &go_image
     - image: circleci/golang:1.13.5
 
+  test_env: &test_env
+    GO111MODULE: "on"
+    KEYCLOAK_CLIENT_ID: "terraform"
+    KEYCLOAK_CLIENT_SECRET: "884e0f95-0f42-4a63-9b1f-94274655669e"
+    KEYCLOAK_CLIENT_TIMEOUT: "5"
+    KEYCLOAK_URL: "http://localhost:8080"
+    KEYCLOAK_REALM: "master"
+    KEYCLOAK_TEST_PASSWORD_GRANT: "true"
+
   keycloak_env: &keycloak_env
     command: ["-b", "0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled"]
     environment:
@@ -51,14 +60,6 @@ defaults:
             ./scripts/wait-for-local-keycloak.sh
             ./scripts/create-terraform-client.sh
             make testacc
-    environment:
-      GO111MODULE: "on"
-      KEYCLOAK_CLIENT_ID: "terraform"
-      KEYCLOAK_CLIENT_SECRET: "884e0f95-0f42-4a63-9b1f-94274655669e"
-      KEYCLOAK_CLIENT_TIMEOUT: "5"
-      KEYCLOAK_URL: "http://localhost:8080"
-      KEYCLOAK_REALM: "master"
-      KEYCLOAK_TEST_PASSWORD_GRANT: "true"
 
 jobs:
   test-7.0.1:
@@ -67,6 +68,9 @@ jobs:
       - image: jboss/keycloak:7.0.1
         <<: *keycloak_env
     <<: *testacc_job
+    environment:
+      <<: *test_env
+      KEYCLOAK_VERSION: "7.0.1"
 
 
   test-8.0.1:
@@ -75,6 +79,9 @@ jobs:
       - image: jboss/keycloak:8.0.1
         <<: *keycloak_env
     <<: *testacc_job
+    environment:
+      <<: *test_env
+      KEYCLOAK_VERSION: "8.0.1"
 
 
   build-and-release:
