@@ -84,7 +84,7 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapper() *schema.Resource {
 				Default:      "String",
 				ValidateFunc: validation.StringInSlice([]string{"JSON", "String", "long", "int", "boolean"}, true),
 			},
-			"aggregate_attrs": {
+			"aggregate_attributes": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
@@ -109,7 +109,7 @@ func mapFromDataToOpenIdUserAttributeProtocolMapper(data *schema.ResourceData) *
 		ClaimName:                data.Get("claim_name").(string),
 		ClaimValueType:           data.Get("claim_value_type").(string),
 		Multivalued:              data.Get("multivalued").(bool),
-		AggregateAttributeValues: data.Get("aggregate_attrs").(bool),
+		AggregateAttributeValues: data.Get("aggregate_attributes").(bool),
 	}
 }
 
@@ -131,7 +131,7 @@ func mapFromOpenIdUserAttributeMapperToData(mapper *keycloak.OpenIdUserAttribute
 	data.Set("claim_name", mapper.ClaimName)
 	data.Set("claim_value_type", mapper.ClaimValueType)
 	data.Set("multivalued", mapper.Multivalued)
-	data.Set("aggregate_attrs", mapper.AggregateAttributeValues)
+	data.Set("aggregate_attributes", mapper.AggregateAttributeValues)
 }
 
 func resourceKeycloakOpenIdUserAttributeProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
