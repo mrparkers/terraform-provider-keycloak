@@ -156,6 +156,24 @@ func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_rootUrl(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+	rootUrl := "https://www.example.com"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_rootUrl(realmName, clientId, rootUrl),
+				Check:  testAccCheckKeycloakOpenidClientRootUrl("keycloak_openid_client.client", rootUrl),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
@@ -169,6 +187,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		implicitFlowEnabled = !standardFlowEnabled
 	}
 
+	rootUrlBefore := acctest.RandString(20)
 	openidClientBefore := &keycloak.OpenidClient{
 		RealmId:                   realm,
 		ClientId:                  clientId,
@@ -184,10 +203,12 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		WebOrigins:                []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 		AdminUrl:                  acctest.RandString(20),
 		BaseUrl:                   acctest.RandString(20),
+		RootUrl:                   &rootUrlBefore,
 	}
 
 	standardFlowEnabled, implicitFlowEnabled = implicitFlowEnabled, standardFlowEnabled
 
+	rootUrlAfter := acctest.RandString(20)
 	openidClientAfter := &keycloak.OpenidClient{
 		RealmId:                   realm,
 		ClientId:                  clientId,
@@ -203,6 +224,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		WebOrigins:                []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 		AdminUrl:                  acctest.RandString(20),
 		BaseUrl:                   acctest.RandString(20),
+		RootUrl:                   &rootUrlAfter,
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -539,6 +561,21 @@ func testAccCheckKeycloakOpenidClientBaseUrl(resourceName string, baseUrl string
 	}
 }
 
+func testAccCheckKeycloakOpenidClientRootUrl(resourceName string, rootUrl string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if *client.RootUrl != rootUrl {
+			return fmt.Errorf("expected openid client to have rootUrl set to %s, but got %s", rootUrl, *client.RootUrl)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakOpenidClientBelongsToRealm(resourceName, realm string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -777,6 +814,25 @@ resource "keycloak_openid_client" "client" {
 	`, realm, clientId, baseUrl)
 }
 
+func testKeycloakOpenidClient_rootUrl(realm, clientId, rootUrl string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id             = "%s"
+	realm_id			  = "${keycloak_realm.realm.id}"
+	root_url			  = "%s"
+	valid_redirect_uris   = ["http://example.com"]
+	web_origins			  = ["http://example.com"]
+	admin_url			  = "http://example.com"
+	access_type           = "CONFIDENTIAL"
+	standard_flow_enabled = true
+}
+	`, realm, clientId, rootUrl)
+}
+
 func testKeycloakOpenidClient_pkceChallengeMethod(realm, clientId, pkceChallengeMethod string) string {
 
 	return fmt.Sprintf(`
@@ -901,8 +957,9 @@ resource "keycloak_openid_client" "client" {
 	web_origins                  = %s
 	admin_url					 = "%s"
 	base_url                     = "%s"
+	root_url                     = "%s"
 }
-	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl)
+	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl)
 }
 
 func testKeycloakOpenidClient_secret(realm, clientId, clientSecret string) string {

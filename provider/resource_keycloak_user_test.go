@@ -293,6 +293,55 @@ func TestAccKeycloakUser_validateLowercaseUsernames(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakUser_federatedLink(t *testing.T) {
+	sourceUserName := "terraform-source-user-" + acctest.RandString(10)
+	sourceUserName2 := "terraform-source-user2-" + acctest.RandString(10)
+	destinationRealmName := "terraform-dest-" + acctest.RandString(10)
+
+	resourceName := "keycloak_user.destination_user"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakUser_FederationLink(sourceUserName, destinationRealmName),
+				Check:  testAccCheckKeycloakUserHasFederationLinkWithSourceUserName(resourceName, sourceUserName),
+			},
+			{
+				Config: testKeycloakUser_FederationLink(sourceUserName2, destinationRealmName),
+				Check:  testAccCheckKeycloakUserHasFederationLinkWithSourceUserName(resourceName, sourceUserName2),
+			},
+		},
+	})
+}
+
+func testAccCheckKeycloakUserHasFederationLinkWithSourceUserName(resourceName, sourceUserName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedUser, err := getUserFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		var found bool = false
+		for _, federatedIdentity := range fetchedUser.FederatedIdentities {
+			if federatedIdentity.UserName == sourceUserName {
+				found = true
+			}
+			if !found {
+				return fmt.Errorf("user had unexpected federatedLink %s or unexpected username %s", federatedIdentity.IdentityProvider, federatedIdentity.UserName)
+			}
+		}
+
+		if !found {
+			return fmt.Errorf("user had no federatedLink, but one was expected")
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakUserExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getUserFromState(s, resourceName)
@@ -487,4 +536,58 @@ resource "keycloak_user" "user" {
 	email_verified = "%t"
 }
 	`, user.RealmId, user.Username, user.Email, user.FirstName, user.LastName, user.Enabled, user.EmailVerified)
+}
+
+func testKeycloakUser_FederationLink(sourceRealmUserName, destinationRealmId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "source_realm" {
+  realm   = "source_test_realm"
+  enabled = true
+}
+
+resource "keycloak_openid_client" "destination_client" {
+  realm_id                 = "${keycloak_realm.source_realm.id}"
+  client_id                = "destination_client"
+  client_secret            = "secret"
+  access_type              = "CONFIDENTIAL"
+  standard_flow_enabled    = true
+  valid_redirect_uris = [
+    "http://localhost:8080/*",
+  ]
+}
+
+resource "keycloak_user" "source_user" {
+  realm_id   = "${keycloak_realm.source_realm.id}"
+  username   = "%s"
+  initial_password {
+    value     = "source"
+    temporary = false
+  }
+}
+
+resource "keycloak_realm" "destination_realm" {
+  realm   = "%s"
+  enabled = true
+}
+
+resource keycloak_oidc_identity_provider source_oidc_idp {
+  realm              = "${keycloak_realm.destination_realm.id}"
+  alias              = "source"
+  authorization_url  = "http://localhost:8080/auth/realms/${keycloak_realm.source_realm.id}/protocol/openid-connect/auth"
+  token_url          = "http://localhost:8080/auth/realms/${keycloak_realm.source_realm.id}/protocol/openid-connect/token"
+  client_id          = "${keycloak_openid_client.destination_client.client_id}"
+  client_secret      = "${keycloak_openid_client.destination_client.client_secret}"
+  default_scopes     = "openid"
+}
+
+resource "keycloak_user" "destination_user" {
+  realm_id   = "${keycloak_realm.destination_realm.id}"
+  username   = "my_destination_username"
+  federated_identity {
+    identity_provider = "${keycloak_oidc_identity_provider.source_oidc_idp.alias}"
+    user_id           = "${keycloak_user.source_user.id}"
+    user_name         = "${keycloak_user.source_user.username}"
+  }
+}
+	`, sourceRealmUserName, destinationRealmId)
 }

@@ -9,6 +9,7 @@ nav:
   - keycloak_realm: data_sources/keycloak_realm.md
   - keycloak_realm_keys: data_sources/keycloak_realm_keys.md
   - keycloak_role: data_sources/keycloak_role.md
+  - keycloak_saml_client_installation_provider: data_sources/keycloak_saml_client_installation_provider.md
 - Resources:
   - keycloak_realm: resources/keycloak_realm.md
   - keycloak_realm_events: resources/keycloak_realm_events.md
@@ -39,10 +40,12 @@ nav:
   - keycloak_ldap_group_mapper: resources/keycloak_ldap_group_mapper.md
   - keycloak_ldap_hardcoded_role_mapper: resources/keycloak_ldap_hardcoded_role_mapper.md
   - keycloak_ldap_msad_user_account_control_mapper: resources/keycloak_ldap_msad_user_account_control_mapper.md
+  - keycloak_ldap_msad_lds_user_account_control_mapper: resources/keycloak_ldap_msad_lds_user_account_control_mapper.md
   - keycloak_ldap_user_attribute_mapper: resources/keycloak_ldap_user_attribute_mapper.md
   - keycloak_custom_user_federation: resources/keycloak_custom_user_federation.md
   - keycloak_saml_identity_provider: resources/keycloak_saml_identity_provider.md
   - keycloak_oidc_identity_provider: resources/keycloak_oidc_identity_provider.md
   - keycloak_attribute_importer_identity_provider_mapper: resources/keycloak_attribute_importer_identity_provider_mapper.md
+  - keycloak_authentication_execution_config: resources/keycloak_authentication_execution_config.md
 theme: readthedocs
 extra_css: [index.css]

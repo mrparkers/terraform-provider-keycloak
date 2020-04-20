@@ -73,6 +73,11 @@ func (keycloakClient *KeycloakClient) GetSamlClient(realmId, id string) (*SamlCl
 	return &client, nil
 }
 
+func (keycloakClient *KeycloakClient) GetSamlClientInstallationProvider(realmId, id string, providerId string) ([]byte, error) {
+	value, err := keycloakClient.getRaw(fmt.Sprintf("/realms/%s/clients/%s/installation/providers/%s", realmId, id, providerId), nil)
+	return value, err
+}
+
 func (keycloakClient *KeycloakClient) UpdateSamlClient(client *SamlClient) error {
 	client.Protocol = "saml"
 	client.ClientAuthenticatorType = "client-secret"
