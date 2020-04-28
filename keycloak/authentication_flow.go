@@ -14,6 +14,21 @@ type AuthenticationFlow struct {
 	BuiltIn     bool   `json:"builtIn"`
 }
 
+func (keycloakClient *KeycloakClient) ListAuthenticationFlows(realmId string) ([]*AuthenticationFlow, error) {
+	var authenticationFlows []*AuthenticationFlow
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows", realmId), &authenticationFlows, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, authenticationFlow := range authenticationFlows {
+		authenticationFlow.RealmId = realmId
+	}
+
+	return authenticationFlows, nil
+}
+
 func (keycloakClient *KeycloakClient) NewAuthenticationFlow(authenticationFlow *AuthenticationFlow) error {
 	authenticationFlow.TopLevel = true
 	authenticationFlow.BuiltIn = false
