@@ -121,6 +121,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 					},
 				},
 			},
+			"login_theme": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
