@@ -1,6 +1,6 @@
 # keycloak_authentication_execution
 
-Allows for managing an authentication execution configuration.
+Allows for managing an authentication execution.
 
 ### Example Usage
 
