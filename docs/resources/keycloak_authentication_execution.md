@@ -21,15 +21,6 @@ resource "keycloak_authentication_execution" "execution" {
 	authenticator     = "identity-provider-redirector"
     requirement       = "REQUIRED"
 }
-
-resource "keycloak_authentication_execution_config" "config" {
-	realm_id     = "${keycloak_realm.realm.id}"
-	execution_id = "${keycloak_authentication_execution.execution.id}"
-	alias        = "my-config-alias"
-	config = {
-		defaultProvider = "my-config-default-idp"
-	}
-}
 ```
 
 ### Argument Reference
