@@ -57,6 +57,7 @@ type OpenidClientAttributes struct {
 	PkceCodeChallengeMethod             string             `json:"pkce.code.challenge.method"`
 	ExcludeSessionStateFromAuthResponse KeycloakBoolQuoted `json:"exclude.session.state.from.auth.response"`
 	AccessTokenLifespan                 string             `json:"access.token.lifespan"`
+	LoginTheme                          string             `json:"login_theme"`
 }
 
 type OpenidAuthenticationFlowBindingOverrides struct {
@@ -88,6 +89,15 @@ func (keycloakClient *KeycloakClient) ValidateOpenidClient(client *OpenidClient)
 
 	if client.ServiceAccountsEnabled && client.PublicClient {
 		return fmt.Errorf("validation error: service accounts (client credentials flow) cannot be enabled on public clients")
+	}
+
+	serverInfo, err := keycloakClient.GetServerInfo()
+	if err != nil {
+		return err
+	}
+
+	if client.Attributes.LoginTheme != "" && !serverInfo.ThemeIsInstalled("login", client.Attributes.LoginTheme) {
+		return fmt.Errorf("validation error: theme \"%s\" does not exist on the server", client.Attributes.LoginTheme)
 	}
 
 	return nil

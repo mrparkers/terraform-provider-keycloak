@@ -176,6 +176,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 					},
 				},
 			},
+			"login_theme": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -232,6 +236,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			PkceCodeChallengeMethod:             data.Get("pkce_code_challenge_method").(string),
 			ExcludeSessionStateFromAuthResponse: keycloak.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
 			AccessTokenLifespan:                 data.Get("access_token_lifespan").(string),
+			LoginTheme:                          data.Get("login_theme").(string),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
@@ -317,6 +322,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
 	data.Set("consent_required", client.ConsentRequired)
 	data.Set("access_token_lifespan", client.Attributes.AccessTokenLifespan)
+	data.Set("login_theme", client.Attributes.LoginTheme)
 
 	if client.AuthorizationServicesEnabled {
 		data.Set("resource_server_id", client.Id)
