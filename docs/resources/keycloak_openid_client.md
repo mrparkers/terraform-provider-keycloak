@@ -25,6 +25,8 @@ resource "keycloak_openid_client" "openid_client" {
     valid_redirect_uris = [
         "http://localhost:8080/openid-callback"
     ]
+
+    login_theme = "keycloak"
 }
 ```
 
@@ -64,6 +66,7 @@ is set to `true`.
 - `authentication_flow_binding_overrides` - (Optional) - Override realm authentication flow bindings
     - `browers_id` - (Optional) - Browser flow id, (flow needs to exist)
     - `direct_grant_id` - (Optional) - Direct grant flow id (flow needs to exist)
+- `login_theme` - (Optional) - Override realm login theme
 
 ### Attributes Reference
 
