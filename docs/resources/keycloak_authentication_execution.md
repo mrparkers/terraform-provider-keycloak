@@ -1,4 +1,4 @@
-# keycloak_authentication_execution_config
+# keycloak_authentication_execution
 
 Allows for managing an authentication execution configuration.
 
