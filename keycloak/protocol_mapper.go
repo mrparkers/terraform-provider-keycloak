@@ -28,6 +28,7 @@ var (
 	userAttributeField                  = "user.attribute"
 	userPropertyField                   = "user.attribute"
 	userRealmRoleMappingRolePrefixField = "usermodel.realmRoleMapping.rolePrefix"
+	aggregateAttributeValuesField       = "aggregate.attrs"
 )
 
 func protocolMapperPath(realmId, clientId, clientScopeId string) string {
