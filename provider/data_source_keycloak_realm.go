@@ -26,9 +26,9 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Optional: true,
 			},
 			"user_managed_access": {
-            	Type:     schema.TypeBool,
-            	Computed: true,
-            },
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 
 			// Login Config
 
