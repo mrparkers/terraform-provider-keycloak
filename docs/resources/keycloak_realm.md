@@ -104,6 +104,7 @@ If any of these attributes are not specified, they will default to Keycloak's de
 
 The following attributes can be found in the "Tokens" tab within the realm settings.
 
+- `default_signature_algorithm` - (Optional) Default algorithm used to sign tokens for the realm.
 - `revoke_refresh_token` - (Optional) If enabled a refresh token can only be used number of times specified in 'refresh_token_max_reuse' before they are revoked. If unspecified, refresh tokens can be reused.
 - `refresh_token_max_reuse` - (Optional) Maximum number of times a refresh token can be reused before they are revoked. If unspecified and 'revoke_refresh_token' is enabled the default value is 0 and refresh tokens can not be reused.
 
