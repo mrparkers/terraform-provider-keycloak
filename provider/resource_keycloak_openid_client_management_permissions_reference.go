@@ -12,9 +12,9 @@ func resourceKeycloakOpenidClientManagementPermissionsReference() *schema.Resour
 		Delete: resourceKeycloakOpenIdClientManagementPermissionsReferenceDelete,
 		Update: resourceKeycloakOpenIdClientManagementPermissionsReferenceUpdate,
 		// This resource can be imported using {{realm}}/clients/{{client_id}}/management/permissions. The Client Id is displayed in the URL when editing it from the GUI.
-		// Importer: &schema.ResourceImporter{
-		// 	State: resourceKeycloakOpenidClientManagementPermissionsReferenceImport,
-		// },
+		Importer: &schema.ResourceImporter{
+			State: genericManagementPermissionsReferenceImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
