@@ -36,7 +36,7 @@ func (genericReference *managementPermissionReference) convertToOpenIdClientMana
 	}
 }
 
-func (keycloakClient *KeycloakClient) GetClientManagementPermissionsReference(realmId, clientId string) (*OpenIdClientManagementPermissionsReference, error) {
+func (keycloakClient *KeycloakClient) GetOpenIdClientManagementPermissionsReference(realmId, clientId string) (*OpenIdClientManagementPermissionsReference, error) {
 	var genericReference *managementPermissionReference
 
 	err := keycloakClient.get(openIdClientManagementPermissionsReferencePath(realmId, clientId), &genericReference, nil)

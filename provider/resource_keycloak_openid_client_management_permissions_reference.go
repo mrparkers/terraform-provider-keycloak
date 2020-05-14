@@ -34,7 +34,7 @@ func resourceKeycloakOpenidClientManagementPermissionsReference() *schema.Resour
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"scopePermissions": {
+			"scope_permissions": {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
@@ -48,7 +48,7 @@ func mapFromDataToOpenIdClientManagementPermissionsReference(data *schema.Resour
 		ClientId:         data.Get("client_id").(string),
 		Enabled:          data.Get("enabled").(bool),
 		Resource:         data.Get("resource").(string),
-		ScopePermissions: data.Get("scopePermissions").(map[string]string),
+		ScopePermissions: data.Get("scope_permissions").(map[string]string),
 	}
 }
 
@@ -57,7 +57,7 @@ func mapFromOpenIdClientManagementPermissionsReferenceToData(reference *keycloak
 	data.Set("client_id", reference.ClientId)
 	data.Set("enabled", reference.Enabled)
 	data.Set("resource", reference.Resource)
-	data.Set("scopePermissions", reference.ScopePermissions)
+	data.Set("scope_permissions", reference.ScopePermissions)
 }
 
 func resourceKeycloakOpenIdClientManagementPermissionsReferenceCreate(data *schema.ResourceData, meta interface{}) error {
@@ -80,7 +80,7 @@ func resourceKeycloakOpenIdClientManagementPermissionsReferenceRead(data *schema
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
-	reference, err := keycloakClient.GetClientManagementPermissionsReference(realmId, clientId)
+	reference, err := keycloakClient.GetOpenIdClientManagementPermissionsReference(realmId, clientId)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
