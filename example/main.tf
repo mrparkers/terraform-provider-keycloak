@@ -172,6 +172,8 @@ resource "keycloak_openid_client" "test_client" {
   client_secret = "secret"
 
   pkce_code_challenge_method = "plain"
+
+  login_theme = "keycloak"
 }
 
 resource "keycloak_openid_client_scope" "test_default_client_scope" {

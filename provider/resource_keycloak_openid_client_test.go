@@ -120,6 +120,7 @@ func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 		},
 	})
 }
+
 func TestAccKeycloakOpenidClient_adminUrl(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
@@ -483,6 +484,38 @@ func TestAccKeycloakOpenidClient_authenticationFlowBindingOverrides(t *testing.T
 	})
 }
 
+func TestAccKeycloakOpenidClient_loginTheme(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+	loginThemeKeycloak := "keycloak"
+	loginThemeBase := "base"
+	loginThemeRandom := "theme-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_loginTheme(realmName, clientId, loginThemeKeycloak),
+				Check:  testAccCheckKeycloakOpenidClientLoginTheme("keycloak_openid_client.client", loginThemeKeycloak),
+			},
+			{
+				Config: testKeycloakOpenidClient_loginTheme(realmName, clientId, loginThemeBase),
+				Check:  testAccCheckKeycloakOpenidClientLoginTheme("keycloak_openid_client.client", loginThemeBase),
+			},
+			{
+				Config:      testKeycloakOpenidClient_loginTheme(realmName, clientId, loginThemeRandom),
+				ExpectError: regexp.MustCompile("validation error: theme \".+\" does not exist on the server"),
+			},
+			{
+				Config: testKeycloakOpenidClient_loginTheme(realmName, clientId, loginThemeKeycloak),
+				Check:  testAccCheckKeycloakOpenidClientLoginTheme("keycloak_openid_client.client", loginThemeKeycloak),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -717,6 +750,21 @@ func testAccCheckKeycloakOpenidClientAuthenticationFlowBindingOverrides(resource
 			if client.AuthenticationFlowBindingOverrides.DirectGrantId != flow.Id {
 				return fmt.Errorf("expected openid client to have directGrantId set to %s, but got %s", flow.Id, client.AuthenticationFlowBindingOverrides.DirectGrantId)
 			}
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientLoginTheme(resourceName string, loginTheme string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.LoginTheme != loginTheme {
+			return fmt.Errorf("expected openid client to have login theme set to %s, but got %s", loginTheme, client.Attributes.LoginTheme)
 		}
 
 		return nil
@@ -1071,4 +1119,19 @@ resource "keycloak_openid_client" "client" {
 	access_type = "PUBLIC"
 }
 	`, realm, clientId)
+}
+
+func testKeycloakOpenidClient_loginTheme(realm, clientId, loginTheme string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "PUBLIC"
+	login_theme = "%s"
+}
+	`, realm, clientId, loginTheme)
 }
