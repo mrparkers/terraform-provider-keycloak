@@ -15,7 +15,7 @@ func (reference *OpenIdClientManagementPermissionsReference) openIdClientManagem
 }
 
 func openIdClientManagementPermissionsReferencePath(realmId, clientId string) string {
-	return fmt.Sprintf("/%s/clients/%s/management/permissions", realmId, clientId)
+	return fmt.Sprintf("/realms/%s/clients/%s/management/permissions", realmId, clientId)
 }
 
 func (reference *OpenIdClientManagementPermissionsReference) convertToGenericManagementPermissionsReference() *managementPermissionReference {
