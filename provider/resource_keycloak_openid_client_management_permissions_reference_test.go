@@ -16,18 +16,19 @@ func TestAccKeycloakOpenIdClientManagementPermissionsReference_basic(t *testing.
 	clientId := "terraform-client-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testKeycloakOpenIdClientManagementPermissionReferenceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeycloakOpenIdClientManagementPermissionsReference(realmName, clientId),
+				Config: testKeycloakOpenIdClientManagementPermissionsReference(realmName, clientId),
 				Check:  testKeycloakOpenIdClientManagementPermissionsReferenceExists("keycloak_openid_client_management_permissions_reference.management_permissions_reference"),
 			},
 		},
 	})
 }
 
-func testAccKeycloakOpenIdClientManagementPermissionsReference(realmId, clientId string) string {
+func testKeycloakOpenIdClientManagementPermissionsReference(realmId, clientId string) string {
 	return fmt.Sprintf(`
 	resource "keycloak_realm" "realm" {
 		realm = "%s"
@@ -43,7 +44,6 @@ func testAccKeycloakOpenIdClientManagementPermissionsReference(realmId, clientId
 	resource "keycloak_openid_client_management_permissions_reference" "management_permissions_reference" {
 		realm_id    = "${keycloak_realm.realm.id}"
 		client_id 	= "${keycloak_openid_client.client.id}"
-		enabled 	= true
 	}
 	`, realmId, clientId)
 }
@@ -67,6 +67,29 @@ func testKeycloakOpenIdClientManagementPermissionsReferenceExists(resourceName s
 		_, err := getOpenIdClientManagementPermissionsReferenceUsingState(state, resourceName)
 		if err != nil {
 			return err
+		}
+
+		return nil
+	}
+}
+
+func testKeycloakOpenIdClientManagementPermissionReferenceDestroy() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "keycloak_openid_client_management_permissions_reference" {
+				continue
+			}
+
+			id := rs.Primary.ID
+			realmId := rs.Primary.Attributes["realm_id"]
+			clientId := rs.Primary.Attributes["client_id"]
+
+			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+			reference, _ := keycloakClient.GetOpenIdClientManagementPermissionsReference(realmId, clientId)
+			if reference != nil {
+				return fmt.Errorf("management permission reference with id %s still exists", id)
+			}
 		}
 
 		return nil

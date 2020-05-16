@@ -21,16 +21,10 @@ func resourceKeycloakOpenidClientManagementPermissionsReference() *schema.Resour
 			"realm_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"client_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
-			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
 			},
 			"resource": {
 				Type:     schema.TypeString,
@@ -50,20 +44,9 @@ func openIdClientManagementReferenceId(realmId, clientId string) string {
 	return fmt.Sprintf("%s/%s", realmId, clientId)
 }
 
-func mapFromDataToOpenIdClientManagementPermissionsReference(data *schema.ResourceData) *keycloak.OpenIdClientManagementPermissionsReference {
-	return &keycloak.OpenIdClientManagementPermissionsReference{
-		RealmId:          data.Get("realm_id").(string),
-		ClientId:         data.Get("client_id").(string),
-		Enabled:          data.Get("enabled").(bool),
-		Resource:         data.Get("resource").(string),
-		ScopePermissions: data.Get("scope_permissions").(map[string]string),
-	}
-}
-
 func mapFromOpenIdClientManagementPermissionsReferenceToData(reference *keycloak.OpenIdClientManagementPermissionsReference, data *schema.ResourceData) {
 	data.Set("realm_id", reference.RealmId)
 	data.Set("client_id", reference.ClientId)
-	data.Set("enabled", reference.Enabled)
 	data.Set("resource", reference.Resource)
 	data.Set("scope_permissions", reference.ScopePermissions)
 }
@@ -101,17 +84,6 @@ func resourceKeycloakOpenIdClientManagementPermissionsReferenceRead(data *schema
 }
 
 func resourceKeycloakOpenIdClientManagementPermissionsReferenceUpdate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	clientManagementPermissionsReference := mapFromDataToOpenIdClientManagementPermissionsReference(data)
-
-	err := keycloakClient.UpdateOpenIdClientManagementPermissionsReference(clientManagementPermissionsReference)
-	if err != nil {
-		return err
-	}
-
-	data.SetId(openIdClientManagementReferenceId(clientManagementPermissionsReference.RealmId, clientManagementPermissionsReference.ClientId))
-
 	return resourceKeycloakOpenIdClientManagementPermissionsReferenceRead(data, meta)
 }
 
