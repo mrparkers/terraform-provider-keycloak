@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -33,13 +35,19 @@ func resourceKeycloakOpenidClientManagementPermissionsReference() *schema.Resour
 			"resource": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"scope_permissions": {
 				Type:     schema.TypeMap,
 				Optional: true,
+				Computed: true,
 			},
 		},
 	}
+}
+
+func openIdClientManagementReferenceId(realmId, clientId string) string {
+	return fmt.Sprintf("%s/%s", realmId, clientId)
 }
 
 func mapFromDataToOpenIdClientManagementPermissionsReference(data *schema.ResourceData) *keycloak.OpenIdClientManagementPermissionsReference {
@@ -80,6 +88,8 @@ func resourceKeycloakOpenIdClientManagementPermissionsReferenceRead(data *schema
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
+	data.SetId(openIdClientManagementReferenceId(realmId, clientId))
+
 	reference, err := keycloakClient.GetOpenIdClientManagementPermissionsReference(realmId, clientId)
 	if err != nil {
 		return handleNotFoundError(err, data)
@@ -99,6 +109,8 @@ func resourceKeycloakOpenIdClientManagementPermissionsReferenceUpdate(data *sche
 	if err != nil {
 		return err
 	}
+
+	data.SetId(openIdClientManagementReferenceId(clientManagementPermissionsReference.RealmId, clientManagementPermissionsReference.ClientId))
 
 	return resourceKeycloakOpenIdClientManagementPermissionsReferenceRead(data, meta)
 }

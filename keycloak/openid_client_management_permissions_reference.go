@@ -1,6 +1,8 @@
 package keycloak
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type OpenIdClientManagementPermissionsReference struct {
 	RealmId          string

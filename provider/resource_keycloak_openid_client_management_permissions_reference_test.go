@@ -41,7 +41,7 @@ func testAccKeycloakOpenIdClientManagementPermissionsReference(realmId, clientId
 	}
 	
 	resource "keycloak_openid_client_management_permissions_reference" "management_permissions_reference" {
-		realm_id    = "${keycloak_realm.realm.name}"
+		realm_id    = "${keycloak_realm.realm.id}"
 		client_id 	= "${keycloak_openid_client.client.id}"
 		enabled 	= true
 	}
