@@ -710,11 +710,11 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	full_sync_period         = %d
 	changed_sync_period      = %d
 
-	server_principal                         = %s
+	server_principal                         = "%s"
 	use_kerberos_for_password_authentication = %t
 	allow_kerberos_authentication            = %t
-	key_tab                                  = %s
-	kerberos_realm                           = %s
+	key_tab                                  = "%s"
+	kerberos_realm                           = "%s"
 
 	cache_policy             = "%s"
 }
