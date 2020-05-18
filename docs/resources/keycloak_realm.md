@@ -73,6 +73,7 @@ The following arguments are supported:
 - `enabled` - (Optional) When false, users and clients will not be able to access this realm. Defaults to `true`.
 - `display_name` - (Optional) The display name for the realm that is shown when logging in to the admin console.
 - `display_name_html` - (Optional) The display name for the realm that is rendered as HTML on the screen when logging in to the admin console.
+- `user_managed_access` - (Optional) When true, users are allowed to manage their own resources. Defaults to `false`.
 
 ##### Login Settings
 
@@ -147,7 +148,7 @@ Internationalization support can be configured by using the `internationalizatio
 
 ##### Security Defenses Headers
 
-Header configuration support for browser security settings and brute force detection. It can be configured trough the`security_defenses` block using the `headers` and the `brute_force_detection` subblocks. 
+Header configuration support for browser security settings and brute force detection. It can be configured trough the`security_defenses` block using the `headers` and the `brute_force_detection` subblocks.
 
 The `headers` block supports the following attributes:
 

@@ -3,6 +3,7 @@ package keycloak
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type OpenidClientAuthorizationJSPolicy struct {
@@ -18,7 +19,13 @@ type OpenidClientAuthorizationJSPolicy struct {
 }
 
 func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationJSPolicy(policy *OpenidClientAuthorizationJSPolicy) error {
-	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/js", policy.RealmId, policy.ResourceServerId), policy)
+	var body []byte
+	var err error
+	if strings.HasSuffix(policy.Code, ".js") {
+		body, _, err = keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/%s", policy.RealmId, policy.ResourceServerId, policy.Code), policy)
+	} else {
+		body, _, err = keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/js", policy.RealmId, policy.ResourceServerId), policy)
+	}
 	if err != nil {
 		return err
 	}
