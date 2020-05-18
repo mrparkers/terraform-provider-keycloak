@@ -188,43 +188,36 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				ValidateFunc: validateSyncPeriod,
 				Description:  "How frequently Keycloak should sync changed LDAP users, in seconds. Omit this property to disable periodic changed users sync.",
 			},
-
-			"auth_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "",
-				Description:  "TODO",
-			},			
 			
 			"server_principal": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "",
-				Description:  "TODO",
+				Description:  "The kerberos server principal, e.g. 'HTTP/host.foo.com@FOO.LOCAL'.",
 			},			
 			"use_kerberos_for_password_authentication": {
 				Type:         schema.TypeBool,
 				Optional:     true,
 				Default:      false,
-				Description:  "TODO",
+				Description:  "Use kerberos login module instead of ldap service api. Defaults to `false`.",
 			},	
 			"allow_kerberos_authentication": {
 				Type:         schema.TypeBool,
 				Optional:     true,
 				Default:      false,
-				Description:  "TODO",
+				Description:  "Should users be authenticated via HTTP SPNEGO/Kerberos Tokens. Defaults to `false`.",
 			},
 			"key_tab": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      false,
-				Description:  "TODO",
+				Default:      "",
+				Description:  "Path to the kerberos keytab file on the server with credentials of the service principal.",
 			},
 			"kerberos_realm": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      false,
-				Description:  "TODO",
+				Default:      "",
+				Description:  "The name of the kerberos realm, e.g. FOO.LOCAL",
 			},
 
 			"cache_policy": {
@@ -287,7 +280,6 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 		ReadTimeout:            data.Get("read_timeout").(string),
 		Pagination:             data.Get("pagination").(bool),
 
-		AuthType:  data.Get("auth_type").(string),
 		ServerPrincipal: data.Get("server_principal").(string),
 		UseKerberosForPasswordAuthentication: data.Get("use_kerberos_for_password_authentication").(bool),
 		AllowKerberosAuthentication: data.Get("allow_kerberos_authentication").(bool),
@@ -333,8 +325,6 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 	data.Set("read_timeout", ldap.ReadTimeout)
 	data.Set("pagination", ldap.Pagination)
 
-	
-	data.Set("auth_type", ldap.AuthType)
 	data.Set("server_principal", ldap.ServerPrincipal)
 	data.Set("use_kerberos_for_password_authentication", ldap.UseKerberosForPasswordAuthentication)
 	data.Set("allow_kerberos_authentication", ldap.AllowKerberosAuthentication)

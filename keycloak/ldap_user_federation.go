@@ -36,7 +36,6 @@ type LdapUserFederation struct {
 	ReadTimeout            string // duration string (ex: 1h30m)
 	Pagination             bool
 
-	AuthType string
 	ServerPrincipal string
 	UseKerberosForPasswordAuthentication bool
 	AllowKerberosAuthentication bool
@@ -110,9 +109,6 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) (*compon
 			strconv.Itoa(ldap.ChangedSyncPeriod),
 		},
 
-		"authType": {
-			ldap.AuthType,
-		},
 		"serverPrincipal": {
 			ldap.ServerPrincipal,
 		},
@@ -273,7 +269,6 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		UseTruststoreSpi:       component.getConfig("useTruststoreSpi"),
 		Pagination:             pagination,
 
-		AuthType: component.getConfig("authType"),
 		ServerPrincipal: component.getConfig("serverPrincipal"),
 		UseKerberosForPasswordAuthentication: useKerberosForPasswordAuthentication,
 		AllowKerberosAuthentication: allowKerberosAuthentication,

@@ -74,6 +74,11 @@ The following arguments are supported:
 - `full_sync_period` - (Optional) How frequently Keycloak should sync all LDAP users, in seconds. Omit this property to disable periodic full sync.
 - `changed_sync_period` - (Optional) How frequently Keycloak should sync changed LDAP users, in seconds. Omit this property to disable periodic changed users sync.
 - `cache_policy` - (Optional) Can be one of `DEFAULT`, `EVICT_DAILY`, `EVICT_WEEKLY`, `MAX_LIFESPAN`, or `NO_CACHE`. Defaults to `DEFAULT`.
+- `kerberos_realm` - (Optional) The name of the kerberos realm, e.g. FOO.LOCAL.
+- `server_principal` - (Optional) The kerberos server principal, e.g. 'HTTP/host.foo.com@FOO.LOCAL'.
+- `use_kerberos_for_password_authentication` - (Optional) Use kerberos login module instead of ldap service api. Defaults to `false`.
+- `allow_kerberos_authentication` - (Optional) Should users be authenticated via HTTP SPNEGO/Kerberos Tokens. Defaults to `false`.
+- `key_tab` - (Optional) Path to the kerberos keytab file on the server with credentials of the service principal.
 
 ### Import
 
