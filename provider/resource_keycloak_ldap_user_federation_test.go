@@ -138,14 +138,14 @@ func TestAccKeycloakLdapUserFederation_basicUpdateServerPrincipal(t *testing.T) 
 				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("server_principal", firstRealm, ldapName, serverPrincipal1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos_realm", serverPrincipal1),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "server_principal", serverPrincipal1),
 				),
 			},
 			{
 				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("server_principal", secondRealm, ldapName, serverPrincipal2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos_realm", serverPrincipal2),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "server_principal", serverPrincipal2),
 				),
 			},
 		},
@@ -168,14 +168,14 @@ func TestAccKeycloakLdapUserFederation_basicUpdateKeyTab(t *testing.T) {
 				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("key_tab", firstRealm, ldapName, keyTab1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos_realm", keyTab1),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "key_tab", keyTab1),
 				),
 			},
 			{
 				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("key_tab", secondRealm, ldapName, keyTab2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos_realm", keyTab2),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "key_tab", keyTab2),
 				),
 			},
 		},
@@ -198,14 +198,14 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAllowKerberosAuthentication(t 
 				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("allow_kerberos_authentication", firstRealm, ldapName, allowKerberosAuthentication1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos_realm", allowKerberosAuthentication1),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "allow_kerberos_authentication", allowKerberosAuthentication1),
 				),
 			},
 			{
 				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("allow_kerberos_authentication", secondRealm, ldapName, allowKerberosAuthentication2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos_realm", allowKerberosAuthentication2),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "allow_kerberos_authentication", allowKerberosAuthentication2),
 				),
 			},
 		},
@@ -228,14 +228,14 @@ func TestAccKeycloakLdapUserFederation_basicUpdateUseKerberosForPasswordAuthenti
 				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("use_kerberos_for_password_authentication", firstRealm, ldapName, useKerberosForPasswordAuthentication1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos_realm", useKerberosForPasswordAuthentication1),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "use_kerberos_for_password_authentication", useKerberosForPasswordAuthentication1),
 				),
 			},
 			{
 				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("use_kerberos_for_password_authentication", secondRealm, ldapName, useKerberosForPasswordAuthentication2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos_realm", useKerberosForPasswordAuthentication2),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "use_kerberos_for_password_authentication", useKerberosForPasswordAuthentication2),
 				),
 			},
 		},
