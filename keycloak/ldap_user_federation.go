@@ -36,11 +36,11 @@ type LdapUserFederation struct {
 	ReadTimeout            string // duration string (ex: 1h30m)
 	Pagination             bool
 
-	ServerPrincipal string
+	ServerPrincipal                      string
 	UseKerberosForPasswordAuthentication bool
-	AllowKerberosAuthentication bool
-	KeyTab string
-	KerberosRealm string
+	AllowKerberosAuthentication          bool
+	KeyTab                               string
+	KerberosRealm                        string
 
 	BatchSizeForSync  int
 	FullSyncPeriod    int // either a number, in milliseconds, or -1 if full sync is disabled
@@ -269,11 +269,11 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		UseTruststoreSpi:       component.getConfig("useTruststoreSpi"),
 		Pagination:             pagination,
 
-		ServerPrincipal: component.getConfig("serverPrincipal"),
+		ServerPrincipal:                      component.getConfig("serverPrincipal"),
 		UseKerberosForPasswordAuthentication: useKerberosForPasswordAuthentication,
-		AllowKerberosAuthentication: allowKerberosAuthentication,
-		KeyTab: component.getConfig("keyTab"),
-		KerberosRealm: component.getConfig("kerberosRealm"),
+		AllowKerberosAuthentication:          allowKerberosAuthentication,
+		KeyTab:                               component.getConfig("keyTab"),
+		KerberosRealm:                        component.getConfig("kerberosRealm"),
 
 		BatchSizeForSync:  batchSizeForSync,
 		FullSyncPeriod:    fullSyncPeriod,

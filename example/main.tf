@@ -242,6 +242,12 @@ resource "keycloak_ldap_user_federation" "openldap" {
   connection_timeout = "5s"
   read_timeout       = "10s"
 
+  server_principal = "HTTP/keycloak.local@FOO.LOCAL"
+  use_kerberos_for_password_authentication = false
+  allow_kerberos_authentication = true
+  key_tab = "/etc/keycloak.keytab"
+  kerberos_realm = "FOO.LOCAL"
+
   cache_policy = "NO_CACHE"
 }
 
