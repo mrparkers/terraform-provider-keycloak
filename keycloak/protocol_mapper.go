@@ -28,7 +28,7 @@ var (
 	userAttributeField                   = "user.attribute"
 	userPropertyField                    = "user.attribute"
 	userRealmRoleMappingRolePrefixField  = "usermodel.realmRoleMapping.rolePrefix"
-  userClientRoleMappingClientIdField   = "usermodel.clientRoleMapping.clientId"
+	userClientRoleMappingClientIdField   = "usermodel.clientRoleMapping.clientId"
 	userClientRoleMappingRolePrefixField = "usermodel.clientRoleMapping.rolePrefix"
 	aggregateAttributeValuesField        = "aggregate.attrs"
 )
