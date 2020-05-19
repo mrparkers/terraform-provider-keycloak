@@ -10,10 +10,19 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: Bash@3
+  displayName: Build  
+  inputs:
+    filePath: 'scripts/build-release.sh'
+- task: UniversalPackages@0
+  displayName: Release  
+  enabled: false
+  inputs:
+    command: 'publish'
+    publishDirectory: '$(Build.ArtifactStagingDirectory)'
+    feedsToUsePublish: 'internal'
+    vstsFeedPublish: '7720f8d2-bf64-47d9-8b10-53f21220d54d/9ba7201b-e25d-4afc-b55b-6ad212a1516d'
+    vstsFeedPackagePublish: 'terraform-provider-keycloak'
+    versionOption: 'patch'
+    packagePublishDescription: 'Embrace Fork of terraform-provider-keycloak, https://github.com/embracesbs/terraform-provider-keycloak'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
