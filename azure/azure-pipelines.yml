@@ -13,8 +13,10 @@ steps:
 - task: Bash@3
   displayName: Build  
   inputs:
-    filePath: 'scripts/build-release.sh'
-    arguments: 'CIRCLE_TAG=1.18.1'
+    targetType: 'inline'
+    script: | 
+      CIRCLE_TAG=1.18.1 ./scripts/build-release.sh
+
 - task: UniversalPackages@0
   displayName: Release  
   enabled: false
