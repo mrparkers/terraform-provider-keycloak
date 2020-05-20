@@ -25,7 +25,7 @@ func resourceKeycloakGroupRoles() *schema.Resource {
 			},
 			"group_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"role_ids": {
