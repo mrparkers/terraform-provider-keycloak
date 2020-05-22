@@ -404,7 +404,7 @@ resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_cl
   claim_value = "bar"
   multivalued = false
 
-  client_client_id   = "${keycloak_openid_client.bearer_only_client.client_id}"
+  client_id_for_role_mappings   = "${keycloak_openid_client.bearer_only_client.client_id}"
   client_role_prefix = "prefixValue"
 
   add_to_id_token     = true
@@ -421,7 +421,7 @@ resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_cl
   claim_value = "bar"
   multivalued = false
 
-  client_client_id   = "${keycloak_openid_client.bearer_only_client.client_id}"
+  client_id_for_role_mappings   = "${keycloak_openid_client.bearer_only_client.client_id}"
   client_role_prefix = "prefixValue"
   
   add_to_id_token     = true

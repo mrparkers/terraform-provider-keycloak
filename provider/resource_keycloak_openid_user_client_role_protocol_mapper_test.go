@@ -507,7 +507,7 @@ func testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignment(realmName, 
 	
 		claim_name      = "foo"
 		claim_value_type = "String"
-		client_client_id = "${keycloak_openid_client.openid_client_assigned.id}"
+		client_id_for_role_mappings = "${keycloak_openid_client.openid_client_assigned.id}"
 	}`, realmName, clientId, assignedClientId, mapperName)
 }
 
@@ -538,7 +538,7 @@ func testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignmentRolePrefix(r
 	
 		claim_name      = "foo"
 		claim_value_type = "String"
-		client_client_id = "${keycloak_openid_client.openid_client_assigned.id}"
+		client_id_for_role_mappings = "${keycloak_openid_client.openid_client_assigned.id}"
 		client_role_prefix= "%s"
 	}`, realmName, clientId, assignedClientId, mapperName, rolePrefix)
 }

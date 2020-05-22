@@ -80,7 +80,7 @@ func resourceKeycloakOpenIdUserClientRoleProtocolMapper() *schema.Resource {
 				Default:     false,
 				Description: "Indicates whether this attribute is a single value or an array of values.",
 			},
-			"client_client_id": {
+			"client_id_for_role_mappings": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Client ID for role mappings.",
@@ -105,11 +105,11 @@ func mapFromDataToOpenIdUserClientRoleProtocolMapper(data *schema.ResourceData) 
 		AddToAccessToken: data.Get("add_to_access_token").(bool),
 		AddToUserInfo:    data.Get("add_to_userinfo").(bool),
 
-		ClaimName:        data.Get("claim_name").(string),
-		ClaimValueType:   data.Get("claim_value_type").(string),
-		Multivalued:      data.Get("multivalued").(bool),
-		ClientClientId:   data.Get("client_client_id").(string),
-		ClientRolePrefix: data.Get("client_role_prefix").(string),
+		ClaimName:               data.Get("claim_name").(string),
+		ClaimValueType:          data.Get("claim_value_type").(string),
+		Multivalued:             data.Get("multivalued").(bool),
+		ClientIdForRoleMappings: data.Get("client_id_for_role_mappings").(string),
+		ClientRolePrefix:        data.Get("client_role_prefix").(string),
 	}
 }
 
@@ -130,7 +130,7 @@ func mapFromOpenIdUserClientRoleMapperToData(mapper *keycloak.OpenIdUserClientRo
 	data.Set("claim_name", mapper.ClaimName)
 	data.Set("claim_value_type", mapper.ClaimValueType)
 	data.Set("multivalued", mapper.Multivalued)
-	data.Set("client_client_id", mapper.ClientClientId)
+	data.Set("client_id_for_role_mappings", mapper.ClientIdForRoleMappings)
 	data.Set("client_role_prefix", mapper.ClientRolePrefix)
 }
 

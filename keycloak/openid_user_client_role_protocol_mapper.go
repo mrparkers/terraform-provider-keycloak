@@ -16,11 +16,11 @@ type OpenIdUserClientRoleProtocolMapper struct {
 	AddToAccessToken bool
 	AddToUserInfo    bool
 
-	ClaimName        string
-	ClaimValueType   string
-	Multivalued      bool
-	ClientClientId   string
-	ClientRolePrefix string
+	ClaimName               string
+	ClaimValueType          string
+	Multivalued             bool
+	ClientIdForRoleMappings string
+	ClientRolePrefix        string
 }
 
 func (mapper *OpenIdUserClientRoleProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
@@ -37,7 +37,7 @@ func (mapper *OpenIdUserClientRoleProtocolMapper) convertToGenericProtocolMapper
 			claimNameField:                       mapper.ClaimName,
 			claimValueTypeField:                  mapper.ClaimValueType,
 			multivaluedField:                     strconv.FormatBool(mapper.Multivalued),
-			userClientRoleMappingClientIdField:   mapper.ClientClientId,
+			userClientRoleMappingClientIdField:   mapper.ClientIdForRoleMappings,
 			userClientRoleMappingRolePrefixField: mapper.ClientRolePrefix,
 		},
 	}
@@ -75,11 +75,11 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserClientRoleProtocolMappe
 		AddToAccessToken: addToAccessToken,
 		AddToUserInfo:    addToUserInfo,
 
-		ClaimName:        protocolMapper.Config[claimNameField],
-		ClaimValueType:   protocolMapper.Config[claimValueTypeField],
-		Multivalued:      multivalued,
-		ClientClientId:   protocolMapper.Config[userClientRoleMappingClientIdField],
-		ClientRolePrefix: protocolMapper.Config[userClientRoleMappingRolePrefixField],
+		ClaimName:               protocolMapper.Config[claimNameField],
+		ClaimValueType:          protocolMapper.Config[claimValueTypeField],
+		Multivalued:             multivalued,
+		ClientIdForRoleMappings: protocolMapper.Config[userClientRoleMappingClientIdField],
+		ClientRolePrefix:        protocolMapper.Config[userClientRoleMappingRolePrefixField],
 	}, nil
 }
 
