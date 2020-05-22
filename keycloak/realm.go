@@ -21,7 +21,7 @@ type Keys struct {
 }
 
 type Realm struct {
-	Id                string `json:"id"`
+	Id                string `json:"id,omitempty"`
 	Realm             string `json:"realm"`
 	Enabled           bool   `json:"enabled"`
 	DisplayName       string `json:"displayName"`
@@ -124,10 +124,10 @@ func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
 	return err
 }
 
-func (keycloakClient *KeycloakClient) GetRealm(id string) (*Realm, error) {
+func (keycloakClient *KeycloakClient) GetRealm(name string) (*Realm, error) {
 	var realm Realm
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s", id), &realm, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s", name), &realm, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -145,10 +145,10 @@ func (keycloakClient *KeycloakClient) GetRealms() ([]*Realm, error) {
 	return realms, nil
 }
 
-func (keycloakClient *KeycloakClient) GetRealmKeys(id string) (*Keys, error) {
+func (keycloakClient *KeycloakClient) GetRealmKeys(name string) (*Keys, error) {
 	var keys Keys
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/keys", id), &keys, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/keys", name), &keys, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -157,14 +157,14 @@ func (keycloakClient *KeycloakClient) GetRealmKeys(id string) (*Keys, error) {
 }
 
 func (keycloakClient *KeycloakClient) UpdateRealm(realm *Realm) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s", realm.Id), realm)
+	return keycloakClient.put(fmt.Sprintf("/realms/%s", realm.Realm), realm)
 }
 
-func (keycloakClient *KeycloakClient) DeleteRealm(id string) error {
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s", id), nil)
+func (keycloakClient *KeycloakClient) DeleteRealm(name string) error {
+	err := keycloakClient.delete(fmt.Sprintf("/realms/%s", name), nil)
 	if err != nil {
 		// For whatever reason, this fails sometimes with a 500 during acceptance tests. try again
-		return keycloakClient.delete(fmt.Sprintf("/realms/%s", id), nil)
+		return keycloakClient.delete(fmt.Sprintf("/realms/%s", name), nil)
 	}
 
 	return nil
