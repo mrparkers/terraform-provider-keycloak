@@ -2,10 +2,11 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 var (
@@ -190,9 +191,9 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			},
 
 			"kerberos": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				MaxItems: 1,
+				Type:        schema.TypeSet,
+				Optional:    true,
+				MaxItems:    1,
 				Description: "Settings regarding kerberos authentication for this realm.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -295,7 +296,7 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 
 		ldapUserFederation.KerberosRealm = kerberosSettings["kerberos_realm"].(string)
 		ldapUserFederation.ServerPrincipal = kerberosSettings["server_principal"].(string)
-		ldapUserFederation.UseKerberosForPasswordAuthentication = kerberosSettings["use_kerberos_for_password_authentication"].(bool)		
+		ldapUserFederation.UseKerberosForPasswordAuthentication = kerberosSettings["use_kerberos_for_password_authentication"].(bool)
 		ldapUserFederation.KeyTab = kerberosSettings["key_tab"].(string)
 	} else {
 		ldapUserFederation.AllowKerberosAuthentication = false
