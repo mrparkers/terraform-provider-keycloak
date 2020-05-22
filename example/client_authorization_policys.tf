@@ -100,7 +100,7 @@ resource keycloak_openid_client_js_policy test {
   name               = "client_js_policy_test"
   logic              = "POSITIVE"
   decision_strategy  = "UNANIMOUS"
-  code               = "test"
+  code               = "test"  # can be js code or a js file already deployed
   description        = "description"
 }
 

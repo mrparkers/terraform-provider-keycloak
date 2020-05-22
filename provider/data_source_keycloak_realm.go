@@ -13,6 +13,10 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"internal_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -24,6 +28,10 @@ func dataSourceKeycloakRealm() *schema.Resource {
 			"display_name_html": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"user_managed_access": {
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
 
 			// Login Config
@@ -355,9 +363,9 @@ func dataSourceKeycloakRealm() *schema.Resource {
 func dataSourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmId := data.Get("realm").(string)
+	realmName := data.Get("realm").(string)
 
-	realm, err := keycloakClient.GetRealm(realmId)
+	realm, err := keycloakClient.GetRealm(realmName)
 	if err != nil {
 		return err
 	}
