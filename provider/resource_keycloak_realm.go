@@ -20,6 +20,10 @@ func resourceKeycloakRealm() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"internal_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -454,8 +458,14 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		defaultLocale = internationalizationSettings["default_locale"].(string)
 	}
 
+	realmId := data.Get("realm")
+	internalId := data.Get("internal_id")
+	if internalId != "" {
+		realmId = internalId
+	}
+
 	realm := &keycloak.Realm{
-		Id:                data.Get("realm").(string),
+		Id:                realmId.(string),
 		Realm:             data.Get("realm").(string),
 		Enabled:           data.Get("enabled").(bool),
 		DisplayName:       data.Get("display_name").(string),
@@ -731,6 +741,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.SetId(realm.Realm)
 
 	data.Set("realm", realm.Realm)
+	data.Set("internal_id", realm.Id)
 	data.Set("enabled", realm.Enabled)
 	data.Set("display_name", realm.DisplayName)
 	data.Set("display_name_html", realm.DisplayNameHtml)
