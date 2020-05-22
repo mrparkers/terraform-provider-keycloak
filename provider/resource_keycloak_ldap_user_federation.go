@@ -189,35 +189,36 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Description:  "How frequently Keycloak should sync changed LDAP users, in seconds. Omit this property to disable periodic changed users sync.",
 			},
 
-			"server_principal": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: "The kerberos server principal, e.g. 'HTTP/host.foo.com@FOO.LOCAL'.",
-			},
-			"use_kerberos_for_password_authentication": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: "Use kerberos login module instead of ldap service api. Defaults to `false`.",
-			},
-			"allow_kerberos_authentication": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: "Should users be authenticated via HTTP SPNEGO/Kerberos Tokens. Defaults to `false`.",
-			},
-			"key_tab": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: "Path to the kerberos keytab file on the server with credentials of the service principal.",
-			},
-			"kerberos_realm": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: "The name of the kerberos realm, e.g. FOO.LOCAL",
+			"kerberos": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1,
+				Description: "Settings regarding kerberos authentication for this realm.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"kerberos_realm": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the kerberos realm, e.g. FOO.LOCAL",
+						},
+						"server_principal": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The kerberos server principal, e.g. 'HTTP/host.foo.com@FOO.LOCAL'.",
+						},
+						"key_tab": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Path to the kerberos keytab file on the server with credentials of the service principal.",
+						},
+						"use_kerberos_for_password_authentication": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Use kerberos login module instead of ldap service api. Defaults to `false`.",
+						},
+					},
+				},
 			},
 
 			"cache_policy": {
@@ -250,7 +251,7 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 		userObjectClasses = append(userObjectClasses, userObjectClass.(string))
 	}
 
-	return &keycloak.LdapUserFederation{
+	ldapUserFederation := &keycloak.LdapUserFederation{
 		Id:      data.Id(),
 		Name:    data.Get("name").(string),
 		RealmId: data.Get("realm_id").(string),
@@ -280,18 +281,27 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 		ReadTimeout:            data.Get("read_timeout").(string),
 		Pagination:             data.Get("pagination").(bool),
 
-		ServerPrincipal:                      data.Get("server_principal").(string),
-		UseKerberosForPasswordAuthentication: data.Get("use_kerberos_for_password_authentication").(bool),
-		AllowKerberosAuthentication:          data.Get("allow_kerberos_authentication").(bool),
-		KeyTab:                               data.Get("key_tab").(string),
-		KerberosRealm:                        data.Get("kerberos_realm").(string),
-
 		BatchSizeForSync:  data.Get("batch_size_for_sync").(int),
 		FullSyncPeriod:    data.Get("full_sync_period").(int),
 		ChangedSyncPeriod: data.Get("changed_sync_period").(int),
 
 		CachePolicy: data.Get("cache_policy").(string),
 	}
+
+	if kerberos, ok := data.GetOk("kerberos"); ok {
+		ldapUserFederation.AllowKerberosAuthentication = true
+		kerberosSettingsData := kerberos.(*schema.Set).List()[0]
+		kerberosSettings := kerberosSettingsData.(map[string]interface{})
+
+		ldapUserFederation.KerberosRealm = kerberosSettings["kerberos_realm"].(string)
+		ldapUserFederation.ServerPrincipal = kerberosSettings["server_principal"].(string)
+		ldapUserFederation.UseKerberosForPasswordAuthentication = kerberosSettings["use_kerberos_for_password_authentication"].(bool)		
+		ldapUserFederation.KeyTab = kerberosSettings["key_tab"].(string)
+	} else {
+		ldapUserFederation.AllowKerberosAuthentication = false
+	}
+
+	return ldapUserFederation
 }
 
 func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUserFederation) {
@@ -325,11 +335,19 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 	data.Set("read_timeout", ldap.ReadTimeout)
 	data.Set("pagination", ldap.Pagination)
 
-	data.Set("server_principal", ldap.ServerPrincipal)
-	data.Set("use_kerberos_for_password_authentication", ldap.UseKerberosForPasswordAuthentication)
-	data.Set("allow_kerberos_authentication", ldap.AllowKerberosAuthentication)
-	data.Set("key_tab", ldap.KeyTab)
-	data.Set("kerberos_realm", ldap.KerberosRealm)
+	if ldap.AllowKerberosAuthentication {
+		kerberosSettingsData := make([]interface{}, 1)
+		kerberosSettings := make(map[string]interface{})
+		kerberosSettingsData[0] = kerberosSettings
+
+		kerberosSettings["server_principal"] = ldap.ServerPrincipal
+		kerberosSettings["use_kerberos_for_password_authentication"] = ldap.UseKerberosForPasswordAuthentication
+		kerberosSettings["allow_kerberos_authentication"] = ldap.AllowKerberosAuthentication
+		kerberosSettings["key_tab"] = ldap.KeyTab
+		kerberosSettings["kerberos_realm"] = ldap.KerberosRealm
+
+		data.Set("kerberos", kerberosSettingsData)
+	}
 
 	data.Set("batch_size_for_sync", ldap.BatchSizeForSync)
 	data.Set("full_sync_period", ldap.FullSyncPeriod)
