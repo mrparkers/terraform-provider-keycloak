@@ -20,7 +20,7 @@ func TestAccKeycloakLdapUserFederation_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
 		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
-		Steps: []resource.TestStep{
+		Steps: []resource.TestStep{ 
 			{
 				Config: testKeycloakLdapUserFederation_basic(realmName, ldapName),
 				Check:  testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
@@ -109,7 +109,7 @@ func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
 				Config: testKeycloakLdapUserFederation_basic(firstRealm, ldapName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap.kerberos", "realm_id", firstRealm),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "realm_id", firstRealm),
 				),
 			},
 			{
@@ -168,9 +168,9 @@ func TestAccKeycloakLdapUserFederation_basicUpdateKerberosSettings(t *testing.T)
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
 					resource.TestCheckResourceAttrSet("keycloak_ldap_user_federation.openldap", "kerberos"),
 					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.kerberos_realm", firstLdap.KerberosRealm),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "server_principal", firstLdap.ServerPrincipal),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "use_kerberos_for_password_authentication", strconv.FormatBool(firstLdap.UseKerberosForPasswordAuthentication)),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "key_tab", firstLdap.KeyTab),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.server_principal", firstLdap.ServerPrincipal),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.use_kerberos_for_password_authentication", strconv.FormatBool(firstLdap.UseKerberosForPasswordAuthentication)),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.key_tab", firstLdap.KeyTab),
 				),
 			},
 			{
@@ -179,9 +179,9 @@ func TestAccKeycloakLdapUserFederation_basicUpdateKerberosSettings(t *testing.T)
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
 					resource.TestCheckResourceAttrSet("keycloak_ldap_user_federation.openldap", "kerberos"),
 					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.kerberos_realm", secondLdap.KerberosRealm),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "server_principal", secondLdap.ServerPrincipal),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "use_kerberos_for_password_authentication", strconv.FormatBool(secondLdap.UseKerberosForPasswordAuthentication)),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "key_tab", secondLdap.KeyTab),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.server_principal", secondLdap.ServerPrincipal),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.use_kerberos_for_password_authentication", strconv.FormatBool(secondLdap.UseKerberosForPasswordAuthentication)),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.key_tab", secondLdap.KeyTab),
 				),
 			},
 		},
@@ -629,14 +629,13 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	kerberos {
 		server_principal                         = "%s"
 		use_kerberos_for_password_authentication = %t
-		allow_kerberos_authentication            = %t
 		key_tab                                  = "%s"
 		kerberos_realm                           = "%s"
 	}
 
 	cache_policy             = "%s"
 }
-	`, ldap.RealmId, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, arrayOfStringsForTerraformResource(ldap.UserObjectClasses), ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.ValidatePasswordPolicy, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.ServerPrincipal, ldap.UseKerberosForPasswordAuthentication, ldap.AllowKerberosAuthentication, ldap.KeyTab, ldap.KerberosRealm, ldap.CachePolicy)
+	`, ldap.RealmId, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, arrayOfStringsForTerraformResource(ldap.UserObjectClasses), ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.ValidatePasswordPolicy, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.ServerPrincipal, ldap.UseKerberosForPasswordAuthentication, ldap.KeyTab, ldap.KerberosRealm, ldap.CachePolicy)
 }
 
 func testKeycloakLdapUserFederation_basicWithAttrValidation(attr, realm, ldap, val string) string {
