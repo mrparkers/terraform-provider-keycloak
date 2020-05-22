@@ -20,7 +20,7 @@ func TestAccKeycloakLdapUserFederation_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
 		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
-		Steps: []resource.TestStep{ 
+		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapUserFederation_basic(realmName, ldapName),
 				Check:  testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
