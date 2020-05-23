@@ -124,6 +124,9 @@ func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
 }
 
 func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
+	connectionTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
+	readTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
+	
 	return &keycloak.LdapUserFederation{
 		RealmId:                              acctest.RandString(10),
 		Name:                                 "terraform-" + acctest.RandString(10),
@@ -138,8 +141,8 @@ func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 		SearchScope:                          randomStringInSlice([]string{"ONE_LEVEL", "SUBTREE"}),
 		ValidatePasswordPolicy:               true,
 		UseTruststoreSpi:                     randomStringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}),
-		ConnectionTimeout:                    "3600",
-		ReadTimeout:                          "3600",
+		ConnectionTimeout:                    connectionTimeout,
+		ReadTimeout:                          readTimeout,
 		Pagination:                           true,
 		BatchSizeForSync:                     acctest.RandIntRange(50, 10000),
 		FullSyncPeriod:                       acctest.RandIntRange(1, 3600),
