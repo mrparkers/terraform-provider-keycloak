@@ -480,19 +480,21 @@ resource keycloak_oidc_google_identity_provider google {
   accepts_prompt_none_forward_from_client = false
 }
 
-resource keycloak_oidc_identity_provider custom_oidc_idp {
-  realm             = "${keycloak_realm.test.id}"
-  provider_id       = "customIdp"
-  alias             = "custom"
-  authorization_url = "https://example.com/auth"
-  token_url         = "https://example.com/token"
-  client_id         = "example_id"
-  client_secret     = "example_token"
-
-  extra_config = {
-    dummyConfig = "dummyValue"
-  }
-}
+//This example does not work in keycloak 10, because the interfaces that our customIdp implements, have changed in the keycloak latest version.
+//We need to make decide which keycloak version we going to support and test for the customIdp
+//resource keycloak_oidc_identity_provider custom_oidc_idp {
+//  realm             = "${keycloak_realm.test.id}"
+//  provider_id       = "customIdp"
+//  alias             = "custom"
+//  authorization_url = "https://example.com/auth"
+//  token_url         = "https://example.com/token"
+//  client_id         = "example_id"
+//  client_secret     = "example_token"
+//
+//  extra_config = {
+//    dummyConfig = "dummyValue"
+//  }
+//}
 
 resource keycloak_attribute_importer_identity_provider_mapper oidc {
   realm                   = "${keycloak_realm.test.id}"
