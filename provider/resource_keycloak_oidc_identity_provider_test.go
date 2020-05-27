@@ -26,26 +26,27 @@ func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
 	})
 }
 
-//This test does not work in keycloak 10, because the interfaces that our customIdp implements, have changed in the keycloak latest version.
-//We need to decide which keycloak version we going to support and test for the customIdp
-//func TestAccKeycloakOidcIdentityProvider_custom(t *testing.T) {
-//	realmName := "terraform-" + acctest.RandString(10)
-//	oidcName := "terraform-" + acctest.RandString(10)
-//
-//	resource.Test(t, resource.TestCase{
-//		Providers:    testAccProviders,
-//		PreCheck:     func() { testAccPreCheck(t) },
-//		CheckDestroy: testAccCheckKeycloakOidcIdentityProviderDestroy(),
-//		Steps: []resource.TestStep{
-//			{
-//				Config: testKeycloakOidcIdentityProvider_custom(realmName, oidcName),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
-//				),
-//			},
-//		},
-//	})
-//}
+func TestAccKeycloakOidcIdentityProvider_custom(t *testing.T) {
+	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom idp in CI
+	//This test does not work in keycloak 10, because the interfaces that our customIdp implements, have changed in the keycloak latest version.
+	//We need to decide which keycloak version we going to support and test for the customIdp
+	realmName := "terraform-" + acctest.RandString(10)
+	oidcName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOidcIdentityProviderDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOidcIdentityProvider_custom(realmName, oidcName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
+				),
+			},
+		},
+	})
+}
 
 func TestAccKeycloakOidcIdentityProvider_extra_config(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
