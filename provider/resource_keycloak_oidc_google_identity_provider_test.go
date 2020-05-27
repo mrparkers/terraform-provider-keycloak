@@ -25,7 +25,7 @@ func TestAccKeycloakOidcGoogleIdentityProvider_basic(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakOidcGoogleIdentityProvider_custom(t *testing.T) {
+func TestAccKeycloakOidcGoogleIdentityProvider_customConfig(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	customConfigValue := "terraform-" + acctest.RandString(10)
 
@@ -35,7 +35,7 @@ func TestAccKeycloakOidcGoogleIdentityProvider_custom(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakOidcGoogleIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOidcGoogleIdentityProvider_custom(realmName, customConfigValue),
+				Config: testKeycloakOidcGoogleIdentityProvider_customConfig(realmName, customConfigValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOidcGoogleIdentityProviderExists("keycloak_oidc_google_identity_provider.google_custom"),
 					testAccCheckKeycloakOidcGoogleIdentityProviderHasCustomConfigValue("keycloak_oidc_google_identity_provider.google_custom", customConfigValue),
@@ -242,7 +242,7 @@ resource "keycloak_oidc_google_identity_provider" "google" {
 	`, realm)
 }
 
-func testKeycloakOidcGoogleIdentityProvider_custom(realm, customConfigValue string) string {
+func testKeycloakOidcGoogleIdentityProvider_customConfig(realm, customConfigValue string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -250,7 +250,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_oidc_google_identity_provider" "google_custom" {
 	realm             = "${keycloak_realm.realm.id}"
-	provider_id       = "customGoogleIdp"
+	provider_id       = "google"
 	client_id         = "example_id"
 	client_secret     = "example_token"
 	extra_config      = {

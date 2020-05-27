@@ -33,7 +33,18 @@ type PasswordCredentials struct {
 }
 
 func (keycloakClient *KeycloakClient) NewUser(user *User) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users", user.RealmId), user)
+	newUser := User{
+		Id:            user.Id,
+		RealmId:       user.RealmId,
+		Username:      user.Username,
+		Email:         user.Email,
+		EmailVerified: user.EmailVerified,
+		FirstName:     user.FirstName,
+		LastName:      user.LastName,
+		Enabled:       user.Enabled,
+		Attributes:    user.Attributes,
+	}
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users", user.RealmId), newUser)
 	if err != nil {
 		return err
 	}
