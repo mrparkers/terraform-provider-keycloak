@@ -77,7 +77,7 @@ The following arguments are supported:
 - `add_to_id_token` - (Optional) Indicates if the attribute should be added as a claim to the id token. Defaults to `true`.
 - `add_to_access_token` - (Optional) Indicates if the attribute should be added as a claim to the access token. Defaults to `true`.
 - `add_to_userinfo` - (Optional) Indicates if the attribute should be added as a claim to the UserInfo response body. Defaults to `true`.
-
+- `aggregate_attributes`- (Optional) Indicates whether this attribute is a single value or an array of values. Defaults to `false`.
 ### Import
 
 Protocol mappers can be imported using one of the following formats:
