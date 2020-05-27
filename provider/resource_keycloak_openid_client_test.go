@@ -188,7 +188,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		implicitFlowEnabled = !standardFlowEnabled
 	}
 
-	rootUrlBefore := "http://localhost:2222/"+ acctest.RandString(20)
+	rootUrlBefore := "http://localhost:2222/" + acctest.RandString(20)
 	openidClientBefore := &keycloak.OpenidClient{
 		RealmId:                   realm,
 		ClientId:                  clientId,
