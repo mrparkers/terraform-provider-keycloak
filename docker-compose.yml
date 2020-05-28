@@ -17,7 +17,7 @@ services:
     ports:
     - 8389:389
   keycloak:
-    image:  jboss/keycloak:5.0.0
+    image:  jboss/keycloak:8.0.1
     command: -b 0.0.0.0 -Dkeycloak.profile.feature.upload_scripts=enabled
     depends_on:
     - postgres
@@ -26,7 +26,6 @@ services:
     - KEYCLOAK_USER=keycloak
     - KEYCLOAK_PASSWORD=password
     - KEYCLOAK_LOGLEVEL=INFO
-    - KEYCLOAK_VERSION=5.0.0
     - DB_VENDOR=POSTGRES
     - DB_ADDR=postgres
     - DB_PORT=5432
