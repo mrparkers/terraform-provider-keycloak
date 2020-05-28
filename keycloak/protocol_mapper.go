@@ -28,6 +28,7 @@ var (
 	userAttributeField                  = "user.attribute"
 	userPropertyField                   = "user.attribute"
 	userRealmRoleMappingRolePrefixField = "usermodel.realmRoleMapping.rolePrefix"
+	userSessionModelNoteLabelField      = "userSession.modelNote.label"
 	aggregateAttributeValuesField       = "aggregate.attrs"
 )
 
