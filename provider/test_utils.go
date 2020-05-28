@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"math/rand"
 	"os"
 	"strconv"
@@ -77,7 +78,7 @@ func TestCheckResourceAttrNot(name, key, value string) resource.TestCheckFunc {
 	}
 }
 
-func keycloakVersionIsHigherOrEqualThan(keycloakMajorVersion int) (bool, error) {
+func keycloakVersionIsGreaterThanOrEqualTo(keycloakMajorVersion int) (bool, error) {
 	keycloakVersion := os.Getenv("KEYCLOAK_VERSION")
 	if len(keycloakVersion) > 0 {
 		i, err := strconv.Atoi(string(keycloakVersion[0]))
@@ -86,4 +87,19 @@ func keycloakVersionIsHigherOrEqualThan(keycloakMajorVersion int) (bool, error) 
 		}
 	}
 	return false, fmt.Errorf("KEYCLOAK_VERSION env var was not correctly set, it was '%s'. It should be for example : 5.0.0, 10.0.1", keycloakVersion)
+}
+
+func keycloakServerInfoVersionIsGreaterThanOrEqualTo(keycloakClient *keycloak.KeycloakClient, keycloakMajorVersion int) (bool, error) {
+	serverInfo, err := keycloakClient.GetServerInfo()
+	if err != nil {
+		return false, fmt.Errorf("/serverInfo endpoint retuned an error, server Keycloak version could not be determined")
+	}
+	keycloakVersion := serverInfo.SystemInfo.ServerVersion
+	if len(keycloakVersion) > 0 {
+		i, err := strconv.Atoi(string(keycloakVersion[0]))
+		if err == nil {
+			return i >= keycloakMajorVersion, nil
+		}
+	}
+	return false, fmt.Errorf("server version returned by /serverInfo endpoint was unreadable")
 }
