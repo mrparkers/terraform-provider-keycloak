@@ -12,7 +12,16 @@ import (
 )
 
 // All openid clients in Keycloak will automatically have these scopes listed as "optional client scopes".
-var preAssignedOptionalClientScopes = []string{"address", "phone", "offline_access", "microprofile-jwt"}
+var preAssignedOptionalClientScopes = getPreAssignedOptionalClientScopes()
+
+func getPreAssignedOptionalClientScopes() []string {
+	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsHigherOrEqualThan(6)
+	if keycloakVersionIsHigherOrEqualTo6 {
+		return []string{"address", "phone", "offline_access", "microprofile-jwt"}
+	} else {
+		return []string{"address", "phone", "offline_access"}
+	}
+}
 
 func TestAccKeycloakOpenidClientOptionalScopes_basic(t *testing.T) {
 	realm := "terraform-realm-" + acctest.RandString(10)
@@ -399,7 +408,9 @@ func testAccCheckKeycloakOpenidClientOptionalScopeIsNotAttached(resourceName, cl
 }
 
 func testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope string) string {
-	return fmt.Sprintf(`
+	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsHigherOrEqualThan(6)
+	if keycloakVersionIsHigherOrEqualTo6 {
+		return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
@@ -429,6 +440,37 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 	]
 }
 	`, realm, client, clientScope)
+	} else {
+		return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "PUBLIC"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name        = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+
+	description = "test description"
+}
+
+resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
+	realm_id       = "${keycloak_realm.realm.id}"
+	client_id      = "${keycloak_openid_client.client.id}"
+	optional_scopes = [
+		"address",
+		"phone",
+		"offline_access",
+		"${keycloak_openid_client_scope.client_scope.name}"
+	]
+}
+	`, realm, client, clientScope)
+	}
 }
 
 func testKeycloakOpenidClientOptionalScopes_noOptionalScopes(realm, client, clientScope string) string {
@@ -482,7 +524,9 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_validationNoClient(realm, client, clientScope string) string {
-	return fmt.Sprintf(`
+	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsHigherOrEqualThan(6)
+	if keycloakVersionIsHigherOrEqualTo6 {
+		return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
@@ -506,10 +550,38 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 	]
 }
 	`, realm, clientScope, client)
+	} else {
+		return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name        = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+
+	description = "test description"
+}
+
+resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
+	realm_id       = "${keycloak_realm.realm.id}"
+	client_id      = "%s"
+	optional_scopes = [
+		"address",
+		"phone",
+		"offline_access",
+		"${keycloak_openid_client_scope.client_scope.name}"
+	]
+}
+	`, realm, clientScope, client)
+	}
 }
 
 func testKeycloakOpenidClientOptionalScopes_validationBearerOnlyClient(realm, client, clientScope string) string {
-	return fmt.Sprintf(`
+
+	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsHigherOrEqualThan(6)
+	if keycloakVersionIsHigherOrEqualTo6 {
+		return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
@@ -539,6 +611,37 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 	]
 }
 	`, realm, client, clientScope)
+	} else {
+		return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "BEARER-ONLY"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name        = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+
+	description = "test description"
+}
+
+resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
+	realm_id       = "${keycloak_realm.realm.id}"
+	client_id      = "${keycloak_openid_client.client.id}"
+	optional_scopes = [
+		"address",
+		"phone",
+		"offline_access",
+		"${keycloak_openid_client_scope.client_scope.name}"
+	]
+}
+	`, realm, client, clientScope)
+	}
 }
 
 func testKeycloakOpenidClientOptionalScopes_multipleClientScopes(realm, client string, allClientScopes, attachedClientScopes []string) string {
@@ -585,7 +688,9 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_duplicateScopeAssignment(realm, client, clientScope string) string {
-	return fmt.Sprintf(`
+	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsHigherOrEqualThan(6)
+	if keycloakVersionIsHigherOrEqualTo6 {
+		return fmt.Sprintf(`
 %s
 
 resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
@@ -600,4 +705,20 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 	]
 }
 	`, testKeycloakOpenidClientDefaultScopes_basic(realm, client, clientScope))
+	} else {
+		return fmt.Sprintf(`
+%s
+
+resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
+	realm_id       = "${keycloak_realm.realm.id}"
+	client_id      = "${keycloak_openid_client.client.id}"
+	optional_scopes = [
+		"address",
+		"phone",
+		"offline_access",
+		"${keycloak_openid_client_scope.client_scope.name}"
+	]
+}
+	`, testKeycloakOpenidClientDefaultScopes_basic(realm, client, clientScope))
+	}
 }

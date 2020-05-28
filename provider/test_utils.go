@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -74,4 +75,15 @@ func TestCheckResourceAttrNot(name, key, value string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func keycloakVersionIsHigherOrEqualThan(keycloakMajorVersion int) (bool, error) {
+	keycloakVersion := os.Getenv("KEYCLOAK_VERSION")
+	if len(keycloakVersion) > 0 {
+		i, err := strconv.Atoi(string(keycloakVersion[0]))
+		if err == nil {
+			return i >= keycloakMajorVersion, nil
+		}
+	}
+	return false, fmt.Errorf("KEYCLOAK_VERSION env var was not correctly set, it was '%s'. It should be for example : 5.0.0, 10.0.1", keycloakVersion)
 }
