@@ -25,7 +25,7 @@ services:
     environment:
     - KEYCLOAK_USER=keycloak
     - KEYCLOAK_PASSWORD=password
-    - KEYCLOAK_LOGLEVEL=DEBUG
+    - KEYCLOAK_LOGLEVEL=INFO
     - DB_VENDOR=POSTGRES
     - DB_ADDR=postgres
     - DB_PORT=5432
