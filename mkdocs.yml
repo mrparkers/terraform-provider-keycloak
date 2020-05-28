@@ -31,6 +31,7 @@ nav:
   - keycloak_openid_audience_protocol_mapper: resources/keycloak_openid_audience_protocol_mapper.md
   - keycloak_openid_hardcoded_role_protocol_mapper: resources/keycloak_openid_hardcoded_role_protocol_mapper.md
   - keycloak_openid_user_realm_role_protocol_mapper: resources/keycloak_openid_user_realm_role_protocol_mapper.md
+  - keycloak_openid_user_client_role_protocol_mapper: resources/keycloak_openid_user_client_role_protocol_mapper.md
   - keycloak_saml_client: resources/keycloak_saml_client.md
   - keycloak_saml_user_attribute_protocol_mapper: resources/keycloak_saml_user_attribute_protocol_mapper.md
   - keycloak_saml_user_property_protocol_mapper: resources/keycloak_saml_user_property_protocol_mapper.md
