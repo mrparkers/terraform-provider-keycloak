@@ -24,6 +24,18 @@ func getPreAssignedOptionalClientScopes(t *testing.T) []string {
 	}
 }
 
+func getPreAssignedOptionalClientScopesUsingKeycloakClient(t *testing.T, keycloakClient *keycloak.KeycloakClient) []string {
+	keycloakVersionIsGreaterThanOrEqualTo6, err := keycloakServerInfoVersionIsGreaterThanOrEqualTo(keycloakClient, 6)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if keycloakVersionIsGreaterThanOrEqualTo6 {
+		return []string{"address", "phone", "offline_access", "microprofile-jwt"}
+	} else {
+		return []string{"address", "phone", "offline_access"}
+	}
+}
+
 func TestAccKeycloakOpenidClientOptionalScopes_basic(t *testing.T) {
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
@@ -38,6 +50,77 @@ func TestAccKeycloakOpenidClientOptionalScopes_basic(t *testing.T) {
 			{
 				Config: testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", clientScopes),
+			},
+			// we need a separate test step for destroy instead of using CheckDestroy because this resource is implicitly
+			// destroyed at the end of each test via destroying clients
+			{
+				Config: testKeycloakOpenidClientOptionalScopes_noOptionalScopes(realm, client, clientScope),
+				Check:  testAccCheckKeycloakOpenidClientHasNoOptionalScopes("keycloak_openid_client.client"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenidClientOptionalScopes_basic_fail1(t *testing.T) {
+	realm := "terraform-realm-" + acctest.RandString(10)
+	client := "terraform-client-" + acctest.RandString(10)
+	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+
+	clientScopes := append(getPreAssignedOptionalClientScopesUsingKeycloakClient(t, testAccProvider.Meta().(*keycloak.KeycloakClient)), clientScope)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope),
+				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", clientScopes),
+			},
+			// we need a separate test step for destroy instead of using CheckDestroy because this resource is implicitly
+			// destroyed at the end of each test via destroying clients
+			{
+				Config: testKeycloakOpenidClientOptionalScopes_noOptionalScopes(realm, client, clientScope),
+				Check:  testAccCheckKeycloakOpenidClientHasNoOptionalScopes("keycloak_openid_client.client"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenidClientOptionalScopes_basic_fail2(t *testing.T) {
+	realm := "terraform-realm-" + acctest.RandString(10)
+	client := "terraform-client-" + acctest.RandString(10)
+	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope),
+				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", append(getPreAssignedOptionalClientScopesUsingKeycloakClient(t, testAccProvider.Meta().(*keycloak.KeycloakClient)), clientScope)),
+			},
+			// we need a separate test step for destroy instead of using CheckDestroy because this resource is implicitly
+			// destroyed at the end of each test via destroying clients
+			{
+				Config: testKeycloakOpenidClientOptionalScopes_noOptionalScopes(realm, client, clientScope),
+				Check:  testAccCheckKeycloakOpenidClientHasNoOptionalScopes("keycloak_openid_client.client"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenidClientOptionalScopes_basic_fail3(t *testing.T) {
+	realm := "terraform-realm-" + acctest.RandString(10)
+	client := "terraform-client-" + acctest.RandString(10)
+	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope),
+				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes2("keycloak_openid_client_optional_scopes.optional_scopes", clientScope), // fetch client scopes in checkmethod
 			},
 			// we need a separate test step for destroy instead of using CheckDestroy because this resource is implicitly
 			// destroyed at the end of each test via destroying clients
@@ -355,6 +438,35 @@ func testAccCheckKeycloakOpenidClientHasOptionalScopes(resourceName string, tfOp
 		if err != nil {
 			return err
 		}
+
+		for _, tfOptionalClientScope := range tfOptionalClientScopes {
+			found := false
+
+			for _, keycloakOptionalScope := range keycloakOptionalClientScopes {
+				if keycloakOptionalScope.Name == tfOptionalClientScope {
+					found = true
+
+					break
+				}
+			}
+
+			if !found {
+				return fmt.Errorf("optional scope %s is not assigned to client", tfOptionalClientScope)
+			}
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientHasOptionalScopes2(resourceName, clientScope string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		keycloakOptionalClientScopes, err := getOptionalClientScopesFromState(resourceName, s)
+		if err != nil {
+			return err
+		}
+
+		tfOptionalClientScopes := append(getPreAssignedOptionalClientScopesUsingKeycloakClient(nil, testAccProvider.Meta().(*keycloak.KeycloakClient)), clientScope)
 
 		for _, tfOptionalClientScope := range tfOptionalClientScopes {
 			found := false
