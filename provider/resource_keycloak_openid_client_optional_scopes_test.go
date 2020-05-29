@@ -66,7 +66,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_basic_fail1(t *testing.T) {
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	clientScopes := append(getPreAssignedOptionalClientScopesUsingKeycloakClient(t, testAccProvider.Meta().(*keycloak.KeycloakClient)), clientScope)
+	clientScopes := append(getPreAssignedOptionalClientScopesUsingKeycloakClient(t, keycloakClient), clientScope)
 
 	resource.Test(t, resource.TestCase{
 		Providers: testAccProviders,
@@ -97,7 +97,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_basic_fail2(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope),
-				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", append(getPreAssignedOptionalClientScopesUsingKeycloakClient(t, testAccProvider.Meta().(*keycloak.KeycloakClient)), clientScope)),
+				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", append(getPreAssignedOptionalClientScopesUsingKeycloakClient(t, keycloakClient), clientScope)),
 			},
 			// we need a separate test step for destroy instead of using CheckDestroy because this resource is implicitly
 			// destroyed at the end of each test via destroying clients
