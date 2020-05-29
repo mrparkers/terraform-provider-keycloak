@@ -1,14 +1,19 @@
 {
 	kind: 'pipeline',
 	type: 'kubernetes',
-	name: 'default',
+	name: 'test',
 	steps: [
 		{
-			name: 'test',
+			name: 'list contents',
 			image: 'alpine',
 			commands: [
 				'ls -alh',
 			]
 		}
 	],
+	trigger: {
+		event: [
+			'pull_request'
+		]
+	}
 }
