@@ -4,11 +4,10 @@
 	name: 'default',
 	steps: [
 		{
-			name: 'greeting',
+			name: 'test',
 			image: 'alpine',
 			commands: [
-				'echo hello',
-				'echo world'
+				'ls -alh',
 			]
 		}
 	],
