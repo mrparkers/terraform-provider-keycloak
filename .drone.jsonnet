@@ -32,5 +32,6 @@ local pipeline(version) = {
 };
 
 [
-	pipeline('8.0.1')
+	pipeline('8.0.1'),
+	pipeline('7.0.1'),
 ]
