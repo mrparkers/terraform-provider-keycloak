@@ -6,7 +6,7 @@ local pipeline(version) = {
 		{
 			name: 'keycloak',
 			image: 'jboss/keycloak:%(version)s' % { version: version },
-		}
+		},
 	],
 	steps: [
 		{
@@ -33,4 +33,5 @@ local pipeline(version) = {
 
 [
 	pipeline('8.0.1'),
+	pipeline('7.0.1'),
 ]
