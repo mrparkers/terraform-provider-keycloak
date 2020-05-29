@@ -126,7 +126,7 @@ func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
 func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 	connectionTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
 	readTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
-	
+
 	return &keycloak.LdapUserFederation{
 		RealmId:                              acctest.RandString(10),
 		Name:                                 "terraform-" + acctest.RandString(10),
@@ -156,6 +156,29 @@ func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 	}
 }
 
+func checkMatchingNestedKey(resourcePath string, blockName string, fieldInBlock string, value string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		resource, ok := s.RootModule().Resources[resourcePath]
+		if !ok {
+			return fmt.Errorf("Could not find resource %s", resourcePath)
+		}
+
+		matchExpression := fmt.Sprintf(`%s\.\d\.mappings\.\d+\.%s`, blockName, fieldInBlock)
+
+		for k, v := range resource.Primary.Attributes {
+			if isMatch, _ := regexp.Match(matchExpression, []byte(k)); isMatch {
+				if v == value {
+					return nil
+				}
+
+				return fmt.Errorf("Value for attribute %s.%s does match: %s != %s", blockName, fieldInBlock, v, value)
+			}
+		}
+
+		return nil
+	}
+}
+
 func TestAccKeycloakLdapUserFederation_basicUpdateKerberosSettings(t *testing.T) {
 	firstLdap := generateRandomLdapKerberos(true)
 	secondLdap := generateRandomLdapKerberos(false)
@@ -169,22 +192,22 @@ func TestAccKeycloakLdapUserFederation_basicUpdateKerberosSettings(t *testing.T)
 				Config: testKeycloakLdapUserFederation_basicFromInterface(firstLdap),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttrSet("keycloak_ldap_user_federation.openldap", "kerberos"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.kerberos_realm", firstLdap.KerberosRealm),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.server_principal", firstLdap.ServerPrincipal),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.use_kerberos_for_password_authentication", strconv.FormatBool(firstLdap.UseKerberosForPasswordAuthentication)),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.key_tab", firstLdap.KeyTab),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "realm_id", firstLdap.RealmId),
+					checkMatchingNestedKey("keycloak_ldap_user_federation.openldap", "kerberos", "kerberos_realm", firstLdap.KerberosRealm),
+					checkMatchingNestedKey("keycloak_ldap_user_federation.openldap", "kerberos", "server_principal", firstLdap.ServerPrincipal),
+					checkMatchingNestedKey("keycloak_ldap_user_federation.openldap", "kerberos", "use_kerberos_for_password_authentication", strconv.FormatBool(firstLdap.UseKerberosForPasswordAuthentication)),
+					checkMatchingNestedKey("keycloak_ldap_user_federation.openldap", "kerberos", "key_tab", firstLdap.KeyTab),
 				),
 			},
 			{
 				Config: testKeycloakLdapUserFederation_basicFromInterface(secondLdap),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttrSet("keycloak_ldap_user_federation.openldap", "kerberos"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.kerberos_realm", secondLdap.KerberosRealm),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.server_principal", secondLdap.ServerPrincipal),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.use_kerberos_for_password_authentication", strconv.FormatBool(secondLdap.UseKerberosForPasswordAuthentication)),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "kerberos.key_tab", secondLdap.KeyTab),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "realm_id", secondLdap.RealmId),
+					checkMatchingNestedKey("keycloak_ldap_user_federation.openldap", "kerberos", "kerberos_realm", secondLdap.KerberosRealm),
+					checkMatchingNestedKey("keycloak_ldap_user_federation.openldap", "kerberos", "server_principal", secondLdap.ServerPrincipal),
+					checkMatchingNestedKey("keycloak_ldap_user_federation.openldap", "kerberos", "use_kerberos_for_password_authentication", strconv.FormatBool(secondLdap.UseKerberosForPasswordAuthentication)),
+					checkMatchingNestedKey("keycloak_ldap_user_federation.openldap", "kerberos", "key_tab", secondLdap.KeyTab),
 				),
 			},
 		},
