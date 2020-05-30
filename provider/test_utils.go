@@ -78,25 +78,18 @@ func TestCheckResourceAttrNot(name, key, value string) resource.TestCheckFunc {
 	}
 }
 
-func keycloakVersionIsGreaterThanOrEqualTo(keycloakMajorVersion int) (bool, error) {
-	keycloakVersion := os.Getenv("KEYCLOAK_VERSION")
-	if len(keycloakVersion) > 0 {
-		i, err := strconv.Atoi(string(keycloakVersion[0]))
-		if err == nil {
-			return i >= keycloakMajorVersion, nil
-		}
-	}
-	return false, fmt.Errorf("KEYCLOAK_VERSION env var was not correctly set, it was '%s'. It should be for example : 5.0.0, 10.0.1", keycloakVersion)
-}
+var keycloakServerInfoVersion = ""
 
 func keycloakServerInfoVersionIsGreaterThanOrEqualTo(keycloakClient *keycloak.KeycloakClient, keycloakMajorVersion int) (bool, error) {
-	serverInfo, err := keycloakClient.GetServerInfo()
-	if err != nil {
-		return false, fmt.Errorf("/serverInfo endpoint retuned an error, server Keycloak version could not be determined")
+	if len(keycloakServerInfoVersion) == 0 {
+		serverInfo, err := keycloakClient.GetServerInfo()
+		if err != nil {
+			return false, fmt.Errorf("/serverInfo endpoint retuned an error, server Keycloak version could not be determined")
+		}
+		keycloakServerInfoVersion = serverInfo.SystemInfo.ServerVersion
 	}
-	keycloakVersion := serverInfo.SystemInfo.ServerVersion
-	if len(keycloakVersion) > 0 {
-		i, err := strconv.Atoi(string(keycloakVersion[0]))
+	if len(keycloakServerInfoVersion) > 0 {
+		i, err := strconv.Atoi(string(keycloakServerInfoVersion[0]))
 		if err == nil {
 			return i >= keycloakMajorVersion, nil
 		}

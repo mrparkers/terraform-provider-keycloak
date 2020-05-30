@@ -35,11 +35,8 @@ KEYCLOAK_CLIENT_SECRET=884e0f95-0f42-4a63-9b1f-94274655669e \
 KEYCLOAK_CLIENT_TIMEOUT=5 \
 KEYCLOAK_REALM=master \
 KEYCLOAK_URL="http://localhost:8080" \
-KEYCLOAK_VERSION=8.0.1
 make testacc
 ```
-
-The `KEYCLOAK_VERSION` ENV variable is needed in some tests to be able to verify if they ran as expected
 
 These tests will also run in CI when opening a PR and on master.
 
