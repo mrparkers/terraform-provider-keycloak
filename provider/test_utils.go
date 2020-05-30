@@ -2,10 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-version"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"math/rand"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -78,21 +78,43 @@ func TestCheckResourceAttrNot(name, key, value string) resource.TestCheckFunc {
 	}
 }
 
-var keycloakServerInfoVersion = ""
+var keycloakServerInfoVersion *version.Version
 
-func keycloakServerInfoVersionIsGreaterThanOrEqualTo(keycloakClient *keycloak.KeycloakClient, keycloakMajorVersion int) (bool, error) {
-	if len(keycloakServerInfoVersion) == 0 {
+func keycloakVersionIsGreaterThanOrEqualTo(keycloakClient *keycloak.KeycloakClient, keycloakMajorVersion *version.Version) (bool, error) {
+	if keycloakServerInfoVersion == nil {
 		serverInfo, err := keycloakClient.GetServerInfo()
 		if err != nil {
-			return false, fmt.Errorf("/serverInfo endpoint retuned an error, server Keycloak version could not be determined")
+			return false, fmt.Errorf("/serverInfo endpoint retuned an error, server Keycloak version could not be determined: %s", err)
 		}
-		keycloakServerInfoVersion = serverInfo.SystemInfo.ServerVersion
-	}
-	if len(keycloakServerInfoVersion) > 0 {
-		i, err := strconv.Atoi(string(keycloakServerInfoVersion[0]))
-		if err == nil {
-			return i >= keycloakMajorVersion, nil
+		keycloakServerInfoVersion, err = version.NewVersion(serverInfo.SystemInfo.ServerVersion)
+		if err != nil {
+			return false, fmt.Errorf("/serverInfo endpoint retuned an unreadable version, server Keycloak version could not be determined: %s", err)
 		}
 	}
-	return false, fmt.Errorf("server version returned by /serverInfo endpoint was unreadable")
+	return keycloakServerInfoVersion.GreaterThanOrEqual(keycloakMajorVersion), nil
+}
+
+func getKeycloakVersion600() *version.Version {
+	v, _ := version.NewVersion("6.0.0")
+	return v
+}
+
+func getKeycloakVersion700() *version.Version {
+	v, _ := version.NewVersion("7.0.0")
+	return v
+}
+
+func getKeycloakVersion800() *version.Version {
+	v, _ := version.NewVersion("8.0.0")
+	return v
+}
+
+func getKeycloakVersion900() *version.Version {
+	v, _ := version.NewVersion("9.0.0")
+	return v
+}
+
+func getKeycloakVersion1000() *version.Version {
+	v, _ := version.NewVersion("10.0.0")
+	return v
 }
