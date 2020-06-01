@@ -6,7 +6,6 @@ workflows:
           matrix:
             parameters:
               keycloak-version:
-                # 4.8.3 doesn't have a docker image
                 - '10.0.1'
                 - '9.0.3'
                 - '8.0.2'
