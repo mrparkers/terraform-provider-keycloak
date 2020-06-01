@@ -30,6 +30,7 @@ var (
 	userRealmRoleMappingRolePrefixField  = "usermodel.realmRoleMapping.rolePrefix"
 	userClientRoleMappingClientIdField   = "usermodel.clientRoleMapping.clientId"
 	userClientRoleMappingRolePrefixField = "usermodel.clientRoleMapping.rolePrefix"
+	userSessionModelNoteLabelField       = "userSession.modelNote.label"
 	aggregateAttributeValuesField        = "aggregate.attrs"
 )
 
