@@ -188,7 +188,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		implicitFlowEnabled = !standardFlowEnabled
 	}
 
-	rootUrlBefore := acctest.RandString(20)
+	rootUrlBefore := "http://localhost:2222/" + acctest.RandString(20)
 	openidClientBefore := &keycloak.OpenidClient{
 		RealmId:                   realm,
 		ClientId:                  clientId,
@@ -203,13 +203,13 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		ValidRedirectUris:         []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 		WebOrigins:                []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 		AdminUrl:                  acctest.RandString(20),
-		BaseUrl:                   acctest.RandString(20),
+		BaseUrl:                   "http://localhost:2222/" + acctest.RandString(20),
 		RootUrl:                   &rootUrlBefore,
 	}
 
 	standardFlowEnabled, implicitFlowEnabled = implicitFlowEnabled, standardFlowEnabled
 
-	rootUrlAfter := acctest.RandString(20)
+	rootUrlAfter := "http://localhost:2222/" + acctest.RandString(20)
 	openidClientAfter := &keycloak.OpenidClient{
 		RealmId:                   realm,
 		ClientId:                  clientId,
@@ -224,7 +224,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		ValidRedirectUris:         []string{acctest.RandString(10), acctest.RandString(10)},
 		WebOrigins:                []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 		AdminUrl:                  acctest.RandString(20),
-		BaseUrl:                   acctest.RandString(20),
+		BaseUrl:                   "http://localhost:2222/" + acctest.RandString(20),
 		RootUrl:                   &rootUrlAfter,
 	}
 

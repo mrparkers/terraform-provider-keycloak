@@ -402,6 +402,66 @@ resource "keycloak_openid_user_realm_role_protocol_mapper" "user_realm_role_clie
   claim_name = "foo"
 }
 
+resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_client" {
+  name      = "tf-test-open-id-user-client-role-claim-protocol-mapper-client"
+  realm_id  = "${keycloak_realm.test.id}"
+  client_id = "${keycloak_openid_client.test_client.id}"
+
+  claim_name = "foo"
+  claim_value = "bar"
+  multivalued = false
+
+  client_id_for_role_mappings   = "${keycloak_openid_client.bearer_only_client.client_id}"
+  client_role_prefix = "prefixValue"
+
+  add_to_id_token     = true
+  add_to_access_token = false
+  add_to_user_info = false
+}
+
+resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_client_scope" {
+  name            = "tf-test-open-id-user-client-role-protocol-mapper-client-scope"
+  realm_id        = "${keycloak_realm.test.id}"
+  client_scope_id = "${keycloak_openid_client_scope.test_default_client_scope.id}"
+
+  claim_name  = "foo"
+  claim_value = "bar"
+  multivalued = false
+
+  client_id_for_role_mappings   = "${keycloak_openid_client.bearer_only_client.client_id}"
+  client_role_prefix = "prefixValue"
+
+  add_to_id_token     = true
+  add_to_access_token = false
+  add_to_user_info    = false
+}
+
+resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_client" {
+	name               = "tf-test-open-id-user-session-note-protocol-mapper-client"
+	realm_id           = "${keycloak_realm.realm.id}"
+	client_id          = "${keycloak_openid_client.openid_client.id}"
+
+	claim_name         = "foo"
+	claim_value_type   = "String"
+	session_note_label = "bar"
+
+  add_to_id_token     = true
+  add_to_access_token = false
+}
+
+resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_client_scope" {
+	name               = "tf-test-open-id-user-session-note-protocol-mapper-client-scope"
+	realm_id           = "${keycloak_realm.realm.id}"
+	client_scope_id    = "${keycloak_openid_client_scope.test_default_client_scope.id}"
+
+	claim_name         = "foo2"
+	claim_value_type   = "String"
+	session_note_label = "bar2"
+
+  add_to_id_token     = true
+  add_to_access_token = false
+}
+
 resource "keycloak_openid_client" "bearer_only_client" {
   client_id   = "test-bearer-only-client"
   name        = "test-bearer-only-client"
@@ -487,19 +547,21 @@ resource keycloak_oidc_google_identity_provider google {
   accepts_prompt_none_forward_from_client = false
 }
 
-resource keycloak_oidc_identity_provider custom_oidc_idp {
-  realm             = "${keycloak_realm.test.id}"
-  provider_id       = "customIdp"
-  alias             = "custom"
-  authorization_url = "https://example.com/auth"
-  token_url         = "https://example.com/token"
-  client_id         = "example_id"
-  client_secret     = "example_token"
-
-  extra_config = {
-    dummyConfig = "dummyValue"
-  }
-}
+//This example does not work in keycloak 10, because the interfaces that our customIdp implements, have changed in the keycloak latest version.
+//We need to make decide which keycloak version we going to support and test for the customIdp
+//resource keycloak_oidc_identity_provider custom_oidc_idp {
+//  realm             = "${keycloak_realm.test.id}"
+//  provider_id       = "customIdp"
+//  alias             = "custom"
+//  authorization_url = "https://example.com/auth"
+//  token_url         = "https://example.com/token"
+//  client_id         = "example_id"
+//  client_secret     = "example_token"
+//
+//  extra_config = {
+//    dummyConfig = "dummyValue"
+//  }
+//}
 
 resource keycloak_attribute_importer_identity_provider_mapper oidc {
   realm                   = "${keycloak_realm.test.id}"
