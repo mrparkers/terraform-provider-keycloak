@@ -35,6 +35,12 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
 
 	connection_timeout      = "5s"
 	read_timeout            = "10s"
+
+    kerberos {
+        kerberos_realm = "FOO.LOCAL"
+        server_principal = "HTTP/host.foo.com@FOO.LOCAL"
+        keytab = "/etc/host.keytab"
+    }
 }
 ```
 
@@ -74,6 +80,11 @@ The following arguments are supported:
 - `full_sync_period` - (Optional) How frequently Keycloak should sync all LDAP users, in seconds. Omit this property to disable periodic full sync.
 - `changed_sync_period` - (Optional) How frequently Keycloak should sync changed LDAP users, in seconds. Omit this property to disable periodic changed users sync.
 - `cache_policy` - (Optional) Can be one of `DEFAULT`, `EVICT_DAILY`, `EVICT_WEEKLY`, `MAX_LIFESPAN`, or `NO_CACHE`. Defaults to `DEFAULT`.
+- `kerberos` - (Optional) A block containing the kerberos settings.
+  - `kerberos_realm` - (Required) The name of the kerberos realm, e.g. FOO.LOCAL.
+  - `server_principal` - (Required) The kerberos server principal, e.g. 'HTTP/host.foo.com@FOO.LOCAL'.
+  - `key_tab` - (Required) Path to the kerberos keytab file on the server with credentials of the service principal.
+  - `use_kerberos_for_password_authentication` - (Optional) Use kerberos login module instead of ldap service api. Defaults to `false`.
 
 ### Import
 
