@@ -36,6 +36,12 @@ type LdapUserFederation struct {
 	ReadTimeout            string // duration string (ex: 1h30m)
 	Pagination             bool
 
+	ServerPrincipal                      string
+	UseKerberosForPasswordAuthentication bool
+	AllowKerberosAuthentication          bool
+	KeyTab                               string
+	KerberosRealm                        string
+
 	BatchSizeForSync  int
 	FullSyncPeriod    int // either a number, in milliseconds, or -1 if full sync is disabled
 	ChangedSyncPeriod int // either a number, in milliseconds, or -1 if changed sync is disabled
@@ -101,6 +107,22 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) (*compon
 		},
 		"changedSyncPeriod": {
 			strconv.Itoa(ldap.ChangedSyncPeriod),
+		},
+
+		"serverPrincipal": {
+			ldap.ServerPrincipal,
+		},
+		"useKerberosForPasswordAuthentication": {
+			strconv.FormatBool(ldap.UseKerberosForPasswordAuthentication),
+		},
+		"allowKerberosAuthentication": {
+			strconv.FormatBool(ldap.AllowKerberosAuthentication),
+		},
+		"keyTab": {
+			ldap.KeyTab,
+		},
+		"kerberosRealm": {
+			ldap.KerberosRealm,
 		},
 	}
 
@@ -209,6 +231,16 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		return nil, err
 	}
 
+	useKerberosForPasswordAuthentication, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("useKerberosForPasswordAuthentication"))
+	if err != nil {
+		return nil, err
+	}
+
+	allowKerberosAuthentication, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("allowKerberosAuthentication"))
+	if err != nil {
+		return nil, err
+	}
+
 	ldap := &LdapUserFederation{
 		Id:      component.Id,
 		Name:    component.Name,
@@ -236,6 +268,12 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		ValidatePasswordPolicy: validatePasswordPolicy,
 		UseTruststoreSpi:       component.getConfig("useTruststoreSpi"),
 		Pagination:             pagination,
+
+		ServerPrincipal:                      component.getConfig("serverPrincipal"),
+		UseKerberosForPasswordAuthentication: useKerberosForPasswordAuthentication,
+		AllowKerberosAuthentication:          allowKerberosAuthentication,
+		KeyTab:                               component.getConfig("keyTab"),
+		KerberosRealm:                        component.getConfig("kerberosRealm"),
 
 		BatchSizeForSync:  batchSizeForSync,
 		FullSyncPeriod:    fullSyncPeriod,
