@@ -242,6 +242,13 @@ resource "keycloak_ldap_user_federation" "openldap" {
   connection_timeout = "5s"
   read_timeout       = "10s"
 
+  kerberos {
+    server_principal = "HTTP/keycloak.local@FOO.LOCAL"
+    use_kerberos_for_password_authentication = false
+    key_tab = "/etc/keycloak.keytab"
+    kerberos_realm = "FOO.LOCAL"
+  }
+
   cache_policy = "NO_CACHE"
 }
 
@@ -427,6 +434,32 @@ resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_cl
   add_to_id_token     = true
   add_to_access_token = false
   add_to_user_info    = false
+}
+
+resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_client" {
+	name               = "tf-test-open-id-user-session-note-protocol-mapper-client"
+	realm_id           = "${keycloak_realm.realm.id}"
+	client_id          = "${keycloak_openid_client.openid_client.id}"
+
+	claim_name         = "foo"
+	claim_value_type   = "String"
+	session_note_label = "bar"
+
+  add_to_id_token     = true
+  add_to_access_token = false
+}
+
+resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_client_scope" {
+	name               = "tf-test-open-id-user-session-note-protocol-mapper-client-scope"
+	realm_id           = "${keycloak_realm.realm.id}"
+	client_scope_id    = "${keycloak_openid_client_scope.test_default_client_scope.id}"
+
+	claim_name         = "foo2"
+	claim_value_type   = "String"
+	session_note_label = "bar2"
+
+  add_to_id_token     = true
+  add_to_access_token = false
 }
 
 resource "keycloak_openid_client" "bearer_only_client" {
