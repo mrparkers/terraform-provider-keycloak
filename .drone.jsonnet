@@ -10,10 +10,17 @@ local pipeline(version) = {
 	],
 	steps: [
 		{
-			name: 'list contents',
+			name: 'create test file',
 			image: 'alpine',
 			commands: [
-				'ls -alh',
+				'echo "hi" >> test.txt',
+			]
+		},
+		{
+			name: 'print test file',
+			image: 'alpine',
+			commands: [
+				'cat test.txt',
 			]
 		},
 		{
