@@ -6,6 +6,7 @@ import (
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"math/rand"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -86,7 +87,11 @@ func keycloakVersionIsGreaterThanOrEqualTo(keycloakClient *keycloak.KeycloakClie
 		if err != nil {
 			return false, fmt.Errorf("/serverInfo endpoint retuned an error, server Keycloak version could not be determined: %s", err)
 		}
-		keycloakServerInfoVersion, err = version.NewVersion(serverInfo.SystemInfo.ServerVersion)
+
+		regex := regexp.MustCompile(`^(\d+\.\d+\.\d+)`)
+		semver := regex.FindStringSubmatch(serverInfo.SystemInfo.ServerVersion)[0]
+
+		keycloakServerInfoVersion, err = version.NewVersion(semver)
 		if err != nil {
 			return false, fmt.Errorf("/serverInfo endpoint retuned an unreadable version, server Keycloak version could not be determined: %s", err)
 		}
