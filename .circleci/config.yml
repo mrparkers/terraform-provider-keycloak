@@ -1,13 +1,22 @@
-version: 2
+version: 2.1
 workflows:
-  version: 2
   test:
     jobs:
-      - test-7.0.1
-      - test-8.0.1
+      - test:
+          matrix:
+            parameters:
+              keycloak-version:
+                - '10.0.1'
+                - '9.0.3'
+                - '8.0.2'
+                - '7.0.1'
+                - '6.0.1'
+                - '5.0.0'
+                - '4.8.3.Final'
   release:
     jobs:
-      - test-8.0.1:
+      - test:
+          keycloak-version: '8.0.1'
           filters:
             tags:
               only: /\d+\.\d+\.\d+(-rc.\d+)?/
@@ -15,35 +24,27 @@ workflows:
               ignore: /.*/
       - build-and-release:
           requires:
-            - test-8.0.1
-          filters:
-            tags:
-              only: /\d+\.\d+\.\d+(-rc.\d+)?/
-            branches:
-              ignore: /.*/
+            - test
 
 defaults:
   go_image: &go_image
     - image: circleci/golang:1.13.5
 
-  test_env: &test_env
-    GO111MODULE: "on"
-    KEYCLOAK_CLIENT_ID: "terraform"
-    KEYCLOAK_CLIENT_SECRET: "884e0f95-0f42-4a63-9b1f-94274655669e"
-    KEYCLOAK_CLIENT_TIMEOUT: "5"
-    KEYCLOAK_URL: "http://localhost:8080"
-    KEYCLOAK_REALM: "master"
-    KEYCLOAK_TEST_PASSWORD_GRANT: "true"
+jobs:
+  test:
+    parameters:
+      keycloak-version:
+        type: string
+    docker:
+      - <<: *go_image
+      - image: jboss/keycloak:<< parameters.keycloak-version >>
+        command: ["-b", "0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled"]
+        environment:
+          DB_VENDOR: H2
+          KEYCLOAK_LOGLEVEL: DEBUG
+          KEYCLOAK_USER: keycloak
+          KEYCLOAK_PASSWORD: password
 
-  keycloak_env: &keycloak_env
-    command: ["-b", "0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled"]
-    environment:
-      DB_VENDOR: H2
-      KEYCLOAK_LOGLEVEL: DEBUG
-      KEYCLOAK_USER: keycloak
-      KEYCLOAK_PASSWORD: password
-
-  testacc_job: &testacc_job
     working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
     steps:
       - checkout
@@ -51,6 +52,8 @@ defaults:
           keys:
             - go-cache-{{ checksum "go.sum" }}
       - run: go mod download
+      - run: go get github.com/jstemmer/go-junit-report
+      - run: mkdir $TEST_RESULTS
       - save_cache:
           key: go-cache-{{ checksum "go.sum" }}
           paths:
@@ -59,29 +62,20 @@ defaults:
           command: |
             ./scripts/wait-for-local-keycloak.sh
             ./scripts/create-terraform-client.sh
-            make testacc
-
-jobs:
-  test-7.0.1:
-    docker:
-      - <<: *go_image
-      - image: jboss/keycloak:7.0.1
-        <<: *keycloak_env
-    <<: *testacc_job
+            trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
+            make testacc | tee ${TEST_RESULTS}/go-test.out
+      - store_test_results:
+          path: /tmp/test-results
     environment:
-      <<: *test_env
-      KEYCLOAK_VERSION: "7.0.1"
-
-
-  test-8.0.1:
-    docker:
-      - <<: *go_image
-      - image: jboss/keycloak:8.0.1
-        <<: *keycloak_env
-    <<: *testacc_job
-    environment:
-      <<: *test_env
-      KEYCLOAK_VERSION: "8.0.1"
+      GO111MODULE: "on"
+      KEYCLOAK_CLIENT_ID: "terraform"
+      KEYCLOAK_CLIENT_SECRET: "884e0f95-0f42-4a63-9b1f-94274655669e"
+      KEYCLOAK_CLIENT_TIMEOUT: "5"
+      KEYCLOAK_URL: "http://localhost:8080"
+      KEYCLOAK_REALM: "master"
+      KEYCLOAK_TEST_PASSWORD_GRANT: "true"
+      KEYCLOAK_VERSION: "<< parameters.keycloak-version >>"
+      TEST_RESULTS: /tmp/test-results
 
 
   build-and-release:
