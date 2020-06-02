@@ -14,7 +14,6 @@ local pipeline(version) = {
 		{
 			name: 'keycloak',
 			image: 'jboss/keycloak:%(version)s' % { version: version },
-			commands: ["/opt/jboss/tools/docker-entrypoint.sh", "-b", "0.0.0.0"],
 			environment: {
 				"DB_VENDOR": "H2",
 				"KEYCLOAK_LOGLEVEL": "DEBUG",
