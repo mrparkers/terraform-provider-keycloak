@@ -47,7 +47,9 @@ nav:
   - keycloak_custom_user_federation: resources/keycloak_custom_user_federation.md
   - keycloak_saml_identity_provider: resources/keycloak_saml_identity_provider.md
   - keycloak_oidc_identity_provider: resources/keycloak_oidc_identity_provider.md
+  - keycloak_generic_client_role_mapper: resources/keycloak_generic_client_role_mapper.md
   - keycloak_attribute_importer_identity_provider_mapper: resources/keycloak_attribute_importer_identity_provider_mapper.md
+  - keycloak_authentication_execution: resources/keycloak_authentication_execution.md
   - keycloak_authentication_execution_config: resources/keycloak_authentication_execution_config.md
 theme: readthedocs
 extra_css: [index.css]
