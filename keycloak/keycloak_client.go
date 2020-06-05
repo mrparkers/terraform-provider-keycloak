@@ -17,7 +17,6 @@ import (
 	"time"
 
 	"golang.org/x/net/publicsuffix"
-	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 )
 
 type KeycloakClient struct {
@@ -45,7 +44,7 @@ const (
 	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, terraformVersion string) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string) (*KeycloakClient, error) {
 	cookieJar, err := cookiejar.New(&cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	})
@@ -87,15 +86,16 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 		return nil, fmt.Errorf("must specify client id, username and password for password grant, or client id and secret for client credentials grant")
 	}
 
-	userAgent := httpclient.TerraformUserAgent(terraformVersion)
-
 	keycloakClient := KeycloakClient{
 		baseUrl:           baseUrl,
 		clientCredentials: clientCredentials,
 		httpClient:        httpClient,
 		initialLogin:      initialLogin,
 		realm:             realm,
-		userAgent:         userAgent,
+	}
+
+	if userAgent != "" {
+		keycloakClient.userAgent = userAgent
 	}
 
 	if keycloakClient.initialLogin {

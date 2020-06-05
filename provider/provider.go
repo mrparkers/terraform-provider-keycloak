@@ -2,6 +2,7 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -140,7 +141,6 @@ func KeycloakProvider() *schema.Provider {
 		},
 	}
 
-
 	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
 		terraformVersion := provider.TerraformVersion
 		if terraformVersion == "" {
@@ -148,13 +148,16 @@ func KeycloakProvider() *schema.Provider {
 			// We can therefore assume that if it's missing it's 0.10 or 0.11
 			terraformVersion = "0.11+compatible"
 		}
-		return configureKeycloakProvider(d, terraformVersion)
+
+		userAgent := httpclient.TerraformUserAgent(terraformVersion)
+
+		return configureKeycloakProvider(d, userAgent)
 	}
 
 	return provider
 }
 
-func configureKeycloakProvider(data *schema.ResourceData, terraformVersion string) (interface{}, error) {
+func configureKeycloakProvider(data *schema.ResourceData, userAgent string) (interface{}, error) {
 	url := data.Get("url").(string)
 	clientId := data.Get("client_id").(string)
 	clientSecret := data.Get("client_secret").(string)
@@ -166,5 +169,5 @@ func configureKeycloakProvider(data *schema.ResourceData, terraformVersion strin
 	tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
 	rootCaCertificate := data.Get("root_ca_certificate").(string)
 
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, terraformVersion)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
 }
