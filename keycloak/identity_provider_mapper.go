@@ -1,20 +1,25 @@
 package keycloak
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"reflect"
+	"strconv"
+	"strings"
 )
 
 type IdentityProviderMapperConfig struct {
-	UserAttribute         string `json:"user.attribute,omitempty"`
-	Claim                 string `json:"claim,omitempty"`
-	ClaimValue            string `json:"claim.value,omitempty"`
-	HardcodedAttribute    string `json:"attribute,omitempty"`
-	Attribute             string `json:"attribute.name,omitempty"`
-	AttributeValue        string `json:"attribute.value,omitempty"`
-	AttributeFriendlyName string `json:"attribute.friendly.name,omitempty"`
-	Template              string `json:"template,omitempty"`
-	Role                  string `json:"role,omitempty"`
+	UserAttribute         string                 `json:"user.attribute,omitempty"`
+	Claim                 string                 `json:"claim,omitempty"`
+	ClaimValue            string                 `json:"claim.value,omitempty"`
+	HardcodedAttribute    string                 `json:"attribute,omitempty"`
+	Attribute             string                 `json:"attribute.name,omitempty"`
+	AttributeValue        string                 `json:"attribute.value,omitempty"`
+	AttributeFriendlyName string                 `json:"attribute.friendly.name,omitempty"`
+	Template              string                 `json:"template,omitempty"`
+	Role                  string                 `json:"role,omitempty"`
+	ExtraConfig           map[string]interface{} `json:"-"`
 }
 
 type IdentityProviderMapper struct {
@@ -58,4 +63,58 @@ func (keycloakClient *KeycloakClient) UpdateIdentityProviderMapper(identityProvi
 
 func (keycloakClient *KeycloakClient) DeleteIdentityProviderMapper(realm, alias, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers/%s", realm, alias, id), nil)
+}
+
+func (f *IdentityProviderMapperConfig) UnmarshalJSON(data []byte) error {
+	f.ExtraConfig = map[string]interface{}{}
+	err := json.Unmarshal(data, &f.ExtraConfig)
+	if err != nil {
+		return err
+	}
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		structField := v.Type().Field(i)
+		jsonKey := strings.Split(structField.Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			value, ok := f.ExtraConfig[jsonKey]
+			if ok {
+				field := v.FieldByName(structField.Name)
+				if field.IsValid() && field.CanSet() {
+					if field.Kind() == reflect.String {
+						field.SetString(value.(string))
+					} else if field.Kind() == reflect.Bool {
+						boolVal, err := strconv.ParseBool(value.(string))
+						if err == nil {
+							field.Set(reflect.ValueOf(KeycloakBoolQuoted(boolVal)))
+						}
+					}
+					delete(f.ExtraConfig, jsonKey)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (f *IdentityProviderMapperConfig) MarshalJSON() ([]byte, error) {
+	out := map[string]interface{}{}
+
+	for k, v := range f.ExtraConfig {
+		out[k] = v
+	}
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		jsonKey := strings.Split(v.Type().Field(i).Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			field := v.Field(i)
+			if field.IsValid() && field.CanSet() {
+				if field.Kind() == reflect.String {
+					out[jsonKey] = field.String()
+				} else if field.Kind() == reflect.Bool {
+					out[jsonKey] = KeycloakBoolQuoted(field.Bool())
+				}
+			}
+		}
+	}
+	return json.Marshal(out)
 }
