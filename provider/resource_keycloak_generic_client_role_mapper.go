@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -12,7 +13,9 @@ func resourceKeycloakGenericClientRoleMapper() *schema.Resource {
 		Create: resourceKeycloakGenericClientRoleMapperCreate,
 		Read:   resourceKeycloakGenericClientRoleMapperRead,
 		Delete: resourceKeycloakGenericClientRoleMapperDelete,
-
+		Importer: &schema.ResourceImporter{
+			State: resourceKeycloakGenericClientRoleMapperImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:        schema.TypeString,
@@ -107,4 +110,28 @@ func resourceKeycloakGenericClientRoleMapperDelete(data *schema.ResourceData, me
 	}
 
 	return keycloakClient.DeleteRoleScopeMapping(realmId, clientId, clientScopeId, role)
+}
+
+func resourceKeycloakGenericClientRoleMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+
+	if len(parts) != 6 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/client/{{clientId}}/scope-mappings/{{roleClientId}}/{{roleId}}, {{realmId}}/client-scope/{{clientScopeId}}/scope-mappings/{{roleClientId}}/{{roleId}}")
+	}
+
+	parentResourceType := parts[1]
+	parentResourceId := parts[2]
+
+	d.Set("realm_id", parts[0])
+
+	if parentResourceType == "client" {
+		d.Set("client_id", parentResourceId)
+	} else if parentResourceType == "client-scope" {
+		d.Set("client_scope_id", parentResourceId)
+	} else {
+		return nil, fmt.Errorf("the associated parent resource must be either a client or a client-scope")
+	}
+
+	d.Set("role_id", parts[5])
+	return []*schema.ResourceData{d}, nil
 }

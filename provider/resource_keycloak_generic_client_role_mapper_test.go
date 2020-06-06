@@ -2,11 +2,12 @@ package provider
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"testing"
 )
 
 func TestGenericRoleMapper_basic(t *testing.T) {
@@ -27,6 +28,32 @@ func TestGenericRoleMapper_basic(t *testing.T) {
 	})
 }
 
+func TestGenericRoleMapper_import(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	parentClientName := "client1-" + acctest.RandString(10)
+	parentRoleName := "role-" + acctest.RandString(10)
+	childClientName := "client2-" + acctest.RandString(10)
+
+	resourceName := "keycloak_generic_client_role_mapper.child-client-with-parent-client-role"
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGenericRoleMapping_basic(realmName, parentClientName, parentRoleName, childClientName),
+				Check:  testAccCheckKeycloakScopeMappingExists(resourceName),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getGenericRoleMapperId(resourceName),
+			},
+		},
+	})
+}
+
 func TestGenericRoleMapperClientScope_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientName := "client-" + acctest.RandString(10)
@@ -40,6 +67,32 @@ func TestGenericRoleMapperClientScope_basic(t *testing.T) {
 			{
 				Config: testKeycloakGenericRoleMappingClientScope_basic(realmName, clientName, roleName, clientScopeName),
 				Check:  testAccCheckKeycloakScopeMappingExists("keycloak_generic_client_role_mapper.clientscope-with-client-role"),
+			},
+		},
+	})
+}
+
+func TestGenericRoleMapperClientScope_import(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientName := "client-" + acctest.RandString(10)
+	roleName := "role-" + acctest.RandString(10)
+	clientScopeName := "clientscope-" + acctest.RandString(10)
+
+	resourceName := "keycloak_generic_client_role_mapper.clientscope-with-client-role"
+
+	resource.Test(t, resource.TestCase{
+		Providers: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGenericRoleMappingClientScope_basic(realmName, clientName, roleName, clientScopeName),
+				Check:  testAccCheckKeycloakScopeMappingExists(resourceName),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getGenericRoleMapperId(resourceName),
 			},
 		},
 	})
@@ -258,4 +311,15 @@ func getOpenidClientScopeFromState(s *terraform.State, resourceName string) (*ke
 	}
 
 	return client, nil
+}
+
+func getGenericRoleMapperId(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		return rs.Primary.ID, nil
+	}
 }
