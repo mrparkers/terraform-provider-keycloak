@@ -319,6 +319,7 @@ resource keycloak_attribute_to_role_identity_provider_mapper oidc {
 	extra_config 			= {
 		syncMode = "%s"
 	}
+}
 	`, realm, alias, name, role, claimName, claimValue, syncMode)
 }
 
