@@ -61,6 +61,10 @@ local pipeline(version) = {
 			'pull_request',
 		],
 	},
+	volumes: [{
+		name: "deps",
+		temp: {},
+	}],
 };
 
 [
