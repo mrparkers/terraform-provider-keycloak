@@ -46,6 +46,10 @@ local pipeline(version) = {
 		{
 			name: 'test',
 			image: 'circleci/golang:1.13.11',
+			volumes: [{
+				name: "deps",
+				path: "/go"
+			}],
 			commands: [
 				'make testacc',
 			],
