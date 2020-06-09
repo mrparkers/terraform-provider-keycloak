@@ -21,7 +21,7 @@ local pipeline(version) = {
 				"KEYCLOAK_PASSWORD": "password",
 			},
 			commands: [
-				'/opt/jboss/tools/docker-entrypoint.sh -b 0.0.0.0'
+				'/opt/jboss/tools/docker-entrypoint.sh -b 0.0.0.0 -Dkeycloak.profile.feature.upload_scripts=enabled'
 			],
 		},
 	],
