@@ -122,6 +122,9 @@ func (keycloakClient *KeycloakClient) login() error {
 	if err != nil {
 		return err
 	}
+	if accessTokenResponse.StatusCode != http.StatusOK {
+		return fmt.Errorf("error sending POST request to %s: %s", accessTokenUrl, accessTokenResponse.Status)
+	}
 
 	defer accessTokenResponse.Body.Close()
 
