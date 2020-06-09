@@ -20,6 +20,9 @@ local pipeline(version) = {
 				"KEYCLOAK_USER": "keycloak",
 				"KEYCLOAK_PASSWORD": "password",
 			},
+			commands: [
+				'/opt/jboss/tools/docker-entrypoint.sh -b 0.0.0.0'
+			],
 		},
 	],
 	steps: [
