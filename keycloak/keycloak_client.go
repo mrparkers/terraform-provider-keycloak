@@ -25,6 +25,7 @@ type KeycloakClient struct {
 	clientCredentials *ClientCredentials
 	httpClient        *http.Client
 	initialLogin      bool
+	userAgent         string
 }
 
 type ClientCredentials struct {
@@ -43,7 +44,7 @@ const (
 	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string) (*KeycloakClient, error) {
 	cookieJar, err := cookiejar.New(&cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	})
@@ -91,6 +92,7 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 		httpClient:        httpClient,
 		initialLogin:      initialLogin,
 		realm:             realm,
+		userAgent:         userAgent,
 	}
 
 	if keycloakClient.initialLogin {
@@ -105,26 +107,16 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 
 func (keycloakClient *KeycloakClient) login() error {
 	accessTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
-	accessTokenData := url.Values{}
-	accessTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
-	accessTokenData.Set("grant_type", keycloakClient.clientCredentials.GrantType)
-
-	if keycloakClient.clientCredentials.GrantType == "password" {
-		accessTokenData.Set("username", keycloakClient.clientCredentials.Username)
-		accessTokenData.Set("password", keycloakClient.clientCredentials.Password)
-
-		if keycloakClient.clientCredentials.ClientSecret != "" {
-			accessTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
-		}
-
-	} else if keycloakClient.clientCredentials.GrantType == "client_credentials" {
-		accessTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
-	}
+	accessTokenData := keycloakClient.getAuthenticationFormData()
 
 	log.Printf("[DEBUG] Login request: %s", accessTokenData.Encode())
 
 	accessTokenRequest, _ := http.NewRequest(http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
 	accessTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	if keycloakClient.userAgent != "" {
+		accessTokenRequest.Header.Set("User-Agent", keycloakClient.userAgent)
+	}
 
 	accessTokenResponse, err := keycloakClient.httpClient.Do(accessTokenRequest)
 	if err != nil {
@@ -153,23 +145,18 @@ func (keycloakClient *KeycloakClient) login() error {
 
 func (keycloakClient *KeycloakClient) refresh() error {
 	refreshTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
-	refreshTokenData := url.Values{}
-	refreshTokenData.Set("client_id", keycloakClient.clientCredentials.ClientId)
-	refreshTokenData.Set("grant_type", keycloakClient.clientCredentials.GrantType)
-
-	if keycloakClient.clientCredentials.GrantType == "password" {
-		refreshTokenData.Set("username", keycloakClient.clientCredentials.Username)
-		refreshTokenData.Set("password", keycloakClient.clientCredentials.Password)
-	} else if keycloakClient.clientCredentials.GrantType == "client_credentials" {
-		refreshTokenData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
-	}
+	refreshTokenData := keycloakClient.getAuthenticationFormData()
 
 	log.Printf("[DEBUG] Refresh request: %s", refreshTokenData.Encode())
 
-	accessTokenRequest, _ := http.NewRequest(http.MethodPost, refreshTokenUrl, strings.NewReader(refreshTokenData.Encode()))
-	accessTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	refreshTokenRequest, _ := http.NewRequest(http.MethodPost, refreshTokenUrl, strings.NewReader(refreshTokenData.Encode()))
+	refreshTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	refreshTokenResponse, err := keycloakClient.httpClient.Do(accessTokenRequest)
+	if keycloakClient.userAgent != "" {
+		refreshTokenRequest.Header.Set("User-Agent", keycloakClient.userAgent)
+	}
+
+	refreshTokenResponse, err := keycloakClient.httpClient.Do(refreshTokenRequest)
 	if err != nil {
 		return err
 	}
@@ -200,12 +187,36 @@ func (keycloakClient *KeycloakClient) refresh() error {
 	return nil
 }
 
+func (keycloakClient *KeycloakClient) getAuthenticationFormData() url.Values {
+	authenticationFormData := url.Values{}
+	authenticationFormData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+	authenticationFormData.Set("grant_type", keycloakClient.clientCredentials.GrantType)
+
+	if keycloakClient.clientCredentials.GrantType == "password" {
+		authenticationFormData.Set("username", keycloakClient.clientCredentials.Username)
+		authenticationFormData.Set("password", keycloakClient.clientCredentials.Password)
+
+		if keycloakClient.clientCredentials.ClientSecret != "" {
+			authenticationFormData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
+		}
+
+	} else if keycloakClient.clientCredentials.GrantType == "client_credentials" {
+		authenticationFormData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
+	}
+
+	return authenticationFormData
+}
+
 func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 	tokenType := keycloakClient.clientCredentials.TokenType
 	accessToken := keycloakClient.clientCredentials.AccessToken
 
 	request.Header.Set("Authorization", fmt.Sprintf("%s %s", tokenType, accessToken))
 	request.Header.Set("Accept", "application/json")
+
+	if keycloakClient.userAgent != "" {
+		request.Header.Set("User-Agent", keycloakClient.userAgent)
+	}
 
 	if request.Method == http.MethodPost || request.Method == http.MethodPut || request.Method == http.MethodDelete {
 		request.Header.Set("Content-type", "application/json")
@@ -286,9 +297,15 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request) ([]byte
 	}
 
 	if response.StatusCode >= 400 {
+		errorMessage := fmt.Sprintf("error sending %s request to %s: %s.", request.Method, request.URL.Path, response.Status)
+
+		if len(body) != 0 {
+			errorMessage = fmt.Sprintf("%s Response body: %s", errorMessage, body)
+		}
+
 		return nil, "", &ApiError{
 			Code:    response.StatusCode,
-			Message: fmt.Sprintf("error sending %s request to %s: %s", request.Method, request.URL.Path, response.Status),
+			Message: errorMessage,
 		}
 	}
 

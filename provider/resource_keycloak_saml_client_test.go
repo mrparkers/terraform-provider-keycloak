@@ -143,13 +143,13 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 
 		FrontChannelLogout: frontChannelLogout,
 
-		RootUrl: acctest.RandString(20),
+		RootUrl: "http://localhost:2222/" + acctest.RandString(20),
 		ValidRedirectUris: []string{
 			acctest.RandString(20),
 			acctest.RandString(20),
 			acctest.RandString(20),
 		},
-		BaseUrl:                 acctest.RandString(20),
+		BaseUrl:                 "http://localhost:2222/" + acctest.RandString(20),
 		MasterSamlProcessingUrl: acctest.RandString(20),
 
 		Attributes: &keycloak.SamlClientAttributes{
@@ -181,11 +181,11 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 
 		FrontChannelLogout: !frontChannelLogout,
 
-		RootUrl: acctest.RandString(20),
+		RootUrl: "http://localhost:2222/" + acctest.RandString(20),
 		ValidRedirectUris: []string{
 			acctest.RandString(20),
 		},
-		BaseUrl:                 acctest.RandString(20),
+		BaseUrl:                 "http://localhost:2222/" + acctest.RandString(20),
 		MasterSamlProcessingUrl: acctest.RandString(20),
 
 		Attributes: &keycloak.SamlClientAttributes{
