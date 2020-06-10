@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -52,13 +53,20 @@ func resourceKeycloakAttributeToRoleIdentityProviderMapper() *schema.Resource {
 func getAttributeToRoleIdentityProviderMapperFromData(data *schema.ResourceData, meta interface{}) (*keycloak.IdentityProviderMapper, error) {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	rec, _ := getIdentityProviderMapperFromData(data)
+	extraConfig := map[string]interface{}{}
+	if v, ok := data.GetOk("extra_config"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			extraConfig[key] = value
+		}
+	}
 	identityProvider, err := keycloakClient.GetIdentityProvider(rec.Realm, rec.IdentityProviderAlias)
 	if err != nil {
 		return nil, handleNotFoundError(err, data)
 	}
 	rec.IdentityProviderMapper = fmt.Sprintf("%s-role-idp-mapper", identityProvider.ProviderId)
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
-		Role: data.Get("role").(string),
+		Role:        data.Get("role").(string),
+		ExtraConfig: extraConfig,
 	}
 	if identityProvider.ProviderId == "saml" {
 		if attr, ok := data.GetOk("attribute_friendly_name"); ok {
@@ -95,5 +103,6 @@ func setAttributeToRoleIdentityProviderMapperData(data *schema.ResourceData, ide
 	data.Set("claim_name", identityProviderMapper.Config.Claim)
 	data.Set("claim_value", identityProviderMapper.Config.ClaimValue)
 	data.Set("attribute_friendly_name", identityProviderMapper.Config.AttributeFriendlyName)
+	data.Set("extra_config", identityProviderMapper.Config.ExtraConfig)
 	return nil
 }
