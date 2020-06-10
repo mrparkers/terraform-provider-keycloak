@@ -1,10 +1,11 @@
 package keycloak
 
-type ComponentType struct {
-	Id string `json:"id"`
+type SystemInfo struct {
+	ServerVersion string `json:"version"`
 }
 
-type Provider struct {
+type ComponentType struct {
+	Id string `json:"id"`
 }
 
 type ProviderType struct {
@@ -12,15 +13,19 @@ type ProviderType struct {
 	Providers map[string]Provider `json:"providers"`
 }
 
-type ServerInfo struct {
-	ComponentTypes map[string][]ComponentType `json:"componentTypes"`
-	ProviderTypes  map[string]ProviderType    `json:"providers"`
-	Themes         map[string][]Theme         `json:"themes"`
+type Provider struct {
 }
 
 type Theme struct {
 	Name    string   `json:"name"`
 	Locales []string `json:"locales,omitempty"`
+}
+
+type ServerInfo struct {
+	SystemInfo     SystemInfo                 `json:"systemInfo"`
+	ComponentTypes map[string][]ComponentType `json:"componentTypes"`
+	ProviderTypes  map[string]ProviderType    `json:"providers"`
+	Themes         map[string][]Theme         `json:"themes"`
 }
 
 func (serverInfo *ServerInfo) ThemeIsInstalled(t, themeName string) bool {

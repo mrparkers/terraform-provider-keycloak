@@ -293,7 +293,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_validateDuplicateScopeAssignment(t
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	optionalClientScopes := append(preAssignedOptionalClientScopes, clientScope)
+	optionalClientScopes := append(getPreAssignedOptionalClientScopes(t), clientScope)
 
 	resource.Test(t, resource.TestCase{
 		Providers: testAccProviders,
