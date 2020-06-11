@@ -134,42 +134,6 @@ func TestGenericRoleMapperClientScope_import(t *testing.T) {
 	})
 }
 
-func TestGenericRoleMapper_createAfterManualDestroy(t *testing.T) {
-	var role = &keycloak.Role{}
-	var childClient = &keycloak.GenericClient{}
-
-	realmName := "terraform-" + acctest.RandString(10)
-	parentClientName := "client1-" + acctest.RandString(10)
-	parentRoleName := "role-" + acctest.RandString(10)
-	childClientName := "client2-" + acctest.RandString(10)
-
-	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakGenericRoleMapping_basic(realmName, parentClientName, parentRoleName, childClientName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakScopeMappingExists("keycloak_generic_client_role_mapper.child-client-with-parent-client-role"),
-					testAccCheckKeycloakRoleFetch("keycloak_role.parent-role", role),
-					testAccCheckKeycloakGenericClientFetch("keycloak_openid_client.child-client", childClient),
-				),
-			},
-			{
-				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
-					err := keycloakClient.DeleteRoleScopeMapping(childClient.RealmId, childClient.Id, "", role)
-					if err != nil {
-						t.Fatal(err)
-					}
-				},
-				Config: testKeycloakGenericRoleMapping_basic(realmName, parentClientName, parentRoleName, childClientName),
-				Check:  testAccCheckKeycloakScopeMappingExists("keycloak_generic_client_role_mapper.child-client-with-parent-client-role"),
-			},
-		},
-	})
-}
 func TestGenericRealmLevelRoleMapperClientScope_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	roleName := "role-" + acctest.RandString(10)
