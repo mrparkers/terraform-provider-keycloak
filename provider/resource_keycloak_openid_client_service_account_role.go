@@ -125,7 +125,6 @@ func resourceKeycloakOpenidClientServiceAccountRoleImport(d *schema.ResourceData
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 4 {
-		fmt.Println(d.Id())
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{serviceAccountUserId}}/{{clientId}}/{{roleId}}")
 	}
 	realmId := parts[0]
