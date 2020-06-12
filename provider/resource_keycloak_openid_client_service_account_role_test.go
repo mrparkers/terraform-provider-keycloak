@@ -178,8 +178,6 @@ func getKeycloakOpenidClientServiceAccountRoleImportId(resourceName string) reso
 		clientId := rs.Primary.Attributes["client_id"]
 		roleId := strings.Split(rs.Primary.ID, "/")[1]
 
-		fmt.Println(fmt.Sprintf("%s/%s/%s/%s", realmId, serviceAccountUserId, clientId, roleId))
-
 		return fmt.Sprintf("%s/%s/%s/%s", realmId, serviceAccountUserId, clientId, roleId), nil
 	}
 }
