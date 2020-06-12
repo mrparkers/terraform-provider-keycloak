@@ -77,9 +77,9 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_import(t *testing.T) {
 				Check:  testAccCheckKeycloakIdpTokenExchangeScopePermissionExists("keycloak_identity_provider_token_exchange_scope_permission.my_permission"),
 			},
 			{
-				ResourceName:      "keycloak_identity_provider_token_exchange_scope_permission.my_permission",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "keycloak_identity_provider_token_exchange_scope_permission.my_permission",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"policy_type"},
 			},
 		},
@@ -103,7 +103,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_updatePolicyMultipleClients(
 			},
 			{
 				Config: testKeycloakIdpTokenExchangeScopePermission_multipleClients(realmName, providerAlias, webappClientId, webappClientId2),
-				Check:  resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakIdpTokenExchangeScopePermissionClientPolicyHasClient("keycloak_identity_provider_token_exchange_scope_permission.my_permission", webappClientId),
 					testAccCheckKeycloakIdpTokenExchangeScopePermissionClientPolicyHasClient("keycloak_identity_provider_token_exchange_scope_permission.my_permission", webappClientId2),
 				),
@@ -131,7 +131,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_rolePolicy(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakIdpTokenExchangeScopePermissionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdpTokenExchangeScopePermission_rolePolicy(realmName, providerAlias, webappClientId),
+				Config:      testKeycloakIdpTokenExchangeScopePermission_rolePolicy(realmName, providerAlias, webappClientId),
 				ExpectError: regexp.MustCompile(".*invalid policy type, supported types are.*"),
 			},
 		},
@@ -203,7 +203,7 @@ func testAccCheckKeycloakIdpTokenExchangeScopePermissionExists(resourceName stri
 			}
 		}
 
-		if authorizationResourceServerId != realmManagementId{
+		if authorizationResourceServerId != realmManagementId {
 			return fmt.Errorf("computed authorizationResourceServerId %s was not equal to %s (the id of the realm-management client)", authorizationResourceServerId, realmManagementId)
 		}
 
@@ -212,7 +212,7 @@ func testAccCheckKeycloakIdpTokenExchangeScopePermissionExists(resourceName stri
 			return err
 		}
 
-		if authorizationTokenExchangeScopePermissionId != tokenExchangeScopedPermissionId{
+		if authorizationTokenExchangeScopePermissionId != tokenExchangeScopedPermissionId {
 			return fmt.Errorf("computed authorizationTokenExchangeScopePermissionId %s was not equal to %s scope permission id set on the idp permission", authorizationTokenExchangeScopePermissionId, tokenExchangeScopedPermissionId)
 		}
 
@@ -247,7 +247,7 @@ func testAccCheckKeycloakIdpTokenExchangeScopePermissionExists(resourceName stri
 			return fmt.Errorf("fetched permission resources %s do not correspond with the idp resource provided id %s", tokenExchangeScopedPermission.Resources[0], idpResource.Id)
 		}
 
-		if  authorizationIdpResourceId != idpResource.Id {
+		if authorizationIdpResourceId != idpResource.Id {
 			return fmt.Errorf("computed authorizationIdpResourceId %s was not equal to %s sidp resource id found on the token exchange scope based permission", authorizationIdpResourceId, idpResource.Id)
 		}
 

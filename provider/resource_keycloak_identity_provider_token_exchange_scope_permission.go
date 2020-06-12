@@ -96,7 +96,6 @@ func setIdentityProviderTokenExchangeScopePermissionClientPolicy(keycloakClient 
 		permission.Policies = []string{policyId}
 		return keycloakClient.UpdateOpenidClientAuthorizationPermission(permission)
 
-
 	} else if len(permission.Policies) == 1 {
 		openidClientAuthorizationClientPolicy, err := keycloakClient.GetOpenidClientAuthorizationClientPolicy(realmId, realmManagementClient.Id, permission.Policies[0])
 		if err != nil {
@@ -225,7 +224,6 @@ func resourceKeycloakIdentityProviderTokenExchangeScopePermissionRead(data *sche
 	data.Set("realm_id", identityProviderPermissions.RealmId)
 	data.Set("provider_alias", identityProviderPermissions.ProviderAlias)
 
-
 	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
 	if err != nil {
 		return err
@@ -287,7 +285,7 @@ func resourceKeycloakIdentityProviderTokenExchangeScopePermissionImport(d *schem
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{providerAlias}}")
 	}
-	d.SetId(parts[0] + "/" +  parts[1])
+	d.SetId(parts[0] + "/" + parts[1])
 	d.Set("realm_id", parts[0])
 	d.Set("provider_alias", parts[1])
 	return []*schema.ResourceData{d}, nil
