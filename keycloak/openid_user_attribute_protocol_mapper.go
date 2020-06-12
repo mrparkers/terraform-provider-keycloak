@@ -65,7 +65,8 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserAttributeProtocolMapper
 		return nil, err
 	}
 
-	aggregateAttributeValues, err := strconv.ParseBool(protocolMapper.Config[aggregateAttributeValuesField])
+	// aggregateAttributeValues's default is "", this is an issue when importing an existing mapper
+	aggregateAttributeValues, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[aggregateAttributeValuesField])
 	if err != nil {
 		return nil, err
 	}
