@@ -2,11 +2,13 @@ package provider
 
 import (
 	"fmt"
+	"strconv"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"testing"
 )
 
 func TestAccKeycloakClientScope_basic(t *testing.T) {
@@ -119,6 +121,64 @@ func TestAccKeycloakClientScope_consentScreenText(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakClientScope_includeInTokenScope(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientScopeName := "terraform-" + acctest.RandString(10)
+	includeInTokenScope := false
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakClientScopeDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
+				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
+			},
+			{
+				Config: testKeycloakClientScope_withIncludeInTokenScope(realmName, clientScopeName, includeInTokenScope),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
+					testAccCheckKeycloakClientScopeExistsWithCorrectIncludeInTokenScope("keycloak_openid_client_scope.client_scope", includeInTokenScope),
+				),
+			},
+			{
+				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
+				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakClientScope_guiOrder(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientScopeName := "terraform-" + acctest.RandString(10)
+	guiOrder := acctest.RandIntRange(0, 1000)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakClientScopeDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
+				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
+			},
+			{
+				Config: testKeycloakClientScope_withGuiOrder(realmName, clientScopeName, guiOrder),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
+					testAccCheckKeycloakClientScopeExistsWithCorrectGuiOrder("keycloak_openid_client_scope.client_scope", guiOrder),
+				),
+			},
+			{
+				Config: testKeycloakClientScope_basic(realmName, clientScopeName),
+				Check:  testAccCheckKeycloakClientScopeExistsWithCorrectProtocol("keycloak_openid_client_scope.client_scope"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakClientScopeExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		clientScope, err := getClientScopeFromState(s, resourceName)
@@ -128,6 +188,36 @@ func testAccCheckKeycloakClientScopeExistsWithCorrectProtocol(resourceName strin
 
 		if clientScope.Protocol != "openid-connect" {
 			return fmt.Errorf("expected openid client scope to have openid-connect protocol, but got %s", clientScope.Protocol)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakClientScopeExistsWithCorrectIncludeInTokenScope(resourceName string, includeInTokenScope bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		clientScope, err := getClientScopeFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if clientScope.Attributes.IncludeInTokenScope != keycloak.KeycloakBoolQuoted(includeInTokenScope) {
+			return fmt.Errorf("expected saml client includeInTokenScope to have %t, but got %t", includeInTokenScope, clientScope.Attributes.IncludeInTokenScope)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakClientScopeExistsWithCorrectGuiOrder(resourceName string, guiOrder int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		clientScope, err := getClientScopeFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if clientScope.Attributes.GuiOrder != strconv.Itoa(guiOrder) {
+			return fmt.Errorf("expected saml client guiOrder to have %d, but got %s", guiOrder, clientScope.Attributes.GuiOrder)
 		}
 
 		return nil
@@ -234,6 +324,40 @@ resource "keycloak_openid_client_scope" "client_scope" {
 	consent_screen_text = "%s"
 }
 	`, realm, clientScopeName, consentText)
+}
+
+func testKeycloakClientScope_withIncludeInTokenScope(realm, clientScopeName string, includeInTokenScope bool) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name                = "%s"
+	realm_id            = "${keycloak_realm.realm.id}"
+
+	description         = "test description"
+
+	include_in_token_scope = %t
+}
+	`, realm, clientScopeName, includeInTokenScope)
+}
+
+func testKeycloakClientScope_withGuiOrder(realm, clientScopeName string, guiOrder int) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name                = "%s"
+	realm_id            = "${keycloak_realm.realm.id}"
+
+	description         = "test description"
+
+	gui_order           = %d
+}
+	`, realm, clientScopeName, guiOrder)
 }
 
 func testKeycloakClientScope_updateRealmBefore(realmOne, realmTwo, clientScopeName string) string {

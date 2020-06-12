@@ -1,11 +1,10 @@
-# keycloak_openid_client_scope
+# keycloak_saml_client_scope
 
 Allows for creating and managing Keycloak client scopes that can be attached to
-clients that use the OpenID Connect protocol.
+clients that use the SAML protocol.
 
 Client Scopes can be used to share common protocol and role mappings between multiple
-clients within a realm. They can also be used by clients to conditionally request
-claims or roles for a user based on the OAuth 2.0 `scope` parameter.
+clients within a realm.
 
 ### Example Usage
 
@@ -15,12 +14,11 @@ resource "keycloak_realm" "realm" {
     enabled = true
 }
 
-resource "keycloak_openid_client_scope" "openid_client_scope" {
-    realm_id               = "${keycloak_realm.realm.id}"
-    name                   = "groups"
-    description            = "When requested, this scope will map a user's group memberships to a claim"
-    include_in_token_scope = true
-    gui_order              = 1
+resource "keycloak_saml_client_scope" "saml_client_scope" {
+    realm_id    = "${keycloak_realm.realm.id}"
+    name        = "groups"
+    description = "This scope will map a user's group memberships to SAML assertion"
+    gui_order   = 1
 }
 ```
 
@@ -34,7 +32,6 @@ The following arguments are supported:
 - `consent_screen_text` - (Optional) When set, a consent screen will be displayed to users
 authenticating to clients with this scope attached. The consent screen will display the string
 value of this attribute.
-- `include_in_token_scope` - (Optional) When `true`, the name of this client scope will be added to the access token property 'scope' as well as to the Token Introspection Endpoint response.
 - `gui_order` - (Optional) Specify order of the client scope in GUI (such as in Consent page) as integer.
 
 ### Import
@@ -45,5 +42,5 @@ assigns to the client scope upon creation. This value can be found in the URI wh
 Example:
 
 ```bash
-$ terraform import keycloak_openid_client_scope.openid_client_scope my-realm/8e8f7fe1-df9b-40ed-bed3-4597aa0dac52
+$ terraform import keycloak_saml_client_scope.saml_client_scope my-realm/e8a5d115-6985-4de3-a0f5-732e1be4525e
 ```

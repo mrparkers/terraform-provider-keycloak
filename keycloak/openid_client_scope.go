@@ -11,8 +11,10 @@ type OpenidClientScope struct {
 	Description string `json:"description"`
 	Protocol    string `json:"protocol"`
 	Attributes  struct {
-		DisplayOnConsentScreen string `json:"display.on.consent.screen"` // boolean in string form
-		ConsentScreenText      string `json:"consent.screen.text"`
+		DisplayOnConsentScreen KeycloakBoolQuoted `json:"display.on.consent.screen"` // boolean in string form
+		ConsentScreenText      string             `json:"consent.screen.text"`
+		GuiOrder               string             `json:"gui.order"`
+		IncludeInTokenScope    KeycloakBoolQuoted `json:"include.in.token.scope"` // boolean in string form
 	} `json:"attributes"`
 }
 
