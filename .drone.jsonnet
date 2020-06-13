@@ -28,7 +28,7 @@ local pipeline(version) = {
 	steps: [
 		{
 			name: 'fetch dependencies',
-			image: 'circleci/golang:1.13.11',
+			image: 'mrparkers/golang-test:1.13.11',
 			volumes: [{
 				name: "deps",
 				path: "/go"
@@ -39,7 +39,7 @@ local pipeline(version) = {
 		},
 		{
 			name: 'setup',
-			image: 'circleci/golang:1.13.11',
+			image: 'mrparkers/golang-test:1.13.11',
 			commands: [
 				'./scripts/wait-for-local-keycloak.sh',
 				'./scripts/create-terraform-client.sh',
@@ -48,7 +48,7 @@ local pipeline(version) = {
 		},
 		{
 			name: 'example tf',
-			image: 'circleci/golang:1.13.11',
+			image: 'mrparkers/golang-test:1.13.11',
 			volumes: [{
 				name: "deps",
 				path: "/go"
@@ -65,7 +65,7 @@ local pipeline(version) = {
 		},
 		{
 			name: 'test',
-			image: 'circleci/golang:1.13.11',
+			image: 'mrparkers/golang-test:1.13.11',
 			volumes: [{
 				name: "deps",
 				path: "/go"
