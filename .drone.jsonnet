@@ -54,8 +54,8 @@ local pipeline(version) = {
 				path: "/go"
 			}],
 			commands: [
-				'mkdir -p ~/.terraform.d/plugins/linux_amd64',
-				'make build && mv terraform-provider-keycloak ~/.terraform.d/plugins/linux_amd64',
+				'mkdir -p ./example/.terraform/plugins/linux_amd64',
+				'make build && mv terraform-provider-keycloak ./example/.terraform/plugins/linux_amd64',
 				'cd example',
 				'sudo terraform init',
 				'terraform apply -auto-approve',
@@ -71,7 +71,7 @@ local pipeline(version) = {
 				path: "/go"
 			}],
 			commands: [
-				'make testacc',
+				'TF_ACC=1 gotestsum --format testname',
 			],
 			environment: keycloakTestEnv(),
 		},
