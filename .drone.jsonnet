@@ -47,6 +47,22 @@ local pipeline(version) = {
 			environment: keycloakTestEnv(),
 		},
 		{
+			name: 'example tf',
+			image: 'circleci/golang:1.13.11',
+			volumes: [{
+				name: "deps",
+				path: "/go"
+			}],
+			commands: [
+				'make build-example',
+				'cd example',
+				'terraform init',
+				'terraform apply -auto-approve',
+				'terraform destroy -auto-approve'
+			],
+			environment: keycloakTestEnv(),
+		},
+		{
 			name: 'test',
 			image: 'circleci/golang:1.13.11',
 			volumes: [{
