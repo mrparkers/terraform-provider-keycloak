@@ -54,7 +54,8 @@ local pipeline(version) = {
 				path: "/go"
 			}],
 			commands: [
-				'make build-example',
+				'mkdir -p ~/.terraform.d/plugins',
+				'make build && mv terraform-provider-keycloak ~/.terraform.d/plugins',
 				'cd example',
 				'terraform init',
 				'terraform apply -auto-approve',
