@@ -55,10 +55,9 @@ local pipeline(version) = {
 			}],
 			commands: [
 				'mkdir -p ~/.terraform.d/plugins',
-				'sudo mkdir -p ./example/.terraform/plugins/linux_amd64',
 				'make build && mv terraform-provider-keycloak ~/.terraform.d/plugins',
 				'cd example',
-				'terraform init',
+				'sudo terraform init',
 				'terraform apply -auto-approve',
 				'terraform destroy -auto-approve'
 			],
