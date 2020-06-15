@@ -58,10 +58,11 @@ local pipeline(version) = {
 				'make build && mv terraform-provider-keycloak ./example/.terraform/plugins/linux_amd64',
 				'cd example',
 				'terraform init',
-				'terraform apply -auto-approve',
-				'terraform destroy -auto-approve'
+				'terraform apply -auto-approve -parallelism=5',
+				'terraform destroy -auto-approve -parallelism=5'
 			],
-			environment: keycloakTestEnv(),
+			environment: keycloakTestEnv() + {
+			},
 		},
 		{
 			name: 'test',
