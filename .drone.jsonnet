@@ -28,7 +28,7 @@ local pipeline(version) = {
 	steps: [
 		{
 			name: 'fetch dependencies',
-			image: 'mrparkers/golang-test:1.13.11',
+			image: 'mrparkers/terraform-provider-keycloak-test:1.14.4-v1',
 			volumes: [{
 				name: "deps",
 				path: "/go"
@@ -39,7 +39,7 @@ local pipeline(version) = {
 		},
 		{
 			name: 'setup',
-			image: 'mrparkers/golang-test:1.13.11',
+			image: 'mrparkers/terraform-provider-keycloak-test:1.14.4-v1',
 			commands: [
 				'./scripts/wait-for-local-keycloak.sh',
 				'./scripts/create-terraform-client.sh',
@@ -48,16 +48,16 @@ local pipeline(version) = {
 		},
 		{
 			name: 'example tf',
-			image: 'mrparkers/golang-test:1.13.11',
+			image: 'mrparkers/terraform-provider-keycloak-test:1.14.4-v1',
 			volumes: [{
 				name: "deps",
 				path: "/go"
 			}],
 			commands: [
-				'sudo mkdir -p ./example/.terraform/plugins/linux_amd64',
-				'make build && sudo mv terraform-provider-keycloak ./example/.terraform/plugins/linux_amd64',
+				'mkdir -p ./example/.terraform/plugins/linux_amd64',
+				'make build && mv terraform-provider-keycloak ./example/.terraform/plugins/linux_amd64',
 				'cd example',
-				'sudo terraform init',
+				'terraform init',
 				'terraform apply -auto-approve',
 				'terraform destroy -auto-approve'
 			],
@@ -65,7 +65,7 @@ local pipeline(version) = {
 		},
 		{
 			name: 'test',
-			image: 'mrparkers/golang-test:1.13.11',
+			image: 'mrparkers/terraform-provider-keycloak-test:1.14.4-v1',
 			volumes: [{
 				name: "deps",
 				path: "/go"
