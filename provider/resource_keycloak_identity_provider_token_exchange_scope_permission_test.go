@@ -132,7 +132,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_rolePolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakIdpTokenExchangeScopePermission_rolePolicy(realmName, providerAlias, webappClientId),
-				ExpectError: regexp.MustCompile(".*invalid policy type, supported types are.*"),
+				ExpectError: regexp.MustCompile(".*expected policy_type to be one of.*"),
 			},
 		},
 	})

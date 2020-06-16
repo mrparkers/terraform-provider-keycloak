@@ -1,12 +1,18 @@
 package provider
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"log"
-	"strconv"
+	"math/rand"
 	"strings"
+)
+
+var (
+	keycloakIdpTokenExchangePermissionPolicyTypes = []string{"client"}
 )
 
 func resourceKeycloakIdentityProviderTokenExchangeScopePermission() *schema.Resource {
@@ -31,10 +37,11 @@ func resourceKeycloakIdentityProviderTokenExchangeScopePermission() *schema.Reso
 				ForceNew: true,
 			},
 			"policy_type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "client",
-				Description: "At the moment only 'client' type is supported",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "client",
+				Description:  "Type of policy that is created. At the moment only 'client' type is supported",
+				ValidateFunc: validation.StringInSlice(keycloakIdpTokenExchangePermissionPolicyTypes, false),
 			},
 			"clients": {
 				Type:        schema.TypeSet,
@@ -45,7 +52,6 @@ func resourceKeycloakIdentityProviderTokenExchangeScopePermission() *schema.Reso
 			"policy_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				ForceNew:    true,
 				Description: "Policy id that will be set on the scope based token exchange permission automatically created by enabling permissions on the reference identity provider",
 			},
 			"authorization_resource_server_id": {
@@ -113,7 +119,7 @@ func createClientPolicy(keycloakClient *keycloak.KeycloakClient, realmId, realmM
 	openidClientAuthorizationClientPolicy := &keycloak.OpenidClientAuthorizationClientPolicy{
 		RealmId:          realmId,
 		ResourceServerId: realmManagementClientId,
-		Name:             realmId + "_" + providerAlias + "_client_policy",
+		Name:             providerAlias + "_idp_client_policy",
 		DecisionStrategy: "UNANIMOUS",
 		Logic:            "POSITIVE",
 		Type:             "client",
@@ -121,13 +127,12 @@ func createClientPolicy(keycloakClient *keycloak.KeycloakClient, realmId, realmM
 	}
 	err := keycloakClient.NewOpenidClientAuthorizationClientPolicy(openidClientAuthorizationClientPolicy)
 	if err != nil {
-		if strings.Contains(err.Error(), "409 Conflict") {
-			index := 1
-			for index <= 10 && err != nil {
-				openidClientAuthorizationClientPolicy.Name = providerAlias + "_" + strconv.Itoa(index) + "_client_policy"
-				err = keycloakClient.NewOpenidClientAuthorizationClientPolicy(openidClientAuthorizationClientPolicy)
-				index = index + 1
-			}
+		if keycloak.ErrorIs409(err) {
+			b := make([]byte, 4)
+			rand.Read(b)
+			suffix := hex.EncodeToString(b)
+			openidClientAuthorizationClientPolicy.Name = providerAlias + "_" + suffix + "_idp_client_policy"
+			err = keycloakClient.NewOpenidClientAuthorizationClientPolicy(openidClientAuthorizationClientPolicy)
 		}
 	}
 	if err != nil {

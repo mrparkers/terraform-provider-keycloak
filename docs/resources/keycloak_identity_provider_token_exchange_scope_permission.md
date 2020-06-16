@@ -64,10 +64,16 @@ The following arguments are supported:
 - `provider_alias` - (Required) Alias of the identity provider.
 - `policy_type` - (Optional) Defaults to "client" This is also the only value policy type supported by this provider.
 - `clients` - (Required) Ids of the clients for which a policy will be created and set on scope based token exchange permission.
-- `policy_id` - (Computed) Policy id that will be set on the scope based token exchange permission automatically created by enabling permissions on the reference identity provider.
-- `authorization_resource_server_id` - (Computed) Resource server id representing the realm management client on which this permission is managed.
-- `authorization_idp_resource_id` - (Computed) Resource id representing the identity provider, this automatically created by keycloak.
-- `authorization_token_exchange_scope_permission_id` - (Computed) Permission id representing the Permission with scope 'Token Exchange' and the resource 'authorization_idp_resource_id', this automatically created by keycloak, the policy id will be set on this permission.
+
+### Attributes Reference
+
+In addition to the arguments listed above, the following computed attributes are exported:
+
+- `policy_id` - Policy id that will be set on the scope based token exchange permission automatically created by enabling permissions on the reference identity provider.
+- `authorization_resource_server_id` - Resource server id representing the realm management client on which this permission is managed.
+- `authorization_idp_resource_id` - Resource id representing the identity provider, this automatically created by keycloak.
+- `authorization_token_exchange_scope_permission_id` - Permission id representing the Permission with scope 'Token Exchange' and the resource 'authorization_idp_resource_id', this automatically created by keycloak, the policy id will be set on this permission.
+
 
 ### Import
 
