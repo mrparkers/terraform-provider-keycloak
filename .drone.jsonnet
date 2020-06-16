@@ -71,7 +71,7 @@ local pipeline(version) = {
 				path: "/go"
 			}],
 			commands: [
-				'TF_ACC=1 gotestsum --format testname',
+				'make testacc',
 			],
 			environment: keycloakTestEnv(),
 		},
