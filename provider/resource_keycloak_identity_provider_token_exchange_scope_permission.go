@@ -105,7 +105,7 @@ func setIdentityProviderTokenExchangeScopePermissionClientPolicy(keycloakClient 
 		return keycloakClient.UpdateOpenidClientAuthorizationClientPolicy(openidClientAuthorizationClientPolicy)
 
 	} else {
-		return fmt.Errorf("only supports 1 client policy is supporterd on the identity provider token exchange scope based permission, but %d were found", len(permission.Policies))
+		return fmt.Errorf("only one client policy is supported, but %d were found", len(permission.Policies))
 	}
 }
 
