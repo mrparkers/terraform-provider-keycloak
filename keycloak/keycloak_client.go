@@ -25,6 +25,7 @@ type KeycloakClient struct {
 	clientCredentials *ClientCredentials
 	httpClient        *http.Client
 	initialLogin      bool
+	userAgent         string
 }
 
 type ClientCredentials struct {
@@ -43,7 +44,7 @@ const (
 	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool) (*KeycloakClient, error) {
+func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string) (*KeycloakClient, error) {
 	cookieJar, err := cookiejar.New(&cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	})
@@ -91,6 +92,7 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 		httpClient:        httpClient,
 		initialLogin:      initialLogin,
 		realm:             realm,
+		userAgent:         userAgent,
 	}
 
 	if keycloakClient.initialLogin {
@@ -111,6 +113,10 @@ func (keycloakClient *KeycloakClient) login() error {
 
 	accessTokenRequest, _ := http.NewRequest(http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
 	accessTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	if keycloakClient.userAgent != "" {
+		accessTokenRequest.Header.Set("User-Agent", keycloakClient.userAgent)
+	}
 
 	accessTokenResponse, err := keycloakClient.httpClient.Do(accessTokenRequest)
 	if err != nil {
@@ -145,6 +151,10 @@ func (keycloakClient *KeycloakClient) refresh() error {
 
 	refreshTokenRequest, _ := http.NewRequest(http.MethodPost, refreshTokenUrl, strings.NewReader(refreshTokenData.Encode()))
 	refreshTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	if keycloakClient.userAgent != "" {
+		refreshTokenRequest.Header.Set("User-Agent", keycloakClient.userAgent)
+	}
 
 	refreshTokenResponse, err := keycloakClient.httpClient.Do(refreshTokenRequest)
 	if err != nil {
@@ -203,6 +213,10 @@ func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 
 	request.Header.Set("Authorization", fmt.Sprintf("%s %s", tokenType, accessToken))
 	request.Header.Set("Accept", "application/json")
+
+	if keycloakClient.userAgent != "" {
+		request.Header.Set("User-Agent", keycloakClient.userAgent)
+	}
 
 	if request.Method == http.MethodPost || request.Method == http.MethodPut || request.Method == http.MethodDelete {
 		request.Header.Set("Content-type", "application/json")

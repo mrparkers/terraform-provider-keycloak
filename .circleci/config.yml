@@ -25,6 +25,11 @@ workflows:
       - build-and-release:
           requires:
             - test
+          filters:
+            tags:
+              only: /\d+\.\d+\.\d+(-rc.\d+)?/
+            branches:
+              ignore: /.*/
 
 defaults:
   go_image: &go_image

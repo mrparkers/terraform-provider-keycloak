@@ -2,11 +2,12 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func KeycloakProvider() *schema.Provider {
-	return &schema.Provider{
+	provider := &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{
 			"keycloak_group":                              dataSourceKeycloakGroup(),
 			"keycloak_openid_client":                      dataSourceKeycloakOpenidClient(),
@@ -139,11 +140,25 @@ func KeycloakProvider() *schema.Provider {
 				Default:     false,
 			},
 		},
-		ConfigureFunc: configureKeycloakProvider,
 	}
+
+	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+		terraformVersion := provider.TerraformVersion
+		if terraformVersion == "" {
+			// Terraform 0.12 introduced this field to the protocol
+			// We can therefore assume that if it's missing it's 0.10 or 0.11
+			terraformVersion = "0.11+compatible"
+		}
+
+		userAgent := httpclient.TerraformUserAgent(terraformVersion)
+
+		return configureKeycloakProvider(d, userAgent)
+	}
+
+	return provider
 }
 
-func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
+func configureKeycloakProvider(data *schema.ResourceData, userAgent string) (interface{}, error) {
 	url := data.Get("url").(string)
 	clientId := data.Get("client_id").(string)
 	clientSecret := data.Get("client_secret").(string)
@@ -155,5 +170,5 @@ func configureKeycloakProvider(data *schema.ResourceData) (interface{}, error) {
 	tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
 	rootCaCertificate := data.Get("root_ca_certificate").(string)
 
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify)
+	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
 }
