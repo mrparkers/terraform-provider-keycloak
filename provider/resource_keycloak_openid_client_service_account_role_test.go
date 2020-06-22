@@ -13,6 +13,7 @@ import (
 func TestAccKeycloakOpenidClientServiceAccountRole_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
+	resourceName := "keycloak_openid_client_service_account_role.test"
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -21,7 +22,13 @@ func TestAccKeycloakOpenidClientServiceAccountRole_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientServiceAccountRole_basic(realmName, clientId),
-				Check:  testAccCheckKeycloakOpenidClientServiceAccountRoleExists("keycloak_openid_client_service_account_role.test"),
+				Check:  testAccCheckKeycloakOpenidClientServiceAccountRoleExists(resourceName),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getKeycloakOpenidClientServiceAccountRoleImportId(resourceName),
 			},
 		},
 	})
@@ -157,6 +164,22 @@ func getKeycloakOpenidClientServiceAccountRoleFromState(s *terraform.State, reso
 	}
 
 	return serviceAccountRole, nil
+}
+
+func getKeycloakOpenidClientServiceAccountRoleImportId(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		realmId := rs.Primary.Attributes["realm_id"]
+		serviceAccountUserId := rs.Primary.Attributes["service_account_user_id"]
+		clientId := rs.Primary.Attributes["client_id"]
+		roleId := strings.Split(rs.Primary.ID, "/")[1]
+
+		return fmt.Sprintf("%s/%s/%s/%s", realmId, serviceAccountUserId, clientId, roleId), nil
+	}
 }
 
 func testKeycloakOpenidClientServiceAccountRole_basic(realm, clientId string) string {

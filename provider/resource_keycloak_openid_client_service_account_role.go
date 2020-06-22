@@ -120,15 +120,27 @@ func resourceKeycloakOpenidClientServiceAccountRoleDelete(data *schema.ResourceD
 	return nil
 }
 
-func resourceKeycloakOpenidClientServiceAccountRoleImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakOpenidClientServiceAccountRoleImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
 	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 {
+	if len(parts) != 4 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{serviceAccountUserId}}/{{clientId}}/{{roleId}}")
 	}
-	d.Set("realm_id", parts[0])
+	realmId := parts[0]
+	d.Set("realm_id", realmId)
 	d.Set("service_account_user_id", parts[1])
 	d.Set("client_id", parts[2])
-	d.SetId(fmt.Sprintf("%s/%s", parts[1], parts[3]))
+	roleId := parts[3]
+
+	// fetch role to get role name
+	role, err := keycloakClient.GetRole(realmId, roleId)
+	if err != nil {
+		return nil, err
+	}
+	d.Set("role", role.Name)
+
+	d.SetId(fmt.Sprintf("%s/%s", parts[1], roleId))
 
 	return []*schema.ResourceData{d}, nil
 }
