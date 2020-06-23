@@ -6,17 +6,13 @@ workflows:
           matrix:
             parameters:
               keycloak-version:
-                - '10.0.1'
+                - '10.0.2'
                 - '9.0.3'
                 - '8.0.2'
-                - '7.0.1'
-                - '6.0.1'
-                - '5.0.0'
-                - '4.8.3.Final'
   release:
     jobs:
       - test:
-          keycloak-version: '8.0.1'
+          keycloak-version: '10.0.2'
           filters:
             tags:
               only: /\d+\.\d+\.\d+(-rc.\d+)?/
@@ -72,7 +68,6 @@ jobs:
       - store_test_results:
           path: /tmp/test-results
     environment:
-      GO111MODULE: "on"
       KEYCLOAK_CLIENT_ID: "terraform"
       KEYCLOAK_CLIENT_SECRET: "884e0f95-0f42-4a63-9b1f-94274655669e"
       KEYCLOAK_CLIENT_TIMEOUT: "5"
@@ -86,8 +81,6 @@ jobs:
   build-and-release:
     docker:
       - <<: *go_image
-    environment:
-      GO111MODULE: "on"
     working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
     steps:
       - checkout
