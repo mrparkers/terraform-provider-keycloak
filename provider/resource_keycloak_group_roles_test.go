@@ -136,27 +136,6 @@ func TestAccKeycloakGroupRoles_update(t *testing.T) {
 	})
 }
 
-func flattenGroupRoles(keycloakClient *keycloak.KeycloakClient, group *keycloak.Group) ([]string, error) {
-	var roles []string
-
-	for _, realmRole := range group.RealmRoles {
-		roles = append(roles, realmRole)
-	}
-
-	for clientId, clientRoles := range group.ClientRoles {
-		client, err := keycloakClient.GetGenericClientByClientId(group.RealmId, clientId)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, clientRole := range clientRoles {
-			roles = append(roles, fmt.Sprintf("%s/%s", client.Id, clientRole))
-		}
-	}
-
-	return roles, nil
-}
-
 func testAccCheckKeycloakGroupHasRoles(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
@@ -188,7 +167,12 @@ func testAccCheckKeycloakGroupHasRoles(resourceName string) resource.TestCheckFu
 			return err
 		}
 
-		groupRoles, err := flattenGroupRoles(keycloakClient, group)
+		groupRoleMappings, err := keycloakClient.GetGroupRoleMappings(realm, groupId)
+		if err != nil {
+			return err
+		}
+
+		groupRoles, err := flattenRoleMapping(groupRoleMappings)
 		if err != nil {
 			return err
 		}

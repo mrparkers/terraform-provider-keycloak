@@ -136,14 +136,14 @@ func TestAccKeycloakUserRoles_update(t *testing.T) {
 	})
 }
 
-func flattenUserRoles(userRoleMapping *keycloak.UserRoleMapping) ([]string, error) {
+func flattenRoleMapping(roleMapping *keycloak.RoleMapping) ([]string, error) {
 	var roles []string
 
-	for _, realmRole := range userRoleMapping.RealmMappings {
+	for _, realmRole := range roleMapping.RealmMappings {
 		roles = append(roles, realmRole.Name)
 	}
 
-	for _, clientRoleMapping := range userRoleMapping.ClientMappings {
+	for _, clientRoleMapping := range roleMapping.ClientMappings {
 		for _, clientRole := range clientRoleMapping.Mappings {
 			roles = append(roles, fmt.Sprintf("%s/%s", clientRoleMapping.Id, clientRole.Name))
 		}
@@ -188,7 +188,7 @@ func testAccCheckKeycloakUserHasRoles(resourceName string) resource.TestCheckFun
 			return err
 		}
 
-		userRoles, err := flattenUserRoles(userRoleMappings)
+		userRoles, err := flattenRoleMapping(userRoleMappings)
 		if err != nil {
 			return err
 		}
