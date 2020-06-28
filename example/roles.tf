@@ -184,7 +184,7 @@ data "keycloak_role" "realm_offline_access" {
   name     = "offline_access"
 }
 
-resource "keycloak_group_roles" "admin_roles" {
+resource "keycloak_group_roles" "admin_group_roles" {
   realm_id = keycloak_realm.roles_example.id
   group_id = keycloak_group.pet_api_admins.id
 
@@ -204,6 +204,28 @@ resource "keycloak_group_roles" "front_desk_roles" {
   role_ids = [
     keycloak_role.pet_api_read_pet.id,
     keycloak_role.pet_api_read_pet_details.id,
+    keycloak_role.pet_api_create_pet.id,
+    data.keycloak_role.realm_offline_access.id,
+  ]
+}
+
+resource "keycloak_user" "admin_user" {
+  realm_id = keycloak_realm.roles_example.id
+  username = "admin-user"
+
+  email      = "admin-user@fakedomain.com"
+  first_name = "Admin"
+  last_name  = "Istrator"
+}
+
+resource "keycloak_user_roles" "admin_user_roles" {
+  realm_id = keycloak_realm.roles_example.id
+  user_id  = keycloak_user.admin_user.id
+
+  role_ids = [
+    keycloak_role.pet_api_read_pet.id,
+    keycloak_role.pet_api_read_pet_details.id,
+    keycloak_role.pet_api_delete_pet.id,
     keycloak_role.pet_api_create_pet.id,
     data.keycloak_role.realm_offline_access.id,
   ]

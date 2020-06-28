@@ -9,9 +9,9 @@ import (
 
 func resourceKeycloakGroupRoles() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakGroupRolesCreate,
+		Create: resourceKeycloakGroupRolesReconcile,
 		Read:   resourceKeycloakGroupRolesRead,
-		Update: resourceKeycloakGroupRolesUpdate,
+		Update: resourceKeycloakGroupRolesReconcile,
 		Delete: resourceKeycloakGroupRolesDelete,
 		// This resource can be imported using {{realm}}/{{groupId}}.
 		Importer: &schema.ResourceImporter{
@@ -42,142 +42,47 @@ func groupRolesId(realmId, groupId string) string {
 	return fmt.Sprintf("%s/%s", realmId, groupId)
 }
 
-func getMapOfRealmAndClientRoles(keycloakClient *keycloak.KeycloakClient, realmId string, roleIds []string) (map[string][]*keycloak.Role, error) {
-	roles := make(map[string][]*keycloak.Role)
-
-	for _, roleId := range roleIds {
-		role, err := keycloakClient.GetRole(realmId, roleId)
+func addRolesToGroup(keycloakClient *keycloak.KeycloakClient, clientRolesToAdd map[string][]*keycloak.Role, realmRolesToAdd []*keycloak.Role, group *keycloak.Group) error {
+	if len(realmRolesToAdd) != 0 {
+		err := keycloakClient.AddRealmRolesToGroup(group.RealmId, group.Id, realmRolesToAdd)
 		if err != nil {
-			return nil, err
-		}
-
-		if role.ClientRole {
-			roles[role.ClientId] = append(roles[role.ClientId], role)
-		} else {
-			roles["realm"] = append(roles["realm"], role)
+			return err
 		}
 	}
 
-	return roles, nil
-}
-
-// given a group and a map of roles we already know about, fetch the roles we don't know about
-// `localRoles` is used as a cache to avoid unnecessary http requests
-func getMapOfRealmAndClientRolesFromGroup(keycloakClient *keycloak.KeycloakClient, group *keycloak.Group, localRoles map[string][]*keycloak.Role) (map[string][]*keycloak.Role, error) {
-	roles := make(map[string][]*keycloak.Role)
-
-	// realm roles
-	if len(group.RealmRoles) != 0 {
-		var realmRoles []*keycloak.Role
-
-		for _, realmRoleName := range group.RealmRoles {
-			found := false
-
-			for _, localRealmRole := range localRoles["realm"] {
-				if localRealmRole.Name == realmRoleName {
-					found = true
-					realmRoles = append(realmRoles, localRealmRole)
-
-					break
-				}
-			}
-
-			if !found {
-				realmRole, err := keycloakClient.GetRoleByName(group.RealmId, "", realmRoleName)
-				if err != nil {
-					return nil, err
-				}
-
-				realmRoles = append(realmRoles, realmRole)
-			}
-		}
-
-		roles["realm"] = realmRoles
-	}
-
-	// client roles
-	if len(group.ClientRoles) != 0 {
-		for clientName, clientRoleNames := range group.ClientRoles {
-			client, err := keycloakClient.GetGenericClientByClientId(group.RealmId, clientName)
+	for k, roles := range clientRolesToAdd {
+		if len(roles) != 0 {
+			err := keycloakClient.AddClientRolesToGroup(group.RealmId, group.Id, k, roles)
 			if err != nil {
-				return nil, err
+				return err
 			}
-
-			var clientRoles []*keycloak.Role
-			for _, clientRoleName := range clientRoleNames {
-				found := false
-
-				for _, localClientRole := range localRoles[client.Id] {
-					if localClientRole.Name == clientRoleName {
-						found = true
-						clientRoles = append(clientRoles, localClientRole)
-
-						break
-					}
-				}
-
-				if !found {
-					clientRole, err := keycloakClient.GetRoleByName(group.RealmId, client.Id, clientRoleName)
-					if err != nil {
-						return nil, err
-					}
-
-					clientRoles = append(clientRoles, clientRole)
-				}
-			}
-
-			roles[client.Id] = clientRoles
-		}
-	}
-
-	return roles, nil
-}
-
-func addRolesToGroup(keycloakClient *keycloak.KeycloakClient, rolesToAdd map[string][]*keycloak.Role, group *keycloak.Group) error {
-	if realmRoles, ok := rolesToAdd["realm"]; ok && len(realmRoles) != 0 {
-		err := keycloakClient.AddRealmRolesToGroup(group.RealmId, group.Id, realmRoles)
-		if err != nil {
-			return err
-		}
-	}
-
-	for k, roles := range rolesToAdd {
-		if k == "realm" {
-			continue
-		}
-
-		err := keycloakClient.AddClientRolesToGroup(group.RealmId, group.Id, k, roles)
-		if err != nil {
-			return err
 		}
 	}
 
 	return nil
 }
 
-func removeRolesFromGroup(keycloakClient *keycloak.KeycloakClient, rolesToRemove map[string][]*keycloak.Role, group *keycloak.Group) error {
-	if realmRoles, ok := rolesToRemove["realm"]; ok && len(realmRoles) != 0 {
-		err := keycloakClient.RemoveRealmRolesFromGroup(group.RealmId, group.Id, realmRoles)
+func removeRolesFromGroup(keycloakClient *keycloak.KeycloakClient, clientRolesToRemove map[string][]*keycloak.Role, realmRolesToRemove []*keycloak.Role, group *keycloak.Group) error {
+	if len(realmRolesToRemove) != 0 {
+		err := keycloakClient.RemoveRealmRolesFromGroup(group.RealmId, group.Id, realmRolesToRemove)
 		if err != nil {
 			return err
 		}
 	}
 
-	for k, roles := range rolesToRemove {
-		if k == "realm" {
-			continue
-		}
-
-		err := keycloakClient.RemoveClientRolesFromGroup(group.RealmId, group.Id, k, roles)
-		if err != nil {
-			return err
+	for k, roles := range clientRolesToRemove {
+		if len(roles) != 0 {
+			err := keycloakClient.RemoveClientRolesFromGroup(group.RealmId, group.Id, k, roles)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	return nil
 }
 
-func resourceKeycloakGroupRolesCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupRolesReconcile(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -189,18 +94,30 @@ func resourceKeycloakGroupRolesCreate(data *schema.ResourceData, meta interface{
 	}
 
 	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
-	rolesToAdd, err := getMapOfRealmAndClientRoles(keycloakClient, realmId, roleIds)
+	tfRoles, err := getExtendedRoleMapping(keycloakClient, realmId, roleIds)
 	if err != nil {
 		return err
 	}
 
-	err = addRolesToGroup(keycloakClient, rolesToAdd, group)
+	// get the list of currently assigned roles. Due to default realm and client roles
+	roleMappings, err := keycloakClient.GetGroupRoleMappings(realmId, groupId)
+
+	// sort into roles we need to add and roles we need to remove
+	updates := calculateRoleMappingUpdates(tfRoles, intoRoleMapping(roleMappings))
+
+	// add roles
+	err = addRolesToGroup(keycloakClient, updates.clientRolesToAdd, updates.realmRolesToAdd, group)
+	if err != nil {
+		return err
+	}
+
+	// remove roles
+	err = removeRolesFromGroup(keycloakClient, updates.clientRolesToRemove, updates.realmRolesToRemove, group)
 	if err != nil {
 		return err
 	}
 
 	data.SetId(groupRolesId(realmId, groupId))
-
 	return resourceKeycloakGroupRolesRead(data, meta)
 }
 
@@ -210,85 +127,25 @@ func resourceKeycloakGroupRolesRead(data *schema.ResourceData, meta interface{})
 	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
 
-	group, err := keycloakClient.GetGroup(realmId, groupId)
+	roles, err := keycloakClient.GetGroupRoleMappings(realmId, groupId)
 	if err != nil {
 		return err
 	}
 
 	var roleIds []string
 
-	if len(group.RealmRoles) != 0 {
-		for _, realmRole := range group.RealmRoles {
-			role, err := keycloakClient.GetRoleByName(realmId, "", realmRole)
-			if err != nil {
-				return err
-			}
-
-			roleIds = append(roleIds, role.Id)
-		}
+	for _, realmRole := range roles.RealmMappings {
+		roleIds = append(roleIds, realmRole.Id)
 	}
 
-	if len(group.ClientRoles) != 0 {
-		for clientName, clientRoles := range group.ClientRoles {
-			client, err := keycloakClient.GetGenericClientByClientId(realmId, clientName)
-			if err != nil {
-				return err
-			}
-
-			for _, clientRole := range clientRoles {
-				role, err := keycloakClient.GetRoleByName(realmId, client.Id, clientRole)
-				if err != nil {
-					return err
-				}
-
-				roleIds = append(roleIds, role.Id)
-			}
+	for _, clientRoleMapping := range roles.ClientMappings {
+		for _, clientRole := range clientRoleMapping.Mappings {
+			roleIds = append(roleIds, clientRole.Id)
 		}
 	}
 
 	data.Set("role_ids", roleIds)
 	data.SetId(groupRolesId(realmId, groupId))
-
-	return nil
-}
-
-func resourceKeycloakGroupRolesUpdate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	realmId := data.Get("realm_id").(string)
-	groupId := data.Get("group_id").(string)
-
-	group, err := keycloakClient.GetGroup(realmId, groupId)
-	if err != nil {
-		return err
-	}
-
-	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
-
-	tfRoles, err := getMapOfRealmAndClientRoles(keycloakClient, realmId, roleIds)
-	if err != nil {
-		return err
-	}
-
-	remoteRoles, err := getMapOfRealmAndClientRolesFromGroup(keycloakClient, group, tfRoles)
-	if err != nil {
-		return err
-	}
-
-	removeDuplicateRoles(&tfRoles, &remoteRoles)
-
-	// `tfRoles` contains all roles that need to be added
-	// `remoteRoles` contains all roles that need to be removed
-
-	err = addRolesToGroup(keycloakClient, tfRoles, group)
-	if err != nil {
-		return err
-	}
-
-	err = removeRolesFromGroup(keycloakClient, remoteRoles, group)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -302,12 +159,12 @@ func resourceKeycloakGroupRolesDelete(data *schema.ResourceData, meta interface{
 	group, err := keycloakClient.GetGroup(realmId, groupId)
 
 	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
-	rolesToRemove, err := getMapOfRealmAndClientRoles(keycloakClient, realmId, roleIds)
+	rolesToRemove, err := getExtendedRoleMapping(keycloakClient, realmId, roleIds)
 	if err != nil {
 		return err
 	}
 
-	err = removeRolesFromGroup(keycloakClient, rolesToRemove, group)
+	err = removeRolesFromGroup(keycloakClient, rolesToRemove.clientRoles, rolesToRemove.realmRoles, group)
 	if err != nil {
 		return err
 	}
@@ -328,29 +185,4 @@ func resourceKeycloakGroupRolesImport(d *schema.ResourceData, _ interface{}) ([]
 	d.SetId(groupRolesId(parts[0], parts[1]))
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func removeRoleFromSlice(slice []*keycloak.Role, index int) []*keycloak.Role {
-	slice[index] = slice[len(slice)-1]
-	return slice[:len(slice)-1]
-}
-
-func removeDuplicateRoles(one, two *map[string][]*keycloak.Role) {
-	for k := range *one {
-		for i1 := 0; i1 < len((*one)[k]); i1++ {
-			s1 := (*one)[k][i1]
-
-			for i2 := 0; i2 < len((*two)[k]); i2++ {
-				s2 := (*two)[k][i2]
-
-				if s1.Id == s2.Id {
-					(*one)[k] = removeRoleFromSlice((*one)[k], i1)
-					(*two)[k] = removeRoleFromSlice((*two)[k], i2)
-
-					i1--
-					break
-				}
-			}
-		}
-	}
 }
