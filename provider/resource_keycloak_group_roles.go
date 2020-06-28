@@ -9,9 +9,9 @@ import (
 
 func resourceKeycloakGroupRoles() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakGroupRolesCreate,
+		Create: resourceKeycloakGroupRolesReconcile,
 		Read:   resourceKeycloakGroupRolesRead,
-		Update: resourceKeycloakGroupRolesUpdate,
+		Update: resourceKeycloakGroupRolesReconcile,
 		Delete: resourceKeycloakGroupRolesDelete,
 		// This resource can be imported using {{realm}}/{{groupId}}.
 		Importer: &schema.ResourceImporter{
@@ -82,7 +82,7 @@ func removeRolesFromGroup(keycloakClient *keycloak.KeycloakClient, clientRolesTo
 	return nil
 }
 
-func resourceKeycloakGroupRolesCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupRolesReconcile(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -100,7 +100,6 @@ func resourceKeycloakGroupRolesCreate(data *schema.ResourceData, meta interface{
 	}
 
 	// get the list of currently assigned roles. Due to default realm and client roles
-	// (e.g. roles of the account client) this is probably not empty upon resource creation
 	roleMappings, err := keycloakClient.GetGroupRoleMappings(realmId, groupId)
 
 	// sort into roles we need to add and roles we need to remove
@@ -147,43 +146,6 @@ func resourceKeycloakGroupRolesRead(data *schema.ResourceData, meta interface{})
 
 	data.Set("role_ids", roleIds)
 	data.SetId(groupRolesId(realmId, groupId))
-
-	return nil
-}
-
-func resourceKeycloakGroupRolesUpdate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	realmId := data.Get("realm_id").(string)
-	groupId := data.Get("group_id").(string)
-
-	group, err := keycloakClient.GetGroup(realmId, groupId)
-	if err != nil {
-		return err
-	}
-
-	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
-	tfRoles, err := getExtendedRoleMapping(keycloakClient, realmId, roleIds)
-	if err != nil {
-		return err
-	}
-
-	roleMappings, err := keycloakClient.GetGroupRoleMappings(realmId, groupId)
-	if err != nil {
-		return err
-	}
-
-	updates := calculateRoleMappingUpdates(tfRoles, intoRoleMapping(roleMappings))
-
-	err = addRolesToGroup(keycloakClient, updates.clientRolesToAdd, updates.realmRolesToAdd, group)
-	if err != nil {
-		return err
-	}
-
-	err = removeRolesFromGroup(keycloakClient, updates.clientRolesToRemove, updates.realmRolesToRemove, group)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }

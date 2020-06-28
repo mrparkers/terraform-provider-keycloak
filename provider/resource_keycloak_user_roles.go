@@ -9,9 +9,9 @@ import (
 
 func resourceKeycloakUserRoles() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakUserRolesCreate,
+		Create: resourceKeycloakUserRolesReconcile,
 		Read:   resourceKeycloakUserRolesRead,
-		Update: resourceKeycloakUserRolesUpdate,
+		Update: resourceKeycloakUserRolesReconcile,
 		Delete: resourceKeycloakUserRolesDelete,
 		// This resource can be imported using {{realm}}/{{userId}}.
 		Importer: &schema.ResourceImporter{
@@ -82,7 +82,7 @@ func removeRolesFromUser(keycloakClient *keycloak.KeycloakClient, clientRolesToR
 	return nil
 }
 
-func resourceKeycloakUserRolesCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakUserRolesReconcile(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -147,43 +147,6 @@ func resourceKeycloakUserRolesRead(data *schema.ResourceData, meta interface{}) 
 
 	data.Set("role_ids", roleIds)
 	data.SetId(userRolesId(realmId, userId))
-
-	return nil
-}
-
-func resourceKeycloakUserRolesUpdate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-
-	realmId := data.Get("realm_id").(string)
-	userId := data.Get("user_id").(string)
-
-	user, err := keycloakClient.GetUser(realmId, userId)
-	if err != nil {
-		return err
-	}
-
-	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
-	tfRoles, err := getExtendedRoleMapping(keycloakClient, realmId, roleIds)
-	if err != nil {
-		return err
-	}
-
-	roleMappings, err := keycloakClient.GetUserRoleMappings(realmId, userId)
-	if err != nil {
-		return err
-	}
-
-	updates := calculateRoleMappingUpdates(tfRoles, intoRoleMapping(roleMappings))
-
-	err = addRolesToUser(keycloakClient, updates.clientRolesToAdd, updates.realmRolesToAdd, user)
-	if err != nil {
-		return err
-	}
-
-	err = removeRolesFromUser(keycloakClient, updates.clientRolesToRemove, updates.realmRolesToRemove, user)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
