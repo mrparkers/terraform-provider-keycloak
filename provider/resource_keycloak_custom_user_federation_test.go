@@ -109,6 +109,41 @@ func TestAccKeycloakCustomUserFederation_validation(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakCustomUserFederation_ParentIdDifferentFromRealmName(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	internalId := acctest.RandString(10)
+	name := "terraform-" + acctest.RandString(10)
+	providerId := "custom"
+
+	realm := &keycloak.Realm{
+		Realm: realmName,
+		Id:    internalId,
+	}
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				ResourceName:  "keycloak_realm.realm",
+				ImportStateId: realmName,
+				ImportState:   true,
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.NewRealm(realm)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakCustomUserFederation_parentId(name, providerId, internalId),
+				Check:  testAccCheckKeycloakCustomUserFederationExists("keycloak_custom_user_federation.custom"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakCustomUserFederationExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getCustomUserFederationFromState(s, resourceName)
@@ -224,4 +259,17 @@ resource "keycloak_custom_user_federation" "custom" {
 	}
 }
 	`, realm, name, providerId, customConfigValue)
+}
+
+func testKeycloakCustomUserFederation_parentId(name, providerId, parentId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_custom_user_federation" "custom" {
+	name        = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	provider_id = "%s"
+    parent_id   = "%s"
+
+	enabled     = true
+}
+	`, name, providerId, parentId)
 }
