@@ -1238,6 +1238,7 @@ resource "keycloak_realm" "realm" {
 }
 
 func testKeycloakRealm_tokenSettings(realm string) string {
+	defaultSignatureAlgorithm := "RS256"
 	ssoSessionIdleTimeout := randomDurationString()
 	ssoSessionMaxLifespan := randomDurationString()
 	offlineSessionIdleTimeout := randomDurationString()
@@ -1256,6 +1257,7 @@ resource "keycloak_realm" "realm" {
 	enabled                                  = true
 	display_name                             = "%s"
 
+	default_signature_algorithm              = "%s"
 	sso_session_idle_timeout                 = "%s"
 	sso_session_max_lifespan                 = "%s"
 	offline_session_idle_timeout             = "%s"
@@ -1268,7 +1270,7 @@ resource "keycloak_realm" "realm" {
 	action_token_generated_by_user_lifespan  = "%s"
 	action_token_generated_by_admin_lifespan = "%s"
 }
-	`, realm, realm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, offlineSessionIdleTimeout, offlineSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
+	`, realm, realm, defaultSignatureAlgorithm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, offlineSessionIdleTimeout, offlineSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
 }
 
 func testKeycloakRealm_securityDefensesHeaders(realm, realmDisplayName, xFrameOptions string) string {

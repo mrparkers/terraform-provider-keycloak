@@ -49,19 +49,20 @@ type Realm struct {
 	EmailTheme   string `json:"emailTheme,omitempty"`
 
 	// Tokens
-	RevokeRefreshToken                  bool `json:"revokeRefreshToken"`
-	RefreshTokenMaxReuse                int  `json:"refreshTokenMaxReuse"`
-	SsoSessionIdleTimeout               int  `json:"ssoSessionIdleTimeout,omitempty"`
-	SsoSessionMaxLifespan               int  `json:"ssoSessionMaxLifespan,omitempty"`
-	OfflineSessionIdleTimeout           int  `json:"offlineSessionIdleTimeout,omitempty"`
-	OfflineSessionMaxLifespan           int  `json:"offlineSessionMaxLifespan,omitempty"`
-	AccessTokenLifespan                 int  `json:"accessTokenLifespan,omitempty"`
-	AccessTokenLifespanForImplicitFlow  int  `json:"accessTokenLifespanForImplicitFlow,omitempty"`
-	AccessCodeLifespan                  int  `json:"accessCodeLifespan,omitempty"`
-	AccessCodeLifespanLogin             int  `json:"accessCodeLifespanLogin,omitempty"`
-	AccessCodeLifespanUserAction        int  `json:"accessCodeLifespanUserAction,omitempty"`
-	ActionTokenGeneratedByUserLifespan  int  `json:"actionTokenGeneratedByUserLifespan,omitempty"`
-	ActionTokenGeneratedByAdminLifespan int  `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
+	DefaultSignatureAlgorithm           string `json:"defaultSignatureAlgorithm"`
+	RevokeRefreshToken                  bool   `json:"revokeRefreshToken"`
+	RefreshTokenMaxReuse                int    `json:"refreshTokenMaxReuse"`
+	SsoSessionIdleTimeout               int    `json:"ssoSessionIdleTimeout,omitempty"`
+	SsoSessionMaxLifespan               int    `json:"ssoSessionMaxLifespan,omitempty"`
+	OfflineSessionIdleTimeout           int    `json:"offlineSessionIdleTimeout,omitempty"`
+	OfflineSessionMaxLifespan           int    `json:"offlineSessionMaxLifespan,omitempty"`
+	AccessTokenLifespan                 int    `json:"accessTokenLifespan,omitempty"`
+	AccessTokenLifespanForImplicitFlow  int    `json:"accessTokenLifespanForImplicitFlow,omitempty"`
+	AccessCodeLifespan                  int    `json:"accessCodeLifespan,omitempty"`
+	AccessCodeLifespanLogin             int    `json:"accessCodeLifespanLogin,omitempty"`
+	AccessCodeLifespanUserAction        int    `json:"accessCodeLifespanUserAction,omitempty"`
+	ActionTokenGeneratedByUserLifespan  int    `json:"actionTokenGeneratedByUserLifespan,omitempty"`
+	ActionTokenGeneratedByAdminLifespan int    `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
 
 	//internationalization
 	InternationalizationEnabled bool     `json:"internationalizationEnabled"`
