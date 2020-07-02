@@ -28,7 +28,20 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The realm this provider will provide user federation for.",
+				Description: "The realm (name) this provider will provide user federation for.",
+			},
+			"parent_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The parent_id of the generated component. will use realm_id if not specified.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					realmId := d.Get("realm_id").(string)
+					if (old == "" && new == realmId) || (old == realmId && new == "") {
+						return true
+					}
+					return false
+				},
 			},
 			"provider_id": {
 				Type:        schema.TypeString,
@@ -72,11 +85,19 @@ func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.Custom
 			config[key] = strings.Split(value.(string), ",")
 		}
 	}
+	parentId := ""
+	dataParentId := data.Get("parent_id").(string)
+	if dataParentId != "" {
+		parentId = dataParentId
+	} else {
+		parentId = data.Get("realm_id").(string)
+	}
 
 	return &keycloak.CustomUserFederation{
 		Id:         data.Id(),
 		Name:       data.Get("name").(string),
 		RealmId:    data.Get("realm_id").(string),
+		ParentId:   parentId,
 		ProviderId: data.Get("provider_id").(string),
 
 		Enabled:  data.Get("enabled").(bool),
@@ -93,6 +114,8 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 
 	data.Set("name", custom.Name)
 	data.Set("realm_id", custom.RealmId)
+
+	data.Set("parent_id", custom.ParentId)
 	data.Set("provider_id", custom.ProviderId)
 
 	data.Set("enabled", custom.Enabled)

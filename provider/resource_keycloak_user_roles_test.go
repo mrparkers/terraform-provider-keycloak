@@ -10,38 +10,38 @@ import (
 	"testing"
 )
 
-func TestAccKeycloakGroupRoles_basic(t *testing.T) {
+func TestAccKeycloakUserRoles_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	realmRoleName := "terraform-role-" + acctest.RandString(10)
 	openIdClientName := "terraform-openid-client-" + acctest.RandString(10)
 	openIdRoleName := "terraform-role-" + acctest.RandString(10)
 	samlClientName := "terraform-saml-client-" + acctest.RandString(10)
 	samlRoleName := "terraform-role-" + acctest.RandString(10)
-	groupName := "terraform-group-" + acctest.RandString(10)
+	userName := "terraform-user-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		Providers: testAccProviders,
 		PreCheck:  func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakGroupRoles_basic(realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName),
-				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+				Config: testKeycloakUserRoles_basic(realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, userName),
+				Check:  testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles"),
 			},
 			{
-				ResourceName:      "keycloak_group_roles.group_roles",
+				ResourceName:      "keycloak_user_roles.user_roles",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			// check destroy
 			{
-				Config: testKeycloakGroupRoles_noGroupRoles(realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName),
-				Check:  testAccCheckKeycloakGroupHasNoRoles("keycloak_group.group"),
+				Config: testKeycloakUserRoles_noUserRoles(realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, userName),
+				Check:  testAccCheckKeycloakUserHasNoRoles("keycloak_user.user"),
 			},
 		},
 	})
 }
 
-func TestAccKeycloakGroupRoles_update(t *testing.T) {
+func TestAccKeycloakUserRoles_update(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 
 	realmRoleOneName := "terraform-role-" + acctest.RandString(10)
@@ -52,7 +52,7 @@ func TestAccKeycloakGroupRoles_update(t *testing.T) {
 	samlClientName := "terraform-saml-client-" + acctest.RandString(10)
 	samlRoleOneName := "terraform-role-" + acctest.RandString(10)
 	samlRoleTwoName := "terraform-role-" + acctest.RandString(10)
-	groupName := "terraform-group-" + acctest.RandString(10)
+	userName := "terraform-user-" + acctest.RandString(10)
 
 	allRoleIds := []string{
 		"${keycloak_role.realm_role_one.id}",
@@ -70,73 +70,89 @@ func TestAccKeycloakGroupRoles_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			// initial setup, resource is defined but no roles are specified
 			{
-				Config: testKeycloakGroupRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, []string{}),
-				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+				Config: testKeycloakUserRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, []string{}),
+				Check:  testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles"),
 			},
 			// add all roles
 			{
-				Config: testKeycloakGroupRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, allRoleIds),
-				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+				Config: testKeycloakUserRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, allRoleIds),
+				Check:  testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles"),
 			},
 			// remove some
 			{
-				Config: testKeycloakGroupRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, []string{
+				Config: testKeycloakUserRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, []string{
 					"${keycloak_role.realm_role_two.id}",
 					"${keycloak_role.openid_client_role_one.id}",
 					"${keycloak_role.openid_client_role_two.id}",
 					"${data.keycloak_role.offline_access.id}",
 				}),
-				Check: testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+				Check: testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles"),
 			},
 			// add some and remove some
 			{
-				Config: testKeycloakGroupRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, []string{
+				Config: testKeycloakUserRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, []string{
 					"${keycloak_role.saml_client_role_one.id}",
 					"${keycloak_role.saml_client_role_two.id}",
 					"${keycloak_role.realm_role_one.id}",
 				}),
-				Check: testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+				Check: testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles"),
 			},
 			// add some and remove some again
 			{
-				Config: testKeycloakGroupRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, []string{
+				Config: testKeycloakUserRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, []string{
 					"${keycloak_role.saml_client_role_one.id}",
 					"${keycloak_role.openid_client_role_two.id}",
 					"${keycloak_role.realm_role_two.id}",
 					"${data.keycloak_role.offline_access.id}",
 				}),
-				Check: testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+				Check: testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles"),
 			},
 			// add all back
 			{
-				Config: testKeycloakGroupRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, allRoleIds),
-				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+				Config: testKeycloakUserRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, allRoleIds),
+				Check:  testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles"),
 			},
 			// random scenario 1
 			{
-				Config: testKeycloakGroupRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, randomStringSliceSubset(allRoleIds)),
-				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+				Config: testKeycloakUserRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, randomStringSliceSubset(allRoleIds)),
+				Check:  testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles"),
 			},
 			// random scenario 2
 			{
-				Config: testKeycloakGroupRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, randomStringSliceSubset(allRoleIds)),
-				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+				Config: testKeycloakUserRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, randomStringSliceSubset(allRoleIds)),
+				Check:  testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles"),
 			},
 			// random scenario 3
 			{
-				Config: testKeycloakGroupRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, randomStringSliceSubset(allRoleIds)),
-				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+				Config: testKeycloakUserRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, randomStringSliceSubset(allRoleIds)),
+				Check:  testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles"),
 			},
 			// remove all
 			{
-				Config: testKeycloakGroupRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, []string{}),
-				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+				Config: testKeycloakUserRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, []string{}),
+				Check:  testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles"),
 			},
 		},
 	})
 }
 
-func testAccCheckKeycloakGroupHasRoles(resourceName string) resource.TestCheckFunc {
+func flattenRoleMapping(roleMapping *keycloak.RoleMapping) ([]string, error) {
+	var roles []string
+
+	for _, realmRole := range roleMapping.RealmMappings {
+		roles = append(roles, realmRole.Name)
+	}
+
+	for _, clientRoleMapping := range roleMapping.ClientMappings {
+		for _, clientRole := range clientRoleMapping.Mappings {
+			roles = append(roles, fmt.Sprintf("%s/%s", clientRoleMapping.Id, clientRole.Name))
+		}
+	}
+
+	return roles, nil
+}
+
+func testAccCheckKeycloakUserHasRoles(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -146,7 +162,7 @@ func testAccCheckKeycloakGroupHasRoles(resourceName string) resource.TestCheckFu
 		}
 
 		realm := rs.Primary.Attributes["realm_id"]
-		groupId := rs.Primary.Attributes["group_id"]
+		userId := rs.Primary.Attributes["user_id"]
 
 		var roles []*keycloak.Role
 		for k, v := range rs.Primary.Attributes {
@@ -162,23 +178,23 @@ func testAccCheckKeycloakGroupHasRoles(resourceName string) resource.TestCheckFu
 			roles = append(roles, role)
 		}
 
-		group, err := keycloakClient.GetGroup(realm, groupId)
+		user, err := keycloakClient.GetUser(realm, userId)
 		if err != nil {
 			return err
 		}
 
-		groupRoleMappings, err := keycloakClient.GetGroupRoleMappings(realm, groupId)
+		userRoleMappings, err := keycloakClient.GetUserRoleMappings(realm, userId)
 		if err != nil {
 			return err
 		}
 
-		groupRoles, err := flattenRoleMapping(groupRoleMappings)
+		userRoles, err := flattenRoleMapping(userRoleMappings)
 		if err != nil {
 			return err
 		}
 
-		if len(groupRoles) != len(roles) {
-			return fmt.Errorf("expected number of group roles to be %d, got %d", len(roles), len(groupRoles))
+		if len(userRoles) != len(roles) {
+			return fmt.Errorf("expected number of user roles to be %d, got %d", len(roles), len(userRoles))
 		}
 
 		for _, role := range roles {
@@ -191,15 +207,15 @@ func testAccCheckKeycloakGroupHasRoles(resourceName string) resource.TestCheckFu
 
 			found := false
 
-			for _, groupRole := range groupRoles {
-				if groupRole == expectedRoleString {
+			for _, userRole := range userRoles {
+				if userRole == expectedRoleString {
 					found = true
 					break
 				}
 			}
 
 			if !found {
-				return fmt.Errorf("expected to find role %s assigned to group %s", expectedRoleString, group.Name)
+				return fmt.Errorf("expected to find role %s assigned to user %s", expectedRoleString, user.Username)
 			}
 		}
 
@@ -207,7 +223,7 @@ func testAccCheckKeycloakGroupHasRoles(resourceName string) resource.TestCheckFu
 	}
 }
 
-func testAccCheckKeycloakGroupHasNoRoles(resourceName string) resource.TestCheckFunc {
+func testAccCheckKeycloakUserHasNoRoles(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
@@ -219,20 +235,25 @@ func testAccCheckKeycloakGroupHasNoRoles(resourceName string) resource.TestCheck
 		realm := rs.Primary.Attributes["realm_id"]
 		id := rs.Primary.ID
 
-		group, err := keycloakClient.GetGroup(realm, id)
+		user, err := keycloakClient.GetUser(realm, id)
 		if err != nil {
 			return err
 		}
 
-		if len(group.RealmRoles) != 0 || len(group.ClientRoles) != 0 {
-			return fmt.Errorf("expected group %s to have no roles", group.Name)
+		userRoleMapping, err := keycloakClient.GetUserRoleMappings(realm, id)
+		if err != nil {
+			return err
+		}
+
+		if len(userRoleMapping.RealmMappings) != 0 || len(userRoleMapping.ClientMappings) != 0 {
+			return fmt.Errorf("expected user %s to have no roles", user.Username)
 		}
 
 		return nil
 	}
 }
 
-func testKeycloakGroupRoles_basic(realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName string) string {
+func testKeycloakUserRoles_basic(realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, userName string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -266,31 +287,58 @@ resource "keycloak_role" "saml_client_role" {
 	client_id = "${keycloak_saml_client.saml_client.id}"
 }
 
+data "keycloak_openid_client" "account" {
+	realm_id = "${keycloak_realm.realm.id}"
+	client_id = "account"
+}
+
+data "keycloak_role" "manage_account" {
+	realm_id  = "${keycloak_realm.realm.id}"
+	client_id = "${data.keycloak_openid_client.account.id}"
+	name 	  = "manage-account"
+}
+
+data "keycloak_role" "view_profile" {
+	realm_id  = "${keycloak_realm.realm.id}"
+	client_id = "${data.keycloak_openid_client.account.id}"
+	name 	  = "view-profile"
+}
+
 data "keycloak_role" "offline_access" {
 	realm_id  = "${keycloak_realm.realm.id}"
 	name      = "offline_access"
 }
 
-resource "keycloak_group" "group" {
-	realm_id = "${keycloak_realm.realm.id}"
-	name = "%s"
+data "keycloak_role" "uma_authorization" {
+	realm_id  = "${keycloak_realm.realm.id}"
+	name      = "uma_authorization"
 }
 
-resource "keycloak_group_roles" "group_roles" {
+resource "keycloak_user" "user" {
 	realm_id = "${keycloak_realm.realm.id}"
-	group_id = "${keycloak_group.group.id}"
+	username = "%s"
+}
+
+resource "keycloak_user_roles" "user_roles" {
+	realm_id = "${keycloak_realm.realm.id}"
+	user_id = "${keycloak_user.user.id}"
 
 	role_ids = [
 		"${keycloak_role.realm_role.id}",
 		"${keycloak_role.openid_client_role.id}",
 		"${keycloak_role.saml_client_role.id}",
+
+		# default roles
 		"${data.keycloak_role.offline_access.id}",
+		"${data.keycloak_role.uma_authorization.id}",
+		"${data.keycloak_role.manage_account.id}",
+		"${data.keycloak_role.view_profile.id}",
 	]
 }
-	`, realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName)
+	`, realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, userName)
 }
 
-func testKeycloakGroupRoles_noGroupRoles(realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName string) string {
+func testKeycloakUserRoles_noUserRoles(realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, userName string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -329,14 +377,14 @@ data "keycloak_role" "offline_access" {
 	name      = "offline_access"
 }
 
-resource "keycloak_group" "group" {
+resource "keycloak_user" "user" {
 	realm_id = "${keycloak_realm.realm.id}"
-	name = "%s"
+	username = "%s"
 }
-	`, realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName)
+	`, realmName, openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, userName)
 }
 
-func testKeycloakGroupRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName string, roleIds []string) string {
+func testKeycloakUserRoles_update(realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName string, roleIds []string) string {
 	tfRoleIds := fmt.Sprintf("role_ids = %s", arrayOfStringsForTerraformResource(roleIds))
 
 	return fmt.Sprintf(`
@@ -394,16 +442,16 @@ data "keycloak_role" "offline_access" {
 	name      = "offline_access"
 }
 
-resource "keycloak_group" "group" {
+resource "keycloak_user" "user" {
 	realm_id = "${keycloak_realm.realm.id}"
-	name = "%s"
+	username = "%s"
 }
 
-resource "keycloak_group_roles" "group_roles" {
+resource "keycloak_user_roles" "user_roles" {
 	realm_id = "${keycloak_realm.realm.id}"
-	group_id = "${keycloak_group.group.id}"
+	user_id = "${keycloak_user.user.id}"
 
 	%s
 }
-	`, realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, tfRoleIds)
+	`, realmName, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, tfRoleIds)
 }
