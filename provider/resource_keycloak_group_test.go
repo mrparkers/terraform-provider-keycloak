@@ -2,12 +2,13 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
-	"testing"
 )
 
 func TestAccKeycloakGroup_basic(t *testing.T) {
@@ -16,6 +17,19 @@ func TestAccKeycloakGroup_basic(t *testing.T) {
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
 	attributeValue := acctest.RandString(250)
 
+	runTestBasicGroup(t, realmName, groupName, attributeName, attributeValue)
+}
+
+func TestAccKeycloakGroup_basicGroupNameContainsBackSlash(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	groupName := "terraform/group/" + acctest.RandString(10)
+	attributeName := "terraform-attribute-" + acctest.RandString(10)
+	attributeValue := acctest.RandString(250)
+
+	runTestBasicGroup(t, realmName, groupName, attributeName, attributeValue)
+}
+
+func runTestBasicGroup(t *testing.T, realmName, groupName, attributeName, attributeValue string) {
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -137,6 +151,19 @@ func TestAccKeycloakGroup_nested(t *testing.T) {
 	firstChildGroupName := "terraform-child-group-" + acctest.RandString(10)
 	secondChildGroupName := "terraform-child-group-" + acctest.RandString(10)
 
+	runTestNestedGroup(t, realmName, parentGroupName, firstChildGroupName, secondChildGroupName)
+}
+
+func TestAccKeycloakGroup_nestedGroupNameContainsBackSlash(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	parentGroupName := "terraform/parent/group/" + acctest.RandString(10)
+	firstChildGroupName := "terraform/child/group/" + acctest.RandString(10)
+	secondChildGroupName := "terraform/child/group/" + acctest.RandString(10)
+
+	runTestNestedGroup(t, realmName, parentGroupName, firstChildGroupName, secondChildGroupName)
+}
+
+func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGroupName, secondChildGroupName string) {
 	parentGroupResource := "keycloak_group.parent_group"
 	firstChildGroupResource := "keycloak_group.first_child_group"
 	secondChildGroupResource := "keycloak_group.second_child_group"
