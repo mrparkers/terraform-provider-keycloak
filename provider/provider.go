@@ -53,6 +53,8 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_client_default_scopes":                      resourceKeycloakOpenidClientDefaultScopes(),
 			"keycloak_openid_client_optional_scopes":                     resourceKeycloakOpenidClientOptionalScopes(),
 			"keycloak_saml_client":                                       resourceKeycloakSamlClient(),
+			"keycloak_saml_client_scope":                                 resourceKeycloakSamlClientScope(),
+			"keycloak_saml_client_default_scopes":                        resourceKeycloakSamlClientDefaultScopes(),
 			"keycloak_generic_client_protocol_mapper":                    resourceKeycloakGenericClientProtocolMapper(),
 			"keycloak_generic_client_role_mapper":                        resourceKeycloakGenericClientRoleMapper(),
 			"keycloak_saml_user_attribute_protocol_mapper":               resourceKeycloakSamlUserAttributeProtocolMapper(),
