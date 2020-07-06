@@ -5,10 +5,19 @@ import (
 )
 
 func roleScopeMappingUrl(realmId, clientId string, clientScopeId string, role *Role) string {
+
 	if clientId != "" {
-		return fmt.Sprintf("/realms/%s/clients/%s/scope-mappings/clients/%s", realmId, clientId, role.ClientId)
-	} else {
+		if role.ClientRole {
+			return fmt.Sprintf("/realms/%s/clients/%s/scope-mappings/clients/%s", realmId, clientId, role.ClientId)
+		} else {
+			return fmt.Sprintf("/realms/%s/clients/%s/scope-mappings/realm", realmId, clientId)
+		}
+	}
+
+	if role.ClientRole {
 		return fmt.Sprintf("/realms/%s/client-scopes/%s/scope-mappings/clients/%s", realmId, clientScopeId, role.ClientId)
+	} else {
+		return fmt.Sprintf("/realms/%s/client-scopes/%s/scope-mappings/realm", realmId, clientScopeId)
 	}
 }
 

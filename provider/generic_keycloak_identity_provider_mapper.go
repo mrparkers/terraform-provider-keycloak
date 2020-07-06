@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 type identityProviderMapperDataGetterFunc func(data *schema.ResourceData, meta interface{}) (*keycloak.IdentityProviderMapper, error)
@@ -34,6 +35,10 @@ func resourceKeycloakIdentityProviderMapper() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: "IDP Alias",
+			},
+			"extra_config": {
+				Type:     schema.TypeMap,
+				Optional: true,
 			},
 		},
 	}

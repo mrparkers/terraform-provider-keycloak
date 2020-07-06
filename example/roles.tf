@@ -160,6 +160,44 @@ resource "keycloak_generic_client_role_mapper" "pet_app_pet_api_admin_role_mappi
   role_id   = keycloak_role.pet_api_admin.id
 }
 
+// Realm roles
+
+resource "keycloak_role" "realm_reader" {  
+  realm_id  = keycloak_realm.roles_example.id
+  name        = "realm_reader"
+  description = "Reader realm role"
+}
+
+resource "keycloak_role" "realm_writer" {
+  realm_id  = keycloak_realm.roles_example.id
+  name        = "realm_writer"
+  description = "Writer realm role"
+}
+
+resource "keycloak_role" "realm_admin" {
+  realm_id  = keycloak_realm.roles_example.id
+  name        = "realm_admin"
+  description = "Admin realm composite role"
+  composite_roles = [
+    keycloak_role.realm_reader.id,
+    keycloak_role.realm_writer.id
+  ]
+}
+
+// Client scope for realm roles mapping 
+
+resource "keycloak_openid_client_scope" "petstore_api_access_scope" {
+  realm_id  = keycloak_realm.roles_example.id
+  name        = "petstore-api-access"
+  description = "Optional scope offering additional information for petstore api access"
+}
+
+resource "keycloak_generic_client_role_mapper" "petstore_api_access_scope_admin" {
+    realm_id  = keycloak_realm.roles_example.id
+    client_scope_id =  keycloak_openid_client_scope.petstore_api_access_scope.id
+    role_id         = keycloak_role.realm_admin.id
+}
+
 // Users and groups
 
 resource "keycloak_group" "pet_api_base" {

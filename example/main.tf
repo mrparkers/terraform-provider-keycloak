@@ -567,6 +567,11 @@ resource keycloak_attribute_importer_identity_provider_mapper oidc {
   claim_name              = "upn"
   identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
   user_attribute          = "email"
+  
+  #KC10 support
+  extra_config = {
+    syncMode = "INHERIT"    
+  }
 }
 
 resource keycloak_attribute_to_role_identity_provider_mapper oidc {
@@ -576,6 +581,11 @@ resource keycloak_attribute_to_role_identity_provider_mapper oidc {
   identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
   claim_value             = "value"
   role                    = "testRole"
+
+  #KC10 support
+  extra_config = {
+    syncMode = "INHERIT"    
+  }  
 }
 
 resource keycloak_user_template_importer_identity_provider_mapper oidc {
@@ -583,6 +593,11 @@ resource keycloak_user_template_importer_identity_provider_mapper oidc {
   name                    = "userTemplate"
   identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
   template                = "$${ALIAS}/$${CLAIM.upn}"
+
+  #KC10 support
+  extra_config = {
+    syncMode = "INHERIT"    
+  }  
 }
 
 resource keycloak_hardcoded_role_identity_provider_mapper oidc {
@@ -590,6 +605,11 @@ resource keycloak_hardcoded_role_identity_provider_mapper oidc {
   name                    = "hardcodedRole"
   identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
   role                    = "testrole"
+
+  #KC10 support
+  extra_config = {
+    syncMode = "INHERIT"    
+  }  
 }
 
 resource keycloak_hardcoded_attribute_identity_provider_mapper oidc {
@@ -599,6 +619,11 @@ resource keycloak_hardcoded_attribute_identity_provider_mapper oidc {
   attribute_name          = "attribute"
   attribute_value         = "value"
   user_session            = true
+
+  #KC10 support
+  extra_config = {
+    syncMode = "INHERIT"    
+  }  
 }
 
 resource keycloak_saml_identity_provider saml {
@@ -613,6 +638,11 @@ resource keycloak_attribute_importer_identity_provider_mapper saml {
   attribute_name          = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
   identity_provider_alias = keycloak_saml_identity_provider.saml.alias
   user_attribute          = "email"
+
+  #KC10 support
+  extra_config = {
+    syncMode = "INHERIT"    
+  }
 }
 
 resource keycloak_attribute_to_role_identity_provider_mapper saml {
@@ -622,6 +652,11 @@ resource keycloak_attribute_to_role_identity_provider_mapper saml {
   identity_provider_alias = keycloak_saml_identity_provider.saml.alias
   attribute_value         = "value"
   role                    = "testRole"
+
+  #KC10 support
+  extra_config = {
+    syncMode = "INHERIT"    
+  }
 }
 
 resource keycloak_user_template_importer_identity_provider_mapper saml {
@@ -629,6 +664,11 @@ resource keycloak_user_template_importer_identity_provider_mapper saml {
   name                    = "userTemplate"
   identity_provider_alias = keycloak_saml_identity_provider.saml.alias
   template                = "$${ALIAS}/$${NAMEID}"
+
+  #KC10 support
+  extra_config = {
+    syncMode = "INHERIT"    
+  }  
 }
 
 resource keycloak_hardcoded_role_identity_provider_mapper saml {
@@ -636,6 +676,11 @@ resource keycloak_hardcoded_role_identity_provider_mapper saml {
   name                    = "hardcodedRole"
   identity_provider_alias = keycloak_saml_identity_provider.saml.alias
   role                    = "testrole"
+
+  #KC10 support
+  extra_config = {
+    syncMode = "INHERIT"    
+  }  
 }
 
 resource keycloak_hardcoded_attribute_identity_provider_mapper saml {
@@ -645,6 +690,11 @@ resource keycloak_hardcoded_attribute_identity_provider_mapper saml {
   attribute_name          = "attribute"
   attribute_value         = "value"
   user_session            = false
+  
+  #KC10 support
+  extra_config = {
+    syncMode = "INHERIT"    
+  }  
 }
 
 data "keycloak_openid_client" "broker" {
