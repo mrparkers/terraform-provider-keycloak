@@ -5,11 +5,22 @@ import (
 )
 
 func roleScopeMappingUrl(realmId, clientId string, clientScopeId string, role *Role) string {
-	if clientId != "" {
-		return fmt.Sprintf("/realms/%s/clients/%s/scope-mappings/clients/%s", realmId, clientId, role.ClientId)
-	} else {
+	if role.ClientId != "" {
+		if clientId != "" {
+			// client role to client
+			return fmt.Sprintf("/realms/%s/clients/%s/scope-mappings/clients/%s", realmId, clientId, role.ClientId)
+		}
+		// client role client-scope
 		return fmt.Sprintf("/realms/%s/client-scopes/%s/scope-mappings/clients/%s", realmId, clientScopeId, role.ClientId)
 	}
+
+	if clientId != "" {
+		// realm role to client
+		return fmt.Sprintf("/realms/%s/clients/%s/scope-mappings/realm", realmId, clientId)
+	}
+
+	// realm role to client-scope
+	return fmt.Sprintf("/realms/%s/client-scopes/%s/scope-mappings/realm", realmId, clientScopeId)
 }
 
 func (keycloakClient *KeycloakClient) CreateRoleScopeMapping(realmId string, clientId string, clientScopeId string, role *Role) error {
