@@ -57,6 +57,12 @@ func resourceKeycloakOidcGoogleIdentityProvider() *schema.Resource {
 			Default:     "openid profile email",
 			Description: "The scopes to be sent when asking for authorization. See the documentation for possible values, separator and default value'. Default: 'openid profile email'",
 		},
+		"store_token": { //storeToken
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Enable/disable if tokens must be stored after authenticating users.",
+		},
 		"accepts_prompt_none_forward_from_client": { // acceptsPromptNoneForwardFromClient
 			Type:        schema.TypeBool,
 			Optional:    true,
@@ -68,6 +74,12 @@ func resourceKeycloakOidcGoogleIdentityProvider() *schema.Resource {
 			Optional:    true,
 			Default:     false,
 			Description: "Disable usage of User Info service to obtain additional user information?  Default is to use this OIDC service.",
+		},
+		"trust_email": { //trustEmail
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "If enabled, email provided by this provider is not verified even if verification is enabled for this realm.",
 		},
 		"hide_on_login_page": {
 			Type:        schema.TypeBool,
