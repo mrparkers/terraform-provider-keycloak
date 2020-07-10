@@ -8,6 +8,7 @@ type SamlClientAttributes struct {
 	IncludeAuthnStatement   *string `json:"saml.authnstatement"`
 	SignDocuments           *string `json:"saml.server.signature"`
 	SignAssertions          *string `json:"saml.assertion.signature"`
+	EncryptAssertions       *string `json:"saml.encrypt"`
 	ClientSignatureRequired *string `json:"saml.client.signature"`
 	ForcePostBinding        *string `json:"saml.force.post.binding"`
 	ForceNameIdFormat       *string `json:"saml_force_name_id_format"`

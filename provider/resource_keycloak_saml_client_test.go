@@ -156,6 +156,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			IncludeAuthnStatement:           randomBoolAsStringPointer(),
 			SignDocuments:                   randomBoolAsStringPointer(),
 			SignAssertions:                  randomBoolAsStringPointer(),
+			EncryptAssertions:               randomBoolAsStringPointer(),
 			ClientSignatureRequired:         &clientSignatureRequired,
 			ForcePostBinding:                randomBoolAsStringPointer(),
 			ForceNameIdFormat:               randomBoolAsStringPointer(),
@@ -192,6 +193,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			IncludeAuthnStatement:           randomBoolAsStringPointer(),
 			SignDocuments:                   randomBoolAsStringPointer(),
 			SignAssertions:                  randomBoolAsStringPointer(),
+			EncryptAssertions:               randomBoolAsStringPointer(),
 			ClientSignatureRequired:         &clientSignatureRequired,
 			ForcePostBinding:                randomBoolAsStringPointer(),
 			ForceNameIdFormat:               randomBoolAsStringPointer(),
@@ -391,6 +393,11 @@ func testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes(resourceName stri
 			return err
 		}
 
+		encryptAssertions, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["encrypt_assertions"])
+		if err != nil {
+			return err
+		}
+
 		clientSignatureRequired, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["client_signature_required"])
 		if err != nil {
 			return err
@@ -406,7 +413,7 @@ func testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes(resourceName stri
 			return err
 		}
 
-		if !includeAuthnStatement && !signDocuments && !signAssertions && !clientSignatureRequired && !forcePostBinding && !forceNameIdFormat {
+		if !includeAuthnStatement && !signDocuments && !signAssertions && !encryptAssertions && !clientSignatureRequired && !forcePostBinding && !forceNameIdFormat {
 			return fmt.Errorf("expected saml client with id %s to have some defaults set by Keycloak", rs.Primary.ID)
 		}
 
@@ -492,6 +499,7 @@ resource "keycloak_saml_client" "saml_client" {
 	include_authn_statement    = %s
 	sign_documents             = %s
 	sign_assertions            = %s
+	encrypt_assertions         = %s
 	client_signature_required  = %s
 	force_post_binding         = %s
 	force_name_id_format       = %s
@@ -522,6 +530,7 @@ resource "keycloak_saml_client" "saml_client" {
 		*client.Attributes.IncludeAuthnStatement,
 		*client.Attributes.SignDocuments,
 		*client.Attributes.SignAssertions,
+		*client.Attributes.EncryptAssertions,
 		*client.Attributes.ClientSignatureRequired,
 		*client.Attributes.ForcePostBinding,
 		*client.Attributes.ForceNameIdFormat,
@@ -554,6 +563,7 @@ resource "keycloak_saml_client" "saml_client" {
 
 	sign_documents          = false
 	sign_assertions         = true
+	encrypt_assertions      = false
 	include_authn_statement = true
 
 	signing_certificate     = "${file("misc/saml-cert.pem")}"
@@ -575,6 +585,7 @@ resource "keycloak_saml_client" "saml_client" {
 
 	sign_documents          = false
 	sign_assertions         = true
+	encrypt_assertions      = false
 	include_authn_statement = true
 
 	signing_certificate     = "${file("misc/saml-cert.pem")}"

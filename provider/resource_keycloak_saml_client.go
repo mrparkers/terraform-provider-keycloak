@@ -62,6 +62,11 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"encrypt_assertions": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 			"client_signature_required": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -222,6 +227,11 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		samlAttributes.SignAssertions = &signAssertionsString
 	}
 
+	if encryptAssertions, ok := data.GetOkExists("encrypt_assertions"); ok {
+		encryptAssertionsString := strconv.FormatBool(encryptAssertions.(bool))
+		samlAttributes.EncryptAssertions = &encryptAssertionsString
+	}
+
 	if clientSignatureRequired, ok := data.GetOkExists("client_signature_required"); ok {
 		clientSignatureRequiredString := strconv.FormatBool(clientSignatureRequired.(bool))
 		samlAttributes.ClientSignatureRequired = &clientSignatureRequiredString
@@ -287,6 +297,15 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 		}
 
 		data.Set("sign_assertions", signAssertions)
+	}
+
+	if client.Attributes.EncryptAssertions != nil {
+		encryptAssertions, err := strconv.ParseBool(*client.Attributes.EncryptAssertions)
+		if err != nil {
+			return err
+		}
+
+		data.Set("encrypt_assertions", encryptAssertions)
 	}
 
 	if client.Attributes.ClientSignatureRequired != nil {

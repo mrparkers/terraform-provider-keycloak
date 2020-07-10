@@ -40,6 +40,7 @@ The following arguments are supported:
 - `include_authn_statement` - (Optional) When `true`, an `AuthnStatement` will be included in the SAML response.
 - `sign_documents` - (Optional) When `true`, the SAML document will be signed by Keycloak using the realm's private key.
 - `sign_assertions` - (Optional) When `true`, the SAML assertions will be signed by Keycloak using the realm's private key, and embedded within the SAML XML Auth response.
+- `encrypt_assertions` - (Optional) When `true`, the SAML assertions will be encrypted by Keycloak using the client's public key.
 - `client_signature_required` - (Optional) When `true`, Keycloak will expect that documents originating from a client will be signed using the certificate and/or key configured via `signing_certificate` and `signing_private_key`.
 - `force_post_binding` - (Optional) When `true`, Keycloak will always respond to an authentication request via the SAML POST Binding.
 - `front_channel_logout` - (Optional) When `true`, this client will require a browser redirect in order to perform a logout.
