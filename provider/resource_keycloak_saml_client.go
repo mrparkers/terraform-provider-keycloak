@@ -111,11 +111,18 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"encryption_certificate": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					return old == formatCertificate(new)
+				},
+			},
 			"signing_certificate": {
 				Type:     schema.TypeString,
 				Optional: true,
 				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
-					return old == formatSigningCertificate(new)
+					return old == formatCertificate(new)
 				},
 			},
 			"signing_private_key": {
@@ -158,7 +165,7 @@ func resourceKeycloakSamlClient() *schema.Resource {
 	}
 }
 
-func formatSigningCertificate(signingCertificate string) string {
+func formatCertificate(signingCertificate string) string {
 	r := strings.NewReplacer(
 		"-----BEGIN CERTIFICATE-----", "",
 		"-----END CERTIFICATE-----", "",
@@ -197,8 +204,13 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		LogoutServiceRedirectBindingURL: data.Get("logout_service_redirect_binding_url").(string),
 	}
 
+	if encryptionCertificate, ok := data.GetOkExists("encryption_certificate"); ok {
+		encryptionCertificateString := formatCertificate(encryptionCertificate.(string))
+		samlAttributes.EncryptionCertificate = &encryptionCertificateString
+	}
+
 	if signingCertificate, ok := data.GetOkExists("signing_certificate"); ok {
-		signingCertificateString := formatSigningCertificate(signingCertificate.(string))
+		signingCertificateString := formatCertificate(signingCertificate.(string))
 		samlAttributes.SigningCertificate = &signingCertificateString
 	}
 
@@ -324,6 +336,10 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 		}
 
 		data.Set("force_post_binding", forcePostBinding)
+	}
+
+	if _, exists := data.GetOkExists("encryption_certificate"); client.Attributes.EncryptionCertificate != nil && exists {
+		data.Set("encryption_certificate", client.Attributes.EncryptionCertificate)
 	}
 
 	if _, exists := data.GetOkExists("signing_certificate"); client.Attributes.SigningCertificate != nil && exists {

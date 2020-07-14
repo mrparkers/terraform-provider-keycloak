@@ -50,6 +50,7 @@ The following arguments are supported:
 - `valid_redirect_uris` - (Optional) When specified, Keycloak will use this list to validate given Assertion Consumer URLs specified in the authentication request.
 - `base_url` - (Optional) When specified, this URL will be used whenever Keycloak needs to link to this client.
 - `master_saml_processing_url` - (Optional) When specified, this URL will be used for all SAML requests.
+- `encryption_certificate` - (Optional) If assertions for the client are encrypted, this certificate will be used for encryption.
 - `signing_certificate` - (Optional) If documents or assertions from the client are signed, this certificate will be used to verify the signature.
 - `signing_private_key` - (Optional) If documents or assertions from the client are signed, this private key will be used to verify the signature.
 - `idp_initiated_sso_url_name` - (Optional) URL fragment name to reference client when you want to do IDP Initiated SSO.
