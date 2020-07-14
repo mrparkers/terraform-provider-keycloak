@@ -245,7 +245,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		ConsentRequired:   data.Get("consent_required").(bool),
 	}
 
-	if rootUrlOk {
+	if data.HasChange("root_url") {
 		openidClient.RootUrl = &rootUrlString
 	}
 

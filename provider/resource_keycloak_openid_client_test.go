@@ -157,6 +157,29 @@ func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_relativeBaseUrl(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+	relativeBaseUrl := "/test"
+	newRelativeBaseUrl := "/foo"
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_baseUrl(realmName, clientId, relativeBaseUrl),
+				Check:  testAccCheckKeycloakOpenidClientBaseUrl("keycloak_openid_client.client", relativeBaseUrl),
+			},
+			{
+				Config: testKeycloakOpenidClient_baseUrl(realmName, clientId, newRelativeBaseUrl),
+				Check:  testAccCheckKeycloakOpenidClientBaseUrl("keycloak_openid_client.client", newRelativeBaseUrl),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_rootUrl(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
