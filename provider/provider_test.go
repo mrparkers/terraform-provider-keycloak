@@ -26,7 +26,7 @@ func init() {
 		"keycloak": testAccProvider,
 	}
 
-	keycloakClient, _ = keycloak.NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), "", "", true, 5, "", false, httpclient.TerraformUserAgent(testAccProvider.TerraformVersion))
+	keycloakClient, _ = keycloak.NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), "/auth", os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), "", "", true, 5, "", false, httpclient.TerraformUserAgent(testAccProvider.TerraformVersion))
 }
 
 func TestProvider(t *testing.T) {

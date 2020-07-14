@@ -142,6 +142,11 @@ func KeycloakProvider() *schema.Provider {
 				Description: "Allows ignoring insecure certificates when set to true. Defaults to false. Disabling security check is dangerous and should be avoided.",
 				Default:     false,
 			},
+			"base_path": {
+				Optional: true,
+				Type:     schema.TypeString,
+				Default:  "/auth",
+			},
 		},
 	}
 
@@ -163,6 +168,7 @@ func KeycloakProvider() *schema.Provider {
 
 func configureKeycloakProvider(data *schema.ResourceData, userAgent string) (interface{}, error) {
 	url := data.Get("url").(string)
+	basePath := data.Get("base_path").(string)
 	clientId := data.Get("client_id").(string)
 	clientSecret := data.Get("client_secret").(string)
 	username := data.Get("username").(string)
@@ -173,5 +179,5 @@ func configureKeycloakProvider(data *schema.ResourceData, userAgent string) (int
 	tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
 	rootCaCertificate := data.Get("root_ca_certificate").(string)
 
-	return keycloak.NewKeycloakClient(url, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
+	return keycloak.NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
 }
