@@ -8,6 +8,7 @@ type SamlClientAttributes struct {
 	IncludeAuthnStatement   *string `json:"saml.authnstatement"`
 	SignDocuments           *string `json:"saml.server.signature"`
 	SignAssertions          *string `json:"saml.assertion.signature"`
+	EncryptAssertions       *string `json:"saml.encrypt"`
 	ClientSignatureRequired *string `json:"saml.client.signature"`
 	ForcePostBinding        *string `json:"saml.force.post.binding"`
 	ForceNameIdFormat       *string `json:"saml_force_name_id_format"`
@@ -15,6 +16,7 @@ type SamlClientAttributes struct {
 	NameIdFormat                    string  `json:"saml_name_id_format"`
 	SigningCertificate              *string `json:"saml.signing.certificate,omitempty"`
 	SigningPrivateKey               *string `json:"saml.signing.private.key"`
+	EncryptionCertificate           *string `json:"saml.encryption.certificate"`
 	IDPInitiatedSSOURLName          string  `json:"saml_idp_initiated_sso_url_name"`
 	IDPInitiatedSSORelayState       string  `json:"saml_idp_initiated_sso_relay_state"`
 	AssertionConsumerPostURL        string  `json:"saml_assertion_consumer_url_post"`
