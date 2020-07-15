@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	keycloakSamlClientNameIdFormats = []string{"username", "email", "transient", "persistent"}
+	keycloakSamlClientNameIdFormats       = []string{"username", "email", "transient", "persistent"}
+	keycloakSamlClientSignatureAlgorithms = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA512", "DSA_SHA1"}
 )
 
 func resourceKeycloakSamlClient() *schema.Resource {
@@ -86,6 +87,11 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
+			},
+			"signature_algorithm": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice(keycloakSamlClientSignatureAlgorithms, false),
 			},
 			"name_id_format": {
 				Type:         schema.TypeString,
@@ -195,6 +201,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	}
 
 	samlAttributes := &keycloak.SamlClientAttributes{
+		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
 		NameIdFormat:                    data.Get("name_id_format").(string),
 		IDPInitiatedSSOURLName:          data.Get("idp_initiated_sso_url_name").(string),
 		IDPInitiatedSSORelayState:       data.Get("idp_initiated_sso_relay_state").(string),
@@ -360,6 +367,7 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
 	data.Set("base_url", client.BaseUrl)
 	data.Set("master_saml_processing_url", client.MasterSamlProcessingUrl)
+	data.Set("signature_algorithm", client.Attributes.SignatureAlgorithm)
 	data.Set("name_id_format", client.Attributes.NameIdFormat)
 	data.Set("idp_initiated_sso_url_name", client.Attributes.IDPInitiatedSSOURLName)
 	data.Set("idp_initiated_sso_relay_state", client.Attributes.IDPInitiatedSSORelayState)
