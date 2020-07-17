@@ -19,15 +19,13 @@ type Group struct {
 
 /*
  * There is no way to get a subgroup's parent ID using the Keycloak API (that I know of, PRs are welcome)
- * The best we can do is use the group's path to figure out what its parents' names are and iterate over all subgroups
+ * The best we can do is check subGroup's path with the group's path to figure out what sub-path to follow
  * until we find it.
  */
 func (keycloakClient *KeycloakClient) groupParentId(group *Group) (string, error) {
 	// Check the path of the group being passed in.
 	// If there is only one group in the path, then this is a top-level group with no parentId
-	parts := strings.Split(strings.TrimPrefix(group.Path, "/"), "/")
-
-	if len(parts) == 1 {
+	if group.Path == "/"+group.Name {
 		return "", nil
 	}
 
@@ -36,26 +34,28 @@ func (keycloakClient *KeycloakClient) groupParentId(group *Group) (string, error
 		return "", err
 	}
 
-	currentGroups := &groups
-
-	for index, groupName := range parts {
-		for _, group := range *currentGroups {
-			if group.Name == groupName {
-				// if we're on the second to last index for the path, then this group must contain the passed in group as a child
-				// thus, this group is the parent
-				if index == len(parts)-2 {
-					return group.Id, nil
-				}
-
-				currentGroups = &(group.SubGroups)
-
-				break
-			}
-		}
+	var parentGroup Group
+	if findParentGroup(*group, groups, parentGroup) {
+		return parentGroup.Id, nil
 	}
 
 	// maybe panic here?  this should never happen
 	return "", fmt.Errorf("unable to determine parent ID for group with path %s", group.Path)
+}
+
+func findParentGroup(group Group, ingroups []*Group, parentGroup Group) bool {
+	for _, grp := range ingroups {
+		if grp.Id == group.Id {
+			return true
+		}
+		if strings.HasPrefix(group.Path, grp.Path+"/") {
+			parentGroup = *grp
+			if findParentGroup(group, grp.SubGroups, parentGroup) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (keycloakClient *KeycloakClient) ValidateGroupMembers(usernames []interface{}) error {
