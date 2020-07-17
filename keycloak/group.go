@@ -144,23 +144,42 @@ func (keycloakClient *KeycloakClient) GetGroupByName(realmId, name string) (*Gro
 	}
 
 	// The search may return more than 1 result even if there is a group exactly matching the search string
-	for _, group := range groups {
-		if group.Name == name {
+	groupsPtr := make([]*Group, len(groups))
+	for i, group := range groups {
+		groupsPtr[i] = &group
+	}
+	group := getGroupByDFS(name, groupsPtr)
+	if group != nil {
+		group.RealmId = realmId // it's important to set RealmId here because fetching the ParentId depends on it
 
-			group.RealmId = realmId // it's important to set RealmId here because fetching the ParentId depends on it
-
-			parentId, err := keycloakClient.groupParentId(&group)
-			if err != nil {
-				return nil, err
-			}
-
-			group.ParentId = parentId
-
-			return &group, nil
+		parentId, err := keycloakClient.groupParentId(group)
+		if err != nil {
+			return nil, err
 		}
+
+		group.ParentId = parentId
+
+		return group, nil
 	}
 
 	return nil, fmt.Errorf("no group with name " + name + " found")
+}
+
+/*
+	Find group by name in groups returned by /groups?search=${group_name}
+	If there are multiple groups match the name, it will return the first one it found, using DFS algorithm
+*/
+func getGroupByDFS(groupName string, groups []*Group) *Group {
+	for _, group := range groups {
+		if groupName == group.Name {
+			return group
+		}
+		groupFound := getGroupByDFS(groupName, group.SubGroups)
+		if groupFound != nil {
+			return groupFound
+		}
+	}
+	return nil
 }
 
 func (keycloakClient *KeycloakClient) UpdateGroup(group *Group) error {

@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -35,10 +36,17 @@ func resourceKeycloakHardcodedAttributeIdentityProviderMapper() *schema.Resource
 
 func getHardcodedAttributeIdentityProviderMapperFromData(data *schema.ResourceData, _ interface{}) (*keycloak.IdentityProviderMapper, error) {
 	rec, _ := getIdentityProviderMapperFromData(data)
+	extraConfig := map[string]interface{}{}
+	if v, ok := data.GetOk("extra_config"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			extraConfig[key] = value
+		}
+	}
 	rec.IdentityProviderMapper = getHardcodedAttributeIdentityProviderMapperType(data.Get("user_session").(bool))
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
 		HardcodedAttribute: data.Get("attribute_name").(string),
 		AttributeValue:     data.Get("attribute_value").(string),
+		ExtraConfig:        extraConfig,
 	}
 	return rec, nil
 }
@@ -47,6 +55,7 @@ func setHardcodedAttributeIdentityProviderMapperData(data *schema.ResourceData, 
 	setIdentityProviderMapperData(data, identityProviderMapper)
 	data.Set("attribute_name", identityProviderMapper.Config.HardcodedAttribute)
 	data.Set("attribute_value", identityProviderMapper.Config.AttributeValue)
+	data.Set("extra_config", identityProviderMapper.Config.ExtraConfig)
 	mapperType, err := getUserSessionFromHardcodedAttributeIdentityProviderMapperType(identityProviderMapper.IdentityProviderMapper)
 	if err != nil {
 		return err

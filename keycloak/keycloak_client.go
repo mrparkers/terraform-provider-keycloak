@@ -40,11 +40,11 @@ type ClientCredentials struct {
 }
 
 const (
-	apiUrl   = "/auth/admin"
-	tokenUrl = "%s/auth/realms/%s/protocol/openid-connect/token"
+	apiUrl   = "/admin"
+	tokenUrl = "%s/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string) (*KeycloakClient, error) {
+func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string) (*KeycloakClient, error) {
 	cookieJar, err := cookiejar.New(&cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	})
@@ -87,7 +87,7 @@ func NewKeycloakClient(baseUrl, clientId, clientSecret, realm, username, passwor
 	}
 
 	keycloakClient := KeycloakClient{
-		baseUrl:           baseUrl,
+		baseUrl:           url + basePath,
 		clientCredentials: clientCredentials,
 		httpClient:        httpClient,
 		initialLogin:      initialLogin,
@@ -121,6 +121,9 @@ func (keycloakClient *KeycloakClient) login() error {
 	accessTokenResponse, err := keycloakClient.httpClient.Do(accessTokenRequest)
 	if err != nil {
 		return err
+	}
+	if accessTokenResponse.StatusCode != http.StatusOK {
+		return fmt.Errorf("error sending POST request to %s: %s", accessTokenUrl, accessTokenResponse.Status)
 	}
 
 	defer accessTokenResponse.Body.Close()

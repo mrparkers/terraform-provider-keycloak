@@ -2,11 +2,12 @@ package provider
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"testing"
 )
 
 func TestAccKeycloakAttributeImporterIdentityProviderMapper_basic(t *testing.T) {
@@ -29,6 +30,27 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_basic(t *testing.T) 
 	})
 }
 
+func TestAccKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	mapperName := "terraform-" + acctest.RandString(10)
+	alias := "terraform-" + acctest.RandString(10)
+	userAttribute := "terraform-" + acctest.RandString(10)
+	claimName := "terraform-" + acctest.RandString(10)
+	syncMode := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(realmName, alias, mapperName, userAttribute, claimName, syncMode),
+				Check:  testAccCheckKeycloakAttributeImporterIdentityProviderMapperExists("keycloak_attribute_importer_identity_provider_mapper.oidc"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakAttributeImporterIdentityProviderMapper_createAfterManualDestroy(t *testing.T) {
 	var mapper = &keycloak.IdentityProviderMapper{}
 
@@ -45,6 +67,41 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_createAfterManualDes
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeImporterIdentityProviderMapper_basic(realmName, alias, mapperName, userAttribute, claimName),
+				Check:  testAccCheckKeycloakAttributeImporterIdentityProviderMapperFetch("keycloak_attribute_importer_identity_provider_mapper.oidc", mapper),
+			},
+			{
+				PreConfig: func() {
+					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+					err := keycloakClient.DeleteIdentityProviderMapper(mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakAttributeImporterIdentityProviderMapper_basic(realmName, alias, mapperName, userAttribute, claimName),
+				Check:  testAccCheckKeycloakAttributeImporterIdentityProviderMapperExists("keycloak_attribute_importer_identity_provider_mapper.oidc"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig_createAfterManualDestroy(t *testing.T) {
+	var mapper = &keycloak.IdentityProviderMapper{}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	mapperName := "terraform-" + acctest.RandString(10)
+	alias := "terraform-" + acctest.RandString(10)
+	userAttribute := "terraform-" + acctest.RandString(10)
+	claimName := "terraform-" + acctest.RandString(10)
+	syncMode := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(realmName, alias, mapperName, userAttribute, claimName, syncMode),
 				Check:  testAccCheckKeycloakAttributeImporterIdentityProviderMapperFetch("keycloak_attribute_importer_identity_provider_mapper.oidc", mapper),
 			},
 			{
@@ -227,6 +284,34 @@ resource keycloak_attribute_importer_identity_provider_mapper oidc {
 	claim_name              = "%s"
 }
 	`, realm, alias, name, userAttribute, claimName)
+}
+
+func testKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(realm, alias, name, userAttribute, claimName, syncMode string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_oidc_identity_provider" "oidc" {
+	realm             = "${keycloak_realm.realm.id}"
+	alias             = "%s"
+	authorization_url = "https://example.com/auth"
+	token_url         = "https://example.com/token"
+	client_id         = "example_id"
+	client_secret     = "example_token"
+}
+
+resource keycloak_attribute_importer_identity_provider_mapper oidc {
+	realm                   = "${keycloak_realm.realm.id}"
+	name                    = "%s"
+	identity_provider_alias = "${keycloak_oidc_identity_provider.oidc.alias}"
+	user_attribute          = "%s"
+	claim_name              = "%s"
+	extra_config 			= {
+		syncMode = "%s"    
+	}
+}
+	`, realm, alias, name, userAttribute, claimName, syncMode)
 }
 
 func testKeycloakAttributeImporterIdentityProviderMapper_basicFromInterface(mapper *keycloak.IdentityProviderMapper) string {

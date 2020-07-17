@@ -34,6 +34,36 @@ func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakDataSourceGroup_nested(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+	group := "terraform-group-" + acctest.RandString(10)
+	groupNested := "terraform-group-nested-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakRoleDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testDataSourceKeycloakGroup_nested(realm, group, groupNested),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakGroupExists("keycloak_group.group"),
+					testAccCheckKeycloakGroupExists("keycloak_group.group_nested"),
+					// realm role
+					resource.TestCheckResourceAttrPair("keycloak_group.group", "id", "data.keycloak_group.group", "id"),
+					resource.TestCheckResourceAttrPair("keycloak_group.group", "realm_id", "data.keycloak_group.group", "realm_id"),
+					resource.TestCheckResourceAttrPair("keycloak_group.group", "name", "data.keycloak_group.group", "name"),
+					resource.TestCheckResourceAttrPair("keycloak_group.group_nested", "id", "data.keycloak_group.group_nested", "id"),
+					resource.TestCheckResourceAttrPair("keycloak_group.group_nested", "realm_id", "data.keycloak_group.group_nested", "realm_id"),
+					resource.TestCheckResourceAttrPair("keycloak_group.group_nested", "name", "data.keycloak_group.group_nested", "name"),
+					testAccCheckDataKeycloakGroup("data.keycloak_group.group"),
+					testAccCheckDataKeycloakGroup("data.keycloak_group.group_nested"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckDataKeycloakGroup(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resourceName]
@@ -76,4 +106,33 @@ data "keycloak_group" "group" {
 	name     = "${keycloak_group.group.name}"
 }
 	`, realm, group)
+}
+
+func testDataSourceKeycloakGroup_nested(realm, group, groupNested string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_group" "group" {
+	name     = "%s"
+	realm_id = "${keycloak_realm.realm.id}"
+}
+
+resource "keycloak_group" "group_nested" {
+	name     	= "%s"
+	parent_id = "${keycloak_group.group.id}"
+	realm_id 	= "${keycloak_realm.realm.id}"
+}
+
+data "keycloak_group" "group" {
+	realm_id = "${keycloak_realm.realm.id}"
+	name     = "${keycloak_group.group.name}"
+}
+
+data "keycloak_group" "group_nested" {
+	realm_id = "${keycloak_realm.realm.id}"
+	name     = "${keycloak_group.group_nested.name}"
+}
+	`, realm, group, groupNested)
 }
