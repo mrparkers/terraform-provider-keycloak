@@ -36,7 +36,7 @@ resource "keycloak_group_roles" "group_roles" {
 The following arguments are supported:
 
 - `realm_id` - (Required) The realm this group exists within.
-- `name` - (Required) The name of the group
+- `name` - (Required) The name of the group. If there are multiple groups match `name`, it will return the first one it found.
 
 ### Attributes Reference
 
