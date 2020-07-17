@@ -162,6 +162,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			ClientSignatureRequired:         &clientSignatureRequired,
 			ForcePostBinding:                randomBoolAsStringPointer(),
 			ForceNameIdFormat:               randomBoolAsStringPointer(),
+			SignatureAlgorithm:              randomStringInSlice(keycloakSamlClientSignatureAlgorithms),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
 			EncryptionCertificate:           &encryptionCertificateBefore,
 			SigningCertificate:              &signingCertificateBefore,
@@ -200,6 +201,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			ClientSignatureRequired:         &clientSignatureRequired,
 			ForcePostBinding:                randomBoolAsStringPointer(),
 			ForceNameIdFormat:               randomBoolAsStringPointer(),
+			SignatureAlgorithm:              randomStringInSlice(keycloakSamlClientSignatureAlgorithms),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
 			EncryptionCertificate:           &encryptionCertificateAfter,
 			SigningCertificate:              &signingCertificateAfter,
@@ -559,6 +561,7 @@ resource "keycloak_saml_client" "saml_client" {
 	force_name_id_format       = %s
 
 	front_channel_logout       = %t
+	signature_algorithm        = "%s"
 	name_id_format             = "%s"
 	root_url                   = "%s"
 	valid_redirect_uris        = %s
@@ -590,6 +593,7 @@ resource "keycloak_saml_client" "saml_client" {
 		*client.Attributes.ForcePostBinding,
 		*client.Attributes.ForceNameIdFormat,
 		client.FrontChannelLogout,
+		client.Attributes.SignatureAlgorithm,
 		client.Attributes.NameIdFormat,
 		client.RootUrl,
 		arrayOfStringsForTerraformResource(client.ValidRedirectUris),

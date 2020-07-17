@@ -13,6 +13,7 @@ type SamlClientAttributes struct {
 	ForcePostBinding        *string `json:"saml.force.post.binding"`
 	ForceNameIdFormat       *string `json:"saml_force_name_id_format"`
 	// attributes above are actually booleans, but the Keycloak API expects strings
+	SignatureAlgorithm              string  `json:"saml.signature.algorithm"`
 	NameIdFormat                    string  `json:"saml_name_id_format"`
 	SigningCertificate              *string `json:"saml.signing.certificate,omitempty"`
 	SigningPrivateKey               *string `json:"saml.signing.private.key"`
