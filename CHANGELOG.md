@@ -1,3 +1,28 @@
+## 1.20.0 (July 20, 2020)
+
+FEATURES:
+
+- new resource: `keycloak_user_roles` ([#315](https://github.com/mrparkers/terraform-provider-keycloak/pull/315))
+- new resource: `keycloak_identity_provider_token_exchange_scope_permission` ([#318](https://github.com/mrparkers/terraform-provider-keycloak/pull/318))
+- new resources: `keycloak_saml_client_scope`, `keycloak_saml_client_default_scopes` ([#320](https://github.com/mrparkers/terraform-provider-keycloak/pull/320))
+
+IMPROVEMENTS:
+
+- adds `default_signature_algorithm` attribute for `keycloak_realm` resource ([#282](https://github.com/mrparkers/terraform-provider-keycloak/pull/282))
+- adds `parent_id` attribute to `keycloak_custom_user_federation` resource ([#325](https://github.com/mrparkers/terraform-provider-keycloak/pull/325))
+- adds `extra_config` attribute to identity provider mapper resources ([#316](https://github.com/mrparkers/terraform-provider-keycloak/pull/316))
+- adds `include_in_token_scope` and `gui_order` attributes to `keycloak_openid_client_scope` resource ([#320](https://github.com/mrparkers/terraform-provider-keycloak/pull/320))
+- adds `base_path` provider attribute, improve login error messages ([#332](https://github.com/mrparkers/terraform-provider-keycloak/pull/332))
+- adds encryption attributes to `keycloak_saml_client` resource ([#342](https://github.com/mrparkers/terraform-provider-keycloak/pull/342))
+- adds `signature_algorithm` attribute to `keycloak_saml_client` resource ([#345](https://github.com/mrparkers/terraform-provider-keycloak/pull/345))
+
+BUG FIXES:
+
+- fix import for `keycloak_openid_client_service_account_role` resource ([#314](https://github.com/mrparkers/terraform-provider-keycloak/pull/314))
+- fix realm role support for `keycloak_generic_client_role_mapper` resource ([#316](https://github.com/mrparkers/terraform-provider-keycloak/pull/316))
+- fix `keycloak_group` data source to support nested groups ([#334](https://github.com/mrparkers/terraform-provider-keycloak/pull/334))
+- fix `keycloak_group` data source / resource to support group names with backslash character ([#337](https://github.com/mrparkers/terraform-provider-keycloak/pull/337))
+
 ## 1.19.0 (June 5, 2020)
 
 FEATURES:
