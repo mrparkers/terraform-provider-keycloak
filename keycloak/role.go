@@ -7,15 +7,16 @@ import (
 )
 
 type Role struct {
-	Id          string `json:"id,omitempty"`
-	RealmId     string `json:"-"`
-	ClientId    string `json:"-"`
-	RoleId      string `json:"-"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	ClientRole  bool   `json:"clientRole"`
-	ContainerId string `json:"containerId"`
-	Composite   bool   `json:"composite"`
+	Id          string              `json:"id,omitempty"`
+	RealmId     string              `json:"-"`
+	ClientId    string              `json:"-"`
+	RoleId      string              `json:"-"`
+	Name        string              `json:"name"`
+	Description string              `json:"description"`
+	ClientRole  bool                `json:"clientRole"`
+	ContainerId string              `json:"containerId"`
+	Composite   bool                `json:"composite"`
+	Attributes  map[string][]string `json:"attributes"`
 }
 
 type UsersInRole struct {

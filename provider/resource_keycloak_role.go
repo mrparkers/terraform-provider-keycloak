@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 func resourceKeycloakRole() *schema.Resource {
@@ -43,29 +44,46 @@ func resourceKeycloakRole() *schema.Resource {
 				Set:      schema.HashString,
 				Optional: true,
 			},
+			"attributes": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func mapFromDataToRole(data *schema.ResourceData) *keycloak.Role {
+	attributes := map[string][]string{}
+	if v, ok := data.GetOk("attributes"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			attributes[key] = splitLen(value.(string), MAX_ATTRIBUTE_VALUE_LEN)
+		}
+	}
+
 	role := &keycloak.Role{
 		Id:          data.Id(),
 		RealmId:     data.Get("realm_id").(string),
 		ClientId:    data.Get("client_id").(string),
 		Name:        data.Get("name").(string),
 		Description: data.Get("description").(string),
+		Attributes:  attributes,
 	}
 
 	return role
 }
 
 func mapFromRoleToData(data *schema.ResourceData, role *keycloak.Role) {
+	attributes := map[string]string{}
+	for k, v := range role.Attributes {
+		attributes[k] = strings.Join(v, "")
+	}
 	data.SetId(role.Id)
 
 	data.Set("realm_id", role.RealmId)
 	data.Set("client_id", role.ClientId)
 	data.Set("name", role.Name)
 	data.Set("description", role.Description)
+	data.Set("attributes", attributes)
 }
 
 func resourceKeycloakRoleCreate(data *schema.ResourceData, meta interface{}) error {

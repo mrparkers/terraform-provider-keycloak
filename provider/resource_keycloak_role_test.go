@@ -2,11 +2,12 @@ package provider
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"testing"
 )
 
 func TestAccKeycloakRole_basicRealm(t *testing.T) {
@@ -108,6 +109,8 @@ func TestAccKeycloakRole_basicRealmUpdate(t *testing.T) {
 	roleName := "terraform-role-" + acctest.RandString(10)
 	descriptionOne := acctest.RandString(50)
 	descriptionTwo := acctest.RandString(50)
+	attributeName := "terraform-attribute-" + acctest.RandString(10)
+	attributeValue := acctest.RandString(250)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -115,11 +118,11 @@ func TestAccKeycloakRole_basicRealmUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRole_basicRealmWithDescription(realmName, roleName, descriptionOne),
+				Config: testKeycloakRole_basicRealmWithDescriptionAndAttribute(realmName, roleName, descriptionOne, attributeName, attributeValue),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
-				Config: testKeycloakRole_basicRealmWithDescription(realmName, roleName, descriptionTwo),
+				Config: testKeycloakRole_basicRealmWithDescriptionAndAttribute(realmName, roleName, descriptionTwo, attributeName, attributeValue),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
@@ -136,6 +139,8 @@ func TestAccKeycloakRole_basicClientUpdate(t *testing.T) {
 	roleName := "terraform-role-" + acctest.RandString(10)
 	descriptionOne := acctest.RandString(50)
 	descriptionTwo := acctest.RandString(50)
+	attributeName := "terraform-attribute-" + acctest.RandString(10)
+	attributeValue := acctest.RandString(250)
 
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
@@ -143,11 +148,11 @@ func TestAccKeycloakRole_basicClientUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRole_basicClientWithDescription(realmName, clientId, roleName, descriptionOne),
+				Config: testKeycloakRole_basicClientWithDescriptionAndAttribute(realmName, clientId, roleName, descriptionOne, attributeName, attributeValue),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
-				Config: testKeycloakRole_basicClientWithDescription(realmName, clientId, roleName, descriptionTwo),
+				Config: testKeycloakRole_basicClientWithDescriptionAndAttribute(realmName, clientId, roleName, descriptionTwo, attributeName, attributeValue),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
@@ -400,7 +405,8 @@ resource "keycloak_role" "role" {
 	`, realm, role)
 }
 
-func testKeycloakRole_basicRealmWithDescription(realm, role, description string) string {
+func testKeycloakRole_basicRealmWithDescriptionAndAttribute(realm, role, description, attributeName, attributeValue string) string {
+
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -410,8 +416,11 @@ resource "keycloak_role" "role" {
 	name        = "%s"
 	description = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
+	attributes = {
+		"%s" = "%s"
+	}
 }
-	`, realm, role, description)
+	`, realm, role, description, attributeName, attributeValue)
 }
 
 func testKeycloakRole_basicClient(realm, clientId, role string) string {
@@ -453,7 +462,7 @@ resource "keycloak_role" "role" {
 	`, realm, clientId, role)
 }
 
-func testKeycloakRole_basicClientWithDescription(realm, clientId, role, description string) string {
+func testKeycloakRole_basicClientWithDescriptionAndAttribute(realm, clientId, role, description, attributeName, attributeValue string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -470,8 +479,11 @@ resource "keycloak_role" "role" {
 	realm_id    = "${keycloak_realm.realm.id}"
 	client_id   = "${keycloak_openid_client.client.id}"
 	description = "%s"
+	attributes = {
+		"%s" = "%s"
+	}
 }
-	`, realm, clientId, role, description)
+	`, realm, clientId, role, description, attributeName, attributeValue)
 }
 
 func testKeycloakRole_composites(realm, clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites string, composites []string) string {
