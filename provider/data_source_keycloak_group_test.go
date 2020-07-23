@@ -101,11 +101,17 @@ resource "keycloak_group" "group" {
 	realm_id = "${keycloak_realm.realm.id}"
 }
 
+# we create another group with a similar name to make the data lookup more realistic
+resource "keycloak_group" "similar_group" {
+	name     = "%s_with_similar_name"
+	realm_id = "${keycloak_realm.realm.id}"
+}
+
 data "keycloak_group" "group" {
 	realm_id = "${keycloak_realm.realm.id}"
 	name     = "${keycloak_group.group.name}"
 }
-	`, realm, group)
+	`, realm, group, group)
 }
 
 func testDataSourceKeycloakGroup_nested(realm, group, groupNested string) string {
