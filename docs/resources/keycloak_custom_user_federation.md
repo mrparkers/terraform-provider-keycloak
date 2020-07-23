@@ -20,6 +20,11 @@ resource "keycloak_custom_user_federation" "custom_user_federation" {
     provider_id = "custom"
 
     enabled     = true
+
+    config = {
+        dummyString = "foobar"
+        dummyBool   = true
+    }
 }
 ```
 
@@ -34,6 +39,7 @@ The following arguments are supported:
 - `priority` - (Optional) Priority of this provider when looking up users. Lower values are first. Defaults to `0`.
 - `cache_policy` - (Optional) Can be one of `DEFAULT`, `EVICT_DAILY`, `EVICT_WEEKLY`, `MAX_LIFESPAN`, or `NO_CACHE`. Defaults to `DEFAULT`.
 - `parent_id` - (Optional) Must be set to the realms' `internal_id`  when it differs from the realm. This can happen when existing resources are imported into the state.
+- `config` - (Optional) The provider configuration handed over to your custom user federation provider.
 
 ### Import
 
