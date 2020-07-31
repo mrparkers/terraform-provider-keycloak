@@ -198,7 +198,19 @@ func resourceKeycloakRealm() *schema.Resource {
 				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
+			"sso_session_idle_timeout_remember_me": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
 			"sso_session_max_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"sso_session_max_lifespan_remember_me": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
@@ -572,6 +584,22 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		realm.SsoSessionMaxLifespan = ssoSessionMaxLifespanDurationString
 	}
 
+	if ssoSessionIdleTimeoutRememberMe := data.Get("sso_session_idle_timeout_remember_me").(string); ssoSessionIdleTimeoutRememberMe != "" {
+		ssoSessionIdleTimeoutRememberMeDurationString, err := getSecondsFromDurationString(ssoSessionIdleTimeoutRememberMe)
+		if err != nil {
+			return nil, err
+		}
+		realm.SsoSessionIdleTimeoutRememberMe = ssoSessionIdleTimeoutRememberMeDurationString
+	}
+
+	if ssoSessionMaxLifespanRememberMe := data.Get("sso_session_max_lifespan_remember_me").(string); ssoSessionMaxLifespanRememberMe != "" {
+		ssoSessionMaxLifespanRememberMeDurationString, err := getSecondsFromDurationString(ssoSessionMaxLifespanRememberMe)
+		if err != nil {
+			return nil, err
+		}
+		realm.SsoSessionMaxLifespanRememberMe = ssoSessionMaxLifespanRememberMeDurationString
+	}
+
 	if offlineSessionIdleTimeout := data.Get("offline_session_idle_timeout").(string); offlineSessionIdleTimeout != "" {
 		offlineSessionIdleTimeoutDurationString, err := getSecondsFromDurationString(offlineSessionIdleTimeout)
 		if err != nil {
@@ -809,6 +837,8 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("refresh_token_max_reuse", realm.RefreshTokenMaxReuse)
 	data.Set("sso_session_idle_timeout", getDurationStringFromSeconds(realm.SsoSessionIdleTimeout))
 	data.Set("sso_session_max_lifespan", getDurationStringFromSeconds(realm.SsoSessionMaxLifespan))
+	data.Set("sso_session_idle_timeout_remember_me", getDurationStringFromSeconds(realm.SsoSessionIdleTimeoutRememberMe))
+	data.Set("sso_session_max_lifespan_remember_me", getDurationStringFromSeconds(realm.SsoSessionMaxLifespanRememberMe))
 	data.Set("offline_session_idle_timeout", getDurationStringFromSeconds(realm.OfflineSessionIdleTimeout))
 	data.Set("offline_session_max_lifespan", getDurationStringFromSeconds(realm.OfflineSessionMaxLifespan))
 	data.Set("access_token_lifespan", getDurationStringFromSeconds(realm.AccessTokenLifespan))
