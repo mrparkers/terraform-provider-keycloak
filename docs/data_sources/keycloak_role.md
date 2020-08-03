@@ -27,7 +27,7 @@ resource "keycloak_group_roles" "group_roles" {
     realm_id = "${keycloak_realm.realm.id}"
     group_id = "${keycloak_group.group.id}"
 
-    roles = [
+    role_ids = [
         "${data.keycloak_role.offline_access.id}"
     ]
 }

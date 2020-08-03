@@ -145,8 +145,8 @@ func (keycloakClient *KeycloakClient) GetGroupByName(realmId, name string) (*Gro
 
 	// The search may return more than 1 result even if there is a group exactly matching the search string
 	groupsPtr := make([]*Group, len(groups))
-	for i, group := range groups {
-		groupsPtr[i] = &group
+	for i := range groups {
+		groupsPtr[i] = &groups[i]
 	}
 	group := getGroupByDFS(name, groupsPtr)
 	if group != nil {
