@@ -103,6 +103,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"service_account_user_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"pkce_code_challenge_method": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -116,10 +120,6 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
-			},
-			"service_account_user_id": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 			"resource_server_id": {
 				Type:     schema.TypeString,

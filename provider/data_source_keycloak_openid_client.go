@@ -63,7 +63,15 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Set:      schema.HashString,
 				Computed: true,
 			},
-			"service_account_user_id": {
+			"admin_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"base_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"root_url": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -71,8 +79,20 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"root_url": {
+			"service_account_user_id": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"pkce_code_challenge_method": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"access_token_lifespan": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"exclude_session_state_from_auth_response": {
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"resource_server_id": {
@@ -90,6 +110,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 							Computed: true,
 						},
 						"allow_remote_resource_management": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"keep_defaults": {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
