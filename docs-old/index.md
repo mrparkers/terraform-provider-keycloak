@@ -29,12 +29,12 @@ like to manage your entire Keycloak instance, or in any other realm if you only 
 These steps will assume that you are using the `admin-cli` client, which is already correctly configured for this type
 of authentication. Do not follow these steps if you have already followed the steps for the client credentials grant.
 
-1. Create or identify the user who's credentials will be used for authentication.
+1. Create or identify the user whose credentials will be used for authentication.
 1. Edit this user in the "Users" section of the management console and assign roles using the "Role Mappings" tab.
 
 ## Assigning Roles
 
-There are many different ways that roles can be assigned to manage Keycloak. Here are a couple of common scenarios accompanied
+There are many ways that roles can be assigned to manage Keycloak. Here are a couple of common scenarios accompanied
 by suggested roles to assign. This is not an exhaustive list, and there is often more than one way to assign a particular set
 of permissions.
 
