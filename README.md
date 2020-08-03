@@ -15,9 +15,9 @@ This provider will officially support the latest three major versions of Keycloa
 
 The following versions are used when running acceptance tests in CI:
 
-- 10.0.2 (latest)
+- 11.0.0 (latest)
+- 10.0.2
 - 9.0.3
-- 8.0.2
 
 ## Releases
 
