@@ -94,6 +94,28 @@ type Realm struct {
 	ResetCredentialsFlow     string `json:"resetCredentialsFlow,omitempty"`
 	ClientAuthenticationFlow string `json:"clientAuthenticationFlow,omitempty"`
 	DockerAuthenticationFlow string `json:"dockerAuthenticationFlow,omitempty"`
+
+	// WebAuthn
+	WebAuthnPolicyAcceptableAaguids                           []string `json:"webAuthnPolicyAcceptableAaguids"`
+	WebAuthnPolicyAttestationConveyancePreference             string   `json:"webAuthnPolicyAttestationConveyancePreference"`
+	WebAuthnPolicyAuthenticatorAttachment                     string   `json:"webAuthnPolicyAuthenticatorAttachment"`
+	WebAuthnPolicyAvoidSameAuthenticatorRegister              bool     `json:"webAuthnPolicyAvoidSameAuthenticatorRegister"`
+	WebAuthnPolicyCreateTimeout                               int      `json:"webAuthnPolicyCreateTimeout"`
+	WebAuthnPolicyPasswordlessAcceptableAaguids               []string `json:"webAuthnPolicyPasswordlessAcceptableAaguids"`
+	WebAuthnPolicyPasswordlessAttestationConveyancePreference string   `json:"webAuthnPolicyPasswordlessAttestationConveyancePreference"`
+	WebAuthnPolicyPasswordlessAuthenticatorAttachment         string   `json:"webAuthnPolicyPasswordlessAuthenticatorAttachment"`
+	WebAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister  bool     `json:"webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister"`
+	WebAuthnPolicyPasswordlessCreateTimeout                   int      `json:"webAuthnPolicyPasswordlessCreateTimeout"`
+	WebAuthnPolicyPasswordlessRequireResidentKey              string   `json:"webAuthnPolicyPasswordlessRequireResidentKey"`
+	WebAuthnPolicyPasswordlessRpEntityName                    string   `json:"webAuthnPolicyPasswordlessRpEntityName"`
+	WebAuthnPolicyPasswordlessRpId                            string   `json:"webAuthnPolicyPasswordlessRpId"`
+	WebAuthnPolicyPasswordlessSignatureAlgorithms             []string `json:"webAuthnPolicyPasswordlessSignatureAlgorithms"`
+	WebAuthnPolicyPasswordlessUserVerificationRequirement     string   `json:"webAuthnPolicyPasswordlessUserVerificationRequirement"`
+	WebAuthnPolicyRequireResidentKey                          string   `json:"webAuthnPolicyRequireResidentKey"`
+	WebAuthnPolicyRpEntityName                                string   `json:"webAuthnPolicyRpEntityName"`
+	WebAuthnPolicyRpId                                        string   `json:"webAuthnPolicyRpId"`
+	WebAuthnPolicySignatureAlgorithms                         []string `json:"webAuthnPolicySignatureAlgorithms"`
+	WebAuthnPolicyUserVerificationRequirement                 string   `json:"webAuthnPolicyUserVerificationRequirement"`
 }
 
 type BrowserSecurityHeaders struct {

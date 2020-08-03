@@ -372,6 +372,130 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+
+			// WebAuthn
+			"web_authn_policy_acceptable_aaguids": {
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+				Computed: true,
+			},
+			"web_authn_policy_attestation_conveyance_preference": {
+				Type:        schema.TypeString,
+				Description: "Either none, indirect or direct",
+				Optional:    true,
+				Default:     "not specified",
+			},
+			"web_authn_policy_authenticator_attachment": {
+				Type:        schema.TypeString,
+				Description: "Either platform or cross-platform",
+				Optional:    true,
+				Default:     "not specified",
+			},
+			"web_authn_policy_avoid_same_authenticator_register": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"web_authn_policy_create_timeout": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  0,
+			},
+			"web_authn_policy_passwordless_acceptable_aaguids": {
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+				Computed: true,
+			},
+			"web_authn_policy_passwordless_attestation_conveyance_preference": {
+				Type:        schema.TypeString,
+				Description: "Either none, indirect or direct",
+				Optional:    true,
+				Default:     "not specified",
+			},
+			"web_authn_policy_passwordless_authenticator_attachment": {
+				Type:        schema.TypeString,
+				Description: "Either platform or cross-platform",
+				Optional:    true,
+				Default:     "not specified",
+			},
+			"web_authn_policy_passwordless_avoid_same_authenticator_register": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"web_authn_policy_passwordless_create_timeout": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  0,
+			},
+			"web_authn_policy_passwordless_require_resident_key": {
+				Type:        schema.TypeString,
+				Description: "Either Yes or No",
+				Optional:    true,
+				Default:     "not specified",
+			},
+			"web_authn_policy_passwordless_rp_entity_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "keycloak",
+			},
+			"web_authn_policy_passwordless_rp_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			"web_authn_policy_passwordless_signature_algorithms": {
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "Keycloak lists ES256, ES384, ES512, RS256, ES384, ES512 at the time of writing",
+				Optional:    true,
+				Computed:    true,
+			},
+			"web_authn_policy_passwordless_user_verification_requirement": {
+				Type:        schema.TypeString,
+				Description: "Either required, preferred or discourage",
+				Optional:    true,
+				Default:     "not specified",
+			},
+			"web_authn_policy_require_resident_key": {
+				Type:        schema.TypeString,
+				Description: "Either Yes or No",
+				Optional:    true,
+				Default:     "not specified",
+			},
+			"web_authn_policy_rp_entity_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "keycloak",
+			},
+			"web_authn_policy_rp_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			"web_authn_policy_signature_algorithms": {
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "Keycloak lists ES256, ES384, ES512, RS256, ES384, ES512 at the time of writing",
+				Optional:    true,
+				Computed:    true,
+			},
+			"web_authn_policy_user_verification_requirement": {
+				Type:        schema.TypeString,
+				Description: "Either required, preferred or discouraged",
+				Optional:    true,
+				Default:     "not specified",
+			},
 		},
 	}
 }

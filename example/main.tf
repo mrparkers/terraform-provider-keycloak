@@ -76,6 +76,9 @@ resource "keycloak_realm" "test" {
   attributes = {
     mycustomAttribute = "myCustomValue"
   }
+  web_authn_policy_rp_entity_name = "Example"
+  web_authn_policy_rp_id = "keycloak.example.com"
+  web_authn_policy_signature_algorithms = ["ES256", "RS256"]
 }
 
 resource "keycloak_required_action" "custom-terms-and-conditions" {
