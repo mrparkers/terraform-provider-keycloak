@@ -75,7 +75,8 @@ is set to `true`.
 
 ## Attributes Reference
 
-- `service_account_user_id` - When service accounts are enabled for this client, this attribute is the unique ID for the Keycloak user that represents this service account.
+- `service_account_user_id` - (Computed) When service accounts are enabled for this client, this attribute is the unique ID for the Keycloak user that represents this service account.
+- `resource_server_id` - (Computed) When authorization is enabled for this client, this attribute is the unique ID for the client (the same value as the `.id` attribute).
 
 
 ## Import
