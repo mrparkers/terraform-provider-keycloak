@@ -68,9 +68,9 @@ is set to `true`.
     - `direct_grant_id` - (Optional) Direct grant flow id (flow needs to exist)
 - `login_theme` - (Optional) The client login theme. This will override the default theme for the realm.
 - `exclude_session_state_from_auth_response` - (Optional) When `true`, the parameter `session_state` will not be included in OpenID Connect Authentication Response.
-- `authorization` - (Optional) Client authorization settings.
-    - `policy_enforcement_mode` - (Required) The authorization enforcement mode. Can be one of `ENFORCING`, `PERMISSIVE`, or `DISABLED`.
-    - `allow_remote_resource_management` - (Optional) When `true`, remote resource management will be allowed. Defaults to `false`.
+- `authorization` - (Optional) When this block is present, fine-grained authorization will be enabled for this client. The client's `access_type` must be `CONFIDENTIAL`, and `service_accounts_enabled` must be `true`. This block has the following arguments:
+    - `policy_enforcement_mode` - (Required) Dictates how policies are enforced when evaluating authorization requests. Can be one of `ENFORCING`, `PERMISSIVE`, or `DISABLED`.
+    - `allow_remote_resource_management` - (Optional) When `true`, resources can be managed remotely by the resource server. Defaults to `false`.
     - `keep_defaults` - (Optional) When `true`, defaults set by Keycloak will be respected. Defaults to `false`.
 
 ## Attributes Reference
