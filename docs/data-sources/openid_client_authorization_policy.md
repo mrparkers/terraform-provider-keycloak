@@ -14,8 +14,8 @@ source to fetch information about this permission, so we can use it to create a 
 
 ```hcl
 resource "keycloak_realm" "realm" {
-    realm   = "my-realm"
-    enabled = true
+  realm   = "my-realm"
+  enabled = true
 }
 
 resource "keycloak_openid_client" "client_with_authz" {
