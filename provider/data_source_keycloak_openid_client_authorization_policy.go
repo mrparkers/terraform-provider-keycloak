@@ -33,7 +33,7 @@ func dataSourceKeycloakOpenidClientAuthorizationPolicy() *schema.Resource {
 			},
 			"logic": {
 				Type:         schema.TypeString,
-				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice(keycloakPolicyLogicTypes, false),
 			},
 			"policies": {
