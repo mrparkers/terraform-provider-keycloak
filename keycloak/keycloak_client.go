@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/go-version"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,6 +14,7 @@ import (
 	"net/http/cookiejar"
 	"net/http/httputil"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -26,6 +28,7 @@ type KeycloakClient struct {
 	httpClient        *http.Client
 	initialLogin      bool
 	userAgent         string
+	serverVersion     *version.Version
 }
 
 type ClientCredentials struct {
@@ -44,7 +47,7 @@ const (
 	tokenUrl = "%s/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string) (*KeycloakClient, error) {
+func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, keycloakVersion string, userAgent string) (*KeycloakClient, error) {
 	cookieJar, err := cookiejar.New(&cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	})
@@ -99,6 +102,28 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 		err := keycloakClient.login()
 		if err != nil {
 			return nil, err
+		}
+
+		if keycloakVersion == "" {
+			serverInfo, err := keycloakClient.GetServerInfo()
+			if err != nil {
+				return nil, fmt.Errorf("/serverInfo endpoint retuned an error, server Keycloak version could not be determined: %s", err)
+			}
+
+			regex := regexp.MustCompile(`^(\d+\.\d+\.\d+)`)
+			semver := regex.FindStringSubmatch(serverInfo.SystemInfo.ServerVersion)[0]
+
+			keycloakServerInfoVersion, err := version.NewVersion(semver)
+			if err != nil {
+				return nil, fmt.Errorf("/serverInfo endpoint retuned an unreadable version, server Keycloak version could not be determined: %s", err)
+			}
+			keycloakClient.serverVersion = keycloakServerInfoVersion
+		} else {
+			v, err := version.NewVersion(keycloakVersion)
+			if err != nil {
+				return nil, err
+			}
+			keycloakClient.serverVersion = v
 		}
 	}
 
@@ -400,4 +425,8 @@ func (keycloakClient *KeycloakClient) delete(path string, requestBody interface{
 	_, _, err = keycloakClient.sendRequest(request)
 
 	return err
+}
+
+func (keycloakClient *KeycloakClient) ServerVersion() *version.Version {
+	return keycloakClient.serverVersion
 }

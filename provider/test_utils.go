@@ -2,11 +2,8 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-version"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"math/rand"
 	"os"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -77,49 +74,4 @@ func TestCheckResourceAttrNot(name, key, value string) resource.TestCheckFunc {
 
 		return nil
 	}
-}
-
-var keycloakServerInfoVersion *version.Version
-
-func keycloakVersionIsGreaterThanOrEqualTo(keycloakClient *keycloak.KeycloakClient, keycloakMajorVersion *version.Version) (bool, error) {
-	if keycloakServerInfoVersion == nil {
-		serverInfo, err := keycloakClient.GetServerInfo()
-		if err != nil {
-			return false, fmt.Errorf("/serverInfo endpoint retuned an error, server Keycloak version could not be determined: %s", err)
-		}
-
-		regex := regexp.MustCompile(`^(\d+\.\d+\.\d+)`)
-		semver := regex.FindStringSubmatch(serverInfo.SystemInfo.ServerVersion)[0]
-
-		keycloakServerInfoVersion, err = version.NewVersion(semver)
-		if err != nil {
-			return false, fmt.Errorf("/serverInfo endpoint retuned an unreadable version, server Keycloak version could not be determined: %s", err)
-		}
-	}
-	return keycloakServerInfoVersion.GreaterThanOrEqual(keycloakMajorVersion), nil
-}
-
-func getKeycloakVersion600() *version.Version {
-	v, _ := version.NewVersion("6.0.0")
-	return v
-}
-
-func getKeycloakVersion700() *version.Version {
-	v, _ := version.NewVersion("7.0.0")
-	return v
-}
-
-func getKeycloakVersion800() *version.Version {
-	v, _ := version.NewVersion("8.0.0")
-	return v
-}
-
-func getKeycloakVersion900() *version.Version {
-	v, _ := version.NewVersion("9.0.0")
-	return v
-}
-
-func getKeycloakVersion1000() *version.Version {
-	v, _ := version.NewVersion("10.0.0")
-	return v
 }

@@ -165,10 +165,7 @@ func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
 							return err
 						}
 						keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-						keycloakVersionIsGreaterThanOrEqualTo7, err := keycloakVersionIsGreaterThanOrEqualTo(keycloakClient, getKeycloakVersion700())
-						if err != nil {
-							return err
-						}
+						keycloakVersionIsGreaterThanOrEqualTo7 := keycloak.KeycloakVersionIsGreaterThanOrEqualTo(keycloakClient, "7.0.0")
 
 						if keycloakVersionIsGreaterThanOrEqualTo7 { //keycloak versions < 7.0.0 have 63 events, versions >=7.0.0 have 67 events
 							if len(realmEventsConfig.EnabledEventTypes) != 67 {

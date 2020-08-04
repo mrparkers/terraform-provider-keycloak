@@ -31,7 +31,7 @@ type LdapGroupMapper struct {
 	LdapGroupsPath string
 }
 
-func convertFromLdapGroupMapperToComponent(ldapGroupMapper *LdapGroupMapper) *component {
+func (keycloakClient *KeycloakClient) convertFromLdapGroupMapperToComponent(ldapGroupMapper *LdapGroupMapper) *component {
 	componentConfig := map[string][]string{
 		"groups.dn": {
 			ldapGroupMapper.LdapGroupsDn,
@@ -69,9 +69,10 @@ func convertFromLdapGroupMapperToComponent(ldapGroupMapper *LdapGroupMapper) *co
 		"drop.non.existing.groups.during.sync": {
 			strconv.FormatBool(ldapGroupMapper.DropNonExistingGroupsDuringSync),
 		},
-		"groups.path": {
-			ldapGroupMapper.LdapGroupsPath,
-		},
+	}
+
+	if KeycloakVersionIsGreaterThanOrEqualTo(keycloakClient, "11.0.0") {
+		componentConfig["groups.path"] = []string{ldapGroupMapper.LdapGroupsPath}
 	}
 
 	if ldapGroupMapper.GroupsLdapFilter != "" {
@@ -159,7 +160,7 @@ func (keycloakClient *KeycloakClient) ValidateLdapGroupMapper(ldapGroupMapper *L
 }
 
 func (keycloakClient *KeycloakClient) NewLdapGroupMapper(ldapGroupMapper *LdapGroupMapper) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapGroupMapper.RealmId), convertFromLdapGroupMapperToComponent(ldapGroupMapper))
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapGroupMapper.RealmId), keycloakClient.convertFromLdapGroupMapperToComponent(ldapGroupMapper))
 	if err != nil {
 		return err
 	}
@@ -181,7 +182,7 @@ func (keycloakClient *KeycloakClient) GetLdapGroupMapper(realmId, id string) (*L
 }
 
 func (keycloakClient *KeycloakClient) UpdateLdapGroupMapper(ldapGroupMapper *LdapGroupMapper) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapGroupMapper.RealmId, ldapGroupMapper.Id), convertFromLdapGroupMapperToComponent(ldapGroupMapper))
+	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapGroupMapper.RealmId, ldapGroupMapper.Id), keycloakClient.convertFromLdapGroupMapperToComponent(ldapGroupMapper))
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapGroupMapper(realmId, id string) error {

@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"bytes"
+	"github.com/hashicorp/go-version"
 	"strconv"
 	"strings"
 	"time"
@@ -73,4 +74,13 @@ func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
 	}
 
 	return strconv.ParseBool(b)
+}
+
+func KeycloakVersionIsGreaterThanOrEqualTo(keycloakClient *KeycloakClient, keycloakVersion string) bool {
+	v, err := version.NewVersion(keycloakVersion)
+	if err != nil {
+		// This should never happen
+		panic(err)
+	}
+	return keycloakClient.ServerVersion().GreaterThanOrEqual(v)
 }

@@ -13,10 +13,7 @@ import (
 
 // All openid clients in Keycloak will automatically have these scopes listed as "optional client scopes".
 func getPreAssignedOptionalClientScopes(t *testing.T) []string {
-	keycloakVersionIsGreaterThanOrEqualTo6, err := keycloakVersionIsGreaterThanOrEqualTo(keycloakClient, getKeycloakVersion600())
-	if err != nil {
-		t.Fatal(err)
-	}
+	keycloakVersionIsGreaterThanOrEqualTo6 := keycloak.KeycloakVersionIsGreaterThanOrEqualTo(keycloakClient, "6.0.0")
 	if keycloakVersionIsGreaterThanOrEqualTo6 {
 		return []string{"address", "phone", "offline_access", "microprofile-jwt"}
 	} else {
@@ -409,7 +406,7 @@ func testAccCheckKeycloakOpenidClientOptionalScopeIsNotAttached(resourceName, cl
 }
 
 func testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope string) string {
-	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsGreaterThanOrEqualTo(keycloakClient, getKeycloakVersion600())
+	keycloakVersionIsHigherOrEqualTo6 := keycloak.KeycloakVersionIsGreaterThanOrEqualTo(keycloakClient, "6.0.0")
 	if keycloakVersionIsHigherOrEqualTo6 {
 		return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -525,7 +522,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_validationNoClient(realm, client, clientScope string) string {
-	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsGreaterThanOrEqualTo(keycloakClient, getKeycloakVersion600())
+	keycloakVersionIsHigherOrEqualTo6 := keycloak.KeycloakVersionIsGreaterThanOrEqualTo(keycloakClient, "6.0.0")
 	if keycloakVersionIsHigherOrEqualTo6 {
 		return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -580,7 +577,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 
 func testKeycloakOpenidClientOptionalScopes_validationBearerOnlyClient(realm, client, clientScope string) string {
 
-	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsGreaterThanOrEqualTo(keycloakClient, getKeycloakVersion600())
+	keycloakVersionIsHigherOrEqualTo6 := keycloak.KeycloakVersionIsGreaterThanOrEqualTo(keycloakClient, "6.0.0")
 	if keycloakVersionIsHigherOrEqualTo6 {
 		return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -689,7 +686,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_duplicateScopeAssignment(realm, client, clientScope string) string {
-	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsGreaterThanOrEqualTo(keycloakClient, getKeycloakVersion600())
+	keycloakVersionIsHigherOrEqualTo6 := keycloak.KeycloakVersionIsGreaterThanOrEqualTo(keycloakClient, "6.0.0")
 	if keycloakVersionIsHigherOrEqualTo6 {
 		return fmt.Sprintf(`
 %s
