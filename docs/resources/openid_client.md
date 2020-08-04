@@ -14,23 +14,23 @@ in order to take advantage of Keycloak's user sessions for SSO.
 
 ```hcl
 resource "keycloak_realm" "realm" {
-    realm   = "my-realm"
-    enabled = true
+  realm   = "my-realm"
+  enabled = true
 }
 
 resource "keycloak_openid_client" "openid_client" {
-    realm_id            = keycloak_realm.realm.id
-    client_id           = "test-client"
+  realm_id            = keycloak_realm.realm.id
+  client_id           = "test-client"
 
-    name                = "test client"
-    enabled             = true
+  name                = "test client"
+  enabled             = true
 
-    access_type         = "CONFIDENTIAL"
-    valid_redirect_uris = [
-        "http://localhost:8080/openid-callback"
+  access_type         = "CONFIDENTIAL"
+  valid_redirect_uris = [
+    "http://localhost:8080/openid-callback"
     ]
 
-    login_theme = "keycloak"
+  login_theme = "keycloak"
 }
 ```
 
