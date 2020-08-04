@@ -19,12 +19,12 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client_with_authz" {
-  client_id   = "client-with-authz"
-  name        = "client-with-authz"
-  realm_id    = keycloak_realm.realm.id
+  client_id = "client-with-authz"
+  name      = "client-with-authz"
+  realm_id  = keycloak_realm.realm.id
 
-  access_type                  = "CONFIDENTIAL"
-  service_accounts_enabled     = true
+  access_type              = "CONFIDENTIAL"
+  service_accounts_enabled = true
 
   authorization {
     policy_enforcement_mode = "ENFORCING"
