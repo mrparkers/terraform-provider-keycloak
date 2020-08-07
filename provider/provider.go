@@ -16,7 +16,9 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_realm":                              dataSourceKeycloakRealm(),
 			"keycloak_realm_keys":                         dataSourceKeycloakRealmKeys(),
 			"keycloak_role":                               dataSourceKeycloakRole(),
+			"keycloak_user":                               dataSourceKeycloakUser(),
 			"keycloak_saml_client_installation_provider":  dataSourceKeycloakSamlClientInstallationProvider(),
+			"keycloak_authentication_execution":           dataSourceKeycloakAuthenticationExecution(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_realm":                                             resourceKeycloakRealm(),

@@ -73,6 +73,27 @@ func (keycloakClient *KeycloakClient) ListAuthenticationExecutions(realmId, pare
 	return authenticationExecutions, err
 }
 
+func (keycloakClient *KeycloakClient) GetAuthenticationExecutionInfoFromProviderId(realmId, parentFlowAlias, providerId string) (*AuthenticationExecutionInfo, error) {
+	var authenticationExecutions []*AuthenticationExecutionInfo
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var authenticationExecution AuthenticationExecutionInfo
+
+	for _, aExecution := range authenticationExecutions {
+		if aExecution != nil && aExecution.ProviderId == providerId {
+			authenticationExecution = *aExecution
+			authenticationExecution.RealmId = realmId
+			authenticationExecution.ParentFlowAlias = parentFlowAlias
+		}
+	}
+
+	return &authenticationExecution, nil
+}
+
 func (keycloakClient *KeycloakClient) NewAuthenticationExecution(execution *AuthenticationExecution) error {
 	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions/execution", execution.RealmId, execution.ParentFlowAlias), &authenticationExecutionCreate{Provider: execution.Authenticator})
 	if err != nil {
