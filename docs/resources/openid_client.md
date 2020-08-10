@@ -28,7 +28,7 @@ resource "keycloak_openid_client" "openid_client" {
   access_type         = "CONFIDENTIAL"
   valid_redirect_uris = [
     "http://localhost:8080/openid-callback"
-    ]
+  ]
 
   login_theme = "keycloak"
 }
