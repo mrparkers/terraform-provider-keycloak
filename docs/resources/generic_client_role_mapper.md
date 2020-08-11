@@ -162,3 +162,16 @@ resource "keycloak_generic_client_role_mapper" "client_b_role_mapper" {
 - `client_id` - (Optional) The ID of the client this role mapper should be added to. Conflicts with `client_scope_id`. This argument is required if `client_scope_id` is not set.
 - `client_scope_id` - (Optional) The ID of the client scope this role mapper should be added to. Conflicts with `client_id`. This argument is required if `client_id` is not set.
 - `role_id` - (Required) The ID of the role to be added to this role mapper.
+
+## Import
+
+Generic client role mappers can be imported using one of the following two formats:
+
+- When mapping a role to a client, use the format `{{realmId}}/client/{{clientId}}/{{roleId}`
+- When mapping a role to a client scope, use the format `{{realmId}}/client-scope/{{clientScopeId}}/{{roleId}}`
+
+Example:
+
+```bash
+$ terraform import keycloak_generic_client_role_mapper.client_role_mapper my-realm/client/23888550-5dcd-41f6-85ba-554233021e9c/ce51f004-bdfb-4dd5-a963-c4487d2dec5b
+```
