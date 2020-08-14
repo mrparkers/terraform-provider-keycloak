@@ -15,7 +15,7 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_saml_client_scope" "saml_client_scope" {
-    realm_id    = "${keycloak_realm.realm.id}"
+    realm_id    = keycloak_realm.realm.id
     name        = "groups"
     description = "This scope will map a user's group memberships to SAML assertion"
     gui_order   = 1

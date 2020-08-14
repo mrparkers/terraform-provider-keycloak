@@ -21,13 +21,13 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_role" "realm_role" {
-  realm_id    = "${keycloak_realm.realm.id}"
+  realm_id    = keycloak_realm.realm.id
   name        = "my-realm-role"
   description = "My Realm Role"
 }
 
 resource "keycloak_openid_client" "client" {
-  realm_id  = "${keycloak_realm.realm.id}"
+  realm_id  = keycloak_realm.realm.id
   client_id = "client"
   name      = "client"
 
@@ -37,14 +37,14 @@ resource "keycloak_openid_client" "client" {
 }
 
 resource "keycloak_role" "client_role" {
-  realm_id    = "${keycloak_realm.realm.id}"
-  client_id   = "${keycloak_client.client.id}"
+  realm_id    = keycloak_realm.realm.id
+  client_id   = keycloak_client.client.id
   name        = "my-client-role"
   description = "My Client Role"
 }
 
 resource "keycloak_user" "user" {
-    realm_id   = "${keycloak_realm.realm.id}"
+    realm_id   = keycloak_realm.realm.id
     username   = "bob"
     enabled    = true
 
@@ -54,12 +54,12 @@ resource "keycloak_user" "user" {
 }
 
 resource "keycloak_user_roles" "user_roles" {
-  realm_id = "${keycloak_realm.realm.id}"
-  user_id = "${keycloak_user.user.id}"
+  realm_id = keycloak_realm.realm.id
+  user_id = keycloak_user.user.id
 
   role_ids = [
-    "${keycloak_role.realm_role.id}",
-    "${keycloak_role.client_role.id}",
+    keycloak_role.realm_role.id,
+    keycloak_role.client_role.id,
   ]
 }
 ```

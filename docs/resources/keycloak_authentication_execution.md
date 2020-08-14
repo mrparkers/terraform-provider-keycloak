@@ -11,13 +11,13 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_authentication_flow" "flow" {
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = keycloak_realm.realm.id
 	alias    = "my-flow-alias"
 }
 
 resource "keycloak_authentication_execution" "execution" {
-	realm_id          = "${keycloak_realm.realm.id}"
-	parent_flow_alias = "${keycloak_authentication_flow.flow.alias}"
+	realm_id          = keycloak_realm.realm.id
+	parent_flow_alias = keycloak_authentication_flow.flow.alias
 	authenticator     = "identity-provider-redirector"
     requirement       = "REQUIRED"
 }

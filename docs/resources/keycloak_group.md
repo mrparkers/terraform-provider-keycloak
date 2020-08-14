@@ -20,19 +20,19 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_group" "parent_group" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "parent-group"
 }
 
 resource "keycloak_group" "child_group" {
-    realm_id  = "${keycloak_realm.realm.id}"
-    parent_id = "${keycloak_group.parent_group.id}"
+    realm_id  = keycloak_realm.realm.id
+    parent_id = keycloak_group.parent_group.id
     name      = "child-group"
 }
 
 resource "keycloak_group" "child_group_with_optional_attributes" {
-    realm_id  = "${keycloak_realm.realm.id}"
-    parent_id = "${keycloak_group.parent_group.id}"
+    realm_id  = keycloak_realm.realm.id
+    parent_id = keycloak_group.parent_group.id
     name      = "child-group-with-optional-attributes"
     attributes = {
 		"key1" = "value1"

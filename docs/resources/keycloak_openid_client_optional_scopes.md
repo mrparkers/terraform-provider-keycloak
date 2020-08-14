@@ -26,26 +26,26 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client" {
-    realm_id    = "${keycloak_realm.realm.id}"
+    realm_id    = keycloak_realm.realm.id
     client_id   = "test-client"
 
     access_type = "CONFIDENTIAL"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "test-client-scope"
 }
 
 resource "keycloak_openid_client_optional_scopes" "client_optional_scopes" {
-    realm_id       = "${keycloak_realm.realm.id}"
-    client_id      = "${keycloak_openid_client.client.id}"
+    realm_id       = keycloak_realm.realm.id
+    client_id      = keycloak_openid_client.client.id
 
     optional_scopes = [
         "address",
         "phone",
         "offline_access",
-        "${keycloak_openid_client_scope.client_scope.name}"
+        keycloak_openid_client_scope.client_scope.name
     ]
 }
 

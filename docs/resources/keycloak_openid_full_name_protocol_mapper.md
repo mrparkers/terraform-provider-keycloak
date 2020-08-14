@@ -17,7 +17,7 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "openid_client" {
-    realm_id            = "${keycloak_realm.realm.id}"
+    realm_id            = keycloak_realm.realm.id
     client_id           = "test-client"
 
     name                = "test client"
@@ -30,8 +30,8 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper" {
-    realm_id       = "${keycloak_realm.realm.id}"
-    client_id      = "${keycloak_openid_client.openid_client.id}"
+    realm_id       = keycloak_realm.realm.id
+    client_id      = keycloak_openid_client.openid_client.id
     name           = "full-name-mapper"
 }
 ```
@@ -45,13 +45,13 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "test-client-scope"
 }
 
 resource "keycloak_openid_full_name_protocol_mapper" "full_name_mapper" {
-    realm_id        = "${keycloak_realm.realm.id}"
-    client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
+    realm_id        = keycloak_realm.realm.id
+    client_scope_id = keycloak_openid_client_scope.client_scope.id
     name            = "full-name-mapper"
 }
 ```
