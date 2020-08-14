@@ -12,23 +12,23 @@ resource "keycloak_realm" "realm" {
 }
 
 data "keycloak_role" "offline_access" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "offline_access"
 }
 
 # use the data source
 
 resource "keycloak_group" "group" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "group"
 }
 
 resource "keycloak_group_roles" "group_roles" {
-    realm_id = "${keycloak_realm.realm.id}"
-    group_id = "${keycloak_group.group.id}"
+    realm_id = keycloak_realm.realm.id
+    group_id = keycloak_group.group.id
 
     role_ids = [
-        "${data.keycloak_role.offline_access.id}"
+        data.keycloak_role.offline_access.id
     ]
 }
 ```
@@ -41,7 +41,7 @@ The following arguments are supported:
 - `client_id` - (Optional) When specified, this role is assumed to be a
   client role belonging to the client with the provided ID
 - `name` - (Required) The name of the role
-  
+
 ### Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:

@@ -5,7 +5,7 @@ of a SAML Client.
 
 ### Example Usage
 
-In the example below, we extract the SAML metadata IDPSSODescriptor 
+In the example below, we extract the SAML metadata IDPSSODescriptor
 to pass it to the AWS IAM SAML Provider.
 
 ```hcl
@@ -15,7 +15,7 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_saml_client" "saml_client" {
-    realm_id                = "${keycloak_realm.realm.id}"
+    realm_id                = keycloak_realm.realm.id
     client_id               = "test-saml-client"
     name                    = "test-saml-client"
 
@@ -28,8 +28,8 @@ resource "keycloak_saml_client" "saml_client" {
 }
 
 data "keycloak_saml_client_installation_provider" "saml_idp_descriptor" {
-  realm_id    = "${keycloak_realm.realm.id}"
-  client_id   = "${keycloak_saml_client.saml_client}"
+  realm_id    = keycloak_realm.realm.id
+  client_id   = keycloak_saml_client.saml_client
   provider_id = "saml-idp-descriptor"
 }
 
