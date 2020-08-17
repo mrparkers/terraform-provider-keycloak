@@ -17,7 +17,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_ldap_user_federation" "ldap_user_federation" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = keycloak_realm.realm.id
 
 	enabled                 = true
 

@@ -18,7 +18,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_ldap_user_federation" "ldap_user_federation" {
 	name                    = "ad"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = keycloak_realm.realm.id
 
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -35,8 +35,8 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
 }
 
 resource "keycloak_ldap_msad_lds_user_account_control_mapper" "msad_lds_user_account_control_mapper" {
-	realm_id                 = "${keycloak_realm.realm.id}"
-	ldap_user_federation_id  = "${keycloak_ldap_user_federation.ldap_user_federation.id}"
+	realm_id                 = keycloak_realm.realm.id
+	ldap_user_federation_id  = keycloak_ldap_user_federation.ldap_user_federation.id
 	name                     = "msad-lds-user-account-control-mapper"
 }
 ```

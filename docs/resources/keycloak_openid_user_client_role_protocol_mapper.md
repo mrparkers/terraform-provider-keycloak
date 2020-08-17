@@ -16,7 +16,7 @@ resource "keycloak_realm" "realm" {
     enabled = true
 }
 resource "keycloak_openid_client" "openid_client" {
-    realm_id            = "${keycloak_realm.realm.id}"
+    realm_id            = keycloak_realm.realm.id
     client_id           = "test-client"
     name                = "test client"
     enabled             = true
@@ -26,8 +26,8 @@ resource "keycloak_openid_client" "openid_client" {
     ]
 }
 resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper" {
-    realm_id    = "${keycloak_realm.realm.id}"
-    client_id   = "${keycloak_openid_client.openid_client.id}"
+    realm_id    = keycloak_realm.realm.id
+    client_id   = keycloak_openid_client.openid_client.id
     name        = "user-client-role-mapper"
     claim_name  = "foo"
 }
@@ -41,12 +41,12 @@ resource "keycloak_realm" "realm" {
     enabled = true
 }
 resource "keycloak_openid_client_scope" "client_scope" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "test-client-scope"
 }
 resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper" {
-    realm_id        = "${keycloak_realm.realm.id}"
-    client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
+    realm_id        = keycloak_realm.realm.id
+    client_scope_id = keycloak_openid_client_scope.client_scope.id
     name            = "user-client-role-mapper"
     claim_name      = "foo"
 }
@@ -63,7 +63,7 @@ The following arguments are supported:
 - `claim_name` - (Required) The name of the claim to insert into a token.
 - `claim_value_type` - (Optional) The claim type used when serializing JSON tokens. Can be one of `String`, `JSON`, `long`, `int`, or `boolean`. Defaults to `String`.
 - `multivalued` - (Optional) Indicates if attribute supports multiple values. If true, then the list of all values of this attribute will be set as claim. If false, then just first value will be set as claim. Defaults to `false`.
-- `client_id_for_role_mappings` - (Optional) The Client ID for role mappings. Just client roles of this client will be added to the token. If this is unset, client roles of all clients will be added to the token. 
+- `client_id_for_role_mappings` - (Optional) The Client ID for role mappings. Just client roles of this client will be added to the token. If this is unset, client roles of all clients will be added to the token.
 - `client_role_prefix` - (Optional) A prefix for each Client Role.
 - `add_to_id_token` - (Optional) Indicates if the property should be added as a claim to the id token. Defaults to `true`.
 - `add_to_access_token` - (Optional) Indicates if the property should be added as a claim to the access token. Defaults to `true`.

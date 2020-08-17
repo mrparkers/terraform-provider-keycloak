@@ -17,14 +17,14 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_saml_client" "saml_client" {
-    realm_id  = "${keycloak_realm.test.id}"
+    realm_id  = keycloak_realm.test.id
     client_id = "test-saml-client"
     name      = "test-saml-client"
 }
 
 resource "keycloak_saml_user_property_protocol_mapper" "saml_user_property_mapper" {
-    realm_id                   = "${keycloak_realm.test.id}"
-    client_id                  = "${keycloak_saml_client.saml_client.id}"
+    realm_id                   = keycloak_realm.test.id
+    client_id                  = keycloak_saml_client.saml_client.id
     name                       = "email-user-property-mapper"
 
     user_property              = "email"

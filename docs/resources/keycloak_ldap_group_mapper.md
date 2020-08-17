@@ -17,7 +17,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_ldap_user_federation" "ldap_user_federation" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = keycloak_realm.realm.id
 
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -33,8 +33,8 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
 }
 
 resource "keycloak_ldap_group_mapper" "ldap_group_mapper" {
-	realm_id                       = "${keycloak_realm.realm.id}"
-	ldap_user_federation_id        = "${keycloak_ldap_user_federation.ldap_user_federation.id}"
+	realm_id                       = keycloak_realm.realm.id
+	ldap_user_federation_id        = keycloak_ldap_user_federation.ldap_user_federation.id
 	name                           = "group-mapper"
 
 	ldap_groups_dn                 = "dc=example,dc=org"

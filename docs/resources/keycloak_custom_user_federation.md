@@ -16,7 +16,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_custom_user_federation" "custom_user_federation" {
     name        = "custom"
-    realm_id    = "${keycloak_realm.realm.id}"
+    realm_id    = keycloak_realm.realm.id
     provider_id = "custom"
 
     enabled     = true

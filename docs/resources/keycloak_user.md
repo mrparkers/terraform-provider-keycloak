@@ -15,7 +15,7 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_user" "user" {
-    realm_id   = "${keycloak_realm.realm.id}"
+    realm_id   = keycloak_realm.realm.id
     username   = "bob"
     enabled    = true
 
@@ -25,7 +25,7 @@ resource "keycloak_user" "user" {
 }
 
 resource "keycloak_user" "user_with_initial_password" {
-    realm_id   = "${keycloak_realm.realm.id}"
+    realm_id   = keycloak_realm.realm.id
     username   = "alice"
     enabled    = true
 

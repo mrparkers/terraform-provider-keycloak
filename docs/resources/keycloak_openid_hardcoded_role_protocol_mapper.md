@@ -17,12 +17,12 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_role" "role" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "my-role"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-    realm_id            = "${keycloak_realm.realm.id}"
+    realm_id            = keycloak_realm.realm.id
     client_id           = "test-client"
 
     name                = "test client"
@@ -35,10 +35,10 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_hardcoded_role_protocol_mapper" "hardcoded_role_mapper" {
-    realm_id  = "${keycloak_realm.realm.id}"
-    client_id = "${keycloak_openid_client.openid_client.id}"
+    realm_id  = keycloak_realm.realm.id
+    client_id = keycloak_openid_client.openid_client.id
     name      = "hardcoded-role-mapper"
-    role_id   = "${keycloak_role.role.id}"
+    role_id   = keycloak_role.role.id
 }
 ```
 
@@ -51,18 +51,18 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_role" "role" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "my-role"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "test-client-scope"
 }
 
 resource "keycloak_openid_hardcoded_role_protocol_mapper" "hardcoded_role_mapper" {
-    realm_id        = "${keycloak_realm.realm.id}"
-    client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
+    realm_id        = keycloak_realm.realm.id
+    client_scope_id = keycloak_openid_client_scope.client_scope.id
     name            = "hardcoded-role-mapper"
     role_id         = "${keycloak_role.role.id}"
 }

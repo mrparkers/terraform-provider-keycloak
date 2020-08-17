@@ -6,7 +6,7 @@ There are two uses cases for using this resource:
 * If you implemented a custom protocol mapper, this resource can be used to configure it
 * If the provider doesn't support a particular protocol mapper, this resource can be used instead.
 
-Due to the generic nature of this mapper, it is less user-friendly and more prone to configuration errors. 
+Due to the generic nature of this mapper, it is less user-friendly and more prone to configuration errors.
 Therefore, if possible, a specific mapper should be used.
 
 ### Example Usage
@@ -18,13 +18,13 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_saml_client" "saml_client" {
-  realm_id  = "${keycloak_realm.realm.id}"
+  realm_id  = keycloak_realm.realm.id
   client_id = "test-client"
 }
 
 resource "keycloak_generic_client_protocol_mapper" "saml_hardcode_attribute_mapper" {
-  realm_id        = "${keycloak_realm.realm.id}"
-  client_id       = "${keycloak_saml_client.saml_client.id}"
+  realm_id        = keycloak_realm.realm.id
+  client_id       = keycloak_saml_client.saml_client.id
   name            = "tes-mapper"
   protocol        = "saml"
   protocol_mapper = "saml-hardcode-attribute-mapper"
