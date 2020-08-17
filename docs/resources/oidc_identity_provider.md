@@ -51,12 +51,12 @@ resource "keycloak_oidc_identity_provider" "realm_identity_provider" {
 - `validate_signature` - (Optional) Enable/disable signature validation of external IDP signatures. Defaults to `false`.
 - `user_info_url` - (Optional) User Info URL.
 - `jwks_url` - (Optional) JSON Web Key Set URL.
-- `hide_on_login_page` - (Optional) Hide On Login Page. Defaults to `false`.
+- `hide_on_login_page` - (Optional) When `true`, this provider will be hidden on the login page, and is only accessible when requested explicitly. Defaults to `false`.
 - `logout_url` - (Optional) The Logout URL is the end session endpoint to use to logout user from external identity provider.
 - `login_hint` - (Optional) Pass login hint to identity provider.
 - `ui_locales` - (Optional) Pass current locale to identity provider. Defaults to `false`.
-- `accepts_prompt_none_forward_from_client` (Optional) Specifies whether the IDP accepts forwarded authentication requests that contain the prompt=none query parameter or not
-- `default_scopes` - (Optional) The scopes to be sent when asking for authorization. It can be a space-separated list of scopes. Defaults to 'openid'.
+- `accepts_prompt_none_forward_from_client` (Optional) When `true`, the IDP will accept forwarded authentication requests that contain the `prompt=none` query parameter. Defaults to `false`.
+- `default_scopes` - (Optional) The scopes to be sent when asking for authorization. It can be a space-separated list of scopes. Defaults to `openid`.
 - `extra_config` - (Optional) A map of key/value pairs to add extra configuration to this identity provider. This can be used for custom oidc provider implementations, or to add configuration that is not yet supported by this Terraform provider.
     - `clientAuthMethod` (Optional) The client authentication method. Since Keycloak 8, this is a required attribute if OIDC provider is created using the Keycloak GUI. It accepts the values `client_secret_post` (Client secret sent as post), `client_secret_basic` (Client secret sent as basic auth), `client_secret_jwt` (Client secret as jwt) and `private_key_jwt ` (JTW signed with private key)
 
