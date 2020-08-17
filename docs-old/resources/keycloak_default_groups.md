@@ -14,14 +14,14 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_group" "group" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "my-group"
 }
 
 resource "keycloak_default_groups" "default" {
-    realm_id  = "${keycloak_realm.realm.id}"
-    group_ids = ["${keycloak_group.group.id}"]
-} 
+    realm_id  = keycloak_realm.realm.id
+    group_ids = [keycloak_group.group.id]
+}
 ```
 
 ### Argument Reference

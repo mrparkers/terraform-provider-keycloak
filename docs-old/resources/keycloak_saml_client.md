@@ -15,7 +15,7 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_saml_client" "saml_client" {
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = keycloak_realm.realm.id
 	client_id               = "test-saml-client"
 	name                    = "test-saml-client"
 

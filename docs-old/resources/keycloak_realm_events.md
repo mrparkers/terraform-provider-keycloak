@@ -10,7 +10,7 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_realm_events" "realm_events" {
-  realm_id = "${keycloak_realm.realm.id}"
+  realm_id = keycloak_realm.realm.id
 
   events_enabled       = true
   events_expiration    = 3600
