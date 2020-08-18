@@ -13,7 +13,7 @@ data "keycloak_realm" "realm" {
 # use the data source
 
 resource "keycloak_role" "group" {
-    realm_id = "${data.keycloak_realm.realm.id}"
+    realm_id = data.keycloak_realm.realm.id
     name     = "group"
 }
 

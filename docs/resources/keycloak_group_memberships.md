@@ -23,21 +23,21 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_group" "group" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "my-group"
 }
 
 resource "keycloak_user" "user" {
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = keycloak_realm.realm.id
 	username = "my-user"
 }
 
 resource "keycloak_group_memberships" "group_members" {
-	realm_id = "${keycloak_realm.realm.id}"
-	group_id = "${keycloak_group.group.id}"
+	realm_id = keycloak_realm.realm.id
+	group_id = keycloak_group.group.id
 
 	members  = [
-		"${keycloak_user.user.username}"
+		keycloak_user.user.username
 	]
 }
 ```

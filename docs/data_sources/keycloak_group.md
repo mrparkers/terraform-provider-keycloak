@@ -12,21 +12,21 @@ resource "keycloak_realm" "realm" {
 }
 
 data "keycloak_role" "offline_access" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "offline_access"
 }
 
 data "keycloak_group" "group" {
-    realm_id = "${keycloak_realm.realm.id}"
+    realm_id = keycloak_realm.realm.id
     name     = "group"
 }
 
 resource "keycloak_group_roles" "group_roles" {
-    realm_id = "${keycloak_realm.realm.id}"
-    group_id = "${data.keycloak_group.group.id}"
+    realm_id = keycloak_realm.realm.id
+    group_id = data.keycloak_group.group.id
 
     role_ids = [
-        "${data.keycloak_role.offline_access.id}"
+        data.keycloak_role.offline_access.id
     ]
 }
 ```

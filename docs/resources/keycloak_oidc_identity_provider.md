@@ -22,7 +22,7 @@ resource "keycloak_oidc_identity_provider" "realm_identity_provider" {
   token_url         = "https://tokenurl.com"
 
   extra_config = {
-    "clientAuthMethod"                   = "client_secret_post"
+    "clientAuthMethod" = "client_secret_post"
   }
 }
 ```
