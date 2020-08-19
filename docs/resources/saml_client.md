@@ -18,9 +18,9 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_saml_client" "saml_client" {
-  realm_id                = keycloak_realm.realm.id
-  client_id               = "saml-client"
-  name                    = "saml-client"
+  realm_id  = keycloak_realm.realm.id
+  client_id = "saml-client"
+  name      = "saml-client"
 
   sign_documents          = false
   sign_assertions         = true
