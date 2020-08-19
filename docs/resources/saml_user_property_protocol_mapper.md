@@ -1,52 +1,54 @@
-# keycloak_saml_user_property_protocol_mapper
+---
+page_title: "keycloak_saml_user_property_protocol_mapper Resource"
+---
 
-Allows for creating and managing user property protocol mappers for
-SAML clients within Keycloak.
+# keycloak\_saml\_user\_property\_protocol\_mapper Resource
+
+Allows for creating and managing user property protocol mappers for SAML clients within Keycloak.
 
 SAML user property protocol mappers allow you to map properties of the Keycloak
-user model to an attribute in a SAML assertion. Protocol mappers
-can be defined for a single client, or they can be defined for a client scope which
-can be shared between multiple different clients.
+user model to an attribute in a SAML assertion.
 
-### Example Usage (Client)
+Protocol mappers can be defined for a single client, or they can be defined for a client scope which can be shared between
+multiple different clients.
+
+## Example Usage
 
 ```hcl
 resource "keycloak_realm" "realm" {
-    realm   = "my-realm"
-    enabled = true
+  realm   = "my-realm"
+  enabled = true
 }
 
 resource "keycloak_saml_client" "saml_client" {
-    realm_id  = keycloak_realm.test.id
-    client_id = "test-saml-client"
-    name      = "test-saml-client"
+  realm_id  = keycloak_realm.test.id
+  client_id = "saml-client"
+  name      = "saml-client"
 }
 
 resource "keycloak_saml_user_property_protocol_mapper" "saml_user_property_mapper" {
-    realm_id                   = keycloak_realm.test.id
-    client_id                  = keycloak_saml_client.saml_client.id
-    name                       = "email-user-property-mapper"
+  realm_id  = keycloak_realm.test.id
+  client_id = keycloak_saml_client.saml_client.id
+  name      = "email-user-property-mapper"
 
-    user_property              = "email"
-    saml_attribute_name        = "email"
-    saml_attribute_name_format = "Unspecified"
+  user_property              = "email"
+  saml_attribute_name        = "email"
+  saml_attribute_name_format = "Unspecified"
 }
 ```
 
-### Argument Reference
-
-The following arguments are supported:
+## Argument Reference
 
 - `realm_id` - (Required) The realm this protocol mapper exists within.
-- `client_id` - (Required if `client_scope_id` is not specified) The SAML client this protocol mapper is attached to.
-- `client_scope_id` - (Required if `client_id` is not specified) The SAML client scope this protocol mapper is attached to.
 - `name` - (Required) The display name of this protocol mapper in the GUI.
 - `user_property` - (Required) The property of the Keycloak user model to map.
-- `friendly_name` - (Optional) An optional human-friendly name for this attribute.
 - `saml_attribute_name` - (Required) The name of the SAML attribute.
 - `saml_attribute_name_format` - (Required) The SAML attribute Name Format. Can be one of `Unspecified`, `Basic`, or `URI Reference`.
+- `client_id` - (Optional) The client this protocol mapper should be attached to. Conflicts with `client_scope_id`. One of `client_id` or `client_scope_id` must be specified.
+- `client_scope_id` - (Optional) The client scope this protocol mapper should be attached to. Conflicts with `client_id`. One of `client_id` or `client_scope_id` must be specified.
+- `friendly_name` - (Optional) An optional human-friendly name for this attribute.
 
-### Import
+## Import
 
 Protocol mappers can be imported using one of the following formats:
 - Client: `{{realm_id}}/client/{{client_keycloak_id}}/{{protocol_mapper_id}}`
