@@ -18,11 +18,11 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "openid_client" {
- realm_id            = keycloak_realm.realm.id
- client_id           = "client"
+  realm_id  = keycloak_realm.realm.id
+  client_id = "client"
 
-  name                = "client"
-  enabled             = true
+  name    = "client"
+  enabled = true
 
   access_type         = "CONFIDENTIAL"
   valid_redirect_uris = [
@@ -31,9 +31,9 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_audience_protocol_mapper" "audience_mapper" {
-  realm_id                 = keycloak_realm.realm.id
-  client_id                = keycloak_openid_client.openid_client.id
-  name                     = "audience-mapper"
+  realm_id  = keycloak_realm.realm.id
+  client_id = keycloak_openid_client.openid_client.id
+  name      = "audience-mapper"
 
   included_custom_audience = "foo"
 }
@@ -53,9 +53,9 @@ resource "keycloak_openid_client_scope" "client_scope" {
 }
 
 resource "keycloak_openid_audience_protocol_mapper" "audience_mapper" {
-  realm_id                 = keycloak_realm.realm.id
-  client_scope_id          = keycloak_openid_client_scope.client_scope.id
-  name                     = "audience-mapper"
+  realm_id        = keycloak_realm.realm.id
+  client_scope_id = keycloak_openid_client_scope.client_scope.id
+  name            = "audience-mapper"
 
   included_custom_audience = "foo"
 }
