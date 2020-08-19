@@ -19,9 +19,9 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_openid_client" "openid_client" {
  realm_id            = keycloak_realm.realm.id
- client_id           = "test-client"
+ client_id           = "client"
 
-  name                = "test client"
+  name                = "client"
   enabled             = true
 
   access_type         = "CONFIDENTIAL"
