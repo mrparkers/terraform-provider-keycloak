@@ -1,13 +1,14 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
+	"github.com/hashicorp/terraform-plugin-sdk/meta"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func KeycloakProvider() *schema.Provider {
-	provider := &schema.Provider{
+	return &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{
 			"keycloak_group":                              dataSourceKeycloakGroup(),
 			"keycloak_openid_client":                      dataSourceKeycloakOpenidClient(),
@@ -148,36 +149,22 @@ func KeycloakProvider() *schema.Provider {
 				Default:  "/auth",
 			},
 		},
+		ConfigureFunc: func(data *schema.ResourceData) (interface{}, error) {
+			url := data.Get("url").(string)
+			basePath := data.Get("base_path").(string)
+			clientId := data.Get("client_id").(string)
+			clientSecret := data.Get("client_secret").(string)
+			username := data.Get("username").(string)
+			password := data.Get("password").(string)
+			realm := data.Get("realm").(string)
+			initialLogin := data.Get("initial_login").(bool)
+			clientTimeout := data.Get("client_timeout").(int)
+			tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
+			rootCaCertificate := data.Get("root_ca_certificate").(string)
+
+			userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", "foo", meta.SDKVersionString())
+
+			return keycloak.NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
+		},
 	}
-
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
-		terraformVersion := provider.TerraformVersion
-		if terraformVersion == "" {
-			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
-			terraformVersion = "0.11+compatible"
-		}
-
-		userAgent := httpclient.TerraformUserAgent(terraformVersion)
-
-		return configureKeycloakProvider(d, userAgent)
-	}
-
-	return provider
-}
-
-func configureKeycloakProvider(data *schema.ResourceData, userAgent string) (interface{}, error) {
-	url := data.Get("url").(string)
-	basePath := data.Get("base_path").(string)
-	clientId := data.Get("client_id").(string)
-	clientSecret := data.Get("client_secret").(string)
-	username := data.Get("username").(string)
-	password := data.Get("password").(string)
-	realm := data.Get("realm").(string)
-	initialLogin := data.Get("initial_login").(bool)
-	clientTimeout := data.Get("client_timeout").(int)
-	tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
-	rootCaCertificate := data.Get("root_ca_certificate").(string)
-
-	return keycloak.NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
 }
