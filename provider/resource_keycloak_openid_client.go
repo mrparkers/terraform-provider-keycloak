@@ -74,6 +74,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"service_accounts_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"valid_redirect_uris": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -86,6 +91,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Set:      schema.HashString,
 				Optional: true,
 			},
+			"root_url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"admin_url": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -94,14 +103,9 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"root_url": {
+			"service_account_user_id": {
 				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"service_accounts_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"pkce_code_challenge_method": {
 				Type:         schema.TypeString,
@@ -116,10 +120,6 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
-			},
-			"service_account_user_id": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 			"resource_server_id": {
 				Type:     schema.TypeString,

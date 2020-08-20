@@ -44,7 +44,6 @@ func resourceKeycloakRealm() *schema.Resource {
 			},
 
 			// Login Config
-
 			"registration_allowed": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -92,8 +91,7 @@ func resourceKeycloakRealm() *schema.Resource {
 				Default:     "external",
 			},
 
-			//Smtp server
-
+			// Smtp server
 			"smtp_server": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -162,7 +160,6 @@ func resourceKeycloakRealm() *schema.Resource {
 			},
 
 			// Themes
-
 			"login_theme": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -262,7 +259,7 @@ func resourceKeycloakRealm() *schema.Resource {
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 
-			//internationalization
+			// internationalization
 			"internationalization": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -283,7 +280,7 @@ func resourceKeycloakRealm() *schema.Resource {
 				},
 			},
 
-			//Security Defenses
+			// Security Defenses
 			"security_defenses": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -381,13 +378,15 @@ func resourceKeycloakRealm() *schema.Resource {
 					},
 				},
 			},
+
+			// authentication password policy
 			"password_policy": {
 				Type:        schema.TypeString,
 				Description: "String that represents the passwordPolicies that are in place. Each policy is separated with \" and \". Supported policies can be found in the server-info providers page. example: \"upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername(undefined)\"",
 				Optional:    true,
 			},
 
-			//flow bindings
+			// authentication flow bindings
 			"browser_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for BrowserFlow",
@@ -424,6 +423,8 @@ func resourceKeycloakRealm() *schema.Resource {
 				Optional:    true,
 				Default:     "docker auth",
 			},
+
+			// misc attributes
 			"attributes": {
 				Type:     schema.TypeMap,
 				Optional: true,
