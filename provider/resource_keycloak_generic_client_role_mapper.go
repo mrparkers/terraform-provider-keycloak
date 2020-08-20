@@ -115,8 +115,8 @@ func resourceKeycloakGenericClientRoleMapperDelete(data *schema.ResourceData, me
 func resourceKeycloakGenericClientRoleMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	if len(parts) != 4 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/client/{{clientId}}/{{roleId}}, {{realmId}}/client-scope/{{clientScopeId}}/{{roleId}}")
+	if len(parts) != 6 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/client/{{clientId}}/scope-mappings/{{roleClientId}}/{{roleId}}, {{realmId}}/client-scope/{{clientScopeId}}/scope-mappings/{{roleClientId}}/{{roleId}}")
 	}
 
 	parentResourceType := parts[1]
@@ -132,6 +132,6 @@ func resourceKeycloakGenericClientRoleMapperImport(d *schema.ResourceData, _ int
 		return nil, fmt.Errorf("the associated parent resource must be either a client or a client-scope")
 	}
 
-	d.Set("role_id", parts[3])
+	d.Set("role_id", parts[5])
 	return []*schema.ResourceData{d}, nil
 }
