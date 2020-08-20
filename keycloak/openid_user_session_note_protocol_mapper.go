@@ -17,6 +17,7 @@ type OpenIdUserSessionNoteProtocolMapper struct {
 
 	ClaimName            string
 	ClaimValueType       string
+	UserSessionNote      string
 	UserSessionNoteLabel string
 }
 
@@ -31,6 +32,7 @@ func (mapper *OpenIdUserSessionNoteProtocolMapper) convertToGenericProtocolMappe
 			addToAccessTokenField:          strconv.FormatBool(mapper.AddToAccessToken),
 			claimNameField:                 mapper.ClaimName,
 			claimValueTypeField:            mapper.ClaimValueType,
+			userSessionNoteField:           mapper.UserSessionNote,
 			userSessionModelNoteLabelField: mapper.UserSessionNoteLabel,
 		},
 	}
@@ -59,6 +61,7 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserSessionNoteProtocolMapp
 
 		ClaimName:            protocolMapper.Config[claimNameField],
 		ClaimValueType:       protocolMapper.Config[claimValueTypeField],
+		UserSessionNote:      protocolMapper.Config[userSessionNoteField],
 		UserSessionNoteLabel: protocolMapper.Config[userSessionModelNoteLabelField],
 	}, nil
 }

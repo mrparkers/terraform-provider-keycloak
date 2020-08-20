@@ -347,6 +347,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_id          = "${keycloak_openid_client.openid_client.id}"
 	claim_name         = "foo"
 	claim_value_type   = "String"
+	session_note       = "bar"
 	session_note_label = "bar"
 }`, realmName, clientId, mapperName)
 }
@@ -366,6 +367,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_scope_id    = "${keycloak_openid_client_scope.client_scope.id}"
 	claim_name         = "foo"
 	claim_value_type   = "String"
+	session_note       = "bar"
 	session_note_label = "bar"
 }`, realmName, clientScopeId, mapperName)
 }
@@ -405,6 +407,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_id          = "${keycloak_openid_client.openid_client.id}"
 	claim_name         = "foo"
 	claim_value_type   = "String"
+	session_note       = "bar"
 	session_note_label = "%s"
 }`, realmName, clientId, mapperName, labelName)
 }
@@ -425,6 +428,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_id          = "${keycloak_openid_client.openid_client.id}"
 	claim_name         = "foo"
 	claim_value_type   = "String"
+	session_note       = "bar"
 	session_note_label = "bar"
 }
 resource "keycloak_openid_client_scope" "client_scope" {
@@ -437,6 +441,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_scope_id    = "${keycloak_openid_client_scope.client_scope.id}"
 	claim_name         = "foo"
 	claim_value_type   = "String"
+	session_note       = "bar"
 	session_note_label = "bar"
 }`, realmName, clientId, mapperName, clientScopeId, mapperName)
 }
@@ -457,6 +462,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_id          = "${keycloak_openid_client.openid_client.id}"
 	claim_name         = "foo"
 	claim_value_type   = "%s"
+	session_note       = "bar"
 	session_note_label = "bar"
 }`, realmName, mapperName, claimValueType)
 }

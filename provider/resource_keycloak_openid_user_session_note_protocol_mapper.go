@@ -68,6 +68,11 @@ func resourceKeycloakOpenIdUserSessionNoteProtocolMapper() *schema.Resource {
 				Default:      "String",
 				ValidateFunc: validation.StringInSlice([]string{"JSON", "String", "long", "int", "boolean"}, true),
 			},
+			"session_note": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "String value being the name of stored user session note within the UserSessionModel.note map.",
+			},
 			"session_note_label": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -89,6 +94,7 @@ func mapFromDataToOpenIdUserSessionNoteProtocolMapper(data *schema.ResourceData)
 
 		ClaimName:            data.Get("claim_name").(string),
 		ClaimValueType:       data.Get("claim_value_type").(string),
+		UserSessionNote:      data.Get("session_note").(string),
 		UserSessionNoteLabel: data.Get("session_note_label").(string),
 	}
 }
@@ -108,6 +114,7 @@ func mapFromOpenIdUserSessionNoteMapperToData(mapper *keycloak.OpenIdUserSession
 	data.Set("add_to_access_token", mapper.AddToAccessToken)
 	data.Set("claim_name", mapper.ClaimName)
 	data.Set("claim_value_type", mapper.ClaimValueType)
+	data.Set("session_note", mapper.UserSessionNote)
 	data.Set("session_note_label", mapper.UserSessionNoteLabel)
 }
 
