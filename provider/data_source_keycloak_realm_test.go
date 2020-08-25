@@ -11,7 +11,7 @@ import (
 func TestAccKeycloakDataSourceRealm_basic(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
 
-	resourceName := "keycloak_realm.realm"
+	resourceName := "keycloak_realm.my_realm"
 	dataSourceName := "data.keycloak_realm.realm"
 
 	resource.Test(t, resource.TestCase{
@@ -34,13 +34,14 @@ func TestAccKeycloakDataSourceRealm_basic(t *testing.T) {
 
 func testDataSourceKeycloakRealm_basic(realm string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm        = "%s"
-	display_name = "foo"
+resource "keycloak_realm" "my_realm" {
+	realm             = "%s"
+	enabled           = true
+	display_name      = "foo"
 	display_name_html = "<b>foo</b>"
 }
 
 data "keycloak_realm" "realm" {
-	realm = "${keycloak_realm.realm.realm}"
+	realm = "${keycloak_realm.my_realm.id}"
 }`, realm)
 }
