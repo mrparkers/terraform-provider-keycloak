@@ -7,8 +7,8 @@ build:
 	go build -o terraform-provider-keycloak
 
 build-example: build
-	mkdir -p example/.terraform/plugins/darwin_amd64
-	cp terraform-provider-keycloak example/.terraform/plugins/darwin_amd64/
+	mkdir -p example/.terraform/plugins/terraform.local/mrparkers/keycloak/2.0.0/darwin_amd64
+	cp terraform-provider-keycloak example/.terraform/plugins/terraform.local/mrparkers/keycloak/2.0.0/darwin_amd64/
 
 local: deps
 	docker-compose up --build -d
