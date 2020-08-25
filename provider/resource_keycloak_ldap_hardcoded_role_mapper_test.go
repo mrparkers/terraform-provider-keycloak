@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -15,9 +15,9 @@ func TestAccKeycloakLdapHardcodedRoleMapper_basic(t *testing.T) {
 	roleMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapHardcodedRoleMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapHardcodedRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapHardcodedRoleMapper(realmName, roleMapperName),
@@ -40,9 +40,9 @@ func TestAccKeycloakLdapHardcodedRoleMapper_createAfterManualDestroy(t *testing.
 	roleMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapHardcodedRoleMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapHardcodedRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapHardcodedRoleMapper(realmName, roleMapperName),

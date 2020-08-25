@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -23,8 +23,8 @@ func TestAccKeycloakSamlClientDefaultScopes_basic(t *testing.T) {
 	clientScopes := append(preAssignedDefaultSamlClientScopes, clientScope)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlClientDefaultScopes_basic(realm, client, clientScope),
@@ -49,8 +49,8 @@ func TestAccKeycloakSamlClientDefaultScopes_updateClientForceNew(t *testing.T) {
 	clientScopes := append(preAssignedDefaultSamlClientScopes, clientScope)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlClientDefaultScopes_basic(realm, clientOne, clientScope),
@@ -80,8 +80,8 @@ func TestAccKeycloakSamlClientDefaultScopes_updateInPlace(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			// init
 			{
@@ -108,8 +108,8 @@ func TestAccKeycloakSamlClientDefaultScopes_validateClientDoesNotExist(t *testin
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakSamlClientDefaultScopes_validationNoClient(realm, client, clientScope),
@@ -130,8 +130,8 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeAdd(t *testing.T) {
 	)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlClientDefaultScopes_multipleClientScopes(realm, client, clientScopes, clientScopes),
@@ -180,8 +180,8 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeRemove(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlClientDefaultScopes_multipleClientScopes(realm, client, allClientScopes, attachedClientScopes),
@@ -220,8 +220,8 @@ func TestAccKeycloakSamlClientDefaultScopes_noImportNeeded(t *testing.T) {
 	clientScopes := append(preAssignedDefaultSamlClientScopes, clientScope)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlClientDefaultScopes_noDefaultScopes(realm, client, clientScope),
@@ -259,8 +259,8 @@ func TestAccKeycloakSamlClientDefaultScopes_profileAndEmailDefaultScopes(t *test
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config:             testKeycloakSamlClientDefaultScopes_listOfScopes(realm, client, clientScope, []string{clientScope}),
@@ -364,7 +364,7 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_saml_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
-	
+
 	sign_documents          = false
 	sign_assertions         = true
 	include_authn_statement = true
@@ -400,7 +400,7 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_saml_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
-	
+
 	sign_documents          = false
 	sign_assertions         = true
 	include_authn_statement = true
@@ -427,7 +427,7 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_saml_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
-	
+
 	sign_documents          = false
 	sign_assertions         = true
 	include_authn_statement = true
@@ -507,7 +507,7 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_saml_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
-	
+
 	sign_documents          = false
 	sign_assertions         = true
 	include_authn_statement = true

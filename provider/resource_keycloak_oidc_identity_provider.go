@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -90,6 +90,12 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 			Default:     false,
 			Description: "This is just used together with Identity Provider Authenticator or when kc_idp_hint points to this identity provider. In case that client sends a request with prompt=none and user is not yet authenticated, the error will not be directly returned to client, but the request with prompt=none will be forwarded to this identity provider.",
 		},
+		"disable_user_info": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Disable usage of User Info service to obtain additional user information?  Default is to use this OIDC service.",
+		},
 		"extra_config": {
 			Type:     schema.TypeMap,
 			Optional: true,
@@ -107,7 +113,6 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 	rec, _ := getIdentityProviderFromData(data)
 	rec.ProviderId = data.Get("provider_id").(string)
 	_, useJwksUrl := data.GetOk("jwks_url")
-	_, enableUserInfo := data.GetOk("user_info_url")
 
 	extraConfig := map[string]interface{}{}
 	if v, ok := data.GetOk("extra_config"); ok {
@@ -131,7 +136,7 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		UserInfoUrl:                 data.Get("user_info_url").(string),
 		ExtraConfig:                 extraConfig,
 		UseJwksUrl:                  keycloak.KeycloakBoolQuoted(useJwksUrl),
-		DisableUserInfo:             keycloak.KeycloakBoolQuoted(!enableUserInfo),
+		DisableUserInfo:             keycloak.KeycloakBoolQuoted(data.Get("disable_user_info").(bool)),
 		DefaultScope:                data.Get("default_scopes").(string),
 		AcceptsPromptNoneForwFrmClt: keycloak.KeycloakBoolQuoted(data.Get("accepts_prompt_none_forward_from_client").(bool)),
 	}
@@ -142,7 +147,6 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 func setOidcIdentityProviderData(data *schema.ResourceData, identityProvider *keycloak.IdentityProvider) error {
 	setIdentityProviderData(data, identityProvider)
 	data.Set("backchannel_supported", identityProvider.Config.BackchannelSupported)
-	data.Set("use_jwks_url", identityProvider.Config.UseJwksUrl)
 	data.Set("jwks_url", identityProvider.Config.JwksUrl)
 	data.Set("logout_url", identityProvider.Config.LogoutUrl)
 	data.Set("validate_signature", identityProvider.Config.ValidateSignature)

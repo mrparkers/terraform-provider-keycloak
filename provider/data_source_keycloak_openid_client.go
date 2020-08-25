@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -102,7 +102,6 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 			"authorization": {
 				Type:     schema.TypeSet,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"policy_enforcement_mode": {
@@ -131,7 +130,6 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 			"authentication_flow_binding_overrides": {
 				Type:     schema.TypeSet,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"browser_id": {

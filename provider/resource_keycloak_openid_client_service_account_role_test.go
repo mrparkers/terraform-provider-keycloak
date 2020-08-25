@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
 	"testing"
@@ -16,9 +16,9 @@ func TestAccKeycloakOpenidClientServiceAccountRole_basic(t *testing.T) {
 	resourceName := "keycloak_openid_client_service_account_role.test"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientServiceAccountRole_basic(realmName, clientId),
@@ -41,9 +41,9 @@ func TestAccKeycloakOpenidClientServiceAccountRole_createAfterManualDestroy(t *t
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientServiceAccountRole_basic(realmName, clientId),
@@ -71,9 +71,9 @@ func TestAccKeycloakOpenidClientServiceAccountRole_basicUpdateRealm(t *testing.T
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientServiceAccountRole_basic(firstRealm, clientId),

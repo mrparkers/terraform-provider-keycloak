@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -15,9 +15,9 @@ func TestAccKeycloakLdapHardcodedGroupMapper_basic(t *testing.T) {
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapHardcodedGroupMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapHardcodedGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapHardcodedGroupMapper(realmName, groupMapperName),
@@ -40,9 +40,9 @@ func TestAccKeycloakLdapHardcodedGroupMapper_createAfterManualDestroy(t *testing
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapHardcodedGroupMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapHardcodedGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapHardcodedGroupMapper(realmName, groupMapperName),

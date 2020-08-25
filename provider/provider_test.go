@@ -1,16 +1,17 @@
 package provider
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/meta"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"os"
 	"testing"
 )
 
-var testAccProviders map[string]terraform.ResourceProvider
+var testAccProviderFactories map[string]func() (*schema.Provider, error)
 var testAccProvider *schema.Provider
 var keycloakClient *keycloak.KeycloakClient
 
@@ -22,14 +23,22 @@ var requiredEnvironmentVariables = []string{
 }
 
 func init() {
+	ctx := context.Background()
+	userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", schema.Provider{}.TerraformVersion, meta.SDKVersionString())
+	keycloakClient, _ = keycloak.NewKeycloakClient(ctx, os.Getenv("KEYCLOAK_URL"), "/auth", os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), "", "", true, 5, "", false, userAgent)
+
 	testAccProvider = KeycloakProvider()
-	testAccProviders = map[string]terraform.ResourceProvider{
-		"keycloak": testAccProvider,
+	providerConfigureFunc := testAccProvider.ConfigureContextFunc
+	// override the default context so a failing test doesn't cancel other tests
+	testAccProvider.ConfigureContextFunc = func(_ context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		return providerConfigureFunc(ctx, data)
 	}
 
-	userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", "foo", meta.SDKVersionString())
-
-	keycloakClient, _ = keycloak.NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), "/auth", os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), "", "", true, 5, "", false, userAgent)
+	testAccProviderFactories = map[string]func() (*schema.Provider, error){
+		"keycloak": func() (*schema.Provider, error) {
+			return testAccProvider, nil
+		},
+	}
 }
 
 func TestProvider(t *testing.T) {

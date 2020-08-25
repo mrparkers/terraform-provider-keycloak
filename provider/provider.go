@@ -1,14 +1,16 @@
 package provider
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/meta"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func KeycloakProvider() *schema.Provider {
-	return &schema.Provider{
+	provider := &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{
 			"keycloak_group":                              dataSourceKeycloakGroup(),
 			"keycloak_openid_client":                      dataSourceKeycloakOpenidClient(),
@@ -149,22 +151,35 @@ func KeycloakProvider() *schema.Provider {
 				Default:  "/auth",
 			},
 		},
-		ConfigureFunc: func(data *schema.ResourceData) (interface{}, error) {
-			url := data.Get("url").(string)
-			basePath := data.Get("base_path").(string)
-			clientId := data.Get("client_id").(string)
-			clientSecret := data.Get("client_secret").(string)
-			username := data.Get("username").(string)
-			password := data.Get("password").(string)
-			realm := data.Get("realm").(string)
-			initialLogin := data.Get("initial_login").(bool)
-			clientTimeout := data.Get("client_timeout").(int)
-			tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
-			rootCaCertificate := data.Get("root_ca_certificate").(string)
-
-			userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", "foo", meta.SDKVersionString())
-
-			return keycloak.NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
-		},
 	}
+
+	provider.ConfigureContextFunc = func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		url := data.Get("url").(string)
+		basePath := data.Get("base_path").(string)
+		clientId := data.Get("client_id").(string)
+		clientSecret := data.Get("client_secret").(string)
+		username := data.Get("username").(string)
+		password := data.Get("password").(string)
+		realm := data.Get("realm").(string)
+		initialLogin := data.Get("initial_login").(bool)
+		clientTimeout := data.Get("client_timeout").(int)
+		tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
+		rootCaCertificate := data.Get("root_ca_certificate").(string)
+
+		var diags diag.Diagnostics
+
+		userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", provider.TerraformVersion, meta.SDKVersionString())
+		keycloakClient, err := keycloak.NewKeycloakClient(ctx, url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "error initializing keycloak provider",
+				Detail:   err.Error(),
+			})
+		}
+
+		return keycloakClient, diags
+	}
+
+	return provider
 }

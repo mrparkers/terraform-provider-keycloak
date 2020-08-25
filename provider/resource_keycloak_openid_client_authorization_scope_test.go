@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"testing"
 )
@@ -15,9 +15,9 @@ func TestAccKeycloakOpenidClientAuthorizationScope_basic(t *testing.T) {
 	scopeName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientAuthorizationScope_basic(realmName, clientId, scopeName),
@@ -35,9 +35,9 @@ func TestAccKeycloakOpenidClientAuthorizationScope_createAfterManualDestroy(t *t
 	scopeName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientAuthorizationScope_basic(realmName, clientId, scopeName),
@@ -66,9 +66,9 @@ func TestAccKeycloakOpenidClientAuthorizationScope_basicUpdateRealm(t *testing.T
 	scopeName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientAuthorizationScope_basic(firstRealm, clientId, scopeName),
@@ -107,9 +107,9 @@ func TestAccKeycloakOpenidClientAuthorizationScope_basicUpdateAll(t *testing.T) 
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientAuthorizationScope_basicFromInterface(clientId, firstAuthrorizationScope),

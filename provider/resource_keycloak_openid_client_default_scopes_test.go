@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 	"strings"
@@ -22,8 +22,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_basic(t *testing.T) {
 	clientScopes := append(preAssignedDefaultClientScopes, clientScope)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientDefaultScopes_basic(realm, client, clientScope),
@@ -48,8 +48,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_updateClientForceNew(t *testing.T)
 	clientScopes := append(preAssignedDefaultClientScopes, clientScope)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientDefaultScopes_basic(realm, clientOne, clientScope),
@@ -79,8 +79,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_updateInPlace(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			// init
 			{
@@ -107,8 +107,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_validateClientDoesNotExist(t *test
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenidClientDefaultScopes_validationNoClient(realm, client, clientScope),
@@ -124,8 +124,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_validateClientAccessType(t *testin
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenidClientDefaultScopes_validationBearerOnlyClient(realm, client, clientScope),
@@ -146,8 +146,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeAdd(t *testing.T) {
 	)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientDefaultScopes_multipleClientScopes(realm, client, clientScopes, clientScopes),
@@ -196,8 +196,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeRemove(t *testing.T) 
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientDefaultScopes_multipleClientScopes(realm, client, allClientScopes, attachedClientScopes),
@@ -236,8 +236,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_noImportNeeded(t *testing.T) {
 	clientScopes := append(preAssignedDefaultClientScopes, clientScope)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientDefaultScopes_noDefaultScopes(realm, client, clientScope),
@@ -275,8 +275,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_profileAndEmailDefaultScopes(t *te
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config:             testKeycloakOpenidClientDefaultScopes_listOfScopes(realm, client, clientScope, []string{clientScope}),
@@ -296,8 +296,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_validateDuplicateScopeAssignment(t
 	optionalClientScopes := append(getPreAssignedOptionalClientScopes(t), clientScope)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			// attach optional scopes, including the custom scope
 			{

@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 	"testing"
@@ -15,9 +15,9 @@ func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapGroupMapper_basic(realmName, groupMapperName),
@@ -40,9 +40,9 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapGroupMapper_basic(realmName, groupMapperName),
@@ -70,9 +70,9 @@ func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
 	mode := randomStringInSlice(keycloakLdapGroupMapperModes)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "mode", acctest.RandString(10)),
@@ -92,9 +92,9 @@ func TestAccKeycloakLdapGroupMapper_membershipAttributeTypeValidation(t *testing
 	membershipAttributeType := randomStringInSlice(keycloakLdapGroupMapperMembershipAttributeTypes)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "membership_attribute_type", acctest.RandString(10)),
@@ -114,9 +114,9 @@ func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testi
 	userRolesRetrieveStrategy := randomStringInSlice(keycloakLdapGroupMapperUserRolesRetrieveStrategies)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "user_roles_retrieve_strategy", acctest.RandString(10)),
@@ -136,9 +136,9 @@ func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
 	groupsLdapFilter := "(" + acctest.RandString(10) + ")"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "groups_ldap_filter", acctest.RandString(10)),
@@ -157,9 +157,9 @@ func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapGroupMapper_groupInheritanceValidation(realmName, groupMapperName),
@@ -175,9 +175,9 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationForceNew(t *testing.
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapGroupMapper_updateLdapUserFederationBefore(realmOne, realmTwo, groupMapperName),
@@ -236,9 +236,9 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapGroupMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapGroupMapper_basicFromInterface(realm, groupMapperOne),

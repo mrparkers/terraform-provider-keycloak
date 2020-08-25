@@ -1,8 +1,8 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -152,7 +152,6 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *keycloak.IdentityProvider) error {
 	setIdentityProviderData(data, identityProvider)
 	data.Set("backchannel_supported", identityProvider.Config.BackchannelSupported)
-	data.Set("use_jwks_url", identityProvider.Config.UseJwksUrl)
 	data.Set("validate_signature", identityProvider.Config.ValidateSignature)
 	data.Set("hide_on_login_page", identityProvider.Config.HideOnLoginPage)
 	data.Set("name_id_policy_format", identityProvider.Config.NameIDPolicyFormat)
@@ -165,7 +164,6 @@ func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("post_binding_response", identityProvider.Config.PostBindingResponse)
 	data.Set("post_binding_logout", identityProvider.Config.PostBindingLogout)
 	data.Set("force_authn", identityProvider.Config.ForceAuthn)
-	data.Set("want_authn_requests_signed", identityProvider.Config.WantAuthnRequestsSigned)
 	data.Set("want_assertions_signed", identityProvider.Config.WantAssertionsSigned)
 	data.Set("want_assertions_encrypted", identityProvider.Config.WantAssertionsEncrypted)
 	return nil

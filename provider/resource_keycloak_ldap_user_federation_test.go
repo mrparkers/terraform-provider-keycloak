@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -17,9 +17,9 @@ func TestAccKeycloakLdapUserFederation_basic(t *testing.T) {
 	ldapName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapUserFederation_basic(realmName, ldapName),
@@ -36,9 +36,9 @@ func TestAccKeycloakLdapUserFederation_import(t *testing.T) {
 	bindCredentialForImport := "admin"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapUserFederation_basic(realmName, ldapName),
@@ -71,9 +71,9 @@ func TestAccKeycloakLdapUserFederation_createAfterManualDestroy(t *testing.T) {
 	ldapName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapUserFederation_basic(realmName, ldapName),
@@ -101,9 +101,9 @@ func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
 	ldapName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapUserFederation_basic(firstRealm, ldapName),
@@ -184,9 +184,9 @@ func TestAccKeycloakLdapUserFederation_basicUpdateKerberosSettings(t *testing.T)
 	secondLdap := generateRandomLdapKerberos(false)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapUserFederation_basicFromInterface(firstLdap),
@@ -282,9 +282,9 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapUserFederation_basicFromInterface(firstLdap),
@@ -303,9 +303,9 @@ func TestAccKeycloakLdapUserFederation_unsetTimeoutDurationStrings(t *testing.T)
 	ldapName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapUserFederation_basicWithTimeouts(realmName, ldapName),
@@ -325,9 +325,9 @@ func TestAccKeycloakLdapUserFederation_editModeValidation(t *testing.T) {
 	editMode := randomStringInSlice(keycloakLdapUserFederationEditModes)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("edit_mode", realmName, ldapName, acctest.RandString(10)),
@@ -347,9 +347,9 @@ func TestAccKeycloakLdapUserFederation_vendorValidation(t *testing.T) {
 	vendor := randomStringInSlice(keycloakLdapUserFederationVendors)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("vendor", realmName, ldapName, acctest.RandString(10)),
@@ -369,9 +369,9 @@ func TestAccKeycloakLdapUserFederation_searchScopeValidation(t *testing.T) {
 	searchScope := randomStringInSlice(keycloakLdapUserFederationSearchScopes)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("search_scope", realmName, ldapName, acctest.RandString(10)),
@@ -391,9 +391,9 @@ func TestAccKeycloakLdapUserFederation_useTrustStoreValidation(t *testing.T) {
 	useTrustStore := randomStringInSlice(keycloakLdapUserFederationTruststoreSpiSettings)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("use_truststore_spi", realmName, ldapName, acctest.RandString(10)),
@@ -413,9 +413,9 @@ func TestAccKeycloakLdapUserFederation_cachePolicyValidation(t *testing.T) {
 	cachePolicy := randomStringInSlice(keycloakUserFederationCachePolicies)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("cache_policy", realmName, ldapName, acctest.RandString(10)),
@@ -434,9 +434,9 @@ func TestAccKeycloakLdapUserFederation_bindValidation(t *testing.T) {
 	ldapName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapUserFederation_noBindCredentialValidation(realmName, ldapName),
@@ -459,9 +459,9 @@ func TestAccKeycloakLdapUserFederation_syncPeriodValidation(t *testing.T) {
 	invalidZeroSyncPeriod := 0
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapUserFederation_basicWithSyncPeriod(realmName, ldapName, validSyncPeriod, invalidNegativeSyncPeriod),
@@ -497,9 +497,9 @@ func TestAccKeycloakLdapUserFederation_bindCredential(t *testing.T) {
 	secondBindCredential := acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapUserFederation_bindCredential(realmName, ldapName, firstBindCredential),

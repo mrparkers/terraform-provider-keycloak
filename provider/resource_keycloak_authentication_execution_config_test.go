@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -15,9 +15,9 @@ func TestAccKeycloakAuthenticationExecutionConfig_basic(t *testing.T) {
 	var config1, config2 keycloak.AuthenticationExecutionConfig
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeycloakAuthenticationExecutionConfig(realmName),
@@ -49,9 +49,9 @@ func TestAccKeycloakAuthenticationExecutionConfig_updateForcesNew(t *testing.T) 
 	var config1, config2 keycloak.AuthenticationExecutionConfig
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeycloakAuthenticationExecutionConfig(realmName),
@@ -82,9 +82,9 @@ func TestAccKeycloakAuthenticationExecutionConfig_import(t *testing.T) {
 	realmName := "terraform-r-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeycloakAuthenticationExecutionConfig(realmName),

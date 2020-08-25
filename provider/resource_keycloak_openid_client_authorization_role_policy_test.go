@@ -4,21 +4,21 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-func TestResourceKeycloakOpenidClientAuthorizationRolePolicy(t *testing.T) {
+func TestAccKeycloakOpenidClientAuthorizationRolePolicy(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	roleName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testResourceKeycloakOpenidClientAuthorizationRolePolicyDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testResourceKeycloakOpenidClientAuthorizationRolePolicyDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testResourceKeycloakOpenidClientAuthorizationRolePolicy_basic(realmName, roleName, clientId),
@@ -34,7 +34,7 @@ func testResourceKeycloakOpenidClientAuthorizationRolePolicy_basic(realm, roleNa
 	resource keycloak_realm test {
 		realm = "%s"
 	}
-	
+
 	resource keycloak_openid_client test {
 		client_id                = "%s"
 		realm_id                 = "${keycloak_realm.test.id}"
@@ -44,7 +44,7 @@ func testResourceKeycloakOpenidClientAuthorizationRolePolicy_basic(realm, roleNa
 			policy_enforcement_mode = "ENFORCING"
 		}
 	}
-	
+
 	resource "keycloak_role" "test" {
     realm_id    = "${keycloak_realm.test.id}"
     name        = "%s"
@@ -58,7 +58,7 @@ func testResourceKeycloakOpenidClientAuthorizationRolePolicy_basic(realm, roleNa
 		logic = "POSITIVE"
 		type = "role"
 		role  {
-			id = "${keycloak_role.test.id}" 
+			id = "${keycloak_role.test.id}"
 			required = false
 		}
 	}
