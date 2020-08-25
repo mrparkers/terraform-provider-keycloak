@@ -153,7 +153,7 @@ func KeycloakProvider() *schema.Provider {
 		},
 	}
 
-	provider.ConfigureContextFunc = func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	provider.ConfigureContextFunc = func(_ context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		url := data.Get("url").(string)
 		basePath := data.Get("base_path").(string)
 		clientId := data.Get("client_id").(string)
@@ -169,7 +169,7 @@ func KeycloakProvider() *schema.Provider {
 		var diags diag.Diagnostics
 
 		userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", provider.TerraformVersion, meta.SDKVersionString())
-		keycloakClient, err := keycloak.NewKeycloakClient(ctx, url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
+		keycloakClient, err := keycloak.NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
