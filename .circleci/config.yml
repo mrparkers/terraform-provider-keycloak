@@ -77,7 +77,7 @@ jobs:
       KEYCLOAK_TEST_PASSWORD_GRANT: "true"
       KEYCLOAK_VERSION: "<< parameters.keycloak-version >>"
       TEST_RESULTS: /tmp/test-results
-
+      CHECKPOINT_DISABLE: "1"
 
   build-and-release:
     docker:
