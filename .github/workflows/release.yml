@@ -1,0 +1,40 @@
+name: release
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for CircleCI tests
+        uses: "WyriHaximus/github-action-wait-for-status@v2"
+        with:
+          checkInterval: 30
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v2
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Get tag name
+        id: get_tag_name
+        run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+      - name: Build release notes link
+        run: |
+          releaseDate=$(date '+%B-%-d-%Y' | tr '[:upper:]' '[:lower:]')
+          releaseVersion=$(echo ${{ steps.get_tag_name.outputs.TAG }} | tr -d '.')
+          echo "[Release Notes](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/CHANGELOG.md#${releaseVersion}-${releaseDate})" > release-notes.md
+      - name: GoReleaser
+        uses: goreleaser/goreleaser-action@v1
+        with:
+          version: latest
+          args: release --rm-dist --release-notes=release-notes.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
