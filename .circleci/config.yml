@@ -9,23 +9,6 @@ workflows:
                 - '11.0.1'
                 - '10.0.2'
                 - '9.0.3'
-  release:
-    jobs:
-      - test:
-          keycloak-version: '11.0.1'
-          filters:
-            tags:
-              only: /\d+\.\d+\.\d+(-rc.\d+)?/
-            branches:
-              ignore: /.*/
-      - build-and-release:
-          requires:
-            - test
-          filters:
-            tags:
-              only: /\d+\.\d+\.\d+(-rc.\d+)?/
-            branches:
-              ignore: /.*/
 
 defaults:
   go_image: &go_image
@@ -92,19 +75,3 @@ jobs:
       CHECKPOINT_DISABLE: "1"
       TF_ACC_TERRAFORM_PATH: "/usr/local/bin/terraform"
       TF_VERSION: "0.13.0"
-
-  build-and-release:
-    docker:
-      - <<: *go_image
-    working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - "27:1c:fb:ea:7d:89:93:bb:13:54:5b:3f:b7:cc:1b:09"
-      - run: go mod download
-      - run:
-          command: |
-            ./scripts/build-release.sh
-            ./scripts/publish-release.sh
-
