@@ -27,15 +27,18 @@ jobs:
         id: get_tag_name
         run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
       - name: Build release notes link
+        id: build_release_notes
         run: |
           releaseDate=$(date '+%B-%-d-%Y' | tr '[:upper:]' '[:lower:]')
           releaseVersion=$(echo ${{ steps.get_tag_name.outputs.TAG }} | tr -d '.')
-          echo "[Release Notes](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/CHANGELOG.md#${releaseVersion}-${releaseDate})" > release-notes.md
+          tmp=$(mktemp)
+          echo "[Release Notes](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/CHANGELOG.md#${releaseVersion}-${releaseDate})" > ${tmp}/release-notes.md
+          echo ::set-output name=NOTES::${tmp}/release-notes.md
       - name: GoReleaser
         uses: goreleaser/goreleaser-action@v1
         with:
           version: latest
-          args: release --rm-dist --release-notes=release-notes.md
+          args: release --rm-dist --release-notes=${{ steps.build_release_notes.outputs.NOTES }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
