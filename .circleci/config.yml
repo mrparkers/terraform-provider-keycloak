@@ -63,6 +63,7 @@ jobs:
           command: |
             ./scripts/wait-for-local-keycloak.sh
             ./scripts/create-terraform-client.sh
+            echo "disable_checkpoint = true" > $HOME/.terraformrc
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
             CHECKPOINT_DISABLE=1 make testacc | tee ${TEST_RESULTS}/go-test.out
           no_output_timeout: 20m
