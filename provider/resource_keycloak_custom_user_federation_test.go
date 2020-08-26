@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 	"testing"
@@ -18,9 +18,9 @@ func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
 	providerId := "custom"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakCustomUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakCustomUserFederation_basic(realmName, name, providerId),
@@ -45,9 +45,9 @@ func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
 	providerId := "custom"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakCustomUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakCustomUserFederation_customConfig(realmName, name, providerId, configValue),
@@ -67,9 +67,9 @@ func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) 
 	providerId := "custom"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakCustomUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakCustomUserFederation_basic(realmName, name, providerId),
@@ -97,9 +97,9 @@ func TestAccKeycloakCustomUserFederation_validation(t *testing.T) {
 	providerId := acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakCustomUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakCustomUserFederation_basic(realmName, name, providerId),
@@ -121,9 +121,9 @@ func TestAccKeycloakCustomUserFederation_ParentIdDifferentFromRealmName(t *testi
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakCustomUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
 				ResourceName:  "keycloak_realm.realm",
@@ -137,7 +137,7 @@ func TestAccKeycloakCustomUserFederation_ParentIdDifferentFromRealmName(t *testi
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakCustomUserFederation_parentId(name, providerId, internalId),
+				Config: testKeycloakCustomUserFederation_parentId(realmName, name, providerId, internalId),
 				Check:  testAccCheckKeycloakCustomUserFederationExists("keycloak_custom_user_federation.custom"),
 			},
 		},
@@ -261,8 +261,12 @@ resource "keycloak_custom_user_federation" "custom" {
 	`, realm, name, providerId, customConfigValue)
 }
 
-func testKeycloakCustomUserFederation_parentId(name, providerId, parentId string) string {
+func testKeycloakCustomUserFederation_parentId(realm, name, providerId, parentId string) string {
 	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
 resource "keycloak_custom_user_federation" "custom" {
 	name        = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
@@ -271,5 +275,5 @@ resource "keycloak_custom_user_federation" "custom" {
 
 	enabled     = true
 }
-	`, name, providerId, parentId)
+	`, realm, name, providerId, parentId)
 }

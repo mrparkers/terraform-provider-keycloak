@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"io/ioutil"
 	"net/http"
@@ -24,9 +24,9 @@ func TestAccKeycloakUser_basic(t *testing.T) {
 	resourceName := "keycloak_user.user"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUser_basic(realmName, username, attributeName, attributeValue),
@@ -51,9 +51,9 @@ func TestAccKeycloakUser_withInitialPassword(t *testing.T) {
 	resourceName := "keycloak_user.user"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUser_initialPassword(realmName, username, password, clientId),
@@ -76,9 +76,9 @@ func TestAccKeycloakUser_createAfterManualDestroy(t *testing.T) {
 	resourceName := "keycloak_user.user"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUser_basic(realmName, username, attributeName, attributeValue),
@@ -111,9 +111,9 @@ func TestAccKeycloakUser_updateRealm(t *testing.T) {
 	resourceName := "keycloak_user.user"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUser_updateRealmBefore(realmOne, realmTwo, username),
@@ -143,9 +143,9 @@ func TestAccKeycloakUser_updateUsername(t *testing.T) {
 	resourceName := "keycloak_user.user"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUser_basic(realmName, usernameOne, attributeName, attributeValue),
@@ -173,9 +173,9 @@ func TestAccKeycloakUser_updateWithInitialPasswordChangeDoesNotReset(t *testing.
 	clientId := "terraform-client-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUser_initialPassword(realmName, username, passwordOne, clientId),
@@ -217,9 +217,9 @@ func TestAccKeycloakUser_updateInPlace(t *testing.T) {
 	resourceName := "keycloak_user.user"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUser_fromInterface(userOne),
@@ -253,9 +253,9 @@ func TestAccKeycloakUser_unsetOptionalAttributes(t *testing.T) {
 	resourceName := "keycloak_user.user"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUser_fromInterface(userWithOptionalAttributes),
@@ -281,9 +281,9 @@ func TestAccKeycloakUser_validateLowercaseUsernames(t *testing.T) {
 	attributeValue := acctest.RandString(250)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakUser_basic(realmName, username, attributeName, attributeValue),
@@ -301,9 +301,9 @@ func TestAccKeycloakUser_federatedLink(t *testing.T) {
 	resourceName := "keycloak_user.destination_user"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUser_FederationLink(sourceUserName, destinationRealmName),

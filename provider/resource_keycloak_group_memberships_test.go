@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 	"strings"
@@ -17,8 +17,8 @@ func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
 	username := "terraform-user-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroupMemberships_basic(realmName, groupName, username),
@@ -39,8 +39,8 @@ func TestAccKeycloakGroupMemberships_moreThan100members(t *testing.T) {
 	groupName := "terraform-group-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroupMemberships_moreThan100members(realmName, groupName),
@@ -58,8 +58,8 @@ func TestAccKeycloakGroupMemberships_updateGroupForceNew(t *testing.T) {
 	username := "terraform-user-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroupMemberships_updateGroupForceNew(realmName, groupOne, groupTwo, username, "group_one"),
@@ -93,8 +93,8 @@ func TestAccKeycloakGroupMemberships_updateInPlace(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			// init
 			{
@@ -124,8 +124,8 @@ func TestAccKeycloakGroupMemberships_userDoesNotExist(t *testing.T) {
 	username := "terraform-user-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakGroupMemberships_userDoesNotExist(realmName, groupName, username),
@@ -147,8 +147,8 @@ func TestAccKeycloakGroupMemberships_authoritativeAdd(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroupMemberships_multipleUsers(realmName, groupName, usersInGroup, usersInGroup),
@@ -199,8 +199,8 @@ func TestAccKeycloakGroupMemberships_authoritativeRemove(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroupMemberships_multipleUsers(realmName, groupName, allUsersForTest, usersInGroup),
@@ -237,8 +237,8 @@ func TestAccKeycloakGroupMemberships_noImportNeeded(t *testing.T) {
 	username := "terraform-user-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroupMemberships_noGroupMemberships(realmName, groupName, username),
@@ -273,8 +273,8 @@ func TestAccKeycloakGroupMemberships_validateLowercaseUsernames(t *testing.T) {
 	usernameWithUppercaseCharacters := "terraform-user-" + strings.ToUpper(randomString)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakGroupMemberships_hardcodedUsername(realmName, groupName, username, usernameWithUppercaseCharacters),
@@ -293,8 +293,8 @@ func TestAccKeycloakGroupMemberships_createAfterManualDestroy(t *testing.T) {
 	var groupId *string
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroupMemberships_basic(realmName, groupName, username),

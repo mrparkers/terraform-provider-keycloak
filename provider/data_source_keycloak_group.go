@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -16,6 +16,18 @@ func dataSourceKeycloakGroup() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"parent_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"path": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"attributes": {
+				Type:     schema.TypeMap,
+				Computed: true,
 			},
 		},
 	}

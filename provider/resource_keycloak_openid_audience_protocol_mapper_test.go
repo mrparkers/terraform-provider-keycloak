@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -19,9 +19,9 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClient(t *testing.T) {
 	resourceName := "keycloak_openid_audience_protocol_mapper.audience_mapper_client"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_client(realmName, clientId, mapperName),
@@ -39,9 +39,9 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClientScope(t *testing.T) 
 	resourceName := "keycloak_openid_audience_protocol_mapper.audience_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
@@ -61,9 +61,9 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_import(t *testing.T) {
 	clientScopeResourceName := "keycloak_openid_audience_protocol_mapper.audience_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdAudienceProtocolMapper_import(realmName, clientId, clientScopeId, mapperName),
@@ -98,9 +98,9 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_update(t *testing.T) {
 	resourceName := "keycloak_openid_audience_protocol_mapper.audience_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(realmName, clientId, mapperName, customAudience),
@@ -124,9 +124,9 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_createAfterManualDestroy(t *tes
 	resourceName := "keycloak_openid_audience_protocol_mapper.audience_mapper_client"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_client(realmName, clientId, mapperName),
@@ -158,9 +158,9 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientIdForceNew(t *testi
 	resourceName := "keycloak_openid_audience_protocol_mapper.audience_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(realmName, clientId, mapperName, customAudience),
@@ -182,9 +182,9 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientScopeForceNew(t *te
 	resourceName := "keycloak_openid_audience_protocol_mapper.audience_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
@@ -208,9 +208,9 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateRealmIdForceNew(t *testin
 	resourceName := "keycloak_openid_audience_protocol_mapper.audience_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(realmName, clientId, mapperName, customAudience),
@@ -230,9 +230,9 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceExists(t 
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceExists(realmName, clientId, mapperName),

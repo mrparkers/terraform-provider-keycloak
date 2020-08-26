@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 	"testing"
@@ -21,9 +21,9 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_basicClient(t *testing.T) {
 	resourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName),
@@ -41,9 +41,9 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_import(t *testing.T) {
 	clientResourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName),
@@ -69,9 +69,9 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_update(t *testing.T) {
 	resourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(realmName, clientId, mapperName, userAttribute),
@@ -95,9 +95,9 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_createAfterManualDestroy(t *
 	resourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName),
@@ -126,9 +126,9 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_validateClaimValueType(t *te
 	invalidSamlNameFormat := acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakSamlUserAttributeProtocolMapper_samlAttributeNameFormat(realmName, clientId, mapperName, invalidSamlNameFormat),
@@ -148,9 +148,9 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_updateClientIdForceNew(t *te
 	resourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(realmName, clientId, mapperName, userAttribute),
@@ -174,9 +174,9 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_updateRealmIdForceNew(t *tes
 	resourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(realmName, clientId, mapperName, userAttribute),

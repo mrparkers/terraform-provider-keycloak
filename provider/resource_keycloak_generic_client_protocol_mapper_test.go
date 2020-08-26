@@ -6,9 +6,9 @@ import (
 
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 const (
@@ -23,9 +23,9 @@ func TestAccKeycloakGenericClientProtocolMapper_basicClient(t *testing.T) {
 	resourceName := "keycloak_generic_client_protocol_mapper." + TF_RESOURCE_NAME
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakGenericClientProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakGenericClientProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericClientProtocolMapper_basic_client(realmName, clientId, mapperName),
@@ -43,9 +43,9 @@ func TestAccKeycloakGenericClientProtocolMapper_basicClientScope(t *testing.T) {
 	resourceName := "keycloak_generic_client_protocol_mapper." + TF_RESOURCE_NAME
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakGenericClientProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakGenericClientProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericClientProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
@@ -63,9 +63,9 @@ func TestAccKeycloakGenericClientProtocolMapper_import(t *testing.T) {
 	resourceName := "keycloak_generic_client_protocol_mapper." + TF_RESOURCE_NAME
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakGenericClientProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakGenericClientProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericClientProtocolMapper_import(realmName, clientId, mapperName),
@@ -94,9 +94,9 @@ func TestGenericClientProtocolMapper_update(t *testing.T) {
 	newAttributeValue := "attribute-value-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakGenericClientProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakGenericClientProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericClientProtocolMapper_update(realmName, clientId, mapperName, oldAttributeName, oldAttributeValue),

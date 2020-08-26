@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -25,6 +25,10 @@ func dataSourceKeycloakOpenidClientServiceAccountUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"email_verified": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"first_name": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -41,7 +45,7 @@ func dataSourceKeycloakOpenidClientServiceAccountUser() *schema.Resource {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
-			"federated_identities": {
+			"federated_identity": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{

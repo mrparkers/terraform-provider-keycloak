@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccKeycloakDataSourceRealmKeys_basic(t *testing.T) {
@@ -14,8 +14,8 @@ func TestAccKeycloakDataSourceRealmKeys_basic(t *testing.T) {
 	dataSourceName := "data.keycloak_realm_keys.test_keys"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeycloakRealmKeysConfig(realm),
@@ -30,8 +30,8 @@ func TestAccKeycloakDataSourceRealmKeys_filterByAlgorithms(t *testing.T) {
 	dataSourceName := "data.keycloak_realm_keys.test_keys"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeycloakRealmKeysConfig_filterByAlgorithms(realm),

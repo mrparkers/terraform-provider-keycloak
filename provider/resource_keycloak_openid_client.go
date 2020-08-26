@@ -3,8 +3,8 @@ package provider
 import (
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
 )
@@ -318,7 +318,6 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("admin_url", client.AdminUrl)
 	data.Set("base_url", client.BaseUrl)
 	data.Set("root_url", &client.RootUrl)
-	data.Set("authorization_services_enabled", client.AuthorizationServicesEnabled)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
 	data.Set("consent_required", client.ConsentRequired)
 	data.Set("access_token_lifespan", client.Attributes.AccessTokenLifespan)

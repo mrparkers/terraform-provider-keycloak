@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccKeycloakDataSourceRealm_basic(t *testing.T) {
 	realm := "terraform-" + acctest.RandString(10)
 
-	resourceName := "keycloak_realm.realm"
+	resourceName := "keycloak_realm.my_realm"
 	dataSourceName := "data.keycloak_realm.realm"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testDataSourceKeycloakRealm_basic(realm),
@@ -34,13 +34,14 @@ func TestAccKeycloakDataSourceRealm_basic(t *testing.T) {
 
 func testDataSourceKeycloakRealm_basic(realm string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm        = "%s"
-	display_name = "foo"
+resource "keycloak_realm" "my_realm" {
+	realm             = "%s"
+	enabled           = true
+	display_name      = "foo"
 	display_name_html = "<b>foo</b>"
 }
 
 data "keycloak_realm" "realm" {
-	realm = "${keycloak_realm.realm.realm}"
+	realm = "${keycloak_realm.my_realm.id}"
 }`, realm)
 }

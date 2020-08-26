@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -337,17 +337,16 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 	data.Set("pagination", ldap.Pagination)
 
 	if ldap.AllowKerberosAuthentication {
-		kerberosSettingsData := make([]interface{}, 1)
 		kerberosSettings := make(map[string]interface{})
-		kerberosSettingsData[0] = kerberosSettings
 
 		kerberosSettings["server_principal"] = ldap.ServerPrincipal
 		kerberosSettings["use_kerberos_for_password_authentication"] = ldap.UseKerberosForPasswordAuthentication
-		kerberosSettings["allow_kerberos_authentication"] = ldap.AllowKerberosAuthentication
 		kerberosSettings["key_tab"] = ldap.KeyTab
 		kerberosSettings["kerberos_realm"] = ldap.KerberosRealm
 
-		data.Set("kerberos", kerberosSettingsData)
+		data.Set("kerberos", []interface{}{kerberosSettings})
+	} else {
+		data.Set("kerberos", nil)
 	}
 
 	data.Set("batch_size_for_sync", ldap.BatchSizeForSync)

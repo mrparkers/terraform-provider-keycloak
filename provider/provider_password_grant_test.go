@@ -1,9 +1,9 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"os"
 	"testing"
 )
@@ -25,8 +25,10 @@ func TestAccKeycloakProvider_passwordGrant(t *testing.T) {
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: map[string]terraform.ResourceProvider{
-			"keycloak": provider,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"keycloak": func() (*schema.Provider, error) {
+				return provider, nil
+			},
 		},
 		PreCheck: func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{

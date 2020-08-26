@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -17,8 +17,8 @@ func TestGenericRoleMapper_basic(t *testing.T) {
 	childClientName := "client2-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericRoleMapping_basic(realmName, parentClientName, parentRoleName, childClientName),
@@ -38,8 +38,8 @@ func TestGenericRoleMapper_createAfterManualDestroy(t *testing.T) {
 	childClientName := "client2-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericRoleMapping_basic(realmName, parentClientName, parentRoleName, childClientName),
@@ -73,8 +73,8 @@ func TestGenericRoleMapper_import(t *testing.T) {
 	resourceName := "keycloak_generic_client_role_mapper.child-client-with-parent-client-role"
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericRoleMapping_basic(realmName, parentClientName, parentRoleName, childClientName),
@@ -97,8 +97,8 @@ func TestGenericRoleMapperClientScope_basic(t *testing.T) {
 	clientScopeName := "clientscope-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericRoleMappingClientScope_basic(realmName, clientName, roleName, clientScopeName),
@@ -117,8 +117,8 @@ func TestGenericRoleMapperClientScope_import(t *testing.T) {
 	resourceName := "keycloak_generic_client_role_mapper.clientscope-with-client-role"
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericRoleMappingClientScope_basic(realmName, clientName, roleName, clientScopeName),
@@ -140,8 +140,8 @@ func TestGenericRealmLevelRoleMapperClientScope_basic(t *testing.T) {
 	clientScopeName := "clientscope-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericRealmLevelRoleMappingClientScope_basic(realmName, roleName, clientScopeName),
@@ -160,8 +160,8 @@ func TestGenericRealmLevelRoleMapperClientScope_createAfterManualDestroy(t *test
 	clientScopeName := "clientscope-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericRealmLevelRoleMappingClientScope_basic(realmName, roleName, clientScopeName),
@@ -197,8 +197,8 @@ func TestGenericRoleMapperClientScope_createAfterManualDestroy(t *testing.T) {
 	clientScopeName := "clientscope-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
-		PreCheck:  func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGenericRoleMappingClientScope_basic(realmName, clientName, roleName, clientScopeName),
@@ -294,7 +294,7 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_role" "role" {
-  realm_id  = "${keycloak_realm.realm.id}"  
+  realm_id  = "${keycloak_realm.realm.id}"
   name      = "%s"
 }
 

@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -16,9 +16,9 @@ func TestAccKeycloakSamlClientScope_basic(t *testing.T) {
 	clientScopeName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakSamlClientScopeDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlClientScope_basic(realmName, clientScopeName),
@@ -41,9 +41,9 @@ func TestAccKeycloakSamlClientScope_createAfterManualDestroy(t *testing.T) {
 	clientScopeName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakSamlClientScopeDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlClientScope_basic(realmName, clientScopeName),
@@ -74,9 +74,9 @@ func TestAccKeycloakSamlClientScope_updateRealm(t *testing.T) {
 	clientScopeName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakSamlClientScopeDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlClientScope_updateRealmBefore(realmOne, realmTwo, clientScopeName),
@@ -101,9 +101,9 @@ func TestAccKeycloakSamlClientScope_consentScreenText(t *testing.T) {
 	clientScopeName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakSamlClientScopeDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlClientScope_basic(realmName, clientScopeName),
@@ -127,9 +127,9 @@ func TestAccKeycloakSamlClientScope_guiOrder(t *testing.T) {
 	guiOrder := acctest.RandIntRange(0, 1000)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakSamlClientScopeDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlClientScope_basic(realmName, clientScopeName),
