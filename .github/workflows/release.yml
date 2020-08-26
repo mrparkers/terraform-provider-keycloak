@@ -12,6 +12,7 @@ jobs:
       - name: Wait for CircleCI tests
         uses: "WyriHaximus/github-action-wait-for-status@v1.1.2"
         with:
+          ignoreActions: release
           checkInterval: 30
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
