@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Wait for CircleCI tests
-        uses: "WyriHaximus/github-action-wait-for-status@v2"
+        uses: "WyriHaximus/github-action-wait-for-status@v1.1.2"
         with:
           checkInterval: 30
         env:
