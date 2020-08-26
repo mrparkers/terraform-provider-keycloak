@@ -61,11 +61,16 @@ jobs:
             - /go/pkg
       - run:
           command: |
+            curl -LO https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
+            unzip terraform_${TF_VERSION}_linux_amd64.zip
+            sudo mv terraform ${TF_ACC_TERRAFORM_PATH}
+            which terraform
+      - run:
+          command: |
             ./scripts/wait-for-local-keycloak.sh
             ./scripts/create-terraform-client.sh
-            echo "disable_checkpoint = true" > $HOME/.terraformrc
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
-            CHECKPOINT_DISABLE=1 make testacc | tee ${TEST_RESULTS}/go-test.out
+            make testacc | tee ${TEST_RESULTS}/go-test.out
           no_output_timeout: 20m
       - store_test_results:
           path: /tmp/test-results
@@ -79,6 +84,8 @@ jobs:
       KEYCLOAK_VERSION: "<< parameters.keycloak-version >>"
       TEST_RESULTS: /tmp/test-results
       CHECKPOINT_DISABLE: "1"
+      TF_ACC_TERRAFORM_PATH: "/usr/local/bin/terraform"
+      TF_VERSION: "0.13.0"
 
   build-and-release:
     docker:
