@@ -14,7 +14,7 @@ func genericResourcePolicyImport(d *schema.ResourceData, _ interface{}) ([]*sche
 	}
 	d.Set("realm_id", parts[0])
 	d.Set("resource_server_id", parts[1])
-	d.SetId(parts[3])
+	d.SetId(parts[2])
 
 	return []*schema.ResourceData{d}, nil
 }
