@@ -186,6 +186,24 @@ func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGrou
 				),
 			},
 			{
+				ResourceName:        parentGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+			{
+				ResourceName:        firstChildGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+			{
+				ResourceName:        secondChildGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+			{
 				Config: testKeycloakGroup_nested(realmName, parentGroupName, firstChildGroupName, secondChildGroupName, parentGroupResource),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists(parentGroupResource),
@@ -196,6 +214,24 @@ func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGrou
 					resource.TestCheckResourceAttrPair(firstChildGroupResource, "parent_id", parentGroupResource, "id"),
 					resource.TestCheckResourceAttrPair(secondChildGroupResource, "parent_id", parentGroupResource, "id"),
 				),
+			},
+			{
+				ResourceName:        parentGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+			{
+				ResourceName:        firstChildGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+			{
+				ResourceName:        secondChildGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
 			},
 		},
 	})
