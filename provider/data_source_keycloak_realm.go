@@ -176,7 +176,15 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"sso_session_idle_timeout_remember_me": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"sso_session_max_lifespan": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"sso_session_max_lifespan_remember_me": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
