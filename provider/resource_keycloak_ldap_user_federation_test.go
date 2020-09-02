@@ -127,6 +127,10 @@ func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 	connectionTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
 	readTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
 
+	evictionDay := acctest.RandIntRange(0, 6)
+	evictionHour := acctest.RandIntRange(0, 23)
+	evictionMinute := acctest.RandIntRange(0, 59)
+
 	return &keycloak.LdapUserFederation{
 		RealmId:                              acctest.RandString(10),
 		Name:                                 "terraform-" + acctest.RandString(10),
@@ -153,6 +157,10 @@ func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 		AllowKerberosAuthentication:          true,
 		KeyTab:                               acctest.RandString(10),
 		KerberosRealm:                        acctest.RandString(10),
+		MaxLifespan:                          randomStringInSlice([]string{"1h", "2h", "3h"}),
+		EvictionDay:                          &evictionDay,
+		EvictionHour:                         &evictionHour,
+		EvictionMinute:                       &evictionMinute,
 	}
 }
 
@@ -225,6 +233,10 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 	firstReadTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
 	secondReadTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
 
+	evictionDay := acctest.RandIntRange(0, 6)
+	evictionHour := acctest.RandIntRange(0, 23)
+	evictionMinute := acctest.RandIntRange(0, 59)
+
 	firstLdap := &keycloak.LdapUserFederation{
 		RealmId:                              realmName,
 		Name:                                 "terraform-" + acctest.RandString(10),
@@ -251,7 +263,15 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		AllowKerberosAuthentication:          randomBool(),
 		KeyTab:                               acctest.RandString(10),
 		KerberosRealm:                        acctest.RandString(10),
+		MaxLifespan:                          randomStringInSlice([]string{"1h", "2h", "3h"}),
+		EvictionDay:                          &evictionDay,
+		EvictionHour:                         &evictionHour,
+		EvictionMinute:                       &evictionMinute,
 	}
+
+	evictionDay = acctest.RandIntRange(0, 6)
+	evictionHour = acctest.RandIntRange(0, 23)
+	evictionMinute = acctest.RandIntRange(0, 59)
 
 	secondLdap := &keycloak.LdapUserFederation{
 		RealmId:                              realmName,
@@ -279,6 +299,10 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		AllowKerberosAuthentication:          randomBool(),
 		KeyTab:                               acctest.RandString(10),
 		KerberosRealm:                        acctest.RandString(10),
+		MaxLifespan:                          randomStringInSlice([]string{"1h", "2h", "3h"}),
+		EvictionDay:                          &evictionDay,
+		EvictionHour:                         &evictionHour,
+		EvictionMinute:                       &evictionMinute,
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -659,9 +683,15 @@ resource "keycloak_ldap_user_federation" "openldap" {
 		kerberos_realm                           = "%s"
 	}
 
-	cache_policy             = "%s"
+	cache {
+		policy               = "%s"
+		max_lifespan         = "%s"
+		eviction_day         = %d
+		eviction_hour        = %d
+		eviction_minute      = %d
+	}
 }
-	`, ldap.RealmId, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, arrayOfStringsForTerraformResource(ldap.UserObjectClasses), ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.ValidatePasswordPolicy, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.ServerPrincipal, ldap.UseKerberosForPasswordAuthentication, ldap.KeyTab, ldap.KerberosRealm, ldap.CachePolicy)
+	`, ldap.RealmId, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, arrayOfStringsForTerraformResource(ldap.UserObjectClasses), ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.ValidatePasswordPolicy, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.ServerPrincipal, ldap.UseKerberosForPasswordAuthentication, ldap.KeyTab, ldap.KerberosRealm, ldap.CachePolicy, ldap.MaxLifespan, *ldap.EvictionDay, *ldap.EvictionHour, *ldap.EvictionMinute)
 }
 
 func testKeycloakLdapUserFederation_basicWithAttrValidation(attr, realm, ldap, val string) string {
