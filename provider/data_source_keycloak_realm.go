@@ -196,6 +196,10 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"offline_session_max_lifespan_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"access_token_lifespan": {
 				Type:     schema.TypeString,
 				Computed: true,
