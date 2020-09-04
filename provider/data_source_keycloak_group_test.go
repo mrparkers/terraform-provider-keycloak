@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -15,9 +15,9 @@ func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
 	group := "terraform-group-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRoleDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testDataSourceKeycloakGroup_basic(realm, group),
@@ -40,9 +40,9 @@ func TestAccKeycloakDataSourceGroup_nested(t *testing.T) {
 	groupNested := "terraform-group-nested-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRoleDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testDataSourceKeycloakGroup_nested(realm, group, groupNested),

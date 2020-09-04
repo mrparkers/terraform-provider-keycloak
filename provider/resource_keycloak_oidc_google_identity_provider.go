@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -110,7 +110,7 @@ func getOidcGoogleIdentityProviderFromData(data *schema.ResourceData) (*keycloak
 		DefaultScope:                data.Get("default_scopes").(string),
 		AcceptsPromptNoneForwFrmClt: keycloak.KeycloakBoolQuoted(data.Get("accepts_prompt_none_forward_from_client").(bool)),
 		ExtraConfig:                 extraConfig,
-		UseJwksUrl:                  keycloak.KeycloakBoolQuoted(true),
+		UseJwksUrl:                  true,
 		DisableUserInfo:             keycloak.KeycloakBoolQuoted(data.Get("disable_user_info").(bool)),
 	}
 
@@ -128,7 +128,6 @@ func setOidcGoogleIdentityProviderData(data *schema.ResourceData, identityProvid
 	data.Set("default_scopes", identityProvider.Config.DefaultScope)
 	data.Set("accepts_prompt_none_forward_from_client", identityProvider.Config.AcceptsPromptNoneForwFrmClt)
 	data.Set("extra_config", identityProvider.Config.ExtraConfig)
-	data.Set("use_jwks_url", identityProvider.Config.UseJwksUrl)
 	data.Set("disable_user_info", identityProvider.Config.DisableUserInfo)
 	return nil
 }

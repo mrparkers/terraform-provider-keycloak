@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -19,9 +19,9 @@ func TestAccKeycloakAttributeToRoleIdentityProviderMapper_basic(t *testing.T) {
 	claimValue := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeToRoleIdentityProviderMapper_basic(realmName, alias, mapperName, role, claimName, claimValue),
@@ -41,9 +41,9 @@ func TestAccKeycloakAttributeToRoleIdentityProviderMapper_withExtraConfig(t *tes
 	syncMode := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeToRoleIdentityProviderMapper_withExtraConfig(realmName, alias, mapperName, role, claimName, claimValue, syncMode),
@@ -64,9 +64,9 @@ func TestAccKeycloakAttributeToRoleIdentityProviderMapper_createAfterManualDestr
 	claimValue := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeToRoleIdentityProviderMapper_basic(realmName, alias, mapperName, role, claimName, claimValue),
@@ -100,9 +100,9 @@ func TestAccKeycloakAttributeToRoleIdentityProviderMapper_withExtraConfig_create
 	syncMode := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeToRoleIdentityProviderMapper_withExtraConfig(realmName, alias, mapperName, role, claimName, claimValue, syncMode),
@@ -134,9 +134,9 @@ func TestAccKeycloakAttributeToRoleIdentityProviderMapper_basicUpdateRealm(t *te
 	claimValue := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeToRoleIdentityProviderMapper_basic(firstRealm, alias, mapperName, role, claimName, claimValue),
@@ -183,9 +183,9 @@ func TestAccKeycloakAttributeToRoleIdentityProviderMapper_basicUpdateAll(t *test
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeToRoleIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeToRoleIdentityProviderMapper_basicFromInterface(firstMapper),

@@ -5,7 +5,6 @@ import (
 )
 
 func roleScopeMappingUrl(realmId, clientId string, clientScopeId string, role *Role) string {
-
 	if clientId != "" {
 		if role.ClientRole {
 			return fmt.Sprintf("/realms/%s/clients/%s/scope-mappings/clients/%s", realmId, clientId, role.ClientId)

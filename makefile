@@ -7,8 +7,8 @@ build:
 	go build -o terraform-provider-keycloak
 
 build-example: build
-	mkdir -p example/.terraform/plugins/darwin_amd64
-	cp terraform-provider-keycloak example/.terraform/plugins/darwin_amd64/
+	mkdir -p example/.terraform/plugins/terraform.local/mrparkers/keycloak/2.0.0/darwin_amd64
+	cp terraform-provider-keycloak example/.terraform/plugins/terraform.local/mrparkers/keycloak/2.0.0/darwin_amd64/
 
 local: deps
 	docker-compose up --build -d
@@ -25,7 +25,7 @@ test: fmtcheck vet
 	go test $(TEST)
 
 testacc: fmtcheck vet
-	TF_ACC=1 go test -timeout 20m $(TEST) -v $(TESTARGS)
+	TF_ACC=1 CHECKPOINT_DISABLE=1 go test -timeout 30m $(TEST) -v $(TESTARGS)
 
 fmtcheck:
 	lineCount=$(shell gofmt -l -s $(GOFMT_FILES) | wc -l | tr -d ' ') && exit $$lineCount

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -56,7 +56,6 @@ func getIdentityProviderMapperFromData(data *schema.ResourceData) (*keycloak.Ide
 
 func setIdentityProviderMapperData(data *schema.ResourceData, identityProviderMapper *keycloak.IdentityProviderMapper) error {
 	data.SetId(identityProviderMapper.Id)
-	data.Set("id", identityProviderMapper.Id)
 	data.Set("realm", identityProviderMapper.Realm)
 	data.Set("name", identityProviderMapper.Name)
 	data.Set("identity_provider_alias", identityProviderMapper.IdentityProviderAlias)

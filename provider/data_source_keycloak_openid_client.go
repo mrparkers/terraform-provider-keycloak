@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -51,6 +51,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"service_accounts_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"valid_redirect_uris": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -63,16 +67,32 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Set:      schema.HashString,
 				Computed: true,
 			},
+			"root_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"admin_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"base_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"service_account_user_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"service_accounts_enabled": {
-				Type:     schema.TypeBool,
+			"pkce_code_challenge_method": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"root_url": {
+			"access_token_lifespan": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"exclude_session_state_from_auth_response": {
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"resource_server_id": {
@@ -82,7 +102,6 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 			"authorization": {
 				Type:     schema.TypeSet,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"policy_enforcement_mode": {
@@ -90,6 +109,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 							Computed: true,
 						},
 						"allow_remote_resource_management": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"keep_defaults": {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
@@ -107,7 +130,6 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 			"authentication_flow_binding_overrides": {
 				Type:     schema.TypeSet,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"browser_id": {

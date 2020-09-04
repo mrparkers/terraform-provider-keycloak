@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -160,6 +160,14 @@ func dataSourceKeycloakRealm() *schema.Resource {
 
 			// Tokens
 
+			"default_signature_algorithm": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"revoke_refresh_token": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"refresh_token_max_reuse": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -168,7 +176,15 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"sso_session_idle_timeout_remember_me": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"sso_session_max_lifespan": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"sso_session_max_lifespan_remember_me": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

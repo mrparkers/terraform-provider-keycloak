@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"testing"
 )
@@ -18,9 +18,9 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_client(t *t
 	resourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedRoleProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_client(realmName, role, clientId, mapperName),
@@ -40,9 +40,9 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicClientRole_client(t *
 	resourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedRoleProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedRoleProtocolMapper_basicClientRole_client(realmName, clientIdForRole, role, clientId, mapperName),
@@ -61,9 +61,9 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_clientScope
 	resourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedRoleProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_clientScope(realmName, role, clientScopeId, mapperName),
@@ -84,9 +84,9 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_import(t *testing.T) {
 	clientScopeResourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedRoleProtocolMapper_import(realmName, role, clientId, clientScopeId, mapperName),
@@ -121,9 +121,9 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_update(t *testing.T) {
 	resourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedRoleProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_clientUpdateBefore(realmName, roleOne, roleTwo, clientId, mapperName),
@@ -148,9 +148,9 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_createAfterManualDestroy(t
 	resourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedRoleProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_client(realmName, role, clientId, mapperName),

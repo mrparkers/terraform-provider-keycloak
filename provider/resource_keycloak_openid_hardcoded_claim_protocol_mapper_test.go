@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 	"testing"
@@ -18,9 +18,9 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClient(t *testing.T)
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper_client"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_client(realmName, clientId, mapperName),
@@ -38,9 +38,9 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClientScope(t *testi
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
@@ -60,9 +60,9 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_import(t *testing.T) {
 	clientScopeResourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_import(realmName, clientId, clientScopeId, mapperName),
@@ -100,9 +100,9 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_update(t *testing.T) {
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(realmName, clientId, mapperName, claimName, claimValue),
@@ -126,9 +126,9 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_createAfterManualDestroy(
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper_client"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_client(realmName, clientId, mapperName),
@@ -156,9 +156,9 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_validateClaimValueType(t 
 	invalidClaimValueType := acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakOpenIdHardcodedClaimProtocolMapper_validateClaimValueType(realmName, mapperName, invalidClaimValueType),
@@ -179,9 +179,9 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientIdForceNew(t 
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(realmName, clientId, mapperName, claimName, claimValue),
@@ -203,9 +203,9 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientScopeForceNew
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
@@ -230,9 +230,9 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateRealmIdForceNew(t *
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(realmName, clientId, mapperName, claimName, claimValue),

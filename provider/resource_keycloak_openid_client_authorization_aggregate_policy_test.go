@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-func TestResourceKeycloakOpenidClientAuthorizationAggregatePolicy(t *testing.T) {
+func TestAccKeycloakOpenidClientAuthorizationAggregatePolicy(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testResourceKeycloakOpenidClientAuthorizationAggregatePolicyDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testResourceKeycloakOpenidClientAuthorizationAggregatePolicyDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testResourceKeycloakOpenidClientAuthorizationAggregatePolicy_basic(realmName, clientId),
@@ -86,7 +86,7 @@ func testResourceKeycloakOpenidClientAuthorizationAggregatePolicy_basic(realm, c
 	resource keycloak_realm test {
 		realm = "%s"
 	}
-	
+
 	resource keycloak_openid_client test {
 		client_id                = "%s"
 		realm_id                 = "${keycloak_realm.test.id}"
@@ -110,11 +110,11 @@ func testResourceKeycloakOpenidClientAuthorizationAggregatePolicy_basic(realm, c
 		logic = "POSITIVE"
 		type = "role"
 		role  {
-			id = "${keycloak_role.test.id}" 
+			id = "${keycloak_role.test.id}"
 			required = false
 		}
 	}
-	
+
 	resource keycloak_openid_client_aggregate_policy test {
 		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
 		realm_id = "${keycloak_realm.test.id}"

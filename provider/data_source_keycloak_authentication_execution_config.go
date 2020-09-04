@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -28,11 +28,11 @@ func dataSourceKeycloakAuthenticationExecution() *schema.Resource {
 func dataSourceKeycloakAuthenticationExecutionRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmId := data.Get("realm_id").(string)
+	realmID := data.Get("realm_id").(string)
 	parentFlowAlias := data.Get("parent_flow_alias").(string)
-	providerId := data.Get("provider_id").(string)
+	providerID := data.Get("provider_id").(string)
 
-	authenticationExecutionInfo, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(realmId, parentFlowAlias, providerId)
+	authenticationExecutionInfo, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(realmID, parentFlowAlias, providerID)
 	if err != nil {
 		return err
 	}

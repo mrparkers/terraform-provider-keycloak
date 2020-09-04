@@ -54,6 +54,8 @@ type Realm struct {
 	RefreshTokenMaxReuse                int    `json:"refreshTokenMaxReuse"`
 	SsoSessionIdleTimeout               int    `json:"ssoSessionIdleTimeout,omitempty"`
 	SsoSessionMaxLifespan               int    `json:"ssoSessionMaxLifespan,omitempty"`
+	SsoSessionIdleTimeoutRememberMe     int    `json:"ssoSessionIdleTimeoutRememberMe,omitempty"`
+	SsoSessionMaxLifespanRememberMe     int    `json:"ssoSessionMaxLifespanRememberMe,omitempty"`
 	OfflineSessionIdleTimeout           int    `json:"offlineSessionIdleTimeout,omitempty"`
 	OfflineSessionMaxLifespan           int    `json:"offlineSessionMaxLifespan,omitempty"`
 	AccessTokenLifespan                 int    `json:"accessTokenLifespan,omitempty"`

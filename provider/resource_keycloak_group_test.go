@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -31,9 +31,9 @@ func TestAccKeycloakGroup_basicGroupNameContainsBackSlash(t *testing.T) {
 
 func runTestBasicGroup(t *testing.T, realmName, groupName, attributeName, attributeValue string) {
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakGroupDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakGroupDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroup_basic(realmName, groupName, attributeName, attributeValue),
@@ -58,9 +58,9 @@ func TestAccKeycloakGroup_createAfterManualDestroy(t *testing.T) {
 	attributeValue := acctest.RandString(250)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakGroupDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakGroupDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroup_basic(realmName, groupName, attributeName, attributeValue),
@@ -94,9 +94,9 @@ func TestAccKeycloakGroup_updateGroupName(t *testing.T) {
 	attributeValue := acctest.RandString(250)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakGroupDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakGroupDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroup_basic(realmName, groupNameBefore, attributeName, attributeValue),
@@ -123,9 +123,9 @@ func TestAccKeycloakGroup_updateRealm(t *testing.T) {
 	group := "terraform-group-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakGroupDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakGroupDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroup_updateRealmBefore(realmOne, realmTwo, group),
@@ -169,9 +169,9 @@ func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGrou
 	secondChildGroupResource := "keycloak_group.second_child_group"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakGroupDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakGroupDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroup_nested(realmName, parentGroupName, firstChildGroupName, secondChildGroupName, firstChildGroupResource),
@@ -186,6 +186,24 @@ func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGrou
 				),
 			},
 			{
+				ResourceName:        parentGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+			{
+				ResourceName:        firstChildGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+			{
+				ResourceName:        secondChildGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+			{
 				Config: testKeycloakGroup_nested(realmName, parentGroupName, firstChildGroupName, secondChildGroupName, parentGroupResource),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists(parentGroupResource),
@@ -196,6 +214,24 @@ func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGrou
 					resource.TestCheckResourceAttrPair(firstChildGroupResource, "parent_id", parentGroupResource, "id"),
 					resource.TestCheckResourceAttrPair(secondChildGroupResource, "parent_id", parentGroupResource, "id"),
 				),
+			},
+			{
+				ResourceName:        parentGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+			{
+				ResourceName:        firstChildGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
+			},
+			{
+				ResourceName:        secondChildGroupResource,
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: realmName + "/",
 			},
 		},
 	})
@@ -217,9 +253,9 @@ func TestAccKeycloakGroup_unsetOptionalAttributes(t *testing.T) {
 	resourceName := "keycloak_group.group"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroup_fromInterface(groupWithOptionalAttributes),

@@ -25,6 +25,9 @@ func (keycloakClient *KeycloakClient) GetClientAuthorizationPolicyByName(realmId
 	if err != nil {
 		return nil, err
 	}
+	if len(policies) == 0 {
+		return nil, fmt.Errorf("unable to find client authorization policy with name %s", name)
+	}
 	policy := policies[0]
 	policy.RealmId = realmId
 	policy.ResourceServerId = resourceServerId

@@ -112,6 +112,8 @@ The attributes below should be specified as [Go duration strings](https://golang
 
 - `sso_session_idle_timeout` - (Optional) The amount of time a session can be idle before it expires.
 - `sso_session_max_lifespan` - (Optional) The maximum amount of time before a session expires regardless of activity.
+- `sso_session_idle_timeout_remember_me` - (Optional) The amount of time a "remember me" session can be idle before it expires.
+- `sso_session_max_lifespan_remember_me` - (Optional) The maximum amount of time before a "remember me" session expires regardless of activity.
 - `offline_session_idle_timeout` - (Optional) The amount of time an offline session can be idle before it expires.
 - `offline_session_max_lifespan` - (Optional) The maximum amount of time before an offline session expires regardless of activity.
 - `access_token_lifespan` - (Optional) The amount of time an access token can be used before it expires.

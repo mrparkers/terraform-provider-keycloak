@@ -2,7 +2,7 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
 )
@@ -69,7 +69,6 @@ func getLdapFullNameMapperFromData(data *schema.ResourceData) *keycloak.LdapFull
 func setLdapFullNameMapperData(data *schema.ResourceData, ldapFullNameMapper *keycloak.LdapFullNameMapper) {
 	data.SetId(ldapFullNameMapper.Id)
 
-	data.Set("id", ldapFullNameMapper.Id)
 	data.Set("name", ldapFullNameMapper.Name)
 	data.Set("realm_id", ldapFullNameMapper.RealmId)
 	data.Set("ldap_user_federation_id", ldapFullNameMapper.LdapUserFederationId)

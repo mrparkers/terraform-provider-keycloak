@@ -1,8 +1,8 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -100,7 +100,7 @@ func getOpenidClientAuthorizationGroupPolicyResourceFromData(data *schema.Resour
 	return &resource
 }
 
-func setOpenidClientAuthorizationGroupPolicyResourceData(data *schema.ResourceData, policy *keycloak.OpenidClientAuthorizationGroupPolicy) {
+func setOpenidClientAuthorizationGroupPolicyResourceData(keycloakClient *keycloak.KeycloakClient, policy *keycloak.OpenidClientAuthorizationGroupPolicy, data *schema.ResourceData) error {
 	data.SetId(policy.Id)
 
 	data.Set("resource_server_id", policy.ResourceServerId)
@@ -110,7 +110,25 @@ func setOpenidClientAuthorizationGroupPolicyResourceData(data *schema.ResourceDa
 	data.Set("logic", policy.Logic)
 	data.Set("description", policy.Description)
 	data.Set("groups_claim", policy.GroupsClaim)
-	data.Set("groups", policy.Groups)
+
+	var groups []interface{}
+	for _, g := range policy.Groups {
+		// the "path" attribute is omitted by Keycloak, so we have to look this group up ourselves to get the path
+		group, err := keycloakClient.GetGroup(policy.RealmId, g.Id)
+		if err != nil {
+			return err
+		}
+
+		groups = append(groups, map[string]interface{}{
+			"id":              g.Id,
+			"path":            group.Path,
+			"extend_children": g.ExtendChildren,
+		})
+	}
+
+	data.Set("groups", groups)
+
+	return nil
 }
 
 func resourceKeycloakOpenidClientAuthorizationGroupPolicyCreate(data *schema.ResourceData, meta interface{}) error {
@@ -123,7 +141,10 @@ func resourceKeycloakOpenidClientAuthorizationGroupPolicyCreate(data *schema.Res
 		return err
 	}
 
-	setOpenidClientAuthorizationGroupPolicyResourceData(data, resource)
+	err = setOpenidClientAuthorizationGroupPolicyResourceData(keycloakClient, resource, data)
+	if err != nil {
+		return err
+	}
 
 	return resourceKeycloakOpenidClientAuthorizationGroupPolicyRead(data, meta)
 }
@@ -140,7 +161,10 @@ func resourceKeycloakOpenidClientAuthorizationGroupPolicyRead(data *schema.Resou
 		return handleNotFoundError(err, data)
 	}
 
-	setOpenidClientAuthorizationGroupPolicyResourceData(data, resource)
+	err = setOpenidClientAuthorizationGroupPolicyResourceData(keycloakClient, resource, data)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -155,7 +179,10 @@ func resourceKeycloakOpenidClientAuthorizationGroupPolicyUpdate(data *schema.Res
 		return err
 	}
 
-	setOpenidClientAuthorizationGroupPolicyResourceData(data, resource)
+	err = setOpenidClientAuthorizationGroupPolicyResourceData(keycloakClient, resource, data)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

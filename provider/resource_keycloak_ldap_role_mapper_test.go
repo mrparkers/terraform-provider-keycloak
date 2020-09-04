@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 	"testing"
@@ -15,9 +15,9 @@ func TestAccKeycloakLdapRoleMapper_basic(t *testing.T) {
 	roleMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapRoleMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapRoleMapper_basic(realmName, roleMapperName),
@@ -40,9 +40,9 @@ func TestAccKeycloakLdapRoleMapper_createAfterManualDestroy(t *testing.T) {
 	roleMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapRoleMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapRoleMapper_basic(realmName, roleMapperName),
@@ -70,9 +70,9 @@ func TestAccKeycloakLdapRoleMapper_modeValidation(t *testing.T) {
 	mode := randomStringInSlice(keycloakLdapRoleMapperModes)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapRoleMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "mode", acctest.RandString(10)),
@@ -92,9 +92,9 @@ func TestAccKeycloakLdapRoleMapper_membershipAttributeTypeValidation(t *testing.
 	membershipAttributeType := randomStringInSlice(keycloakLdapRoleMapperMembershipAttributeTypes)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapRoleMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "membership_attribute_type", acctest.RandString(10)),
@@ -114,9 +114,9 @@ func TestAccKeycloakLdapRoleMapper_userRolesRetrieveStrategyValidation(t *testin
 	userRolesRetrieveStrategy := randomStringInSlice(keycloakLdapRoleMapperUserRolesRetrieveStrategies)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapRoleMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "user_roles_retrieve_strategy", acctest.RandString(10)),
@@ -136,9 +136,9 @@ func TestAccKeycloakLdapRoleMapper_rolesLdapFilterValidation(t *testing.T) {
 	rolesLdapFilter := "(" + acctest.RandString(10) + ")"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapRoleMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "roles_ldap_filter", acctest.RandString(10)),
@@ -158,9 +158,9 @@ func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationForceNew(t *testing.T
 	roleMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapRoleMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapRoleMapper_updateLdapUserFederationBefore(realmOne, realmTwo, roleMapperName),
@@ -214,9 +214,9 @@ func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationInPlace(t *testing.T)
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapRoleMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapRoleMapper_basicFromInterface(realm, roleMapperOne),

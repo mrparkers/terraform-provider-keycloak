@@ -2,8 +2,8 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
 )
@@ -122,7 +122,13 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 	data.Set("priority", custom.Priority)
 
 	data.Set("cache_policy", custom.CachePolicy)
-	data.Set("config", custom.Config)
+
+	config := make(map[string]interface{})
+	for k, v := range custom.Config {
+		config[k] = strings.Join(v, ",")
+	}
+
+	data.Set("config", config)
 }
 
 func resourceKeycloakCustomUserFederationCreate(data *schema.ResourceData, meta interface{}) error {

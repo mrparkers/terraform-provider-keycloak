@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -15,9 +15,9 @@ func TestAccKeycloakDataSourceUser(t *testing.T) {
 	username := acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakUserDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testDataSourceKeycloakUser(realm, username),
@@ -43,10 +43,10 @@ func testAccCheckDataKeycloakUser(resourceName string) resource.TestCheckFunc {
 		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 		id := rs.Primary.ID
-		realmId := rs.Primary.Attributes["realm_id"]
+		realmID := rs.Primary.Attributes["realm_id"]
 		username := rs.Primary.Attributes["username"]
 
-		user, err := keycloakClient.GetUser(realmId, id)
+		user, err := keycloakClient.GetUser(realmID, id)
 		if err != nil {
 			return err
 		}

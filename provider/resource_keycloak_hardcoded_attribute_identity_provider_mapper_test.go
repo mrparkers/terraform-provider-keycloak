@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -19,9 +19,9 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_basic(t *testing.T)
 	userSession := randomBool()
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(realmName, alias, mapperName, attributeName, attributeValue, userSession),
@@ -41,9 +41,9 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(t *
 	syncMode := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(realmName, alias, mapperName, attributeName, attributeValue, userSession, syncMode),
@@ -64,9 +64,9 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_createAfterManualDe
 	userSession := randomBool()
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(realmName, alias, mapperName, attributeName, attributeValue, userSession),
@@ -100,9 +100,9 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig_cre
 	syncMode := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(realmName, alias, mapperName, attributeName, attributeValue, userSession, syncMode),
@@ -133,9 +133,9 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_basicUpdateRealm(t 
 	userSession := randomBool()
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(firstRealm, alias, mapperName, attributeName, attributeValue, userSession),
@@ -183,9 +183,9 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_basicUpdateAll(t *t
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basicFromInterface(firstMapper, userSession),

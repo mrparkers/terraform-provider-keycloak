@@ -6,26 +6,9 @@ workflows:
           matrix:
             parameters:
               keycloak-version:
+                - '11.0.1'
                 - '10.0.2'
                 - '9.0.3'
-                - '8.0.2'
-  release:
-    jobs:
-      - test:
-          keycloak-version: '10.0.2'
-          filters:
-            tags:
-              only: /\d+\.\d+\.\d+(-rc.\d+)?/
-            branches:
-              ignore: /.*/
-      - build-and-release:
-          requires:
-            - test
-          filters:
-            tags:
-              only: /\d+\.\d+\.\d+(-rc.\d+)?/
-            branches:
-              ignore: /.*/
 
 defaults:
   go_image: &go_image
@@ -53,13 +36,25 @@ jobs:
           keys:
             - go-cache-{{ checksum "go.sum" }}
       - run: go mod download
-      - run: go get github.com/jstemmer/go-junit-report
-      - run: mkdir $TEST_RESULTS
+      - run:
+          name: Install go-junit-report
+          command: |
+            go get github.com/jstemmer/go-junit-report
+            mkdir $TEST_RESULTS
       - save_cache:
           key: go-cache-{{ checksum "go.sum" }}
           paths:
             - /go/pkg
       - run:
+          name: Install Terraform
+          command: |
+            curl -LO https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
+            unzip terraform_${TF_VERSION}_linux_amd64.zip
+            sudo mv terraform ${TF_ACC_TERRAFORM_PATH}
+            which terraform
+            terraform version
+      - run:
+          name: Run Tests
           command: |
             ./scripts/wait-for-local-keycloak.sh
             ./scripts/create-terraform-client.sh
@@ -77,20 +72,6 @@ jobs:
       KEYCLOAK_TEST_PASSWORD_GRANT: "true"
       KEYCLOAK_VERSION: "<< parameters.keycloak-version >>"
       TEST_RESULTS: /tmp/test-results
-
-
-  build-and-release:
-    docker:
-      - <<: *go_image
-    working_directory: /go/src/github.com/mrparkers/terraform-provider-keycloak
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - "27:1c:fb:ea:7d:89:93:bb:13:54:5b:3f:b7:cc:1b:09"
-      - run: go mod download
-      - run:
-          command: |
-            ./scripts/build-release.sh
-            ./scripts/publish-release.sh
-
+      CHECKPOINT_DISABLE: "1"
+      TF_ACC_TERRAFORM_PATH: "/usr/local/bin/terraform"
+      TF_VERSION: "0.13.0"

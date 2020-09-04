@@ -2,11 +2,12 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func TestAccKeycloakAuthenticationExecution_basic(t *testing.T) {
@@ -14,9 +15,9 @@ func TestAccKeycloakAuthenticationExecution_basic(t *testing.T) {
 	parentAuthFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAuthenticationExecutionDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAuthenticationExecution_basic(realmName, parentAuthFlowAlias),
@@ -39,9 +40,9 @@ func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.
 	authParentFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAuthenticationExecutionDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAuthenticationExecution_basic(realmName, authParentFlowAlias),
@@ -71,9 +72,9 @@ func TestAccKeycloakAuthenticationExecution_updateAuthenticationExecutionRequire
 	authParentFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAuthenticationSubFlowDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationSubFlowDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAuthenticationExecution_basic(realmName, authParentFlowAlias),

@@ -1,7 +1,7 @@
 package keycloak
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"io/ioutil"
 	"log"
 	"os"

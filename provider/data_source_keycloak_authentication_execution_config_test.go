@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -15,19 +15,14 @@ func TestAccKeycloakDataSourceAuthenticationExecution(t *testing.T) {
 	parentFlowAlias := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testDataSourceKeycloakAuthenticationExecution(realm, parentFlowAlias),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationExecutionExists("keycloak_authentication_execution.execution"),
-				),
-			},
-			{
-				Config: testDataSourceKeycloakAuthenticationExecution(realm, parentFlowAlias),
-				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair("keycloak_authentication_execution.execution", "id", "data.keycloak_authentication_execution.execution", "id"),
 					resource.TestCheckResourceAttrPair("keycloak_authentication_execution.execution", "realm_id", "data.keycloak_authentication_execution.execution", "realm_id"),
 					resource.TestCheckResourceAttrPair("keycloak_authentication_execution.execution", "parent_flow_alias", "data.keycloak_authentication_execution.execution", "parent_flow_alias"),
@@ -49,11 +44,11 @@ func testAccCheckDataKeycloakAuthenticationExecution(resourceName string) resour
 		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 		id := rs.Primary.ID
-		realmId := rs.Primary.Attributes["realm_id"]
+		realmID := rs.Primary.Attributes["realm_id"]
 		parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
-		providerId := rs.Primary.Attributes["provider_id"]
+		providerID := rs.Primary.Attributes["provider_id"]
 
-		authenticationExecutionInfo, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(realmId, parentFlowAlias, providerId)
+		authenticationExecutionInfo, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(realmID, parentFlowAlias, providerID)
 		if err != nil {
 			return err
 		}

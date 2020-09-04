@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"testing"
 )
@@ -14,9 +14,9 @@ func TestAccKeycloakAuthenticationFlow_basic(t *testing.T) {
 	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAuthenticationFlowDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationFlowDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAuthenticationFlow_basic(realmName, authFlowAlias),
@@ -39,9 +39,9 @@ func TestAccKeycloakAuthenticationFlow_createAfterManualDestroy(t *testing.T) {
 	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAuthenticationFlowDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationFlowDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAuthenticationFlow_basic(realmName, authFlowAlias),
@@ -73,9 +73,9 @@ func TestAccKeycloakAuthenticationFlow_updateAuthenticationFlow(t *testing.T) {
 	authFlowAliasAfter := "terraform-flow-after-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAuthenticationFlowDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationFlowDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAuthenticationFlow_basic(realmName, authFlowAliasBefore),
@@ -102,9 +102,9 @@ func TestAccKeycloakAuthenticationFlow_updateRealm(t *testing.T) {
 	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAuthenticationFlowDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationFlowDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAuthenticationFlow_updateRealmBefore(realmOne, realmTwo, authFlowAlias),

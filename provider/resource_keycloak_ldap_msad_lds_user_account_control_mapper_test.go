@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"testing"
 )
@@ -14,9 +14,9 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_basic(t *testing.T) {
 	msadLdsUacMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_basic(realmName, msadLdsUacMapperName),
@@ -39,9 +39,9 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy
 	msadLdsUacMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_basic(realmName, msadLdsUacMapperName),
@@ -69,9 +69,9 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederation
 	msadLdsUacMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederationBefore(realmOne, realmTwo, msadLdsUacMapperName),

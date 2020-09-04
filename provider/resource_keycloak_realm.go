@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -44,7 +44,6 @@ func resourceKeycloakRealm() *schema.Resource {
 			},
 
 			// Login Config
-
 			"registration_allowed": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -92,8 +91,7 @@ func resourceKeycloakRealm() *schema.Resource {
 				Default:     "external",
 			},
 
-			//Smtp server
-
+			// Smtp server
 			"smtp_server": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -162,7 +160,6 @@ func resourceKeycloakRealm() *schema.Resource {
 			},
 
 			// Themes
-
 			"login_theme": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -201,7 +198,19 @@ func resourceKeycloakRealm() *schema.Resource {
 				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
+			"sso_session_idle_timeout_remember_me": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
 			"sso_session_max_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"sso_session_max_lifespan_remember_me": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
@@ -262,7 +271,7 @@ func resourceKeycloakRealm() *schema.Resource {
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
 
-			//internationalization
+			// internationalization
 			"internationalization": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -283,7 +292,7 @@ func resourceKeycloakRealm() *schema.Resource {
 				},
 			},
 
-			//Security Defenses
+			// Security Defenses
 			"security_defenses": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -381,13 +390,15 @@ func resourceKeycloakRealm() *schema.Resource {
 					},
 				},
 			},
+
+			// authentication password policy
 			"password_policy": {
 				Type:        schema.TypeString,
 				Description: "String that represents the passwordPolicies that are in place. Each policy is separated with \" and \". Supported policies can be found in the server-info providers page. example: \"upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername(undefined)\"",
 				Optional:    true,
 			},
 
-			//flow bindings
+			// authentication flow bindings
 			"browser_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for BrowserFlow",
@@ -424,6 +435,8 @@ func resourceKeycloakRealm() *schema.Resource {
 				Optional:    true,
 				Default:     "docker auth",
 			},
+
+			// misc attributes
 			"attributes": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -569,6 +582,22 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 			return nil, err
 		}
 		realm.SsoSessionMaxLifespan = ssoSessionMaxLifespanDurationString
+	}
+
+	if ssoSessionIdleTimeoutRememberMe := data.Get("sso_session_idle_timeout_remember_me").(string); ssoSessionIdleTimeoutRememberMe != "" {
+		ssoSessionIdleTimeoutRememberMeDurationString, err := getSecondsFromDurationString(ssoSessionIdleTimeoutRememberMe)
+		if err != nil {
+			return nil, err
+		}
+		realm.SsoSessionIdleTimeoutRememberMe = ssoSessionIdleTimeoutRememberMeDurationString
+	}
+
+	if ssoSessionMaxLifespanRememberMe := data.Get("sso_session_max_lifespan_remember_me").(string); ssoSessionMaxLifespanRememberMe != "" {
+		ssoSessionMaxLifespanRememberMeDurationString, err := getSecondsFromDurationString(ssoSessionMaxLifespanRememberMe)
+		if err != nil {
+			return nil, err
+		}
+		realm.SsoSessionMaxLifespanRememberMe = ssoSessionMaxLifespanRememberMeDurationString
 	}
 
 	if offlineSessionIdleTimeout := data.Get("offline_session_idle_timeout").(string); offlineSessionIdleTimeout != "" {
@@ -808,6 +837,8 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("refresh_token_max_reuse", realm.RefreshTokenMaxReuse)
 	data.Set("sso_session_idle_timeout", getDurationStringFromSeconds(realm.SsoSessionIdleTimeout))
 	data.Set("sso_session_max_lifespan", getDurationStringFromSeconds(realm.SsoSessionMaxLifespan))
+	data.Set("sso_session_idle_timeout_remember_me", getDurationStringFromSeconds(realm.SsoSessionIdleTimeoutRememberMe))
+	data.Set("sso_session_max_lifespan_remember_me", getDurationStringFromSeconds(realm.SsoSessionMaxLifespanRememberMe))
 	data.Set("offline_session_idle_timeout", getDurationStringFromSeconds(realm.OfflineSessionIdleTimeout))
 	data.Set("offline_session_max_lifespan", getDurationStringFromSeconds(realm.OfflineSessionMaxLifespan))
 	data.Set("access_token_lifespan", getDurationStringFromSeconds(realm.AccessTokenLifespan))

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -18,9 +18,9 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_basic(t *testing.T) 
 	claimName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeImporterIdentityProviderMapper_basic(realmName, alias, mapperName, userAttribute, claimName),
@@ -39,9 +39,9 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(t *t
 	syncMode := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(realmName, alias, mapperName, userAttribute, claimName, syncMode),
@@ -61,9 +61,9 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_createAfterManualDes
 	claimName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeImporterIdentityProviderMapper_basic(realmName, alias, mapperName, userAttribute, claimName),
@@ -96,9 +96,9 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig_crea
 	syncMode := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(realmName, alias, mapperName, userAttribute, claimName, syncMode),
@@ -129,9 +129,9 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_basicUpdateRealm(t *
 	claimName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeImporterIdentityProviderMapper_basic(firstRealm, alias, mapperName, userAttribute, claimName),
@@ -176,9 +176,9 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_basicUpdateAll(t *te
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakAttributeImporterIdentityProviderMapper_basicFromInterface(firstMapper),
@@ -308,7 +308,7 @@ resource keycloak_attribute_importer_identity_provider_mapper oidc {
 	user_attribute          = "%s"
 	claim_name              = "%s"
 	extra_config 			= {
-		syncMode = "%s"    
+		syncMode = "%s"
 	}
 }
 	`, realm, alias, name, userAttribute, claimName, syncMode)

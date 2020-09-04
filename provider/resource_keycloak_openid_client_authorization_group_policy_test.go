@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-func TestResourceKeycloakOpenidClientAuthorizationGroupPolicy(t *testing.T) {
+func TestAccKeycloakOpenidClientAuthorizationGroupPolicy(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testResourceKeycloakOpenidClientAuthorizationGroupPolicyDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testResourceKeycloakOpenidClientAuthorizationGroupPolicyDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testResourceKeycloakOpenidClientAuthorizationGroupPolicy_basic(realmName, clientId),
@@ -87,7 +87,7 @@ func testResourceKeycloakOpenidClientAuthorizationGroupPolicy_basic(realm, clien
 	resource keycloak_realm test {
 		realm = "%s"
 	}
-	
+
 	resource keycloak_openid_client test {
 		client_id                = "%s"
 		realm_id                 = "${keycloak_realm.test.id}"

@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -56,7 +56,6 @@ func getLdapMsadUserAccountControlMapperFromData(data *schema.ResourceData) *key
 func setLdapMsadUserAccountControlMapperData(data *schema.ResourceData, ldapMsadUserAccountControlMapper *keycloak.LdapMsadUserAccountControlMapper) {
 	data.SetId(ldapMsadUserAccountControlMapper.Id)
 
-	data.Set("id", ldapMsadUserAccountControlMapper.Id)
 	data.Set("name", ldapMsadUserAccountControlMapper.Name)
 	data.Set("realm_id", ldapMsadUserAccountControlMapper.RealmId)
 	data.Set("ldap_user_federation_id", ldapMsadUserAccountControlMapper.LdapUserFederationId)

@@ -1,8 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -32,9 +31,8 @@ func dataSourceKeycloakOpenidClientAuthorizationPolicy() *schema.Resource {
 				Computed: true,
 			},
 			"logic": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice(keycloakPolicyLogicTypes, false),
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"policies": {
 				Type:     schema.TypeSet,
