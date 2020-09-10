@@ -4,12 +4,12 @@ repo_url: https://github.com/mrparkers/terraform-provider-keycloak
 nav:
 - Getting Started: index.md
 - Data Sources:
-  - keycloak_group: data_sources/keycloak_group.md
-  - keycloak_openid_client: data_sources/keycloak_openid_client.md
-  - keycloak_realm: data_sources/keycloak_realm.md
-  - keycloak_realm_keys: data_sources/keycloak_realm_keys.md
-  - keycloak_role: data_sources/keycloak_role.md
-  - keycloak_saml_client_installation_provider: data_sources/keycloak_saml_client_installation_provider.md
+  - keycloak_group: data-sources/keycloak_group.md
+  - keycloak_openid_client: data-sources/keycloak_openid_client.md
+  - keycloak_realm: data-sources/keycloak_realm.md
+  - keycloak_realm_keys: data-sources/keycloak_realm_keys.md
+  - keycloak_role: data-sources/keycloak_role.md
+  - keycloak_saml_client_installation_provider: data-sources/keycloak_saml_client_installation_provider.md
 - Resources:
   - keycloak_realm: resources/keycloak_realm.md
   - keycloak_realm_events: resources/keycloak_realm_events.md
