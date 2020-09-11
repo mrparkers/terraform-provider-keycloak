@@ -443,127 +443,143 @@ func resourceKeycloakRealm() *schema.Resource {
 			},
 
 			// WebAuthn
-			"web_authn_policy_acceptable_aaguids": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+			"web_authn_policy": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"acceptable_aaguids": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Optional: true,
+						},
+						"attestation_conveyance_preference": {
+							Type:        schema.TypeString,
+							Description: "Either none, indirect or direct",
+							Optional:    true,
+							Default:     "not specified",
+						},
+						"authenticator_attachment": {
+							Type:        schema.TypeString,
+							Description: "Either platform or cross-platform",
+							Optional:    true,
+							Default:     "not specified",
+						},
+						"avoid_same_authenticator_register": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"create_timeout": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  0,
+						},
+						"require_resident_key": {
+							Type:        schema.TypeString,
+							Description: "Either Yes or No",
+							Optional:    true,
+							Default:     "not specified",
+						},
+						"rp_entity_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "keycloak",
+						},
+						"rp_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "",
+						},
+						"signature_algorithms": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "Keycloak lists ES256, ES384, ES512, RS256, ES384, ES512 at the time of writing",
+							Optional:    true,
+							Computed:    true,
+						},
+						"user_verification_requirement": {
+							Type:        schema.TypeString,
+							Description: "Either required, preferred or discouraged",
+							Optional:    true,
+							Default:     "not specified",
+						},
+					},
 				},
+			},
+
+			// WebAuthn Passwordless
+			"web_authn_passwordless_policy": {
+				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
-			},
-			"web_authn_policy_attestation_conveyance_preference": {
-				Type:        schema.TypeString,
-				Description: "Either none, indirect or direct",
-				Optional:    true,
-				Default:     "not specified",
-			},
-			"web_authn_policy_authenticator_attachment": {
-				Type:        schema.TypeString,
-				Description: "Either platform or cross-platform",
-				Optional:    true,
-				Default:     "not specified",
-			},
-			"web_authn_policy_avoid_same_authenticator_register": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"web_authn_policy_create_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  0,
-			},
-			"web_authn_policy_passwordless_acceptable_aaguids": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"acceptable_aaguids": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Optional: true,
+						},
+						"attestation_conveyance_preference": {
+							Type:        schema.TypeString,
+							Description: "Either none, indirect or direct",
+							Optional:    true,
+							Default:     "not specified",
+						},
+						"authenticator_attachment": {
+							Type:        schema.TypeString,
+							Description: "Either platform or cross-platform",
+							Optional:    true,
+							Default:     "not specified",
+						},
+						"avoid_same_authenticator_register": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"create_timeout": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  0,
+						},
+						"require_resident_key": {
+							Type:        schema.TypeString,
+							Description: "Either Yes or No",
+							Optional:    true,
+							Default:     "not specified",
+						},
+						"rp_entity_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "keycloak",
+						},
+						"rp_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "",
+						},
+						"signature_algorithms": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "Keycloak lists ES256, ES384, ES512, RS256, ES384, ES512 at the time of writing",
+							Optional:    true,
+							Computed:    true,
+						},
+						"user_verification_requirement": {
+							Type:        schema.TypeString,
+							Description: "Either required, preferred or discouraged",
+							Optional:    true,
+							Default:     "not specified",
+						},
+					},
 				},
-				Optional: true,
-				Computed: true,
-			},
-			"web_authn_policy_passwordless_attestation_conveyance_preference": {
-				Type:        schema.TypeString,
-				Description: "Either none, indirect or direct",
-				Optional:    true,
-				Default:     "not specified",
-			},
-			"web_authn_policy_passwordless_authenticator_attachment": {
-				Type:        schema.TypeString,
-				Description: "Either platform or cross-platform",
-				Optional:    true,
-				Default:     "not specified",
-			},
-			"web_authn_policy_passwordless_avoid_same_authenticator_register": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"web_authn_policy_passwordless_create_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  0,
-			},
-			"web_authn_policy_passwordless_require_resident_key": {
-				Type:        schema.TypeString,
-				Description: "Either Yes or No",
-				Optional:    true,
-				Default:     "not specified",
-			},
-			"web_authn_policy_passwordless_rp_entity_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "keycloak",
-			},
-			"web_authn_policy_passwordless_rp_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			"web_authn_policy_passwordless_signature_algorithms": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "Keycloak lists ES256, ES384, ES512, RS256, ES384, ES512 at the time of writing",
-				Optional:    true,
-				Computed:    true,
-			},
-			"web_authn_policy_passwordless_user_verification_requirement": {
-				Type:        schema.TypeString,
-				Description: "Either required, preferred or discourage",
-				Optional:    true,
-				Default:     "not specified",
-			},
-			"web_authn_policy_require_resident_key": {
-				Type:        schema.TypeString,
-				Description: "Either Yes or No",
-				Optional:    true,
-				Default:     "not specified",
-			},
-			"web_authn_policy_rp_entity_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "keycloak",
-			},
-			"web_authn_policy_rp_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			"web_authn_policy_signature_algorithms": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "Keycloak lists ES256, ES384, ES512, RS256, ES384, ES512 at the time of writing",
-				Optional:    true,
-				Computed:    true,
-			},
-			"web_authn_policy_user_verification_requirement": {
-				Type:        schema.TypeString,
-				Description: "Either required, preferred or discouraged",
-				Optional:    true,
-				Default:     "not specified",
 			},
 		},
 	}
@@ -874,76 +890,85 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	realm.Attributes = attributes
 
 	//WebAuthn
-	realm.WebAuthnPolicyAcceptableAaguids = interfaceSliceToStringSlice(data.Get("web_authn_policy_acceptable_aaguids").([]interface{}))
+	if v, ok := data.GetOk("web_authn_policy"); ok {
+		webAuthnPolicy := v.([]interface{})[0].(map[string]interface{})
 
-	if webAuthnPolicyAttestationConveyancePreference, ok := data.GetOk("web_authn_policy_attestation_conveyance_preference"); ok {
-		realm.WebAuthnPolicyAttestationConveyancePreference = webAuthnPolicyAttestationConveyancePreference.(string)
+		realm.WebAuthnPolicyAcceptableAaguids = interfaceSliceToStringSlice(webAuthnPolicy["acceptable_aaguids"].([]interface{}))
+
+		if webAuthnPolicyAttestationConveyancePreference, ok := webAuthnPolicy["attestation_conveyance_preference"]; ok {
+			realm.WebAuthnPolicyAttestationConveyancePreference = webAuthnPolicyAttestationConveyancePreference.(string)
+		}
+
+		if webAuthnPolicyAuthenticatorAttachment, ok := webAuthnPolicy["authenticator_attachment"]; ok {
+			realm.WebAuthnPolicyAuthenticatorAttachment = webAuthnPolicyAuthenticatorAttachment.(string)
+		}
+
+		if webAuthnPolicyAvoidSameAuthenticatorRegister, ok := webAuthnPolicy["avoid_same_authenticator_register"]; ok {
+			realm.WebAuthnPolicyAvoidSameAuthenticatorRegister = webAuthnPolicyAvoidSameAuthenticatorRegister.(bool)
+		}
+
+		if webAuthnPolicyCreateTimeout, ok := webAuthnPolicy["create_timeout"]; ok {
+			realm.WebAuthnPolicyCreateTimeout = webAuthnPolicyCreateTimeout.(int)
+		}
+
+		if webAuthnPolicyRequireResidentKey, ok := webAuthnPolicy["require_resident_key"]; ok {
+			realm.WebAuthnPolicyRequireResidentKey = webAuthnPolicyRequireResidentKey.(string)
+		}
+
+		if webAuthnPolicyRpEntityName, ok := webAuthnPolicy["rp_entity_name"]; ok {
+			realm.WebAuthnPolicyRpEntityName = webAuthnPolicyRpEntityName.(string)
+		}
+
+		if webAuthnPolicyRpId, ok := webAuthnPolicy["rp_id"]; ok {
+			realm.WebAuthnPolicyRpId = webAuthnPolicyRpId.(string)
+		}
+
+		realm.WebAuthnPolicySignatureAlgorithms = interfaceSliceToStringSlice(webAuthnPolicy["signature_algorithms"].([]interface{}))
+
+		if webAuthnPolicyUserVerificationRequirement, ok := webAuthnPolicy["user_verification_requirement"]; ok {
+			realm.WebAuthnPolicyUserVerificationRequirement = webAuthnPolicyUserVerificationRequirement.(string)
+		}
 	}
 
-	if webAuthnPolicyAuthenticatorAttachment, ok := data.GetOk("web_authn_policy_authenticator_attachment"); ok {
-		realm.WebAuthnPolicyAuthenticatorAttachment = webAuthnPolicyAuthenticatorAttachment.(string)
-	}
+	//WebAuthn Passwordless
+	if v, ok := data.GetOk("web_authn_passwordless_policy"); ok {
+		webAuthnPasswordlessPolicy := v.([]interface{})[0].(map[string]interface{})
 
-	if webAuthnPolicyAvoidSameAuthenticatorRegister, ok := data.GetOk("web_authn_policy_avoid_same_authenticator_register"); ok {
-		realm.WebAuthnPolicyAvoidSameAuthenticatorRegister = webAuthnPolicyAvoidSameAuthenticatorRegister.(bool)
-	}
+		realm.WebAuthnPolicyPasswordlessAcceptableAaguids = interfaceSliceToStringSlice(webAuthnPasswordlessPolicy["acceptable_aaguids"].([]interface{}))
 
-	if webAuthnPolicyCreateTimeout, ok := data.GetOk("web_authn_policy_create_timeout"); ok {
-		realm.WebAuthnPolicyCreateTimeout = webAuthnPolicyCreateTimeout.(int)
-	}
+		if webAuthnPolicyPasswordlessAttestationConveyancePreference, ok := webAuthnPasswordlessPolicy["attestation_conveyance_preference"]; ok {
+			realm.WebAuthnPolicyPasswordlessAttestationConveyancePreference = webAuthnPolicyPasswordlessAttestationConveyancePreference.(string)
+		}
 
-	realm.WebAuthnPolicyPasswordlessAcceptableAaguids = interfaceSliceToStringSlice(data.Get("web_authn_policy_passwordless_acceptable_aaguids").([]interface{}))
+		if webAuthnPolicyPasswordlessAuthenticatorAttachment, ok := webAuthnPasswordlessPolicy["authenticator_attachment"]; ok {
+			realm.WebAuthnPolicyPasswordlessAuthenticatorAttachment = webAuthnPolicyPasswordlessAuthenticatorAttachment.(string)
+		}
 
-	if webAuthnPolicyPasswordlessAttestationConveyancePreference, ok := data.GetOk("web_authn_policy_passwordless_attestation_conveyance_preference"); ok {
-		realm.WebAuthnPolicyPasswordlessAttestationConveyancePreference = webAuthnPolicyPasswordlessAttestationConveyancePreference.(string)
-	}
+		if webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister, ok := webAuthnPasswordlessPolicy["avoid_same_authenticator_register"]; ok {
+			realm.WebAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister = webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister.(bool)
+		}
 
-	if webAuthnPolicyPasswordlessAuthenticatorAttachment, ok := data.GetOk("web_authn_policy_passwordless_authenticator_attachment"); ok {
-		realm.WebAuthnPolicyPasswordlessAuthenticatorAttachment = webAuthnPolicyPasswordlessAuthenticatorAttachment.(string)
-	}
+		if webAuthnPolicyPasswordlessCreateTimeout, ok := webAuthnPasswordlessPolicy["create_timeout"]; ok {
+			realm.WebAuthnPolicyPasswordlessCreateTimeout = webAuthnPolicyPasswordlessCreateTimeout.(int)
+		}
 
-	if webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister, ok := data.GetOk("web_authn_policy_passwordless_avoid_same_authenticator_register"); ok {
-		realm.WebAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister = webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister.(bool)
-	}
+		if webAuthnPolicyPasswordlessRequireResidentKey, ok := webAuthnPasswordlessPolicy["require_resident_key"]; ok {
+			realm.WebAuthnPolicyPasswordlessRequireResidentKey = webAuthnPolicyPasswordlessRequireResidentKey.(string)
+		}
 
-	if webAuthnPolicyPasswordlessCreateTimeout, ok := data.GetOk("web_authn_policy_passwordless_create_timeout"); ok {
-		realm.WebAuthnPolicyPasswordlessCreateTimeout = webAuthnPolicyPasswordlessCreateTimeout.(int)
-	}
+		if webAuthnPolicyPasswordlessRpEntityName, ok := webAuthnPasswordlessPolicy["rp_entity_name"]; ok {
+			realm.WebAuthnPolicyPasswordlessRpEntityName = webAuthnPolicyPasswordlessRpEntityName.(string)
+		}
 
-	if webAuthnPolicyPasswordlessRequireResidentKey, ok := data.GetOk("web_authn_policy_passwordless_require_resident_key"); ok {
-		realm.WebAuthnPolicyPasswordlessRequireResidentKey = webAuthnPolicyPasswordlessRequireResidentKey.(string)
-	}
+		if webAuthnPolicyPasswordlessRpId, ok := webAuthnPasswordlessPolicy["rp_id"]; ok {
+			realm.WebAuthnPolicyPasswordlessRpId = webAuthnPolicyPasswordlessRpId.(string)
+		}
 
-	if webAuthnPolicyPasswordlessRpEntityName, ok := data.GetOk("web_authn_policy_passwordless_rp_entity_name"); ok {
-		realm.WebAuthnPolicyPasswordlessRpEntityName = webAuthnPolicyPasswordlessRpEntityName.(string)
-	}
+		realm.WebAuthnPolicyPasswordlessSignatureAlgorithms = interfaceSliceToStringSlice(webAuthnPasswordlessPolicy["signature_algorithms"].([]interface{}))
 
-	if webAuthnPolicyPasswordlessRpId, ok := data.GetOk("web_authn_policy_passwordless_rp_id"); ok {
-		realm.WebAuthnPolicyPasswordlessRpId = webAuthnPolicyPasswordlessRpId.(string)
-	}
-
-	realm.WebAuthnPolicyPasswordlessSignatureAlgorithms = interfaceSliceToStringSlice(data.Get("web_authn_policy_passwordless_signature_algorithms").([]interface{}))
-
-	if webAuthnPolicyPasswordlessUserVerificationRequirement, ok := data.GetOk("web_authn_policy_passwordless_user_verification_requirement"); ok {
-		realm.WebAuthnPolicyPasswordlessUserVerificationRequirement = webAuthnPolicyPasswordlessUserVerificationRequirement.(string)
-	}
-
-	if webAuthnPolicyRequireResidentKey, ok := data.GetOk("web_authn_policy_require_resident_key"); ok {
-		realm.WebAuthnPolicyRequireResidentKey = webAuthnPolicyRequireResidentKey.(string)
-	}
-
-	if webAuthnPolicyRpEntityName, ok := data.GetOk("web_authn_policy_rp_entity_name"); ok {
-		realm.WebAuthnPolicyRpEntityName = webAuthnPolicyRpEntityName.(string)
-	}
-
-	if webAuthnPolicyRpId, ok := data.GetOk("web_authn_policy_rp_id"); ok {
-		realm.WebAuthnPolicyRpId = webAuthnPolicyRpId.(string)
-	}
-
-	realm.WebAuthnPolicySignatureAlgorithms = interfaceSliceToStringSlice(data.Get("web_authn_policy_signature_algorithms").([]interface{}))
-
-	if webAuthnPolicyUserVerificationRequirement, ok := data.GetOk("web_authn_policy_user_verification_requirement"); ok {
-		realm.WebAuthnPolicyUserVerificationRequirement = webAuthnPolicyUserVerificationRequirement.(string)
+		if webAuthnPolicyPasswordlessUserVerificationRequirement, ok := webAuthnPasswordlessPolicy["user_verification_requirement"]; ok {
+			realm.WebAuthnPolicyPasswordlessUserVerificationRequirement = webAuthnPolicyPasswordlessUserVerificationRequirement.(string)
+		}
 	}
 
 	return realm, nil
@@ -1087,26 +1112,32 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("docker_authentication_flow", realm.DockerAuthenticationFlow)
 
 	//WebAuthn
-	data.Set("web_authn_policy_acceptable_aaguids", realm.WebAuthnPolicyAcceptableAaguids)
-	data.Set("web_authn_policy_attestation_conveyance_preference", realm.WebAuthnPolicyAttestationConveyancePreference)
-	data.Set("web_authn_policy_authenticator_attachment", realm.WebAuthnPolicyAuthenticatorAttachment)
-	data.Set("web_authn_policy_avoid_same_authenticator_register", realm.WebAuthnPolicyAvoidSameAuthenticatorRegister)
-	data.Set("web_authn_policy_create_timeout", realm.WebAuthnPolicyCreateTimeout)
-	data.Set("web_authn_policy_passwordless_acceptable_aaguids", realm.WebAuthnPolicyPasswordlessAcceptableAaguids)
-	data.Set("web_authn_policy_passwordless_attestation_conveyance_preference", realm.WebAuthnPolicyPasswordlessAttestationConveyancePreference)
-	data.Set("web_authn_policy_passwordless_authenticator_attachment", realm.WebAuthnPolicyPasswordlessAuthenticatorAttachment)
-	data.Set("web_authn_policy_passwordless_avoid_same_authenticator_register", realm.WebAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister)
-	data.Set("web_authn_policy_passwordless_create_timeout", realm.WebAuthnPolicyPasswordlessCreateTimeout)
-	data.Set("web_authn_policy_passwordless_require_resident_key", realm.WebAuthnPolicyPasswordlessRequireResidentKey)
-	data.Set("web_authn_policy_passwordless_rp_entity_name", realm.WebAuthnPolicyPasswordlessRpEntityName)
-	data.Set("web_authn_policy_passwordless_rp_id", realm.WebAuthnPolicyPasswordlessRpId)
-	data.Set("web_authn_policy_passwordless_signature_algorithms", realm.WebAuthnPolicyPasswordlessSignatureAlgorithms)
-	data.Set("web_authn_policy_passwordless_user_verification_requirement", realm.WebAuthnPolicyPasswordlessUserVerificationRequirement)
-	data.Set("web_authn_policy_require_resident_key", realm.WebAuthnPolicyRequireResidentKey)
-	data.Set("web_authn_policy_rp_entity_name", realm.WebAuthnPolicyRpEntityName)
-	data.Set("web_authn_policy_rp_id", realm.WebAuthnPolicyRpId)
-	data.Set("web_authn_policy_signature_algorithms", realm.WebAuthnPolicySignatureAlgorithms)
-	data.Set("web_authn_policy_user_verification_requirement", realm.WebAuthnPolicyUserVerificationRequirement)
+	webAuthnPolicy := make(map[string]interface{})
+	data.Set("web_authn_policy", webAuthnPolicy)
+	webAuthnPolicy["acceptable_aaguids"] = realm.WebAuthnPolicyAcceptableAaguids
+	webAuthnPolicy["attestation_conveyance_preference"] = realm.WebAuthnPolicyAttestationConveyancePreference
+	webAuthnPolicy["authenticator_attachment"] = realm.WebAuthnPolicyAuthenticatorAttachment
+	webAuthnPolicy["avoid_same_authenticator_register"] = realm.WebAuthnPolicyAvoidSameAuthenticatorRegister
+	webAuthnPolicy["create_timeout"] = realm.WebAuthnPolicyCreateTimeout
+	webAuthnPolicy["require_resident_key"] = realm.WebAuthnPolicyRequireResidentKey
+	webAuthnPolicy["rp_entity_name"] = realm.WebAuthnPolicyRpEntityName
+	webAuthnPolicy["rp_id"] = realm.WebAuthnPolicyRpId
+	webAuthnPolicy["signature_algorithms"] = realm.WebAuthnPolicySignatureAlgorithms
+	webAuthnPolicy["user_verification_requirement"] = realm.WebAuthnPolicyUserVerificationRequirement
+
+	//WebAuthn Passwordless
+	webAuthnPasswordlessPolicy := make(map[string]interface{})
+	data.Set("web_authn_passwordless_policy", webAuthnPasswordlessPolicy)
+	webAuthnPasswordlessPolicy["acceptable_aaguids"] = realm.WebAuthnPolicyPasswordlessAcceptableAaguids
+	webAuthnPasswordlessPolicy["attestation_conveyance_preference"] = realm.WebAuthnPolicyPasswordlessAttestationConveyancePreference
+	webAuthnPasswordlessPolicy["authenticator_attachment"] = realm.WebAuthnPolicyPasswordlessAuthenticatorAttachment
+	webAuthnPasswordlessPolicy["avoid_same_authenticator_register"] = realm.WebAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister
+	webAuthnPasswordlessPolicy["create_timeout"] = realm.WebAuthnPolicyPasswordlessCreateTimeout
+	webAuthnPasswordlessPolicy["require_resident_key"] = realm.WebAuthnPolicyPasswordlessRequireResidentKey
+	webAuthnPasswordlessPolicy["rp_entity_name"] = realm.WebAuthnPolicyPasswordlessRpEntityName
+	webAuthnPasswordlessPolicy["rp_id"] = realm.WebAuthnPolicyPasswordlessRpId
+	webAuthnPasswordlessPolicy["signature_algorithms"] = realm.WebAuthnPolicyPasswordlessSignatureAlgorithms
+	webAuthnPasswordlessPolicy["user_verification_requirement"] = realm.WebAuthnPolicyPasswordlessUserVerificationRequirement
 
 	attributes := map[string]interface{}{}
 	if v, ok := data.GetOk("attributes"); ok {
