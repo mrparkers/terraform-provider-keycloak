@@ -446,6 +446,7 @@ func resourceKeycloakRealm() *schema.Resource {
 			"web_authn_policy": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"acceptable_aaguids": {
@@ -516,6 +517,7 @@ func resourceKeycloakRealm() *schema.Resource {
 			"web_authn_passwordless_policy": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"acceptable_aaguids": {
