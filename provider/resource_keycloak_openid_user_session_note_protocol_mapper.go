@@ -87,9 +87,9 @@ func mapFromDataToOpenIdUserSessionNoteProtocolMapper(data *schema.ResourceData)
 		AddToIdToken:     data.Get("add_to_id_token").(bool),
 		AddToAccessToken: data.Get("add_to_access_token").(bool),
 
-		ClaimName:            data.Get("claim_name").(string),
-		ClaimValueType:       data.Get("claim_value_type").(string),
-		UserSessionNote:      data.Get("session_note").(string),
+		ClaimName:       data.Get("claim_name").(string),
+		ClaimValueType:  data.Get("claim_value_type").(string),
+		UserSessionNote: data.Get("session_note").(string),
 	}
 }
 
