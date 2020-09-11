@@ -1113,7 +1113,6 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 
 	//WebAuthn
 	webAuthnPolicy := make(map[string]interface{})
-	data.Set("web_authn_policy", webAuthnPolicy)
 	webAuthnPolicy["acceptable_aaguids"] = realm.WebAuthnPolicyAcceptableAaguids
 	webAuthnPolicy["attestation_conveyance_preference"] = realm.WebAuthnPolicyAttestationConveyancePreference
 	webAuthnPolicy["authenticator_attachment"] = realm.WebAuthnPolicyAuthenticatorAttachment
@@ -1124,10 +1123,10 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	webAuthnPolicy["rp_id"] = realm.WebAuthnPolicyRpId
 	webAuthnPolicy["signature_algorithms"] = realm.WebAuthnPolicySignatureAlgorithms
 	webAuthnPolicy["user_verification_requirement"] = realm.WebAuthnPolicyUserVerificationRequirement
+	data.Set("web_authn_policy", []interface{}{webAuthnPolicy})
 
 	//WebAuthn Passwordless
 	webAuthnPasswordlessPolicy := make(map[string]interface{})
-	data.Set("web_authn_passwordless_policy", webAuthnPasswordlessPolicy)
 	webAuthnPasswordlessPolicy["acceptable_aaguids"] = realm.WebAuthnPolicyPasswordlessAcceptableAaguids
 	webAuthnPasswordlessPolicy["attestation_conveyance_preference"] = realm.WebAuthnPolicyPasswordlessAttestationConveyancePreference
 	webAuthnPasswordlessPolicy["authenticator_attachment"] = realm.WebAuthnPolicyPasswordlessAuthenticatorAttachment
@@ -1138,6 +1137,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	webAuthnPasswordlessPolicy["rp_id"] = realm.WebAuthnPolicyPasswordlessRpId
 	webAuthnPasswordlessPolicy["signature_algorithms"] = realm.WebAuthnPolicyPasswordlessSignatureAlgorithms
 	webAuthnPasswordlessPolicy["user_verification_requirement"] = realm.WebAuthnPolicyPasswordlessUserVerificationRequirement
+	data.Set("web_authn_passwordless_policy", []interface{}{webAuthnPasswordlessPolicy})
 
 	attributes := map[string]interface{}{}
 	if v, ok := data.GetOk("attributes"); ok {
