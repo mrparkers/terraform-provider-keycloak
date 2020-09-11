@@ -31,7 +31,6 @@ var (
 	userClientRoleMappingClientIdField   = "usermodel.clientRoleMapping.clientId"
 	userClientRoleMappingRolePrefixField = "usermodel.clientRoleMapping.rolePrefix"
 	userSessionNoteField                 = "user.session.note"
-	userSessionModelNoteLabelField       = "userSession.modelNote.label"
 	aggregateAttributeValuesField        = "aggregate.attrs"
 )
 

@@ -32,7 +32,6 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	claim_name         = "foo"
 	claim_value_type   = "String"
 	session_note       = "bar"
-	session_note_label = "bar"
     add_to_id_token     = true
     add_to_access_token = false
 }
@@ -56,7 +55,6 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	claim_name         = "foo"
 	claim_value_type   = "String"
 	session_note       = "bar"
-	session_note_label = "bar"
     add_to_id_token     = true
     add_to_access_token = false
 }
@@ -73,7 +71,6 @@ The following arguments are supported:
 - `claim_name` - (Required) The name of the claim to insert into a token.
 - `claim_value_type` - (Optional) The claim type used when serializing JSON tokens. Can be one of `String`, `JSON`, `long`, `int`, or `boolean`. Defaults to `String`.
 - `session_note` - (Optional) String value being the name of stored user session note within the UserSession.note map.
-- `session_note_label` - (Optional) String value being the name of stored user session note within the UserSessionModel.note map.
 - `add_to_id_token` - (Optional) Indicates if the property should be added as a claim to the id token. Defaults to `true`.
 - `add_to_access_token` - (Optional) Indicates if the property should be added as a claim to the access token. Defaults to `true`.
 
