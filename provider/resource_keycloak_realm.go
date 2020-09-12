@@ -2,6 +2,7 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -15,16 +16,18 @@ func resourceKeycloakRealm() *schema.Resource {
 			Optional: true,
 		},
 		"attestation_conveyance_preference": {
-			Type:        schema.TypeString,
-			Description: "Either none, indirect or direct",
-			Optional:    true,
-			Default:     "not specified",
+			Type:         schema.TypeString,
+			Description:  "Either none, indirect or direct",
+			Optional:     true,
+			Default:      "not specified",
+			ValidateFunc: validation.StringInSlice([]string{"not specified", "none", "indirect", "direct", "enterprise"}, false),
 		},
 		"authenticator_attachment": {
-			Type:        schema.TypeString,
-			Description: "Either platform or cross-platform",
-			Optional:    true,
-			Default:     "not specified",
+			Type:         schema.TypeString,
+			Description:  "Either platform or cross-platform",
+			Optional:     true,
+			Default:      "not specified",
+			ValidateFunc: validation.StringInSlice([]string{"not specified", "platform", "cross-platform"}, false),
 		},
 		"avoid_same_authenticator_register": {
 			Type:     schema.TypeBool,
@@ -35,12 +38,23 @@ func resourceKeycloakRealm() *schema.Resource {
 			Type:     schema.TypeInt,
 			Optional: true,
 			Default:  0,
+			ValidateFunc: func(i interface{}, k string) ([]string, []error) {
+				v := i.(int)
+
+				// https://w3c.github.io/webauthn/#sctn-createCredential
+				if v != 0 && (v < 30 || v > 600) {
+					return []string{"the recommended timeout value is between 30<->180 seconds (inclusive, userVerification=discouraged) or 30<->600 seconds (inclusive, userVerification=(required || preferred))"}, nil
+				}
+
+				return nil, nil
+			},
 		},
 		"require_resident_key": {
-			Type:        schema.TypeString,
-			Description: "Either Yes or No",
-			Optional:    true,
-			Default:     "not specified",
+			Type:         schema.TypeString,
+			Description:  "Either Yes or No",
+			Optional:     true,
+			Default:      "not specified",
+			ValidateFunc: validation.StringInSlice([]string{"not specified", "Yes", "No"}, false),
 		},
 		"rp_entity_name": {
 			Type:     schema.TypeString,
@@ -62,10 +76,11 @@ func resourceKeycloakRealm() *schema.Resource {
 			Computed:    true,
 		},
 		"user_verification_requirement": {
-			Type:        schema.TypeString,
-			Description: "Either required, preferred or discouraged",
-			Optional:    true,
-			Default:     "not specified",
+			Type:         schema.TypeString,
+			Description:  "Either required, preferred or discouraged",
+			Optional:     true,
+			Default:      "not specified",
+			ValidateFunc: validation.StringInSlice([]string{"not specified", "required", "preferred", "discouraged"}, false),
 		},
 	}
 	return &schema.Resource{
