@@ -440,6 +440,7 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: webAuthnSchema,
 				},
@@ -450,6 +451,7 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: webAuthnSchema,
 				},
