@@ -8,7 +8,7 @@ import (
 func dataSourceKeycloakRealm() *schema.Resource {
 	webAuthnSchema := map[string]*schema.Schema{
 		"acceptable_aaguids": {
-			Type: schema.TypeList,
+			Type: schema.TypeSet,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
@@ -53,7 +53,7 @@ func dataSourceKeycloakRealm() *schema.Resource {
 			Default:  "",
 		},
 		"signature_algorithms": {
-			Type: schema.TypeList,
+			Type: schema.TypeSet,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
