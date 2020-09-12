@@ -12,45 +12,38 @@ func dataSourceKeycloakRealm() *schema.Resource {
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
-			Optional: true,
+			Computed: true,
 		},
 		"attestation_conveyance_preference": {
 			Type:        schema.TypeString,
 			Description: "Either none, indirect or direct",
-			Optional:    true,
-			Default:     "not specified",
+			Computed:    true,
 		},
 		"authenticator_attachment": {
 			Type:        schema.TypeString,
 			Description: "Either platform or cross-platform",
-			Optional:    true,
-			Default:     "not specified",
+			Computed:    true,
 		},
 		"avoid_same_authenticator_register": {
 			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Computed: true,
 		},
 		"create_timeout": {
 			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  0,
+			Computed: true,
 		},
 		"require_resident_key": {
 			Type:        schema.TypeString,
 			Description: "Either Yes or No",
-			Optional:    true,
-			Default:     "not specified",
+			Computed:    true,
 		},
 		"rp_entity_name": {
 			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "keycloak",
+			Computed: true,
 		},
 		"rp_id": {
 			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "",
+			Computed: true,
 		},
 		"signature_algorithms": {
 			Type: schema.TypeSet,
@@ -58,14 +51,12 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type: schema.TypeString,
 			},
 			Description: "Keycloak lists ES256, ES384, ES512, RS256, ES384, ES512 at the time of writing",
-			Optional:    true,
 			Computed:    true,
 		},
 		"user_verification_requirement": {
 			Type:        schema.TypeString,
 			Description: "Either required, preferred or discouraged",
-			Optional:    true,
-			Default:     "not specified",
+			Computed:    true,
 		},
 	}
 	return &schema.Resource{
