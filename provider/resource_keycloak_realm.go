@@ -852,7 +852,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	if v, ok := data.GetOk("web_authn_policy"); ok {
 		webAuthnPolicy := v.([]interface{})[0].(map[string]interface{})
 
-		realm.WebAuthnPolicyAcceptableAaguids = interfaceSliceToStringSlice(webAuthnPolicy["acceptable_aaguids"].([]interface{}))
+		realm.WebAuthnPolicyAcceptableAaguids = interfaceSliceToStringSlice(webAuthnPolicy["acceptable_aaguids"].(*schema.Set).List())
 
 		if webAuthnPolicyAttestationConveyancePreference, ok := webAuthnPolicy["attestation_conveyance_preference"]; ok {
 			realm.WebAuthnPolicyAttestationConveyancePreference = webAuthnPolicyAttestationConveyancePreference.(string)
@@ -882,7 +882,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 			realm.WebAuthnPolicyRpId = webAuthnPolicyRpId.(string)
 		}
 
-		realm.WebAuthnPolicySignatureAlgorithms = interfaceSliceToStringSlice(webAuthnPolicy["signature_algorithms"].([]interface{}))
+		realm.WebAuthnPolicySignatureAlgorithms = interfaceSliceToStringSlice(webAuthnPolicy["signature_algorithms"].(*schema.Set).List())
 
 		if webAuthnPolicyUserVerificationRequirement, ok := webAuthnPolicy["user_verification_requirement"]; ok {
 			realm.WebAuthnPolicyUserVerificationRequirement = webAuthnPolicyUserVerificationRequirement.(string)
@@ -893,7 +893,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	if v, ok := data.GetOk("web_authn_passwordless_policy"); ok {
 		webAuthnPasswordlessPolicy := v.([]interface{})[0].(map[string]interface{})
 
-		realm.WebAuthnPolicyPasswordlessAcceptableAaguids = interfaceSliceToStringSlice(webAuthnPasswordlessPolicy["acceptable_aaguids"].([]interface{}))
+		realm.WebAuthnPolicyPasswordlessAcceptableAaguids = interfaceSliceToStringSlice(webAuthnPasswordlessPolicy["acceptable_aaguids"].(*schema.Set).List())
 
 		if webAuthnPolicyPasswordlessAttestationConveyancePreference, ok := webAuthnPasswordlessPolicy["attestation_conveyance_preference"]; ok {
 			realm.WebAuthnPolicyPasswordlessAttestationConveyancePreference = webAuthnPolicyPasswordlessAttestationConveyancePreference.(string)
@@ -923,7 +923,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 			realm.WebAuthnPolicyPasswordlessRpId = webAuthnPolicyPasswordlessRpId.(string)
 		}
 
-		realm.WebAuthnPolicyPasswordlessSignatureAlgorithms = interfaceSliceToStringSlice(webAuthnPasswordlessPolicy["signature_algorithms"].([]interface{}))
+		realm.WebAuthnPolicyPasswordlessSignatureAlgorithms = interfaceSliceToStringSlice(webAuthnPasswordlessPolicy["signature_algorithms"].(*schema.Set).List())
 
 		if webAuthnPolicyPasswordlessUserVerificationRequirement, ok := webAuthnPasswordlessPolicy["user_verification_requirement"]; ok {
 			realm.WebAuthnPolicyPasswordlessUserVerificationRequirement = webAuthnPolicyPasswordlessUserVerificationRequirement.(string)
