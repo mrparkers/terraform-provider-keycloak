@@ -107,6 +107,13 @@ resource "keycloak_required_action" "custom-configured_totp" {
   priority       = keycloak_required_action.custom-terms-and-conditions.priority + 15
 }
 
+resource "keycloak_required_action" "required_action" {
+  realm_id  = keycloak_realm.test.realm
+  alias     = "webauthn-register"
+  enabled   = true
+  name      = "Webauthn Register"
+}
+
 resource "keycloak_group" "foo" {
   realm_id = keycloak_realm.test.id
   name     = "foo"

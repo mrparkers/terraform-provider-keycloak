@@ -7,6 +7,7 @@ type RequiredAction struct {
 	RealmId       string              `json:"-"`
 	Alias         string              `json:"alias"`
 	Name          string              `json:"name"`
+	ProviderId    string              `json:"providerId"`
 	Enabled       bool                `json:"enabled"`
 	DefaultAction bool                `json:"defaultAction"`
 	Priority      int                 `json:"priority"`
@@ -42,6 +43,21 @@ func (keycloakClient *KeycloakClient) GetRequiredActions(realmId string) ([]*Req
 	return requiredActions, nil
 }
 
+func (keycloakClient *KeycloakClient) GetUnregisteredRequiredActions(realmId string) ([]*RequiredAction, error) {
+	var unregisteredRequiredActions []*RequiredAction
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/unregistered-required-actions", realmId), &unregisteredRequiredActions, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, unregisteredRequiredAction := range unregisteredRequiredActions {
+		unregisteredRequiredAction.RealmId = realmId
+	}
+
+	return unregisteredRequiredActions, nil
+}
+
 func (keycloakClient *KeycloakClient) GetRequiredAction(realmId string, alias string) (*RequiredAction, error) {
 	var requiredAction RequiredAction
 
@@ -51,6 +67,11 @@ func (keycloakClient *KeycloakClient) GetRequiredAction(realmId string, alias st
 	}
 	requiredAction.RealmId = realmId
 	return &requiredAction, nil
+}
+
+func (keycloakClient *KeycloakClient) RegisterRequiredAction(requiredAction *RequiredAction) error {
+	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/authentication/register-required-action", requiredAction.RealmId), requiredAction)
+	return err
 }
 
 func (keycloakClient *KeycloakClient) CreateRequiredAction(requiredAction *RequiredAction) error {
