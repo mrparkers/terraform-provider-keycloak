@@ -1,7 +1,6 @@
 package keycloak
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -79,14 +78,12 @@ func (keycloakClient *KeycloakClient) GetAuthenticationExecutionInfoFromProvider
 	var authenticationExecution AuthenticationExecutionInfo
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
-
 	if err != nil {
 		return nil, err
 	}
 
 	// Retry 5 more times if not found, sometimes it took split milliseconds the Authentication Executions to populate
 	if len(authenticationExecutions) == 0 {
-
 		for i := 0; i < 5; i++ {
 			err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
 
@@ -100,7 +97,7 @@ func (keycloakClient *KeycloakClient) GetAuthenticationExecutionInfoFromProvider
 		}
 
 		if len(authenticationExecutions) == 0 {
-			return nil, errors.New("No Authentication Executions found")
+			return nil, fmt.Errorf("no authentication executions found for parent flow alias %s", parentFlowAlias)
 		}
 	}
 
