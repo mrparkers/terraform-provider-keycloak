@@ -78,14 +78,14 @@ resource "keycloak_realm" "test" {
   }
 
   web_authn_policy {
-    rp_entity_name = "Example"
-    rp_id = "keycloak.example.com"
+    relying_party_entity_name = "Example"
+    relying_party_id = "keycloak.example.com"
     signature_algorithms = ["ES256", "RS256"]
   }
 
   web_authn_passwordless_policy {
-    rp_entity_name = "Example"
-    rp_id = "keycloak.example.com"
+    relying_party_entity_name = "Example"
+    relying_party_id = "keycloak.example.com"
     signature_algorithms = ["ES256", "RS256"]
   }
 }

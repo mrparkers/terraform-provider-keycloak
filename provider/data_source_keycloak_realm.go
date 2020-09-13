@@ -37,11 +37,11 @@ func dataSourceKeycloakRealm() *schema.Resource {
 			Description: "Either Yes or No",
 			Computed:    true,
 		},
-		"rp_entity_name": {
+		"relying_party_entity_name": {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
-		"rp_id": {
+		"relying_party_id": {
 			Type:     schema.TypeString,
 			Computed: true,
 		},

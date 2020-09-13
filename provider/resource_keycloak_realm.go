@@ -56,12 +56,12 @@ func resourceKeycloakRealm() *schema.Resource {
 			Default:      "not specified",
 			ValidateFunc: validation.StringInSlice([]string{"not specified", "Yes", "No"}, false),
 		},
-		"rp_entity_name": {
+		"relying_party_entity_name": {
 			Type:     schema.TypeString,
 			Optional: true,
 			Default:  "keycloak",
 		},
-		"rp_id": {
+		"relying_party_id": {
 			Type:     schema.TypeString,
 			Optional: true,
 			Default:  "",
@@ -874,11 +874,11 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 			realm.WebAuthnPolicyRequireResidentKey = webAuthnPolicyRequireResidentKey.(string)
 		}
 
-		if webAuthnPolicyRpEntityName, ok := webAuthnPolicy["rp_entity_name"]; ok {
+		if webAuthnPolicyRpEntityName, ok := webAuthnPolicy["relying_party_entity_name"]; ok {
 			realm.WebAuthnPolicyRpEntityName = webAuthnPolicyRpEntityName.(string)
 		}
 
-		if webAuthnPolicyRpId, ok := webAuthnPolicy["rp_id"]; ok {
+		if webAuthnPolicyRpId, ok := webAuthnPolicy["relying_party_id"]; ok {
 			realm.WebAuthnPolicyRpId = webAuthnPolicyRpId.(string)
 		}
 
@@ -915,11 +915,11 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 			realm.WebAuthnPolicyPasswordlessRequireResidentKey = webAuthnPolicyPasswordlessRequireResidentKey.(string)
 		}
 
-		if webAuthnPolicyPasswordlessRpEntityName, ok := webAuthnPasswordlessPolicy["rp_entity_name"]; ok {
+		if webAuthnPolicyPasswordlessRpEntityName, ok := webAuthnPasswordlessPolicy["relying_party_entity_name"]; ok {
 			realm.WebAuthnPolicyPasswordlessRpEntityName = webAuthnPolicyPasswordlessRpEntityName.(string)
 		}
 
-		if webAuthnPolicyPasswordlessRpId, ok := webAuthnPasswordlessPolicy["rp_id"]; ok {
+		if webAuthnPolicyPasswordlessRpId, ok := webAuthnPasswordlessPolicy["relying_party_id"]; ok {
 			realm.WebAuthnPolicyPasswordlessRpId = webAuthnPolicyPasswordlessRpId.(string)
 		}
 
@@ -1078,8 +1078,8 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	webAuthnPolicy["avoid_same_authenticator_register"] = realm.WebAuthnPolicyAvoidSameAuthenticatorRegister
 	webAuthnPolicy["create_timeout"] = realm.WebAuthnPolicyCreateTimeout
 	webAuthnPolicy["require_resident_key"] = realm.WebAuthnPolicyRequireResidentKey
-	webAuthnPolicy["rp_entity_name"] = realm.WebAuthnPolicyRpEntityName
-	webAuthnPolicy["rp_id"] = realm.WebAuthnPolicyRpId
+	webAuthnPolicy["relying_party_entity_name"] = realm.WebAuthnPolicyRpEntityName
+	webAuthnPolicy["relying_party_id"] = realm.WebAuthnPolicyRpId
 	webAuthnPolicy["signature_algorithms"] = realm.WebAuthnPolicySignatureAlgorithms
 	webAuthnPolicy["user_verification_requirement"] = realm.WebAuthnPolicyUserVerificationRequirement
 	data.Set("web_authn_policy", []interface{}{webAuthnPolicy})
@@ -1092,8 +1092,8 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	webAuthnPasswordlessPolicy["avoid_same_authenticator_register"] = realm.WebAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister
 	webAuthnPasswordlessPolicy["create_timeout"] = realm.WebAuthnPolicyPasswordlessCreateTimeout
 	webAuthnPasswordlessPolicy["require_resident_key"] = realm.WebAuthnPolicyPasswordlessRequireResidentKey
-	webAuthnPasswordlessPolicy["rp_entity_name"] = realm.WebAuthnPolicyPasswordlessRpEntityName
-	webAuthnPasswordlessPolicy["rp_id"] = realm.WebAuthnPolicyPasswordlessRpId
+	webAuthnPasswordlessPolicy["relying_party_entity_name"] = realm.WebAuthnPolicyPasswordlessRpEntityName
+	webAuthnPasswordlessPolicy["relying_party_id"] = realm.WebAuthnPolicyPasswordlessRpId
 	webAuthnPasswordlessPolicy["signature_algorithms"] = realm.WebAuthnPolicyPasswordlessSignatureAlgorithms
 	webAuthnPasswordlessPolicy["user_verification_requirement"] = realm.WebAuthnPolicyPasswordlessUserVerificationRequirement
 	data.Set("web_authn_passwordless_policy", []interface{}{webAuthnPasswordlessPolicy})
