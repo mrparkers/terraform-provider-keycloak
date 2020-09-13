@@ -52,6 +52,23 @@ func TestAccKeycloakDataSourceAuthenticationExecution_errorNoExecutions(t *testi
 	})
 }
 
+func TestAccKeycloakDataSourceAuthenticationExecution_errorWrongProviderId(t *testing.T) {
+	realm := "terraform-" + acctest.RandString(10)
+	parentFlowAlias := acctest.RandString(20)
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testDataSourceKeycloakAuthenticationExecution_errorWrongProviderId(realm, parentFlowAlias, acctest.RandString(10)),
+				ExpectError: regexp.MustCompile("no authentication execution under parent flow alias .* with provider id .* found"),
+			},
+		},
+	})
+}
+
 func testAccCheckDataKeycloakAuthenticationExecution(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resourceName]
@@ -124,4 +141,31 @@ data "keycloak_authentication_execution" "execution" {
 	provider_id     	= "foo"
 }
 	`, realm, parentFlowAlias)
+}
+
+func testDataSourceKeycloakAuthenticationExecution_errorWrongProviderId(realm, parentFlowAlias, providerId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm   = "%s"
+	enabled = true
+}
+
+resource "keycloak_authentication_flow" "flow" {
+	realm_id = keycloak_realm.realm.id
+	alias    = "%s"
+}
+
+resource "keycloak_authentication_execution" "execution" {
+	realm_id          = keycloak_realm.realm.id
+	parent_flow_alias = keycloak_authentication_flow.flow.alias
+	authenticator     = "identity-provider-redirector"
+	requirement       = "REQUIRED"
+}
+
+data "keycloak_authentication_execution" "execution" {
+	realm_id 			= keycloak_realm.realm.id
+	parent_flow_alias   = keycloak_authentication_flow.flow.alias
+	provider_id     	= "%s"
+}
+	`, realm, parentFlowAlias, providerId)
 }
