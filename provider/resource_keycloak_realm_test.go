@@ -708,6 +708,40 @@ func TestAccKeycloakRealm_internalId(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_webauthn(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	realmDisplayName := "terraform-" + acctest.RandString(10)
+	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	rpName := "terraform-" + acctest.RandString(10)
+	rpId := "terraform-" + acctest.RandString(10)
+	attestationConveyancePreference := randomStringInSlice([]string{"none", "indirect", "not specified"})
+	authenticatorAttachment := randomStringInSlice([]string{"platform", "cross-platform", "not specified"})
+	requireResidentKey := randomStringInSlice([]string{"Yes", "No", "not specified"})
+	userVerificationRequirement := randomStringInSlice([]string{"not specified", "required", "preferred", "discouraged"})
+	signatureAlgorithms := randomStringSliceSubset([]string{"ES256", "ES384", "ES512", "RS256", "ES384", "ES512"})
+	avoidSameAuthenticatorRegister := randomBool()
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_webauthn_policy(realmName, realmDisplayName, realmDisplayNameHtml, rpName, rpId, attestationConveyancePreference, authenticatorAttachment, requireResidentKey, userVerificationRequirement, signatureAlgorithms, avoidSameAuthenticatorRegister),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+			{
+				Config: testKeycloakRealm_webauthn_passwordless_policy(realmName, realmDisplayName, realmDisplayNameHtml, rpName, rpId, attestationConveyancePreference, authenticatorAttachment, requireResidentKey, userVerificationRequirement, signatureAlgorithms, avoidSameAuthenticatorRegister),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+		},
+	})
+}
+
 func testKeycloakRealmLoginInfo(resourceName string, realm *keycloak.Realm) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		realmFromState, err := getRealmFromState(s, resourceName)
@@ -1380,4 +1414,50 @@ resource "keycloak_realm" "realm" {
 	}
 }
 	`, realm, key, value)
+}
+
+func testKeycloakRealm_webauthn_policy(realm, realmDisplayName, realmDisplayNameHtml, rpName, rpId, attestationConveyancePreference, authenticatorAttachment, requireResidentKey, userVerificationRequirement string, signatureAlgorithms []string, avoidSameAuthenticatorRegister bool) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        		= "%s"
+	enabled     	 	= true
+	display_name 		= "%s"
+	display_name_html 	= "%s"
+
+	web_authn_policy {
+		relying_party_entity_name         = "%s"
+		relying_party_id                  = "%s"
+		signature_algorithms              = %s
+
+		attestation_conveyance_preference = "%s"
+		authenticator_attachment          = "%s"
+		avoid_same_authenticator_register = %t
+		require_resident_key              = "%s"
+		user_verification_requirement     = "%s"
+	}
+}
+	`, realm, realmDisplayName, realmDisplayNameHtml, rpName, rpId, arrayOfStringsForTerraformResource(signatureAlgorithms), attestationConveyancePreference, authenticatorAttachment, avoidSameAuthenticatorRegister, requireResidentKey, userVerificationRequirement)
+}
+
+func testKeycloakRealm_webauthn_passwordless_policy(realm, realmDisplayName, realmDisplayNameHtml, rpName, rpId, attestationConveyancePreference, authenticatorAttachment, requireResidentKey, userVerificationRequirement string, signatureAlgorithms []string, avoidSameAuthenticatorRegister bool) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        		= "%s"
+	enabled     	 	= true
+	display_name 		= "%s"
+	display_name_html 	= "%s"
+
+	web_authn_passwordless_policy {
+		relying_party_entity_name         = "%s"
+		relying_party_id                  = "%s"
+		signature_algorithms              = %s
+
+		attestation_conveyance_preference = "%s"
+		authenticator_attachment          = "%s"
+		avoid_same_authenticator_register = %t
+		require_resident_key              = "%s"
+		user_verification_requirement     = "%s"
+	}
+}
+	`, realm, realmDisplayName, realmDisplayNameHtml, rpName, rpId, arrayOfStringsForTerraformResource(signatureAlgorithms), attestationConveyancePreference, authenticatorAttachment, avoidSameAuthenticatorRegister, requireResidentKey, userVerificationRequirement)
 }
