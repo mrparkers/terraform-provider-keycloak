@@ -6,6 +6,59 @@ import (
 )
 
 func dataSourceKeycloakRealm() *schema.Resource {
+	webAuthnSchema := map[string]*schema.Schema{
+		"acceptable_aaguids": {
+			Type: schema.TypeSet,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Computed: true,
+		},
+		"attestation_conveyance_preference": {
+			Type:        schema.TypeString,
+			Description: "Either none, indirect or direct",
+			Computed:    true,
+		},
+		"authenticator_attachment": {
+			Type:        schema.TypeString,
+			Description: "Either platform or cross-platform",
+			Computed:    true,
+		},
+		"avoid_same_authenticator_register": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"create_timeout": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"require_resident_key": {
+			Type:        schema.TypeString,
+			Description: "Either Yes or No",
+			Computed:    true,
+		},
+		"relying_party_entity_name": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"relying_party_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"signature_algorithms": {
+			Type: schema.TypeSet,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Description: "Keycloak lists ES256, ES384, ES512, RS256, ES384, ES512 at the time of writing",
+			Computed:    true,
+		},
+		"user_verification_requirement": {
+			Type:        schema.TypeString,
+			Description: "Either required, preferred or discouraged",
+			Computed:    true,
+		},
+	}
 	return &schema.Resource{
 		Read: dataSourceKeycloakRealmRead,
 		Schema: map[string]*schema.Schema{
@@ -371,6 +424,28 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Computed: true,
+			},
+
+			// WebAuthn
+			"web_authn_policy": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: webAuthnSchema,
+				},
+			},
+
+			// WebAuthn Passwordless
+			"web_authn_passwordless_policy": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: webAuthnSchema,
+				},
 			},
 		},
 	}

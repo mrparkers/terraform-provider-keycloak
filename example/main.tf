@@ -76,6 +76,18 @@ resource "keycloak_realm" "test" {
   attributes = {
     mycustomAttribute = "myCustomValue"
   }
+
+  web_authn_policy {
+    relying_party_entity_name = "Example"
+    relying_party_id = "keycloak.example.com"
+    signature_algorithms = ["ES256", "RS256"]
+  }
+
+  web_authn_passwordless_policy {
+    relying_party_entity_name = "Example"
+    relying_party_id = "keycloak.example.com"
+    signature_algorithms = ["ES256", "RS256"]
+  }
 }
 
 resource "keycloak_required_action" "custom-terms-and-conditions" {
