@@ -71,7 +71,7 @@ func resourceKeycloakRealm() *schema.Resource {
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
-			Description: "Keycloak lists ES256, ES384, ES512, RS256, ES384, ES512 at the time of writing",
+			Description: "Keycloak lists ES256, ES384, ES512, RS256, RS384, RS512, RS1 at the time of writing",
 			Optional:    true,
 			Computed:    true,
 		},
