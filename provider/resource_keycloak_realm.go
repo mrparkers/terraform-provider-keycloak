@@ -305,6 +305,11 @@ func resourceKeycloakRealm() *schema.Resource {
 				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
+			"offline_session_max_lifespan_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"access_token_lifespan": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -715,6 +720,10 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		realm.OfflineSessionMaxLifespan = offlineSessionMaxLifespanDurationString
 	}
 
+	if offlineSessionMaxLifespanEnabled, ok := data.GetOk("offline_session_max_lifespan_enabled"); ok {
+		realm.OfflineSessionMaxLifespanEnabled = offlineSessionMaxLifespanEnabled.(bool)
+	}
+
 	if accessTokenLifespan := data.Get("access_token_lifespan").(string); accessTokenLifespan != "" {
 		accessTokenLifespanDurationString, err := getSecondsFromDurationString(accessTokenLifespan)
 		if err != nil {
@@ -1022,6 +1031,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("sso_session_max_lifespan_remember_me", getDurationStringFromSeconds(realm.SsoSessionMaxLifespanRememberMe))
 	data.Set("offline_session_idle_timeout", getDurationStringFromSeconds(realm.OfflineSessionIdleTimeout))
 	data.Set("offline_session_max_lifespan", getDurationStringFromSeconds(realm.OfflineSessionMaxLifespan))
+	data.Set("offline_session_max_lifespan_enabled", realm.OfflineSessionMaxLifespanEnabled)
 	data.Set("access_token_lifespan", getDurationStringFromSeconds(realm.AccessTokenLifespan))
 	data.Set("access_token_lifespan_for_implicit_flow", getDurationStringFromSeconds(realm.AccessTokenLifespanForImplicitFlow))
 	data.Set("access_code_lifespan", getDurationStringFromSeconds(realm.AccessCodeLifespan))

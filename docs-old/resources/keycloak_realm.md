@@ -116,6 +116,7 @@ The attributes below should be specified as [Go duration strings](https://golang
 - `sso_session_max_lifespan_remember_me` - (Optional) The maximum amount of time before a "remember me" session expires regardless of activity.
 - `offline_session_idle_timeout` - (Optional) The amount of time an offline session can be idle before it expires.
 - `offline_session_max_lifespan` - (Optional) The maximum amount of time before an offline session expires regardless of activity.
+- `offline_session_max_lifespan_enabled` - (Optional) Enable `offline_session_max_lifespan`.
 - `access_token_lifespan` - (Optional) The amount of time an access token can be used before it expires.
 - `access_token_lifespan_for_implicit_flow` - (Optional) The amount of time an access token issued with the OpenID Connect Implicit Flow can be used before it expires.
 - `access_code_lifespan` - (Optional) The maximum amount of time a client has to finish the authorization code flow.
