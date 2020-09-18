@@ -1299,6 +1299,7 @@ resource "keycloak_realm" "realm" {
 	sso_session_max_lifespan_remember_me     = "%s"
 	offline_session_idle_timeout             = "%s"
 	offline_session_max_lifespan             = "%s"
+	offline_session_max_lifespan_enabled     = true
 	access_token_lifespan                    = "%s"
 	access_token_lifespan_for_implicit_flow  = "%s"
 	access_code_lifespan                     = "%s"
