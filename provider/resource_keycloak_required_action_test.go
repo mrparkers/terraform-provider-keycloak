@@ -26,6 +26,22 @@ func TestAccKeycloakRequiredAction_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRequiredAction_unregisteredAction(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	requiredActionAlias := "webauthn-register"
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRequiredAction_basic(realmName, requiredActionAlias, 37),
+				Check:  testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realmName, requiredActionAlias, 37),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRequiredAction_invalidAlias(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	randomReqActionAlias := "randomRequiredAction-" + acctest.RandString(10)
