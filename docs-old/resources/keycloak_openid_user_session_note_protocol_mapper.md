@@ -70,7 +70,8 @@ The following arguments are supported:
 - `name` - (Required) The display name of this protocol mapper in the GUI.
 - `claim_name` - (Required) The name of the claim to insert into a token.
 - `claim_value_type` - (Optional) The claim type used when serializing JSON tokens. Can be one of `String`, `JSON`, `long`, `int`, or `boolean`. Defaults to `String`.
-- `session_note` - (Optional) String value being the name of stored user session note within the UserSession.note map.
+- `session_note` - (Optional) String value being the name of stored user session note within the UserSessionModel.note map.
+- `session_note_label` - (Optional) **Deprecated** Use `session_note` instead.
 - `add_to_id_token` - (Optional) Indicates if the property should be added as a claim to the id token. Defaults to `true`.
 - `add_to_access_token` - (Optional) Indicates if the property should be added as a claim to the access token. Defaults to `true`.
 
