@@ -469,7 +469,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 
 	claim_name         = "foo"
 	claim_value_type   = "String"
-	session_note_label = "bar"
+	session_note       = "bar"
 
   add_to_id_token     = true
   add_to_access_token = false
@@ -482,7 +482,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 
 	claim_name         = "foo2"
 	claim_value_type   = "String"
-	session_note_label = "bar2"
+	session_note       = "bar2"
 
   add_to_id_token     = true
   add_to_access_token = false

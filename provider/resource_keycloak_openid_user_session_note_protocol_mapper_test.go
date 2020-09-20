@@ -115,13 +115,13 @@ func TestAccKeycloakOpenIdUserSessionNoteProtocolMapper_updateClaim(t *testing.T
 	})
 }
 
-func TestAccKeycloakOpenIdUserSessionNoteProtocolMapper_updateLabel(t *testing.T) {
+func TestAccKeycloakOpenIdUserSessionNoteProtocolMapper_updateNote(t *testing.T) {
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-session-note-mapper-" + acctest.RandString(5)
 
-	labelName := "session-note-label-" + acctest.RandString(10)
-	updatedLabelName := "session-note-label-update-" + acctest.RandString(10)
+	noteName := "session-note-" + acctest.RandString(10)
+	updatedNoteName := "session-note-update-" + acctest.RandString(10)
 
 	resourceName := "keycloak_openid_user_session_note_protocol_mapper.user_session_note_mapper"
 
@@ -131,11 +131,11 @@ func TestAccKeycloakOpenIdUserSessionNoteProtocolMapper_updateLabel(t *testing.T
 		CheckDestroy:      testAccKeycloakOpenIdUserSessionNoteProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdUserSessionNoteProtocolMapper_label(realmName, clientId, mapperName, labelName),
+				Config: testKeycloakOpenIdUserSessionNoteProtocolMapper_note(realmName, clientId, mapperName, noteName),
 				Check:  testKeycloakOpenIdUserSessionNoteProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdUserSessionNoteProtocolMapper_label(realmName, clientId, mapperName, updatedLabelName),
+				Config: testKeycloakOpenIdUserSessionNoteProtocolMapper_note(realmName, clientId, mapperName, updatedNoteName),
 				Check:  testKeycloakOpenIdUserSessionNoteProtocolMapperExists(resourceName),
 			},
 		},
@@ -347,7 +347,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_id          = "${keycloak_openid_client.openid_client.id}"
 	claim_name         = "foo"
 	claim_value_type   = "String"
-	session_note_label = "bar"
+	session_note       = "bar"
 }`, realmName, clientId, mapperName)
 }
 
@@ -366,7 +366,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_scope_id    = "${keycloak_openid_client_scope.client_scope.id}"
 	claim_name         = "foo"
 	claim_value_type   = "String"
-	session_note_label = "bar"
+	session_note       = "bar"
 }`, realmName, clientScopeId, mapperName)
 }
 
@@ -389,7 +389,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 }`, realmName, clientId, mapperName, claimName)
 }
 
-func testKeycloakOpenIdUserSessionNoteProtocolMapper_label(realmName, clientId, mapperName, labelName string) string {
+func testKeycloakOpenIdUserSessionNoteProtocolMapper_note(realmName, clientId, mapperName, noteName string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -405,8 +405,8 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_id          = "${keycloak_openid_client.openid_client.id}"
 	claim_name         = "foo"
 	claim_value_type   = "String"
-	session_note_label = "%s"
-}`, realmName, clientId, mapperName, labelName)
+	session_note       = "%s"
+}`, realmName, clientId, mapperName, noteName)
 }
 
 func testKeycloakOpenIdUserSessionNoteProtocolMapper_import(realmName, clientId, clientScopeId, mapperName string) string {
@@ -425,7 +425,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_id          = "${keycloak_openid_client.openid_client.id}"
 	claim_name         = "foo"
 	claim_value_type   = "String"
-	session_note_label = "bar"
+	session_note       = "bar"
 }
 resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
@@ -437,7 +437,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_scope_id    = "${keycloak_openid_client_scope.client_scope.id}"
 	claim_name         = "foo"
 	claim_value_type   = "String"
-	session_note_label = "bar"
+	session_note       = "bar"
 }`, realmName, clientId, mapperName, clientScopeId, mapperName)
 }
 
@@ -457,6 +457,6 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 	client_id          = "${keycloak_openid_client.openid_client.id}"
 	claim_name         = "foo"
 	claim_value_type   = "%s"
-	session_note_label = "bar"
+	session_note       = "bar"
 }`, realmName, mapperName, claimValueType)
 }
