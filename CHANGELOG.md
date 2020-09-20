@@ -1,4 +1,4 @@
-## 2.0.0 (September 20, 2020)
+## v2.0.0 (September 20, 2020)
 
 BREAKING CHANGES:
 
