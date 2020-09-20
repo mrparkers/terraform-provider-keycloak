@@ -80,7 +80,13 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
 - `batch_size_for_sync` - (Optional) The number of users to sync within a single transaction. Defaults to `1000`.
 - `full_sync_period` - (Optional) How frequently Keycloak should sync all LDAP users, in seconds. Omit this property to disable periodic full sync.
 - `changed_sync_period` - (Optional) How frequently Keycloak should sync changed LDAP users, in seconds. Omit this property to disable periodic changed users sync.
-- `cache_policy` - (Optional) Can be one of `DEFAULT`, `EVICT_DAILY`, `EVICT_WEEKLY`, `MAX_LIFESPAN`, or `NO_CACHE`. Defaults to `DEFAULT`.
+- `cache_policy` - (Optional) **Deprecated** Can be one of `DEFAULT`, `EVICT_DAILY`, `EVICT_WEEKLY`, `MAX_LIFESPAN`, or `NO_CACHE`. Defaults to `DEFAULT`.
+- `cache` - (Optional) A block containing the cache settings.
+  - `policy` - (Optional) Can be one of `DEFAULT`, `EVICT_DAILY`, `EVICT_WEEKLY`, `MAX_LIFESPAN`, or `NO_CACHE`. Defaults to `DEFAULT`.
+  - `max_lifespan` - (Optional) Max lifespan of cache entry (duration string).
+  - `eviction_day` - (Optional) Day of the week the entry will become invalid on
+  - `eviction_hour` - (Optional) Hour of day the entry will become invalid on.
+  - `eviction_day` - (Optional) Minute of day the entry will become invalid on.
 - `kerberos` - (Optional) A block containing the kerberos settings.
   - `kerberos_realm` - (Required) The name of the kerberos realm, e.g. FOO.LOCAL.
   - `server_principal` - (Required) The kerberos server principal, e.g. 'HTTP/host.foo.com@FOO.LOCAL'.
