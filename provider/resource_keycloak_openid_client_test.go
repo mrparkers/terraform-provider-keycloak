@@ -740,7 +740,7 @@ resource "keycloak_openid_client" "client" {
 	realm_id    = "${keycloak_realm.realm.id}"
 	access_type = "CONFIDENTIAL"
     attributes = {
-		%s = "%s"
+		"%s" = "%s"
 	}
 }
 	`, realm, clientId, attributeName, attributeValue)
