@@ -125,6 +125,11 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"attributes": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }

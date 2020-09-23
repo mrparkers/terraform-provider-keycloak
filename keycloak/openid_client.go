@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -58,6 +59,54 @@ type OpenidClientAttributes struct {
 	ExcludeSessionStateFromAuthResponse KeycloakBoolQuoted `json:"exclude.session.state.from.auth.response"`
 	AccessTokenLifespan                 string             `json:"access.token.lifespan"`
 	LoginTheme                          string             `json:"login_theme"`
+	OtherAttributes                     map[string]interface{}
+}
+
+func (attr *OpenidClientAttributes) MarshalJSON() ([]byte, error) {
+
+	if attr.OtherAttributes == nil {
+		attr.OtherAttributes = make(map[string]interface{})
+	}
+
+	attr.OtherAttributes["access.token.lifespan"] = attr.AccessTokenLifespan
+	b, _ := attr.ExcludeSessionStateFromAuthResponse.MarshalJSON()
+	attr.OtherAttributes["exclude.session.state.from.auth.response"] = string(b)
+	attr.OtherAttributes["login_theme"] = attr.LoginTheme
+	attr.OtherAttributes["pkce.code.challenge.method"] = attr.PkceCodeChallengeMethod
+
+	result, err := json.Marshal(attr.OtherAttributes)
+	return result, err
+}
+
+func (attr *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
+
+	var attrMap map[string]string
+	if err := json.Unmarshal(data, &attrMap); err != nil {
+		return err
+	}
+
+	attr.AccessTokenLifespan = attrMap["access.token.lifespan"]
+	var quotedBool KeycloakBoolQuoted
+	json.Unmarshal([]byte(attrMap["exclude.session.state.from.auth.response"]), &quotedBool)
+	attr.ExcludeSessionStateFromAuthResponse = quotedBool
+	attr.LoginTheme = attrMap["login_theme"]
+	attr.PkceCodeChallengeMethod = attrMap["pkce.code.challenge.method"]
+
+	attr.OtherAttributes = make(map[string]interface{})
+
+	reserverdKeys := map[string]bool{
+		"access.token.lifespan":                    true,
+		"exclude.session.state.from.auth.response": true,
+		"login_theme":                              true,
+		"pkce.code.challenge.method":               true}
+
+	for k, v := range attrMap {
+		if found, _ := reserverdKeys[k]; !found {
+			attr.OtherAttributes[k] = v
+		}
+	}
+
+	return nil
 }
 
 type OpenidAuthenticationFlowBindingOverrides struct {

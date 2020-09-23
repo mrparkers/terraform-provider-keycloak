@@ -3,10 +3,11 @@ package provider
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 var (
@@ -96,6 +97,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 			},
 			"root_url": {
 				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"attributes": {
+				Type:     schema.TypeMap,
 				Optional: true,
 			},
 			"service_accounts_enabled": {
@@ -243,6 +248,26 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		AdminUrl:          data.Get("admin_url").(string),
 		BaseUrl:           data.Get("base_url").(string),
 		ConsentRequired:   data.Get("consent_required").(bool),
+	}
+
+	attributes := data.Get("attributes").(map[string]interface{})
+	if attributes != nil {
+		reserverdKeys := map[string]bool{
+			"access.token.lifespan":                    true,
+			"exclude.session.state.from.auth.response": true,
+			"login_theme":                              true,
+			"pkce.code.challenge.method":               true}
+
+		for k, v := range attributes {
+			if found, _ := reserverdKeys[k]; found {
+				return nil, errors.New(fmt.Sprintf("%s is a wrong key in attributes. Use the field defined for this purpose instead.", k))
+			}
+
+			if openidClient.Attributes.OtherAttributes == nil {
+				openidClient.Attributes.OtherAttributes = make(map[string]interface{})
+			}
+			openidClient.Attributes.OtherAttributes[k] = v
+		}
 	}
 
 	if rootUrlOk {
