@@ -478,7 +478,7 @@ func TestAccKeycloakOpenidClient_otherAttributes(t *testing.T) {
 				Check:  testAccCheckKeycloakOpenidClientHasAttributeWithValue("keycloak_openid_client.client", "foo", "bar"),
 			},
 			{
-				Config:      testKeycloakOpenidClient_otherAttributes(realmName, clientId, "pkce.code.challenge.method'", "bar"),
+				Config:      testKeycloakOpenidClient_otherAttributes(realmName, clientId, "pkce.code.challenge.method", "bar"),
 				ExpectError: regexp.MustCompile("pkce.code.challenge.method is a wrong key in attributes. Use the field defined for this purpose instead."),
 			},
 		},
