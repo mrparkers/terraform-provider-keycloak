@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -149,6 +150,10 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"attributes": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -173,7 +178,7 @@ func formatSigningPrivateKey(signingPrivateKey string) string {
 	return r.Replace(signingPrivateKey)
 }
 
-func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
+func mapToSamlClientFromData(data *schema.ResourceData) (*keycloak.SamlClient, error) {
 	var validRedirectUris []string
 
 	if v, ok := data.GetOk("valid_redirect_uris"); ok {
@@ -190,6 +195,38 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		AssertionConsumerRedirectURL:    data.Get("assertion_consumer_redirect_url").(string),
 		LogoutServicePostBindingURL:     data.Get("logout_service_post_binding_url").(string),
 		LogoutServiceRedirectBindingURL: data.Get("logout_service_redirect_binding_url").(string),
+	}
+
+	attributes := data.Get("attributes").(map[string]interface{})
+	if attributes != nil {
+		reserverdKeys := map[string]bool{
+			"saml.authnstatement":                     true,
+			"saml.server.signature":                   true,
+			"saml.assertion.signature":                true,
+			"saml.client.signature":                   true,
+			"saml.force.post.binding":                 true,
+			"saml_force_name_id_format":               true,
+			"saml_name_id_format":                     true,
+			"saml.signing.certificate":                true,
+			"saml.signing.private.key":                true,
+			"saml_idp_initiated_sso_url_name":         true,
+			"saml_idp_initiated_sso_relay_state":      true,
+			"saml_assertion_consumer_url_post":        true,
+			"saml_assertion_consumer_url_redirect":    true,
+			"saml_single_logout_service_url_post":     true,
+			"saml_single_logout_service_url_redirect": true,
+		}
+
+		for k, v := range attributes {
+			if found, _ := reserverdKeys[k]; found {
+				return nil, errors.New(fmt.Sprintf("%s is a wrong key in attributes. Use the field defined for this purpose instead.", k))
+			}
+
+			if samlAttributes.OtherAttributes == nil {
+				samlAttributes.OtherAttributes = make(map[string]interface{})
+			}
+			samlAttributes.OtherAttributes[k] = v
+		}
 	}
 
 	if signingCertificate, ok := data.GetOkExists("signing_certificate"); ok {
@@ -248,7 +285,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		Attributes:              samlAttributes,
 	}
 
-	return samlClient
+	return samlClient, nil
 }
 
 func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlClient) error {
@@ -340,9 +377,12 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 func resourceKeycloakSamlClientCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client := mapToSamlClientFromData(data)
+	client, err := mapToSamlClientFromData(data)
+	if err != nil {
+		return err
+	}
 
-	err := keycloakClient.NewSamlClient(client)
+	err = keycloakClient.NewSamlClient(client)
 	if err != nil {
 		return err
 	}
@@ -374,9 +414,12 @@ func resourceKeycloakSamlClientRead(data *schema.ResourceData, meta interface{})
 func resourceKeycloakSamlClientUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client := mapToSamlClientFromData(data)
+	client, err := mapToSamlClientFromData(data)
+	if err != nil {
+		return err
+	}
 
-	err := keycloakClient.UpdateSamlClient(client)
+	err = keycloakClient.UpdateSamlClient(client)
 	if err != nil {
 		return err
 	}
