@@ -66,7 +66,7 @@ func (attr *OpenidClientAttributes) MarshalJSON() ([]byte, error) {
 
 	allAttributes := make(map[string]interface{})
 
-	if attr.OtherAttributes == nil {
+	if attr.OtherAttributes != nil {
 		for k, v := range attr.OtherAttributes {
 			allAttributes[k] = v
 		}
