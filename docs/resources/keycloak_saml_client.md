@@ -25,6 +25,11 @@ resource "keycloak_saml_client" "saml_client" {
 
 	signing_certificate = "${file("saml-cert.pem")}"
 	signing_private_key = "${file("saml-key.pem")}"
+	
+	attributes = {
+		"key1" = "value1"
+		"key2" = "value2"
+    }
 }
 ```
 
@@ -58,6 +63,7 @@ The following arguments are supported:
 - `logout_service_post_binding_url` - (Optional) SAML POST Binding URL for the client's single logout service.
 - `logout_service_redirect_binding_url` - (Optional) SAML Redirect Binding URL for the client's single logout service.
 - `full_scope_allowed` - (Optional) - Allow to include all roles mappings in the access token
+- `attributes` - (Optional) A map of key/value pairs to set as custom attributes for the client.
 
 ### Import
 
