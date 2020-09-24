@@ -51,30 +51,34 @@ type SamlClient struct {
 
 func (attr *SamlClientAttributes) MarshalJSON() ([]byte, error) {
 
-	if attr.OtherAttributes == nil {
-		attr.OtherAttributes = make(map[string]interface{})
+	allAttributes := make(map[string]interface{})
+
+	if attr.OtherAttributes != nil {
+		for k, v := range attr.OtherAttributes {
+			allAttributes[k] = v
+		}
 	}
 
-	attr.OtherAttributes["saml.authnstatement"] = attr.IncludeAuthnStatement
-	attr.OtherAttributes["saml.server.signature"] = attr.SignDocuments
-	attr.OtherAttributes["saml.assertion.signature"] = attr.SignAssertions
-	attr.OtherAttributes["saml.client.signature"] = attr.ClientSignatureRequired
-	attr.OtherAttributes["saml.force.post.binding"] = attr.ForcePostBinding
-	attr.OtherAttributes["saml_force_name_id_format"] = attr.ForceNameIdFormat
-	attr.OtherAttributes["saml_name_id_format"] = attr.NameIdFormat
+	allAttributes["saml.authnstatement"] = attr.IncludeAuthnStatement
+	allAttributes["saml.server.signature"] = attr.SignDocuments
+	allAttributes["saml.assertion.signature"] = attr.SignAssertions
+	allAttributes["saml.client.signature"] = attr.ClientSignatureRequired
+	allAttributes["saml.force.post.binding"] = attr.ForcePostBinding
+	allAttributes["saml_force_name_id_format"] = attr.ForceNameIdFormat
+	allAttributes["saml_name_id_format"] = attr.NameIdFormat
 	if attr.SigningCertificate != nil && *attr.SigningCertificate != "" {
 		//omit empty
-		attr.OtherAttributes["saml.signing.certificate"] = attr.SigningCertificate
+		allAttributes["saml.signing.certificate"] = attr.SigningCertificate
 	}
-	attr.OtherAttributes["saml.signing.private.key"] = attr.SigningPrivateKey
-	attr.OtherAttributes["saml_idp_initiated_sso_url_name"] = attr.IDPInitiatedSSOURLName
-	attr.OtherAttributes["saml_idp_initiated_sso_relay_state"] = attr.IDPInitiatedSSORelayState
-	attr.OtherAttributes["saml_assertion_consumer_url_post"] = attr.AssertionConsumerPostURL
-	attr.OtherAttributes["saml_assertion_consumer_url_redirect"] = attr.AssertionConsumerRedirectURL
-	attr.OtherAttributes["saml_single_logout_service_url_post"] = attr.LogoutServicePostBindingURL
-	attr.OtherAttributes["saml_single_logout_service_url_redirect"] = attr.LogoutServiceRedirectBindingURL
+	allAttributes["saml.signing.private.key"] = attr.SigningPrivateKey
+	allAttributes["saml_idp_initiated_sso_url_name"] = attr.IDPInitiatedSSOURLName
+	allAttributes["saml_idp_initiated_sso_relay_state"] = attr.IDPInitiatedSSORelayState
+	allAttributes["saml_assertion_consumer_url_post"] = attr.AssertionConsumerPostURL
+	allAttributes["saml_assertion_consumer_url_redirect"] = attr.AssertionConsumerRedirectURL
+	allAttributes["saml_single_logout_service_url_post"] = attr.LogoutServicePostBindingURL
+	allAttributes["saml_single_logout_service_url_redirect"] = attr.LogoutServiceRedirectBindingURL
 
-	result, err := json.Marshal(attr.OtherAttributes)
+	result, err := json.Marshal(allAttributes)
 	return result, err
 }
 

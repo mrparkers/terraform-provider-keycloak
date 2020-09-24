@@ -64,17 +64,21 @@ type OpenidClientAttributes struct {
 
 func (attr *OpenidClientAttributes) MarshalJSON() ([]byte, error) {
 
+	allAttributes := make(map[string]interface{})
+
 	if attr.OtherAttributes == nil {
-		attr.OtherAttributes = make(map[string]interface{})
+		for k, v := range attr.OtherAttributes {
+			allAttributes[k] = v
+		}
 	}
 
-	attr.OtherAttributes["access.token.lifespan"] = attr.AccessTokenLifespan
+	allAttributes["access.token.lifespan"] = attr.AccessTokenLifespan
 	b, _ := attr.ExcludeSessionStateFromAuthResponse.MarshalJSON()
-	attr.OtherAttributes["exclude.session.state.from.auth.response"] = string(b)
-	attr.OtherAttributes["login_theme"] = attr.LoginTheme
-	attr.OtherAttributes["pkce.code.challenge.method"] = attr.PkceCodeChallengeMethod
+	allAttributes["exclude.session.state.from.auth.response"] = string(b)
+	allAttributes["login_theme"] = attr.LoginTheme
+	allAttributes["pkce.code.challenge.method"] = attr.PkceCodeChallengeMethod
 
-	result, err := json.Marshal(attr.OtherAttributes)
+	result, err := json.Marshal(allAttributes)
 	return result, err
 }
 
