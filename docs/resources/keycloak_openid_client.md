@@ -27,6 +27,11 @@ resource "keycloak_openid_client" "openid_client" {
     ]
 
     login_theme = "keycloak"
+    
+    attributes = {
+		"key1" = "value1"
+		"key2" = "value2"
+    }
 }
 ```
 
@@ -67,6 +72,7 @@ is set to `true`.
     - `browers_id` - (Optional) - Browser flow id, (flow needs to exist)
     - `direct_grant_id` - (Optional) - Direct grant flow id (flow needs to exist)
 - `login_theme` - (Optional) - Override realm login theme
+- `attributes` - (Optional) A map of key/value pairs to set as custom attributes for the client.
 
 ### Attributes Reference
 

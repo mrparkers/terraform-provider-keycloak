@@ -2,12 +2,13 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"regexp"
-	"testing"
 )
 
 func TestAccKeycloakOpenidClient_basic(t *testing.T) {
@@ -463,6 +464,27 @@ func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.
 	})
 }
 
+func TestAccKeycloakOpenidClient_otherAttributes(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_otherAttributes(realmName, clientId, "foo", "bar"),
+				Check:  testAccCheckKeycloakOpenidClientHasAttributeWithValue("keycloak_openid_client.client", "foo", "bar"),
+			},
+			{
+				Config:      testKeycloakOpenidClient_otherAttributes(realmName, clientId, "pkce.code.challenge.method", "bar"),
+				ExpectError: regexp.MustCompile("pkce.code.challenge.method is a wrong key in attributes. Use the field defined for this purpose instead."),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_authenticationFlowBindingOverrides(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
@@ -700,6 +722,39 @@ func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(reso
 
 		if client.Attributes.ExcludeSessionStateFromAuthResponse != excludeSessionStateFromAuthResponse {
 			return fmt.Errorf("expected openid client %s to have exclude_session_state_from_auth_response value of %t, but got %t", client.ClientId, excludeSessionStateFromAuthResponse, client.Attributes.ExcludeSessionStateFromAuthResponse)
+		}
+
+		return nil
+	}
+}
+
+func testKeycloakOpenidClient_otherAttributes(realm, clientId, attributeName string, attributeValue string) string {
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "CONFIDENTIAL"
+    attributes = {
+		"%s" = "%s"
+	}
+}
+	`, realm, clientId, attributeName, attributeValue)
+}
+
+func testAccCheckKeycloakOpenidClientHasAttributeWithValue(resourceName, attributeName, attributeValue string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.OtherAttributes[attributeName] != attributeValue {
+			return fmt.Errorf("expected openid client %s to have attribute %s with value of %s, but got %s", client.ClientId, attributeName, attributeValue, client.Attributes.OtherAttributes[attributeName])
 		}
 
 		return nil
