@@ -227,27 +227,3 @@ func (keycloakClient *KeycloakClient) GetDefaultGroups(realmName string) ([]Grou
 
 	return defaultGroups, err
 }
-
-func (keycloakClient *KeycloakClient) AddRealmRolesToGroup(realmId, groupId string, roles []*Role) error {
-	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/groups/%s/role-mappings/realm", realmId, groupId), roles)
-
-	return err
-}
-
-func (keycloakClient *KeycloakClient) AddClientRolesToGroup(realmId, groupId, clientId string, roles []*Role) error {
-	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/groups/%s/role-mappings/clients/%s", realmId, groupId, clientId), roles)
-
-	return err
-}
-
-func (keycloakClient *KeycloakClient) RemoveRealmRolesFromGroup(realmId, groupId string, roles []*Role) error {
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/groups/%s/role-mappings/realm", realmId, groupId), roles)
-
-	return err
-}
-
-func (keycloakClient *KeycloakClient) RemoveClientRolesFromGroup(realmId, groupId, clientId string, roles []*Role) error {
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/groups/%s/role-mappings/clients/%s", realmId, groupId, clientId), roles)
-
-	return err
-}

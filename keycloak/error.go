@@ -19,3 +19,9 @@ func ErrorIs404(err error) bool {
 
 	return ok && keycloakError != nil && keycloakError.Code == http.StatusNotFound
 }
+
+func ErrorIs409(err error) bool {
+	keycloakError, ok := errwrap.GetType(err, &ApiError{}).(*ApiError)
+
+	return ok && keycloakError != nil && keycloakError.Code == http.StatusConflict
+}
