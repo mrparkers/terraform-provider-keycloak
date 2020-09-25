@@ -181,6 +181,10 @@ func resourceKeycloakRealm() *schema.Resource {
 			},
 
 			// Tokens
+			"default_signature_algorithm": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"revoke_refresh_token": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -538,6 +542,11 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	}
 
 	// Tokens
+
+	if defaultSignatureAlgorithm, ok := data.GetOk("default_signature_algorithm"); ok {
+		realm.DefaultSignatureAlgorithm = defaultSignatureAlgorithm.(string)
+	}
+
 	if revokeRefreshToken, ok := data.GetOk("revoke_refresh_token"); ok {
 		realm.RevokeRefreshToken = revokeRefreshToken.(bool)
 	}
@@ -794,6 +803,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("email_theme", realm.EmailTheme)
 
 	// Tokens
+	data.Set("default_signature_algorithm", realm.DefaultSignatureAlgorithm)
 	data.Set("revoke_refresh_token", realm.RevokeRefreshToken)
 	data.Set("refresh_token_max_reuse", realm.RefreshTokenMaxReuse)
 	data.Set("sso_session_idle_timeout", getDurationStringFromSeconds(realm.SsoSessionIdleTimeout))

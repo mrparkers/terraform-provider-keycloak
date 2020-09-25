@@ -9,6 +9,7 @@ type CustomUserFederation struct {
 	Id         string
 	Name       string
 	RealmId    string
+	ParentId   string
 	ProviderId string
 
 	Enabled  bool
@@ -34,18 +35,21 @@ func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *c
 	componentConfig["cachePolicy"] = append(componentConfig["cachePolicy"], custom.CachePolicy)
 	componentConfig["enabled"] = append(componentConfig["enabled"], strconv.FormatBool(custom.Enabled))
 	componentConfig["priority"] = append(componentConfig["priority"], strconv.Itoa(custom.Priority))
-
+	parentId := custom.RealmId
+	if custom.ParentId != "" {
+		parentId = custom.ParentId
+	}
 	return &component{
 		Id:           custom.Id,
 		Name:         custom.Name,
 		ProviderId:   custom.ProviderId,
 		ProviderType: userStorageProviderType,
-		ParentId:     custom.RealmId,
+		ParentId:     parentId,
 		Config:       componentConfig,
 	}
 }
 
-func convertFromComponentToCustomUserFederation(component *component) (*CustomUserFederation, error) {
+func convertFromComponentToCustomUserFederation(component *component, realmName string) (*CustomUserFederation, error) {
 	enabled, err := strconv.ParseBool(component.getConfig("enabled"))
 	if err != nil {
 		return nil, err
@@ -66,7 +70,8 @@ func convertFromComponentToCustomUserFederation(component *component) (*CustomUs
 	custom := &CustomUserFederation{
 		Id:         component.Id,
 		Name:       component.Name,
-		RealmId:    component.ParentId,
+		ParentId:   component.ParentId,
+		RealmId:    realmName,
 		ProviderId: component.ProviderId,
 
 		Enabled:  enabled,
@@ -105,29 +110,29 @@ func (keycloakClient *KeycloakClient) NewCustomUserFederation(customUserFederati
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetCustomUserFederation(realmId, id string) (*CustomUserFederation, error) {
+func (keycloakClient *KeycloakClient) GetCustomUserFederation(realmName, id string) (*CustomUserFederation, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmName, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return convertFromComponentToCustomUserFederation(component)
+	return convertFromComponentToCustomUserFederation(component, realmName)
 }
 
-func (keycloakClient *KeycloakClient) GetCustomUserFederations(realmId string) (*[]CustomUserFederation, error) {
+func (keycloakClient *KeycloakClient) GetCustomUserFederations(realmName, realmId string) (*[]CustomUserFederation, error) {
 	var components []*component
 	var customUserFederations []CustomUserFederation
 	var customUserFederation *CustomUserFederation
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components?parent=%s&type=%s", realmId, realmId, userStorageProviderType), &components, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components?parent=%s&type=%s", realmName, realmId, userStorageProviderType), &components, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, component := range components {
-		customUserFederation, err = convertFromComponentToCustomUserFederation(component)
+		customUserFederation, err = convertFromComponentToCustomUserFederation(component, realmName)
 		if err != nil {
 			return nil, err
 		}
@@ -140,6 +145,6 @@ func (keycloakClient *KeycloakClient) UpdateCustomUserFederation(customUserFeder
 	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", customUserFederation.RealmId, customUserFederation.Id), convertFromCustomUserFederationToComponent(customUserFederation))
 }
 
-func (keycloakClient *KeycloakClient) DeleteCustomUserFederation(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteCustomUserFederation(realmName, id string) error {
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmName, id), nil)
 }
