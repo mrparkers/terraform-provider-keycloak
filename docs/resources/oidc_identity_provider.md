@@ -37,7 +37,9 @@ resource "keycloak_oidc_identity_provider" "realm_identity_provider" {
 - `authorization_url` - (Required) The Authorization Url.
 - `client_id` - (Required) The client or client identifier registered within the identity provider.
 - `client_secret` - (Required) The client or client secret registered within the identity provider. This field is able to obtain its value from vault, use $${vault.ID} format.
+- `sync_mode` - (Optional) Default sync mode for all mappers. The sync mode determines when user data will be synced using the mappers. Defaults to `LEGACY`.
 - `token_url` - (Required) The Token URL.
+- `issuer` - (Optional) The issuer identifier for the issuer of the response. If not provided, no validation will be performed.
 - `display_name` - (Optional) Display name for the identity provider in the GUI.
 - `enabled` - (Optional) When `true`, users will be able to log in to this realm using this identity provider. Defaults to `true`.
 - `store_token` - (Optional) When `true`, tokens will be stored after authenticating users. Defaults to `true`.

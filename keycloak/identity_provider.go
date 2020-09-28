@@ -36,6 +36,8 @@ type IdentityProviderConfig struct {
 	ValidateSignature                KeycloakBoolQuoted     `json:"validateSignature,omitempty"`
 	AuthorizationUrl                 string                 `json:"authorizationUrl,omitempty"`
 	TokenUrl                         string                 `json:"tokenUrl,omitempty"`
+	Issuer                           string                 `json:"issuer,omitempty"`
+	SyncMode                         string                 `json:"syncMode,omitempty"`
 	LoginHint                        string                 `json:"loginHint,omitempty"`
 	UILocales                        KeycloakBoolQuoted     `json:"uiLocales,omitempty"`
 	LogoutUrl                        string                 `json:"logoutUrl,omitempty"`
