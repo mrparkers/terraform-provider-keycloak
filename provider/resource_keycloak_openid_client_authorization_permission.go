@@ -10,8 +10,7 @@ import (
 )
 
 var (
-	keycloakOpenidClientResourcePermissionDecisionStrategies = []string{"UNANIMOUS", "AFFIRMATIVE", "CONSENSUS"}
-	keycloakOpenidClientPermissionTypes                      = []string{"resource", "scope"}
+	keycloakOpenidClientPermissionTypes = []string{"resource", "scope"}
 )
 
 func resourceKeycloakOpenidClientAuthorizationPermission() *schema.Resource {

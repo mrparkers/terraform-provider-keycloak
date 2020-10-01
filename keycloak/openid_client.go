@@ -20,6 +20,7 @@ type OpenidClientSecret struct {
 
 type OpenidClientAuthorizationSettings struct {
 	PolicyEnforcementMode         string `json:"policyEnforcementMode,omitempty"`
+	DecisionStrategy              string `json:"decisionStrategy,omitempty"`
 	AllowRemoteResourceManagement bool   `json:"allowRemoteResourceManagement,omitempty"`
 	KeepDefaults                  bool   `json:"-"`
 }

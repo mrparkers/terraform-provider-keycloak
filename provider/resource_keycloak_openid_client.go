@@ -3,16 +3,18 @@ package provider
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 var (
-	keycloakOpenidClientAccessTypes                        = []string{"CONFIDENTIAL", "PUBLIC", "BEARER-ONLY"}
-	keycloakOpenidClientAuthorizationPolicyEnforcementMode = []string{"ENFORCING", "PERMISSIVE", "DISABLED"}
-	keycloakOpenidClientPkceCodeChallengeMethod            = []string{"", "plain", "S256"}
+	keycloakOpenidClientAccessTypes                          = []string{"CONFIDENTIAL", "PUBLIC", "BEARER-ONLY"}
+	keycloakOpenidClientAuthorizationPolicyEnforcementMode   = []string{"ENFORCING", "PERMISSIVE", "DISABLED"}
+	keycloakOpenidClientResourcePermissionDecisionStrategies = []string{"UNANIMOUS", "AFFIRMATIVE", "CONSENSUS"}
+	keycloakOpenidClientPkceCodeChallengeMethod              = []string{"", "plain", "S256"}
 )
 
 func resourceKeycloakOpenidClient() *schema.Resource {
@@ -135,6 +137,12 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validation.StringInSlice(keycloakOpenidClientAuthorizationPolicyEnforcementMode, false),
+						},
+						"decision_strategy": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice(keycloakOpenidClientResourcePermissionDecisionStrategies, false),
+							Default:      "UNANIMOUS",
 						},
 						"allow_remote_resource_management": {
 							Type:     schema.TypeBool,
@@ -274,6 +282,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		authorizationSettings := authorizationSettingsData.(map[string]interface{})
 		openidClient.AuthorizationSettings = &keycloak.OpenidClientAuthorizationSettings{
 			PolicyEnforcementMode:         authorizationSettings["policy_enforcement_mode"].(string),
+			DecisionStrategy:              authorizationSettings["decision_strategy"].(string),
 			AllowRemoteResourceManagement: authorizationSettings["allow_remote_resource_management"].(bool),
 			KeepDefaults:                  authorizationSettings["keep_defaults"].(bool),
 		}
