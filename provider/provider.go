@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
@@ -19,7 +20,9 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_realm":                              dataSourceKeycloakRealm(),
 			"keycloak_realm_keys":                         dataSourceKeycloakRealmKeys(),
 			"keycloak_role":                               dataSourceKeycloakRole(),
+			"keycloak_user":                               dataSourceKeycloakUser(),
 			"keycloak_saml_client_installation_provider":  dataSourceKeycloakSamlClientInstallationProvider(),
+			"keycloak_authentication_execution":           dataSourceKeycloakAuthenticationExecution(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_realm":                                             resourceKeycloakRealm(),
@@ -88,6 +91,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_authentication_execution":                          resourceKeycloakAuthenticationExecution(),
 			"keycloak_authentication_execution_config":                   resourceKeycloakAuthenticationExecutionConfig(),
 			"keycloak_identity_provider_token_exchange_scope_permission": resourceKeycloakIdentityProviderTokenExchangeScopePermission(),
+			"keycloak_openid_client_permissions":                         resourceKeycloakOpenidClientPermissions(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {

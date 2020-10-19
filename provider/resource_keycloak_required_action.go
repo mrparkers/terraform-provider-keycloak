@@ -81,6 +81,19 @@ func resourceKeycloakRequiredActionsCreate(data *schema.ResourceData, meta inter
 		return err
 	}
 
+	unregisteredRequiredActions, err := keycloakClient.GetUnregisteredRequiredActions(action.RealmId)
+	if err != nil {
+		return err
+	}
+	for _, unregisteredRequiredAction := range unregisteredRequiredActions {
+		if unregisteredRequiredAction.ProviderId == action.Alias {
+			if err := keycloakClient.RegisterRequiredAction(unregisteredRequiredAction); err != nil {
+				return err
+			}
+			break
+		}
+	}
+
 	err = keycloakClient.CreateRequiredAction(action)
 	if err != nil {
 		return err

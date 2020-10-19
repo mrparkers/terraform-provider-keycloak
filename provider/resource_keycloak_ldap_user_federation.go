@@ -223,10 +223,56 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 			},
 
 			"cache_policy": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "DEFAULT",
-				ValidateFunc: validation.StringInSlice(keycloakUserFederationCachePolicies, false),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "DEFAULT",
+				Deprecated:    "use cache.policy instead",
+				ConflictsWith: []string{"cache"},
+				ValidateFunc:  validation.StringInSlice(keycloakUserFederationCachePolicies, false),
+			},
+			"cache": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
+				Description:   "Settings regarding cache policy for this realm.",
+				ConflictsWith: []string{"cache_policy"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"policy": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      "DEFAULT",
+							ValidateFunc: validation.StringInSlice(keycloakUserFederationCachePolicies, false),
+						},
+						"max_lifespan": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							DiffSuppressFunc: suppressDurationStringDiff,
+							Description:      "Max lifespan of cache entry (duration string).",
+						},
+						"eviction_day": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      "-1",
+							ValidateFunc: validation.All(validation.IntAtLeast(0), validation.IntAtMost(6)),
+							Description:  "Day of the week the entry will become invalid on.",
+						},
+						"eviction_hour": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      "-1",
+							ValidateFunc: validation.All(validation.IntAtLeast(0), validation.IntAtMost(23)),
+							Description:  "Hour of day the entry will become invalid on.",
+						},
+						"eviction_minute": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      "-1",
+							ValidateFunc: validation.All(validation.IntAtLeast(0), validation.IntAtMost(59)),
+							Description:  "Minute of day the entry will become invalid on.",
+						},
+					},
+				},
 			},
 		},
 	}
@@ -287,6 +333,22 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 		ChangedSyncPeriod: data.Get("changed_sync_period").(int),
 
 		CachePolicy: data.Get("cache_policy").(string),
+	}
+
+	if cache, ok := data.GetOk("cache"); ok {
+		cache := cache.([]interface{})
+		cacheData := cache[0].(map[string]interface{})
+
+		evictionDay := cacheData["eviction_day"].(int)
+		evictionHour := cacheData["eviction_hour"].(int)
+		evictionMinute := cacheData["eviction_minute"].(int)
+
+		ldapUserFederation.MaxLifespan = cacheData["max_lifespan"].(string)
+
+		ldapUserFederation.EvictionDay = &evictionDay
+		ldapUserFederation.EvictionHour = &evictionHour
+		ldapUserFederation.EvictionMinute = &evictionMinute
+		ldapUserFederation.CachePolicy = cacheData["policy"].(string)
 	}
 
 	if kerberos, ok := data.GetOk("kerberos"); ok {
@@ -353,7 +415,29 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 	data.Set("full_sync_period", ldap.FullSyncPeriod)
 	data.Set("changed_sync_period", ldap.ChangedSyncPeriod)
 
-	data.Set("cache_policy", ldap.CachePolicy)
+	if _, ok := data.GetOk("cache"); ok {
+		cachePolicySettings := make(map[string]interface{})
+
+		if ldap.MaxLifespan != "" {
+			cachePolicySettings["max_lifespan"] = ldap.MaxLifespan
+		}
+
+		if ldap.EvictionDay != nil {
+			cachePolicySettings["eviction_day"] = *ldap.EvictionDay
+		}
+		if ldap.EvictionHour != nil {
+			cachePolicySettings["eviction_hour"] = *ldap.EvictionHour
+		}
+		if ldap.EvictionMinute != nil {
+			cachePolicySettings["eviction_minute"] = *ldap.EvictionMinute
+		}
+
+		cachePolicySettings["policy"] = ldap.CachePolicy
+
+		data.Set("cache", []interface{}{cachePolicySettings})
+	} else {
+		data.Set("cache_policy", ldap.CachePolicy)
+	}
 }
 
 func resourceKeycloakLdapUserFederationCreate(data *schema.ResourceData, meta interface{}) error {

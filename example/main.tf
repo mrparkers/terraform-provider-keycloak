@@ -76,6 +76,18 @@ resource "keycloak_realm" "test" {
   attributes = {
     mycustomAttribute = "myCustomValue"
   }
+
+  web_authn_policy {
+    relying_party_entity_name = "Example"
+    relying_party_id = "keycloak.example.com"
+    signature_algorithms = ["ES256", "RS256"]
+  }
+
+  web_authn_passwordless_policy {
+    relying_party_entity_name = "Example"
+    relying_party_id = "keycloak.example.com"
+    signature_algorithms = ["ES256", "RS256"]
+  }
 }
 
 resource "keycloak_required_action" "custom-terms-and-conditions" {
@@ -93,6 +105,13 @@ resource "keycloak_required_action" "custom-configured_totp" {
   enabled        = true
   name           = "Custom configure totp"
   priority       = keycloak_required_action.custom-terms-and-conditions.priority + 15
+}
+
+resource "keycloak_required_action" "required_action" {
+  realm_id  = keycloak_realm.test.realm
+  alias     = "webauthn-register"
+  enabled   = true
+  name      = "Webauthn Register"
 }
 
 resource "keycloak_group" "foo" {
@@ -450,7 +469,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 
 	claim_name         = "foo"
 	claim_value_type   = "String"
-	session_note_label = "bar"
+	session_note       = "bar"
 
   add_to_id_token     = true
   add_to_access_token = false
@@ -463,7 +482,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 
 	claim_name         = "foo2"
 	claim_value_type   = "String"
-	session_note_label = "bar2"
+	session_note       = "bar2"
 
   add_to_id_token     = true
   add_to_access_token = false

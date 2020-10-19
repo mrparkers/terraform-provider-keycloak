@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"fmt"
+	"time"
 )
 
 // this is only used when creating an execution on a flow.
@@ -71,6 +72,49 @@ func (keycloakClient *KeycloakClient) ListAuthenticationExecutions(realmId, pare
 	}
 
 	return authenticationExecutions, err
+}
+
+func (keycloakClient *KeycloakClient) GetAuthenticationExecutionInfoFromProviderId(realmId, parentFlowAlias, providerId string) (*AuthenticationExecutionInfo, error) {
+	var authenticationExecutions []*AuthenticationExecutionInfo
+	var authenticationExecution AuthenticationExecutionInfo
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Retry 3 more times if not found, sometimes it took split milliseconds the Authentication Executions to populate
+	if len(authenticationExecutions) == 0 {
+		for i := 0; i < 3; i++ {
+			err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
+
+			if len(authenticationExecutions) > 0 {
+				break
+			}
+
+			if err != nil {
+				return nil, err
+			}
+
+			time.Sleep(time.Millisecond * 50)
+		}
+
+		if len(authenticationExecutions) == 0 {
+			return nil, fmt.Errorf("no authentication executions found for parent flow alias %s", parentFlowAlias)
+		}
+	}
+
+	for _, aExecution := range authenticationExecutions {
+		if aExecution != nil && aExecution.ProviderId == providerId {
+			authenticationExecution = *aExecution
+			authenticationExecution.RealmId = realmId
+			authenticationExecution.ParentFlowAlias = parentFlowAlias
+
+			return &authenticationExecution, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no authentication execution under parent flow alias %s with provider id %s found", parentFlowAlias, providerId)
 }
 
 func (keycloakClient *KeycloakClient) NewAuthenticationExecution(execution *AuthenticationExecution) error {

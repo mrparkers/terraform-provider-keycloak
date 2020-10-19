@@ -46,7 +46,11 @@ type LdapUserFederation struct {
 	FullSyncPeriod    int // either a number, in milliseconds, or -1 if full sync is disabled
 	ChangedSyncPeriod int // either a number, in milliseconds, or -1 if changed sync is disabled
 
-	CachePolicy string
+	CachePolicy    string
+	MaxLifespan    string // duration string (ex: 1h30m)
+	EvictionDay    *int
+	EvictionHour   *int
+	EvictionMinute *int
 }
 
 func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) (*component, error) {
@@ -171,6 +175,31 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) (*compon
 		componentConfig["readTimeout"] = []string{readTimeoutMs}
 	} else {
 		componentConfig["readTimeout"] = []string{} // the keycloak API will not unset this unless the config is present with an empty array
+	}
+
+	componentConfig["evictionHour"] = []string{}
+	componentConfig["evictionMinute"] = []string{}
+	componentConfig["evictionDay"] = []string{}
+	componentConfig["maxLifespan"] = []string{}
+
+	if ldap.CachePolicy != "" {
+		if ldap.EvictionHour != nil {
+			componentConfig["evictionHour"] = []string{strconv.Itoa(*ldap.EvictionHour)}
+		}
+		if ldap.EvictionMinute != nil {
+			componentConfig["evictionMinute"] = []string{strconv.Itoa(*ldap.EvictionMinute)}
+		}
+		if ldap.EvictionDay != nil {
+			componentConfig["evictionDay"] = []string{strconv.Itoa(*ldap.EvictionDay)}
+		}
+
+		if ldap.MaxLifespan != "" {
+			maxLifespanMs, err := getMillisecondsFromDurationString(ldap.MaxLifespan)
+			if err != nil {
+				return nil, err
+			}
+			componentConfig["maxLifespan"] = []string{maxLifespanMs}
+		}
 	}
 
 	return &component{
@@ -322,6 +351,49 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		}
 
 		ldap.ReadTimeout = readTimeoutDurationString
+	}
+
+	if maxLifespan, ok := component.getConfigOk("maxLifespan"); ok {
+		maxLifespanString, err := GetDurationStringFromMilliseconds(maxLifespan)
+		if err != nil {
+			return nil, err
+		}
+
+		ldap.MaxLifespan = maxLifespanString
+	}
+
+	defaultEvictioValue := -1
+
+	if evictionDay, ok := component.getConfigOk("evictionDay"); ok {
+		evictionDayInt, err := strconv.Atoi(evictionDay)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse `evictionDay`: %w", err)
+		}
+
+		ldap.EvictionDay = &evictionDayInt
+	} else {
+		ldap.EvictionDay = &defaultEvictioValue
+	}
+
+	if evictionHour, ok := component.getConfigOk("evictionHour"); ok {
+		evictionHourInt, err := strconv.Atoi(evictionHour)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse `evictionHour`: %w", err)
+		}
+
+		ldap.EvictionHour = &evictionHourInt
+	} else {
+		ldap.EvictionHour = &defaultEvictioValue
+	}
+	if evictionMinute, ok := component.getConfigOk("evictionMinute"); ok {
+		evictionMinuteInt, err := strconv.Atoi(evictionMinute)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse `evictionMinute`: %w", err)
+		}
+
+		ldap.EvictionMinute = &evictionMinuteInt
+	} else {
+		ldap.EvictionMinute = &defaultEvictioValue
 	}
 
 	return ldap, nil
