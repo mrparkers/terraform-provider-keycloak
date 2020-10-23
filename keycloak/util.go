@@ -46,7 +46,7 @@ func GetTags(f interface{}) []string {
 	t := reflect.ValueOf(f).Elem().Type()
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
-		tag := string(field.Tag)
+		tag := string(field.Tag.Get("json"))
 		if tag != "" {
 			result = append(result, tag)
 		}
