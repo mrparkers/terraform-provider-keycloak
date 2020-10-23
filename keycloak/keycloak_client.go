@@ -111,7 +111,11 @@ func (keycloakClient *KeycloakClient) login() error {
 
 	log.Printf("[DEBUG] Login request: %s", accessTokenData.Encode())
 
-	accessTokenRequest, _ := http.NewRequest(http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
+	accessTokenRequest, err := http.NewRequest(http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
+	if err != nil {
+		return err
+	}
+
 	accessTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	if keycloakClient.userAgent != "" {
