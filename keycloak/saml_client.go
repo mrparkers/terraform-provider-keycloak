@@ -138,23 +138,7 @@ func (attr *SamlClientAttributes) UnmarshalJSON(data []byte) error {
 
 	attr.OtherAttributes = make(map[string]interface{})
 
-	reserverdKeys := map[string]bool{
-		"saml.authnstatement":                     true,
-		"saml.server.signature":                   true,
-		"saml.assertion.signature":                true,
-		"saml.client.signature":                   true,
-		"saml.force.post.binding":                 true,
-		"saml_force_name_id_format":               true,
-		"saml_name_id_format":                     true,
-		"saml.signing.certificate":                true,
-		"saml.signing.private.key":                true,
-		"saml_idp_initiated_sso_url_name":         true,
-		"saml_idp_initiated_sso_relay_state":      true,
-		"saml_assertion_consumer_url_post":        true,
-		"saml_assertion_consumer_url_redirect":    true,
-		"saml_single_logout_service_url_post":     true,
-		"saml_single_logout_service_url_redirect": true,
-	}
+	reserverdKeys := GetReservedKeys(attr)
 
 	for k, v := range attrMap {
 		if found, _ := reserverdKeys[k]; !found {
