@@ -3,6 +3,7 @@ package keycloak
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 )
 
 type OpenidClientRole struct {
@@ -62,6 +63,21 @@ type OpenidClientAttributes struct {
 	OtherAttributes                     map[string]interface{}
 }
 
+func (f *OpenidClientAttributes) GetReservedKeys() map[string]bool {
+	result := map[string]bool{}
+
+	t := reflect.ValueOf(f).Elem().Type()
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		tag := string(field.Tag)
+		if tag != "" {
+			result[tag] = true
+		}
+	}
+
+	return result
+}
+
 func (attr *OpenidClientAttributes) MarshalJSON() ([]byte, error) {
 
 	allAttributes := make(map[string]interface{})
@@ -98,12 +114,7 @@ func (attr *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
 
 	attr.OtherAttributes = make(map[string]interface{})
 
-	reserverdKeys := map[string]bool{
-		"access.token.lifespan":                    true,
-		"exclude.session.state.from.auth.response": true,
-		"login_theme":                              true,
-		"pkce.code.challenge.method":               true}
-
+	reserverdKeys := attr.GetReservedKeys()
 	for k, v := range attrMap {
 		if found, _ := reserverdKeys[k]; !found {
 			attr.OtherAttributes[k] = v
