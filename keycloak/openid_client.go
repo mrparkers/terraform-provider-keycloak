@@ -98,12 +98,7 @@ func (attr *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
 
 	attr.OtherAttributes = make(map[string]interface{})
 
-	reserverdKeys := map[string]bool{
-		"access.token.lifespan":                    true,
-		"exclude.session.state.from.auth.response": true,
-		"login_theme":                              true,
-		"pkce.code.challenge.method":               true}
-
+	reserverdKeys := GetReservedKeys(attr)
 	for k, v := range attrMap {
 		if found, _ := reserverdKeys[k]; !found {
 			attr.OtherAttributes[k] = v
