@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	keycloakLdapGroupMapperModes                       = []string{"READ_ONLY", "LDAP_ONLY"}
+	keycloakLdapGroupMapperModes                       = []string{"READ_ONLY", "LDAP_ONLY", "IMPORT"}
 	keycloakLdapGroupMapperMembershipAttributeTypes    = []string{"DN", "UID"}
 	keycloakLdapGroupMapperUserRolesRetrieveStrategies = []string{"LOAD_GROUPS_BY_MEMBER_ATTRIBUTE", "GET_GROUPS_FROM_USER_MEMBEROF_ATTRIBUTE", "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE_RECURSIVELY"}
 )
