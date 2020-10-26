@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"bytes"
-	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -21,7 +20,6 @@ import (
 )
 
 type KeycloakClient struct {
-	ctx               context.Context
 	baseUrl           string
 	realm             string
 	clientCredentials *ClientCredentials
@@ -47,8 +45,6 @@ const (
 )
 
 func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string) (*KeycloakClient, error) {
-	ctx := context.Background()
-
 	cookieJar, err := cookiejar.New(&cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	})
@@ -91,7 +87,6 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 	}
 
 	keycloakClient := KeycloakClient{
-		ctx:               ctx,
 		baseUrl:           url + basePath,
 		clientCredentials: clientCredentials,
 		httpClient:        httpClient,
@@ -116,7 +111,11 @@ func (keycloakClient *KeycloakClient) login() error {
 
 	log.Printf("[DEBUG] Login request: %s", accessTokenData.Encode())
 
-	accessTokenRequest, _ := http.NewRequestWithContext(keycloakClient.ctx, http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
+	accessTokenRequest, err := http.NewRequest(http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
+	if err != nil {
+		return err
+	}
+
 	accessTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	if keycloakClient.userAgent != "" {
@@ -157,7 +156,11 @@ func (keycloakClient *KeycloakClient) refresh() error {
 
 	log.Printf("[DEBUG] Refresh request: %s", refreshTokenData.Encode())
 
-	refreshTokenRequest, _ := http.NewRequestWithContext(keycloakClient.ctx, http.MethodPost, refreshTokenUrl, strings.NewReader(refreshTokenData.Encode()))
+	refreshTokenRequest, err := http.NewRequest(http.MethodPost, refreshTokenUrl, strings.NewReader(refreshTokenData.Encode()))
+	if err != nil {
+		return err
+	}
+
 	refreshTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	if keycloakClient.userAgent != "" {
@@ -331,7 +334,7 @@ func (keycloakClient *KeycloakClient) get(path string, resource interface{}, par
 func (keycloakClient *KeycloakClient) getRaw(path string, params map[string]string) ([]byte, error) {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
-	request, err := http.NewRequestWithContext(keycloakClient.ctx, http.MethodGet, resourceUrl, nil)
+	request, err := http.NewRequest(http.MethodGet, resourceUrl, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -356,7 +359,7 @@ func (keycloakClient *KeycloakClient) post(path string, requestBody interface{})
 		return nil, "", err
 	}
 
-	request, err := http.NewRequestWithContext(keycloakClient.ctx, http.MethodPost, resourceUrl, bytes.NewReader(payload))
+	request, err := http.NewRequest(http.MethodPost, resourceUrl, bytes.NewReader(payload))
 	if err != nil {
 		return nil, "", err
 	}
@@ -374,7 +377,7 @@ func (keycloakClient *KeycloakClient) put(path string, requestBody interface{}) 
 		return err
 	}
 
-	request, err := http.NewRequestWithContext(keycloakClient.ctx, http.MethodPut, resourceUrl, bytes.NewReader(payload))
+	request, err := http.NewRequest(http.MethodPut, resourceUrl, bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
@@ -397,7 +400,7 @@ func (keycloakClient *KeycloakClient) delete(path string, requestBody interface{
 		body = bytes.NewReader(payload)
 	}
 
-	request, err := http.NewRequestWithContext(keycloakClient.ctx, http.MethodDelete, resourceUrl, body)
+	request, err := http.NewRequest(http.MethodDelete, resourceUrl, body)
 	if err != nil {
 		return err
 	}
