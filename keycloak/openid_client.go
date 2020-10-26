@@ -59,6 +59,10 @@ type OpenidClientAttributes struct {
 	ExcludeSessionStateFromAuthResponse KeycloakBoolQuoted `json:"exclude.session.state.from.auth.response"`
 	AccessTokenLifespan                 string             `json:"access.token.lifespan"`
 	LoginTheme                          string             `json:"login_theme"`
+	ClientOfflineSessionIdleTimeout     string             `json:"client.offline.session.idle.timeout,omitempty"`
+	ClientOfflineSessionMaxLifespan     string             `json:"client.offline.session.max.lifespan,omitempty"`
+	ClientSessionIdleTimeout            string             `json:"client.session.idle.timeout,omitempty"`
+	ClientSessionMaxLifespan            string             `json:"client.session.max.lifespan,omitempty"`
 }
 
 type OpenidAuthenticationFlowBindingOverrides struct {

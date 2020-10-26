@@ -118,6 +118,22 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"client_offline_session_idle_timeout": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"client_offline_session_max_lifespan": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"client_session_idle_timeout": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"client_session_max_lifespan": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"exclude_session_state_from_auth_response": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -245,6 +261,10 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			ExcludeSessionStateFromAuthResponse: keycloak.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
 			AccessTokenLifespan:                 data.Get("access_token_lifespan").(string),
 			LoginTheme:                          data.Get("login_theme").(string),
+			ClientOfflineSessionIdleTimeout:     data.Get("client_offline_session_idle_timeout").(string),
+			ClientOfflineSessionMaxLifespan:     data.Get("client_offline_session_max_lifespan").(string),
+			ClientSessionIdleTimeout:            data.Get("client_session_idle_timeout").(string),
+			ClientSessionMaxLifespan:            data.Get("client_session_max_lifespan").(string),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,

@@ -282,6 +282,38 @@ func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	offlineSessionIdleTimeout := "1800"
+	offlineSessionMaxLifespan := "1900"
+	sessionIdleTimeout := "2000"
+	sessionMaxLifespan := "2100"
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_ClientTimeouts(realmName, clientId,
+					offlineSessionIdleTimeout, offlineSessionMaxLifespan, sessionIdleTimeout, sessionMaxLifespan),
+				Check: testAccCheckKeycloakOpenidClientExistsWithCorrectClientTimeouts("keycloak_openid_client.client",
+					offlineSessionIdleTimeout, offlineSessionMaxLifespan, sessionIdleTimeout, sessionMaxLifespan,
+				),
+			},
+			{
+				ResourceName:            "keycloak_openid_client.client",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     realmName + "/",
+				ImportStateVerifyIgnore: []string{"exclude_session_state_from_auth_response"},
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_secret(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
@@ -541,6 +573,35 @@ func testAccCheckKeycloakOpenidClientExistsWithCorrectLifespan(resourceName stri
 
 		if client.Attributes.AccessTokenLifespan != accessTokenLifespan {
 			return fmt.Errorf("expected openid client to have access token lifespan set to %s, but got %s", accessTokenLifespan, client.Attributes.AccessTokenLifespan)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientExistsWithCorrectClientTimeouts(resourceName string,
+	offlineSessionIdleTimeout string, offlineSessionMaxLifespan string,
+	sessionIdleTimeout string, sessionMaxLifespan string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.ClientOfflineSessionIdleTimeout != offlineSessionIdleTimeout {
+			return fmt.Errorf("expected openid client to have client offline session idle timeout set to %s, but got %s", offlineSessionIdleTimeout, client.Attributes.ClientOfflineSessionIdleTimeout)
+		}
+
+		if client.Attributes.ClientOfflineSessionMaxLifespan != offlineSessionMaxLifespan {
+			return fmt.Errorf("expected openid client to have client offline session max lifespan set to %s, but got %s", offlineSessionMaxLifespan, client.Attributes.ClientOfflineSessionMaxLifespan)
+		}
+
+		if client.Attributes.ClientSessionIdleTimeout != sessionIdleTimeout {
+			return fmt.Errorf("expected openid client to have client session idle timeout set to %s, but got %s", sessionIdleTimeout, client.Attributes.ClientSessionIdleTimeout)
+		}
+
+		if client.Attributes.ClientSessionMaxLifespan != sessionMaxLifespan {
+			return fmt.Errorf("expected openid client to have client session max lifespan set to %s, but got %s", sessionMaxLifespan, client.Attributes.ClientSessionMaxLifespan)
 		}
 
 		return nil
@@ -818,6 +879,27 @@ resource "keycloak_openid_client" "client" {
 	access_token_lifespan = "%s"
 }
 	`, realm, clientId, accessTokenLifespan)
+}
+
+func testKeycloakOpenidClient_ClientTimeouts(realm, clientId,
+	offlineSessionIdleTimeout string, offlineSessionMaxLifespan string,
+	sessionIdleTimeout string, sessionMaxLifespan string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   		  = "%s"
+	realm_id    		  = "${keycloak_realm.realm.id}"
+	access_type 		  = "CONFIDENTIAL"
+
+	client_offline_session_idle_timeout = "%s"
+	client_offline_session_max_lifespan = "%s"
+	client_session_idle_timeout         = "%s"
+	client_session_max_lifespan         = "%s"
+}
+	`, realm, clientId, offlineSessionIdleTimeout, offlineSessionMaxLifespan, sessionIdleTimeout, sessionMaxLifespan)
 }
 
 func testKeycloakOpenidClient_accessType(realm, clientId, accessType string) string {
