@@ -108,6 +108,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"decision_strategy": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"allow_remote_resource_management": {
 							Type:     schema.TypeBool,
 							Computed: true,

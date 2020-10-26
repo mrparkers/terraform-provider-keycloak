@@ -70,6 +70,7 @@ is set to `true`.
 - `exclude_session_state_from_auth_response` - (Optional) When `true`, the parameter `session_state` will not be included in OpenID Connect Authentication Response.
 - `authorization` - (Optional) When this block is present, fine-grained authorization will be enabled for this client. The client's `access_type` must be `CONFIDENTIAL`, and `service_accounts_enabled` must be `true`. This block has the following arguments:
     - `policy_enforcement_mode` - (Required) Dictates how policies are enforced when evaluating authorization requests. Can be one of `ENFORCING`, `PERMISSIVE`, or `DISABLED`.
+    - `decision_strategy` - (Optional) Dictates how the policies associated with a given permission are evaluated and how a final decision is obtained. Could be one of `AFFIRMATIVE`, `CONSENSUS`, or `UNANIMOUS`. Applies to permissions.
     - `allow_remote_resource_management` - (Optional) When `true`, resources can be managed remotely by the resource server. Defaults to `false`.
     - `keep_defaults` - (Optional) When `true`, defaults set by Keycloak will be respected. Defaults to `false`.
 
