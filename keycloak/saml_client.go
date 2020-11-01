@@ -3,6 +3,8 @@ package keycloak
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -14,16 +16,16 @@ type SamlClientAttributes struct {
 	ForcePostBinding        *string `json:"saml.force.post.binding"`
 	ForceNameIdFormat       *string `json:"saml_force_name_id_format"`
 	// attributes above are actually booleans, but the Keycloak API expects strings
-	NameIdFormat                    string  `json:"saml_name_id_format"`
-	SigningCertificate              *string `json:"saml.signing.certificate,omitempty"`
-	SigningPrivateKey               *string `json:"saml.signing.private.key"`
-	IDPInitiatedSSOURLName          string  `json:"saml_idp_initiated_sso_url_name"`
-	IDPInitiatedSSORelayState       string  `json:"saml_idp_initiated_sso_relay_state"`
-	AssertionConsumerPostURL        string  `json:"saml_assertion_consumer_url_post"`
-	AssertionConsumerRedirectURL    string  `json:"saml_assertion_consumer_url_redirect"`
-	LogoutServicePostBindingURL     string  `json:"saml_single_logout_service_url_post"`
-	LogoutServiceRedirectBindingURL string  `json:"saml_single_logout_service_url_redirect"`
-	OtherAttributes                 map[string]interface{}
+	NameIdFormat                    string                 `json:"saml_name_id_format"`
+	SigningCertificate              *string                `json:"saml.signing.certificate,omitempty"`
+	SigningPrivateKey               *string                `json:"saml.signing.private.key"`
+	IDPInitiatedSSOURLName          string                 `json:"saml_idp_initiated_sso_url_name"`
+	IDPInitiatedSSORelayState       string                 `json:"saml_idp_initiated_sso_relay_state"`
+	AssertionConsumerPostURL        string                 `json:"saml_assertion_consumer_url_post"`
+	AssertionConsumerRedirectURL    string                 `json:"saml_assertion_consumer_url_redirect"`
+	LogoutServicePostBindingURL     string                 `json:"saml_single_logout_service_url_post"`
+	LogoutServiceRedirectBindingURL string                 `json:"saml_single_logout_service_url_redirect"`
+	OtherAttributes                 map[string]interface{} `json:"-"`
 }
 
 type SamlClient struct {
@@ -49,104 +51,58 @@ type SamlClient struct {
 	Attributes *SamlClientAttributes `json:"attributes"`
 }
 
-func (attr *SamlClientAttributes) MarshalJSON() ([]byte, error) {
-
-	allAttributes := make(map[string]interface{})
-
-	if attr.OtherAttributes != nil {
-		for k, v := range attr.OtherAttributes {
-			allAttributes[k] = v
-		}
-	}
-
-	allAttributes["saml.authnstatement"] = attr.IncludeAuthnStatement
-	allAttributes["saml.server.signature"] = attr.SignDocuments
-	allAttributes["saml.assertion.signature"] = attr.SignAssertions
-	allAttributes["saml.client.signature"] = attr.ClientSignatureRequired
-	allAttributes["saml.force.post.binding"] = attr.ForcePostBinding
-	allAttributes["saml_force_name_id_format"] = attr.ForceNameIdFormat
-	allAttributes["saml_name_id_format"] = attr.NameIdFormat
-	if attr.SigningCertificate != nil && *attr.SigningCertificate != "" {
-		//omit empty
-		allAttributes["saml.signing.certificate"] = attr.SigningCertificate
-	}
-	allAttributes["saml.signing.private.key"] = attr.SigningPrivateKey
-	allAttributes["saml_idp_initiated_sso_url_name"] = attr.IDPInitiatedSSOURLName
-	allAttributes["saml_idp_initiated_sso_relay_state"] = attr.IDPInitiatedSSORelayState
-	allAttributes["saml_assertion_consumer_url_post"] = attr.AssertionConsumerPostURL
-	allAttributes["saml_assertion_consumer_url_redirect"] = attr.AssertionConsumerRedirectURL
-	allAttributes["saml_single_logout_service_url_post"] = attr.LogoutServicePostBindingURL
-	allAttributes["saml_single_logout_service_url_redirect"] = attr.LogoutServiceRedirectBindingURL
-
-	result, err := json.Marshal(allAttributes)
-	return result, err
-}
-
-func (attr *SamlClientAttributes) UnmarshalJSON(data []byte) error {
-	var attrMap map[string]string
-	if err := json.Unmarshal(data, &attrMap); err != nil {
+func (f *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
+	f.OtherAttributes = map[string]interface{}{}
+	err := json.Unmarshal(data, &f.OtherAttributes)
+	if err != nil {
 		return err
 	}
-
-	if strings.Trim(attrMap["saml.authnstatement"], " ") != "" {
-		includeAuthnStatement := attrMap["saml.authnstatement"]
-		attr.IncludeAuthnStatement = &includeAuthnStatement
-	}
-
-	if strings.Trim(attrMap["saml.server.signature"], " ") != "" {
-		signDocuments := attrMap["saml.server.signature"]
-		attr.SignDocuments = &signDocuments
-	}
-
-	if strings.Trim(attrMap["saml.assertion.signature"], " ") != "" {
-		signAssertions := attrMap["saml.assertion.signature"]
-		attr.SignAssertions = &signAssertions
-	}
-
-	if strings.Trim(attrMap["saml.client.signature"], " ") != "" {
-		clientSignatureRequired := attrMap["saml.client.signature"]
-		attr.ClientSignatureRequired = &clientSignatureRequired
-	}
-
-	if strings.Trim(attrMap["saml.force.post.binding"], " ") != "" {
-		forcePostBinding := attrMap["saml.force.post.binding"]
-		attr.ForcePostBinding = &forcePostBinding
-	}
-
-	if strings.Trim(attrMap["saml_force_name_id_format"], " ") != "" {
-		forceNameIDFormat := attrMap["saml_force_name_id_format"]
-		attr.ForceNameIdFormat = &forceNameIDFormat
-	}
-
-	if strings.Trim(attrMap["saml.signing.certificate"], " ") != "" {
-		signingCertificate := attrMap["saml.signing.certificate"]
-		attr.SigningCertificate = &signingCertificate
-	}
-
-	if strings.Trim(attrMap["saml.signing.private.key"], " ") != "" {
-		signingPrivateKey := attrMap["saml.signing.private.key"]
-		attr.SigningPrivateKey = &signingPrivateKey
-	}
-
-	attr.NameIdFormat = attrMap["saml_name_id_format"]
-	attr.IDPInitiatedSSOURLName = attrMap["saml_idp_initiated_sso_url_name"]
-	attr.IDPInitiatedSSORelayState = attrMap["saml_idp_initiated_sso_relay_state"]
-	attr.AssertionConsumerPostURL = attrMap["saml_assertion_consumer_url_post"]
-	attr.AssertionConsumerRedirectURL = attrMap["saml_assertion_consumer_url_redirect"]
-	attr.LogoutServicePostBindingURL = attrMap["saml_single_logout_service_url_post"]
-	attr.LogoutServiceRedirectBindingURL = attrMap["saml_single_logout_service_url_redirect"]
-
-	attr.OtherAttributes = make(map[string]interface{})
-
-	reserverdKeys := GetReservedKeys(attr)
-
-	for k, v := range attrMap {
-		if found, _ := reserverdKeys[k]; !found {
-			attr.OtherAttributes[k] = v
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		structField := v.Type().Field(i)
+		jsonKey := strings.Split(structField.Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			value, ok := f.OtherAttributes[jsonKey]
+			if ok {
+				field := v.FieldByName(structField.Name)
+				if field.IsValid() && field.CanSet() {
+					if field.Kind() == reflect.String {
+						field.SetString(value.(string))
+					} else if field.Kind() == reflect.Bool {
+						boolVal, err := strconv.ParseBool(value.(string))
+						if err == nil {
+							field.Set(reflect.ValueOf(KeycloakBoolQuoted(boolVal)))
+						}
+					}
+					delete(f.OtherAttributes, jsonKey)
+				}
+			}
 		}
 	}
-
 	return nil
+}
+
+func (f *OpenidClientAttributes) MarshalJSON() ([]byte, error) {
+	out := map[string]interface{}{}
+
+	for k, v := range f.OtherAttributes {
+		out[k] = v
+	}
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		jsonKey := strings.Split(v.Type().Field(i).Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			field := v.Field(i)
+			if field.IsValid() && field.CanSet() {
+				if field.Kind() == reflect.String {
+					out[jsonKey] = field.String()
+				} else if field.Kind() == reflect.Bool {
+					out[jsonKey] = KeycloakBoolQuoted(field.Bool())
+				}
+			}
+		}
+	}
+	return json.Marshal(out)
 }
 
 func (keycloakClient *KeycloakClient) NewSamlClient(client *SamlClient) error {

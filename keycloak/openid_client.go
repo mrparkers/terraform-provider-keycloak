@@ -3,6 +3,9 @@ package keycloak
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strconv"
+	"strings"
 )
 
 type OpenidClientRole struct {
@@ -55,57 +58,65 @@ type OpenidClient struct {
 }
 
 type OpenidClientAttributes struct {
-	PkceCodeChallengeMethod             string             `json:"pkce.code.challenge.method"`
-	ExcludeSessionStateFromAuthResponse KeycloakBoolQuoted `json:"exclude.session.state.from.auth.response"`
-	AccessTokenLifespan                 string             `json:"access.token.lifespan"`
-	LoginTheme                          string             `json:"login_theme"`
-	OtherAttributes                     map[string]interface{}
+	PkceCodeChallengeMethod             string                 `json:"pkce.code.challenge.method"`
+	ExcludeSessionStateFromAuthResponse KeycloakBoolQuoted     `json:"exclude.session.state.from.auth.response"`
+	AccessTokenLifespan                 string                 `json:"access.token.lifespan"`
+	LoginTheme                          string                 `json:"login_theme"`
+	OtherAttributes                     map[string]interface{} `json:"-"`
 }
 
-func (attr *OpenidClientAttributes) MarshalJSON() ([]byte, error) {
-
-	allAttributes := make(map[string]interface{})
-
-	if attr.OtherAttributes != nil {
-		for k, v := range attr.OtherAttributes {
-			allAttributes[k] = v
-		}
-	}
-
-	allAttributes["access.token.lifespan"] = attr.AccessTokenLifespan
-	b, _ := attr.ExcludeSessionStateFromAuthResponse.MarshalJSON()
-	allAttributes["exclude.session.state.from.auth.response"] = string(b)
-	allAttributes["login_theme"] = attr.LoginTheme
-	allAttributes["pkce.code.challenge.method"] = attr.PkceCodeChallengeMethod
-
-	result, err := json.Marshal(allAttributes)
-	return result, err
-}
-
-func (attr *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
-
-	var attrMap map[string]string
-	if err := json.Unmarshal(data, &attrMap); err != nil {
+func (f *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
+	f.OtherAttributes = map[string]interface{}{}
+	err := json.Unmarshal(data, &f.OtherAttributes)
+	if err != nil {
 		return err
 	}
-
-	attr.AccessTokenLifespan = attrMap["access.token.lifespan"]
-	var quotedBool KeycloakBoolQuoted
-	json.Unmarshal([]byte(attrMap["exclude.session.state.from.auth.response"]), &quotedBool)
-	attr.ExcludeSessionStateFromAuthResponse = quotedBool
-	attr.LoginTheme = attrMap["login_theme"]
-	attr.PkceCodeChallengeMethod = attrMap["pkce.code.challenge.method"]
-
-	attr.OtherAttributes = make(map[string]interface{})
-
-	reserverdKeys := GetReservedKeys(attr)
-	for k, v := range attrMap {
-		if found, _ := reserverdKeys[k]; !found {
-			attr.OtherAttributes[k] = v
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		structField := v.Type().Field(i)
+		jsonKey := strings.Split(structField.Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			value, ok := f.OtherAttributes[jsonKey]
+			if ok {
+				field := v.FieldByName(structField.Name)
+				if field.IsValid() && field.CanSet() {
+					if field.Kind() == reflect.String {
+						field.SetString(value.(string))
+					} else if field.Kind() == reflect.Bool {
+						boolVal, err := strconv.ParseBool(value.(string))
+						if err == nil {
+							field.Set(reflect.ValueOf(KeycloakBoolQuoted(boolVal)))
+						}
+					}
+					delete(f.OtherAttributes, jsonKey)
+				}
+			}
 		}
 	}
-
 	return nil
+}
+
+func (f *OpenidClientAttributes) MarshalJSON() ([]byte, error) {
+	out := map[string]interface{}{}
+
+	for k, v := range f.OtherAttributes {
+		out[k] = v
+	}
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		jsonKey := strings.Split(v.Type().Field(i).Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			field := v.Field(i)
+			if field.IsValid() && field.CanSet() {
+				if field.Kind() == reflect.String {
+					out[jsonKey] = field.String()
+				} else if field.Kind() == reflect.Bool {
+					out[jsonKey] = KeycloakBoolQuoted(field.Bool())
+				}
+			}
+		}
+	}
+	return json.Marshal(out)
 }
 
 type OpenidAuthenticationFlowBindingOverrides struct {
