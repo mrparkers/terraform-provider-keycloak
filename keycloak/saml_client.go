@@ -102,7 +102,7 @@ func (f *SamlClientAttributes) MarshalJSON() ([]byte, error) {
 			field := v.Field(i)
 			if field.IsValid() && field.CanSet() {
 				if field.Kind() == reflect.Ptr {
-					out[jsonKey] = field.Elem().String()
+					out[jsonKey] = field.Elem()
 				} else if field.Kind() == reflect.String {
 					out[jsonKey] = field.String()
 				} else if field.Kind() == reflect.Bool {
