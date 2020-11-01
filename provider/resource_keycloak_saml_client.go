@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -187,6 +186,13 @@ func mapToSamlClientFromData(data *schema.ResourceData) (*keycloak.SamlClient, e
 		}
 	}
 
+	otherAttributes := map[string]interface{}{}
+	if v, ok := data.GetOk("attributes"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			otherAttributes[key] = value
+		}
+	}
+
 	samlAttributes := &keycloak.SamlClientAttributes{
 		NameIdFormat:                    data.Get("name_id_format").(string),
 		IDPInitiatedSSOURLName:          data.Get("idp_initiated_sso_url_name").(string),
@@ -195,38 +201,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) (*keycloak.SamlClient, e
 		AssertionConsumerRedirectURL:    data.Get("assertion_consumer_redirect_url").(string),
 		LogoutServicePostBindingURL:     data.Get("logout_service_post_binding_url").(string),
 		LogoutServiceRedirectBindingURL: data.Get("logout_service_redirect_binding_url").(string),
-	}
-
-	attributes := data.Get("attributes").(map[string]interface{})
-	if attributes != nil {
-		reserverdKeys := map[string]bool{
-			"saml.authnstatement":                     true,
-			"saml.server.signature":                   true,
-			"saml.assertion.signature":                true,
-			"saml.client.signature":                   true,
-			"saml.force.post.binding":                 true,
-			"saml_force_name_id_format":               true,
-			"saml_name_id_format":                     true,
-			"saml.signing.certificate":                true,
-			"saml.signing.private.key":                true,
-			"saml_idp_initiated_sso_url_name":         true,
-			"saml_idp_initiated_sso_relay_state":      true,
-			"saml_assertion_consumer_url_post":        true,
-			"saml_assertion_consumer_url_redirect":    true,
-			"saml_single_logout_service_url_post":     true,
-			"saml_single_logout_service_url_redirect": true,
-		}
-
-		for k, v := range attributes {
-			if found, _ := reserverdKeys[k]; found {
-				return nil, errors.New(fmt.Sprintf("%s is a wrong key in attributes. Use the field defined for this purpose instead.", k))
-			}
-
-			if samlAttributes.OtherAttributes == nil {
-				samlAttributes.OtherAttributes = make(map[string]interface{})
-			}
-			samlAttributes.OtherAttributes[k] = v
-		}
+		OtherAttributes:                 otherAttributes,
 	}
 
 	if signingCertificate, ok := data.GetOkExists("signing_certificate"); ok {
