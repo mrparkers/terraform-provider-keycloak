@@ -66,7 +66,12 @@ func (f *SamlClientAttributes) UnmarshalJSON(data []byte) error {
 			if ok {
 				field := v.FieldByName(structField.Name)
 				if field.IsValid() && field.CanSet() {
-					if field.Kind() == reflect.String {
+					if field.Kind() == reflect.Ptr {
+						temp := value.(string)
+						if temp != "" {
+							field.Set(reflect.ValueOf(&temp))
+						}
+					} else if field.Kind() == reflect.String {
 						field.SetString(value.(string))
 					} else if field.Kind() == reflect.Bool {
 						boolVal, err := strconv.ParseBool(value.(string))
@@ -94,7 +99,9 @@ func (f *SamlClientAttributes) MarshalJSON() ([]byte, error) {
 		if jsonKey != "-" {
 			field := v.Field(i)
 			if field.IsValid() && field.CanSet() {
-				if field.Kind() == reflect.String {
+				if field.Kind() == reflect.Ptr {
+					out[jsonKey] = field.String()
+				} else if field.Kind() == reflect.String {
 					out[jsonKey] = field.String()
 				} else if field.Kind() == reflect.Bool {
 					out[jsonKey] = KeycloakBoolQuoted(field.Bool())
