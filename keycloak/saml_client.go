@@ -51,7 +51,7 @@ type SamlClient struct {
 	Attributes *SamlClientAttributes `json:"attributes"`
 }
 
-func (f *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
+func (f *SamlClientAttributes) UnmarshalJSON(data []byte) error {
 	f.OtherAttributes = map[string]interface{}{}
 	err := json.Unmarshal(data, &f.OtherAttributes)
 	if err != nil {
@@ -82,7 +82,7 @@ func (f *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (f *OpenidClientAttributes) MarshalJSON() ([]byte, error) {
+func (f *SamlClientAttributes) MarshalJSON() ([]byte, error) {
 	out := map[string]interface{}{}
 
 	for k, v := range f.OtherAttributes {
