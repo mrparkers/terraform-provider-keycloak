@@ -177,7 +177,7 @@ func formatSigningPrivateKey(signingPrivateKey string) string {
 	return r.Replace(signingPrivateKey)
 }
 
-func mapToSamlClientFromData(data *schema.ResourceData) (*keycloak.SamlClient, error) {
+func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	var validRedirectUris []string
 
 	if v, ok := data.GetOk("valid_redirect_uris"); ok {
@@ -260,7 +260,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) (*keycloak.SamlClient, e
 		Attributes:              samlAttributes,
 	}
 
-	return samlClient, nil
+	return samlClient
 }
 
 func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlClient) error {
@@ -345,6 +345,7 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("logout_service_post_binding_url", client.Attributes.LogoutServicePostBindingURL)
 	data.Set("logout_service_redirect_binding_url", client.Attributes.LogoutServiceRedirectBindingURL)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
+	data.Set("attributes", client.Attributes.OtherAttributes)
 
 	return nil
 }
@@ -352,12 +353,8 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 func resourceKeycloakSamlClientCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client, err := mapToSamlClientFromData(data)
-	if err != nil {
-		return err
-	}
-
-	err = keycloakClient.NewSamlClient(client)
+	client := mapToSamlClientFromData(data)
+	err := keycloakClient.NewSamlClient(client)
 	if err != nil {
 		return err
 	}
@@ -389,12 +386,8 @@ func resourceKeycloakSamlClientRead(data *schema.ResourceData, meta interface{})
 func resourceKeycloakSamlClientUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	client, err := mapToSamlClientFromData(data)
-	if err != nil {
-		return err
-	}
-
-	err = keycloakClient.UpdateSamlClient(client)
+	client := mapToSamlClientFromData(data)
+	err := keycloakClient.UpdateSamlClient(client)
 	if err != nil {
 		return err
 	}

@@ -336,6 +336,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("consent_required", client.ConsentRequired)
 	data.Set("access_token_lifespan", client.Attributes.AccessTokenLifespan)
 	data.Set("login_theme", client.Attributes.LoginTheme)
+	data.Set("attributes", client.Attributes.OtherAttributes)
 
 	if client.AuthorizationServicesEnabled {
 		data.Set("resource_server_id", client.Id)
