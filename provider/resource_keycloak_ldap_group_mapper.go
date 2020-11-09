@@ -111,6 +111,11 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"groups_path": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "/",
+			},
 		},
 	}
 }
@@ -148,6 +153,7 @@ func getLdapGroupMapperFromData(data *schema.ResourceData) *keycloak.LdapGroupMa
 		MemberofLdapAttribute:           data.Get("memberof_ldap_attribute").(string),
 		MappedGroupAttributes:           mappedGroupAttributes,
 		DropNonExistingGroupsDuringSync: data.Get("drop_non_existing_groups_during_sync").(bool),
+		GroupsPath:                      data.Get("groups_path").(string),
 	}
 }
 
@@ -172,6 +178,7 @@ func setLdapGroupMapperData(data *schema.ResourceData, ldapGroupMapper *keycloak
 	data.Set("memberof_ldap_attribute", ldapGroupMapper.MemberofLdapAttribute)
 	data.Set("mapped_group_attributes", ldapGroupMapper.MappedGroupAttributes)
 	data.Set("drop_non_existing_groups_during_sync", ldapGroupMapper.DropNonExistingGroupsDuringSync)
+	data.Set("groups_path", ldapGroupMapper.GroupsPath)
 }
 
 func resourceKeycloakLdapGroupMapperCreate(data *schema.ResourceData, meta interface{}) error {

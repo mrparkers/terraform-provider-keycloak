@@ -233,6 +233,7 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 		MemberofLdapAttribute:           acctest.RandString(10),
 		MappedGroupAttributes:           []string{acctest.RandString(10)},
 		DropNonExistingGroupsDuringSync: !dropNonExistingGroupsDuringSync,
+		GroupsPath:                      "/foo/bar",
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -401,6 +402,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	membership_ldap_attribute      = "member"
 	membership_user_ldap_attribute = "cn"
 	memberof_ldap_attribute        = "memberOf"
+	groups_path                    = "/"
 }
 	`, realm, groupMapperName, attr, val)
 }
@@ -446,6 +448,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	membership_ldap_attribute      = "member"
 	membership_user_ldap_attribute = "cn"
 	memberof_ldap_attribute        = "memberOf"
+	groups_path                    = "/"
 }
 	`, realm, groupMapperName)
 }
@@ -494,8 +497,9 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	memberof_ldap_attribute              = "%s"
 	mapped_group_attributes              = %s
 	drop_non_existing_groups_during_sync = %t
+	groups_path                          = "%s"
 }
-	`, realm, mapper.Name, mapper.LdapGroupsDn, mapper.GroupNameLdapAttribute, arrayOfStringsForTerraformResource(mapper.GroupObjectClasses), mapper.PreserveGroupInheritance, mapper.IgnoreMissingGroups, mapper.MembershipLdapAttribute, mapper.MembershipAttributeType, mapper.MembershipUserLdapAttribute, mapper.GroupsLdapFilter, mapper.Mode, mapper.UserRolesRetrieveStrategy, mapper.MemberofLdapAttribute, arrayOfStringsForTerraformResource(mapper.MappedGroupAttributes), mapper.DropNonExistingGroupsDuringSync)
+	`, realm, mapper.Name, mapper.LdapGroupsDn, mapper.GroupNameLdapAttribute, arrayOfStringsForTerraformResource(mapper.GroupObjectClasses), mapper.PreserveGroupInheritance, mapper.IgnoreMissingGroups, mapper.MembershipLdapAttribute, mapper.MembershipAttributeType, mapper.MembershipUserLdapAttribute, mapper.GroupsLdapFilter, mapper.Mode, mapper.UserRolesRetrieveStrategy, mapper.MemberofLdapAttribute, arrayOfStringsForTerraformResource(mapper.MappedGroupAttributes), mapper.DropNonExistingGroupsDuringSync, mapper.GroupsPath)
 }
 
 func testKeycloakLdapGroupMapper_updateLdapUserFederationBefore(realmOne, realmTwo, groupMapperName string) string {
@@ -560,6 +564,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	membership_ldap_attribute      = "member"
 	membership_user_ldap_attribute = "cn"
 	memberof_ldap_attribute        = "memberOf"
+	groups_path                    = "/"
 }
 	`, realmOne, realmTwo, groupMapperName)
 }
