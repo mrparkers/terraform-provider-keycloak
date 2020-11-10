@@ -1,10 +1,12 @@
 package provider
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -205,6 +207,9 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 			},
 		},
+		CustomizeDiff: customdiff.ComputedIf("service_account_user_id", func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+			return d.HasChange("service_accounts_enabled")
+		}),
 	}
 }
 
