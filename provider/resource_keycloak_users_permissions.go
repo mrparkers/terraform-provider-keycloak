@@ -6,6 +6,32 @@ import (
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
+func userScopePermissionsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeSet,
+		Optional: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"policies": {
+					Type:     schema.TypeSet,
+					Elem:     &schema.Schema{Type: schema.TypeString},
+					Optional: true,
+				},
+				"description": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"decision_strategy": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					ValidateFunc: validation.StringInSlice(keycloakOpenidClientResourcePermissionDecisionStrategies, false),
+				},
+			},
+		},
+	}
+}
+
 func resourceKeycloakUsersPermissions() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceKeycloakUsersPermissionsCreate,
@@ -30,154 +56,32 @@ func resourceKeycloakUsersPermissions() *schema.Resource {
 				Computed:    true,
 				Description: "Resource server id representing the realm management client on which this permission is managed",
 			},
-			"view_scope": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"policies": {
-							Type:     schema.TypeSet,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"decision_strategy": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice(keycloakOpenidClientResourcePermissionDecisionStrategies, false),
-						},
-					},
-				},
-			},
-			"manage_scope": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"policies": {
-							Type:     schema.TypeSet,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"decision_strategy": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice(keycloakOpenidClientResourcePermissionDecisionStrategies, false),
-						},
-					},
-				},
-			},
-			"map_roles_scope": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"policies": {
-							Type:     schema.TypeSet,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"decision_strategy": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice(keycloakOpenidClientResourcePermissionDecisionStrategies, false),
-						},
-					},
-				},
-			},
-			"manage_group_membership_scope": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"policies": {
-							Type:     schema.TypeSet,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"decision_strategy": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice(keycloakOpenidClientResourcePermissionDecisionStrategies, false),
-						},
-					},
-				},
-			},
-			"impersonate_scope": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"policies": {
-							Type:     schema.TypeSet,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"decision_strategy": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice(keycloakOpenidClientResourcePermissionDecisionStrategies, false),
-						},
-					},
-				},
-			},
-			"user_impersonated_scope": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"policies": {
-							Type:     schema.TypeSet,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"decision_strategy": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice(keycloakOpenidClientResourcePermissionDecisionStrategies, false),
-						},
-					},
-				},
-			},
+			"view_scope":                    userScopePermissionsSchema(),
+			"manage_scope":                  userScopePermissionsSchema(),
+			"map_roles_scope":               userScopePermissionsSchema(),
+			"manage_group_membership_scope": userScopePermissionsSchema(),
+			"impersonate_scope":             userScopePermissionsSchema(),
+			"user_impersonated_scope":       userScopePermissionsSchema(),
 		},
 	}
 }
 
 func getUsersScopePermissions(keycloakClient *keycloak.KeycloakClient, realmId string, realmManagementClientId, permissionId string) (map[string]interface{}, error) {
-
 	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClientId, permissionId)
 	if err != nil {
 		return nil, err
 	}
 
+	if permission.Description == "" && permission.DecisionStrategy == "UNANIMOUS" && len(permission.Policies) == 0 {
+		return nil, nil
+	}
+
 	permissionViewSettings := make(map[string]interface{})
+
 	if permission.Description != "" {
 		permissionViewSettings["description"] = permission.Description
 	}
+
 	if permission.DecisionStrategy != "" {
 		permissionViewSettings["decision_strategy"] = permission.DecisionStrategy
 	}
@@ -186,15 +90,10 @@ func getUsersScopePermissions(keycloakClient *keycloak.KeycloakClient, realmId s
 		permissionViewSettings["policies"] = permission.Policies
 	}
 
-	if permission.Description == "" && permission.DecisionStrategy == "UNANIMOUS" && len(permission.Policies) == 0 {
-		permissionViewSettings = nil
-	}
-
 	return permissionViewSettings, nil
 }
 
-func setUsersScopePermission(keycloakClient *keycloak.KeycloakClient, realmId string, scopeName string, scopeDataSet *schema.Set) error {
-
+func setUsersScopePermission(keycloakClient *keycloak.KeycloakClient, realmId, realmManagementClientId, authorizationPermissionId string, scopeDataSet *schema.Set) error {
 	var policies []string
 
 	scopeData := scopeDataSet.List()[0]
@@ -206,17 +105,7 @@ func setUsersScopePermission(keycloakClient *keycloak.KeycloakClient, realmId st
 		}
 	}
 
-	usersPermissions, err := keycloakClient.GetUsersPermissions(realmId)
-	if err != nil {
-		return err
-	}
-
-	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
-	if err != nil {
-		return err
-	}
-
-	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, usersPermissions.ScopePermissions[scopeName].(string))
+	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClientId, authorizationPermissionId)
 	if err != nil {
 		return err
 	}
@@ -224,9 +113,11 @@ func setUsersScopePermission(keycloakClient *keycloak.KeycloakClient, realmId st
 	if v, ok := scopePermission["description"]; ok {
 		permission.Description = v.(string)
 	}
+
 	if v, ok := scopePermission["decision_strategy"]; ok {
 		permission.DecisionStrategy = v.(string)
 	}
+
 	permission.Policies = policies
 
 	return keycloakClient.UpdateOpenidClientAuthorizationPermission(permission)
@@ -241,49 +132,61 @@ func resourceKeycloakUsersPermissionsUpdate(data *schema.ResourceData, meta inte
 
 	realmId := data.Get("realm_id").(string)
 
+	// the existence of this resource implies that it is enabled.
 	err := keycloakClient.EnableUsersPermissions(realmId)
+	if err != nil {
+		return err
+	}
+
+	// setting scope permissions requires us to fetch the users permissions details, as well as the realm management client
+	usersPermissions, err := keycloakClient.GetUsersPermissions(realmId)
+	if err != nil {
+		return err
+	}
+
+	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
 	if err != nil {
 		return err
 	}
 
 	viewScope, ok := data.GetOk("view_scope")
 	if ok {
-		err := setUsersScopePermission(keycloakClient, realmId, "view", viewScope.(*schema.Set))
+		err := setUsersScopePermission(keycloakClient, realmId, realmManagementClient.Id, usersPermissions.ScopePermissions["view"].(string), viewScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
 	}
 	manageScope, ok := data.GetOk("manage_scope")
 	if ok {
-		err := setUsersScopePermission(keycloakClient, realmId, "manage", manageScope.(*schema.Set))
+		err := setUsersScopePermission(keycloakClient, realmId, realmManagementClient.Id, usersPermissions.ScopePermissions["manage"].(string), manageScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
 	}
 	mapRolesScope, ok := data.GetOk("map_roles_scope")
 	if ok {
-		err := setUsersScopePermission(keycloakClient, realmId, "map-roles", mapRolesScope.(*schema.Set))
+		err := setUsersScopePermission(keycloakClient, realmId, realmManagementClient.Id, usersPermissions.ScopePermissions["map-roles"].(string), mapRolesScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
 	}
 	manageGroupMembershipScope, ok := data.GetOk("manage_group_membership_scope")
 	if ok {
-		err := setUsersScopePermission(keycloakClient, realmId, "manage-group-membership", manageGroupMembershipScope.(*schema.Set))
+		err := setUsersScopePermission(keycloakClient, realmId, realmManagementClient.Id, usersPermissions.ScopePermissions["manage-group-membership"].(string), manageGroupMembershipScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
 	}
 	impersonateScope, ok := data.GetOk("impersonate_scope")
 	if ok {
-		err := setUsersScopePermission(keycloakClient, realmId, "impersonate", impersonateScope.(*schema.Set))
+		err := setUsersScopePermission(keycloakClient, realmId, realmManagementClient.Id, usersPermissions.ScopePermissions["impersonate"].(string), impersonateScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
 	}
 	userImpersonatedScope, ok := data.GetOk("user_impersonated_scope")
 	if ok {
-		err := setUsersScopePermission(keycloakClient, realmId, "user-impersonated", userImpersonatedScope.(*schema.Set))
+		err := setUsersScopePermission(keycloakClient, realmId, realmManagementClient.Id, usersPermissions.ScopePermissions["user-impersonated"].(string), userImpersonatedScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
@@ -363,7 +266,6 @@ func resourceKeycloakUsersPermissionsRead(data *schema.ResourceData, meta interf
 }
 
 func resourceKeycloakUsersPermissionsDelete(data *schema.ResourceData, meta interface{}) error {
-
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -372,7 +274,6 @@ func resourceKeycloakUsersPermissionsDelete(data *schema.ResourceData, meta inte
 }
 
 func resourceKeycloakUsersPermissionsImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-
 	d.Set("realm_id", d.Id())
 	d.SetId(d.Id())
 

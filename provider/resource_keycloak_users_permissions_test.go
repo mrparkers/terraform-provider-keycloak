@@ -11,23 +11,22 @@ import (
 )
 
 func TestAccKeycloakUsersPermission_basic(t *testing.T) {
-	realmName := "tf_view-" + acctest.RandString(10)
+	realmName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUsersPermissionsAreDisabled(realmName),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUsersPermission_basic(realmName),
 				Check:  testAccCheckKeycloakUsersPermissionExists("keycloak_users_permissions.my_permission"),
-			}, {
+			},
+			{
 				ResourceName:      "keycloak_users_permissions.my_permission",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateId:     realmName,
-			}, {
-				Config: testKeycloakUsersPermissionDelete_basic(realmName),
-				Check:  testAccCheckKeycloakUsersPermissionDoesNotExists(realmName),
 			},
 		},
 	})
@@ -35,7 +34,6 @@ func TestAccKeycloakUsersPermission_basic(t *testing.T) {
 
 func testAccCheckKeycloakUsersPermissionExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-
 		permissions, err := getUsersPermissionsFromState(s, resourceName)
 		if err != nil {
 			return err
@@ -110,7 +108,7 @@ func testAccCheckKeycloakUsersPermissionExists(resourceName string) resource.Tes
 	}
 }
 
-func testAccCheckKeycloakUsersPermissionDoesNotExists(realmId string) resource.TestCheckFunc {
+func testAccCheckKeycloakUsersPermissionsAreDisabled(realmId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		permissions, err := keycloakClient.GetUsersPermissions(realmId)
 		if err != nil {
@@ -118,7 +116,7 @@ func testAccCheckKeycloakUsersPermissionDoesNotExists(realmId string) resource.T
 		}
 
 		if permissions.Enabled != false {
-			return fmt.Errorf("Users Permission in Keycloak is not disabled")
+			return fmt.Errorf("expected users permission in Keycloak to be disabled")
 		}
 
 		return nil
@@ -146,21 +144,21 @@ func getUsersPermissionsFromState(s *terraform.State, resourceName string) (*key
 func testKeycloakUsersPermission_basic(realmId string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-  realm = "%s"
+	realm = "%s"
 }
 
-data keycloak_openid_client "realm_management" {
-  realm_id  = keycloak_realm.realm.id
-  client_id = "realm-management"  
+data "keycloak_openid_client" "realm_management" {
+	realm_id  = keycloak_realm.realm.id
+	client_id = "realm-management"
 }
 
-resource keycloak_openid_client_permissions "realm-management_permission" {
+resource "keycloak_openid_client_permissions" "realm-management_permission" {
 	realm_id   = keycloak_realm.realm.id
 	client_id  = data.keycloak_openid_client.realm_management.id
-	enabled = true
+	enabled    = true
 }
 
-resource keycloak_user test {
+resource "keycloak_user" "test" {
 	realm_id = keycloak_realm.realm.id
 	username = "test-user"
 
@@ -169,85 +167,56 @@ resource keycloak_user test {
 	last_name  = "Tester"
 }
 
-resource keycloak_openid_client_user_policy test {
+resource "keycloak_openid_client_user_policy" "test" {
+	realm_id           = keycloak_realm.realm.id
 	resource_server_id = data.keycloak_openid_client.realm_management.id
-	realm_id = keycloak_realm.realm.id
-	name = "client_user_policy_test"
-	users = [keycloak_user.test.id]
-	logic = "POSITIVE"
-	decision_strategy = "UNANIMOUS"
-	depends_on = [
-		keycloak_openid_client_permissions.realm-management_permission,
-	]
-}
-resource keycloak_openid_client_user_policy test2 {
-	resource_server_id = data.keycloak_openid_client.realm_management.id
-	realm_id = keycloak_realm.realm.id
-	name = "client_user_policy_test2"
-	users = [keycloak_user.test.id]
-	logic = "POSITIVE"
-	decision_strategy = "UNANIMOUS"
-	depends_on = [
-		keycloak_openid_client_permissions.realm-management_permission,
-	]
-}
+	name               = "client_user_policy_test"
 
+	users             = [
+		keycloak_user.test.id
+	]
+	logic             = "POSITIVE"
+	decision_strategy = "UNANIMOUS"
+
+	depends_on = [
+		keycloak_openid_client_permissions.realm-management_permission,
+	]
+}
+resource "keycloak_openid_client_user_policy" "test2" {
+	realm_id           = keycloak_realm.realm.id
+	resource_server_id = data.keycloak_openid_client.realm_management.id
+	name               = "client_user_policy_test2"
+
+	users             = [
+		keycloak_user.test.id
+	]
+	logic             = "POSITIVE"
+	decision_strategy = "UNANIMOUS"
+
+	depends_on = [
+		keycloak_openid_client_permissions.realm-management_permission,
+	]
+}
 
 resource "keycloak_users_permissions" "my_permission" {
-	realm_id                               = keycloak_realm.realm.id
+	realm_id = keycloak_realm.realm.id
 
 	view_scope {
-		policies = [ keycloak_openid_client_user_policy.test.id ]
-		description = "view_scope"
+		policies          = [
+			keycloak_openid_client_user_policy.test.id
+		]
+		description       = "view_scope"
 		decision_strategy = "CONSENSUS"
 	}
+
 	manage_scope {
-		policies = [ keycloak_openid_client_user_policy.test.id, keycloak_openid_client_user_policy.test2.id ]
-		description = "manage_scope"
+		policies          = [
+			keycloak_openid_client_user_policy.test.id,
+			keycloak_openid_client_user_policy.test2.id,
+		]
+		description       = "manage_scope"
 		decision_strategy = "UNANIMOUS"
 	}
 }
-
-	`, realmId)
-}
-
-func testKeycloakUsersPermissionDelete_basic(realmId string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-  realm = "%s"
-}
-
-data keycloak_openid_client "realm_management" {
-  realm_id  = keycloak_realm.realm.id
-  client_id = "realm-management"  
-}
-
-resource keycloak_openid_client_permissions "realm-management_permission" {
-	realm_id   = keycloak_realm.realm.id
-	client_id  = data.keycloak_openid_client.realm_management.id
-	enabled = true
-}
-
-resource keycloak_user test {
-	realm_id = keycloak_realm.realm.id
-	username = "test-user"
-
-	email      = "test-user@fakedomain.com"
-	first_name = "Testy"
-	last_name  = "Tester"
-}
-
-resource keycloak_openid_client_user_policy test {
-	resource_server_id = data.keycloak_openid_client.realm_management.id
-	realm_id = keycloak_realm.realm.id
-	name = "client_user_policy_test"
-	users = [keycloak_user.test.id]
-	logic = "POSITIVE"
-	decision_strategy = "UNANIMOUS"
-	depends_on = [
-		keycloak_openid_client_permissions.realm-management_permission,
-	]
-}
-
 	`, realmId)
 }

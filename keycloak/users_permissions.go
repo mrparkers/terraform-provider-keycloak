@@ -25,12 +25,13 @@ func (keycloakClient *KeycloakClient) DisableUsersPermissions(realmId string) er
 
 func (keycloakClient *KeycloakClient) GetUsersPermissions(realmId string) (*UsersPermissions, error) {
 	var openidClientPermissions UsersPermissions
-	openidClientPermissions.RealmId = realmId
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users-management-permissions", realmId), &openidClientPermissions, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	openidClientPermissions.RealmId = realmId
 
 	return &openidClientPermissions, nil
 }
