@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -213,12 +214,6 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		LogoutServiceRedirectBindingURL: data.Get("logout_service_redirect_binding_url").(string),
 		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
 		SignatureCanonicalizationMethod: data.Get("saml_signature_canonicalization_method").(string),
-		IncludeAuthnStatement:           keycloak.KeycloakBoolQuoted(data.Get("include_authn_statement").(bool)),
-		ForceNameIdFormat:               keycloak.KeycloakBoolQuoted(data.Get("force_name_id_format").(bool)),
-		SignDocuments:                   keycloak.KeycloakBoolQuoted(data.Get("sign_documents").(bool)),
-		SignAssertions:                  keycloak.KeycloakBoolQuoted(data.Get("sign_assertions").(bool)),
-		ClientSignatureRequired:         keycloak.KeycloakBoolQuoted(data.Get("client_signature_required").(bool)),
-		ForcePostBinding:                keycloak.KeycloakBoolQuoted(data.Get("force_post_binding").(bool)),
 		ExtraConfig:                     extraConfig,
 	}
 
@@ -230,6 +225,36 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	if signingPrivateKey, ok := data.GetOkExists("signing_private_key"); ok {
 		signingPrivateKeyString := formatSigningPrivateKey(signingPrivateKey.(string))
 		samlAttributes.SigningPrivateKey = &signingPrivateKeyString
+	}
+
+	if includeAuthnStatement, ok := data.GetOkExists("include_authn_statement"); ok {
+		includeAuthnStatementString := strconv.FormatBool(includeAuthnStatement.(bool))
+		samlAttributes.IncludeAuthnStatement = &includeAuthnStatementString
+	}
+
+	if forceNameIdFormat, ok := data.GetOkExists("force_name_id_format"); ok {
+		forceNameIdFormatString := strconv.FormatBool(forceNameIdFormat.(bool))
+		samlAttributes.ForceNameIdFormat = &forceNameIdFormatString
+	}
+
+	if signDocuments, ok := data.GetOkExists("sign_documents"); ok {
+		signDocumentsString := strconv.FormatBool(signDocuments.(bool))
+		samlAttributes.SignDocuments = &signDocumentsString
+	}
+
+	if signAssertions, ok := data.GetOkExists("sign_assertions"); ok {
+		signAssertionsString := strconv.FormatBool(signAssertions.(bool))
+		samlAttributes.SignAssertions = &signAssertionsString
+	}
+
+	if clientSignatureRequired, ok := data.GetOkExists("client_signature_required"); ok {
+		clientSignatureRequiredString := strconv.FormatBool(clientSignatureRequired.(bool))
+		samlAttributes.ClientSignatureRequired = &clientSignatureRequiredString
+	}
+
+	if forcePostBinding, ok := data.GetOkExists("force_post_binding"); ok {
+		forcePostBindingString := strconv.FormatBool(forcePostBinding.(bool))
+		samlAttributes.ForcePostBinding = &forcePostBindingString
 	}
 
 	samlClient := &keycloak.SamlClient{
@@ -253,13 +278,58 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 
 func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlClient) error {
 	data.SetId(client.Id)
+	if client.Attributes.IncludeAuthnStatement != nil {
+		includeAuthnStatement, err := strconv.ParseBool(*client.Attributes.IncludeAuthnStatement)
+		if err != nil {
+			return err
+		}
 
-	data.Set("include_authn_statement", client.Attributes.IncludeAuthnStatement)
-	data.Set("force_name_id_format", client.Attributes.ForceNameIdFormat)
-	data.Set("sign_documents", client.Attributes.SignDocuments)
-	data.Set("sign_assertions", client.Attributes.SignAssertions)
-	data.Set("client_signature_required", client.Attributes.ClientSignatureRequired)
-	data.Set("force_post_binding", client.Attributes.ForcePostBinding)
+		data.Set("include_authn_statement", includeAuthnStatement)
+	}
+	if client.Attributes.ForceNameIdFormat != nil {
+		forceNameIdFormat, err := strconv.ParseBool(*client.Attributes.ForceNameIdFormat)
+		if err != nil {
+			return err
+		}
+
+		data.Set("force_name_id_format", forceNameIdFormat)
+	}
+
+	if client.Attributes.SignDocuments != nil {
+		signDocuments, err := strconv.ParseBool(*client.Attributes.SignDocuments)
+		if err != nil {
+			return err
+		}
+
+		data.Set("sign_documents", signDocuments)
+	}
+
+	if client.Attributes.SignAssertions != nil {
+		signAssertions, err := strconv.ParseBool(*client.Attributes.SignAssertions)
+		if err != nil {
+			return err
+		}
+
+		data.Set("sign_assertions", signAssertions)
+	}
+
+	if client.Attributes.ClientSignatureRequired != nil {
+		clientSignatureRequired, err := strconv.ParseBool(*client.Attributes.ClientSignatureRequired)
+		if err != nil {
+			return err
+		}
+
+		data.Set("client_signature_required", clientSignatureRequired)
+	}
+
+	if client.Attributes.ForcePostBinding != nil {
+		forcePostBinding, err := strconv.ParseBool(*client.Attributes.ForcePostBinding)
+		if err != nil {
+			return err
+		}
+
+		data.Set("force_post_binding", forcePostBinding)
+	}
 
 	if _, exists := data.GetOkExists("signing_certificate"); client.Attributes.SigningCertificate != nil && exists {
 		data.Set("signing_certificate", *client.Attributes.SigningCertificate)

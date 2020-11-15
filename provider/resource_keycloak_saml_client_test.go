@@ -126,7 +126,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 	clientId := "terraform-" + acctest.RandString(10)
 	enabled := randomBool()
 	frontChannelLogout := randomBool()
-	clientSignatureRequired := keycloak.KeycloakBoolQuoted(true)
+	clientSignatureRequired := "true"
 
 	signingCertificateBefore := acctest.RandString(20)
 	signingCertificateAfter := acctest.RandString(20)
@@ -156,7 +156,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			IncludeAuthnStatement:           randomBoolAsStringPointer(),
 			SignDocuments:                   randomBoolAsStringPointer(),
 			SignAssertions:                  randomBoolAsStringPointer(),
-			ClientSignatureRequired:         clientSignatureRequired,
+			ClientSignatureRequired:         &clientSignatureRequired,
 			ForcePostBinding:                randomBoolAsStringPointer(),
 			ForceNameIdFormat:               randomBoolAsStringPointer(),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
@@ -193,7 +193,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			IncludeAuthnStatement:           randomBoolAsStringPointer(),
 			SignDocuments:                   randomBoolAsStringPointer(),
 			SignAssertions:                  randomBoolAsStringPointer(),
-			ClientSignatureRequired:         clientSignatureRequired,
+			ClientSignatureRequired:         &clientSignatureRequired,
 			ForcePostBinding:                randomBoolAsStringPointer(),
 			ForceNameIdFormat:               randomBoolAsStringPointer(),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
@@ -424,8 +424,10 @@ func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
 	return strconv.ParseBool(b)
 }
 
-func randomBoolAsStringPointer() keycloak.KeycloakBoolQuoted {
-	return keycloak.KeycloakBoolQuoted(randomBool())
+func randomBoolAsStringPointer() *string {
+	s := strconv.FormatBool(randomBool())
+
+	return &s
 }
 
 func testKeycloakSamlClient_basic(realm, clientId string) string {
@@ -489,12 +491,12 @@ resource "keycloak_saml_client" "saml_client" {
 	enabled     = %t
 
 	# below attributes are bools, but the model (and API) uses strings
-	include_authn_statement    = %t
-	sign_documents             = %t
-	sign_assertions            = %t
-	client_signature_required  = %t
-	force_post_binding         = %t
-	force_name_id_format       = %t
+	include_authn_statement    = %s
+	sign_documents             = %s
+	sign_assertions            = %s
+	client_signature_required  = %s
+	force_post_binding         = %s
+	force_name_id_format       = %s
 
 	front_channel_logout       = %t
 	name_id_format             = "%s"
@@ -522,12 +524,12 @@ resource "keycloak_saml_client" "saml_client" {
 		client.Name,
 		client.Description,
 		client.Enabled,
-		client.Attributes.IncludeAuthnStatement,
-		client.Attributes.SignDocuments,
-		client.Attributes.SignAssertions,
-		client.Attributes.ClientSignatureRequired,
-		client.Attributes.ForcePostBinding,
-		client.Attributes.ForceNameIdFormat,
+		*client.Attributes.IncludeAuthnStatement,
+		*client.Attributes.SignDocuments,
+		*client.Attributes.SignAssertions,
+		*client.Attributes.ClientSignatureRequired,
+		*client.Attributes.ForcePostBinding,
+		*client.Attributes.ForceNameIdFormat,
 		client.FrontChannelLogout,
 		client.Attributes.NameIdFormat,
 		client.RootUrl,
