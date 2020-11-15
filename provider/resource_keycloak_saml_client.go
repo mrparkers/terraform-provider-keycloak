@@ -149,6 +149,17 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"signature_algorithm": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "",
+				ValidateFunc: validation.StringInSlice(signatureAlgorithms, false),
+				Description:  "Signing Algorithm.",
+			},
+			"saml_signature_canonicalization_method": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"attributes": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -201,6 +212,8 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		AssertionConsumerRedirectURL:    data.Get("assertion_consumer_redirect_url").(string),
 		LogoutServicePostBindingURL:     data.Get("logout_service_post_binding_url").(string),
 		LogoutServiceRedirectBindingURL: data.Get("logout_service_redirect_binding_url").(string),
+		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
+		SignatureCanonicalizationMethod: data.Get("saml_signature_canonicalization_method").(string),
 		OtherAttributes:                 otherAttributes,
 	}
 
@@ -345,6 +358,8 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("logout_service_post_binding_url", client.Attributes.LogoutServicePostBindingURL)
 	data.Set("logout_service_redirect_binding_url", client.Attributes.LogoutServiceRedirectBindingURL)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
+	data.Set("signature_algorithm", client.Attributes.SignatureAlgorithm)
+	data.Set("saml_signature_canonicalization_method", client.Attributes.SignatureCanonicalizationMethod)
 	data.Set("attributes", client.Attributes.OtherAttributes)
 
 	return nil
