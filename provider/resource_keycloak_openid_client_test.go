@@ -464,7 +464,7 @@ func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.
 	})
 }
 
-func TestAccKeycloakOpenidClient_otherAttributes(t *testing.T) {
+func TestAccKeycloakOpenidClient_extraConfig(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -474,7 +474,7 @@ func TestAccKeycloakOpenidClient_otherAttributes(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_otherAttributes(realmName, clientId, "foo", "bar"),
+				Config: testKeycloakOpenidClient_extraConfig(realmName, clientId, "foo", "bar"),
 				Check:  testAccCheckKeycloakOpenidClientHasAttributeWithValue("keycloak_openid_client.client", "foo", "bar"),
 			},
 		},
@@ -724,7 +724,7 @@ func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(reso
 	}
 }
 
-func testKeycloakOpenidClient_otherAttributes(realm, clientId, attributeName string, attributeValue string) string {
+func testKeycloakOpenidClient_extraConfig(realm, clientId, attributeName string, attributeValue string) string {
 
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -749,8 +749,8 @@ func testAccCheckKeycloakOpenidClientHasAttributeWithValue(resourceName, attribu
 			return err
 		}
 
-		if client.Attributes.OtherAttributes[attributeName] != attributeValue {
-			return fmt.Errorf("expected openid client %s to have extra config %s with value of %s, but got %s", client.ClientId, attributeName, attributeValue, client.Attributes.OtherAttributes[attributeName])
+		if client.Attributes.ExtraConfig[attributeName] != attributeValue {
+			return fmt.Errorf("expected openid client %s to have extra config %s with value of %s, but got %s", client.ClientId, attributeName, attributeValue, client.Attributes.ExtraConfig[attributeName])
 		}
 
 		return nil
