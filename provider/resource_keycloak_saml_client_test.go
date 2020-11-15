@@ -513,7 +513,7 @@ resource "keycloak_saml_client" "saml_client" {
 	assertion_consumer_redirect_url     = "%s"
 	logout_service_post_binding_url     = "%s"
 	logout_service_redirect_binding_url = "%s"
-	attributes = {
+	extra_config = {
 		foo = "%s"
 	}
 }
@@ -541,7 +541,7 @@ resource "keycloak_saml_client" "saml_client" {
 		client.Attributes.AssertionConsumerRedirectURL,
 		client.Attributes.LogoutServicePostBindingURL,
 		client.Attributes.LogoutServiceRedirectBindingURL,
-		client.Attributes.OtherAttributes["foo"],
+		client.Attributes.ExtraConfig["foo"],
 	)
 }
 

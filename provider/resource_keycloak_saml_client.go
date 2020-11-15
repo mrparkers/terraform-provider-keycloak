@@ -159,7 +159,7 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"attributes": {
+			"extra_config": {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
@@ -196,10 +196,10 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		}
 	}
 
-	otherAttributes := map[string]interface{}{}
-	if v, ok := data.GetOk("attributes"); ok {
+	extraConfig := map[string]interface{}{}
+	if v, ok := data.GetOk("extra_config"); ok {
 		for key, value := range v.(map[string]interface{}) {
-			otherAttributes[key] = value
+			extraConfig[key] = value
 		}
 	}
 
@@ -219,7 +219,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		SignAssertions:                  keycloak.KeycloakBoolQuoted(data.Get("sign_assertions").(bool)),
 		ClientSignatureRequired:         keycloak.KeycloakBoolQuoted(data.Get("client_signature_required").(bool)),
 		ForcePostBinding:                keycloak.KeycloakBoolQuoted(data.Get("force_post_binding").(bool)),
-		OtherAttributes:                 otherAttributes,
+		ExtraConfig:                     extraConfig,
 	}
 
 	if signingCertificate, ok := data.GetOkExists("signing_certificate"); ok {
@@ -289,7 +289,7 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
 	data.Set("signature_algorithm", client.Attributes.SignatureAlgorithm)
 	data.Set("saml_signature_canonicalization_method", client.Attributes.SignatureCanonicalizationMethod)
-	data.Set("attributes", client.Attributes.OtherAttributes)
+	data.Set("extra_config", client.Attributes.ExtraConfig)
 
 	return nil
 }
