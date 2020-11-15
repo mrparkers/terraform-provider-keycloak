@@ -99,7 +99,7 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"attributes": {
+			"extra_config": {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
@@ -224,10 +224,10 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		}
 	}
 
-	otherAttributes := map[string]interface{}{}
-	if v, ok := data.GetOk("attributes"); ok {
+	extraConfig := map[string]interface{}{}
+	if v, ok := data.GetOk("extra_config"); ok {
 		for key, value := range v.(map[string]interface{}) {
-			otherAttributes[key] = value
+			extraConfig[key] = value
 		}
 	}
 
@@ -249,7 +249,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			ExcludeSessionStateFromAuthResponse: keycloak.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
 			AccessTokenLifespan:                 data.Get("access_token_lifespan").(string),
 			LoginTheme:                          data.Get("login_theme").(string),
-			OtherAttributes:                     otherAttributes,
+			ExtraConfig:                         extraConfig,
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
@@ -336,7 +336,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("consent_required", client.ConsentRequired)
 	data.Set("access_token_lifespan", client.Attributes.AccessTokenLifespan)
 	data.Set("login_theme", client.Attributes.LoginTheme)
-	data.Set("attributes", client.Attributes.OtherAttributes)
+	data.Set("extra_config", client.Attributes.ExtraConfig)
 
 	if client.AuthorizationServicesEnabled {
 		data.Set("resource_server_id", client.Id)

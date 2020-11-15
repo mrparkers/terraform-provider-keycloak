@@ -735,7 +735,7 @@ resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = "${keycloak_realm.realm.id}"
 	access_type = "CONFIDENTIAL"
-    attributes = {
+    extra_config = {
 		"%s" = "%s"
 	}
 }
@@ -750,7 +750,7 @@ func testAccCheckKeycloakOpenidClientHasAttributeWithValue(resourceName, attribu
 		}
 
 		if client.Attributes.OtherAttributes[attributeName] != attributeValue {
-			return fmt.Errorf("expected openid client %s to have attribute %s with value of %s, but got %s", client.ClientId, attributeName, attributeValue, client.Attributes.OtherAttributes[attributeName])
+			return fmt.Errorf("expected openid client %s to have extra config %s with value of %s, but got %s", client.ClientId, attributeName, attributeValue, client.Attributes.OtherAttributes[attributeName])
 		}
 
 		return nil

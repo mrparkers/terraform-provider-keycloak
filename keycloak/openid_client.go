@@ -62,12 +62,12 @@ type OpenidClientAttributes struct {
 	ExcludeSessionStateFromAuthResponse KeycloakBoolQuoted     `json:"exclude.session.state.from.auth.response"`
 	AccessTokenLifespan                 string                 `json:"access.token.lifespan"`
 	LoginTheme                          string                 `json:"login_theme"`
-	OtherAttributes                     map[string]interface{} `json:"-"`
+	ExtraConfig                         map[string]interface{} `json:"-"`
 }
 
 func (f *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
-	f.OtherAttributes = map[string]interface{}{}
-	err := json.Unmarshal(data, &f.OtherAttributes)
+	f.ExtraConfig = map[string]interface{}{}
+	err := json.Unmarshal(data, &f.ExtraConfig)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (f *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
 		structField := v.Type().Field(i)
 		jsonKey := strings.Split(structField.Tag.Get("json"), ",")[0]
 		if jsonKey != "-" {
-			value, ok := f.OtherAttributes[jsonKey]
+			value, ok := f.ExtraConfig[jsonKey]
 			if ok {
 				field := v.FieldByName(structField.Name)
 				if field.IsValid() && field.CanSet() {
@@ -88,7 +88,7 @@ func (f *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
 							field.Set(reflect.ValueOf(KeycloakBoolQuoted(boolVal)))
 						}
 					}
-					delete(f.OtherAttributes, jsonKey)
+					delete(f.ExtraConfig, jsonKey)
 				}
 			}
 		}
@@ -99,7 +99,7 @@ func (f *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
 func (f *OpenidClientAttributes) MarshalJSON() ([]byte, error) {
 	out := map[string]interface{}{}
 
-	for k, v := range f.OtherAttributes {
+	for k, v := range f.ExtraConfig {
 		out[k] = v
 	}
 	v := reflect.ValueOf(f).Elem()
