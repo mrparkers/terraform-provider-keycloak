@@ -172,3 +172,25 @@ resource keycloak_openid_client_user_policy test {
   logic              = "POSITIVE"
   decision_strategy  = "UNANIMOUS"
 }
+
+# users permissions
+
+resource "keycloak_users_permissions" "my_permission" {
+  realm_id = keycloak_realm.test_authorization.id
+
+  view_scope {
+    policies          = [
+      keycloak_openid_client_user_policy.test.id
+    ]
+    description       = "view_scope"
+    decision_strategy = "CONSENSUS"
+  }
+
+  manage_scope {
+    policies          = [
+      keycloak_openid_client_user_policy.test.id
+    ]
+    description       = "manage_scope"
+    decision_strategy = "UNANIMOUS"
+  }
+}
