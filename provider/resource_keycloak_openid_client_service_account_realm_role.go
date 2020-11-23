@@ -114,7 +114,7 @@ func resourceKeycloakOpenidClientServiceAccountRealmRoleDelete(data *schema.Reso
 
 func resourceKeycloakOpenidClientServiceAccountRealmRoleImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 {
+	if len(parts) != 3 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{serviceAccountUserId}}/{{roleId}}")
 	}
 	d.Set("realm_id", parts[0])
