@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"bytes"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -38,32 +37,6 @@ func (c *KeycloakBoolQuoted) UnmarshalJSON(in []byte) error {
 	res := KeycloakBoolQuoted(b)
 	*c = res
 	return nil
-}
-
-func GetTags(f interface{}) []string {
-	var result []string = make([]string, 0)
-
-	t := reflect.ValueOf(f).Elem().Type()
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		tag := strings.Split(field.Tag.Get("json"), ",")[0]
-		if tag != "" {
-			result = append(result, tag)
-		}
-	}
-
-	return result
-}
-
-func GetReservedKeys(f interface{}) map[string]bool {
-	var result = map[string]bool{}
-
-	tags := GetTags(f)
-	for i := 0; i < len(tags); i++ {
-		result[tags[i]] = true
-	}
-
-	return result
 }
 
 func getIdFromLocationHeader(locationHeader string) string {

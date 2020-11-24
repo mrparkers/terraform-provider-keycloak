@@ -99,7 +99,7 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"attributes": {
+			"extra_config": {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
@@ -224,6 +224,13 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		}
 	}
 
+	extraConfig := map[string]interface{}{}
+	if v, ok := data.GetOk("extra_config"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			extraConfig[key] = value
+		}
+	}
+
 	openidClient := &keycloak.OpenidClient{
 		Id:                        data.Id(),
 		ClientId:                  data.Get("client_id").(string),
@@ -242,32 +249,13 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			ExcludeSessionStateFromAuthResponse: keycloak.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
 			AccessTokenLifespan:                 data.Get("access_token_lifespan").(string),
 			LoginTheme:                          data.Get("login_theme").(string),
+			ExtraConfig:                         extraConfig,
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
 		AdminUrl:          data.Get("admin_url").(string),
 		BaseUrl:           data.Get("base_url").(string),
 		ConsentRequired:   data.Get("consent_required").(bool),
-	}
-
-	attributes := data.Get("attributes").(map[string]interface{})
-	if attributes != nil {
-		reserverdKeys := map[string]bool{
-			"access.token.lifespan":                    true,
-			"exclude.session.state.from.auth.response": true,
-			"login_theme":                              true,
-			"pkce.code.challenge.method":               true}
-
-		for k, v := range attributes {
-			if found, _ := reserverdKeys[k]; found {
-				return nil, errors.New(fmt.Sprintf("%s is a wrong key in attributes. Use the field defined for this purpose instead.", k))
-			}
-
-			if openidClient.Attributes.OtherAttributes == nil {
-				openidClient.Attributes.OtherAttributes = make(map[string]interface{})
-			}
-			openidClient.Attributes.OtherAttributes[k] = v
-		}
 	}
 
 	if rootUrlOk {
@@ -348,6 +336,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("consent_required", client.ConsentRequired)
 	data.Set("access_token_lifespan", client.Attributes.AccessTokenLifespan)
 	data.Set("login_theme", client.Attributes.LoginTheme)
+	data.Set("extra_config", client.Attributes.ExtraConfig)
 
 	if client.AuthorizationServicesEnabled {
 		data.Set("resource_server_id", client.Id)
