@@ -72,8 +72,6 @@ func (f *SamlClientAttributes) UnmarshalJSON(data []byte) error {
 						temp := value.(string)
 						if temp != "" {
 							field.Set(reflect.ValueOf(&temp))
-						} else {
-							field.Set(reflect.ValueOf(nil))
 						}
 					} else if field.Kind() == reflect.String {
 						field.SetString(value.(string))
