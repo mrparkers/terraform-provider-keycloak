@@ -12,12 +12,8 @@ import (
 )
 
 // All openid clients in Keycloak will automatically have these scopes listed as "optional client scopes".
-func getPreAssignedOptionalClientScopes(t *testing.T) []string {
-	keycloakVersionIsGreaterThanOrEqualTo6, err := keycloakVersionIsGreaterThanOrEqualTo(keycloakClient, getKeycloakVersion600())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if keycloakVersionIsGreaterThanOrEqualTo6 {
+func getPreAssignedOptionalClientScopes() []string {
+	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
 		return []string{"address", "phone", "offline_access", "microprofile-jwt"}
 	} else {
 		return []string{"address", "phone", "offline_access"}
@@ -29,7 +25,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_basic(t *testing.T) {
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	clientScopes := append(getPreAssignedOptionalClientScopes(t), clientScope)
+	clientScopes := append(getPreAssignedOptionalClientScopes(), clientScope)
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -55,7 +51,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_updateClientForceNew(t *testing.T
 	clientTwo := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	clientScopes := append(getPreAssignedOptionalClientScopes(t), clientScope)
+	clientScopes := append(getPreAssignedOptionalClientScopes(), clientScope)
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -78,7 +74,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_updateInPlace(t *testing.T) {
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	allClientScopes := append(getPreAssignedOptionalClientScopes(t), clientScope)
+	allClientScopes := append(getPreAssignedOptionalClientScopes(), clientScope)
 
 	clientScopeToRemove := allClientScopes[acctest.RandIntRange(0, 2)]
 	var subsetOfClientScopes []string
@@ -149,7 +145,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_validateClientAccessType(t *testi
 func TestAccKeycloakOpenidClientOptionalScopes_authoritativeAdd(t *testing.T) {
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
-	clientScopes := append(getPreAssignedOptionalClientScopes(t),
+	clientScopes := append(getPreAssignedOptionalClientScopes(),
 		"terraform-client-scope-"+acctest.RandString(10),
 		"terraform-client-scope-"+acctest.RandString(10),
 		"terraform-client-scope-"+acctest.RandString(10),
@@ -195,7 +191,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_authoritativeRemove(t *testing.T)
 		"terraform-client-scope-" + acctest.RandString(10),
 		"terraform-client-scope-" + acctest.RandString(10),
 	}
-	allClientScopes := append(getPreAssignedOptionalClientScopes(t), randomClientScopes...)
+	allClientScopes := append(getPreAssignedOptionalClientScopes(), randomClientScopes...)
 
 	clientToManuallyAttach := randomClientScopes[acctest.RandIntRange(0, len(randomClientScopes)-1)]
 	var attachedClientScopes []string
@@ -243,7 +239,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_noImportNeeded(t *testing.T) {
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
-	clientScopes := append(getPreAssignedOptionalClientScopes(t), clientScope)
+	clientScopes := append(getPreAssignedOptionalClientScopes(), clientScope)
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -291,7 +287,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_profileAndEmailOptionalScopes(t *
 		Steps: []resource.TestStep{
 			{
 				Config:             testKeycloakOpenidClientOptionalScopes_listOfScopes(realm, client, clientScope, []string{clientScope}),
-				Check:              testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client.client", append(getPreAssignedOptionalClientScopes(t), clientScope)),
+				Check:              testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client.client", append(getPreAssignedOptionalClientScopes(), clientScope)),
 				ExpectNonEmptyPlan: true,
 			},
 		},
@@ -409,8 +405,7 @@ func testAccCheckKeycloakOpenidClientOptionalScopeIsNotAttached(resourceName, cl
 }
 
 func testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope string) string {
-	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsGreaterThanOrEqualTo(keycloakClient, getKeycloakVersion600())
-	if keycloakVersionIsHigherOrEqualTo6 {
+	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
 		return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -525,8 +520,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_validationNoClient(realm, client, clientScope string) string {
-	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsGreaterThanOrEqualTo(keycloakClient, getKeycloakVersion600())
-	if keycloakVersionIsHigherOrEqualTo6 {
+	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
 		return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -579,9 +573,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_validationBearerOnlyClient(realm, client, clientScope string) string {
-
-	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsGreaterThanOrEqualTo(keycloakClient, getKeycloakVersion600())
-	if keycloakVersionIsHigherOrEqualTo6 {
+	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
 		return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -689,8 +681,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_duplicateScopeAssignment(realm, client, clientScope string) string {
-	keycloakVersionIsHigherOrEqualTo6, _ := keycloakVersionIsGreaterThanOrEqualTo(keycloakClient, getKeycloakVersion600())
-	if keycloakVersionIsHigherOrEqualTo6 {
+	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
 		return fmt.Sprintf(`
 %s
 
