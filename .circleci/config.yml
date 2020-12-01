@@ -12,7 +12,7 @@ workflows:
 
 defaults:
   go_image: &go_image
-    - image: circleci/golang:1.13.5
+    - image: circleci/golang:1.15.5
 
 jobs:
   test:
@@ -22,7 +22,7 @@ jobs:
     docker:
       - <<: *go_image
       - image: jboss/keycloak:<< parameters.keycloak-version >>
-        command: ["-b", "0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled"]
+        command: ["-b", "0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled", "-Dkeycloak.profile.feature.admin_fine_grained_authz=enabled", "-Dkeycloak.profile.feature.token_exchange=enabled"]
         environment:
           DB_VENDOR: H2
           KEYCLOAK_LOGLEVEL: DEBUG
@@ -74,4 +74,4 @@ jobs:
       TEST_RESULTS: /tmp/test-results
       CHECKPOINT_DISABLE: "1"
       TF_ACC_TERRAFORM_PATH: "/usr/local/bin/terraform"
-      TF_VERSION: "0.13.0"
+      TF_VERSION: "0.13.5"
