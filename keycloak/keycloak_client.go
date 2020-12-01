@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/go-version"
 	"io"
 	"io/ioutil"
 	"log"
@@ -26,6 +27,7 @@ type KeycloakClient struct {
 	httpClient        *http.Client
 	initialLogin      bool
 	userAgent         string
+	version           *version.Version
 }
 
 type ClientCredentials struct {
@@ -138,7 +140,6 @@ func (keycloakClient *KeycloakClient) login() error {
 
 	var clientCredentials ClientCredentials
 	err = json.Unmarshal(body, &clientCredentials)
-
 	if err != nil {
 		return err
 	}
@@ -146,6 +147,18 @@ func (keycloakClient *KeycloakClient) login() error {
 	keycloakClient.clientCredentials.AccessToken = clientCredentials.AccessToken
 	keycloakClient.clientCredentials.RefreshToken = clientCredentials.RefreshToken
 	keycloakClient.clientCredentials.TokenType = clientCredentials.TokenType
+
+	info, err := keycloakClient.GetServerInfo()
+	if err != nil {
+		return err
+	}
+
+	v, err := version.NewVersion(info.SystemInfo.ServerVersion)
+	if err != nil {
+		return err
+	}
+
+	keycloakClient.version = v
 
 	return nil
 }
