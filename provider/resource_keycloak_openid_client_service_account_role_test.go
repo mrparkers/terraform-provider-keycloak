@@ -105,10 +105,10 @@ func TestAccKeycloakOpenidClientServiceAccountRole_enableAfterCreate(t *testing.
 		CheckDestroy:      testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientServiceAccountRole_enableAfterCreateBefore(realmName, bearerClientId, consumerClientId),
+				Config: testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_before(realmName, bearerClientId, consumerClientId),
 			},
 			{
-				Config: testKeycloakOpenidClientServiceAccountRole_enableAfterCreateAfter(realmName, bearerClientId, consumerClientId),
+				Config: testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_after(realmName, bearerClientId, consumerClientId),
 				Check:  testAccCheckKeycloakOpenidClientServiceAccountRoleExists(resourceName),
 			},
 		},
@@ -231,7 +231,7 @@ resource "keycloak_openid_client_service_account_role" "test" {
 	`, realm, clientId)
 }
 
-func testKeycloakOpenidClientServiceAccountRole_enableAfterCreateBefore(realm, bearerClientId, consumerClientId string) string {
+func testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_before(realm, bearerClientId, consumerClientId string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "test" {
 	realm = "%s"
@@ -259,7 +259,7 @@ resource "keycloak_openid_client" "consumer" {
 	`, realm, bearerClientId, consumerClientId)
 }
 
-func testKeycloakOpenidClientServiceAccountRole_enableAfterCreateAfter(realm, bearerClientId, consumerClientId string) string {
+func testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_after(realm, bearerClientId, consumerClientId string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "test" {
 	realm = "%s"
