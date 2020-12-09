@@ -253,6 +253,12 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 }
 
 func TestAccKeycloakLdapGroupMapper_groupsPath(t *testing.T) {
+	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+	if !keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {
+		t.Skip()
+	}
+
 	realmName := "terraform-" + acctest.RandString(10)
 	groupName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
