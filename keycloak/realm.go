@@ -199,10 +199,6 @@ func (keycloakClient *KeycloakClient) DeleteRealm(name string) error {
 }
 
 func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
-	if realm.RegistrationAllowed == false && realm.RegistrationEmailAsUsername == true {
-		return fmt.Errorf("validation error: RegistrationEmailAsUsername cannot be true if RegistrationAllowed is false")
-	}
-
 	if realm.DuplicateEmailsAllowed == true && realm.RegistrationEmailAsUsername == true {
 		return fmt.Errorf("validation error: DuplicateEmailsAllowed cannot be true if RegistrationEmailAsUsername is true")
 	}
