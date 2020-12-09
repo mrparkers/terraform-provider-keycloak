@@ -13,6 +13,7 @@ import (
 func TestAccKeycloakOpenidClientServiceAccountRealmRole_basic(t *testing.T) {
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
+	resourceName := "keycloak_openid_client_service_account_realm_role.test"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -21,7 +22,13 @@ func TestAccKeycloakOpenidClientServiceAccountRealmRole_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakOpenidClientServiceAccountRealmRole_basic(realmName, clientId),
-				Check:  testAccCheckKeycloakOpenidClientServiceAccountRealmRoleExists("keycloak_openid_client_service_account_realm_role.test"),
+				Check:  testAccCheckKeycloakOpenidClientServiceAccountRealmRoleExists(resourceName),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getKeycloakOpenidClientServiceAccountRealmRoleImportId(resourceName),
 			},
 		},
 	})
@@ -153,6 +160,17 @@ func getKeycloakOpenidClientServiceAccountRealmRoleFromState(s *terraform.State,
 	}
 
 	return serviceAccountRole, nil
+}
+
+func getKeycloakOpenidClientServiceAccountRealmRoleImportId(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		serviceAccountRole, err := getKeycloakOpenidClientServiceAccountRealmRoleFromState(s, resourceName)
+		if err != nil {
+			return "", err
+		}
+
+		return fmt.Sprintf("%s/%s/%s", serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.Id), nil
+	}
 }
 
 func testKeycloakOpenidClientServiceAccountRealmRole_basic(realm, clientId string) string {
