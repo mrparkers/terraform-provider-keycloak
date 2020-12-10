@@ -333,10 +333,6 @@ func TestAccKeycloakRealm_loginConfigValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakRealm_invalidRegistrationEmailAsUsernameWithoutRegistrationAllowed(realmName),
-				ExpectError: regexp.MustCompile("validation error: RegistrationEmailAsUsername cannot be true if RegistrationAllowed is false"),
-			},
-			{
 				Config:      testKeycloakRealm_invalidRegistrationEmailAsUsernameAndDuplicateEmailsAllowed(realmName),
 				ExpectError: regexp.MustCompile("validation error: DuplicateEmailsAllowed cannot be true if RegistrationEmailAsUsername is true"),
 			},
@@ -1225,17 +1221,6 @@ resource "keycloak_realm" "realm" {
 	ssl_required       			   = "%s"
 }
 	`, realm.Realm, realm.RegistrationAllowed, realm.RegistrationEmailAsUsername, realm.EditUsernameAllowed, realm.ResetPasswordAllowed, realm.RememberMe, realm.VerifyEmail, realm.LoginWithEmailAllowed, realm.DuplicateEmailsAllowed, realm.SslRequired)
-}
-
-func testKeycloakRealm_invalidRegistrationEmailAsUsernameWithoutRegistrationAllowed(realm string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm                          = "%s"
-
-	registration_allowed           = false
-	registration_email_as_username = true
-}
-	`, realm)
 }
 
 func testKeycloakRealm_invalidRegistrationEmailAsUsernameAndDuplicateEmailsAllowed(realm string) string {

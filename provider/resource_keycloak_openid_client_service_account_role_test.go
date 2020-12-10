@@ -93,6 +93,28 @@ func TestAccKeycloakOpenidClientServiceAccountRole_basicUpdateRealm(t *testing.T
 	})
 }
 
+func TestAccKeycloakOpenidClientServiceAccountRole_enableAfterCreate(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	bearerClientId := "terraform-" + acctest.RandString(10)
+	consumerClientId := "terraform-" + acctest.RandString(10)
+	resourceName := "keycloak_openid_client_service_account_role.consumer_service_account_role"
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_before(realmName, bearerClientId, consumerClientId),
+			},
+			{
+				Config: testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_after(realmName, bearerClientId, consumerClientId),
+				Check:  testAccCheckKeycloakOpenidClientServiceAccountRoleExists(resourceName),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientServiceAccountRoleExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getKeycloakOpenidClientServiceAccountRoleFromState(s, resourceName)
@@ -184,27 +206,90 @@ func getKeycloakOpenidClientServiceAccountRoleImportId(resourceName string) reso
 
 func testKeycloakOpenidClientServiceAccountRole_basic(realm, clientId string) string {
 	return fmt.Sprintf(`
-resource keycloak_realm test {
+resource "keycloak_realm" "test" {
 	realm = "%s"
 }
 
-resource keycloak_openid_client test {
+resource "keycloak_openid_client" "test" {
 	client_id                = "%s"
-	realm_id                 = "${keycloak_realm.test.id}"
+	realm_id                 = keycloak_realm.test.id
 	access_type              = "CONFIDENTIAL"
 	service_accounts_enabled = true
 }
 
-data keycloak_openid_client broker {
-  realm_id  = "${keycloak_realm.test.id}"
+data "keycloak_openid_client" "broker" {
+  realm_id  = keycloak_realm.test.id
   client_id = "broker"
 }
 
-resource keycloak_openid_client_service_account_role test {
-	service_account_user_id = "${keycloak_openid_client.test.service_account_user_id}"
-	realm_id 					= "${keycloak_realm.test.id}"
-	client_id 					= "${data.keycloak_openid_client.broker.id}"
-	role 							= "read-token"
+resource "keycloak_openid_client_service_account_role" "test" {
+	realm_id                = keycloak_realm.test.id
+	client_id               = data.keycloak_openid_client.broker.id
+	service_account_user_id = keycloak_openid_client.test.service_account_user_id
+	role                    = "read-token"
 }
 	`, realm, clientId)
+}
+
+func testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_before(realm, bearerClientId, consumerClientId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "test" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "bearer" {
+	client_id   = "%s"
+	realm_id    = keycloak_realm.test.id
+	access_type = "BEARER-ONLY"
+}
+
+resource "keycloak_role" "bearer_role" {
+	realm_id  = keycloak_realm.test.id
+	client_id = keycloak_openid_client.bearer.id
+	name      = "bearer-role"
+}
+
+resource "keycloak_openid_client" "consumer" {
+  realm_id  = keycloak_realm.test.id
+  client_id = "%s"
+
+  access_type              = "CONFIDENTIAL"
+  service_accounts_enabled = false
+}
+	`, realm, bearerClientId, consumerClientId)
+}
+
+func testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_after(realm, bearerClientId, consumerClientId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "test" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "bearer" {
+	client_id   = "%s"
+	realm_id    = keycloak_realm.test.id
+	access_type = "BEARER-ONLY"
+}
+
+resource "keycloak_role" "bearer_role" {
+	realm_id  = keycloak_realm.test.id
+	client_id = keycloak_openid_client.bearer.id
+	name      = "bearer-role"
+}
+
+resource "keycloak_openid_client" "consumer" {
+  realm_id  = keycloak_realm.test.id
+  client_id = "%s"
+
+  access_type              = "CONFIDENTIAL"
+  service_accounts_enabled = true
+}
+
+resource "keycloak_openid_client_service_account_role" "consumer_service_account_role" {
+  realm_id                = keycloak_realm.test.id
+  service_account_user_id = keycloak_openid_client.consumer.service_account_user_id
+  client_id               = keycloak_openid_client.bearer.id
+  role                    = keycloak_role.bearer_role.name
+}
+	`, realm, bearerClientId, consumerClientId)
 }
