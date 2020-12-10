@@ -183,7 +183,7 @@ func resourceKeycloakSamlClient() *schema.Resource {
 						},
 					},
 				},
-			}
+			},
 		},
 	}
 }
@@ -297,7 +297,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	if v, ok := data.GetOk("authentication_flow_binding_overrides"); ok {
 		authenticationFlowBindingOverridesData := v.(*schema.Set).List()[0]
 		authenticationFlowBindingOverrides := authenticationFlowBindingOverridesData.(map[string]interface{})
-		openidClient.AuthenticationFlowBindingOverrides = keycloak.SamlAuthenticationFlowBindingOverrides{
+		samlClient.AuthenticationFlowBindingOverrides = keycloak.SamlAuthenticationFlowBindingOverrides{
 			BrowserId:     authenticationFlowBindingOverrides["browser_id"].(string),
 			DirectGrantId: authenticationFlowBindingOverrides["direct_grant_id"].(string),
 		}
