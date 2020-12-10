@@ -26,6 +26,11 @@ type SamlClientAttributes struct {
 	LogoutServiceRedirectBindingURL string  `json:"saml_single_logout_service_url_redirect"`
 }
 
+type SamlAuthenticationFlowBindingOverrides struct {
+	BrowserId     string `json:"browser"`
+	DirectGrantId string `json:"direct_grant"`
+}
+
 type SamlClient struct {
 	Id                      string `json:"id,omitempty"`
 	ClientId                string `json:"clientId"`
@@ -47,6 +52,8 @@ type SamlClient struct {
 	FullScopeAllowed bool `json:"fullScopeAllowed"`
 
 	Attributes *SamlClientAttributes `json:"attributes"`
+
+	AuthenticationFlowBindingOverrides SamlAuthenticationFlowBindingOverrides `json:"authenticationFlowBindingOverrides,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewSamlClient(client *SamlClient) error {
