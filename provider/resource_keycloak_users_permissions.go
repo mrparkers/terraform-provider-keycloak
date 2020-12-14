@@ -2,35 +2,8 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
-
-func userScopePermissionsSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Optional: true,
-		MaxItems: 1,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"policies": {
-					Type:     schema.TypeSet,
-					Elem:     &schema.Schema{Type: schema.TypeString},
-					Optional: true,
-				},
-				"description": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-				"decision_strategy": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					ValidateFunc: validation.StringInSlice(keycloakOpenidClientResourcePermissionDecisionStrategies, false),
-				},
-			},
-		},
-	}
-}
 
 func resourceKeycloakUsersPermissions() *schema.Resource {
 	return &schema.Resource{
@@ -56,12 +29,12 @@ func resourceKeycloakUsersPermissions() *schema.Resource {
 				Computed:    true,
 				Description: "Resource server id representing the realm management client on which this permission is managed",
 			},
-			"view_scope":                    userScopePermissionsSchema(),
-			"manage_scope":                  userScopePermissionsSchema(),
-			"map_roles_scope":               userScopePermissionsSchema(),
-			"manage_group_membership_scope": userScopePermissionsSchema(),
-			"impersonate_scope":             userScopePermissionsSchema(),
-			"user_impersonated_scope":       userScopePermissionsSchema(),
+			"view_scope":                    scopePermissionsSchema(),
+			"manage_scope":                  scopePermissionsSchema(),
+			"map_roles_scope":               scopePermissionsSchema(),
+			"manage_group_membership_scope": scopePermissionsSchema(),
+			"impersonate_scope":             scopePermissionsSchema(),
+			"user_impersonated_scope":       scopePermissionsSchema(),
 		},
 	}
 }
