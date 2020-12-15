@@ -252,6 +252,30 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 	})
 }
 
+func TestAccKeycloakLdapGroupMapper_groupsPath(t *testing.T) {
+	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
+
+	if !keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {
+		t.Skip()
+	}
+
+	realmName := "terraform-" + acctest.RandString(10)
+	groupName := "terraform-" + acctest.RandString(10)
+	groupMapperName := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapGroupMapper_groupsPath(realmName, groupName, groupMapperName),
+				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakLdapGroupMapperExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getLdapGroupMapperFromState(s, resourceName)
@@ -401,6 +425,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	membership_ldap_attribute      = "member"
 	membership_user_ldap_attribute = "cn"
 	memberof_ldap_attribute        = "memberOf"
+	groups_path                    = "/"
 }
 	`, realm, groupMapperName, attr, val)
 }
@@ -446,6 +471,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	membership_ldap_attribute      = "member"
 	membership_user_ldap_attribute = "cn"
 	memberof_ldap_attribute        = "memberOf"
+	groups_path                    = "/"
 }
 	`, realm, groupMapperName)
 }
@@ -560,6 +586,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	membership_ldap_attribute      = "member"
 	membership_user_ldap_attribute = "cn"
 	memberof_ldap_attribute        = "memberOf"
+	groups_path                    = "/"
 }
 	`, realmOne, realmTwo, groupMapperName)
 }
@@ -628,4 +655,54 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	memberof_ldap_attribute        = "memberOf"
 }
 	`, realmOne, realmTwo, groupMapperName)
+}
+
+func testKeycloakLdapGroupMapper_groupsPath(realm, groupName, groupMapperName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_group" "group" {
+	realm_id = keycloak_realm.realm.id
+	name = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+	name                    = "openldap"
+	realm_id                = keycloak_realm.realm.id
+
+	enabled                 = true
+
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
+}
+
+resource "keycloak_ldap_group_mapper" "group_mapper" {
+	name                        = "%s"
+	realm_id                    = keycloak_realm.realm.id
+	ldap_user_federation_id     = keycloak_ldap_user_federation.openldap.id
+
+	ldap_groups_dn                 = "dc=example,dc=org"
+	group_name_ldap_attribute      = "cn"
+	group_object_classes           = [
+		"groupOfNames"
+	]
+	membership_attribute_type      = "DN"
+	membership_ldap_attribute      = "member"
+	membership_user_ldap_attribute = "cn"
+	memberof_ldap_attribute        = "memberOf"
+
+	groups_path = keycloak_group.group.path
+}
+	`, realm, groupName, groupMapperName)
 }
