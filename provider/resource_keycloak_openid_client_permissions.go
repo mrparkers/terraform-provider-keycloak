@@ -25,13 +25,12 @@ func resourceKeycloakOpenidClientPermissions() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"client_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
 			"enabled": {
 				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"client_id": {
+				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
@@ -40,34 +39,13 @@ func resourceKeycloakOpenidClientPermissions() *schema.Resource {
 				Computed:    true,
 				Description: "Resource server id representing the realm management client on which this permission is managed",
 			},
-			"view_scope_policy_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"manage_scope_policy_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"configure_scope_policy_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"map_roles_scope_policy_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"map_roles_client_scope_scope_policy_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"map_roles_composite_scope_policy_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"token_exchange_scope_policy_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+			"view_scope":                   scopePermissionsSchema(),
+			"manage_scope":                 scopePermissionsSchema(),
+			"configure_scope":              scopePermissionsSchema(),
+			"map_roles_scope":              scopePermissionsSchema(),
+			"map_roles_client_scope_scope": scopePermissionsSchema(),
+			"map_roles_composite_scope":    scopePermissionsSchema(),
+			"token_exchange_scope":         scopePermissionsSchema(),
 		},
 	}
 }
@@ -76,51 +54,31 @@ func clientPermissionsId(realmId, clientId string) string {
 	return fmt.Sprintf("%s/%s", realmId, clientId)
 }
 
-func setOpenidClientScopePermissionPolicy(keycloakClient *keycloak.KeycloakClient, realmId, clientId string, scopeName string, policyId string) error {
-	openidClientPermissions, err := keycloakClient.GetOpenidClientPermissions(realmId, clientId)
-	if err != nil {
-		return err
-	}
-
-	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
-	if err != nil {
-		return err
-	}
-
-	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions[scopeName].(string))
-	if err != nil {
-		return err
-	}
-
-	permission.Policies = []string{policyId}
-
-	return keycloakClient.UpdateOpenidClientAuthorizationPermission(permission)
-}
-
-func unsetOpenidClientScopePermissionPolicy(keycloakClient *keycloak.KeycloakClient, realmId, clientId, scopeName string) error {
-	openidClientPermissions, err := keycloakClient.GetOpenidClientPermissions(realmId, clientId)
-	if err != nil {
-		return err
-	}
-
-	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
-	if err != nil {
-		return err
-	}
-
-	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions[scopeName].(string))
-	if err != nil {
-		return err
-	}
-
-	permission.Policies = []string{}
-	err = keycloakClient.UpdateOpenidClientAuthorizationPermission(permission)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
+// TODO: is this needed?
+//func unsetOpenidClientScopePermissionPolicy(keycloakClient *keycloak.KeycloakClient, realmId, clientId, scopeName string) error {
+//	openidClientPermissions, err := keycloakClient.GetOpenidClientPermissions(realmId, clientId)
+//	if err != nil {
+//		return err
+//	}
+//
+//	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
+//	if err != nil {
+//		return err
+//	}
+//
+//	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions[scopeName].(string))
+//	if err != nil {
+//		return err
+//	}
+//
+//	permission.Policies = []string{}
+//	err = keycloakClient.UpdateOpenidClientAuthorizationPermission(permission)
+//	if err != nil {
+//		return err
+//	}
+//
+//	return nil
+//}
 
 func resourceKeycloakOpenidClientPermissionsCreate(data *schema.ResourceData, meta interface{}) error {
 	return resourceKeycloakOpenidClientPermissionsUpdate(data, meta)
@@ -132,63 +90,60 @@ func resourceKeycloakOpenidClientPermissionsUpdate(data *schema.ResourceData, me
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
-	if data.Get("enabled").(bool) {
-		err := keycloakClient.EnableOpenidClientPermissions(realmId, clientId)
-		if err != nil {
-			return err
-		}
-	} else {
-		err := keycloakClient.DisableOpenidClientPermissions(realmId, clientId)
-		if err != nil {
-			return err
-		}
+	// the existence of this resource implies that permissions are enabled for this client.
+	err := keycloakClient.EnableOpenidClientPermissions(realmId, clientId)
+	if err != nil {
+		return err
 	}
 
-	viewScopePolicyId, ok := data.GetOkExists("view_scope_policy_id")
-	if ok && viewScopePolicyId != nil {
-		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, clientId, "view", viewScopePolicyId.(string))
+	openidClientPermissions, err := keycloakClient.GetOpenidClientPermissions(realmId, clientId)
+	if err != nil {
+		return err
+	}
+
+	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
+	if err != nil {
+		return err
+	}
+
+	if viewScope, ok := data.GetOk("view_scope"); ok {
+		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["view"].(string), viewScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
 	}
-	manageScopePolicyId, ok := data.GetOkExists("manage_scope_policy_id")
-	if ok && manageScopePolicyId != "" {
-		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, clientId, "manage", manageScopePolicyId.(string))
+	if manageScope, ok := data.GetOk("manage_scope"); ok {
+		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["manage"].(string), manageScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
 	}
-	configureScopePolicyId, ok := data.GetOkExists("configure_scope_policy_id")
-	if ok && configureScopePolicyId != "" {
-		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, clientId, "configure", configureScopePolicyId.(string))
+	if configureScope, ok := data.GetOk("configure_scope"); ok {
+		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["configure"].(string), configureScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
 	}
-	mapRolesScopePolicyId, ok := data.GetOkExists("map_roles_scope_policy_id")
-	if ok && mapRolesScopePolicyId != "" {
-		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, clientId, "map-roles", mapRolesScopePolicyId.(string))
+	if mapRolesScope, ok := data.GetOk("map_roles_scope"); ok {
+		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles"].(string), mapRolesScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
 	}
-	mapRolesClientsScopePolicyId, ok := data.GetOkExists("map_roles_client_scope_scope_policy_id")
-	if ok && mapRolesClientsScopePolicyId != "" {
-		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, clientId, "map-roles-client-scope", mapRolesClientsScopePolicyId.(string))
+	if mapRolesClientsScope, ok := data.GetOk("map_roles_client_scope_scope"); ok {
+		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles-client-scope"].(string), mapRolesClientsScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
 	}
-	mapRolesCompositeScopePolicyId, ok := data.GetOkExists("map_roles_composite_scope_policy_id")
-	if ok && mapRolesCompositeScopePolicyId != "" {
-		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, clientId, "map-roles-composite", mapRolesCompositeScopePolicyId.(string))
+	if mapRolesCompositeScope, ok := data.GetOk("map_roles_composite_scope"); ok {
+		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles-composite"].(string), mapRolesCompositeScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
 	}
-	tokenExchangeScopePolicyId, ok := data.GetOkExists("token_exchange_scope_policy_id")
-	if ok && tokenExchangeScopePolicyId != "" {
-		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, clientId, "token-exchange", tokenExchangeScopePolicyId.(string))
+	if tokenExchangeScope, ok := data.GetOk("token_exchange_scope"); ok {
+		err := setOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["token-exchange"].(string), tokenExchangeScope.(*schema.Set))
 		if err != nil {
 			return err
 		}
@@ -207,94 +162,74 @@ func resourceKeycloakOpenidClientPermissionsRead(data *schema.ResourceData, meta
 		return handleNotFoundError(err, data)
 	}
 
-	data.SetId(clientPermissionsId(openidClientPermissions.RealmId, openidClientPermissions.ClientId))
-	data.Set("realm_id", openidClientPermissions.RealmId)
-	data.Set("client_id", openidClientPermissions.ClientId)
-
-	data.Set("enabled", openidClientPermissions.Enabled)
-
 	if !openidClientPermissions.Enabled {
 		log.Printf("[WARN] Removing resource with id %s from state as it no longer enabled", data.Id())
+		data.SetId("")
 		return nil
 	}
-
-	data.Set("view_scope_policy_id", nil)
-	data.Set("manage_scope_policy_id", nil)
-	data.Set("configure_scope_policy_id", nil)
-	data.Set("map_roles_scope_policy_id", nil)
-	data.Set("map_roles_client_scope_scope_policy_id", nil)
-	data.Set("map_roles_composite_scope_policy_id", nil)
-	data.Set("token_exchange_scope_policy_id", nil)
 
 	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
 	if err != nil {
 		return err
 	}
-	permissionView, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["view"].(string))
-	if err != nil {
-		return err
-	}
-	if permissionView != nil && len(permissionView.Policies) > 0 {
-		data.Set("view_scope_policy_id", permissionView.Policies[0])
-	}
-	permissionManage, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["manage"].(string))
-	if err != nil {
-		return err
-	}
-	if permissionManage != nil && len(permissionManage.Policies) > 0 {
-		data.Set("manage_scope_policy_id", permissionManage.Policies[0])
-	}
-	permissionConfigure, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["configure"].(string))
-	if err != nil {
-		return err
-	}
-	if permissionConfigure != nil && len(permissionConfigure.Policies) > 0 {
-		data.Set("configure_scope_policy_id", permissionConfigure.Policies[0])
-	}
-	permissionMapRoles, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles"].(string))
-	if err != nil {
-		return err
-	}
-	if permissionMapRoles != nil && len(permissionMapRoles.Policies) > 0 {
-		data.Set("map_roles_scope_policy_id", permissionMapRoles.Policies[0])
-	}
-	permissionMapRolesClientScope, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles-client-scope"].(string))
-	if err != nil {
-		return err
-	}
-	if permissionMapRolesClientScope != nil && len(permissionMapRolesClientScope.Policies) > 0 {
-		data.Set("map_roles_client_scope_scope_policy_id", permissionMapRolesClientScope.Policies[0])
-	}
-	permissionMapRolesComposite, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles-composite"].(string))
-	if err != nil {
-		return err
-	}
-	if permissionMapRolesComposite != nil && len(permissionMapRolesComposite.Policies) > 0 {
-		data.Set("map_roles_composite_scope_policy_id", permissionMapRolesComposite.Policies[0])
-	}
-	permissionTokenExchange, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["token-exchange"].(string))
-	if err != nil {
-		return err
-	}
-	if permissionTokenExchange != nil && len(permissionTokenExchange.Policies) > 0 {
-		data.Set("token_exchange_scope_policy_id", permissionTokenExchange.Policies[0])
-	}
+
+	data.SetId(clientPermissionsId(openidClientPermissions.RealmId, openidClientPermissions.ClientId))
+	data.Set("realm_id", openidClientPermissions.RealmId)
+	data.Set("client_id", openidClientPermissions.ClientId)
+	data.Set("enabled", openidClientPermissions.Enabled)
 	data.Set("authorization_resource_server_id", realmManagementClient.Id)
+
+	if viewScope, err := getOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["view"].(string)); err == nil && viewScope != nil {
+		data.Set("view_scope", []interface{}{viewScope})
+	} else if err != nil {
+		return err
+	}
+
+	if manageScope, err := getOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["manage"].(string)); err == nil && manageScope != nil {
+		data.Set("manage_scope", []interface{}{manageScope})
+	} else if err != nil {
+		return err
+	}
+
+	if mapRolesScope, err := getOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["configure"].(string)); err == nil && mapRolesScope != nil {
+		data.Set("configure_scope", []interface{}{mapRolesScope})
+	} else if err != nil {
+		return err
+	}
+
+	if manageGroupMembershipScope, err := getOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles"].(string)); err == nil && manageGroupMembershipScope != nil {
+		data.Set("map_roles_scope", []interface{}{manageGroupMembershipScope})
+	} else if err != nil {
+		return err
+	}
+
+	if impersonateScope, err := getOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles-client-scope"].(string)); err == nil && impersonateScope != nil {
+		data.Set("map_roles_client_scope_scope", []interface{}{impersonateScope})
+	} else if err != nil {
+		return err
+	}
+
+	if userImpersonatedScope, err := getOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles-composite"].(string)); err == nil && userImpersonatedScope != nil {
+		data.Set("map_roles_composite_scope", []interface{}{userImpersonatedScope})
+	} else if err != nil {
+		return err
+	}
+
+	if tokenExchangeScope, err := getOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["token-exchange"].(string)); err == nil && tokenExchangeScope != nil {
+		data.Set("token_exchange_scope", []interface{}{tokenExchangeScope})
+	} else if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func resourceKeycloakOpenidClientPermissionsDelete(data *schema.ResourceData, meta interface{}) error {
-
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
-	openidClientPermissions, err := keycloakClient.GetOpenidClientPermissions(realmId, clientId)
-	if err == nil && openidClientPermissions.Enabled {
-		_ = unsetOpenidClientScopePermissionPolicy(keycloakClient, realmId, clientId, "view")
-	}
 	return keycloakClient.DisableOpenidClientPermissions(realmId, clientId)
 }
 
