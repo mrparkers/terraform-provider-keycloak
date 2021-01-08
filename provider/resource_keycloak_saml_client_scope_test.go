@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccKeycloakSamlClientScope_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientScopeName := "terraform-" + acctest.RandString(10)
 
@@ -35,6 +36,7 @@ func TestAccKeycloakSamlClientScope_basic(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientScope_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var clientScope = &keycloak.SamlClientScope{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -69,6 +71,7 @@ func TestAccKeycloakSamlClientScope_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientScope_updateRealm(t *testing.T) {
+	t.Parallel()
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
 	clientScopeName := "terraform-" + acctest.RandString(10)
@@ -97,6 +100,7 @@ func TestAccKeycloakSamlClientScope_updateRealm(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientScope_consentScreenText(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientScopeName := "terraform-" + acctest.RandString(10)
 
@@ -122,6 +126,7 @@ func TestAccKeycloakSamlClientScope_consentScreenText(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientScope_guiOrder(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientScopeName := "terraform-" + acctest.RandString(10)
 	guiOrder := acctest.RandIntRange(0, 1000)

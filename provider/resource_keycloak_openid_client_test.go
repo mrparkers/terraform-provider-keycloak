@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccKeycloakOpenidClient_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -36,6 +37,7 @@ func TestAccKeycloakOpenidClient_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var client = &keycloak.OpenidClient{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -70,6 +72,7 @@ func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
+	t.Parallel()
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
@@ -98,6 +101,7 @@ func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -123,6 +127,7 @@ func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_adminUrl(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	adminUrl := "https://www.example.com/admin"
@@ -141,6 +146,7 @@ func TestAccKeycloakOpenidClient_adminUrl(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	baseUrl := "https://www.example.com"
@@ -159,6 +165,7 @@ func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_rootUrl(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	rootUrl := "https://www.example.com"
@@ -177,6 +184,7 @@ func TestAccKeycloakOpenidClient_rootUrl(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	enabled := randomBool()
@@ -257,6 +265,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -283,6 +292,7 @@ func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -315,6 +325,7 @@ func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_secret(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	clientSecret := acctest.RandString(10)
@@ -343,6 +354,7 @@ func TestAccKeycloakOpenidClient_secret(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	accessType := randomStringInSlice([]string{"PUBLIC", "CONFIDENTIAL"})
@@ -365,6 +377,7 @@ func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_publicClientCredentialsValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -382,6 +395,7 @@ func TestAccKeycloakOpenidClient_publicClientCredentialsValidation(t *testing.T)
 }
 
 func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -411,6 +425,7 @@ func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -456,6 +471,7 @@ func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -497,6 +513,7 @@ func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.
 }
 
 func TestAccKeycloakOpenidClient_authenticationFlowBindingOverrides(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -518,6 +535,7 @@ func TestAccKeycloakOpenidClient_authenticationFlowBindingOverrides(t *testing.T
 }
 
 func TestAccKeycloakOpenidClient_loginTheme(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	loginThemeKeycloak := "keycloak"

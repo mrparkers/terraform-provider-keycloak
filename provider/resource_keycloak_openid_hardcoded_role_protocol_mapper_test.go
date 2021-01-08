@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_client(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	role := "terraform-role-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
@@ -31,6 +32,7 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_client(t *t
 }
 
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicClientRole_client(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientIdForRole := "terraform-client-" + acctest.RandString(10)
 	role := "terraform-role-" + acctest.RandString(10)
@@ -53,6 +55,7 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicClientRole_client(t *
 }
 
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_clientScope(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	role := "terraform-role-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
@@ -74,6 +77,7 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_clientScope
 }
 
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_import(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	role := "terraform-role-" + acctest.RandString(10)
 	clientId := "terraform-openid-client-" + acctest.RandString(10)
@@ -112,6 +116,7 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_update(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	roleOne := "terraform-role-" + acctest.RandString(10)
 	roleTwo := "terraform-role-" + acctest.RandString(10)
@@ -138,6 +143,7 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.OpenIdHardcodedRoleProtocolMapper{}
 
 	realmName := "terraform-realm-" + acctest.RandString(10)

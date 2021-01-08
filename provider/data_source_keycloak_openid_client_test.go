@@ -8,6 +8,7 @@ import (
 )
 
 func TestAccKeycloakDataSourceOpenidClient_basic(t *testing.T) {
+	t.Parallel()
 	realm := acctest.RandomWithPrefix("tf-acc-test")
 	clientId := acctest.RandomWithPrefix("tf-acc-test")
 	dataSourceName := "data.keycloak_openid_client.test"

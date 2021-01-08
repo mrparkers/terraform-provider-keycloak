@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakUserRoles_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmRoleName := "terraform-role-" + acctest.RandString(10)
 	openIdClientName := "terraform-openid-client-" + acctest.RandString(10)
@@ -42,6 +43,7 @@ func TestAccKeycloakUserRoles_basic(t *testing.T) {
 }
 
 func TestAccKeycloakUserRoles_update(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	realmRoleOneName := "terraform-role-" + acctest.RandString(10)

@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakDataSourceRole_basic(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	realmRole := "terraform-role-" + acctest.RandString(10)

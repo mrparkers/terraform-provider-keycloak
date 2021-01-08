@@ -21,6 +21,7 @@ func getPreAssignedOptionalClientScopes() []string {
 }
 
 func TestAccKeycloakOpenidClientOptionalScopes_basic(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
@@ -46,6 +47,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClientOptionalScopes_updateClientForceNew(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	clientOne := "terraform-client-" + acctest.RandString(10)
 	clientTwo := "terraform-client-" + acctest.RandString(10)
@@ -70,6 +72,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_updateClientForceNew(t *testing.T
 }
 
 func TestAccKeycloakOpenidClientOptionalScopes_updateInPlace(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
@@ -108,6 +111,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_updateInPlace(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClientOptionalScopes_validateClientDoesNotExist(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
@@ -125,6 +129,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_validateClientDoesNotExist(t *tes
 }
 
 func TestAccKeycloakOpenidClientOptionalScopes_validateClientAccessType(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
@@ -143,6 +148,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_validateClientAccessType(t *testi
 
 // if a optional client scope is manually detached from a client with optional scopes controlled by this resource, terraform should add it again
 func TestAccKeycloakOpenidClientOptionalScopes_authoritativeAdd(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScopes := append(getPreAssignedOptionalClientScopes(),
@@ -183,6 +189,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_authoritativeAdd(t *testing.T) {
 
 // if an optional client scope is manually attached to a client with optional scopes controlled by this resource, terraform should detach it
 func TestAccKeycloakOpenidClientOptionalScopes_authoritativeRemove(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 
@@ -235,6 +242,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_authoritativeRemove(t *testing.T)
 
 // this resource doesn't support import because it can be created even if the desired state already exists in keycloak
 func TestAccKeycloakOpenidClientOptionalScopes_noImportNeeded(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
@@ -277,6 +285,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_noImportNeeded(t *testing.T) {
 // as terraform will think it needs to remove these scopes, which is okay to do
 // during an update
 func TestAccKeycloakOpenidClientOptionalScopes_profileAndEmailOptionalScopes(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
@@ -296,6 +305,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_profileAndEmailOptionalScopes(t *
 
 // Keycloak throws a 500 if you attempt to attach an optional scope that is already attached as a default scope
 func TestAccKeycloakOpenidClientOptionalScopes_validateDuplicateScopeAssignment(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)

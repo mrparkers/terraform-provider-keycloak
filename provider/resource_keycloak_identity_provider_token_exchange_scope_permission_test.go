@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakIdpTokenExchangeScopePermission_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "tf_token_exchange-" + acctest.RandString(10)
 	providerAlias := "tf-" + acctest.RandString(10)
 	webappClientId := "tf-" + acctest.RandString(10)
@@ -29,6 +30,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_basic(t *testing.T) {
 }
 
 func TestAccKeycloakIdpTokenExchangeScopePermission_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var idpPermissions = &keycloak.IdentityProviderPermissions{}
 
 	realmName := "tf_token_exchange-" + acctest.RandString(10)
@@ -63,6 +65,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_createAfterManualDestroy(t *
 }
 
 func TestAccKeycloakIdpTokenExchangeScopePermission_import(t *testing.T) {
+	t.Parallel()
 	realmName := "tf_token_exchange-" + acctest.RandString(10)
 	providerAlias := "tf-" + acctest.RandString(10)
 	webappClientId := "tf-" + acctest.RandString(10)
@@ -87,6 +90,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_import(t *testing.T) {
 }
 
 func TestAccKeycloakIdpTokenExchangeScopePermission_updatePolicyMultipleClients(t *testing.T) {
+	t.Parallel()
 	realmName := "tf_token_exchange-" + acctest.RandString(10)
 	providerAlias := "tf-" + acctest.RandString(10)
 	webappClientId := "tf-" + acctest.RandString(10)
@@ -121,6 +125,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_updatePolicyMultipleClients(
 }
 
 func TestAccKeycloakIdpTokenExchangeScopePermission_rolePolicy(t *testing.T) {
+	t.Parallel()
 	realmName := "tf_token_exchange-" + acctest.RandString(10)
 	providerAlias := "tf-" + acctest.RandString(10)
 	webappClientId := "tf-" + acctest.RandString(10)

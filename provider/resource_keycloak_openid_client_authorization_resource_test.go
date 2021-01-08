@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakOpenidClientAuthorizationResource_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	resourceName := "terraform-" + acctest.RandString(10)
@@ -28,6 +29,7 @@ func TestAccKeycloakOpenidClientAuthorizationResource_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClientAuthorizationResource_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var authorizationResource = &keycloak.OpenidClientAuthorizationResource{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -60,6 +62,7 @@ func TestAccKeycloakOpenidClientAuthorizationResource_createAfterManualDestroy(t
 }
 
 func TestAccKeycloakOpenidClientAuthorizationResource_basicUpdateRealm(t *testing.T) {
+	t.Parallel()
 	firstRealm := "terraform-" + acctest.RandString(10)
 	secondRealm := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
@@ -89,6 +92,7 @@ func TestAccKeycloakOpenidClientAuthorizationResource_basicUpdateRealm(t *testin
 }
 
 func TestAccKeycloakOpenidClientAuthorizationResource_basicUpdateAll(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	ownerManagedAccess := randomBool()

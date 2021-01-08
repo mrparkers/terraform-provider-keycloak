@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakLdapFullNameMapper_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	fullNameMapperName := "terraform-" + acctest.RandString(10)
 
@@ -34,6 +35,7 @@ func TestAccKeycloakLdapFullNameMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapFullNameMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.LdapFullNameMapper{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -65,6 +67,7 @@ func TestAccKeycloakLdapFullNameMapper_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakLdapFullNameMapper_readWriteValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	mapper := &keycloak.LdapFullNameMapper{
@@ -88,6 +91,7 @@ func TestAccKeycloakLdapFullNameMapper_readWriteValidation(t *testing.T) {
 
 // write_only can't be set to true if the user federation provider is not writable
 func TestAccKeycloakLdapFullNameMapper_writableValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	mapperName := "terraform-" + acctest.RandString(10)
 
@@ -109,6 +113,7 @@ func TestAccKeycloakLdapFullNameMapper_writableValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapFullNameMapper_updateLdapUserFederation(t *testing.T) {
+	t.Parallel()
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
 	mapperName := "terraform-" + acctest.RandString(10)

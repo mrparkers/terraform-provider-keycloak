@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccKeycloakDataSourceAuthenticationExecution_basic(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	parentFlowAlias := acctest.RandString(20)
 
@@ -36,6 +37,7 @@ func TestAccKeycloakDataSourceAuthenticationExecution_basic(t *testing.T) {
 }
 
 func TestAccKeycloakDataSourceAuthenticationExecution_errorNoExecutions(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	parentFlowAlias := acctest.RandString(20)
 
@@ -53,6 +55,7 @@ func TestAccKeycloakDataSourceAuthenticationExecution_errorNoExecutions(t *testi
 }
 
 func TestAccKeycloakDataSourceAuthenticationExecution_errorWrongProviderId(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	parentFlowAlias := acctest.RandString(20)
 

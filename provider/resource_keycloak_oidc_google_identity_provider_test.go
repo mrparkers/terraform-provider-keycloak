@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakOidcGoogleIdentityProvider_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -26,6 +27,7 @@ func TestAccKeycloakOidcGoogleIdentityProvider_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOidcGoogleIdentityProvider_customConfig(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	customConfigValue := "terraform-" + acctest.RandString(10)
 
@@ -46,6 +48,7 @@ func TestAccKeycloakOidcGoogleIdentityProvider_customConfig(t *testing.T) {
 }
 
 func TestAccKeycloakOidcGoogleIdentityProvider_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var idp = &keycloak.IdentityProvider{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -76,6 +79,7 @@ func TestAccKeycloakOidcGoogleIdentityProvider_createAfterManualDestroy(t *testi
 }
 
 func TestAccKeycloakOidcGoogleIdentityProvider_basicUpdateRealm(t *testing.T) {
+	t.Parallel()
 	firstRealm := "terraform-" + acctest.RandString(10)
 	secondRealm := "terraform-" + acctest.RandString(10)
 
@@ -103,6 +107,7 @@ func TestAccKeycloakOidcGoogleIdentityProvider_basicUpdateRealm(t *testing.T) {
 }
 
 func TestAccKeycloakOidcGoogleIdentityProvider_basicUpdateAll(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	firstEnabled := randomBool()
 

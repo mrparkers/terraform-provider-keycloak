@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
+	t.Parallel()
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -37,6 +38,7 @@ func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
 }
 
 func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
+	t.Parallel()
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -58,6 +60,7 @@ func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
 }
 
 func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
 
 	var customFederation = &keycloak.CustomUserFederation{}
@@ -92,6 +95,7 @@ func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) 
 }
 
 func TestAccKeycloakCustomUserFederation_validation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	name := "terraform-" + acctest.RandString(10)
 	providerId := acctest.RandString(10)
@@ -110,6 +114,7 @@ func TestAccKeycloakCustomUserFederation_validation(t *testing.T) {
 }
 
 func TestAccKeycloakCustomUserFederation_ParentIdDifferentFromRealmName(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	internalId := acctest.RandString(10)
 	name := "terraform-" + acctest.RandString(10)

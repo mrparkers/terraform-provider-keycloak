@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	samlName := "terraform-" + acctest.RandString(10)
 
@@ -28,6 +29,7 @@ func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
 }
 
 func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var saml = &keycloak.IdentityProvider{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -59,6 +61,7 @@ func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) 
 }
 
 func TestAccKeycloakSamlIdentityProvider_basicUpdateRealm(t *testing.T) {
+	t.Parallel()
 	firstRealm := "terraform-" + acctest.RandString(10)
 	secondRealm := "terraform-" + acctest.RandString(10)
 	samlName := "terraform-" + acctest.RandString(10)
@@ -87,6 +90,7 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateRealm(t *testing.T) {
 }
 
 func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	firstEnabled := randomBool()
 	firstBackchannel := randomBool()

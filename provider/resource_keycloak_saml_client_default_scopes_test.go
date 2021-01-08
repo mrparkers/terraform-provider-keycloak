@@ -16,6 +16,7 @@ import (
 var preAssignedDefaultSamlClientScopes = []string{"role_list"}
 
 func TestAccKeycloakSamlClientDefaultScopes_basic(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
@@ -41,6 +42,7 @@ func TestAccKeycloakSamlClientDefaultScopes_basic(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientDefaultScopes_updateClientForceNew(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	clientOne := "terraform-client-" + acctest.RandString(10)
 	clientTwo := "terraform-client-" + acctest.RandString(10)
@@ -65,6 +67,7 @@ func TestAccKeycloakSamlClientDefaultScopes_updateClientForceNew(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientDefaultScopes_updateInPlace(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
@@ -103,6 +106,7 @@ func TestAccKeycloakSamlClientDefaultScopes_updateInPlace(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientDefaultScopes_validateClientDoesNotExist(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
@@ -121,6 +125,7 @@ func TestAccKeycloakSamlClientDefaultScopes_validateClientDoesNotExist(t *testin
 
 // if a default client scope is manually detached from a client with default scopes controlled by this resource, terraform should add it again
 func TestAccKeycloakSamlClientDefaultScopes_authoritativeAdd(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScopes := append(preAssignedDefaultSamlClientScopes,
@@ -161,6 +166,7 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeAdd(t *testing.T) {
 
 // if a default client scope is manually attached to a client with default scopes controlled by this resource, terraform should detach it
 func TestAccKeycloakSamlClientDefaultScopes_authoritativeRemove(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 
@@ -213,6 +219,7 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeRemove(t *testing.T) {
 
 // this resource doesn't support import because it can be created even if the desired state already exists in keycloak
 func TestAccKeycloakSamlClientDefaultScopes_noImportNeeded(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
@@ -254,6 +261,7 @@ func TestAccKeycloakSamlClientDefaultScopes_noImportNeeded(t *testing.T) {
 // result in anything destructive. thus, a following plan will not be empty, as terraform
 // will think it needs to remove these scopes, which is okay to do during an update
 func TestAccKeycloakSamlClientDefaultScopes_profileAndEmailDefaultScopes(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-realm-" + acctest.RandString(10)
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)

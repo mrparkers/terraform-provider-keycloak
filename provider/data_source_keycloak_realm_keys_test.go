@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakDataSourceRealmKeys_basic(t *testing.T) {
+	t.Parallel()
 	realm := acctest.RandomWithPrefix("tf-acc-test")
 	dataSourceName := "data.keycloak_realm_keys.test_keys"
 
@@ -26,6 +27,7 @@ func TestAccKeycloakDataSourceRealmKeys_basic(t *testing.T) {
 }
 
 func TestAccKeycloakDataSourceRealmKeys_filterByAlgorithms(t *testing.T) {
+	t.Parallel()
 	realm := acctest.RandomWithPrefix("tf-acc-test")
 	dataSourceName := "data.keycloak_realm_keys.test_keys"
 

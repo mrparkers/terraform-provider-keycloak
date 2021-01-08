@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakRealm_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
@@ -41,6 +42,7 @@ func TestAccKeycloakRealm_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
@@ -71,6 +73,7 @@ func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_import(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
@@ -94,6 +97,7 @@ func TestAccKeycloakRealm_import(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_SmtpServer(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
@@ -115,6 +119,7 @@ func TestAccKeycloakRealm_SmtpServer(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_SmtpServerUpdate(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -135,6 +140,7 @@ func TestAccKeycloakRealm_SmtpServerUpdate(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_SmtpServerInvalid(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -155,6 +161,7 @@ func TestAccKeycloakRealm_SmtpServerInvalid(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_themes(t *testing.T) {
+	t.Parallel()
 	realmOne := &keycloak.Realm{
 		Realm:        "terraform-" + acctest.RandString(10),
 		DisplayName:  "terraform-" + acctest.RandString(10),
@@ -191,6 +198,7 @@ func TestAccKeycloakRealm_themes(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_themesValidation(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -219,6 +227,7 @@ func TestAccKeycloakRealm_themesValidation(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_InternationalizationValidation(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -239,6 +248,7 @@ func TestAccKeycloakRealm_InternationalizationValidation(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_Internationalization(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
@@ -264,6 +274,7 @@ func TestAccKeycloakRealm_Internationalization(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_InternationalizationDisabled(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
@@ -281,6 +292,7 @@ func TestAccKeycloakRealm_InternationalizationDisabled(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_loginConfigBasic(t *testing.T) {
+	t.Parallel()
 	realm := &keycloak.Realm{
 		Realm:                       "terraform-" + acctest.RandString(10),
 		RegistrationAllowed:         true,
@@ -325,6 +337,7 @@ func TestAccKeycloakRealm_loginConfigBasic(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_loginConfigValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -349,6 +362,7 @@ func TestAccKeycloakRealm_loginConfigValidation(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
 
@@ -375,6 +389,7 @@ func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
@@ -428,6 +443,7 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_securityDefensesHeaders(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
@@ -458,6 +474,7 @@ func TestAccKeycloakRealm_securityDefensesHeaders(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_securityDefensesBruteForceDetection(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
@@ -493,6 +510,7 @@ func TestAccKeycloakRealm_securityDefensesBruteForceDetection(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
@@ -555,6 +573,7 @@ func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
@@ -592,6 +611,7 @@ func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_browserFlow(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
@@ -619,6 +639,7 @@ func TestAccKeycloakRealm_browserFlow(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_customAttribute(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	key := "terraform-" + acctest.RandString(10)
 	value := "terraform-" + acctest.RandString(10)
@@ -642,6 +663,7 @@ func TestAccKeycloakRealm_customAttribute(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
@@ -675,6 +697,7 @@ func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_internalId(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	internalId := acctest.RandString(10)
 	realm := &keycloak.Realm{
@@ -705,6 +728,7 @@ func TestAccKeycloakRealm_internalId(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_webauthn(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	realmDisplayName := "terraform-" + acctest.RandString(10)
 	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"

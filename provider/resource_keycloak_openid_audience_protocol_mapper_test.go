@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClient(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
@@ -32,6 +33,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClient(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClientScope(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
@@ -52,6 +54,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClientScope(t *testing.T) 
 }
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_import(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-openid-client-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
@@ -89,6 +92,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_update(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
@@ -115,6 +119,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.OpenIdAudienceProtocolMapper{}
 
 	realmName := "terraform-realm-" + acctest.RandString(10)
@@ -149,6 +154,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_createAfterManualDestroy(t *tes
 }
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientIdForceNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	updatedClientId := "terraform-client-update-" + acctest.RandString(10)
@@ -175,6 +181,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientIdForceNew(t *testi
 }
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientScopeForceNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
 	clientScopeId := "terraform-client-" + acctest.RandString(10)
@@ -199,6 +206,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientScopeForceNew(t *te
 }
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_updateRealmIdForceNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	newRealmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
@@ -225,6 +233,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateRealmIdForceNew(t *testin
 }
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceExists(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)

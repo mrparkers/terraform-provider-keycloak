@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakLdapHardcodedGroupMapper_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
@@ -34,6 +35,7 @@ func TestAccKeycloakLdapHardcodedGroupMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapHardcodedGroupMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.LdapHardcodedGroupMapper{}
 
 	realmName := "terraform-" + acctest.RandString(10)

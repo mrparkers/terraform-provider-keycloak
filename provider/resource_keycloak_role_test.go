@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakRole_basicRealm(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
 
@@ -33,6 +34,7 @@ func TestAccKeycloakRole_basicRealm(t *testing.T) {
 }
 
 func TestAccKeycloakRole_basicRealmUrlRoleName(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	roleName := "terraform-role-httpfoo.bara1b2" + acctest.RandString(10)
 
@@ -56,6 +58,7 @@ func TestAccKeycloakRole_basicRealmUrlRoleName(t *testing.T) {
 }
 
 func TestAccKeycloakRole_basicClient(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
@@ -80,6 +83,7 @@ func TestAccKeycloakRole_basicClient(t *testing.T) {
 }
 
 func TestAccKeycloakRole_basicSamlClient(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
@@ -104,6 +108,7 @@ func TestAccKeycloakRole_basicSamlClient(t *testing.T) {
 }
 
 func TestAccKeycloakRole_basicRealmUpdate(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
 	descriptionOne := acctest.RandString(50)
@@ -131,6 +136,7 @@ func TestAccKeycloakRole_basicRealmUpdate(t *testing.T) {
 }
 
 func TestAccKeycloakRole_basicClientUpdate(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
@@ -159,6 +165,7 @@ func TestAccKeycloakRole_basicClientUpdate(t *testing.T) {
 }
 
 func TestAccKeycloakRole_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var role = &keycloak.Role{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -193,6 +200,7 @@ func TestAccKeycloakRole_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakRole_composites(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientOne := "terraform-client-" + acctest.RandString(10)
 	clientTwo := "terraform-client-" + acctest.RandString(10)

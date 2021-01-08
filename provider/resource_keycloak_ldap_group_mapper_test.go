@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
@@ -34,6 +35,7 @@ func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.LdapGroupMapper{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -65,6 +67,7 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
 	mode := randomStringInSlice(keycloakLdapGroupMapperModes)
@@ -87,6 +90,7 @@ func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapGroupMapper_membershipAttributeTypeValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
 	membershipAttributeType := randomStringInSlice(keycloakLdapGroupMapperMembershipAttributeTypes)
@@ -109,6 +113,7 @@ func TestAccKeycloakLdapGroupMapper_membershipAttributeTypeValidation(t *testing
 }
 
 func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
 	userRolesRetrieveStrategy := randomStringInSlice(keycloakLdapGroupMapperUserRolesRetrieveStrategies)
@@ -131,6 +136,7 @@ func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testi
 }
 
 func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
 	groupsLdapFilter := "(" + acctest.RandString(10) + ")"
@@ -153,6 +159,7 @@ func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
@@ -170,6 +177,7 @@ func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationForceNew(t *testing.T) {
+	t.Parallel()
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
@@ -192,6 +200,7 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationForceNew(t *testing.
 }
 
 func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	preserveGroupInheritance := true
 	ignoreMissingGroups := randomBool()
@@ -253,6 +262,7 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 }
 
 func TestAccKeycloakLdapGroupMapper_groupsPath(t *testing.T) {
+	t.Parallel()
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 	if !keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {

@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakRealmEvents_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -25,6 +26,7 @@ func TestAccKeycloakRealmEvents_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRealmEvents_destroy(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -68,6 +70,7 @@ func TestAccKeycloakRealmEvents_destroy(t *testing.T) {
 }
 
 func TestAccKeycloakRealmEvents_update(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	before := &keycloak.RealmEventsConfig{
@@ -127,6 +130,7 @@ func TestAccKeycloakRealmEvents_update(t *testing.T) {
 }
 
 func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	before := &keycloak.RealmEventsConfig{

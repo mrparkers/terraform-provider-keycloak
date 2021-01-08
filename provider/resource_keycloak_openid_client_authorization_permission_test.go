@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakOpenidClientAuthorizationPermission_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	resourceName := "terraform-" + acctest.RandString(10)
@@ -31,6 +32,7 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClientAuthorizationPermission_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var authorizationPermission = &keycloak.OpenidClientAuthorizationPermission{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -65,6 +67,7 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_createAfterManualDestroy
 }
 
 func TestAccKeycloakOpenidClientAuthorizationPermission_basicUpdateRealm(t *testing.T) {
+	t.Parallel()
 	firstRealm := "terraform-" + acctest.RandString(10)
 	secondRealm := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
@@ -96,6 +99,7 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_basicUpdateRealm(t *test
 }
 
 func TestAccKeycloakOpenidClientAuthorizationPermission_basicUpdateAll(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	scopeName := "terraform-" + acctest.RandString(10)

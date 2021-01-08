@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakLdapHardcodedRoleMapper_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	roleMapperName := "terraform-" + acctest.RandString(10)
 
@@ -34,6 +35,7 @@ func TestAccKeycloakLdapHardcodedRoleMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapHardcodedRoleMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.LdapHardcodedRoleMapper{}
 
 	realmName := "terraform-" + acctest.RandString(10)

@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakLdapUserAttributeMapper_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	userAttributeMapperName := "terraform-" + acctest.RandString(10)
 
@@ -33,6 +34,7 @@ func TestAccKeycloakLdapUserAttributeMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapUserAttributeMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.LdapUserAttributeMapper{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -64,6 +66,7 @@ func TestAccKeycloakLdapUserAttributeMapper_createAfterManualDestroy(t *testing.
 }
 
 func TestAccKeycloakLdapUserAttributeMapper_updateLdapUserFederation(t *testing.T) {
+	t.Parallel()
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
 	userAttributeMapperName := "terraform-" + acctest.RandString(10)
@@ -86,6 +89,7 @@ func TestAccKeycloakLdapUserAttributeMapper_updateLdapUserFederation(t *testing.
 }
 
 func TestAccKeycloakLdapUserAttributeMapper_updateInPlace(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	userAttributeMapperBefore := &keycloak.LdapUserAttributeMapper{
 		Name:                    acctest.RandString(10),

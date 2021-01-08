@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakLdapRoleMapper_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	roleMapperName := "terraform-" + acctest.RandString(10)
 
@@ -34,6 +35,7 @@ func TestAccKeycloakLdapRoleMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.LdapRoleMapper{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -65,6 +67,7 @@ func TestAccKeycloakLdapRoleMapper_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_modeValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	roleMapperName := "terraform-" + acctest.RandString(10)
 	mode := randomStringInSlice(keycloakLdapRoleMapperModes)
@@ -87,6 +90,7 @@ func TestAccKeycloakLdapRoleMapper_modeValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_membershipAttributeTypeValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	roleMapperName := "terraform-" + acctest.RandString(10)
 	membershipAttributeType := randomStringInSlice(keycloakLdapRoleMapperMembershipAttributeTypes)
@@ -109,6 +113,7 @@ func TestAccKeycloakLdapRoleMapper_membershipAttributeTypeValidation(t *testing.
 }
 
 func TestAccKeycloakLdapRoleMapper_userRolesRetrieveStrategyValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	roleMapperName := "terraform-" + acctest.RandString(10)
 	userRolesRetrieveStrategy := randomStringInSlice(keycloakLdapRoleMapperUserRolesRetrieveStrategies)
@@ -131,6 +136,7 @@ func TestAccKeycloakLdapRoleMapper_userRolesRetrieveStrategyValidation(t *testin
 }
 
 func TestAccKeycloakLdapRoleMapper_rolesLdapFilterValidation(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	roleMapperName := "terraform-" + acctest.RandString(10)
 	rolesLdapFilter := "(" + acctest.RandString(10) + ")"
@@ -153,6 +159,7 @@ func TestAccKeycloakLdapRoleMapper_rolesLdapFilterValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationForceNew(t *testing.T) {
+	t.Parallel()
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
 	roleMapperName := "terraform-" + acctest.RandString(10)
@@ -175,6 +182,7 @@ func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationForceNew(t *testing.T
 }
 
 func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationInPlace(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	useRealmRolesMapping := randomBool()

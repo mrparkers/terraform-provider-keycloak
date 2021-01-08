@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakAuthenticationSubFlow_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-r-" + acctest.RandString(10)
 	parentAuthFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
 	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
@@ -34,6 +35,7 @@ func TestAccKeycloakAuthenticationSubFlow_basic(t *testing.T) {
 }
 
 func TestAccKeycloakAuthenticationSubFlow_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var authenticationSubFlow = &keycloak.AuthenticationSubFlow{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -69,6 +71,7 @@ func TestAccKeycloakAuthenticationSubFlow_createAfterManualDestroy(t *testing.T)
 }
 
 func TestAccKeycloakAuthenticationSubFlow_updateAuthenticationSubFlow(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-r-" + acctest.RandString(10)
 	authParentFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
 	authFlowAliasBefore := "terraform-flow-before-" + acctest.RandString(10)
@@ -98,6 +101,7 @@ func TestAccKeycloakAuthenticationSubFlow_updateAuthenticationSubFlow(t *testing
 }
 
 func TestAccKeycloakAuthenticationSubFlow_updateAuthenticationSubFlowRequirement(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-r-" + acctest.RandString(10)
 	authParentFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
 	authFlowAlias := "terraform-flow-" + acctest.RandString(10)

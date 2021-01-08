@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakOpenidClientAuthorizationRolePolicy(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	roleName := "terraform-" + acctest.RandString(10)

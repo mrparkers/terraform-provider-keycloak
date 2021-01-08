@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakUsersPermission_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{

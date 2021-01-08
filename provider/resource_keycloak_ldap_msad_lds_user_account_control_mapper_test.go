@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	msadLdsUacMapperName := "terraform-" + acctest.RandString(10)
 
@@ -33,6 +34,7 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.LdapMsadLdsUserAccountControlMapper{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -64,6 +66,7 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy
 }
 
 func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederation(t *testing.T) {
+	t.Parallel()
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
 	msadLdsUacMapperName := "terraform-" + acctest.RandString(10)

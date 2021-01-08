@@ -13,6 +13,7 @@ import (
 )
 
 func TestAccKeycloakSamlClient_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -36,6 +37,7 @@ func TestAccKeycloakSamlClient_basic(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClient_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var client = &keycloak.SamlClient{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -70,6 +72,7 @@ func TestAccKeycloakSamlClient_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClient_updateRealm(t *testing.T) {
+	t.Parallel()
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
@@ -100,6 +103,7 @@ func TestAccKeycloakSamlClient_updateRealm(t *testing.T) {
 // Keycloak typically sets some values as default if they aren't provided
 // This test asserts that these default values are present if none are provided
 func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -122,6 +126,7 @@ func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	enabled := randomBool()
@@ -233,6 +238,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
@@ -262,6 +268,7 @@ func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClient_encryptionCertificate(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 

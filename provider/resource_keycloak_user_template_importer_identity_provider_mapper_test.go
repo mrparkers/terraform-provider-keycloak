@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakUserTemplateIdentityProviderMapper_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	mapperName := "terraform-" + acctest.RandString(10)
 	alias := "terraform-" + acctest.RandString(10)
@@ -30,6 +31,7 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakUserTemplateIdentityProviderMapper_withExtraConfig(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	mapperName := "terraform-" + acctest.RandString(10)
 	alias := "terraform-" + acctest.RandString(10)
@@ -50,6 +52,7 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_withExtraConfig(t *testin
 }
 
 func TestAccKeycloakUserTemplateIdentityProviderMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.IdentityProviderMapper{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -83,6 +86,7 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_createAfterManualDestroy(
 }
 
 func TestAccKeycloakUserTemplateIdentityProviderMapper_withExtraConfig_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.IdentityProviderMapper{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -117,6 +121,7 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_withExtraConfig_createAft
 }
 
 func TestAccKeycloakUserTemplateIdentityProviderMapper_basicUpdateRealm(t *testing.T) {
+	t.Parallel()
 	firstRealm := "terraform-" + acctest.RandString(10)
 	secondRealm := "terraform-" + acctest.RandString(10)
 	mapperName := "terraform-" + acctest.RandString(10)
@@ -147,6 +152,7 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_basicUpdateRealm(t *testi
 }
 
 func TestAccKeycloakUserTemplateIdentityProviderMapper_basicUpdateAll(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	identityProviderAliasName := "terraform-" + acctest.RandString(10)
 

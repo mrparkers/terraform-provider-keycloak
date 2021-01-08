@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClient(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
@@ -31,6 +32,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClient(t *testing.T)
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClientScope(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
@@ -51,6 +53,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClientScope(t *testi
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_import(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-openid-client-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
@@ -88,6 +91,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_update(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
@@ -117,6 +121,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.OpenIdHardcodedClaimProtocolMapper{}
 
 	realmName := "terraform-realm-" + acctest.RandString(10)
@@ -151,6 +156,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_createAfterManualDestroy(
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_validateClaimValueType(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(10)
 	invalidClaimValueType := acctest.RandString(5)
@@ -169,6 +175,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_validateClaimValueType(t 
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientIdForceNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	updatedClientId := "terraform-client-update-" + acctest.RandString(10)
@@ -196,6 +203,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientIdForceNew(t 
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientScopeForceNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
 	clientScopeId := "terraform-client-" + acctest.RandString(10)
@@ -220,6 +228,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientScopeForceNew
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateRealmIdForceNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	newRealmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)

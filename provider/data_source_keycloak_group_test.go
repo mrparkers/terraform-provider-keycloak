@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	group := "terraform-group-" + acctest.RandString(10)
 
@@ -35,6 +36,7 @@ func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
 }
 
 func TestAccKeycloakDataSourceGroup_nested(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	group := "terraform-group-" + acctest.RandString(10)
 	groupNested := "terraform-group-nested-" + acctest.RandString(10)

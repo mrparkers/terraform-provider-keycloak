@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakAuthenticationFlow_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-r-" + acctest.RandString(10)
 	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
 
@@ -33,6 +34,7 @@ func TestAccKeycloakAuthenticationFlow_basic(t *testing.T) {
 }
 
 func TestAccKeycloakAuthenticationFlow_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var authenticationFlow = &keycloak.AuthenticationFlow{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -67,6 +69,7 @@ func TestAccKeycloakAuthenticationFlow_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakAuthenticationFlow_updateAuthenticationFlow(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-r-" + acctest.RandString(10)
 
 	authFlowAliasBefore := "terraform-flow-before-" + acctest.RandString(10)
@@ -96,6 +99,7 @@ func TestAccKeycloakAuthenticationFlow_updateAuthenticationFlow(t *testing.T) {
 }
 
 func TestAccKeycloakAuthenticationFlow_updateRealm(t *testing.T) {
+	t.Parallel()
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
 

@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakDataSourceUser(t *testing.T) {
+	t.Parallel()
 	realm := "terraform-" + acctest.RandString(10)
 	username := acctest.RandString(10)
 

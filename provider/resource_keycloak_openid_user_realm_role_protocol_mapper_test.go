@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_basicClient(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-realm-role-mapper-" + acctest.RandString(5)
@@ -32,6 +33,7 @@ func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_basicClient(t *testing.T) 
 }
 
 func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_basicClientScope(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-realm-role-mapper-" + acctest.RandString(5)
@@ -52,6 +54,7 @@ func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_basicClientScope(t *testin
 }
 
 func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_import(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-openid-client-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
@@ -89,6 +92,7 @@ func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_update(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-realm-role-mapper-" + acctest.RandString(5)
@@ -116,6 +120,7 @@ func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.OpenIdUserRealmRoleProtocolMapper{}
 
 	realmName := "terraform-realm-" + acctest.RandString(10)
@@ -150,6 +155,7 @@ func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_createAfterManualDestroy(t
 }
 
 func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_validateClaimValueType(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-realm-role-mapper-" + acctest.RandString(10)
 	invalidClaimValueType := acctest.RandString(5)
@@ -168,6 +174,7 @@ func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_validateClaimValueType(t *
 }
 
 func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_updateClientIdForceNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	updatedClientId := "terraform-client-update-" + acctest.RandString(10)
@@ -194,6 +201,7 @@ func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_updateClientIdForceNew(t *
 }
 
 func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_updateClientScopeForceNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-realm-role-mapper-" + acctest.RandString(5)
 	clientScopeId := "terraform-client-" + acctest.RandString(10)
@@ -218,6 +226,7 @@ func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_updateClientScopeForceNew(
 }
 
 func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_updateRealmIdForceNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	newRealmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)

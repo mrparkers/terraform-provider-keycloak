@@ -16,6 +16,7 @@ const (
 )
 
 func TestAccKeycloakGenericClientProtocolMapper_basicClient(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)
@@ -36,6 +37,7 @@ func TestAccKeycloakGenericClientProtocolMapper_basicClient(t *testing.T) {
 }
 
 func TestAccKeycloakGenericClientProtocolMapper_basicClientScope(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)
@@ -56,6 +58,7 @@ func TestAccKeycloakGenericClientProtocolMapper_basicClientScope(t *testing.T) {
 }
 
 func TestAccKeycloakGenericClientProtocolMapper_import(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)

@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakAuthenticationExecutionConfig_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-r-" + acctest.RandString(10)
 	var config1, config2 keycloak.AuthenticationExecutionConfig
 
@@ -45,6 +46,7 @@ func TestAccKeycloakAuthenticationExecutionConfig_basic(t *testing.T) {
 }
 
 func TestAccKeycloakAuthenticationExecutionConfig_updateForcesNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-r-" + acctest.RandString(10)
 	var config1, config2 keycloak.AuthenticationExecutionConfig
 
@@ -79,6 +81,7 @@ func TestAccKeycloakAuthenticationExecutionConfig_updateForcesNew(t *testing.T) 
 }
 
 func TestAccKeycloakAuthenticationExecutionConfig_import(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-r-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{

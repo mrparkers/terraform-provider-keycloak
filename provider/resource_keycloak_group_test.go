@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccKeycloakGroup_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	groupName := "terraform-group-" + acctest.RandString(10)
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
@@ -21,6 +22,7 @@ func TestAccKeycloakGroup_basic(t *testing.T) {
 }
 
 func TestAccKeycloakGroup_basicGroupNameContainsBackSlash(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	groupName := "terraform/group/" + acctest.RandString(10)
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
@@ -50,6 +52,7 @@ func runTestBasicGroup(t *testing.T, realmName, groupName, attributeName, attrib
 }
 
 func TestAccKeycloakGroup_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var group = &keycloak.Group{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -86,6 +89,7 @@ func TestAccKeycloakGroup_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakGroup_updateGroupName(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	groupNameBefore := "terraform-group-" + acctest.RandString(10)
@@ -117,6 +121,7 @@ func TestAccKeycloakGroup_updateGroupName(t *testing.T) {
 }
 
 func TestAccKeycloakGroup_updateRealm(t *testing.T) {
+	t.Parallel()
 	realmOne := "terraform-" + acctest.RandString(10)
 	realmTwo := "terraform-" + acctest.RandString(10)
 
@@ -146,6 +151,7 @@ func TestAccKeycloakGroup_updateRealm(t *testing.T) {
 }
 
 func TestAccKeycloakGroup_nested(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	parentGroupName := "terraform-parent-group-" + acctest.RandString(10)
 	firstChildGroupName := "terraform-child-group-" + acctest.RandString(10)
@@ -155,6 +161,7 @@ func TestAccKeycloakGroup_nested(t *testing.T) {
 }
 
 func TestAccKeycloakGroup_nestedGroupNameContainsBackSlash(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	parentGroupName := "terraform/parent/group/" + acctest.RandString(10)
 	firstChildGroupName := "terraform/child/group/" + acctest.RandString(10)
@@ -238,6 +245,7 @@ func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGrou
 }
 
 func TestAccKeycloakGroup_unsetOptionalAttributes(t *testing.T) {
+	t.Parallel()
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
 	groupWithOptionalAttributes := &keycloak.Group{
 		RealmId: "terraform-" + acctest.RandString(10),

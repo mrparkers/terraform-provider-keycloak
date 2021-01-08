@@ -14,6 +14,7 @@ import (
 // because the keycloak_saml_client_scope resource does not exist yet.
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_basicClient(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
@@ -34,6 +35,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_basicClient(t *testing.T) {
 }
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_import(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-saml-client-" + acctest.RandString(10)
 	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
@@ -60,6 +62,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_update(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
@@ -86,6 +89,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.SamlUserAttributeProtocolMapper{}
 
 	realmName := "terraform-realm-" + acctest.RandString(10)
@@ -120,6 +124,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_createAfterManualDestroy(t *
 }
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_validateClaimValueType(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(10)
@@ -139,6 +144,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_validateClaimValueType(t *te
 }
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_updateClientIdForceNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	updatedClientId := "terraform-client-update-" + acctest.RandString(10)
@@ -165,6 +171,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_updateClientIdForceNew(t *te
 }
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_updateRealmIdForceNew(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	newRealmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)

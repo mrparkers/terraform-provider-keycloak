@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakRequiredAction_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	requiredActionAlias := "CONFIGURE_TOTP"
 
@@ -27,6 +28,7 @@ func TestAccKeycloakRequiredAction_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_unregisteredAction(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	requiredActionAlias := "webauthn-register"
 
@@ -43,6 +45,7 @@ func TestAccKeycloakRequiredAction_unregisteredAction(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_invalidAlias(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	randomReqActionAlias := "randomRequiredAction-" + acctest.RandString(10)
 
@@ -59,6 +62,7 @@ func TestAccKeycloakRequiredAction_invalidAlias(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_import(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	requiredActionAlias := "terms_and_conditions"
 
@@ -81,6 +85,7 @@ func TestAccKeycloakRequiredAction_import(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_disabledDefault(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	requiredActionAlias := "terms_and_conditions"
 
@@ -96,6 +101,7 @@ func TestAccKeycloakRequiredAction_disabledDefault(t *testing.T) {
 	})
 }
 func TestAccKeycloakRequiredAction_computedPriority(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	requiredActionAlias := "terms_and_conditions"
 

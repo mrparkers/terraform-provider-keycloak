@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	oidcName := "terraform-" + acctest.RandString(10)
 
@@ -27,6 +28,7 @@ func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOidcIdentityProvider_custom(t *testing.T) {
+	t.Parallel()
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom idp in CI
 	//This test does not work in keycloak 10, because the interfaces that our customIdp implements, have changed in the keycloak latest version.
 	//We need to decide which keycloak version we going to support and test for the customIdp
@@ -49,6 +51,7 @@ func TestAccKeycloakOidcIdentityProvider_custom(t *testing.T) {
 }
 
 func TestAccKeycloakOidcIdentityProvider_extra_config(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	oidcName := "terraform-" + acctest.RandString(10)
 	customConfigValue := "terraform-" + acctest.RandString(10)
@@ -69,6 +72,7 @@ func TestAccKeycloakOidcIdentityProvider_extra_config(t *testing.T) {
 }
 
 func TestAccKeycloakOidcIdentityProvider_keyDefaultScopes(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	oidcName := "terraform-" + acctest.RandString(10)
 
@@ -89,6 +93,7 @@ func TestAccKeycloakOidcIdentityProvider_keyDefaultScopes(t *testing.T) {
 }
 
 func TestAccKeycloakOidcIdentityProvider_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var oidc = &keycloak.IdentityProvider{}
 
 	realmName := "terraform-" + acctest.RandString(10)
@@ -120,6 +125,7 @@ func TestAccKeycloakOidcIdentityProvider_createAfterManualDestroy(t *testing.T) 
 }
 
 func TestAccKeycloakOidcIdentityProvider_basicUpdateRealm(t *testing.T) {
+	t.Parallel()
 	firstRealm := "terraform-" + acctest.RandString(10)
 	secondRealm := "terraform-" + acctest.RandString(10)
 	oidcName := "terraform-" + acctest.RandString(10)
@@ -148,6 +154,7 @@ func TestAccKeycloakOidcIdentityProvider_basicUpdateRealm(t *testing.T) {
 }
 
 func TestAccKeycloakOidcIdentityProvider_basicUpdateAll(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	firstEnabled := randomBool()
 

@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccKeycloakDefaultGroups_basic(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	groupName := "terraform-group-" + acctest.RandString(10)
 
@@ -33,6 +34,7 @@ func TestAccKeycloakDefaultGroups_basic(t *testing.T) {
 }
 
 func TestAccKeycloakDefaultGroups_import(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 	groupName := "terraform-group-" + acctest.RandString(10)
 
@@ -55,6 +57,7 @@ func TestAccKeycloakDefaultGroups_import(t *testing.T) {
 }
 
 func TestAccKeycloakDefaultGroups_updateInPlace(t *testing.T) {
+	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	allGroupsForTest := []string{
