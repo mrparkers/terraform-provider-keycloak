@@ -84,7 +84,7 @@ func TestAccKeycloakGenericClientProtocolMapper_import(t *testing.T) {
 	})
 }
 
-func TestGenericClientProtocolMapper_update(t *testing.T) {
+func TestAccKeycloakGenericClientProtocolMapper_update(t *testing.T) {
 	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)

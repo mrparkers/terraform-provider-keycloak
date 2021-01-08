@@ -263,7 +263,7 @@ func TestAccKeycloakGroup_unsetOptionalAttributes(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
+		CheckDestroy:      testAccCheckKeycloakGroupDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroup_fromInterface(groupWithOptionalAttributes),
