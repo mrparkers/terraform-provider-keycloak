@@ -10,7 +10,6 @@ import (
 )
 
 func TestAccKeycloakRealmEvents_basic(t *testing.T) {
-	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -26,7 +25,6 @@ func TestAccKeycloakRealmEvents_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRealmEvents_destroy(t *testing.T) {
-	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -70,8 +68,7 @@ func TestAccKeycloakRealmEvents_destroy(t *testing.T) {
 }
 
 func TestAccKeycloakRealmEvents_update(t *testing.T) {
-	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := "terraform-" + acctest.RandString(10) //
 
 	before := &keycloak.RealmEventsConfig{
 		AdminEventsDetailsEnabled: true,
@@ -130,7 +127,6 @@ func TestAccKeycloakRealmEvents_update(t *testing.T) {
 }
 
 func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
-	t.Parallel()
 	realmName := "terraform-" + acctest.RandString(10)
 
 	before := &keycloak.RealmEventsConfig{
@@ -170,7 +166,13 @@ func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
 						}
 
 						keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-						if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_7) { //keycloak versions < 7.0.0 have 63 events, versions >=7.0.0 have 67 events
+
+						//keycloak versions < 7.0.0 have 63 events, versions >=7.0.0 have 67 events, versions >=12.0.0 have 69 events
+						if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_12) {
+							if len(realmEventsConfig.EnabledEventTypes) != 69 {
+								return fmt.Errorf("exptected to enabled_event_types to contain all(69) event types, but it contains %d", len(realmEventsConfig.EnabledEventTypes))
+							}
+						} else if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_7) {
 							if len(realmEventsConfig.EnabledEventTypes) != 67 {
 								return fmt.Errorf("exptected to enabled_event_types to contain all(67) event types, but it contains %d", len(realmEventsConfig.EnabledEventTypes))
 							}
@@ -220,25 +222,25 @@ func testAccCheckKeycloakRealmEventsExists(resourceName string) resource.TestChe
 func testKeycloakRealmEvents_basic(realm string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-  realm = "%s"
+ realm = "%s"
 }
 resource "keycloak_realm_events" "realm_events" {
-  realm_id = "${keycloak_realm.realm.id}"
+ realm_id = "${keycloak_realm.realm.id}"
 
-  admin_events_enabled         = true
-  admin_events_details_enabled = true
-  events_enabled               = true
-  events_expiration            = 1234
+ admin_events_enabled         = true
+ admin_events_details_enabled = true
+ events_enabled               = true
+ events_expiration            = 1234
 
-  enabled_event_types = [
+ enabled_event_types = [
 	"LOGIN",
 	"LOGOUT",
-  ]
+ ]
 
-  events_listeners = [
-    "jboss-logging",
+ events_listeners = [
+   "jboss-logging",
 	"example-listener",
-  ]
+ ]
 }
 	`, realm)
 }
@@ -246,7 +248,7 @@ resource "keycloak_realm_events" "realm_events" {
 func testKeycloakRealmEvents_realmOnly(realm string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-  realm = "%s"
+ realm = "%s"
 }
 	`, realm)
 }
@@ -258,16 +260,16 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_realm_events" "realm_events" {
-  realm_id = "${keycloak_realm.realm.id}"
+ realm_id = "${keycloak_realm.realm.id}"
 
-  admin_events_enabled         = %t
-  admin_events_details_enabled = %t
-  events_enabled               = %t
-  events_expiration            = %d
+ admin_events_enabled         = %t
+ admin_events_details_enabled = %t
+ events_enabled               = %t
+ events_expiration            = %d
 
-  enabled_event_types = %s
+ enabled_event_types = %s
 
-  events_listeners = %s
+ events_listeners = %s
 }
 	`, realm, realmEventsConfig.AdminEventsEnabled, realmEventsConfig.AdminEventsDetailsEnabled, realmEventsConfig.EventsEnabled, realmEventsConfig.EventsExpiration, arrayOfStringsForTerraformResource(realmEventsConfig.EnabledEventTypes), arrayOfStringsForTerraformResource(realmEventsConfig.EventsListeners))
 }
