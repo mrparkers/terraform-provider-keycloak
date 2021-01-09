@@ -312,7 +312,7 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request, body []
 		return nil, "", err
 	}
 
-	if len(responseBody) != 0 {
+	if len(responseBody) != 0 && request.URL.Path != "/auth/admin/serverinfo" {
 		log.Printf("[DEBUG] Response body: %s", responseBody)
 	}
 
