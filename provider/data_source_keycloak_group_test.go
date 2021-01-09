@@ -12,7 +12,6 @@ import (
 
 func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
 	t.Parallel()
-	realm := "terraform-" + acctest.RandString(10)
 	group := "terraform-group-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -21,7 +20,7 @@ func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testDataSourceKeycloakGroup_basic(realm, group),
+				Config: testDataSourceKeycloakGroup_basic(group),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists("keycloak_group.group"),
 					// realm role
@@ -37,7 +36,6 @@ func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
 
 func TestAccKeycloakDataSourceGroup_nested(t *testing.T) {
 	t.Parallel()
-	realm := "terraform-" + acctest.RandString(10)
 	group := "terraform-group-" + acctest.RandString(10)
 	groupNested := "terraform-group-nested-" + acctest.RandString(10)
 
@@ -47,7 +45,7 @@ func TestAccKeycloakDataSourceGroup_nested(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testDataSourceKeycloakGroup_nested(realm, group, groupNested),
+				Config: testDataSourceKeycloakGroup_nested(group, groupNested),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists("keycloak_group.group"),
 					testAccCheckKeycloakGroupExists("keycloak_group.group_nested"),
@@ -92,55 +90,68 @@ func testAccCheckDataKeycloakGroup(resourceName string) resource.TestCheckFunc {
 	}
 }
 
-func testDataSourceKeycloakGroup_basic(realm, group string) string {
+func testDataSourceKeycloakGroup_basic(group string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_group" "group" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 # we create another group with a similar name to make the data lookup more realistic
 resource "keycloak_group" "similar_group" {
 	name     = "%s_with_similar_name"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 data "keycloak_group" "group" {
-	realm_id = "${keycloak_realm.realm.id}"
-	name     = "${keycloak_group.group.name}"
+	realm_id = data.keycloak_realm.realm.id
+	name     = keycloak_group.group.name
+
+	depends_on = [
+		keycloak_group.group,
+		keycloak_group.similar_group,
+	]
 }
-	`, realm, group, group)
+	`, testAccRealm.Realm, group, group)
 }
 
-func testDataSourceKeycloakGroup_nested(realm, group, groupNested string) string {
+func testDataSourceKeycloakGroup_nested(group, groupNested string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_group" "group" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_group" "group_nested" {
 	name     	= "%s"
-	parent_id = "${keycloak_group.group.id}"
-	realm_id 	= "${keycloak_realm.realm.id}"
+	parent_id = keycloak_group.group.id
+	realm_id 	= data.keycloak_realm.realm.id
 }
 
 data "keycloak_group" "group" {
-	realm_id = "${keycloak_realm.realm.id}"
-	name     = "${keycloak_group.group.name}"
+	realm_id = data.keycloak_realm.realm.id
+	name     = keycloak_group.group.name
+
+	depends_on = [
+		keycloak_group.group
+	]
 }
 
 data "keycloak_group" "group_nested" {
-	realm_id = "${keycloak_realm.realm.id}"
-	name     = "${keycloak_group.group_nested.name}"
+	realm_id = data.keycloak_realm.realm.id
+	name     = keycloak_group.group_nested.name
+
+	depends_on = [
+		keycloak_group.group_nested
+	]
 }
-	`, realm, group, groupNested)
+	`, testAccRealm.Realm, group, groupNested)
 }
