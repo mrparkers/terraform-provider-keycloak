@@ -12,7 +12,6 @@ import (
 
 func TestAccKeycloakDataSourceUser(t *testing.T) {
 	t.Parallel()
-	realm := "terraform-" + acctest.RandString(10)
 	username := acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -21,7 +20,7 @@ func TestAccKeycloakDataSourceUser(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testDataSourceKeycloakUser(realm, username),
+				Config: testDataSourceKeycloakUser(username),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakUserExists("keycloak_user.user"),
 					resource.TestCheckResourceAttrPair("keycloak_user.user", "id", "data.keycloak_user.user", "id"),
@@ -60,15 +59,15 @@ func testAccCheckDataKeycloakUser(resourceName string) resource.TestCheckFunc {
 	}
 }
 
-func testDataSourceKeycloakUser(realm, username string) string {
+func testDataSourceKeycloakUser(username string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm 		= "%s"
+data "keycloak_realm" "realm" {
+	realm = "%s"
 }
 
 resource "keycloak_user" "user" {
 	username    = "%s"
-	realm_id 	= "${keycloak_realm.realm.id}"
+	realm_id 	= data.keycloak_realm.realm.id
 	enabled    	= true
 
     email      	= "bob@domain.com"
@@ -77,8 +76,12 @@ resource "keycloak_user" "user" {
 }
 
 data "keycloak_user" "user" {
-	realm_id 	= "${keycloak_realm.realm.id}"
-	username    = "${keycloak_user.user.username}"
+	realm_id 	= data.keycloak_realm.realm.id
+	username    = keycloak_user.user.username
+
+	depends_on = [
+		keycloak_user.user
+	]
 }
-	`, realm, username)
+	`, testAccRealm.Realm, username)
 }
