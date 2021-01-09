@@ -13,39 +13,39 @@ import (
 
 func TestAccKeycloakGroup_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	groupName := "terraform-group-" + acctest.RandString(10)
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
 	attributeValue := acctest.RandString(250)
 
-	runTestBasicGroup(t, realmName, groupName, attributeName, attributeValue)
+	runTestBasicGroup(t, groupName, attributeName, attributeValue)
 }
 
 func TestAccKeycloakGroup_basicGroupNameContainsBackSlash(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	groupName := "terraform/group/" + acctest.RandString(10)
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
 	attributeValue := acctest.RandString(250)
 
-	runTestBasicGroup(t, realmName, groupName, attributeName, attributeValue)
+	runTestBasicGroup(t, groupName, attributeName, attributeValue)
 }
 
-func runTestBasicGroup(t *testing.T, realmName, groupName, attributeName, attributeValue string) {
+func runTestBasicGroup(t *testing.T, groupName, attributeName, attributeValue string) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
 		CheckDestroy:      testAccCheckKeycloakGroupDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakGroup_basic(realmName, groupName, attributeName, attributeValue),
+				Config: testKeycloakGroup_basic(groupName, attributeName, attributeValue),
 				Check:  testAccCheckKeycloakGroupExists("keycloak_group.group"),
 			},
 			{
 				ResourceName:        "keycloak_group.group",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 		},
 	})
@@ -53,9 +53,9 @@ func runTestBasicGroup(t *testing.T, realmName, groupName, attributeName, attrib
 
 func TestAccKeycloakGroup_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
+
 	var group = &keycloak.Group{}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	groupName := "terraform-group-" + acctest.RandString(10)
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
 	attributeValue := acctest.RandString(250)
@@ -66,7 +66,7 @@ func TestAccKeycloakGroup_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakGroupDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakGroup_basic(realmName, groupName, attributeName, attributeValue),
+				Config: testKeycloakGroup_basic(groupName, attributeName, attributeValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists("keycloak_group.group"),
 					testAccCheckKeycloakGroupFetch("keycloak_group.group", group),
@@ -79,7 +79,7 @@ func TestAccKeycloakGroup_createAfterManualDestroy(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakGroup_basic(realmName, groupName, attributeName, attributeValue),
+				Config: testKeycloakGroup_basic(groupName, attributeName, attributeValue),
 				Check:  testAccCheckKeycloakGroupExists("keycloak_group.group"),
 			},
 		},
@@ -88,7 +88,6 @@ func TestAccKeycloakGroup_createAfterManualDestroy(t *testing.T) {
 
 func TestAccKeycloakGroup_updateGroupName(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 
 	groupNameBefore := "terraform-group-" + acctest.RandString(10)
 	groupNameAfter := "terraform-group-" + acctest.RandString(10)
@@ -101,14 +100,14 @@ func TestAccKeycloakGroup_updateGroupName(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakGroupDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakGroup_basic(realmName, groupNameBefore, attributeName, attributeValue),
+				Config: testKeycloakGroup_basic(groupNameBefore, attributeName, attributeValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists("keycloak_group.group"),
 					resource.TestCheckResourceAttr("keycloak_group.group", "name", groupNameBefore),
 				),
 			},
 			{
-				Config: testKeycloakGroup_basic(realmName, groupNameAfter, attributeName, attributeValue),
+				Config: testKeycloakGroup_basic(groupNameAfter, attributeName, attributeValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists("keycloak_group.group"),
 					resource.TestCheckResourceAttr("keycloak_group.group", "name", groupNameAfter),
@@ -120,8 +119,6 @@ func TestAccKeycloakGroup_updateGroupName(t *testing.T) {
 
 func TestAccKeycloakGroup_updateRealm(t *testing.T) {
 	t.Parallel()
-	realmOne := "terraform-" + acctest.RandString(10)
-	realmTwo := "terraform-" + acctest.RandString(10)
 
 	group := "terraform-group-" + acctest.RandString(10)
 
@@ -131,17 +128,17 @@ func TestAccKeycloakGroup_updateRealm(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakGroupDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakGroup_updateRealmBefore(realmOne, realmTwo, group),
+				Config: testKeycloakGroup_updateRealmBefore(group),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists("keycloak_group.group"),
-					testAccCheckKeycloakGroupBelongsToRealm("keycloak_group.group", realmOne),
+					testAccCheckKeycloakGroupBelongsToRealm("keycloak_group.group", testAccRealm.Realm),
 				),
 			},
 			{
-				Config: testKeycloakGroup_updateRealmAfter(realmOne, realmTwo, group),
+				Config: testKeycloakGroup_updateRealmAfter(group),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists("keycloak_group.group"),
-					testAccCheckKeycloakGroupBelongsToRealm("keycloak_group.group", realmTwo),
+					testAccCheckKeycloakGroupBelongsToRealm("keycloak_group.group", testAccRealmTwo.Realm),
 				),
 			},
 		},
@@ -150,25 +147,25 @@ func TestAccKeycloakGroup_updateRealm(t *testing.T) {
 
 func TestAccKeycloakGroup_nested(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	parentGroupName := "terraform-parent-group-" + acctest.RandString(10)
 	firstChildGroupName := "terraform-child-group-" + acctest.RandString(10)
 	secondChildGroupName := "terraform-child-group-" + acctest.RandString(10)
 
-	runTestNestedGroup(t, realmName, parentGroupName, firstChildGroupName, secondChildGroupName)
+	runTestNestedGroup(t, parentGroupName, firstChildGroupName, secondChildGroupName)
 }
 
 func TestAccKeycloakGroup_nestedGroupNameContainsBackSlash(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	parentGroupName := "terraform/parent/group/" + acctest.RandString(10)
 	firstChildGroupName := "terraform/child/group/" + acctest.RandString(10)
 	secondChildGroupName := "terraform/child/group/" + acctest.RandString(10)
 
-	runTestNestedGroup(t, realmName, parentGroupName, firstChildGroupName, secondChildGroupName)
+	runTestNestedGroup(t, parentGroupName, firstChildGroupName, secondChildGroupName)
 }
 
-func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGroupName, secondChildGroupName string) {
+func runTestNestedGroup(t *testing.T, parentGroupName, firstChildGroupName, secondChildGroupName string) {
 	parentGroupResource := "keycloak_group.parent_group"
 	firstChildGroupResource := "keycloak_group.first_child_group"
 	secondChildGroupResource := "keycloak_group.second_child_group"
@@ -179,7 +176,7 @@ func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGrou
 		CheckDestroy:      testAccCheckKeycloakGroupDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakGroup_nested(realmName, parentGroupName, firstChildGroupName, secondChildGroupName, firstChildGroupResource),
+				Config: testKeycloakGroup_nested(parentGroupName, firstChildGroupName, secondChildGroupName, firstChildGroupResource),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists(parentGroupResource),
 					testAccCheckKeycloakGroupExists(firstChildGroupResource),
@@ -194,22 +191,22 @@ func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGrou
 				ResourceName:        parentGroupResource,
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 			{
 				ResourceName:        firstChildGroupResource,
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 			{
 				ResourceName:        secondChildGroupResource,
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 			{
-				Config: testKeycloakGroup_nested(realmName, parentGroupName, firstChildGroupName, secondChildGroupName, parentGroupResource),
+				Config: testKeycloakGroup_nested(parentGroupName, firstChildGroupName, secondChildGroupName, parentGroupResource),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists(parentGroupResource),
 					testAccCheckKeycloakGroupExists(firstChildGroupResource),
@@ -224,19 +221,19 @@ func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGrou
 				ResourceName:        parentGroupResource,
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 			{
 				ResourceName:        firstChildGroupResource,
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 			{
 				ResourceName:        secondChildGroupResource,
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 		},
 	})
@@ -244,6 +241,7 @@ func runTestNestedGroup(t *testing.T, realmName, parentGroupName, firstChildGrou
 
 func TestAccKeycloakGroup_unsetOptionalAttributes(t *testing.T) {
 	t.Parallel()
+
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
 	groupWithOptionalAttributes := &keycloak.Group{
 		RealmId: "terraform-" + acctest.RandString(10),
@@ -268,7 +266,7 @@ func TestAccKeycloakGroup_unsetOptionalAttributes(t *testing.T) {
 				Check:  testAccCheckKeycloakGroupExists(resourceName),
 			},
 			{
-				Config: testKeycloakGroup_basic(groupWithOptionalAttributes.RealmId, groupWithOptionalAttributes.Name, attributeName, strings.Join(groupWithOptionalAttributes.Attributes[attributeName], "")),
+				Config: testKeycloakGroup_basic(groupWithOptionalAttributes.Name, attributeName, strings.Join(groupWithOptionalAttributes.Attributes[attributeName], "")),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakGroupExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", groupWithOptionalAttributes.Name),
@@ -355,90 +353,90 @@ func getGroupFromState(s *terraform.State, resourceName string) (*keycloak.Group
 	return group, nil
 }
 
-func testKeycloakGroup_basic(realm, group string, attributeName string, attributeValue string) string {
+func testKeycloakGroup_basic(group string, attributeName string, attributeValue string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_group" "group" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 	attributes = {
 		"%s" = "%s"
 	}
 }
-	`, realm, group, attributeName, attributeValue)
+	`, testAccRealm.Realm, group, attributeName, attributeValue)
 }
 
-func testKeycloakGroup_updateRealmBefore(realmOne, realmTwo, group string) string {
+func testKeycloakGroup_updateRealmBefore(group string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
+data "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_2" {
+data "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
 resource "keycloak_group" "group" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm_1.id}"
+	realm_id  = data.keycloak_realm.realm_1.id
 }
-	`, realmOne, realmTwo, group)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, group)
 }
 
-func testKeycloakGroup_updateRealmAfter(realmOne, realmTwo, group string) string {
+func testKeycloakGroup_updateRealmAfter(group string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
+data "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_2" {
+data "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
 resource "keycloak_group" "group" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm_2.id}"
+	realm_id  = data.keycloak_realm.realm_2.id
 }
-	`, realmOne, realmTwo, group)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, group)
 }
 
-func testKeycloakGroup_nested(realm, parentGroup, firstChildGroup, secondChildGroup, secondChildGroupParent string) string {
+func testKeycloakGroup_nested(parentGroup, firstChildGroup, secondChildGroup, secondChildGroupParent string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_group" "parent_group" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_group" "first_child_group" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
-	parent_id = "${keycloak_group.parent_group.id}"
+	realm_id  = data.keycloak_realm.realm.id
+	parent_id = keycloak_group.parent_group.id
 }
 
 resource "keycloak_group" "second_child_group" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
-	parent_id = "${%s.id}"
+	realm_id  = data.keycloak_realm.realm.id
+	parent_id = %s.id
 }
-	`, realm, parentGroup, firstChildGroup, secondChildGroup, secondChildGroupParent)
+	`, testAccRealm.Realm, parentGroup, firstChildGroup, secondChildGroup, secondChildGroupParent)
 }
 
 func testKeycloakGroup_fromInterface(group *keycloak.Group) string {
 	return fmt.Sprintf(`
-	resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_group" "group" {
-	realm_id   = "${keycloak_realm.realm.id}"
-	name   = "%s"
+	realm_id = data.keycloak_realm.realm.id
+	name     = "%s"
 }
-	`, group.RealmId, group.Name)
+	`, testAccRealm.Realm, group.Name)
 }
