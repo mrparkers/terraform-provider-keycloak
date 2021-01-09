@@ -11,7 +11,6 @@ import (
 
 func TestAccKeycloakAuthenticationFlow_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-r-" + acctest.RandString(10)
 	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -20,14 +19,14 @@ func TestAccKeycloakAuthenticationFlow_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakAuthenticationFlowDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakAuthenticationFlow_basic(realmName, authFlowAlias),
+				Config: testKeycloakAuthenticationFlow_basic(authFlowAlias),
 				Check:  testAccCheckKeycloakAuthenticationFlowExists("keycloak_authentication_flow.flow"),
 			},
 			{
 				ResourceName:        "keycloak_authentication_flow.flow",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 		},
 	})
@@ -37,7 +36,6 @@ func TestAccKeycloakAuthenticationFlow_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var authenticationFlow = &keycloak.AuthenticationFlow{}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -46,7 +44,7 @@ func TestAccKeycloakAuthenticationFlow_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakAuthenticationFlowDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakAuthenticationFlow_basic(realmName, authFlowAlias),
+				Config: testKeycloakAuthenticationFlow_basic(authFlowAlias),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationFlowExists("keycloak_authentication_flow.flow"),
 					testAccCheckKeycloakAuthenticationFlowFetch("keycloak_authentication_flow.flow", authenticationFlow),
@@ -54,14 +52,12 @@ func TestAccKeycloakAuthenticationFlow_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteAuthenticationFlow(authenticationFlow.RealmId, authenticationFlow.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakAuthenticationFlow_basic(realmName, authFlowAlias),
+				Config: testKeycloakAuthenticationFlow_basic(authFlowAlias),
 				Check:  testAccCheckKeycloakAuthenticationFlowExists("keycloak_authentication_flow.flow"),
 			},
 		},
@@ -70,7 +66,6 @@ func TestAccKeycloakAuthenticationFlow_createAfterManualDestroy(t *testing.T) {
 
 func TestAccKeycloakAuthenticationFlow_updateAuthenticationFlow(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-r-" + acctest.RandString(10)
 
 	authFlowAliasBefore := "terraform-flow-before-" + acctest.RandString(10)
 	authFlowAliasAfter := "terraform-flow-after-" + acctest.RandString(10)
@@ -81,14 +76,14 @@ func TestAccKeycloakAuthenticationFlow_updateAuthenticationFlow(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakAuthenticationFlowDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakAuthenticationFlow_basic(realmName, authFlowAliasBefore),
+				Config: testKeycloakAuthenticationFlow_basic(authFlowAliasBefore),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationFlowExists("keycloak_authentication_flow.flow"),
 					resource.TestCheckResourceAttr("keycloak_authentication_flow.flow", "alias", authFlowAliasBefore),
 				),
 			},
 			{
-				Config: testKeycloakAuthenticationFlow_basic(realmName, authFlowAliasAfter),
+				Config: testKeycloakAuthenticationFlow_basic(authFlowAliasAfter),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationFlowExists("keycloak_authentication_flow.flow"),
 					resource.TestCheckResourceAttr("keycloak_authentication_flow.flow", "alias", authFlowAliasAfter),
@@ -100,8 +95,6 @@ func TestAccKeycloakAuthenticationFlow_updateAuthenticationFlow(t *testing.T) {
 
 func TestAccKeycloakAuthenticationFlow_updateRealm(t *testing.T) {
 	t.Parallel()
-	realmOne := "terraform-" + acctest.RandString(10)
-	realmTwo := "terraform-" + acctest.RandString(10)
 
 	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
 
@@ -111,17 +104,17 @@ func TestAccKeycloakAuthenticationFlow_updateRealm(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakAuthenticationFlowDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakAuthenticationFlow_updateRealmBefore(realmOne, realmTwo, authFlowAlias),
+				Config: testKeycloakAuthenticationFlow_updateRealmBefore(authFlowAlias),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationFlowExists("keycloak_authentication_flow.flow"),
-					testAccCheckKeycloakAuthenticationFlowBelongsToRealm("keycloak_authentication_flow.flow", realmOne),
+					testAccCheckKeycloakAuthenticationFlowBelongsToRealm("keycloak_authentication_flow.flow", testAccRealm.Realm),
 				),
 			},
 			{
-				Config: testKeycloakAuthenticationFlow_updateRealmAfter(realmOne, realmTwo, authFlowAlias),
+				Config: testKeycloakAuthenticationFlow_updateRealmAfter(authFlowAlias),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationFlowExists("keycloak_authentication_flow.flow"),
-					testAccCheckKeycloakAuthenticationFlowBelongsToRealm("keycloak_authentication_flow.flow", realmTwo),
+					testAccCheckKeycloakAuthenticationFlowBelongsToRealm("keycloak_authentication_flow.flow", testAccRealmTwo.Realm),
 				),
 			},
 		},
@@ -209,49 +202,49 @@ func getAuthenticationFlowFromState(s *terraform.State, resourceName string) (*k
 	return authenticationFlow, nil
 }
 
-func testKeycloakAuthenticationFlow_basic(realm, alias string) string {
+func testKeycloakAuthenticationFlow_basic(alias string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_authentication_flow" "flow" {
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 	alias    = "%s"
 }
-	`, realm, alias)
+	`, testAccRealm.Realm, alias)
 }
 
-func testKeycloakAuthenticationFlow_updateRealmBefore(realmOne, realmTwo, alias string) string {
+func testKeycloakAuthenticationFlow_updateRealmBefore(alias string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
+data "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_2" {
-	realm = "%s"
-}
-
-resource "keycloak_authentication_flow" "flow" {
-	alias    = "%s"
-	realm_id = "${keycloak_realm.realm_1.id}"
-}
-	`, realmOne, realmTwo, alias)
-}
-
-func testKeycloakAuthenticationFlow_updateRealmAfter(realmOne, realmTwo, alias string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
-	realm = "%s"
-}
-
-resource "keycloak_realm" "realm_2" {
+data "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
 resource "keycloak_authentication_flow" "flow" {
 	alias    = "%s"
-	realm_id = "${keycloak_realm.realm_2.id}"
+	realm_id = data.keycloak_realm.realm_1.id
 }
-	`, realmOne, realmTwo, alias)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, alias)
+}
+
+func testKeycloakAuthenticationFlow_updateRealmAfter(alias string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm_1" {
+	realm = "%s"
+}
+
+data "keycloak_realm" "realm_2" {
+	realm = "%s"
+}
+
+resource "keycloak_authentication_flow" "flow" {
+	alias    = "%s"
+	realm_id = data.keycloak_realm.realm_2.id
+}
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, alias)
 }

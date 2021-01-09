@@ -14,6 +14,7 @@ var testAccProviderFactories map[string]func() (*schema.Provider, error)
 var testAccProvider *schema.Provider
 var keycloakClient *keycloak.KeycloakClient
 var testAccRealm *keycloak.Realm
+var testAccRealmTwo *keycloak.Realm
 
 var requiredEnvironmentVariables = []string{
 	"KEYCLOAK_CLIENT_ID",
@@ -34,26 +35,38 @@ func init() {
 }
 
 func TestMain(m *testing.M) {
-	realmName := "terraform-acc-" + acctest.RandString(10)
-	testAccRealm = &keycloak.Realm{
-		Id:      realmName,
-		Realm:   realmName,
-		Enabled: true,
-	}
+	testAccRealm = createTestRealm()
+	testAccRealmTwo = createTestRealm()
 
-	err := keycloakClient.NewRealm(testAccRealm)
+	code := m.Run()
+
+	err := keycloakClient.DeleteRealm(testAccRealm.Realm)
 	if err != nil {
 		os.Exit(1)
 	}
 
-	code := m.Run()
-
-	err = keycloakClient.DeleteRealm(testAccRealm.Realm)
+	err = keycloakClient.DeleteRealm(testAccRealmTwo.Realm)
 	if err != nil {
 		os.Exit(1)
 	}
 
 	os.Exit(code)
+}
+
+func createTestRealm() *keycloak.Realm {
+	name := acctest.RandomWithPrefix("tf-acc")
+	r := &keycloak.Realm{
+		Id:      name,
+		Realm:   name,
+		Enabled: true,
+	}
+
+	err := keycloakClient.NewRealm(r)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	return r
 }
 
 func TestProvider(t *testing.T) {
