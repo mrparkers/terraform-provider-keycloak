@@ -12,7 +12,7 @@ import (
 
 func TestAccKeycloakLdapFullNameMapper_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	fullNameMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -21,7 +21,7 @@ func TestAccKeycloakLdapFullNameMapper_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapFullNameMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapFullNameMapper_basic(realmName, fullNameMapperName),
+				Config: testKeycloakLdapFullNameMapper_basic(fullNameMapperName),
 				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full_name_mapper"),
 			},
 			{
@@ -36,9 +36,9 @@ func TestAccKeycloakLdapFullNameMapper_basic(t *testing.T) {
 
 func TestAccKeycloakLdapFullNameMapper_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
+
 	var mapper = &keycloak.LdapFullNameMapper{}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	fullNameMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -47,7 +47,7 @@ func TestAccKeycloakLdapFullNameMapper_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapFullNameMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapFullNameMapper_basic(realmName, fullNameMapperName),
+				Config: testKeycloakLdapFullNameMapper_basic(fullNameMapperName),
 				Check:  testAccCheckKeycloakLdapFullNameMapperFetch("keycloak_ldap_full_name_mapper.full_name_mapper", mapper),
 			},
 			{
@@ -57,7 +57,7 @@ func TestAccKeycloakLdapFullNameMapper_createAfterManualDestroy(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakLdapFullNameMapper_basic(realmName, fullNameMapperName),
+				Config: testKeycloakLdapFullNameMapper_basic(fullNameMapperName),
 				Check:  testAccCheckKeycloakLdapFullNameMapperFetch("keycloak_ldap_full_name_mapper.full_name_mapper", mapper),
 			},
 		},
@@ -66,7 +66,6 @@ func TestAccKeycloakLdapFullNameMapper_createAfterManualDestroy(t *testing.T) {
 
 func TestAccKeycloakLdapFullNameMapper_readWriteValidation(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 
 	mapper := &keycloak.LdapFullNameMapper{
 		LdapFullNameAttribute: "terraform-" + acctest.RandString(10),
@@ -80,7 +79,7 @@ func TestAccKeycloakLdapFullNameMapper_readWriteValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapFullNameMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakLdapFullNameMapper_basicFromInterface(realmName, mapper),
+				Config:      testKeycloakLdapFullNameMapper_basicFromInterface(mapper),
 				ExpectError: regexp.MustCompile("validation error: ldap full name mapper cannot be both read only and write only"),
 			},
 		},
@@ -90,7 +89,7 @@ func TestAccKeycloakLdapFullNameMapper_readWriteValidation(t *testing.T) {
 // write_only can't be set to true if the user federation provider is not writable
 func TestAccKeycloakLdapFullNameMapper_writableValidation(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	mapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -99,11 +98,11 @@ func TestAccKeycloakLdapFullNameMapper_writableValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapFullNameMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakLdapFullNameMapper_writableInvalid(realmName, mapperName),
+				Config:      testKeycloakLdapFullNameMapper_writableInvalid(mapperName),
 				ExpectError: regexp.MustCompile("validation error: ldap full name mapper cannot be write only when ldap provider is not writable"),
 			},
 			{
-				Config: testKeycloakLdapFullNameMapper_writableValid(realmName, mapperName),
+				Config: testKeycloakLdapFullNameMapper_writableValid(mapperName),
 				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full_name_mapper"),
 			},
 		},
@@ -112,8 +111,7 @@ func TestAccKeycloakLdapFullNameMapper_writableValidation(t *testing.T) {
 
 func TestAccKeycloakLdapFullNameMapper_updateLdapUserFederation(t *testing.T) {
 	t.Parallel()
-	realmOne := "terraform-" + acctest.RandString(10)
-	realmTwo := "terraform-" + acctest.RandString(10)
+
 	mapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -122,11 +120,11 @@ func TestAccKeycloakLdapFullNameMapper_updateLdapUserFederation(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapFullNameMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapFullNameMapper_updateLdapUserFederationBefore(realmOne, realmTwo, mapperName),
+				Config: testKeycloakLdapFullNameMapper_updateLdapUserFederationBefore(mapperName),
 				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full_name_mapper"),
 			},
 			{
-				Config: testKeycloakLdapFullNameMapper_updateLdapUserFederationAfter(realmOne, realmTwo, mapperName),
+				Config: testKeycloakLdapFullNameMapper_updateLdapUserFederationAfter(mapperName),
 				Check:  testAccCheckKeycloakLdapFullNameMapperExists("keycloak_ldap_full_name_mapper.full_name_mapper"),
 			},
 		},
@@ -210,17 +208,17 @@ func getLdapGenericMapperImportId(resourceName string) resource.ImportStateIdFun
 	}
 }
 
-func testKeycloakLdapFullNameMapper_basic(realm, mapperName string) string {
+func testKeycloakLdapFullNameMapper_basic(mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
-	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	name     = "openldap"
+	realm_id = data.keycloak_realm.realm.id
 
-	enabled                 = true
+	enabled = true
 
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -237,25 +235,25 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
-	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
+	realm_id                 = data.keycloak_realm.realm.id
+	ldap_user_federation_id  = keycloak_ldap_user_federation.openldap.id
 
 	ldap_full_name_attribute = "cn"
 }
-	`, realm, mapperName)
+	`, testAccRealm.Realm, mapperName)
 }
 
-func testKeycloakLdapFullNameMapper_basicFromInterface(realm string, mapper *keycloak.LdapFullNameMapper) string {
+func testKeycloakLdapFullNameMapper_basicFromInterface(mapper *keycloak.LdapFullNameMapper) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
-	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	name     = "openldap"
+	realm_id = data.keycloak_realm.realm.id
 
-	enabled                 = true
+	enabled = true
 
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -271,32 +269,32 @@ resource "keycloak_ldap_user_federation" "openldap" {
 }
 
 resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
-	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
-	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
+	name                    = "%s"
+	realm_id                = data.keycloak_realm.realm.id
+	ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
 
 	ldap_full_name_attribute = "%s"
 	read_only                = %t
 	write_only               = %t
 }
-	`, realm, mapper.Name, mapper.LdapFullNameAttribute, mapper.ReadOnly, mapper.WriteOnly)
+	`, testAccRealm.Realm, mapper.Name, mapper.LdapFullNameAttribute, mapper.ReadOnly, mapper.WriteOnly)
 }
 
-func testKeycloakLdapFullNameMapper_updateLdapUserFederationBefore(realmOne, realmTwo, mapperName string) string {
+func testKeycloakLdapFullNameMapper_updateLdapUserFederationBefore(mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_one" {
+data "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_two" {
+data "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap_one" {
-	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_one.id}"
+	name     = "openldap"
+	realm_id = data.keycloak_realm.realm_one.id
 
-	enabled                 = true
+	enabled = true
 
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -312,10 +310,10 @@ resource "keycloak_ldap_user_federation" "openldap_one" {
 }
 
 resource "keycloak_ldap_user_federation" "openldap_two" {
-	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_two.id}"
+	name     = "openldap"
+	realm_id = data.keycloak_realm.realm_two.id
 
-	enabled                 = true
+	enabled = true
 
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -331,30 +329,30 @@ resource "keycloak_ldap_user_federation" "openldap_two" {
 }
 
 resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
-	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm_one.id}"
-	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap_one.id}"
+	name                    = "%s"
+	realm_id                = data.keycloak_realm.realm_one.id
+	ldap_user_federation_id = keycloak_ldap_user_federation.openldap_one.id
 
 	ldap_full_name_attribute = "cn"
 }
-	`, realmOne, realmTwo, mapperName)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, mapperName)
 }
 
-func testKeycloakLdapFullNameMapper_updateLdapUserFederationAfter(realmOne, realmTwo, mapperName string) string {
+func testKeycloakLdapFullNameMapper_updateLdapUserFederationAfter(mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_one" {
+data "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_two" {
+data "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap_one" {
-	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_one.id}"
+	name     = "openldap"
+	realm_id = data.keycloak_realm.realm_one.id
 
-	enabled                 = true
+	enabled = true
 
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -370,8 +368,8 @@ resource "keycloak_ldap_user_federation" "openldap_one" {
 }
 
 resource "keycloak_ldap_user_federation" "openldap_two" {
-	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_two.id}"
+	name     = "openldap"
+	realm_id = data.keycloak_realm.realm_two.id
 
 	enabled                 = true
 
@@ -389,27 +387,27 @@ resource "keycloak_ldap_user_federation" "openldap_two" {
 }
 
 resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
-	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm_two.id}"
-	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap_two.id}"
+	name                    = "%s"
+	realm_id                = data.keycloak_realm.realm_two.id
+	ldap_user_federation_id = keycloak_ldap_user_federation.openldap_two.id
 
 	ldap_full_name_attribute = "cn"
 }
-	`, realmOne, realmTwo, mapperName)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, mapperName)
 }
 
-func testKeycloakLdapFullNameMapper_writableInvalid(realm, mapperName string) string {
+func testKeycloakLdapFullNameMapper_writableInvalid(mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
-	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	name     = "openldap"
+	realm_id = data.keycloak_realm.realm.id
 
-	enabled                 = true
-	edit_mode               = "READ_ONLY"
+	enabled   = true
+	edit_mode = "READ_ONLY"
 
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -425,28 +423,28 @@ resource "keycloak_ldap_user_federation" "openldap" {
 }
 
 resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
-	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
-	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
+	name                    = "%s"
+	realm_id                = data.keycloak_realm.realm.id
+	ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
 
 	ldap_full_name_attribute = "cn"
 	write_only               = true
 }
-	`, realm, mapperName)
+	`, testAccRealm.Realm, mapperName)
 }
 
-func testKeycloakLdapFullNameMapper_writableValid(realm, mapperName string) string {
+func testKeycloakLdapFullNameMapper_writableValid(mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
-	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	name     = "openldap"
+	realm_id = data.keycloak_realm.realm.id
 
-	enabled                 = true
-	edit_mode               = "WRITABLE"
+	enabled   = true
+	edit_mode = "WRITABLE"
 
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -462,12 +460,12 @@ resource "keycloak_ldap_user_federation" "openldap" {
 }
 
 resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
-	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
-	ldap_user_federation_id  = "${keycloak_ldap_user_federation.openldap.id}"
+	name                    = "%s"
+	realm_id                = data.keycloak_realm.realm.id
+	ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
 
 	ldap_full_name_attribute = "cn"
 	write_only               = true
 }
-	`, realm, mapperName)
+	`, testAccRealm.Realm, mapperName)
 }
