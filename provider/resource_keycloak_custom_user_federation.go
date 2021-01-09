@@ -82,7 +82,7 @@ func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.Custom
 	config := map[string][]string{}
 	if v, ok := data.GetOk("config"); ok {
 		for key, value := range v.(map[string]interface{}) {
-			config[key] = strings.Split(value.(string), ",")
+			config[key] = []string{value.(string)}
 		}
 	}
 	parentId := ""
@@ -125,7 +125,7 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 
 	config := make(map[string]interface{})
 	for k, v := range custom.Config {
-		config[k] = strings.Join(v, ",")
+		config[k] = v[0]
 	}
 
 	data.Set("config", config)

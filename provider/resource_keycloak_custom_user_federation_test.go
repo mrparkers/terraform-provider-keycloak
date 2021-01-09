@@ -55,6 +55,20 @@ func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
 			},
 		},
 	})
+
+	configValue = configValue + "," + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakCustomUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakCustomUserFederation_customConfig(realmName, name, providerId, configValue),
+				Check:  testAccCheckKeycloakCustomUserFederationExistsWithCustomConfig("keycloak_custom_user_federation.custom", configValue),
+			},
+		},
+	})
 }
 
 func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) {
