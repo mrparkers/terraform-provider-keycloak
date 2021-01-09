@@ -162,8 +162,6 @@ func TestAccKeycloakGroupMemberships_authoritativeAdd(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					groupsWithName, err := keycloakClient.ListGroupsWithName(realmName, groupName)
 					if err != nil {
 						t.Fatal(err)
@@ -215,8 +213,6 @@ func TestAccKeycloakGroupMemberships_authoritativeRemove(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					groupsWithName, err := keycloakClient.ListGroupsWithName(realmName, groupName)
 					if err != nil {
 						t.Fatal(err)
@@ -254,8 +250,6 @@ func TestAccKeycloakGroupMemberships_noImportNeeded(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					groupsWithName, err := keycloakClient.ListGroupsWithName(realmName, groupName)
 					if err != nil {
 						t.Fatal(err)
@@ -325,8 +319,6 @@ func TestAccKeycloakGroupMemberships_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteGroup(realmName, *groupId)
 					if err != nil {
 						t.Fatal(err)
@@ -340,8 +332,6 @@ func TestAccKeycloakGroupMemberships_createAfterManualDestroy(t *testing.T) {
 }
 
 func testAccGetUsersInGroupFromGroupMembershipsState(resourceName string, s *terraform.State) ([]*keycloak.User, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

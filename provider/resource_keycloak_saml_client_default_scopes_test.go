@@ -144,8 +144,6 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeAdd(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					client, err := keycloakClient.GetSamlClientByClientId(realm, client)
 					if err != nil {
 						t.Fatal(err)
@@ -195,8 +193,6 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeRemove(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					client, err := keycloakClient.GetSamlClientByClientId(realm, client)
 					if err != nil {
 						t.Fatal(err)
@@ -236,8 +232,6 @@ func TestAccKeycloakSamlClientDefaultScopes_noImportNeeded(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					samlClient, err := keycloakClient.GetSamlClientByClientId(realm, client)
 					if err != nil {
 						t.Fatal(err)
@@ -280,8 +274,6 @@ func TestAccKeycloakSamlClientDefaultScopes_profileAndEmailDefaultScopes(t *test
 }
 
 func getDefaultSamlClientScopesFromState(resourceName string, s *terraform.State) ([]*keycloak.SamlClientScope, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

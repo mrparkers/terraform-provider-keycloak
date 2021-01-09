@@ -56,8 +56,6 @@ func TestAccKeycloakClientScope_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteOpenidClientScope(clientScope.RealmId, clientScope.Id)
 					if err != nil {
 						t.Fatal(err)
@@ -268,8 +266,6 @@ func testAccCheckKeycloakClientScopeDestroy() resource.TestCheckFunc {
 
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
-
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 			clientScope, _ := keycloakClient.GetOpenidClientScope(realm, id)
 			if clientScope != nil {

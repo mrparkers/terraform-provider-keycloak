@@ -92,8 +92,6 @@ func TestAccKeycloakUser_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteUser(user.RealmId, user.Id)
 					if err != nil {
 						t.Fatal(err)
@@ -420,8 +418,6 @@ func testAccCheckKeycloakUserDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			user, _ := keycloakClient.GetUser(realm, id)
 			if user != nil {
 				return fmt.Errorf("user with id %s still exists", id)
@@ -433,8 +429,6 @@ func testAccCheckKeycloakUserDestroy() resource.TestCheckFunc {
 }
 
 func getUserFromState(s *terraform.State, resourceName string) (*keycloak.User, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

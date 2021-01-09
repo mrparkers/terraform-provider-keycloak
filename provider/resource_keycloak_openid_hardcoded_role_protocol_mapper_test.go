@@ -164,8 +164,6 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_createAfterManualDestroy(t
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteOpenIdHardcodedRoleProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
@@ -233,8 +231,6 @@ func getHardcodedRoleMapperUsingState(state *terraform.State, resourceName strin
 	realm := rs.Primary.Attributes["realm_id"]
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
-
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 	return keycloakClient.GetOpenIdHardcodedRoleProtocolMapper(realm, clientId, clientScopeId, id)
 }

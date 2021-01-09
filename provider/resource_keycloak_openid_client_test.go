@@ -57,8 +57,6 @@ func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteOpenidClient(client.RealmId, client.Id)
 					if err != nil {
 						t.Fatal(err)
@@ -744,8 +742,6 @@ func testAccCheckKeycloakOpenidClientDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			client, _ := keycloakClient.GetOpenidClient(realm, id)
 			if client != nil {
 				return fmt.Errorf("openid client %s still exists", id)
@@ -852,8 +848,6 @@ func testAccCheckKeycloakOpenidClientLoginTheme(resourceName string, loginTheme 
 }
 
 func getOpenidClientFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClient, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

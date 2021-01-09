@@ -52,8 +52,6 @@ func TestAccKeycloakLdapHardcodedGroupMapper_createAfterManualDestroy(t *testing
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteLdapHardcodedGroupMapper(mapper.RealmId, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
@@ -101,8 +99,6 @@ func testAccCheckKeycloakLdapHardcodedGroupMapperDestroy() resource.TestCheckFun
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			ldapMapper, _ := keycloakClient.GetLdapHardcodedGroupMapper(realm, id)
 			if ldapMapper != nil {
 				return fmt.Errorf("ldap hardcoded group mapper with id %s still exists", id)
@@ -114,8 +110,6 @@ func testAccCheckKeycloakLdapHardcodedGroupMapperDestroy() resource.TestCheckFun
 }
 
 func getLdapHardcodedGroupMapperFromState(s *terraform.State, resourceName string) (*keycloak.LdapHardcodedGroupMapper, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

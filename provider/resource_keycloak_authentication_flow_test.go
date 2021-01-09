@@ -171,8 +171,6 @@ func testAccCheckKeycloakAuthenticationFlowDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			authenticationFlow, _ := keycloakClient.GetAuthenticationFlow(realm, id)
 			if authenticationFlow != nil {
 				return fmt.Errorf("authentication flow with id %s still exists", id)
@@ -184,8 +182,6 @@ func testAccCheckKeycloakAuthenticationFlowDestroy() resource.TestCheckFunc {
 }
 
 func getAuthenticationFlowFromState(s *terraform.State, resourceName string) (*keycloak.AuthenticationFlow, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

@@ -141,7 +141,6 @@ func testAccCheckKeycloakAuthenticationExecutionConfigExists(resourceName string
 		config.ExecutionId = rs.Primary.Attributes["execution_id"]
 		config.Id = rs.Primary.ID
 
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 		if err := keycloakClient.GetAuthenticationExecutionConfig(config); err != nil {
 			return fmt.Errorf("error fetching authentication execution config: %v", err)
 		}

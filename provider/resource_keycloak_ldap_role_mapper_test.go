@@ -52,8 +52,6 @@ func TestAccKeycloakLdapRoleMapper_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteLdapRoleMapper(mapper.RealmId, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
@@ -273,8 +271,6 @@ func testAccCheckKeycloakLdapRoleMapperDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			ldapRoleMapper, _ := keycloakClient.GetLdapRoleMapper(realm, id)
 			if ldapRoleMapper != nil {
 				return fmt.Errorf("ldap role mapper with id %s still exists", id)
@@ -286,8 +282,6 @@ func testAccCheckKeycloakLdapRoleMapperDestroy() resource.TestCheckFunc {
 }
 
 func getLdapRoleMapperFromState(s *terraform.State, resourceName string) (*keycloak.LdapRoleMapper, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

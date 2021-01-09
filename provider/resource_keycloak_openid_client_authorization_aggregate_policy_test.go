@@ -29,8 +29,6 @@ func TestAccKeycloakOpenidClientAuthorizationAggregatePolicy(t *testing.T) {
 }
 
 func getResourceKeycloakOpenidClientAuthorizationAggregatePolicyFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClientAuthorizationAggregatePolicy, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -58,8 +56,6 @@ func testResourceKeycloakOpenidClientAuthorizationAggregatePolicyDestroy() resou
 			realm := rs.Primary.Attributes["realm"]
 			resourceServerId := rs.Primary.Attributes["resource_server_id"]
 			policyId := rs.Primary.ID
-
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 			policy, _ := keycloakClient.GetOpenidClientAuthorizationAggregatePolicy(realm, resourceServerId, policyId)
 			if policy != nil {

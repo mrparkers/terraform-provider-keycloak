@@ -156,8 +156,6 @@ func flattenRoleMapping(roleMapping *keycloak.RoleMapping) ([]string, error) {
 
 func testAccCheckKeycloakUserHasRoles(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("resource not found: %s", resourceName)
@@ -227,8 +225,6 @@ func testAccCheckKeycloakUserHasRoles(resourceName string) resource.TestCheckFun
 
 func testAccCheckKeycloakUserHasNoRoles(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("resource not found: %s", resourceName)

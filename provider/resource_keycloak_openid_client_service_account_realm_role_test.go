@@ -53,8 +53,6 @@ func TestAccKeycloakOpenidClientServiceAccountRealmRole_createAfterManualDestroy
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteOpenidClientServiceAccountRealmRole(serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.Id)
 					if err != nil {
 						t.Fatal(err)
@@ -133,8 +131,6 @@ func testAccCheckKeycloakOpenidClientServiceAccountRealmRoleDestroy() resource.T
 			serviceAccountUserId := rs.Primary.Attributes["service_account_user_id"]
 			id := strings.Split(rs.Primary.ID, "/")[1]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			serviceAccountRole, _ := keycloakClient.GetOpenidClientServiceAccountRealmRole(realmId, serviceAccountUserId, id)
 			if serviceAccountRole != nil {
 				return fmt.Errorf("service account role exists")
@@ -146,8 +142,6 @@ func testAccCheckKeycloakOpenidClientServiceAccountRealmRoleDestroy() resource.T
 }
 
 func getKeycloakOpenidClientServiceAccountRealmRoleFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClientServiceAccountRealmRole, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

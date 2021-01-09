@@ -80,8 +80,6 @@ func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) 
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteCustomUserFederation(customFederation.RealmId, customFederation.Id)
 					if err != nil {
 						t.Fatal(err)
@@ -196,8 +194,6 @@ func testAccCheckKeycloakCustomUserFederationDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			custom, _ := keycloakClient.GetCustomUserFederation(realm, id)
 			if custom != nil {
 				return fmt.Errorf("custom user federation with id %s still exists", id)
@@ -209,8 +205,6 @@ func testAccCheckKeycloakCustomUserFederationDestroy() resource.TestCheckFunc {
 }
 
 func getCustomUserFederationFromState(s *terraform.State, resourceName string) (*keycloak.CustomUserFederation, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

@@ -125,8 +125,6 @@ func testAccCheckKeycloakUsersPermissionsAreDisabled(realmId string) resource.Te
 }
 
 func getUsersPermissionsFromState(s *terraform.State, resourceName string) (*keycloak.UsersPermissions, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

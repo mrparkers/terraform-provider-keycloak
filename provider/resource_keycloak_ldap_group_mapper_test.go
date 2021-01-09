@@ -52,7 +52,6 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 					err := keycloakClient.DeleteLdapGroupMapper(mapper.RealmId, mapper.Id)
 					if err != nil {
@@ -263,8 +262,6 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 
 func TestAccKeycloakLdapGroupMapper_groupsPath(t *testing.T) {
 	t.Parallel()
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	if !keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {
 		t.Skip()
 	}
@@ -321,8 +318,6 @@ func testAccCheckKeycloakLdapGroupMapperDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			ldapGroupMapper, _ := keycloakClient.GetLdapGroupMapper(realm, id)
 			if ldapGroupMapper != nil {
 				return fmt.Errorf("ldap group mapper with id %s still exists", id)
@@ -334,8 +329,6 @@ func testAccCheckKeycloakLdapGroupMapperDestroy() resource.TestCheckFunc {
 }
 
 func getLdapGroupMapperFromState(s *terraform.State, resourceName string) (*keycloak.LdapGroupMapper, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

@@ -51,7 +51,6 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_createAfterManualDestroy(t *
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 					err := keycloakClient.DisableIdentityProviderPermissions(idpPermissions.RealmId, idpPermissions.ProviderAlias)
 					if err != nil {
 						t.Fatal(err)
@@ -157,7 +156,6 @@ func testAccCheckKeycloakIdpTokenExchangeScopePermissionDestroy() resource.TestC
 			authorizationIdpResourceId := rs.Primary.Attributes["authorization_idp_resource_id"]
 			authorizationTokenExchangeScopePermissionId := rs.Primary.Attributes["authorization_token_exchange_scope_permission_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 			permissions, _ := keycloakClient.GetIdentityProviderPermissions(realmId, providerAlias)
 			if permissions != nil {
 				return fmt.Errorf("idp permissions for realm id %s and provider alias %s still exists", realmId, providerAlias)
@@ -313,8 +311,6 @@ func testAccCheckKeycloakIdpPermissionFetch(resourceName string, idpPermissions 
 }
 
 func getIdpPermissionsFromState(s *terraform.State, resourceName string) (*keycloak.IdentityProviderPermissions, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

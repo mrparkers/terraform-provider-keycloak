@@ -30,8 +30,6 @@ func TestAccKeycloakOpenidClientAuthorizationTimePolicy(t *testing.T) {
 }
 
 func getResourceKeycloakOpenidClientAuthorizationTimePolicyFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClientAuthorizationTimePolicy, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -59,8 +57,6 @@ func testResourceKeycloakOpenidClientAuthorizationTimePolicyDestroy() resource.T
 			realm := rs.Primary.Attributes["realm_id"]
 			resourceServerId := rs.Primary.Attributes["resource_server_id"]
 			policyId := rs.Primary.ID
-
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 			policy, _ := keycloakClient.GetOpenidClientAuthorizationTimePolicy(realm, resourceServerId, policyId)
 			if policy != nil {

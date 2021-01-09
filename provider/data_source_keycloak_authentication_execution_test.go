@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func TestAccKeycloakDataSourceAuthenticationExecution_basic(t *testing.T) {
@@ -75,8 +74,6 @@ func testAccCheckDataKeycloakAuthenticationExecution(resourceName string) resour
 		if !ok {
 			return fmt.Errorf("resource not found: %s", resourceName)
 		}
-
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 		id := rs.Primary.ID
 		realmID := rs.Primary.Attributes["realm_id"]

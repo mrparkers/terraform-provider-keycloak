@@ -84,8 +84,6 @@ func TestAccKeycloakLdapUserFederation_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteLdapUserFederation(ldap.RealmId, ldap.Id)
 					if err != nil {
 						t.Fatal(err)
@@ -587,8 +585,6 @@ func testAccCheckKeycloakLdapUserFederationDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			ldap, _ := keycloakClient.GetLdapUserFederation(realm, id)
 			if ldap != nil {
 				return fmt.Errorf("ldap config with id %s still exists", id)
@@ -600,8 +596,6 @@ func testAccCheckKeycloakLdapUserFederationDestroy() resource.TestCheckFunc {
 }
 
 func getLdapUserFederationFromState(s *terraform.State, resourceName string) (*keycloak.LdapUserFederation, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

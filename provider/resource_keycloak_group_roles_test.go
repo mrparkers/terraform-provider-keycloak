@@ -140,8 +140,6 @@ func TestAccKeycloakGroupRoles_update(t *testing.T) {
 
 func testAccCheckKeycloakGroupHasRoles(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("resource not found: %s", resourceName)
@@ -211,8 +209,6 @@ func testAccCheckKeycloakGroupHasRoles(resourceName string) resource.TestCheckFu
 
 func testAccCheckKeycloakGroupHasNoRoles(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("resource not found: %s", resourceName)

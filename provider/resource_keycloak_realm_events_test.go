@@ -38,7 +38,6 @@ func TestAccKeycloakRealmEvents_destroy(t *testing.T) {
 			{
 				Config: testKeycloakRealmEvents_realmOnly(realmName),
 				Check: func(state *terraform.State) error {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 					realmEventsConfig, err := keycloakClient.GetRealmEventsConfig(realmName)
 					if err != nil {
 						return err
@@ -165,8 +164,6 @@ func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
 							return err
 						}
 
-						keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 						//keycloak versions < 7.0.0 have 63 events, versions >=7.0.0 have 67 events, versions >=12.0.0 have 69 events
 						if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_12) {
 							if len(realmEventsConfig.EnabledEventTypes) != 69 {
@@ -191,8 +188,6 @@ func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
 }
 
 func getRealmEventsFromState(s *terraform.State, resourceName string) (*keycloak.RealmEventsConfig, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

@@ -71,8 +71,6 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_createAfterManualDes
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteIdentityProviderMapper(mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
@@ -106,8 +104,6 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig_crea
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteIdentityProviderMapper(mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
@@ -198,8 +194,6 @@ func testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy() resour
 			alias := rs.Primary.Attributes["identity_provider_alias"]
 			id := rs.Primary.ID
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			mapper, _ := keycloakClient.GetIdentityProviderMapper(realm, alias, id)
 			if mapper != nil {
 				return fmt.Errorf("oidc config with id %s still exists", id)
@@ -211,8 +205,6 @@ func testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy() resour
 }
 
 func getKeycloakAttributeImporterIdentityProviderMapperFromState(s *terraform.State, resourceName string) (*keycloak.IdentityProviderMapper, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

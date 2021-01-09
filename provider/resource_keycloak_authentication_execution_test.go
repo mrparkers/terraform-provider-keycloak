@@ -53,8 +53,6 @@ func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteAuthenticationExecution(authenticationExecution.RealmId, authenticationExecution.Id)
 					if err != nil {
 						t.Fatal(err)
@@ -138,8 +136,6 @@ func testAccCheckKeycloakAuthenticationExecutionDestroy() resource.TestCheckFunc
 			realm := rs.Primary.Attributes["realm_id"]
 			parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			authenticationExecution, _ := keycloakClient.GetAuthenticationExecution(realm, parentFlowAlias, id)
 			if authenticationExecution != nil {
 				return fmt.Errorf("authentication flow with id %s still exists", id)
@@ -151,8 +147,6 @@ func testAccCheckKeycloakAuthenticationExecutionDestroy() resource.TestCheckFunc
 }
 
 func getAuthenticationExecutionFromState(s *terraform.State, resourceName string) (*keycloak.AuthenticationExecution, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
