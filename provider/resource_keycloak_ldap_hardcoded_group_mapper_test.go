@@ -162,5 +162,5 @@ resource "keycloak_ldap_hardcoded_group_mapper" "hardcoded_group_mapper" {
 	ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
 	group                   = keycloak_group.hardcoded_group_mapper_test.name
 }
-	`, testAccRealm.Realm, groupName, groupMapperName)
+	`, testAccRealmUserFederation.Realm, groupName, groupMapperName)
 }

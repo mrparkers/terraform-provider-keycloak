@@ -175,7 +175,7 @@ resource "keycloak_ldap_msad_lds_user_account_control_mapper" "uac_mapper" {
 	realm_id                           = data.keycloak_realm.realm.id
 	ldap_user_federation_id            = keycloak_ldap_user_federation.openldap.id
 }
-	`, testAccRealm.Realm, msadLdsUacMapperName)
+	`, testAccRealmUserFederation.Realm, msadLdsUacMapperName)
 }
 
 func testKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederationBefore(msadLdsUacMapperName string) string {
@@ -227,7 +227,7 @@ resource "keycloak_ldap_msad_lds_user_account_control_mapper" "uac_mapper" {
 	realm_id                           = data.keycloak_realm.realm_one.id
 	ldap_user_federation_id            = keycloak_ldap_user_federation.openldap_one.id
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, msadLdsUacMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, msadLdsUacMapperName)
 }
 
 func testKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederationAfter(msadLdsUacMapperName string) string {
@@ -279,5 +279,5 @@ resource "keycloak_ldap_msad_lds_user_account_control_mapper" "uac_mapper" {
 	realm_id                           = data.keycloak_realm.realm_two.id
 	ldap_user_federation_id            = keycloak_ldap_user_federation.openldap_two.id
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, msadLdsUacMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, msadLdsUacMapperName)
 }

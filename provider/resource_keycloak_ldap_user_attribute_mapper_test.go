@@ -217,7 +217,7 @@ resource "keycloak_ldap_user_attribute_mapper" "username" {
 	user_model_attribute        = "username"
 	ldap_attribute              = "cn"
 }
-	`, testAccRealm.Realm, userAttributeMapperName)
+	`, testAccRealmUserFederation.Realm, userAttributeMapperName)
 }
 
 func testKeycloakLdapUserAttributeMapper_basicFromInterface(mapper *keycloak.LdapUserAttributeMapper) string {
@@ -257,7 +257,7 @@ resource "keycloak_ldap_user_attribute_mapper" "username" {
 	always_read_value_from_ldap = %t
 	is_mandatory_in_ldap        = %t
 }
-	`, testAccRealm.Realm, mapper.Name, mapper.UserModelAttribute, mapper.LdapAttribute, mapper.ReadOnly, mapper.AlwaysReadValueFromLdap, mapper.IsMandatoryInLdap)
+	`, testAccRealmUserFederation.Realm, mapper.Name, mapper.UserModelAttribute, mapper.LdapAttribute, mapper.ReadOnly, mapper.AlwaysReadValueFromLdap, mapper.IsMandatoryInLdap)
 }
 
 func testKeycloakLdapUserAttributeMapper_updateLdapUserFederationBefore(userAttributeMapperName string) string {
@@ -316,7 +316,7 @@ resource "keycloak_ldap_user_attribute_mapper" "username" {
 	user_model_attribute        = "username"
 	ldap_attribute              = "cn"
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, userAttributeMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, userAttributeMapperName)
 }
 
 func testKeycloakLdapUserAttributeMapper_updateLdapUserFederationAfter(userAttributeMapperName string) string {
@@ -375,5 +375,5 @@ resource "keycloak_ldap_user_attribute_mapper" "username" {
 	user_model_attribute        = "username"
 	ldap_attribute              = "cn"
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, userAttributeMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, userAttributeMapperName)
 }

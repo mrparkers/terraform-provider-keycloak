@@ -15,6 +15,7 @@ var testAccProvider *schema.Provider
 var keycloakClient *keycloak.KeycloakClient
 var testAccRealm *keycloak.Realm
 var testAccRealmTwo *keycloak.Realm
+var testAccRealmUserFederation *keycloak.Realm
 
 var requiredEnvironmentVariables = []string{
 	"KEYCLOAK_CLIENT_ID",
@@ -37,6 +38,7 @@ func init() {
 func TestMain(m *testing.M) {
 	testAccRealm = createTestRealm()
 	testAccRealmTwo = createTestRealm()
+	testAccRealmUserFederation = createTestRealm()
 
 	code := m.Run()
 
@@ -46,6 +48,11 @@ func TestMain(m *testing.M) {
 	}
 
 	err = keycloakClient.DeleteRealm(testAccRealmTwo.Realm)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	err = keycloakClient.DeleteRealm(testAccRealmUserFederation.Realm)
 	if err != nil {
 		os.Exit(1)
 	}

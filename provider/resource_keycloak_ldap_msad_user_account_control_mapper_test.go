@@ -201,7 +201,7 @@ resource "keycloak_ldap_msad_user_account_control_mapper" "uac_mapper" {
 
 	ldap_password_policy_hints_enabled = %t
 }
-	`, testAccRealm.Realm, msadUacMapperName, passwordHintsEnabled)
+	`, testAccRealmUserFederation.Realm, msadUacMapperName, passwordHintsEnabled)
 }
 
 func testKeycloakLdapMsadUserAccountControlMapper_updateLdapUserFederationBefore(msadUacMapperName string) string {
@@ -257,7 +257,7 @@ resource "keycloak_ldap_msad_user_account_control_mapper" "uac_mapper" {
 	realm_id                           = data.keycloak_realm.realm_one.id
 	ldap_user_federation_id            = "${keycloak_ldap_user_federation.openldap_one.id}"
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, msadUacMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, msadUacMapperName)
 }
 
 func testKeycloakLdapMsadUserAccountControlMapper_updateLdapUserFederationAfter(msadUacMapperName string) string {
@@ -313,5 +313,5 @@ resource "keycloak_ldap_msad_user_account_control_mapper" "uac_mapper" {
 	realm_id                           = data.keycloak_realm.realm_two.id
 	ldap_user_federation_id            = "${keycloak_ldap_user_federation.openldap_two.id}"
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, msadUacMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, msadUacMapperName)
 }

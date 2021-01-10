@@ -162,5 +162,5 @@ resource "keycloak_ldap_hardcoded_role_mapper" "hardcoded_role_mapper" {
 	ldap_user_federation_id     = keycloak_ldap_user_federation.openldap.id
 	role                        = keycloak_role.hardcoded_role_mapper_test.name
 }
-	`, testAccRealm.Realm, roleName, roleMapperName)
+	`, testAccRealmUserFederation.Realm, roleName, roleMapperName)
 }

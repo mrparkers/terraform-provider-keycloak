@@ -58,7 +58,7 @@ func TestAccKeycloakLdapUserFederation_import(t *testing.T) {
 				ResourceName:        "keycloak_ldap_user_federation.openldap_no_auth",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: testAccRealm.Realm + "/",
+				ImportStateIdPrefix: testAccRealmUserFederation.Realm + "/",
 			},
 		},
 	})
@@ -106,14 +106,14 @@ func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
 				Config: testKeycloakLdapUserFederation_basic(ldapName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "realm_id", testAccRealm.Realm),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "realm_id", testAccRealmUserFederation.Realm),
 				),
 			},
 			{
 				Config: testKeycloakLdapUserFederation_basic(ldapName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
-					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "realm_id", testAccRealm.Realm),
+					resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "realm_id", testAccRealmUserFederation.Realm),
 				),
 			},
 		},
@@ -129,7 +129,7 @@ func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 	evictionMinute := acctest.RandIntRange(0, 59)
 
 	return &keycloak.LdapUserFederation{
-		RealmId:                              testAccRealm.Realm,
+		RealmId:                              testAccRealmUserFederation.Realm,
 		Name:                                 "terraform-" + acctest.RandString(10),
 		Enabled:                              enabled,
 		UsernameLDAPAttribute:                acctest.RandString(10),
@@ -633,7 +633,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_dn                 = "cn=admin,dc=example,dc=org"
 	bind_credential         = "admin"
 }
-	`, testAccRealm.Realm, ldap)
+	`, testAccRealmUserFederation.Realm, ldap)
 }
 
 func testKeycloakLdapUserFederation_basicFromInterface(ldap *keycloak.LdapUserFederation) string {
@@ -683,7 +683,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 		eviction_minute      = %d
 	}
 }
-	`, testAccRealm.Realm, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, arrayOfStringsForTerraformResource(ldap.UserObjectClasses), ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.ValidatePasswordPolicy, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.ServerPrincipal, ldap.UseKerberosForPasswordAuthentication, ldap.KeyTab, ldap.KerberosRealm, ldap.CachePolicy, ldap.MaxLifespan, *ldap.EvictionDay, *ldap.EvictionHour, *ldap.EvictionMinute)
+	`, testAccRealmUserFederation.Realm, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, arrayOfStringsForTerraformResource(ldap.UserObjectClasses), ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.ValidatePasswordPolicy, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.ServerPrincipal, ldap.UseKerberosForPasswordAuthentication, ldap.KeyTab, ldap.KerberosRealm, ldap.CachePolicy, ldap.MaxLifespan, *ldap.EvictionDay, *ldap.EvictionHour, *ldap.EvictionMinute)
 }
 
 func testKeycloakLdapUserFederation_basicWithAttrValidation(attr, ldap, val string) string {
@@ -712,7 +712,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_dn                 = "cn=admin,dc=example,dc=org"
 	bind_credential         = "admin"
 }
-	`, testAccRealm.Realm, ldap, attr, val)
+	`, testAccRealmUserFederation.Realm, ldap, attr, val)
 }
 
 func testKeycloakLdapUserFederation_nobindDnValidation(ldap string) string {
@@ -739,7 +739,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	connection_url          = "ldap://openldap"
 	users_dn                = "dc=example,dc=org"
 }
-	`, testAccRealm.Realm, ldap)
+	`, testAccRealmUserFederation.Realm, ldap)
 }
 
 func testKeycloakLdapUserFederation_noBindCredentialValidation(ldap string) string {
@@ -766,7 +766,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	connection_url          = "ldap://openldap"
 	users_dn                = "dc=example,dc=org"
 }
-	`, testAccRealm.Realm, ldap)
+	`, testAccRealmUserFederation.Realm, ldap)
 }
 
 func testKeycloakLdapUserFederation_basicWithSyncPeriod(ldap string, fullSyncPeriod, changedSyncPeriod int) string {
@@ -796,7 +796,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	full_sync_period        = %d
 	changed_sync_period     = %d
 }
-	`, testAccRealm.Realm, ldap, fullSyncPeriod, changedSyncPeriod)
+	`, testAccRealmUserFederation.Realm, ldap, fullSyncPeriod, changedSyncPeriod)
 }
 
 func testKeycloakLdapUserFederation_basicWithTimeouts(ldap string) string {
@@ -826,7 +826,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	connection_timeout      = "10s"
 	read_timeout            = "5s"
 }
-	`, testAccRealm.Realm, ldap)
+	`, testAccRealmUserFederation.Realm, ldap)
 }
 
 func testKeycloakLdapUserFederation_bindCredential(ldap, bindCredential string) string {
@@ -853,7 +853,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_dn                 = "cn=admin,dc=example,dc=org"
 	bind_credential         = "%s"
 }
-	`, testAccRealm.Realm, ldap, bindCredential)
+	`, testAccRealmUserFederation.Realm, ldap, bindCredential)
 }
 
 func testKeycloakLdapUserFederation_noAuth(ldap string) string {
@@ -878,5 +878,5 @@ resource "keycloak_ldap_user_federation" "openldap_no_auth" {
 	connection_url          = "ldap://openldap"
 	users_dn                = "dc=example,dc=org"
 }
-	`, testAccRealm.Realm, ldap)
+	`, testAccRealmUserFederation.Realm, ldap)
 }

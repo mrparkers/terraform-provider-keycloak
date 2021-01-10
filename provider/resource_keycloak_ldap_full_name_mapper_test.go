@@ -240,7 +240,7 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 
 	ldap_full_name_attribute = "cn"
 }
-	`, testAccRealm.Realm, mapperName)
+	`, testAccRealmUserFederation.Realm, mapperName)
 }
 
 func testKeycloakLdapFullNameMapper_basicFromInterface(mapper *keycloak.LdapFullNameMapper) string {
@@ -277,7 +277,7 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 	read_only                = %t
 	write_only               = %t
 }
-	`, testAccRealm.Realm, mapper.Name, mapper.LdapFullNameAttribute, mapper.ReadOnly, mapper.WriteOnly)
+	`, testAccRealmUserFederation.Realm, mapper.Name, mapper.LdapFullNameAttribute, mapper.ReadOnly, mapper.WriteOnly)
 }
 
 func testKeycloakLdapFullNameMapper_updateLdapUserFederationBefore(mapperName string) string {
@@ -335,7 +335,7 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 
 	ldap_full_name_attribute = "cn"
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, mapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, mapperName)
 }
 
 func testKeycloakLdapFullNameMapper_updateLdapUserFederationAfter(mapperName string) string {
@@ -393,7 +393,7 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 
 	ldap_full_name_attribute = "cn"
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, mapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, mapperName)
 }
 
 func testKeycloakLdapFullNameMapper_writableInvalid(mapperName string) string {
@@ -430,7 +430,7 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 	ldap_full_name_attribute = "cn"
 	write_only               = true
 }
-	`, testAccRealm.Realm, mapperName)
+	`, testAccRealmUserFederation.Realm, mapperName)
 }
 
 func testKeycloakLdapFullNameMapper_writableValid(mapperName string) string {
@@ -467,5 +467,5 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 	ldap_full_name_attribute = "cn"
 	write_only               = true
 }
-	`, testAccRealm.Realm, mapperName)
+	`, testAccRealmUserFederation.Realm, mapperName)
 }

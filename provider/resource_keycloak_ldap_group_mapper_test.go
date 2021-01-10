@@ -206,7 +206,7 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 
 	groupMapperOne := &keycloak.LdapGroupMapper{
 		Name:                            acctest.RandString(10),
-		RealmId:                         testAccRealm.Realm,
+		RealmId:                         testAccRealmUserFederation.Realm,
 		LdapGroupsDn:                    acctest.RandString(10),
 		GroupNameLdapAttribute:          acctest.RandString(10),
 		GroupObjectClasses:              []string{acctest.RandString(10), acctest.RandString(10)},
@@ -225,7 +225,7 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 
 	groupMapperTwo := &keycloak.LdapGroupMapper{
 		Name:                            acctest.RandString(10),
-		RealmId:                         testAccRealm.Realm,
+		RealmId:                         testAccRealmUserFederation.Realm,
 		LdapGroupsDn:                    acctest.RandString(10),
 		GroupNameLdapAttribute:          acctest.RandString(10),
 		GroupObjectClasses:              []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
@@ -384,7 +384,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	membership_user_ldap_attribute = "cn"
 	memberof_ldap_attribute        = "memberOf"
 }
-	`, testAccRealm.Realm, groupMapperName)
+	`, testAccRealmUserFederation.Realm, groupMapperName)
 }
 
 func testKeycloakLdapGroupMapper_basicWithAttrValidation(groupMapperName, attr, val string) string {
@@ -429,7 +429,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	memberof_ldap_attribute        = "memberOf"
 	groups_path                    = "/"
 }
-	`, testAccRealm.Realm, groupMapperName, attr, val)
+	`, testAccRealmUserFederation.Realm, groupMapperName, attr, val)
 }
 
 func testKeycloakLdapGroupMapper_groupInheritanceValidation(groupMapperName string) string {
@@ -475,7 +475,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	memberof_ldap_attribute        = "memberOf"
 	groups_path                    = "/"
 }
-	`, testAccRealm.Realm, groupMapperName)
+	`, testAccRealmUserFederation.Realm, groupMapperName)
 }
 
 func testKeycloakLdapGroupMapper_basicFromInterface(mapper *keycloak.LdapGroupMapper) string {
@@ -523,7 +523,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	mapped_group_attributes              = %s
 	drop_non_existing_groups_during_sync = %t
 }
-	`, testAccRealm.Realm, mapper.Name, mapper.LdapGroupsDn, mapper.GroupNameLdapAttribute, arrayOfStringsForTerraformResource(mapper.GroupObjectClasses), mapper.PreserveGroupInheritance, mapper.IgnoreMissingGroups, mapper.MembershipLdapAttribute, mapper.MembershipAttributeType, mapper.MembershipUserLdapAttribute, mapper.GroupsLdapFilter, mapper.Mode, mapper.UserRolesRetrieveStrategy, mapper.MemberofLdapAttribute, arrayOfStringsForTerraformResource(mapper.MappedGroupAttributes), mapper.DropNonExistingGroupsDuringSync)
+	`, testAccRealmUserFederation.Realm, mapper.Name, mapper.LdapGroupsDn, mapper.GroupNameLdapAttribute, arrayOfStringsForTerraformResource(mapper.GroupObjectClasses), mapper.PreserveGroupInheritance, mapper.IgnoreMissingGroups, mapper.MembershipLdapAttribute, mapper.MembershipAttributeType, mapper.MembershipUserLdapAttribute, mapper.GroupsLdapFilter, mapper.Mode, mapper.UserRolesRetrieveStrategy, mapper.MemberofLdapAttribute, arrayOfStringsForTerraformResource(mapper.MappedGroupAttributes), mapper.DropNonExistingGroupsDuringSync)
 }
 
 func testKeycloakLdapGroupMapper_updateLdapUserFederationBefore(groupMapperName string) string {
@@ -590,7 +590,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	memberof_ldap_attribute        = "memberOf"
 	groups_path                    = "/"
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, groupMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, groupMapperName)
 }
 
 func testKeycloakLdapGroupMapper_updateLdapUserFederationAfter(groupMapperName string) string {
@@ -656,7 +656,7 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	membership_user_ldap_attribute = "cn"
 	memberof_ldap_attribute        = "memberOf"
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, groupMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, groupMapperName)
 }
 
 func testKeycloakLdapGroupMapper_groupsPath(groupName, groupMapperName string) string {
@@ -706,5 +706,5 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 
 	groups_path = keycloak_group.group.path
 }
-	`, testAccRealm.Realm, groupName, groupMapperName)
+	`, testAccRealmUserFederation.Realm, groupName, groupMapperName)
 }

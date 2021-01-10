@@ -186,7 +186,7 @@ func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationInPlace(t *testing.T)
 
 	roleMapperOne := &keycloak.LdapRoleMapper{
 		Name:                        acctest.RandString(10),
-		RealmId:                     testAccRealm.Realm,
+		RealmId:                     testAccRealmUserFederation.Realm,
 		LdapRolesDn:                 acctest.RandString(10),
 		RoleNameLdapAttribute:       acctest.RandString(10),
 		RoleObjectClasses:           []string{acctest.RandString(10), acctest.RandString(10)},
@@ -203,7 +203,7 @@ func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationInPlace(t *testing.T)
 
 	roleMapperTwo := &keycloak.LdapRoleMapper{
 		Name:                        acctest.RandString(10),
-		RealmId:                     testAccRealm.Realm,
+		RealmId:                     testAccRealmUserFederation.Realm,
 		LdapRolesDn:                 acctest.RandString(10),
 		RoleNameLdapAttribute:       acctest.RandString(10),
 		RoleObjectClasses:           []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
@@ -336,7 +336,7 @@ resource "keycloak_ldap_role_mapper" "role_mapper" {
         membership_user_ldap_attribute = "sAMAccountName"
         memberof_ldap_attribute        = "memberOf"
 }
-	`, testAccRealm.Realm, roleMapperName)
+	`, testAccRealmUserFederation.Realm, roleMapperName)
 }
 
 func testKeycloakLdapRoleMapper_basicWithAttrValidation(roleMapperName, attr, val string) string {
@@ -380,7 +380,7 @@ resource "keycloak_ldap_role_mapper" "role_mapper" {
 	membership_user_ldap_attribute = "sAMAccountName"
 	memberof_ldap_attribute        = "memberOf"
 }
-	`, testAccRealm.Realm, roleMapperName, attr, val)
+	`, testAccRealmUserFederation.Realm, roleMapperName, attr, val)
 }
 
 func testKeycloakLdapRoleMapper_basicFromInterface(mapper *keycloak.LdapRoleMapper) string {
@@ -426,7 +426,7 @@ resource "keycloak_ldap_role_mapper" "role_mapper" {
 	use_realm_roles_mapping        = %t
 	client_id                      = "%s"
 }
-	`, testAccRealm.Realm, mapper.Name, mapper.LdapRolesDn, mapper.RoleNameLdapAttribute, arrayOfStringsForTerraformResource(mapper.RoleObjectClasses), mapper.MembershipLdapAttribute, mapper.MembershipAttributeType, mapper.MembershipUserLdapAttribute, mapper.RolesLdapFilter, mapper.Mode, mapper.UserRolesRetrieveStrategy, mapper.MemberofLdapAttribute, mapper.UseRealmRolesMapping, mapper.ClientId)
+	`, testAccRealmUserFederation.Realm, mapper.Name, mapper.LdapRolesDn, mapper.RoleNameLdapAttribute, arrayOfStringsForTerraformResource(mapper.RoleObjectClasses), mapper.MembershipLdapAttribute, mapper.MembershipAttributeType, mapper.MembershipUserLdapAttribute, mapper.RolesLdapFilter, mapper.Mode, mapper.UserRolesRetrieveStrategy, mapper.MemberofLdapAttribute, mapper.UseRealmRolesMapping, mapper.ClientId)
 }
 
 func testKeycloakLdapRoleMapper_updateLdapUserFederationBefore(roleMapperName string) string {
@@ -492,7 +492,7 @@ resource "keycloak_ldap_role_mapper" "role_mapper" {
 	membership_user_ldap_attribute = "sAMAccountName"
 	memberof_ldap_attribute        = "memberOf"
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, roleMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, roleMapperName)
 }
 
 func testKeycloakLdapRoleMapper_updateLdapUserFederationAfter(roleMapperName string) string {
@@ -558,5 +558,5 @@ resource "keycloak_ldap_role_mapper" "role_mapper" {
 	membership_user_ldap_attribute = "sAMAccountName"
 	memberof_ldap_attribute        = "memberOf"
 }
-	`, testAccRealm.Realm, testAccRealmTwo.Realm, roleMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, roleMapperName)
 }
