@@ -10,16 +10,13 @@ import (
 )
 
 func TestAccKeycloakOidcGoogleIdentityProvider_basic(t *testing.T) {
-	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
-
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
 		CheckDestroy:      testAccCheckKeycloakOidcGoogleIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOidcGoogleIdentityProvider_basic(realmName),
+				Config: testKeycloakOidcGoogleIdentityProvider_basic(),
 				Check:  testAccCheckKeycloakOidcGoogleIdentityProviderExists("keycloak_oidc_google_identity_provider.google"),
 			},
 		},
@@ -27,8 +24,6 @@ func TestAccKeycloakOidcGoogleIdentityProvider_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOidcGoogleIdentityProvider_customConfig(t *testing.T) {
-	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	customConfigValue := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -37,7 +32,7 @@ func TestAccKeycloakOidcGoogleIdentityProvider_customConfig(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOidcGoogleIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOidcGoogleIdentityProvider_customConfig(realmName, customConfigValue),
+				Config: testKeycloakOidcGoogleIdentityProvider_customConfig(customConfigValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOidcGoogleIdentityProviderExists("keycloak_oidc_google_identity_provider.google_custom"),
 					testAccCheckKeycloakOidcGoogleIdentityProviderHasCustomConfigValue("keycloak_oidc_google_identity_provider.google_custom", customConfigValue),
@@ -48,10 +43,7 @@ func TestAccKeycloakOidcGoogleIdentityProvider_customConfig(t *testing.T) {
 }
 
 func TestAccKeycloakOidcGoogleIdentityProvider_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 	var idp = &keycloak.IdentityProvider{}
-
-	realmName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -59,7 +51,7 @@ func TestAccKeycloakOidcGoogleIdentityProvider_createAfterManualDestroy(t *testi
 		CheckDestroy:      testAccCheckKeycloakOidcGoogleIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOidcGoogleIdentityProvider_basic(realmName),
+				Config: testKeycloakOidcGoogleIdentityProvider_basic(),
 				Check:  testAccCheckKeycloakOidcGoogleIdentityProviderFetch("keycloak_oidc_google_identity_provider.google", idp),
 			},
 			{
@@ -69,48 +61,17 @@ func TestAccKeycloakOidcGoogleIdentityProvider_createAfterManualDestroy(t *testi
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakOidcGoogleIdentityProvider_basic(realmName),
+				Config: testKeycloakOidcGoogleIdentityProvider_basic(),
 				Check:  testAccCheckKeycloakOidcGoogleIdentityProviderExists("keycloak_oidc_google_identity_provider.google"),
 			},
 		},
 	})
 }
 
-func TestAccKeycloakOidcGoogleIdentityProvider_basicUpdateRealm(t *testing.T) {
-	t.Parallel()
-	firstRealm := "terraform-" + acctest.RandString(10)
-	secondRealm := "terraform-" + acctest.RandString(10)
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakOidcGoogleIdentityProviderDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakOidcGoogleIdentityProvider_basic(firstRealm),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakOidcGoogleIdentityProviderExists("keycloak_oidc_google_identity_provider.google"),
-					resource.TestCheckResourceAttr("keycloak_oidc_google_identity_provider.google", "realm", firstRealm),
-				),
-			},
-			{
-				Config: testKeycloakOidcGoogleIdentityProvider_basic(secondRealm),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakOidcGoogleIdentityProviderExists("keycloak_oidc_google_identity_provider.google"),
-					resource.TestCheckResourceAttr("keycloak_oidc_google_identity_provider.google", "realm", secondRealm),
-				),
-			},
-		},
-	})
-}
-
 func TestAccKeycloakOidcGoogleIdentityProvider_basicUpdateAll(t *testing.T) {
-	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	firstEnabled := randomBool()
 
 	firstOidc := &keycloak.IdentityProvider{
-		Realm:   realmName,
 		Alias:   acctest.RandString(10),
 		Enabled: firstEnabled,
 		Config: &keycloak.IdentityProviderConfig{
@@ -122,7 +83,6 @@ func TestAccKeycloakOidcGoogleIdentityProvider_basicUpdateAll(t *testing.T) {
 	}
 
 	secondOidc := &keycloak.IdentityProvider{
-		Realm:   realmName,
 		Alias:   acctest.RandString(10),
 		Enabled: !firstEnabled,
 		Config: &keycloak.IdentityProviderConfig{
@@ -227,28 +187,28 @@ func getKeycloakOidcGoogleIdentityProviderFromState(s *terraform.State, resource
 	return idp, nil
 }
 
-func testKeycloakOidcGoogleIdentityProvider_basic(realm string) string {
+func testKeycloakOidcGoogleIdentityProvider_basic() string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_google_identity_provider" "google" {
-	realm             = "${keycloak_realm.realm.id}"
+	realm             = data.keycloak_realm.realm.id
 	client_id         = "example_id"
 	client_secret     = "example_token"
 }
-	`, realm)
+	`, testAccRealm.Realm)
 }
 
-func testKeycloakOidcGoogleIdentityProvider_customConfig(realm, customConfigValue string) string {
+func testKeycloakOidcGoogleIdentityProvider_customConfig(customConfigValue string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_google_identity_provider" "google_custom" {
-	realm             = "${keycloak_realm.realm.id}"
+	realm             = data.keycloak_realm.realm.id
 	provider_id       = "google"
 	client_id         = "example_id"
 	client_secret     = "example_token"
@@ -256,22 +216,22 @@ resource "keycloak_oidc_google_identity_provider" "google_custom" {
 		dummyConfig = "%s"
 	}
 }
-	`, realm, customConfigValue)
+	`, testAccRealm.Realm, customConfigValue)
 }
 
 func testKeycloakOidcGoogleIdentityProvider_basicFromInterface(idp *keycloak.IdentityProvider) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_google_identity_provider" "google" {
-	realm             						= "${keycloak_realm.realm.id}"
+	realm             						= data.keycloak_realm.realm.id
 	enabled           						= %t
 	hosted_domain	  						= "%s"
 	accepts_prompt_none_forward_from_client	= %t
 	client_id         						= "%s"
 	client_secret     						= "%s"
 }
-	`, idp.Realm, idp.Enabled, idp.Config.HostedDomain, idp.Config.AcceptsPromptNoneForwFrmClt, idp.Config.ClientId, idp.Config.ClientSecret)
+	`, testAccRealm.Realm, idp.Enabled, idp.Config.HostedDomain, idp.Config.AcceptsPromptNoneForwFrmClt, idp.Config.ClientId, idp.Config.ClientSecret)
 }
