@@ -69,8 +69,7 @@ func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 	t.Parallel()
-	realmOne := "terraform-" + acctest.RandString(10)
-	realmTwo := "terraform-" + acctest.RandString(10)
+
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -79,17 +78,17 @@ func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_updateRealmBefore(realmTwo, clientId),
+				Config: testKeycloakOpenidClient_updateRealmBefore(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
-					testAccCheckKeycloakOpenidClientBelongsToRealm("keycloak_openid_client.client", realmOne),
+					testAccCheckKeycloakOpenidClientBelongsToRealm("keycloak_openid_client.client", testAccRealm.Realm),
 				),
 			},
 			{
-				Config: testKeycloakOpenidClient_updateRealmAfter(realmTwo, clientId),
+				Config: testKeycloakOpenidClient_updateRealmAfter(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
-					testAccCheckKeycloakOpenidClientBelongsToRealm("keycloak_openid_client.client", realmTwo),
+					testAccCheckKeycloakOpenidClientBelongsToRealm("keycloak_openid_client.client", testAccRealmTwo.Realm),
 				),
 			},
 		},
@@ -1020,7 +1019,7 @@ resource "keycloak_openid_client" "client" {
 	`, testAccRealm.Realm, clientId, pkceChallengeMethod)
 }
 
-func testKeycloakOpenidClient_updateRealmBefore(realmTwo, clientId string) string {
+func testKeycloakOpenidClient_updateRealmBefore(clientId string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm_1" {
 	realm = "%s"
@@ -1038,7 +1037,7 @@ resource "keycloak_openid_client" "client" {
 	`, testAccRealm.Realm, testAccRealmTwo.Realm, clientId)
 }
 
-func testKeycloakOpenidClient_updateRealmAfter(realmTwo, clientId string) string {
+func testKeycloakOpenidClient_updateRealmAfter(clientId string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm_1" {
 	realm = "%s"
