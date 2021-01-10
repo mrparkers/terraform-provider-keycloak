@@ -12,8 +12,8 @@ import (
 
 func TestAccKeycloakLdapHardcodedRoleMapper_basic(t *testing.T) {
 	t.Parallel()
-	roleName := "terraform-" + acctest.RandString(10)
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	roleName := acctest.RandomWithPrefix("tf-acc")
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -38,8 +38,8 @@ func TestAccKeycloakLdapHardcodedRoleMapper_createAfterManualDestroy(t *testing.
 	t.Parallel()
 	var mapper = &keycloak.LdapHardcodedRoleMapper{}
 
-	roleName := "terraform-" + acctest.RandString(10)
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	roleName := acctest.RandomWithPrefix("tf-acc")
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

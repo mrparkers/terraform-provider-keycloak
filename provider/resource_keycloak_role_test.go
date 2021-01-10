@@ -11,7 +11,7 @@ import (
 
 func TestAccKeycloakRole_basicRealm(t *testing.T) {
 	t.Parallel()
-	roleName := "terraform-role-" + acctest.RandString(10)
+	roleName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -34,7 +34,7 @@ func TestAccKeycloakRole_basicRealm(t *testing.T) {
 
 func TestAccKeycloakRole_basicRealmUrlRoleName(t *testing.T) {
 	t.Parallel()
-	roleName := "terraform-role-httpfoo.bara1b2" + acctest.RandString(10)
+	roleName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -57,8 +57,8 @@ func TestAccKeycloakRole_basicRealmUrlRoleName(t *testing.T) {
 
 func TestAccKeycloakRole_basicClient(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-client-" + acctest.RandString(10)
-	roleName := "terraform-role-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	roleName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -81,8 +81,8 @@ func TestAccKeycloakRole_basicClient(t *testing.T) {
 
 func TestAccKeycloakRole_basicSamlClient(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-client-" + acctest.RandString(10)
-	roleName := "terraform-role-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	roleName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -105,9 +105,9 @@ func TestAccKeycloakRole_basicSamlClient(t *testing.T) {
 
 func TestAccKeycloakRole_basicRealmUpdate(t *testing.T) {
 	t.Parallel()
-	roleName := "terraform-role-" + acctest.RandString(10)
-	descriptionOne := acctest.RandString(50)
-	descriptionTwo := acctest.RandString(50)
+	roleName := acctest.RandomWithPrefix("tf-acc")
+	descriptionOne := acctest.RandomWithPrefix("tf-acc")
+	descriptionTwo := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -132,10 +132,10 @@ func TestAccKeycloakRole_basicRealmUpdate(t *testing.T) {
 
 func TestAccKeycloakRole_basicClientUpdate(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-client-" + acctest.RandString(10)
-	roleName := "terraform-role-" + acctest.RandString(10)
-	descriptionOne := acctest.RandString(50)
-	descriptionTwo := acctest.RandString(50)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	roleName := acctest.RandomWithPrefix("tf-acc")
+	descriptionOne := acctest.RandomWithPrefix("tf-acc")
+	descriptionTwo := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -162,7 +162,7 @@ func TestAccKeycloakRole_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var role = &keycloak.Role{}
 
-	roleName := "terraform-role-" + acctest.RandString(10)
+	roleName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -192,13 +192,13 @@ func TestAccKeycloakRole_createAfterManualDestroy(t *testing.T) {
 
 func TestAccKeycloakRole_composites(t *testing.T) {
 	t.Parallel()
-	clientOne := "terraform-client-" + acctest.RandString(10)
-	clientTwo := "terraform-client-" + acctest.RandString(10)
-	roleOne := "terraform-role-one-" + acctest.RandString(10)
-	roleTwo := "terraform-role-two-" + acctest.RandString(10)
-	roleThree := "terraform-role-three-" + acctest.RandString(10)
-	roleFour := "terraform-role-four-" + acctest.RandString(10)
-	roleWithComposites := "terraform-role-with-composites-" + acctest.RandString(10)
+	clientOne := acctest.RandomWithPrefix("tf-acc")
+	clientTwo := acctest.RandomWithPrefix("tf-acc")
+	roleOne := acctest.RandomWithPrefix("tf-acc")
+	roleTwo := acctest.RandomWithPrefix("tf-acc")
+	roleThree := acctest.RandomWithPrefix("tf-acc")
+	roleFour := acctest.RandomWithPrefix("tf-acc")
+	roleWithComposites := acctest.RandomWithPrefix("tf-acc")
 	roleWithCompositesResourceName := "keycloak_role.role_with_composites"
 
 	resource.Test(t, resource.TestCase{

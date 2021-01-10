@@ -16,8 +16,8 @@ var preAssignedDefaultClientScopes = []string{"profile", "email", "web-origins",
 
 func TestAccKeycloakOpenidClientDefaultScopes_basic(t *testing.T) {
 	t.Parallel()
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	clientScopes := append(preAssignedDefaultClientScopes, clientScope)
 
@@ -41,9 +41,9 @@ func TestAccKeycloakOpenidClientDefaultScopes_basic(t *testing.T) {
 
 func TestAccKeycloakOpenidClientDefaultScopes_updateClientForceNew(t *testing.T) {
 	t.Parallel()
-	clientOne := "terraform-client-" + acctest.RandString(10)
-	clientTwo := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	clientOne := acctest.RandomWithPrefix("tf-acc")
+	clientTwo := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	clientScopes := append(preAssignedDefaultClientScopes, clientScope)
 
@@ -65,8 +65,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_updateClientForceNew(t *testing.T)
 
 func TestAccKeycloakOpenidClientDefaultScopes_updateInPlace(t *testing.T) {
 	t.Parallel()
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	allClientScopes := append(preAssignedDefaultClientScopes, clientScope)
 
@@ -103,8 +103,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_updateInPlace(t *testing.T) {
 
 func TestAccKeycloakOpenidClientDefaultScopes_validateClientDoesNotExist(t *testing.T) {
 	t.Parallel()
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -120,8 +120,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_validateClientDoesNotExist(t *test
 
 func TestAccKeycloakOpenidClientDefaultScopes_validateClientAccessType(t *testing.T) {
 	t.Parallel()
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -138,7 +138,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_validateClientAccessType(t *testin
 // if a default client scope is manually detached from a client with default scopes controlled by this resource, terraform should add it again
 func TestAccKeycloakOpenidClientDefaultScopes_authoritativeAdd(t *testing.T) {
 	t.Parallel()
-	client := "terraform-client-" + acctest.RandString(10)
+	client := acctest.RandomWithPrefix("tf-acc")
 	clientScopes := append(preAssignedDefaultClientScopes,
 		"terraform-client-scope-"+acctest.RandString(10),
 		"terraform-client-scope-"+acctest.RandString(10),
@@ -176,7 +176,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeAdd(t *testing.T) {
 // if a default client scope is manually attached to a client with default scopes controlled by this resource, terraform should detach it
 func TestAccKeycloakOpenidClientDefaultScopes_authoritativeRemove(t *testing.T) {
 	t.Parallel()
-	client := "terraform-client-" + acctest.RandString(10)
+	client := acctest.RandomWithPrefix("tf-acc")
 
 	randomClientScopes := []string{
 		"terraform-client-scope-" + acctest.RandString(10),
@@ -226,8 +226,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeRemove(t *testing.T) 
 // this resource doesn't support import because it can be created even if the desired state already exists in keycloak
 func TestAccKeycloakOpenidClientDefaultScopes_noImportNeeded(t *testing.T) {
 	t.Parallel()
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	clientScopes := append(preAssignedDefaultClientScopes, clientScope)
 
@@ -265,8 +265,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_noImportNeeded(t *testing.T) {
 // will think it needs to remove these scopes, which is okay to do during an update
 func TestAccKeycloakOpenidClientDefaultScopes_profileAndEmailDefaultScopes(t *testing.T) {
 	t.Parallel()
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -284,8 +284,8 @@ func TestAccKeycloakOpenidClientDefaultScopes_profileAndEmailDefaultScopes(t *te
 // Keycloak throws a 500 if you attempt to attach an optional scope that is already attached as an optional scope
 func TestAccKeycloakOpenidClientDefaultScopes_validateDuplicateScopeAssignment(t *testing.T) {
 	t.Parallel()
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	optionalClientScopes := append(getPreAssignedOptionalClientScopes(), clientScope)
 

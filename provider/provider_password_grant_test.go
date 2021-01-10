@@ -21,7 +21,7 @@ func TestAccKeycloakProvider_passwordGrant(t *testing.T) {
 
 	provider := KeycloakProvider(keycloakClient)
 
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: map[string]func() (*schema.Provider, error){

@@ -14,7 +14,7 @@ import (
 
 func TestAccKeycloakLdapUserFederation_basic(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -31,7 +31,7 @@ func TestAccKeycloakLdapUserFederation_basic(t *testing.T) {
 
 func TestAccKeycloakLdapUserFederation_import(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	bindCredentialForImport := "admin"
 
@@ -68,7 +68,7 @@ func TestAccKeycloakLdapUserFederation_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var ldap = &keycloak.LdapUserFederation{}
 
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -95,7 +95,7 @@ func TestAccKeycloakLdapUserFederation_createAfterManualDestroy(t *testing.T) {
 
 func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -320,7 +320,7 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 
 func TestAccKeycloakLdapUserFederation_unsetTimeoutDurationStrings(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -341,7 +341,7 @@ func TestAccKeycloakLdapUserFederation_unsetTimeoutDurationStrings(t *testing.T)
 
 func TestAccKeycloakLdapUserFederation_editModeValidation(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 	editMode := randomStringInSlice(keycloakLdapUserFederationEditModes)
 
 	resource.Test(t, resource.TestCase{
@@ -363,7 +363,7 @@ func TestAccKeycloakLdapUserFederation_editModeValidation(t *testing.T) {
 
 func TestAccKeycloakLdapUserFederation_vendorValidation(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 	vendor := randomStringInSlice(keycloakLdapUserFederationVendors)
 
 	resource.Test(t, resource.TestCase{
@@ -385,7 +385,7 @@ func TestAccKeycloakLdapUserFederation_vendorValidation(t *testing.T) {
 
 func TestAccKeycloakLdapUserFederation_searchScopeValidation(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 	searchScope := randomStringInSlice(keycloakLdapUserFederationSearchScopes)
 
 	resource.Test(t, resource.TestCase{
@@ -407,7 +407,7 @@ func TestAccKeycloakLdapUserFederation_searchScopeValidation(t *testing.T) {
 
 func TestAccKeycloakLdapUserFederation_useTrustStoreValidation(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 	useTrustStore := randomStringInSlice(keycloakLdapUserFederationTruststoreSpiSettings)
 
 	resource.Test(t, resource.TestCase{
@@ -429,7 +429,7 @@ func TestAccKeycloakLdapUserFederation_useTrustStoreValidation(t *testing.T) {
 
 func TestAccKeycloakLdapUserFederation_cachePolicyValidation(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 	cachePolicy := randomStringInSlice(keycloakUserFederationCachePolicies)
 
 	resource.Test(t, resource.TestCase{
@@ -451,7 +451,7 @@ func TestAccKeycloakLdapUserFederation_cachePolicyValidation(t *testing.T) {
 
 func TestAccKeycloakLdapUserFederation_bindValidation(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -472,7 +472,7 @@ func TestAccKeycloakLdapUserFederation_bindValidation(t *testing.T) {
 
 func TestAccKeycloakLdapUserFederation_syncPeriodValidation(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	validSyncPeriod := acctest.RandIntRange(1, 3600)
 	invalidNegativeSyncPeriod := -acctest.RandIntRange(1, 3600)
@@ -512,9 +512,9 @@ func TestAccKeycloakLdapUserFederation_syncPeriodValidation(t *testing.T) {
 
 func TestAccKeycloakLdapUserFederation_bindCredential(t *testing.T) {
 	t.Parallel()
-	ldapName := "terraform-" + acctest.RandString(10)
-	firstBindCredential := acctest.RandString(10)
-	secondBindCredential := acctest.RandString(10)
+	ldapName := acctest.RandomWithPrefix("tf-acc")
+	firstBindCredential := acctest.RandomWithPrefix("tf-acc")
+	secondBindCredential := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

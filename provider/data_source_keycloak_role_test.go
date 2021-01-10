@@ -10,9 +10,9 @@ import (
 
 func TestAccKeycloakDataSourceRole_basic(t *testing.T) {
 	t.Parallel()
-	client := "terraform-client-" + acctest.RandString(10)
-	realmRole := "terraform-role-" + acctest.RandString(10)
-	clientRole := "terraform-role-" + acctest.RandString(10)
+	client := acctest.RandomWithPrefix("tf-acc")
+	realmRole := acctest.RandomWithPrefix("tf-acc")
+	clientRole := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

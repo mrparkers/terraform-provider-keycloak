@@ -13,7 +13,7 @@ import (
 func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
 	t.Parallel()
 
-	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -39,7 +39,7 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 
 	var mapper = &keycloak.LdapGroupMapper{}
 
-	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -68,7 +68,7 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
 	t.Parallel()
 
-	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 	mode := randomStringInSlice(keycloakLdapGroupMapperModes)
 
 	resource.Test(t, resource.TestCase{
@@ -91,7 +91,7 @@ func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
 func TestAccKeycloakLdapGroupMapper_membershipAttributeTypeValidation(t *testing.T) {
 	t.Parallel()
 
-	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 	membershipAttributeType := randomStringInSlice(keycloakLdapGroupMapperMembershipAttributeTypes)
 
 	resource.Test(t, resource.TestCase{
@@ -114,7 +114,7 @@ func TestAccKeycloakLdapGroupMapper_membershipAttributeTypeValidation(t *testing
 func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testing.T) {
 	t.Parallel()
 
-	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 	userRolesRetrieveStrategy := randomStringInSlice(keycloakLdapGroupMapperUserRolesRetrieveStrategies)
 
 	resource.Test(t, resource.TestCase{
@@ -137,7 +137,7 @@ func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testi
 func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
 	t.Parallel()
 
-	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 	groupsLdapFilter := "(" + acctest.RandString(10) + ")"
 
 	resource.Test(t, resource.TestCase{
@@ -160,7 +160,7 @@ func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
 func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
 	t.Parallel()
 
-	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -178,7 +178,7 @@ func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
 func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationForceNew(t *testing.T) {
 	t.Parallel()
 
-	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -266,8 +266,8 @@ func TestAccKeycloakLdapGroupMapper_groupsPath(t *testing.T) {
 		t.Skip()
 	}
 
-	groupName := "terraform-" + acctest.RandString(10)
-	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
+	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

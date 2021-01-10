@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccKeycloakDataSourceRealm_basic(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
+	realm := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_realm.my_realm"
 	dataSourceName := "data.keycloak_realm.realm"

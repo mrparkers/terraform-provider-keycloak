@@ -14,7 +14,7 @@ import (
 
 func TestAccKeycloakSamlClient_basic(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -39,7 +39,7 @@ func TestAccKeycloakSamlClient_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var client = &keycloak.SamlClient{}
 
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -70,7 +70,7 @@ func TestAccKeycloakSamlClient_createAfterManualDestroy(t *testing.T) {
 func TestAccKeycloakSamlClient_updateRealm(t *testing.T) {
 	t.Parallel()
 
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -99,7 +99,7 @@ func TestAccKeycloakSamlClient_updateRealm(t *testing.T) {
 // This test asserts that these default values are present if none are provided
 func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -121,17 +121,17 @@ func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
 
 func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	enabled := randomBool()
 	frontChannelLogout := randomBool()
 	clientSignatureRequired := "true"
 
-	encryptionCertificateBefore := acctest.RandString(20)
-	encryptionCertificateAfter := acctest.RandString(20)
-	signingCertificateBefore := acctest.RandString(20)
-	signingCertificateAfter := acctest.RandString(20)
-	signingPrivateKeyBefore := acctest.RandString(20)
-	signingPrivateKeyAfter := acctest.RandString(20)
+	encryptionCertificateBefore := acctest.RandomWithPrefix("tf-acc")
+	encryptionCertificateAfter := acctest.RandomWithPrefix("tf-acc")
+	signingCertificateBefore := acctest.RandomWithPrefix("tf-acc")
+	signingCertificateAfter := acctest.RandomWithPrefix("tf-acc")
+	signingPrivateKeyBefore := acctest.RandomWithPrefix("tf-acc")
+	signingPrivateKeyAfter := acctest.RandomWithPrefix("tf-acc")
 
 	samlClientBefore := &keycloak.SamlClient{
 		RealmId:  testAccRealm.Realm,
@@ -232,7 +232,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 
 func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -261,7 +261,7 @@ func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
 
 func TestAccKeycloakSamlClient_encryptionCertificate(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

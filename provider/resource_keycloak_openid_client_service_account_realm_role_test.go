@@ -12,7 +12,7 @@ import (
 
 func TestAccKeycloakOpenidClientServiceAccountRealmRole_basic(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	resourceName := "keycloak_openid_client_service_account_realm_role.test"
 
 	resource.Test(t, resource.TestCase{
@@ -38,7 +38,7 @@ func TestAccKeycloakOpenidClientServiceAccountRealmRole_createAfterManualDestroy
 	t.Parallel()
 	var serviceAccountRole = &keycloak.OpenidClientServiceAccountRealmRole{}
 
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

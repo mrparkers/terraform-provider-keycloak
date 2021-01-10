@@ -11,7 +11,7 @@ import (
 
 func TestAccKeycloakAuthenticationFlow_basic(t *testing.T) {
 	t.Parallel()
-	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
+	authFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -36,7 +36,7 @@ func TestAccKeycloakAuthenticationFlow_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var authenticationFlow = &keycloak.AuthenticationFlow{}
 
-	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
+	authFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -67,8 +67,8 @@ func TestAccKeycloakAuthenticationFlow_createAfterManualDestroy(t *testing.T) {
 func TestAccKeycloakAuthenticationFlow_updateAuthenticationFlow(t *testing.T) {
 	t.Parallel()
 
-	authFlowAliasBefore := "terraform-flow-before-" + acctest.RandString(10)
-	authFlowAliasAfter := "terraform-flow-after-" + acctest.RandString(10)
+	authFlowAliasBefore := acctest.RandomWithPrefix("tf-acc")
+	authFlowAliasAfter := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -96,7 +96,7 @@ func TestAccKeycloakAuthenticationFlow_updateAuthenticationFlow(t *testing.T) {
 func TestAccKeycloakAuthenticationFlow_updateRealm(t *testing.T) {
 	t.Parallel()
 
-	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
+	authFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
