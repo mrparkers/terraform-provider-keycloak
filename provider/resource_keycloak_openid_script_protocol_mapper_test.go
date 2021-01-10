@@ -11,7 +11,8 @@ import (
 )
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_basicClient(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
+
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
 
@@ -23,7 +24,7 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_basicClient(t *testing.T) {
 		CheckDestroy:      testAccKeycloakOpenIdScriptProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdScriptProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdScriptProtocolMapperExists(resourceName),
 			},
 		},
@@ -31,7 +32,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_basicClient(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_basicClientScope(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
+
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
 
@@ -43,7 +45,7 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_basicClientScope(t *testing.T) {
 		CheckDestroy:      testAccKeycloakOpenIdScriptProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdScriptProtocolMapper_basic_clientScope(clientScopeId, mapperName),
 				Check:  testKeycloakOpenIdScriptProtocolMapperExists(resourceName),
 			},
 		},
@@ -51,7 +53,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_basicClientScope(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_import(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
+
 	clientId := "terraform-openid-client-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
@@ -65,7 +68,7 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_import(t *testing.T) {
 		CheckDestroy:      testAccKeycloakOpenIdScriptProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_import(realmName, clientId, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdScriptProtocolMapper_import(clientId, clientScopeId, mapperName),
 				Check: resource.ComposeTestCheckFunc(
 					testKeycloakOpenIdScriptProtocolMapperExists(clientResourceName),
 					testKeycloakOpenIdScriptProtocolMapperExists(clientScopeResourceName),
@@ -88,7 +91,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_update(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
+
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
 
@@ -102,11 +106,11 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_update(t *testing.T) {
 		CheckDestroy:      testAccKeycloakOpenIdScriptProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_claim(realmName, clientId, mapperName, attributeName),
+				Config: testKeycloakOpenIdScriptProtocolMapper_claim(clientId, mapperName, attributeName),
 				Check:  testKeycloakOpenIdScriptProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_claim(realmName, clientId, mapperName, updatedAttributeName),
+				Config: testKeycloakOpenIdScriptProtocolMapper_claim(clientId, mapperName, updatedAttributeName),
 				Check:  testKeycloakOpenIdScriptProtocolMapperExists(resourceName),
 			},
 		},
@@ -114,9 +118,10 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
+
 	var mapper = &keycloak.OpenIdScriptProtocolMapper{}
 
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
 
@@ -128,7 +133,7 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_createAfterManualDestroy(t *testi
 		CheckDestroy:      testAccKeycloakOpenIdScriptProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdScriptProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdScriptProtocolMapperFetch(resourceName, mapper),
 			},
 			{
@@ -140,7 +145,7 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_createAfterManualDestroy(t *testi
 						t.Error(err)
 					}
 				},
-				Config: testKeycloakOpenIdScriptProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdScriptProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdScriptProtocolMapperExists(resourceName),
 			},
 		},
@@ -148,7 +153,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_createAfterManualDestroy(t *testi
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_validateClaimValueType(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
+
 	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(10)
 	invalidClaimValueType := acctest.RandString(5)
 
@@ -158,7 +164,7 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_validateClaimValueType(t *testing
 		CheckDestroy:      testAccKeycloakOpenIdScriptProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenIdScriptProtocolMapper_claimValueType(realmName, mapperName, invalidClaimValueType),
+				Config:      testKeycloakOpenIdScriptProtocolMapper_claimValueType(mapperName, invalidClaimValueType),
 				ExpectError: regexp.MustCompile("expected claim_value_type to be one of .+ got " + invalidClaimValueType),
 			},
 		},
@@ -166,7 +172,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_validateClaimValueType(t *testing
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_updateClientIdForceNew(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
+
 	clientId := "terraform-client-" + acctest.RandString(10)
 	updatedClientId := "terraform-client-update-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
@@ -180,11 +187,11 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_updateClientIdForceNew(t *testing
 		CheckDestroy:      testAccKeycloakOpenIdScriptProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_claim(realmName, clientId, mapperName, attributeName),
+				Config: testKeycloakOpenIdScriptProtocolMapper_claim(clientId, mapperName, attributeName),
 				Check:  testKeycloakOpenIdScriptProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_claim(realmName, updatedClientId, mapperName, attributeName),
+				Config: testKeycloakOpenIdScriptProtocolMapper_claim(updatedClientId, mapperName, attributeName),
 				Check:  testKeycloakOpenIdScriptProtocolMapperExists(resourceName),
 			},
 		},
@@ -192,7 +199,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_updateClientIdForceNew(t *testing
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_updateClientScopeForceNew(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
+
 	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
 	clientScopeId := "terraform-client-" + acctest.RandString(10)
 	newClientScopeId := "terraform-client-scope-" + acctest.RandString(10)
@@ -204,37 +212,11 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_updateClientScopeForceNew(t *test
 		CheckDestroy:      testAccKeycloakOpenIdScriptProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdScriptProtocolMapper_basic_clientScope(clientScopeId, mapperName),
 				Check:  testKeycloakOpenIdScriptProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_basic_clientScope(realmName, newClientScopeId, mapperName),
-				Check:  testKeycloakOpenIdScriptProtocolMapperExists(resourceName),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakOpenIdScriptProtocolMapper_updateRealmIdForceNew(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	newRealmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
-
-	attributeName := "claim-" + acctest.RandString(10)
-	resourceName := "keycloak_openid_script_protocol_mapper.script_mapper"
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccKeycloakOpenIdScriptProtocolMapperDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_claim(realmName, clientId, mapperName, attributeName),
-				Check:  testKeycloakOpenIdScriptProtocolMapperExists(resourceName),
-			},
-			{
-				Config: testKeycloakOpenIdScriptProtocolMapper_claim(newRealmName, clientId, mapperName, attributeName),
+				Config: testKeycloakOpenIdScriptProtocolMapper_basic_clientScope(newClientScopeId, mapperName),
 				Check:  testKeycloakOpenIdScriptProtocolMapperExists(resourceName),
 			},
 		},
@@ -302,14 +284,14 @@ func getScriptMapperUsingState(state *terraform.State, resourceName string) (*ke
 	return keycloakClient.GetOpenIdScriptProtocolMapper(realm, clientId, clientScopeId, id)
 }
 
-func testKeycloakOpenIdScriptProtocolMapper_basic_client(realmName, clientId, mapperName string) string {
+func testKeycloakOpenIdScriptProtocolMapper_basic_client(clientId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 
 	access_type = "BEARER-ONLY"
@@ -317,41 +299,41 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_script_protocol_mapper" "script_mapper_client" {
 	name       = "%s"
-	realm_id   = "${keycloak_realm.realm.id}"
-	client_id  = "${keycloak_openid_client.openid_client.id}"
+	realm_id   = data.keycloak_realm.realm.id
+	client_id  = keycloak_openid_client.openid_client.id
 	script     = "exports = 'foo';"
 	claim_name = "bar"
-}`, realmName, clientId, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName)
 }
 
-func testKeycloakOpenIdScriptProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName string) string {
+func testKeycloakOpenIdScriptProtocolMapper_basic_clientScope(clientScopeId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_openid_script_protocol_mapper" "script_mapper_client_scope" {
 	name            = "%s"
-	realm_id        = "${keycloak_realm.realm.id}"
-	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
+	realm_id        = data.keycloak_realm.realm.id
+	client_scope_id = keycloak_openid_client_scope.client_scope.id
 	script          = "exports = 'foo';"
 	claim_name      = "bar"
-}`, realmName, clientScopeId, mapperName)
+}`, testAccRealm.Realm, clientScopeId, mapperName)
 }
 
-func testKeycloakOpenIdScriptProtocolMapper_import(realmName, clientId, clientScopeId, mapperName string) string {
+func testKeycloakOpenIdScriptProtocolMapper_import(clientId, clientScopeId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	client_id   = "%s"
 
 	access_type = "BEARER-ONLY"
@@ -359,34 +341,34 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_script_protocol_mapper" "script_mapper_client" {
 	name       = "%s"
-	realm_id   = "${keycloak_realm.realm.id}"
-	client_id  = "${keycloak_openid_client.openid_client.id}"
+	realm_id   = data.keycloak_realm.realm.id
+	client_id  = keycloak_openid_client.openid_client.id
 	script     = "exports = 'foo';"
 	claim_name = "bar"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_openid_script_protocol_mapper" "script_mapper_client_scope" {
 	name            = "%s"
-	realm_id        = "${keycloak_realm.realm.id}"
-	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
+	realm_id        = data.keycloak_realm.realm.id
+	client_scope_id = keycloak_openid_client_scope.client_scope.id
 	script          = "exports = 'foo';"
 	claim_name      = "bar"
-}`, realmName, clientId, mapperName, clientScopeId, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName, clientScopeId, mapperName)
 }
 
-func testKeycloakOpenIdScriptProtocolMapper_claim(realmName, clientId, mapperName, attributeName string) string {
+func testKeycloakOpenIdScriptProtocolMapper_claim(clientId, mapperName, attributeName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 
 	access_type = "BEARER-ONLY"
@@ -394,24 +376,24 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_script_protocol_mapper" "script_mapper" {
 	name       = "%s"
-	realm_id   = "${keycloak_realm.realm.id}"
-	client_id  = "${keycloak_openid_client.openid_client.id}"
+	realm_id   = data.keycloak_realm.realm.id
+	client_id  = keycloak_openid_client.openid_client.id
 	script     = "exports = '%s';"
 	claim_name = "bar"
-}`, realmName, clientId, mapperName, attributeName)
+}`, testAccRealm.Realm, clientId, mapperName, attributeName)
 }
 
-func testKeycloakOpenIdScriptProtocolMapper_claimValueType(realmName, mapperName, claimValueType string) string {
+func testKeycloakOpenIdScriptProtocolMapper_claimValueType(mapperName, claimValueType string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_script_protocol_mapper" "script_mapper_validation" {
 	name              = "%s"
-	realm_id          = "${keycloak_realm.realm.id}"
+	realm_id          = data.keycloak_realm.realm.id
 	script            = "exports = 'foo';"
 	claim_name        = "bar"
 	claim_value_type  = "%s"
-}`, realmName, mapperName, claimValueType)
+}`, testAccRealm.Realm, mapperName, claimValueType)
 }
