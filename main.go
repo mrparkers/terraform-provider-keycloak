@@ -9,7 +9,7 @@ import (
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
 		ProviderFunc: func() *schema.Provider {
-			return provider.KeycloakProvider()
+			return provider.KeycloakProvider(nil)
 		},
 	})
 }

@@ -19,7 +19,7 @@ func TestAccKeycloakProvider_passwordGrant(t *testing.T) {
 		os.Unsetenv("KEYCLOAK_PASSWORD")
 	}()
 
-	provider := KeycloakProvider()
+	provider := KeycloakProvider(keycloakClient)
 
 	clientId := "terraform-" + acctest.RandString(10)
 
