@@ -25,6 +25,7 @@ var (
 	includedClientAudienceField          = "included.client.audience"
 	includedCustomAudienceField          = "included.custom.audience"
 	multivaluedField                     = "multivalued"
+	scriptField                          = "script"
 	userAttributeField                   = "user.attribute"
 	userPropertyField                    = "user.attribute"
 	userRealmRoleMappingRolePrefixField  = "usermodel.realmRoleMapping.rolePrefix"
