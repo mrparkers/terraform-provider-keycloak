@@ -11,7 +11,7 @@ import (
 
 func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	msadLdsUacMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -20,7 +20,7 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_basic(realmName, msadLdsUacMapperName),
+				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_basic(msadLdsUacMapperName),
 				Check:  testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperExists("keycloak_ldap_msad_lds_user_account_control_mapper.uac_mapper"),
 			},
 			{
@@ -35,9 +35,9 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_basic(t *testing.T) {
 
 func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
+
 	var mapper = &keycloak.LdapMsadLdsUserAccountControlMapper{}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	msadLdsUacMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -46,7 +46,7 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy
 		CheckDestroy:      testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_basic(realmName, msadLdsUacMapperName),
+				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_basic(msadLdsUacMapperName),
 				Check:  testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperFetch("keycloak_ldap_msad_lds_user_account_control_mapper.uac_mapper", mapper),
 			},
 			{
@@ -56,7 +56,7 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_basic(realmName, msadLdsUacMapperName),
+				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_basic(msadLdsUacMapperName),
 				Check:  testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperExists("keycloak_ldap_msad_lds_user_account_control_mapper.uac_mapper"),
 			},
 		},
@@ -65,8 +65,7 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy
 
 func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederation(t *testing.T) {
 	t.Parallel()
-	realmOne := "terraform-" + acctest.RandString(10)
-	realmTwo := "terraform-" + acctest.RandString(10)
+
 	msadLdsUacMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -75,11 +74,11 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederation
 		CheckDestroy:      testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederationBefore(realmOne, realmTwo, msadLdsUacMapperName),
+				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederationBefore(msadLdsUacMapperName),
 				Check:  testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperExists("keycloak_ldap_msad_lds_user_account_control_mapper.uac_mapper"),
 			},
 			{
-				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederationAfter(realmOne, realmTwo, msadLdsUacMapperName),
+				Config: testKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederationAfter(msadLdsUacMapperName),
 				Check:  testAccCheckKeycloakLdapMsadLdsUserAccountControlMapperExists("keycloak_ldap_msad_lds_user_account_control_mapper.uac_mapper"),
 			},
 		},
@@ -148,14 +147,15 @@ func getLdapMsadLdsUserAccountControlMapperFromState(s *terraform.State, resourc
 	return ldapMsadLdsUserAccountControlMapper, nil
 }
 
-func testKeycloakLdapMsadLdsUserAccountControlMapper_basic(realm, msadLdsUacMapperName string) string {
+func testKeycloakLdapMsadLdsUserAccountControlMapper_basic(msadLdsUacMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
+
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 	enabled                 = true
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -168,74 +168,29 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	users_dn                = "dc=example,dc=org"
 	bind_dn                 = "cn=admin,dc=example,dc=org"
 	bind_credential         = "admin"
-}
-resource "keycloak_ldap_msad_lds_user_account_control_mapper" "uac_mapper" {
-	name                               = "%s"
-	realm_id                           = "${keycloak_realm.realm.id}"
-	ldap_user_federation_id            = "${keycloak_ldap_user_federation.openldap.id}"
-}
-	`, realm, msadLdsUacMapperName)
 }
 
-func testKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederationBefore(realmOne, realmTwo, msadLdsUacMapperName string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_one" {
-	realm = "%s"
-}
-resource "keycloak_realm" "realm_two" {
-	realm = "%s"
-}
-resource "keycloak_ldap_user_federation" "openldap_one" {
-	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_one.id}"
-	enabled                 = true
-	username_ldap_attribute = "cn"
-	rdn_ldap_attribute      = "cn"
-	uuid_ldap_attribute     = "entryDN"
-	user_object_classes     = [
-		"simpleSecurityObject",
-		"organizationalRole"
-	]
-	connection_url          = "ldap://openldap"
-	users_dn                = "dc=example,dc=org"
-	bind_dn                 = "cn=admin,dc=example,dc=org"
-	bind_credential         = "admin"
-}
-resource "keycloak_ldap_user_federation" "openldap_two" {
-	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_two.id}"
-	enabled                 = true
-	username_ldap_attribute = "cn"
-	rdn_ldap_attribute      = "cn"
-	uuid_ldap_attribute     = "entryDN"
-	user_object_classes     = [
-		"simpleSecurityObject",
-		"organizationalRole"
-	]
-	connection_url          = "ldap://openldap"
-	users_dn                = "dc=example,dc=org"
-	bind_dn                 = "cn=admin,dc=example,dc=org"
-	bind_credential         = "admin"
-}
 resource "keycloak_ldap_msad_lds_user_account_control_mapper" "uac_mapper" {
 	name                               = "%s"
-	realm_id                           = "${keycloak_realm.realm_one.id}"
-	ldap_user_federation_id            = "${keycloak_ldap_user_federation.openldap_one.id}"
+	realm_id                           = data.keycloak_realm.realm.id
+	ldap_user_federation_id            = keycloak_ldap_user_federation.openldap.id
 }
-	`, realmOne, realmTwo, msadLdsUacMapperName)
+	`, testAccRealm.Realm, msadLdsUacMapperName)
 }
 
-func testKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederationAfter(realmOne, realmTwo, msadLdsUacMapperName string) string {
+func testKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederationBefore(msadLdsUacMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_one" {
+data "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
-resource "keycloak_realm" "realm_two" {
+
+data "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
+
 resource "keycloak_ldap_user_federation" "openldap_one" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_one.id}"
+	realm_id                = data.keycloak_realm.realm_one.id
 	enabled                 = true
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -249,9 +204,10 @@ resource "keycloak_ldap_user_federation" "openldap_one" {
 	bind_dn                 = "cn=admin,dc=example,dc=org"
 	bind_credential         = "admin"
 }
+
 resource "keycloak_ldap_user_federation" "openldap_two" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_two.id}"
+	realm_id                = data.keycloak_realm.realm_two.id
 	enabled                 = true
 	username_ldap_attribute = "cn"
 	rdn_ldap_attribute      = "cn"
@@ -265,10 +221,63 @@ resource "keycloak_ldap_user_federation" "openldap_two" {
 	bind_dn                 = "cn=admin,dc=example,dc=org"
 	bind_credential         = "admin"
 }
+
 resource "keycloak_ldap_msad_lds_user_account_control_mapper" "uac_mapper" {
 	name                               = "%s"
-	realm_id                           = "${keycloak_realm.realm_two.id}"
-	ldap_user_federation_id            = "${keycloak_ldap_user_federation.openldap_two.id}"
+	realm_id                           = data.keycloak_realm.realm_one.id
+	ldap_user_federation_id            = keycloak_ldap_user_federation.openldap_one.id
 }
-	`, realmOne, realmTwo, msadLdsUacMapperName)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, msadLdsUacMapperName)
+}
+
+func testKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederationAfter(msadLdsUacMapperName string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm_one" {
+	realm = "%s"
+}
+
+data "keycloak_realm" "realm_two" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap_one" {
+	name                    = "openldap"
+	realm_id                = data.keycloak_realm.realm_one.id
+	enabled                 = true
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
+}
+
+resource "keycloak_ldap_user_federation" "openldap_two" {
+	name                    = "openldap"
+	realm_id                = data.keycloak_realm.realm_two.id
+	enabled                 = true
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
+}
+
+resource "keycloak_ldap_msad_lds_user_account_control_mapper" "uac_mapper" {
+	name                               = "%s"
+	realm_id                           = data.keycloak_realm.realm_two.id
+	ldap_user_federation_id            = keycloak_ldap_user_federation.openldap_two.id
+}
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, msadLdsUacMapperName)
 }
