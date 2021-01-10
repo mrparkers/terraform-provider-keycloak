@@ -1,6 +1,6 @@
 buildscript {
 	ext.kotlinVersion = '1.3.31'
-	ext.keycloakVersion = '7.0.0'
+	ext.keycloakVersion = '12.0.1'
 	ext.shadowJarVersion = '4.0.2'
 
     repositories {
