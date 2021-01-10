@@ -17,7 +17,6 @@ import (
 
 func TestAccKeycloakUser_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	username := "terraform-user-" + acctest.RandString(10)
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
 	attributeValue := acctest.RandString(250)
@@ -30,14 +29,14 @@ func TestAccKeycloakUser_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakUser_basic(realmName, username, attributeName, attributeValue),
+				Config: testKeycloakUser_basic(username, attributeName, attributeValue),
 				Check:  testAccCheckKeycloakUserExists(resourceName),
 			},
 			{
 				ResourceName:        resourceName,
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 		},
 	})
@@ -45,7 +44,6 @@ func TestAccKeycloakUser_basic(t *testing.T) {
 
 func TestAccKeycloakUser_withInitialPassword(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	username := "terraform-user-" + acctest.RandString(10)
 	password := "terraform-password-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
@@ -58,10 +56,10 @@ func TestAccKeycloakUser_withInitialPassword(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakUser_initialPassword(realmName, username, password, clientId),
+				Config: testKeycloakUser_initialPassword(username, password, clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakUserExists(resourceName),
-					testAccCheckKeycloakUserInitialPasswordLogin(realmName, username, password, clientId),
+					testAccCheckKeycloakUserInitialPasswordLogin(username, password, clientId),
 				),
 			},
 		},
@@ -72,7 +70,6 @@ func TestAccKeycloakUser_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var user = &keycloak.User{}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	username := "terraform-user-" + acctest.RandString(10)
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
 	attributeValue := acctest.RandString(250)
@@ -84,7 +81,7 @@ func TestAccKeycloakUser_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakUser_basic(realmName, username, attributeName, attributeValue),
+				Config: testKeycloakUser_basic(username, attributeName, attributeValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakUserExists(resourceName),
 					testAccCheckKeycloakUserFetch(resourceName, user),
@@ -97,39 +94,8 @@ func TestAccKeycloakUser_createAfterManualDestroy(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakUser_basic(realmName, username, attributeName, attributeValue),
+				Config: testKeycloakUser_basic(username, attributeName, attributeValue),
 				Check:  testAccCheckKeycloakUserExists(resourceName),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakUser_updateRealm(t *testing.T) {
-	t.Parallel()
-	realmOne := "terraform-" + acctest.RandString(10)
-	realmTwo := "terraform-" + acctest.RandString(10)
-	username := "terraform-user-" + acctest.RandString(10)
-
-	resourceName := "keycloak_user.user"
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakUser_updateRealmBefore(realmOne, realmTwo, username),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakUserExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "realm_id", realmOne),
-				),
-			},
-			{
-				Config: testKeycloakUser_updateRealmAfter(realmOne, realmTwo, username),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakUserExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "realm_id", realmTwo),
-				),
 			},
 		},
 	})
@@ -137,7 +103,6 @@ func TestAccKeycloakUser_updateRealm(t *testing.T) {
 
 func TestAccKeycloakUser_updateUsername(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	usernameOne := "terraform-user-" + acctest.RandString(10)
 	usernameTwo := "terraform-user-" + acctest.RandString(10)
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
@@ -151,14 +116,14 @@ func TestAccKeycloakUser_updateUsername(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakUser_basic(realmName, usernameOne, attributeName, attributeValue),
+				Config: testKeycloakUser_basic(usernameOne, attributeName, attributeValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakUserExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "username", usernameOne),
 				),
 			},
 			{
-				Config: testKeycloakUser_basic(realmName, usernameTwo, attributeName, attributeValue),
+				Config: testKeycloakUser_basic(usernameTwo, attributeName, attributeValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakUserExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "username", usernameTwo),
@@ -170,7 +135,6 @@ func TestAccKeycloakUser_updateUsername(t *testing.T) {
 
 func TestAccKeycloakUser_updateWithInitialPasswordChangeDoesNotReset(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	username := "terraform-user-" + acctest.RandString(10)
 	passwordOne := "terraform-password1-" + acctest.RandString(10)
 	passwordTwo := "terraform-password2-" + acctest.RandString(10)
@@ -182,15 +146,15 @@ func TestAccKeycloakUser_updateWithInitialPasswordChangeDoesNotReset(t *testing.
 		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakUser_initialPassword(realmName, username, passwordOne, clientId),
+				Config: testKeycloakUser_initialPassword(username, passwordOne, clientId),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakUserInitialPasswordLogin(realmName, username, passwordOne, clientId),
+					testAccCheckKeycloakUserInitialPasswordLogin(username, passwordOne, clientId),
 				),
 			},
 			{
-				Config: testKeycloakUser_initialPassword(realmName, username, passwordTwo, clientId),
+				Config: testKeycloakUser_initialPassword(username, passwordTwo, clientId),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakUserInitialPasswordLogin(realmName, username, passwordOne, clientId),
+					testAccCheckKeycloakUserInitialPasswordLogin(username, passwordOne, clientId),
 				),
 			},
 		},
@@ -268,7 +232,7 @@ func TestAccKeycloakUser_unsetOptionalAttributes(t *testing.T) {
 				Check:  testAccCheckKeycloakUserExists(resourceName),
 			},
 			{
-				Config: testKeycloakUser_basic(userWithOptionalAttributes.RealmId, userWithOptionalAttributes.Username, attributeName, strings.Join(userWithOptionalAttributes.Attributes[attributeName], "")),
+				Config: testKeycloakUser_basic(userWithOptionalAttributes.Username, attributeName, strings.Join(userWithOptionalAttributes.Attributes[attributeName], "")),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakUserExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "email", ""),
@@ -282,7 +246,6 @@ func TestAccKeycloakUser_unsetOptionalAttributes(t *testing.T) {
 
 func TestAccKeycloakUser_validateLowercaseUsernames(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	username := "terraform-user-" + strings.ToUpper(acctest.RandString(10))
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
 	attributeValue := acctest.RandString(250)
@@ -293,7 +256,7 @@ func TestAccKeycloakUser_validateLowercaseUsernames(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakUser_basic(realmName, username, attributeName, attributeValue),
+				Config:      testKeycloakUser_basic(username, attributeName, attributeValue),
 				ExpectError: regexp.MustCompile("expected username .+ to be all lowercase"),
 			},
 		},
@@ -301,7 +264,6 @@ func TestAccKeycloakUser_validateLowercaseUsernames(t *testing.T) {
 }
 
 func TestAccKeycloakUser_federatedLink(t *testing.T) {
-	t.Parallel()
 	sourceUserName := "terraform-source-user-" + acctest.RandString(10)
 	sourceUserName2 := "terraform-source-user2-" + acctest.RandString(10)
 	destinationRealmName := "terraform-dest-" + acctest.RandString(10)
@@ -375,11 +337,11 @@ func testAccCheckKeycloakUserFetch(resourceName string, user *keycloak.User) res
 	}
 }
 
-func testAccCheckKeycloakUserInitialPasswordLogin(realmName string, username string, password string, clientId string) resource.TestCheckFunc {
+func testAccCheckKeycloakUserInitialPasswordLogin(username, password, clientId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		httpClient := &http.Client{}
 
-		resourceUrl := fmt.Sprintf("%s/auth/realms/%s/protocol/openid-connect/token", os.Getenv("KEYCLOAK_URL"), realmName)
+		resourceUrl := fmt.Sprintf("%s/auth/realms/%s/protocol/openid-connect/token", os.Getenv("KEYCLOAK_URL"), testAccRealm.Realm)
 
 		form := url.Values{}
 		form.Add("username", username)
@@ -445,30 +407,30 @@ func getUserFromState(s *terraform.State, resourceName string) (*keycloak.User, 
 	return user, nil
 }
 
-func testKeycloakUser_basic(realm, username, attributeName, attributeValue string) string {
+func testKeycloakUser_basic(username, attributeName, attributeValue string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_user" "user" {
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 	username = "%s"
 	attributes = {
 		"%s" = "%s"
 	}
 }
-	`, realm, username, attributeName, attributeValue)
+	`, testAccRealm.Realm, username, attributeName, attributeValue)
 }
 
-func testKeycloakUser_initialPassword(realm, username string, password string, clientId string) string {
+func testKeycloakUser_initialPassword(username string, password string, clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
-	realm_id                     = "${keycloak_realm.realm.id}"
+	realm_id                     = data.keycloak_realm.realm.id
 	client_id                    = "%s"
 
 	name                         = "test client"
@@ -479,58 +441,24 @@ resource "keycloak_openid_client" "client" {
 }
 
 resource "keycloak_user" "user" {
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	username         = "%s"
 	initial_password {
 		value = "%s"
 		temporary = false
 	}
 }
-	`, realm, clientId, username, password)
-}
-
-func testKeycloakUser_updateRealmBefore(realmOne, realmTwo, username string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
-	realm = "%s"
-}
-
-resource "keycloak_realm" "realm_2" {
-	realm = "%s"
-}
-
-resource "keycloak_user" "user" {
-	realm_id  = "${keycloak_realm.realm_1.id}"
-	username  = "%s"
-}
-	`, realmOne, realmTwo, username)
-}
-
-func testKeycloakUser_updateRealmAfter(realmOne, realmTwo, username string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
-	realm = "%s"
-}
-
-resource "keycloak_realm" "realm_2" {
-	realm = "%s"
-}
-
-resource "keycloak_user" "user" {
-	realm_id  = "${keycloak_realm.realm_2.id}"
-	username  = "%s"
-}
-	`, realmOne, realmTwo, username)
+	`, testAccRealm.Realm, clientId, username, password)
 }
 
 func testKeycloakUser_fromInterface(user *keycloak.User) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_user" "user" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	username       = "%s"
 
 	email          = "%s"
@@ -539,7 +467,7 @@ resource "keycloak_user" "user" {
 	enabled        = %t
 	email_verified = "%t"
 }
-	`, user.RealmId, user.Username, user.Email, user.FirstName, user.LastName, user.Enabled, user.EmailVerified)
+	`, testAccRealm.Realm, user.Username, user.Email, user.FirstName, user.LastName, user.Enabled, user.EmailVerified)
 }
 
 func testKeycloakUser_FederationLink(sourceRealmUserName, destinationRealmId string) string {

@@ -15,7 +15,6 @@ import (
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_basicClient(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
 
@@ -27,7 +26,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_basicClient(t *testing.T) {
 		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakSamlUserAttributeProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakSamlUserAttributeProtocolMapperExists(resourceName),
 			},
 		},
@@ -36,7 +35,6 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_basicClient(t *testing.T) {
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_import(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-saml-client-" + acctest.RandString(10)
 	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
 
@@ -48,7 +46,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_import(t *testing.T) {
 		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakSamlUserAttributeProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakSamlUserAttributeProtocolMapperExists(clientResourceName),
 			},
 			{
@@ -63,7 +61,6 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_import(t *testing.T) {
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_update(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
 
@@ -77,11 +74,11 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_update(t *testing.T) {
 		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(realmName, clientId, mapperName, userAttribute),
+				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(clientId, mapperName, userAttribute),
 				Check:  testKeycloakSamlUserAttributeProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(realmName, clientId, mapperName, updatedUserAttribute),
+				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(clientId, mapperName, updatedUserAttribute),
 				Check:  testKeycloakSamlUserAttributeProtocolMapperExists(resourceName),
 			},
 		},
@@ -92,7 +89,6 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_createAfterManualDestroy(t *
 	t.Parallel()
 	var mapper = &keycloak.SamlUserAttributeProtocolMapper{}
 
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
 
@@ -104,7 +100,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_createAfterManualDestroy(t *
 		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakSamlUserAttributeProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakSamlUserAttributeProtocolMapperFetch(resourceName, mapper),
 			},
 			{
@@ -114,7 +110,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_createAfterManualDestroy(t *
 						t.Error(err)
 					}
 				},
-				Config: testKeycloakSamlUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakSamlUserAttributeProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakSamlUserAttributeProtocolMapperExists(resourceName),
 			},
 		},
@@ -123,7 +119,6 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_createAfterManualDestroy(t *
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_validateClaimValueType(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(10)
 	invalidSamlNameFormat := acctest.RandString(5)
@@ -134,7 +129,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_validateClaimValueType(t *te
 		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakSamlUserAttributeProtocolMapper_samlAttributeNameFormat(realmName, clientId, mapperName, invalidSamlNameFormat),
+				Config:      testKeycloakSamlUserAttributeProtocolMapper_samlAttributeNameFormat(clientId, mapperName, invalidSamlNameFormat),
 				ExpectError: regexp.MustCompile("expected saml_attribute_name_format to be one of .+ got " + invalidSamlNameFormat),
 			},
 		},
@@ -143,7 +138,6 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_validateClaimValueType(t *te
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_updateClientIdForceNew(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	updatedClientId := "terraform-client-update-" + acctest.RandString(10)
 	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
@@ -157,38 +151,11 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_updateClientIdForceNew(t *te
 		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(realmName, clientId, mapperName, userAttribute),
+				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(clientId, mapperName, userAttribute),
 				Check:  testKeycloakSamlUserAttributeProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(realmName, updatedClientId, mapperName, userAttribute),
-				Check:  testKeycloakSamlUserAttributeProtocolMapperExists(resourceName),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakSamlUserAttributeProtocolMapper_updateRealmIdForceNew(t *testing.T) {
-	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	newRealmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
-
-	userAttribute := "attr-" + acctest.RandString(10)
-	resourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccKeycloakSamlUserAttributeProtocolMapperDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(realmName, clientId, mapperName, userAttribute),
-				Check:  testKeycloakSamlUserAttributeProtocolMapperExists(resourceName),
-			},
-			{
-				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(newRealmName, clientId, mapperName, userAttribute),
+				Config: testKeycloakSamlUserAttributeProtocolMapper_userAttribute(updatedClientId, mapperName, userAttribute),
 				Check:  testKeycloakSamlUserAttributeProtocolMapperExists(resourceName),
 			},
 		},
@@ -254,68 +221,68 @@ func getSamlUserAttributeMapperUsingState(state *terraform.State, resourceName s
 	return keycloakClient.GetSamlUserAttributeProtocolMapper(realm, clientId, clientScopeId, id)
 }
 
-func testKeycloakSamlUserAttributeProtocolMapper_basic_client(realmName, clientId, mapperName string) string {
+func testKeycloakSamlUserAttributeProtocolMapper_basic_client(clientId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 }
 
 resource "keycloak_saml_user_attribute_protocol_mapper" "saml_user_attribute_mapper" {
 	name                       = "%s"
-	realm_id                   = "${keycloak_realm.realm.id}"
+	realm_id                   = data.keycloak_realm.realm.id
 	client_id                  = "${keycloak_saml_client.saml_client.id}"
 
 	user_attribute             = "foo"
 	saml_attribute_name        = "bar"
 	saml_attribute_name_format = "Unspecified"
-}`, realmName, clientId, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName)
 }
 
-func testKeycloakSamlUserAttributeProtocolMapper_userAttribute(realmName, clientId, mapperName, userAttribute string) string {
+func testKeycloakSamlUserAttributeProtocolMapper_userAttribute(clientId, mapperName, userAttribute string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 }
 
 resource "keycloak_saml_user_attribute_protocol_mapper" "saml_user_attribute_mapper" {
 	name                       = "%s"
-	realm_id                   = "${keycloak_realm.realm.id}"
+	realm_id                   = data.keycloak_realm.realm.id
 	client_id                  = "${keycloak_saml_client.saml_client.id}"
 
 	user_attribute             = "%s"
 	saml_attribute_name        = "bar"
 	saml_attribute_name_format = "Unspecified"
-}`, realmName, clientId, mapperName, userAttribute)
+}`, testAccRealm.Realm, clientId, mapperName, userAttribute)
 }
 
-func testKeycloakSamlUserAttributeProtocolMapper_samlAttributeNameFormat(realmName, clientName, mapperName, samlAttributeNameFormat string) string {
+func testKeycloakSamlUserAttributeProtocolMapper_samlAttributeNameFormat(clientName, mapperName, samlAttributeNameFormat string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 }
 
 resource "keycloak_saml_user_attribute_protocol_mapper" "saml_user_attribute_mapper" {
 	name                       = "%s"
-	realm_id                   = "${keycloak_realm.realm.id}"
+	realm_id                   = data.keycloak_realm.realm.id
 	client_id                  = "${keycloak_saml_client.saml_client.id}"
 
 	user_attribute             = "foo"
 	saml_attribute_name        = "bar"
 	saml_attribute_name_format = "%s"
-}`, realmName, clientName, mapperName, samlAttributeNameFormat)
+}`, testAccRealm.Realm, clientName, mapperName, samlAttributeNameFormat)
 }

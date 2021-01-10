@@ -11,7 +11,6 @@ import (
 
 func TestAccKeycloakRole_basicRealm(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -20,14 +19,14 @@ func TestAccKeycloakRole_basicRealm(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRole_basicRealm(realmName, roleName),
+				Config: testKeycloakRole_basicRealm(roleName),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
 				ResourceName:        "keycloak_role.role",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 		},
 	})
@@ -35,7 +34,6 @@ func TestAccKeycloakRole_basicRealm(t *testing.T) {
 
 func TestAccKeycloakRole_basicRealmUrlRoleName(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	roleName := "terraform-role-httpfoo.bara1b2" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -44,14 +42,14 @@ func TestAccKeycloakRole_basicRealmUrlRoleName(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRole_basicRealm(realmName, roleName),
+				Config: testKeycloakRole_basicRealm(roleName),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
 				ResourceName:        "keycloak_role.role",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 		},
 	})
@@ -59,7 +57,6 @@ func TestAccKeycloakRole_basicRealmUrlRoleName(t *testing.T) {
 
 func TestAccKeycloakRole_basicClient(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
 
@@ -69,14 +66,14 @@ func TestAccKeycloakRole_basicClient(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRole_basicClient(realmName, clientId, roleName),
+				Config: testKeycloakRole_basicClient(clientId, roleName),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
 				ResourceName:        "keycloak_role.role",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 		},
 	})
@@ -84,7 +81,6 @@ func TestAccKeycloakRole_basicClient(t *testing.T) {
 
 func TestAccKeycloakRole_basicSamlClient(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
 
@@ -94,14 +90,14 @@ func TestAccKeycloakRole_basicSamlClient(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRole_basicSamlClient(realmName, clientId, roleName),
+				Config: testKeycloakRole_basicSamlClient(clientId, roleName),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
 				ResourceName:        "keycloak_role.role",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 		},
 	})
@@ -109,7 +105,6 @@ func TestAccKeycloakRole_basicSamlClient(t *testing.T) {
 
 func TestAccKeycloakRole_basicRealmUpdate(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
 	descriptionOne := acctest.RandString(50)
 	descriptionTwo := acctest.RandString(50)
@@ -120,15 +115,15 @@ func TestAccKeycloakRole_basicRealmUpdate(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRole_basicRealmWithDescription(realmName, roleName, descriptionOne),
+				Config: testKeycloakRole_basicRealmWithDescription(roleName, descriptionOne),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
-				Config: testKeycloakRole_basicRealmWithDescription(realmName, roleName, descriptionTwo),
+				Config: testKeycloakRole_basicRealmWithDescription(roleName, descriptionTwo),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
-				Config: testKeycloakRole_basicRealm(realmName, roleName),
+				Config: testKeycloakRole_basicRealm(roleName),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 		},
@@ -137,7 +132,6 @@ func TestAccKeycloakRole_basicRealmUpdate(t *testing.T) {
 
 func TestAccKeycloakRole_basicClientUpdate(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
 	descriptionOne := acctest.RandString(50)
@@ -149,15 +143,15 @@ func TestAccKeycloakRole_basicClientUpdate(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRole_basicClientWithDescription(realmName, clientId, roleName, descriptionOne),
+				Config: testKeycloakRole_basicClientWithDescription(clientId, roleName, descriptionOne),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
-				Config: testKeycloakRole_basicClientWithDescription(realmName, clientId, roleName, descriptionTwo),
+				Config: testKeycloakRole_basicClientWithDescription(clientId, roleName, descriptionTwo),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 			{
-				Config: testKeycloakRole_basicClient(realmName, clientId, roleName),
+				Config: testKeycloakRole_basicClient(clientId, roleName),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 		},
@@ -168,7 +162,6 @@ func TestAccKeycloakRole_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var role = &keycloak.Role{}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	roleName := "terraform-role-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -177,7 +170,7 @@ func TestAccKeycloakRole_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRole_basicRealm(realmName, roleName),
+				Config: testKeycloakRole_basicRealm(roleName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakRoleExists("keycloak_role.role"),
 					testAccCheckKeycloakRoleFetch("keycloak_role.role", role),
@@ -190,7 +183,7 @@ func TestAccKeycloakRole_createAfterManualDestroy(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakRole_basicRealm(realmName, roleName),
+				Config: testKeycloakRole_basicRealm(roleName),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
 		},
@@ -199,7 +192,6 @@ func TestAccKeycloakRole_createAfterManualDestroy(t *testing.T) {
 
 func TestAccKeycloakRole_composites(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientOne := "terraform-client-" + acctest.RandString(10)
 	clientTwo := "terraform-client-" + acctest.RandString(10)
 	roleOne := "terraform-role-one-" + acctest.RandString(10)
@@ -216,7 +208,7 @@ func TestAccKeycloakRole_composites(t *testing.T) {
 		Steps: []resource.TestStep{
 			// initial setup - no composites attached
 			{
-				Config: testKeycloakRole_composites(realmName, clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, []string{}),
+				Config: testKeycloakRole_composites(clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, []string{}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakRoleExists("keycloak_role.role_1"),
 					testAccCheckKeycloakRoleExists("keycloak_role.role_2"),
@@ -227,7 +219,7 @@ func TestAccKeycloakRole_composites(t *testing.T) {
 			},
 			// add all composites
 			{
-				Config: testKeycloakRole_composites(realmName, clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, []string{
+				Config: testKeycloakRole_composites(clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, []string{
 					"${keycloak_role.role_1.id}",
 					"${keycloak_role.role_2.id}",
 					"${keycloak_role.role_3.id}",
@@ -242,7 +234,7 @@ func TestAccKeycloakRole_composites(t *testing.T) {
 			},
 			// remove two composites
 			{
-				Config: testKeycloakRole_composites(realmName, clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, []string{
+				Config: testKeycloakRole_composites(clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, []string{
 					"${keycloak_role.role_1.id}",
 					"${keycloak_role.role_2.id}",
 				}),
@@ -253,7 +245,7 @@ func TestAccKeycloakRole_composites(t *testing.T) {
 			},
 			// add them back and remove the others
 			{
-				Config: testKeycloakRole_composites(realmName, clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, []string{
+				Config: testKeycloakRole_composites(clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, []string{
 					"${keycloak_role.role_3.id}",
 					"${keycloak_role.role_4.id}",
 				}),
@@ -264,7 +256,7 @@ func TestAccKeycloakRole_composites(t *testing.T) {
 			},
 			// remove them all
 			{
-				Config: testKeycloakRole_composites(realmName, clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, []string{}),
+				Config: testKeycloakRole_composites(clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, []string{}),
 				Check:  testAccCheckKeycloakRoleHasComposites(roleWithCompositesResourceName, []string{}),
 			},
 		},
@@ -387,143 +379,143 @@ func getRoleFromState(s *terraform.State, resourceName string) (*keycloak.Role, 
 	return role, nil
 }
 
-func testKeycloakRole_basicRealm(realm, role string) string {
+func testKeycloakRole_basicRealm(role string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_role" "role" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
-	`, realm, role)
+	`, testAccRealm.Realm, role)
 }
 
-func testKeycloakRole_basicRealmWithDescription(realm, role, description string) string {
+func testKeycloakRole_basicRealmWithDescription(role, description string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_role" "role" {
 	name        = "%s"
 	description = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 }
-	`, realm, role, description)
+	`, testAccRealm.Realm, role, description)
 }
 
-func testKeycloakRole_basicClient(realm, clientId, role string) string {
+func testKeycloakRole_basicClient(clientId, role string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
 }
 
 resource "keycloak_role" "role" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
-	client_id = "${keycloak_openid_client.client.id}"
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = keycloak_openid_client.client.id
 }
-	`, realm, clientId, role)
+	`, testAccRealm.Realm, clientId, role)
 }
 
-func testKeycloakRole_basicSamlClient(realm, clientId, role string) string {
+func testKeycloakRole_basicSamlClient(clientId, role string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "client" {
 	client_id = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_role" "role" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
-	client_id = "${keycloak_saml_client.client.id}"
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = keycloak_saml_client.client.id
 }
-	`, realm, clientId, role)
+	`, testAccRealm.Realm, clientId, role)
 }
 
-func testKeycloakRole_basicClientWithDescription(realm, clientId, role, description string) string {
+func testKeycloakRole_basicClientWithDescription(clientId, role, description string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
 }
 
 resource "keycloak_role" "role" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
-	client_id   = "${keycloak_openid_client.client.id}"
+	realm_id    = data.keycloak_realm.realm.id
+	client_id   = keycloak_openid_client.client.id
 	description = "%s"
 }
-	`, realm, clientId, role, description)
+	`, testAccRealm.Realm, clientId, role, description)
 }
 
-func testKeycloakRole_composites(realm, clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites string, composites []string) string {
+func testKeycloakRole_composites(clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites string, composites []string) string {
 	var tfComposites string
 	if len(composites) != 0 {
 		tfComposites = fmt.Sprintf("composite_roles = %s", arrayOfStringsForTerraformResource(composites))
 	}
 
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client_one" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
 }
 
 resource "keycloak_openid_client" "client_two" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
 }
 
 resource "keycloak_role" "role_1" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_role" "role_2" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
-	client_id = "${keycloak_openid_client.client_one.id}"
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = keycloak_openid_client.client_one.id
 }
 
 resource "keycloak_role" "role_3" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_role" "role_4" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
-	client_id = "${keycloak_openid_client.client_two.id}"
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = keycloak_openid_client.client_two.id
 }
 
 resource "keycloak_role" "role_with_composites" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 
 	%s
 }
-	`, realm, clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, tfComposites)
+	`, testAccRealm.Realm, clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, tfComposites)
 }
