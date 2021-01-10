@@ -12,7 +12,7 @@ import (
 
 func TestAccKeycloakLdapHardcodedRoleMapper_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+	roleName := "terraform-" + acctest.RandString(10)
 	roleMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -21,7 +21,7 @@ func TestAccKeycloakLdapHardcodedRoleMapper_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapHardcodedRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapHardcodedRoleMapper(realmName, roleMapperName),
+				Config: testKeycloakLdapHardcodedRoleMapper(roleName, roleMapperName),
 				Check:  testAccCheckKeycloakLdapHardcodedRoleMapperExists("keycloak_ldap_hardcoded_role_mapper.hardcoded_role_mapper"),
 			},
 			{
@@ -38,7 +38,7 @@ func TestAccKeycloakLdapHardcodedRoleMapper_createAfterManualDestroy(t *testing.
 	t.Parallel()
 	var mapper = &keycloak.LdapHardcodedRoleMapper{}
 
-	realmName := "terraform-" + acctest.RandString(10)
+	roleName := "terraform-" + acctest.RandString(10)
 	roleMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -47,7 +47,7 @@ func TestAccKeycloakLdapHardcodedRoleMapper_createAfterManualDestroy(t *testing.
 		CheckDestroy:      testAccCheckKeycloakLdapHardcodedRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapHardcodedRoleMapper(realmName, roleMapperName),
+				Config: testKeycloakLdapHardcodedRoleMapper(roleName, roleMapperName),
 				Check:  testAccCheckKeycloakLdapHardcodedRoleMapperFetch("keycloak_ldap_hardcoded_role_mapper.hardcoded_role_mapper", mapper),
 			},
 			{
@@ -57,7 +57,7 @@ func TestAccKeycloakLdapHardcodedRoleMapper_createAfterManualDestroy(t *testing.
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakLdapHardcodedRoleMapper(realmName, roleMapperName),
+				Config: testKeycloakLdapHardcodedRoleMapper(roleName, roleMapperName),
 				Check:  testAccCheckKeycloakLdapHardcodedRoleMapperExists("keycloak_ldap_hardcoded_role_mapper.hardcoded_role_mapper"),
 			},
 		},
@@ -126,15 +126,15 @@ func getLdapHardcodedRoleMapperFromState(s *terraform.State, resourceName string
 	return ldapMapper, nil
 }
 
-func testKeycloakLdapHardcodedRoleMapper(realm, roleMapperName string) string {
+func testKeycloakLdapHardcodedRoleMapper(roleName, roleMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = keycloak_realm.realm.id
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -152,15 +152,15 @@ resource "keycloak_ldap_user_federation" "openldap" {
 }
 
 resource "keycloak_role" "hardcoded_role_mapper_test" {
-    realm_id    = keycloak_realm.realm.id
-    name        = "hardcoded-role-test"
+    realm_id    = data.keycloak_realm.realm.id
+    name        = "%s"
 }
 
 resource "keycloak_ldap_hardcoded_role_mapper" "hardcoded_role_mapper" {
 	name                        = "%s"
-	realm_id                    = keycloak_realm.realm.id
+	realm_id                    = data.keycloak_realm.realm.id
 	ldap_user_federation_id     = keycloak_ldap_user_federation.openldap.id
 	role                        = keycloak_role.hardcoded_role_mapper_test.name
 }
-	`, realm, roleMapperName)
+	`, testAccRealm.Realm, roleName, roleMapperName)
 }
