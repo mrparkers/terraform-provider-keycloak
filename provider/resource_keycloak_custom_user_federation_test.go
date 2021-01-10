@@ -66,7 +66,7 @@ func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakCustomUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakCustomUserFederation_customConfig(realmName, name, providerId, configValue),
+				Config: testKeycloakCustomUserFederation_customConfig(name, providerId, configValue),
 				Check:  testAccCheckKeycloakCustomUserFederationExistsWithCustomConfig("keycloak_custom_user_federation.custom", configValue),
 			},
 		},
