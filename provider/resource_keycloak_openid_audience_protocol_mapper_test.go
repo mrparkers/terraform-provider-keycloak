@@ -13,7 +13,6 @@ import (
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClient(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
 
@@ -25,7 +24,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClient(t *testing.T) {
 		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
 			},
 		},
@@ -34,7 +33,6 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClient(t *testing.T) {
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClientScope(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
 
@@ -46,7 +44,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClientScope(t *testing.T) 
 		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_clientScope(clientScopeId, mapperName),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
 			},
 		},
@@ -55,7 +53,6 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_basicClientScope(t *testing.T) 
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_import(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-openid-client-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
@@ -69,7 +66,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_import(t *testing.T) {
 		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_import(realmName, clientId, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_import(clientId, clientScopeId, mapperName),
 				Check: resource.ComposeTestCheckFunc(
 					testKeycloakOpenIdAudienceProtocolMapperExists(clientResourceName),
 					testKeycloakOpenIdAudienceProtocolMapperExists(clientScopeResourceName),
@@ -93,7 +90,6 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_import(t *testing.T) {
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_update(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
 
@@ -107,11 +103,11 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_update(t *testing.T) {
 		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(realmName, clientId, mapperName, customAudience),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(clientId, mapperName, customAudience),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(realmName, clientId, mapperName, updatedCustomAudience),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(clientId, mapperName, updatedCustomAudience),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
 			},
 		},
@@ -122,7 +118,6 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_createAfterManualDestroy(t *tes
 	t.Parallel()
 	var mapper = &keycloak.OpenIdAudienceProtocolMapper{}
 
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
 
@@ -134,7 +129,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_createAfterManualDestroy(t *tes
 		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperFetch(resourceName, mapper),
 			},
 			{
@@ -144,7 +139,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_createAfterManualDestroy(t *tes
 						t.Error(err)
 					}
 				},
-				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
 			},
 		},
@@ -153,7 +148,6 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_createAfterManualDestroy(t *tes
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientIdForceNew(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	updatedClientId := "terraform-client-update-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
@@ -167,11 +161,11 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientIdForceNew(t *testi
 		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(realmName, clientId, mapperName, customAudience),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(clientId, mapperName, customAudience),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(realmName, updatedClientId, mapperName, customAudience),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(updatedClientId, mapperName, customAudience),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
 			},
 		},
@@ -180,7 +174,6 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientIdForceNew(t *testi
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientScopeForceNew(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
 	clientScopeId := "terraform-client-" + acctest.RandString(10)
 	newClientScopeId := "terraform-client-scope-" + acctest.RandString(10)
@@ -192,11 +185,11 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientScopeForceNew(t *te
 		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_clientScope(clientScopeId, mapperName),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_clientScope(realmName, newClientScopeId, mapperName),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_basic_clientScope(newClientScopeId, mapperName),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
 			},
 		},
@@ -205,8 +198,6 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateClientScopeForceNew(t *te
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_updateRealmIdForceNew(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	newRealmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
 
@@ -219,11 +210,11 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateRealmIdForceNew(t *testin
 		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(realmName, clientId, mapperName, customAudience),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(clientId, mapperName, customAudience),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(newRealmName, clientId, mapperName, customAudience),
+				Config: testKeycloakOpenIdAudienceProtocolMapper_customAudience(clientId, mapperName, customAudience),
 				Check:  testKeycloakOpenIdAudienceProtocolMapperExists(resourceName),
 			},
 		},
@@ -232,7 +223,6 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_updateRealmIdForceNew(t *testin
 
 func TestAccKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceExists(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-audience-mapper-" + acctest.RandString(5)
 
@@ -242,7 +232,7 @@ func TestAccKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceExists(t 
 		CheckDestroy:      testAccKeycloakOpenIdAudienceProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceExists(realmName, clientId, mapperName),
+				Config:      testKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceExists(clientId, mapperName),
 				ExpectError: regexp.MustCompile("validation error: client .+ does not exist"),
 			},
 		},
@@ -308,14 +298,14 @@ func getAudienceMapperUsingState(state *terraform.State, resourceName string) (*
 	return keycloakClient.GetOpenIdAudienceProtocolMapper(realm, clientId, clientScopeId, id)
 }
 
-func testKeycloakOpenIdAudienceProtocolMapper_basic_client(realmName, clientId, mapperName string) string {
+func testKeycloakOpenIdAudienceProtocolMapper_basic_client(clientId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 
 	access_type = "BEARER-ONLY"
@@ -323,41 +313,41 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_audience_protocol_mapper" "audience_mapper_client" {
 	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = data.keycloak_realm.realm.id
 	client_id                = "${keycloak_openid_client.openid_client.id}"
 
 	included_custom_audience = "foo"
-}`, realmName, clientId, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName)
 }
 
-func testKeycloakOpenIdAudienceProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName string) string {
+func testKeycloakOpenIdAudienceProtocolMapper_basic_clientScope(clientScopeId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_openid_audience_protocol_mapper" "audience_mapper_client_scope" {
 	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = data.keycloak_realm.realm.id
 	client_scope_id          = "${keycloak_openid_client_scope.client_scope.id}"
 
 	included_custom_audience = "foo"
-}`, realmName, clientScopeId, mapperName)
+}`, testAccRealm.Realm, clientScopeId, mapperName)
 }
 
-func testKeycloakOpenIdAudienceProtocolMapper_import(realmName, clientId, clientScopeId, mapperName string) string {
+func testKeycloakOpenIdAudienceProtocolMapper_import(clientId, clientScopeId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	client_id   = "%s"
 
 	access_type = "BEARER-ONLY"
@@ -365,7 +355,7 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_audience_protocol_mapper" "audience_mapper_client" {
 	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = data.keycloak_realm.realm.id
 	client_id                = "${keycloak_openid_client.openid_client.id}"
 
 	included_custom_audience = "foo"
@@ -373,26 +363,26 @@ resource "keycloak_openid_audience_protocol_mapper" "audience_mapper_client" {
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_openid_audience_protocol_mapper" "audience_mapper_client_scope" {
 	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = data.keycloak_realm.realm.id
 	client_scope_id          = "${keycloak_openid_client_scope.client_scope.id}"
 
 	included_custom_audience = "foo"
-}`, realmName, clientId, mapperName, clientScopeId, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName, clientScopeId, mapperName)
 }
 
-func testKeycloakOpenIdAudienceProtocolMapper_customAudience(realmName, clientId, mapperName, customAudience string) string {
+func testKeycloakOpenIdAudienceProtocolMapper_customAudience(clientId, mapperName, customAudience string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 
 	access_type = "CONFIDENTIAL"
@@ -404,21 +394,21 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_audience_protocol_mapper" "audience_mapper" {
 	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = data.keycloak_realm.realm.id
 	client_id                = "${keycloak_openid_client.openid_client.id}"
 
 	included_custom_audience = "%s"
-}`, realmName, clientId, mapperName, customAudience)
+}`, testAccRealm.Realm, clientId, mapperName, customAudience)
 }
 
-func testKeycloakOpenIdAudienceProtocolMapper_validateClientConflictsWithClientScope(realmName, clientId, clientScopeId, mapperName string) string {
+func testKeycloakOpenIdAudienceProtocolMapper_validateClientConflictsWithClientScope(clientId, clientScopeId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 
 	access_type = "BEARER-ONLY"
@@ -426,27 +416,27 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_openid_audience_protocol_mapper" "audience_mapper" {
 	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = data.keycloak_realm.realm.id
 	client_id                = "${keycloak_openid_client.openid_client.id}"
 	client_scope_id          = "${keycloak_openid_client_scope.client_scope.id}"
 
 	included_custom_audience = "foo"
-}`, realmName, clientId, clientScopeId, mapperName)
+}`, testAccRealm.Realm, clientId, clientScopeId, mapperName)
 }
 
-func testKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceConflictsWithCustomAudience(realmName, clientId, mapperName string) string {
+func testKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceConflictsWithCustomAudience(clientId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 
 	access_type = "BEARER-ONLY"
@@ -454,22 +444,22 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_audience_protocol_mapper" "audience_mapper" {
 	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = data.keycloak_realm.realm.id
 	client_id                = "${keycloak_openid_client.openid_client.id}"
 
 	included_client_audience = "${keycloak_openid_client.openid_client.client_id}"
 	included_custom_audience = "foo"
-}`, realmName, clientId, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName)
 }
 
-func testKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceExists(realmName, clientId, mapperName string) string {
+func testKeycloakOpenIdAudienceProtocolMapper_validateClientAudienceExists(clientId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "openid-client"
 
 	access_type = "BEARER-ONLY"
@@ -477,11 +467,11 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_audience_protocol_mapper" "audience_mapper" {
 	name                     = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = data.keycloak_realm.realm.id
 	client_id                = "${keycloak_openid_client.openid_client.id}"
 
 	included_client_audience = "%s"
 
 	depends_on = [ "keycloak_openid_client.openid_client" ]
-}`, realmName, mapperName, clientId)
+}`, testAccRealm.Realm, mapperName, clientId)
 }
