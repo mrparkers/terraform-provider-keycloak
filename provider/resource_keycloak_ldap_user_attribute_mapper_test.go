@@ -11,7 +11,7 @@ import (
 
 func TestAccKeycloakLdapUserAttributeMapper_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	userAttributeMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -20,7 +20,7 @@ func TestAccKeycloakLdapUserAttributeMapper_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapUserAttributeMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapUserAttributeMapper_basic(realmName, userAttributeMapperName),
+				Config: testKeycloakLdapUserAttributeMapper_basic(userAttributeMapperName),
 				Check:  testAccCheckKeycloakLdapUserAttributeMapperExists("keycloak_ldap_user_attribute_mapper.username"),
 			},
 			{
@@ -35,9 +35,9 @@ func TestAccKeycloakLdapUserAttributeMapper_basic(t *testing.T) {
 
 func TestAccKeycloakLdapUserAttributeMapper_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
+
 	var mapper = &keycloak.LdapUserAttributeMapper{}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	userAttributeMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -46,7 +46,7 @@ func TestAccKeycloakLdapUserAttributeMapper_createAfterManualDestroy(t *testing.
 		CheckDestroy:      testAccCheckKeycloakLdapUserAttributeMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapUserAttributeMapper_basic(realmName, userAttributeMapperName),
+				Config: testKeycloakLdapUserAttributeMapper_basic(userAttributeMapperName),
 				Check:  testAccCheckKeycloakLdapUserAttributeMapperFetch("keycloak_ldap_user_attribute_mapper.username", mapper),
 			},
 			{
@@ -56,7 +56,7 @@ func TestAccKeycloakLdapUserAttributeMapper_createAfterManualDestroy(t *testing.
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakLdapUserAttributeMapper_basic(realmName, userAttributeMapperName),
+				Config: testKeycloakLdapUserAttributeMapper_basic(userAttributeMapperName),
 				Check:  testAccCheckKeycloakLdapUserAttributeMapperExists("keycloak_ldap_user_attribute_mapper.username"),
 			},
 		},
@@ -65,8 +65,7 @@ func TestAccKeycloakLdapUserAttributeMapper_createAfterManualDestroy(t *testing.
 
 func TestAccKeycloakLdapUserAttributeMapper_updateLdapUserFederation(t *testing.T) {
 	t.Parallel()
-	realmOne := "terraform-" + acctest.RandString(10)
-	realmTwo := "terraform-" + acctest.RandString(10)
+
 	userAttributeMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -75,11 +74,11 @@ func TestAccKeycloakLdapUserAttributeMapper_updateLdapUserFederation(t *testing.
 		CheckDestroy:      testAccCheckKeycloakLdapUserAttributeMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapUserAttributeMapper_updateLdapUserFederationBefore(realmOne, realmTwo, userAttributeMapperName),
+				Config: testKeycloakLdapUserAttributeMapper_updateLdapUserFederationBefore(userAttributeMapperName),
 				Check:  testAccCheckKeycloakLdapUserAttributeMapperExists("keycloak_ldap_user_attribute_mapper.username"),
 			},
 			{
-				Config: testKeycloakLdapUserAttributeMapper_updateLdapUserFederationAfter(realmOne, realmTwo, userAttributeMapperName),
+				Config: testKeycloakLdapUserAttributeMapper_updateLdapUserFederationAfter(userAttributeMapperName),
 				Check:  testAccCheckKeycloakLdapUserAttributeMapperExists("keycloak_ldap_user_attribute_mapper.username"),
 			},
 		},
@@ -88,7 +87,7 @@ func TestAccKeycloakLdapUserAttributeMapper_updateLdapUserFederation(t *testing.
 
 func TestAccKeycloakLdapUserAttributeMapper_updateInPlace(t *testing.T) {
 	t.Parallel()
-	realm := "terraform-" + acctest.RandString(10)
+
 	userAttributeMapperBefore := &keycloak.LdapUserAttributeMapper{
 		Name:                    acctest.RandString(10),
 		UserModelAttribute:      acctest.RandString(10),
@@ -112,11 +111,11 @@ func TestAccKeycloakLdapUserAttributeMapper_updateInPlace(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapUserAttributeMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapUserAttributeMapper_basicFromInterface(realm, userAttributeMapperBefore),
+				Config: testKeycloakLdapUserAttributeMapper_basicFromInterface(userAttributeMapperBefore),
 				Check:  testAccCheckKeycloakLdapUserAttributeMapperExists("keycloak_ldap_user_attribute_mapper.username"),
 			},
 			{
-				Config: testKeycloakLdapUserAttributeMapper_basicFromInterface(realm, userAttributeMapperAfter),
+				Config: testKeycloakLdapUserAttributeMapper_basicFromInterface(userAttributeMapperAfter),
 				Check:  testAccCheckKeycloakLdapUserAttributeMapperExists("keycloak_ldap_user_attribute_mapper.username"),
 			},
 		},
@@ -185,15 +184,15 @@ func getLdapUserAttributeMapperFromState(s *terraform.State, resourceName string
 	return ldapUserAttributeMapper, nil
 }
 
-func testKeycloakLdapUserAttributeMapper_basic(realm, userAttributeMapperName string) string {
+func testKeycloakLdapUserAttributeMapper_basic(userAttributeMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -212,24 +211,24 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 resource "keycloak_ldap_user_attribute_mapper" "username" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm.id}"
+	realm_id                    = data.keycloak_realm.realm.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
 	user_model_attribute        = "username"
 	ldap_attribute              = "cn"
 }
-	`, realm, userAttributeMapperName)
+	`, testAccRealm.Realm, userAttributeMapperName)
 }
 
-func testKeycloakLdapUserAttributeMapper_basicFromInterface(realm string, mapper *keycloak.LdapUserAttributeMapper) string {
+func testKeycloakLdapUserAttributeMapper_basicFromInterface(mapper *keycloak.LdapUserAttributeMapper) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -248,7 +247,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 resource "keycloak_ldap_user_attribute_mapper" "username" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm.id}"
+	realm_id                    = data.keycloak_realm.realm.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
 	user_model_attribute        = "%s"
@@ -258,22 +257,22 @@ resource "keycloak_ldap_user_attribute_mapper" "username" {
 	always_read_value_from_ldap = %t
 	is_mandatory_in_ldap        = %t
 }
-	`, realm, mapper.Name, mapper.UserModelAttribute, mapper.LdapAttribute, mapper.ReadOnly, mapper.AlwaysReadValueFromLdap, mapper.IsMandatoryInLdap)
+	`, testAccRealm.Realm, mapper.Name, mapper.UserModelAttribute, mapper.LdapAttribute, mapper.ReadOnly, mapper.AlwaysReadValueFromLdap, mapper.IsMandatoryInLdap)
 }
 
-func testKeycloakLdapUserAttributeMapper_updateLdapUserFederationBefore(realmOne, realmTwo, userAttributeMapperName string) string {
+func testKeycloakLdapUserAttributeMapper_updateLdapUserFederationBefore(userAttributeMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_one" {
+data "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_two" {
+data "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap_one" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_one.id}"
+	realm_id                = data.keycloak_realm.realm_one.id
 
 	enabled                 = true
 
@@ -292,7 +291,7 @@ resource "keycloak_ldap_user_federation" "openldap_one" {
 
 resource "keycloak_ldap_user_federation" "openldap_two" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_two.id}"
+	realm_id                = data.keycloak_realm.realm_two.id
 
 	enabled                 = true
 
@@ -311,28 +310,28 @@ resource "keycloak_ldap_user_federation" "openldap_two" {
 
 resource "keycloak_ldap_user_attribute_mapper" "username" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm_one.id}"
+	realm_id                    = data.keycloak_realm.realm_one.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap_one.id}"
 
 	user_model_attribute        = "username"
 	ldap_attribute              = "cn"
 }
-	`, realmOne, realmTwo, userAttributeMapperName)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, userAttributeMapperName)
 }
 
-func testKeycloakLdapUserAttributeMapper_updateLdapUserFederationAfter(realmOne, realmTwo, userAttributeMapperName string) string {
+func testKeycloakLdapUserAttributeMapper_updateLdapUserFederationAfter(userAttributeMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_one" {
+data "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_two" {
+data "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap_one" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_one.id}"
+	realm_id                = data.keycloak_realm.realm_one.id
 
 	enabled                 = true
 
@@ -351,7 +350,7 @@ resource "keycloak_ldap_user_federation" "openldap_one" {
 
 resource "keycloak_ldap_user_federation" "openldap_two" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_two.id}"
+	realm_id                = data.keycloak_realm.realm_two.id
 
 	enabled                 = true
 
@@ -370,11 +369,11 @@ resource "keycloak_ldap_user_federation" "openldap_two" {
 
 resource "keycloak_ldap_user_attribute_mapper" "username" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm_two.id}"
+	realm_id                    = data.keycloak_realm.realm_two.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap_two.id}"
 
 	user_model_attribute        = "username"
 	ldap_attribute              = "cn"
 }
-	`, realmOne, realmTwo, userAttributeMapperName)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, userAttributeMapperName)
 }
