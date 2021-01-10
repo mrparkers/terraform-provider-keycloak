@@ -12,7 +12,6 @@ import (
 
 func TestAccKeycloakOpenidClientAuthorizationUserPolicy(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -21,7 +20,7 @@ func TestAccKeycloakOpenidClientAuthorizationUserPolicy(t *testing.T) {
 		CheckDestroy:      testResourceKeycloakOpenidClientAuthorizationUserPolicyDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(realmName, clientId),
+				Config: testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(clientId),
 				Check:  testResourceKeycloakOpenidClientAuthorizationUserPolicyExists("keycloak_openid_client_user_policy.test"),
 			},
 		},
@@ -79,15 +78,15 @@ func testResourceKeycloakOpenidClientAuthorizationUserPolicyExists(resourceName 
 	}
 }
 
-func testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(realm, clientId string) string {
+func testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(clientId string) string {
 	return fmt.Sprintf(`
-	resource keycloak_realm test {
+	data "keycloak_realm" "realm" {
 		realm = "%s"
 	}
 
 	resource keycloak_openid_client test {
 		client_id                = "%s"
-		realm_id                 = "${keycloak_realm.test.id}"
+		realm_id                 = data.keycloak_realm.realm.id
 		access_type              = "CONFIDENTIAL"
 		service_accounts_enabled = true
 		authorization {
@@ -96,7 +95,7 @@ func testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(realm, client
 	}
 
 	resource keycloak_user test {
-		realm_id = "${keycloak_realm.test.id}"
+		realm_id = data.keycloak_realm.realm.id
 		username = "test-user"
 
 		email      = "test-user@fakedomain.com"
@@ -106,11 +105,11 @@ func testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(realm, client
 
 	resource keycloak_openid_client_user_policy test {
 		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
-		realm_id = "${keycloak_realm.test.id}"
+		realm_id = data.keycloak_realm.realm.id
 		name = "client_user_policy_test"
 		users = ["${keycloak_user.test.id}"]
 		logic = "POSITIVE"
 		decision_strategy = "UNANIMOUS"
 	}
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }

@@ -12,7 +12,6 @@ import (
 
 func TestAccKeycloakOpenidClientServiceAccountRole_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	resourceName := "keycloak_openid_client_service_account_role.test"
 
@@ -22,7 +21,7 @@ func TestAccKeycloakOpenidClientServiceAccountRole_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientServiceAccountRole_basic(realmName, clientId),
+				Config: testKeycloakOpenidClientServiceAccountRole_basic(clientId),
 				Check:  testAccCheckKeycloakOpenidClientServiceAccountRoleExists(resourceName),
 			},
 			{
@@ -39,7 +38,6 @@ func TestAccKeycloakOpenidClientServiceAccountRole_createAfterManualDestroy(t *t
 	t.Parallel()
 	var serviceAccountRole = &keycloak.OpenidClientServiceAccountRole{}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -48,7 +46,7 @@ func TestAccKeycloakOpenidClientServiceAccountRole_createAfterManualDestroy(t *t
 		CheckDestroy:      testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientServiceAccountRole_basic(realmName, clientId),
+				Config: testKeycloakOpenidClientServiceAccountRole_basic(clientId),
 				Check:  testAccCheckKeycloakOpenidClientServiceAccountRoleFetch("keycloak_openid_client_service_account_role.test", serviceAccountRole),
 			},
 			{
@@ -58,37 +56,8 @@ func TestAccKeycloakOpenidClientServiceAccountRole_createAfterManualDestroy(t *t
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakOpenidClientServiceAccountRole_basic(realmName, clientId),
+				Config: testKeycloakOpenidClientServiceAccountRole_basic(clientId),
 				Check:  testAccCheckKeycloakOpenidClientServiceAccountRoleExists("keycloak_openid_client_service_account_role.test"),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakOpenidClientServiceAccountRole_basicUpdateRealm(t *testing.T) {
-	t.Parallel()
-	firstRealm := "terraform-" + acctest.RandString(10)
-	secondRealm := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakOpenidClientServiceAccountRole_basic(firstRealm, clientId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakOpenidClientServiceAccountRoleExists("keycloak_openid_client_service_account_role.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_service_account_role.test", "realm_id", firstRealm),
-				),
-			},
-			{
-				Config: testKeycloakOpenidClientServiceAccountRole_basic(secondRealm, clientId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakOpenidClientServiceAccountRoleExists("keycloak_openid_client_service_account_role.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_service_account_role.test", "realm_id", secondRealm),
-				),
 			},
 		},
 	})
@@ -96,7 +65,6 @@ func TestAccKeycloakOpenidClientServiceAccountRole_basicUpdateRealm(t *testing.T
 
 func TestAccKeycloakOpenidClientServiceAccountRole_enableAfterCreate(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	bearerClientId := "terraform-" + acctest.RandString(10)
 	consumerClientId := "terraform-" + acctest.RandString(10)
 	resourceName := "keycloak_openid_client_service_account_role.consumer_service_account_role"
@@ -107,10 +75,10 @@ func TestAccKeycloakOpenidClientServiceAccountRole_enableAfterCreate(t *testing.
 		CheckDestroy:      testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_before(realmName, bearerClientId, consumerClientId),
+				Config: testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_before(bearerClientId, consumerClientId),
 			},
 			{
-				Config: testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_after(realmName, bearerClientId, consumerClientId),
+				Config: testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_after(bearerClientId, consumerClientId),
 				Check:  testAccCheckKeycloakOpenidClientServiceAccountRoleExists(resourceName),
 			},
 		},
@@ -152,12 +120,12 @@ func testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy() resource.TestCh
 				continue
 			}
 
-			realmId := rs.Primary.Attributes["realm_id"]
+			realm := rs.Primary.Attributes["realm_id"]
 			serviceAccountUserId := rs.Primary.Attributes["service_account_user_id"]
 			clientId := rs.Primary.Attributes["client_id"]
 			id := strings.Split(rs.Primary.ID, "/")[1]
 
-			serviceAccountRole, _ := keycloakClient.GetOpenidClientServiceAccountRole(realmId, serviceAccountUserId, clientId, id)
+			serviceAccountRole, _ := keycloakClient.GetOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, id)
 			if serviceAccountRole != nil {
 				return fmt.Errorf("service account role exists")
 			}
@@ -173,12 +141,12 @@ func getKeycloakOpenidClientServiceAccountRoleFromState(s *terraform.State, reso
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
 	}
 
-	realmId := rs.Primary.Attributes["realm_id"]
+	realm := rs.Primary.Attributes["realm_id"]
 	serviceAccountUserId := rs.Primary.Attributes["service_account_user_id"]
 	clientId := rs.Primary.Attributes["client_id"]
 	id := strings.Split(rs.Primary.ID, "/")[1]
 
-	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRole(realmId, serviceAccountUserId, clientId, id)
+	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting service account role mapping: %s", err)
 	}
@@ -202,81 +170,81 @@ func getKeycloakOpenidClientServiceAccountRoleImportId(resourceName string) reso
 	}
 }
 
-func testKeycloakOpenidClientServiceAccountRole_basic(realm, clientId string) string {
+func testKeycloakOpenidClientServiceAccountRole_basic(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "test" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "test" {
 	client_id                = "%s"
-	realm_id                 = keycloak_realm.test.id
+	realm_id                 = data.keycloak_realm.realm.id
 	access_type              = "CONFIDENTIAL"
 	service_accounts_enabled = true
 }
 
 data "keycloak_openid_client" "broker" {
-  realm_id  = keycloak_realm.test.id
+  realm_id  = data.keycloak_realm.realm.id
   client_id = "broker"
 }
 
 resource "keycloak_openid_client_service_account_role" "test" {
-	realm_id                = keycloak_realm.test.id
+	realm_id                = data.keycloak_realm.realm.id
 	client_id               = data.keycloak_openid_client.broker.id
 	service_account_user_id = keycloak_openid_client.test.service_account_user_id
 	role                    = "read-token"
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }
 
-func testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_before(realm, bearerClientId, consumerClientId string) string {
+func testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_before(bearerClientId, consumerClientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "test" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "bearer" {
 	client_id   = "%s"
-	realm_id    = keycloak_realm.test.id
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "BEARER-ONLY"
 }
 
 resource "keycloak_role" "bearer_role" {
-	realm_id  = keycloak_realm.test.id
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = keycloak_openid_client.bearer.id
 	name      = "bearer-role"
 }
 
 resource "keycloak_openid_client" "consumer" {
-  realm_id  = keycloak_realm.test.id
+  realm_id  = data.keycloak_realm.realm.id
   client_id = "%s"
 
   access_type              = "CONFIDENTIAL"
   service_accounts_enabled = false
 }
-	`, realm, bearerClientId, consumerClientId)
+	`, testAccRealm.Realm, bearerClientId, consumerClientId)
 }
 
-func testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_after(realm, bearerClientId, consumerClientId string) string {
+func testKeycloakOpenidClientServiceAccountRole_enableAfterCreate_after(bearerClientId, consumerClientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "test" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "bearer" {
 	client_id   = "%s"
-	realm_id    = keycloak_realm.test.id
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "BEARER-ONLY"
 }
 
 resource "keycloak_role" "bearer_role" {
-	realm_id  = keycloak_realm.test.id
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = keycloak_openid_client.bearer.id
 	name      = "bearer-role"
 }
 
 resource "keycloak_openid_client" "consumer" {
-  realm_id  = keycloak_realm.test.id
+  realm_id  = data.keycloak_realm.realm.id
   client_id = "%s"
 
   access_type              = "CONFIDENTIAL"
@@ -284,10 +252,10 @@ resource "keycloak_openid_client" "consumer" {
 }
 
 resource "keycloak_openid_client_service_account_role" "consumer_service_account_role" {
-  realm_id                = keycloak_realm.test.id
+  realm_id                = data.keycloak_realm.realm.id
   service_account_user_id = keycloak_openid_client.consumer.service_account_user_id
   client_id               = keycloak_openid_client.bearer.id
   role                    = keycloak_role.bearer_role.name
 }
-	`, realm, bearerClientId, consumerClientId)
+	`, testAccRealm.Realm, bearerClientId, consumerClientId)
 }

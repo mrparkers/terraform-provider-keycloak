@@ -11,7 +11,6 @@ import (
 
 func TestAccKeycloakOpenidClientAuthorizationScope_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	scopeName := "terraform-" + acctest.RandString(10)
 
@@ -21,7 +20,7 @@ func TestAccKeycloakOpenidClientAuthorizationScope_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientAuthorizationScope_basic(realmName, clientId, scopeName),
+				Config: testKeycloakOpenidClientAuthorizationScope_basic(clientId, scopeName),
 				Check:  testAccCheckKeycloakOpenidClientAuthorizationScopeExists("keycloak_openid_client_authorization_scope.test"),
 			},
 		},
@@ -32,7 +31,6 @@ func TestAccKeycloakOpenidClientAuthorizationScope_createAfterManualDestroy(t *t
 	t.Parallel()
 	var authorizationScope = &keycloak.OpenidClientAuthorizationScope{}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	scopeName := "terraform-" + acctest.RandString(10)
 
@@ -42,7 +40,7 @@ func TestAccKeycloakOpenidClientAuthorizationScope_createAfterManualDestroy(t *t
 		CheckDestroy:      testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientAuthorizationScope_basic(realmName, clientId, scopeName),
+				Config: testKeycloakOpenidClientAuthorizationScope_basic(clientId, scopeName),
 				Check:  testAccCheckKeycloakOpenidClientAuthorizationScopeFetch("keycloak_openid_client_authorization_scope.test", authorizationScope),
 			},
 			{
@@ -52,38 +50,8 @@ func TestAccKeycloakOpenidClientAuthorizationScope_createAfterManualDestroy(t *t
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakOpenidClientAuthorizationScope_basic(realmName, clientId, scopeName),
+				Config: testKeycloakOpenidClientAuthorizationScope_basic(clientId, scopeName),
 				Check:  testAccCheckKeycloakOpenidClientAuthorizationScopeExists("keycloak_openid_client_authorization_scope.test"),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakOpenidClientAuthorizationScope_basicUpdateRealm(t *testing.T) {
-	t.Parallel()
-	firstRealm := "terraform-" + acctest.RandString(10)
-	secondRealm := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
-	scopeName := "terraform-" + acctest.RandString(10)
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakOpenidClientAuthorizationScope_basic(firstRealm, clientId, scopeName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakOpenidClientAuthorizationScopeExists("keycloak_openid_client_authorization_scope.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_scope.test", "realm_id", firstRealm),
-				),
-			},
-			{
-				Config: testKeycloakOpenidClientAuthorizationScope_basic(secondRealm, clientId, scopeName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakOpenidClientAuthorizationScopeExists("keycloak_openid_client_authorization_scope.test"),
-					resource.TestCheckResourceAttr("keycloak_openid_client_authorization_scope.test", "realm_id", secondRealm),
-				),
 			},
 		},
 	})
@@ -91,18 +59,17 @@ func TestAccKeycloakOpenidClientAuthorizationScope_basicUpdateRealm(t *testing.T
 
 func TestAccKeycloakOpenidClientAuthorizationScope_basicUpdateAll(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	firstAuthrorizationScope := &keycloak.OpenidClientAuthorizationScope{
-		RealmId:     realmName,
+		RealmId:     testAccRealm.Realm,
 		Name:        acctest.RandString(10),
 		DisplayName: acctest.RandString(10),
 		IconUri:     acctest.RandString(10),
 	}
 
 	secondAuthrorizationScope := &keycloak.OpenidClientAuthorizationScope{
-		RealmId:     realmName,
+		RealmId:     testAccRealm.Realm,
 		Name:        acctest.RandString(10),
 		DisplayName: acctest.RandString(10),
 		IconUri:     acctest.RandString(10),
@@ -158,11 +125,11 @@ func testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy() resource.TestCh
 				continue
 			}
 
-			realmId := rs.Primary.Attributes["realm_id"]
+			realm := rs.Primary.Attributes["realm_id"]
 			resourceServerId := rs.Primary.Attributes["resource_server_id"]
 			id := rs.Primary.ID
 
-			authorizationScope, _ := keycloakClient.GetOpenidClientAuthorizationScope(realmId, resourceServerId, id)
+			authorizationScope, _ := keycloakClient.GetOpenidClientAuthorizationScope(realm, resourceServerId, id)
 			if authorizationScope != nil {
 				return fmt.Errorf("test config with id %s still exists", id)
 			}
@@ -178,11 +145,11 @@ func getKeycloakOpenidClientAuthorizationScopeFromState(s *terraform.State, scop
 		return nil, fmt.Errorf("resource not found: %s", scopeName)
 	}
 
-	realmId := rs.Primary.Attributes["realm_id"]
+	realm := rs.Primary.Attributes["realm_id"]
 	resourceServerId := rs.Primary.Attributes["resource_server_id"]
 	id := rs.Primary.ID
 
-	authorizationScope, err := keycloakClient.GetOpenidClientAuthorizationScope(realmId, resourceServerId, id)
+	authorizationScope, err := keycloakClient.GetOpenidClientAuthorizationScope(realm, resourceServerId, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting authorization scope config with id %s: %s", id, err)
 	}
@@ -190,15 +157,15 @@ func getKeycloakOpenidClientAuthorizationScopeFromState(s *terraform.State, scop
 	return authorizationScope, nil
 }
 
-func testKeycloakOpenidClientAuthorizationScope_basic(realm, clientId, scopeName string) string {
+func testKeycloakOpenidClientAuthorizationScope_basic(clientId, scopeName string) string {
 	return fmt.Sprintf(`
-resource keycloak_realm test {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource keycloak_openid_client test {
 	client_id                = "%s"
-	realm_id                 = "${keycloak_realm.test.id}"
+	realm_id                 = data.keycloak_realm.realm.id
 	access_type              = "CONFIDENTIAL"
 	service_accounts_enabled = true
 	authorization {
@@ -209,20 +176,20 @@ resource keycloak_openid_client test {
 resource keycloak_openid_client_authorization_scope test {
   resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
   name               = "%s"
-  realm_id           = "${keycloak_realm.test.id}"
+  realm_id           = data.keycloak_realm.realm.id
 }
-	`, realm, clientId, scopeName)
+	`, testAccRealm.Realm, clientId, scopeName)
 }
 
 func testKeycloakOpenidClientAuthorizationScope_basicFromInterface(clientId string, authorizationScope *keycloak.OpenidClientAuthorizationScope) string {
 	return fmt.Sprintf(`
-resource keycloak_realm test {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource keycloak_openid_client test {
 	client_id                = "%s"
-	realm_id                 = "${keycloak_realm.test.id}"
+	realm_id                 = data.keycloak_realm.realm.id
 	access_type              = "CONFIDENTIAL"
 	service_accounts_enabled = true
 	authorization {
@@ -233,7 +200,7 @@ resource keycloak_openid_client test {
 resource keycloak_openid_client_authorization_scope test {
   resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
   name                 = "%s"
-  realm_id             = "${keycloak_realm.test.id}"
+  realm_id             = data.keycloak_realm.realm.id
   display_name         = "%s"
   icon_uri             = "%s"
 }

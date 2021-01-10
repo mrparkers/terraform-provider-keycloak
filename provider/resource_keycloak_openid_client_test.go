@@ -13,7 +13,6 @@ import (
 
 func TestAccKeycloakOpenidClient_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -22,14 +21,14 @@ func TestAccKeycloakOpenidClient_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_basic(realmName, clientId),
+				Config: testKeycloakOpenidClient_basic(clientId),
 				Check:  testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 			},
 			{
 				ResourceName:            "keycloak_openid_client.client",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateIdPrefix:     realmName + "/",
+				ImportStateIdPrefix:     testAccRealm.Realm + "/",
 				ImportStateVerifyIgnore: []string{"exclude_session_state_from_auth_response"},
 			},
 		},
@@ -40,7 +39,6 @@ func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var client = &keycloak.OpenidClient{}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -49,7 +47,7 @@ func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_basic(realmName, clientId),
+				Config: testKeycloakOpenidClient_basic(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 					testAccCheckKeycloakOpenidClientFetch("keycloak_openid_client.client", client),
@@ -62,7 +60,7 @@ func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakOpenidClient_basic(realmName, clientId),
+				Config: testKeycloakOpenidClient_basic(clientId),
 				Check:  testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 			},
 		},
@@ -81,14 +79,14 @@ func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_updateRealmBefore(realmOne, realmTwo, clientId),
+				Config: testKeycloakOpenidClient_updateRealmBefore(realmTwo, clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 					testAccCheckKeycloakOpenidClientBelongsToRealm("keycloak_openid_client.client", realmOne),
 				),
 			},
 			{
-				Config: testKeycloakOpenidClient_updateRealmAfter(realmOne, realmTwo, clientId),
+				Config: testKeycloakOpenidClient_updateRealmAfter(realmTwo, clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 					testAccCheckKeycloakOpenidClientBelongsToRealm("keycloak_openid_client.client", realmTwo),
@@ -100,7 +98,6 @@ func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -109,15 +106,15 @@ func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_accessType(realmName, clientId, "CONFIDENTIAL"),
+				Config: testKeycloakOpenidClient_accessType(clientId, "CONFIDENTIAL"),
 				Check:  testAccCheckKeycloakOpenidClientAccessType("keycloak_openid_client.client", false, false),
 			},
 			{
-				Config: testKeycloakOpenidClient_accessType(realmName, clientId, "PUBLIC"),
+				Config: testKeycloakOpenidClient_accessType(clientId, "PUBLIC"),
 				Check:  testAccCheckKeycloakOpenidClientAccessType("keycloak_openid_client.client", true, false),
 			},
 			{
-				Config: testKeycloakOpenidClient_accessType(realmName, clientId, "BEARER-ONLY"),
+				Config: testKeycloakOpenidClient_accessType(clientId, "BEARER-ONLY"),
 				Check:  testAccCheckKeycloakOpenidClientAccessType("keycloak_openid_client.client", false, true),
 			},
 		},
@@ -126,7 +123,6 @@ func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_adminUrl(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	adminUrl := "https://www.example.com/admin"
 
@@ -136,7 +132,7 @@ func TestAccKeycloakOpenidClient_adminUrl(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_adminUrl(realmName, clientId, adminUrl),
+				Config: testKeycloakOpenidClient_adminUrl(clientId, adminUrl),
 				Check:  testAccCheckKeycloakOpenidClientAdminUrl("keycloak_openid_client.client", adminUrl),
 			},
 		},
@@ -145,7 +141,6 @@ func TestAccKeycloakOpenidClient_adminUrl(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	baseUrl := "https://www.example.com"
 
@@ -155,7 +150,7 @@ func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_baseUrl(realmName, clientId, baseUrl),
+				Config: testKeycloakOpenidClient_baseUrl(clientId, baseUrl),
 				Check:  testAccCheckKeycloakOpenidClientBaseUrl("keycloak_openid_client.client", baseUrl),
 			},
 		},
@@ -164,7 +159,6 @@ func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_rootUrl(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	rootUrl := "https://www.example.com"
 
@@ -174,7 +168,7 @@ func TestAccKeycloakOpenidClient_rootUrl(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_rootUrl(realmName, clientId, rootUrl),
+				Config: testKeycloakOpenidClient_rootUrl(clientId, rootUrl),
 				Check:  testAccCheckKeycloakOpenidClientRootUrl("keycloak_openid_client.client", rootUrl),
 			},
 		},
@@ -183,7 +177,6 @@ func TestAccKeycloakOpenidClient_rootUrl(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	t.Parallel()
-	realm := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	enabled := randomBool()
 	standardFlowEnabled := randomBool()
@@ -197,7 +190,6 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 
 	rootUrlBefore := "http://localhost:2222/" + acctest.RandString(20)
 	openidClientBefore := &keycloak.OpenidClient{
-		RealmId:                   realm,
 		ClientId:                  clientId,
 		Name:                      acctest.RandString(10),
 		Enabled:                   enabled,
@@ -218,7 +210,6 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 
 	rootUrlAfter := "http://localhost:2222/" + acctest.RandString(20)
 	openidClientAfter := &keycloak.OpenidClient{
-		RealmId:                   realm,
 		ClientId:                  clientId,
 		Name:                      acctest.RandString(10),
 		Enabled:                   !enabled,
@@ -253,7 +244,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 				),
 			},
 			{
-				Config: testKeycloakOpenidClient_basic(realm, clientId),
+				Config: testKeycloakOpenidClient_basic(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 				),
@@ -264,7 +255,6 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	accessTokenLifespan := "1800"
@@ -275,14 +265,14 @@ func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_AccessToken_basic(realmName, clientId, accessTokenLifespan),
+				Config: testKeycloakOpenidClient_AccessToken_basic(clientId, accessTokenLifespan),
 				Check:  testAccCheckKeycloakOpenidClientExistsWithCorrectLifespan("keycloak_openid_client.client", accessTokenLifespan),
 			},
 			{
 				ResourceName:            "keycloak_openid_client.client",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateIdPrefix:     realmName + "/",
+				ImportStateIdPrefix:     testAccRealm.Realm + "/",
 				ImportStateVerifyIgnore: []string{"exclude_session_state_from_auth_response"},
 			},
 		},
@@ -291,7 +281,6 @@ func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	offlineSessionIdleTimeout := "1800"
@@ -305,7 +294,7 @@ func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_ClientTimeouts(realmName, clientId,
+				Config: testKeycloakOpenidClient_ClientTimeouts(clientId,
 					offlineSessionIdleTimeout, offlineSessionMaxLifespan, sessionIdleTimeout, sessionMaxLifespan),
 				Check: testAccCheckKeycloakOpenidClientExistsWithCorrectClientTimeouts("keycloak_openid_client.client",
 					offlineSessionIdleTimeout, offlineSessionMaxLifespan, sessionIdleTimeout, sessionMaxLifespan,
@@ -315,7 +304,7 @@ func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
 				ResourceName:            "keycloak_openid_client.client",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateIdPrefix:     realmName + "/",
+				ImportStateIdPrefix:     testAccRealm.Realm + "/",
 				ImportStateVerifyIgnore: []string{"exclude_session_state_from_auth_response"},
 			},
 		},
@@ -324,7 +313,6 @@ func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_secret(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	clientSecret := acctest.RandString(10)
 
@@ -334,14 +322,14 @@ func TestAccKeycloakOpenidClient_secret(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_basic(realmName, clientId),
+				Config: testKeycloakOpenidClient_basic(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 					testAccCheckKeycloakOpenidClientHasNonEmptyClientSecret("keycloak_openid_client.client"),
 				),
 			},
 			{
-				Config: testKeycloakOpenidClient_secret(realmName, clientId, clientSecret),
+				Config: testKeycloakOpenidClient_secret(clientId, clientSecret),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
 					testAccCheckKeycloakOpenidClientHasClientSecret("keycloak_openid_client.client", clientSecret),
@@ -353,7 +341,6 @@ func TestAccKeycloakOpenidClient_secret(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	accessType := randomStringInSlice([]string{"PUBLIC", "CONFIDENTIAL"})
 
@@ -363,11 +350,11 @@ func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenidClient_invalidRedirectUris(realmName, clientId, accessType, true, false),
+				Config:      testKeycloakOpenidClient_invalidRedirectUris(clientId, accessType, true, false),
 				ExpectError: regexp.MustCompile("validation error: standard \\(authorization code\\) and implicit flows require at least one valid redirect uri"),
 			},
 			{
-				Config:      testKeycloakOpenidClient_invalidRedirectUris(realmName, clientId, accessType, false, true),
+				Config:      testKeycloakOpenidClient_invalidRedirectUris(clientId, accessType, false, true),
 				ExpectError: regexp.MustCompile("validation error: standard \\(authorization code\\) and implicit flows require at least one valid redirect uri"),
 			},
 		},
@@ -376,7 +363,6 @@ func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_publicClientCredentialsValidation(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -385,7 +371,7 @@ func TestAccKeycloakOpenidClient_publicClientCredentialsValidation(t *testing.T)
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenidClient_invalidPublicClientWithClientCredentials(realmName, clientId),
+				Config:      testKeycloakOpenidClient_invalidPublicClientWithClientCredentials(clientId),
 				ExpectError: regexp.MustCompile("validation error: service accounts \\(client credentials flow\\) cannot be enabled on public clients"),
 			},
 		},
@@ -394,7 +380,6 @@ func TestAccKeycloakOpenidClient_publicClientCredentialsValidation(t *testing.T)
 
 func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -403,19 +388,19 @@ func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, true, false, false, false),
+				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(clientId, true, false, false, false),
 				ExpectError: regexp.MustCompile("validation error: Keycloak cannot issue tokens for bearer-only clients; no oauth2 flows can be enabled for this client"),
 			},
 			{
-				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, false, true, false, false),
+				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(clientId, false, true, false, false),
 				ExpectError: regexp.MustCompile("validation error: Keycloak cannot issue tokens for bearer-only clients; no oauth2 flows can be enabled for this client"),
 			},
 			{
-				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, false, false, true, false),
+				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(clientId, false, false, true, false),
 				ExpectError: regexp.MustCompile("validation error: Keycloak cannot issue tokens for bearer-only clients; no oauth2 flows can be enabled for this client"),
 			},
 			{
-				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realmName, clientId, false, false, false, true),
+				Config:      testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(clientId, false, false, false, true),
 				ExpectError: regexp.MustCompile("validation error: Keycloak cannot issue tokens for bearer-only clients; no oauth2 flows can be enabled for this client"),
 			},
 		},
@@ -424,7 +409,6 @@ func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -433,32 +417,32 @@ func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, "invalidMethod"),
+				Config:      testKeycloakOpenidClient_pkceChallengeMethod(clientId, "invalidMethod"),
 				ExpectError: regexp.MustCompile(`expected pkce_code_challenge_method to be one of \[\ plain S256\], got invalidMethod`),
 			},
 			{
-				Config: testKeycloakOpenidClient_omitPkceChallengeMethod(realmName, clientId),
+				Config: testKeycloakOpenidClient_omitPkceChallengeMethod(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
 					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
 				),
 			},
 			{
-				Config: testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, "plain"),
+				Config: testKeycloakOpenidClient_pkceChallengeMethod(clientId, "plain"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", "plain"),
 					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
 				),
 			},
 			{
-				Config: testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, "S256"),
+				Config: testKeycloakOpenidClient_pkceChallengeMethod(clientId, "S256"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", "S256"),
 					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
 				),
 			},
 			{
-				Config: testKeycloakOpenidClient_pkceChallengeMethod(realmName, clientId, ""),
+				Config: testKeycloakOpenidClient_pkceChallengeMethod(clientId, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
 					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
@@ -470,7 +454,6 @@ func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -479,28 +462,28 @@ func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_omitExcludeSessionStateFromAuthResponse(realmName, clientId, "plain"),
+				Config: testKeycloakOpenidClient_omitExcludeSessionStateFromAuthResponse(clientId, "plain"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
 					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", "plain"),
 				),
 			},
 			{
-				Config: testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(realmName, clientId, false),
+				Config: testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(clientId, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
 					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
 				),
 			},
 			{
-				Config: testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(realmName, clientId, true),
+				Config: testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(clientId, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", true),
 					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
 				),
 			},
 			{
-				Config: testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(realmName, clientId, false),
+				Config: testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(clientId, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse("keycloak_openid_client.client", false),
 					testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod("keycloak_openid_client.client", ""),
@@ -512,7 +495,6 @@ func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.
 
 func TestAccKeycloakOpenidClient_authenticationFlowBindingOverrides(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -521,11 +503,11 @@ func TestAccKeycloakOpenidClient_authenticationFlowBindingOverrides(t *testing.T
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_authenticationFlowBindingOverrides(realmName, clientId),
+				Config: testKeycloakOpenidClient_authenticationFlowBindingOverrides(clientId),
 				Check:  testAccCheckKeycloakOpenidClientAuthenticationFlowBindingOverrides("keycloak_openid_client.client", "keycloak_authentication_flow.another_flow"),
 			},
 			{
-				Config: testKeycloakOpenidClient_withoutAuthenticationFlowBindingOverrides(realmName, clientId),
+				Config: testKeycloakOpenidClient_withoutAuthenticationFlowBindingOverrides(clientId),
 				Check:  testAccCheckKeycloakOpenidClientAuthenticationFlowBindingOverrides("keycloak_openid_client.client", ""),
 			},
 		},
@@ -534,7 +516,6 @@ func TestAccKeycloakOpenidClient_authenticationFlowBindingOverrides(t *testing.T
 
 func TestAccKeycloakOpenidClient_loginTheme(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 	loginThemeKeycloak := "keycloak"
 	loginThemeBase := "base"
@@ -546,19 +527,19 @@ func TestAccKeycloakOpenidClient_loginTheme(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_loginTheme(realmName, clientId, loginThemeKeycloak),
+				Config: testKeycloakOpenidClient_loginTheme(clientId, loginThemeKeycloak),
 				Check:  testAccCheckKeycloakOpenidClientLoginTheme("keycloak_openid_client.client", loginThemeKeycloak),
 			},
 			{
-				Config: testKeycloakOpenidClient_loginTheme(realmName, clientId, loginThemeBase),
+				Config: testKeycloakOpenidClient_loginTheme(clientId, loginThemeBase),
 				Check:  testAccCheckKeycloakOpenidClientLoginTheme("keycloak_openid_client.client", loginThemeBase),
 			},
 			{
-				Config:      testKeycloakOpenidClient_loginTheme(realmName, clientId, loginThemeRandom),
+				Config:      testKeycloakOpenidClient_loginTheme(clientId, loginThemeRandom),
 				ExpectError: regexp.MustCompile("validation error: theme \".+\" does not exist on the server"),
 			},
 			{
-				Config: testKeycloakOpenidClient_loginTheme(realmName, clientId, loginThemeKeycloak),
+				Config: testKeycloakOpenidClient_loginTheme(clientId, loginThemeKeycloak),
 				Check:  testAccCheckKeycloakOpenidClientLoginTheme("keycloak_openid_client.client", loginThemeKeycloak),
 			},
 		},
@@ -864,46 +845,46 @@ func getOpenidClientFromState(s *terraform.State, resourceName string) (*keycloa
 	return client, nil
 }
 
-func testKeycloakOpenidClient_basic(realm, clientId string) string {
+func testKeycloakOpenidClient_basic(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }
 
-func testKeycloakOpenidClient_AccessToken_basic(realm, clientId, accessTokenLifespan string) string {
+func testKeycloakOpenidClient_AccessToken_basic(clientId, accessTokenLifespan string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   		  = "%s"
-	realm_id    		  = "${keycloak_realm.realm.id}"
+	realm_id    		  = data.keycloak_realm.realm.id
 	access_type 		  = "CONFIDENTIAL"
 	access_token_lifespan = "%s"
 }
-	`, realm, clientId, accessTokenLifespan)
+	`, testAccRealm.Realm, clientId, accessTokenLifespan)
 }
 
-func testKeycloakOpenidClient_ClientTimeouts(realm, clientId,
+func testKeycloakOpenidClient_ClientTimeouts(clientId,
 	offlineSessionIdleTimeout string, offlineSessionMaxLifespan string,
 	sessionIdleTimeout string, sessionMaxLifespan string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   		  = "%s"
-	realm_id    		  = "${keycloak_realm.realm.id}"
+	realm_id    		  = data.keycloak_realm.realm.id
 	access_type 		  = "CONFIDENTIAL"
 
 	client_offline_session_idle_timeout = "%s"
@@ -911,61 +892,61 @@ resource "keycloak_openid_client" "client" {
 	client_session_idle_timeout         = "%s"
 	client_session_max_lifespan         = "%s"
 }
-	`, realm, clientId, offlineSessionIdleTimeout, offlineSessionMaxLifespan, sessionIdleTimeout, sessionMaxLifespan)
+	`, testAccRealm.Realm, clientId, offlineSessionIdleTimeout, offlineSessionMaxLifespan, sessionIdleTimeout, sessionMaxLifespan)
 }
 
-func testKeycloakOpenidClient_accessType(realm, clientId, accessType string) string {
+func testKeycloakOpenidClient_accessType(clientId, accessType string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "%s"
 }
-	`, realm, clientId, accessType)
+	`, testAccRealm.Realm, clientId, accessType)
 }
 
-func testKeycloakOpenidClient_adminUrl(realm, clientId, adminUrl string) string {
+func testKeycloakOpenidClient_adminUrl(clientId, adminUrl string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	admin_url = "%s"
 	access_type = "PUBLIC"
 }
-	`, realm, clientId, adminUrl)
+	`, testAccRealm.Realm, clientId, adminUrl)
 }
 
-func testKeycloakOpenidClient_baseUrl(realm, clientId, baseUrl string) string {
+func testKeycloakOpenidClient_baseUrl(clientId, baseUrl string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	base_url = "%s"
 	access_type = "PUBLIC"
 }
-	`, realm, clientId, baseUrl)
+	`, testAccRealm.Realm, clientId, baseUrl)
 }
 
-func testKeycloakOpenidClient_rootUrl(realm, clientId, rootUrl string) string {
+func testKeycloakOpenidClient_rootUrl(clientId, rootUrl string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id             = "%s"
-	realm_id			  = "${keycloak_realm.realm.id}"
+	realm_id			  = data.keycloak_realm.realm.id
 	root_url			  = "%s"
 	valid_redirect_uris   = ["http://example.com"]
 	web_origins			  = ["http://example.com"]
@@ -973,117 +954,117 @@ resource "keycloak_openid_client" "client" {
 	access_type           = "CONFIDENTIAL"
 	standard_flow_enabled = true
 }
-	`, realm, clientId, rootUrl)
+	`, testAccRealm.Realm, clientId, rootUrl)
 }
 
-func testKeycloakOpenidClient_pkceChallengeMethod(realm, clientId, pkceChallengeMethod string) string {
+func testKeycloakOpenidClient_pkceChallengeMethod(clientId, pkceChallengeMethod string) string {
 
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
 	pkce_code_challenge_method = "%s"
 }
-	`, realm, clientId, pkceChallengeMethod)
+	`, testAccRealm.Realm, clientId, pkceChallengeMethod)
 }
 
-func testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(realm, clientId string, excludeSessionStateFromAuthResponse bool) string {
+func testKeycloakOpenidClient_excludeSessionStateFromAuthResponse(clientId string, excludeSessionStateFromAuthResponse bool) string {
 
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
 	exclude_session_state_from_auth_response = %t
 }
-	`, realm, clientId, excludeSessionStateFromAuthResponse)
+	`, testAccRealm.Realm, clientId, excludeSessionStateFromAuthResponse)
 }
 
-func testKeycloakOpenidClient_omitPkceChallengeMethod(realm, clientId string) string {
+func testKeycloakOpenidClient_omitPkceChallengeMethod(clientId string) string {
 
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }
 
-func testKeycloakOpenidClient_omitExcludeSessionStateFromAuthResponse(realm, clientId, pkceChallengeMethod string) string {
+func testKeycloakOpenidClient_omitExcludeSessionStateFromAuthResponse(clientId, pkceChallengeMethod string) string {
 
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
     pkce_code_challenge_method = "%s"
 }
-	`, realm, clientId, pkceChallengeMethod)
+	`, testAccRealm.Realm, clientId, pkceChallengeMethod)
 }
 
-func testKeycloakOpenidClient_updateRealmBefore(realmOne, realmTwo, clientId string) string {
+func testKeycloakOpenidClient_updateRealmBefore(realmTwo, clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
+data "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_2" {
+data "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm_1.id}"
+	realm_id    = data.keycloak_realm.realm_1.id
 	access_type = "BEARER-ONLY"
 }
-	`, realmOne, realmTwo, clientId)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, clientId)
 }
 
-func testKeycloakOpenidClient_updateRealmAfter(realmOne, realmTwo, clientId string) string {
+func testKeycloakOpenidClient_updateRealmAfter(realmTwo, clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
+data "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_2" {
+data "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm_2.id}"
+	realm_id    = data.keycloak_realm.realm_2.id
 	access_type = "BEARER-ONLY"
 }
-	`, realmOne, realmTwo, clientId)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, clientId)
 }
 
 func testKeycloakOpenidClient_fromInterface(openidClient *keycloak.OpenidClient) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id                    = "%s"
-	realm_id                     = "${keycloak_realm.realm.id}"
+	realm_id                     = data.keycloak_realm.realm.id
 	name                         = "%s"
 	enabled                      = %t
 	description                  = "%s"
@@ -1102,66 +1083,66 @@ resource "keycloak_openid_client" "client" {
 	base_url                     = "%s"
 	root_url                     = "%s"
 }
-	`, openidClient.RealmId, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl)
+	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl)
 }
 
-func testKeycloakOpenidClient_secret(realm, clientId, clientSecret string) string {
+func testKeycloakOpenidClient_secret(clientId, clientSecret string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id     = "%s"
-	realm_id      = "${keycloak_realm.realm.id}"
+	realm_id      = data.keycloak_realm.realm.id
 	access_type   = "CONFIDENTIAL"
 	client_secret = "%s"
 }
-	`, realm, clientId, clientSecret)
+	`, testAccRealm.Realm, clientId, clientSecret)
 }
 
-func testKeycloakOpenidClient_invalidRedirectUris(realm, clientId, accessType string, standardFlowEnabled, implicitFlowEnabled bool) string {
+func testKeycloakOpenidClient_invalidRedirectUris(clientId, accessType string, standardFlowEnabled, implicitFlowEnabled bool) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id             = "%s"
-	realm_id              = "${keycloak_realm.realm.id}"
+	realm_id              = data.keycloak_realm.realm.id
 	access_type           = "%s"
 
 	standard_flow_enabled = %t
 	implicit_flow_enabled = %t
 }
-	`, realm, clientId, accessType, standardFlowEnabled, implicitFlowEnabled)
+	`, testAccRealm.Realm, clientId, accessType, standardFlowEnabled, implicitFlowEnabled)
 }
 
-func testKeycloakOpenidClient_invalidPublicClientWithClientCredentials(realm, clientId string) string {
+func testKeycloakOpenidClient_invalidPublicClientWithClientCredentials(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id                = "%s"
-	realm_id                 = "${keycloak_realm.realm.id}"
+	realm_id                 = data.keycloak_realm.realm.id
 	access_type              = "PUBLIC"
 
 	service_accounts_enabled = true
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }
 
-func testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(realm, clientId string, standardFlowEnabled, implicitFlowEnabled, directAccessGrantsEnabled, serviceAccountsEnabled bool) string {
+func testKeycloakOpenidClient_bearerOnlyClientsCannotIssueTokens(clientId string, standardFlowEnabled, implicitFlowEnabled, directAccessGrantsEnabled, serviceAccountsEnabled bool) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id                    = "%s"
-	realm_id                     = "${keycloak_realm.realm.id}"
+	realm_id                     = data.keycloak_realm.realm.id
 	access_type                  = "BEARER-ONLY"
 
 	standard_flow_enabled        = %t
@@ -1169,64 +1150,64 @@ resource "keycloak_openid_client" "client" {
 	direct_access_grants_enabled = %t
 	service_accounts_enabled     = %t
 }
-	`, realm, clientId, standardFlowEnabled, implicitFlowEnabled, directAccessGrantsEnabled, serviceAccountsEnabled)
+	`, testAccRealm.Realm, clientId, standardFlowEnabled, implicitFlowEnabled, directAccessGrantsEnabled, serviceAccountsEnabled)
 }
 
-func testKeycloakOpenidClient_authenticationFlowBindingOverrides(realm, clientId string) string {
+func testKeycloakOpenidClient_authenticationFlowBindingOverrides(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_authentication_flow" "another_flow" {
   alias    = "anotherFlow"
-  realm_id = "${keycloak_realm.realm.id}"
+  realm_id = data.keycloak_realm.realm.id
   description = "this is another flow"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "PUBLIC"
 	authentication_flow_binding_overrides {
 		browser_id = "${keycloak_authentication_flow.another_flow.id}"
 		direct_grant_id = "${keycloak_authentication_flow.another_flow.id}"
 	}
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }
 
-func testKeycloakOpenidClient_withoutAuthenticationFlowBindingOverrides(realm, clientId string) string {
+func testKeycloakOpenidClient_withoutAuthenticationFlowBindingOverrides(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_authentication_flow" "another_flow" {
   alias    = "anotherFlow"
-  realm_id = "${keycloak_realm.realm.id}"
+  realm_id = data.keycloak_realm.realm.id
   description = "this is another flow"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "PUBLIC"
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }
 
-func testKeycloakOpenidClient_loginTheme(realm, clientId, loginTheme string) string {
+func testKeycloakOpenidClient_loginTheme(clientId, loginTheme string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "PUBLIC"
 	login_theme = "%s"
 }
-	`, realm, clientId, loginTheme)
+	`, testAccRealm.Realm, clientId, loginTheme)
 }
