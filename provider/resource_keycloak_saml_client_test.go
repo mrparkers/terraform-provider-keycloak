@@ -286,6 +286,28 @@ func TestAccKeycloakSamlClient_encryptionCertificate(t *testing.T) {
 	})
 }
 
+func TestAccCheckKeycloakSamlClient_authenticationFlowBindingOverrides(t *testing.T) {
+	t.Parallel()
+
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlClient_authenticationFlowBindingOverrides(clientId),
+				Check:  testAccCheckKeycloakSamlClientAuthenticationFlowBindingOverrides("keycloak_saml_client.client", "keycloak_authentication_flow.another_flow"),
+			},
+			{
+				Config: testKeycloakSamlClient_withoutFlowBindingOverrides(clientId),
+				Check:  testAccCheckKeycloakSamlClientAuthenticationFlowBindingOverrides("keycloak_saml_client.client", ""),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakSamlClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getSamlClientFromState(s, resourceName)
@@ -465,6 +487,41 @@ func testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes(resourceName stri
 
 		if !includeAuthnStatement && !signDocuments && !signAssertions && !encryptAssertions && !clientSignatureRequired && !forcePostBinding && !forceNameIdFormat {
 			return fmt.Errorf("expected saml client with id %s to have some defaults set by Keycloak", rs.Primary.ID)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakSamlClientAuthenticationFlowBindingOverrides(resourceName, flowResourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getSamlClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if flowResourceName == "" {
+			if client.AuthenticationFlowBindingOverrides.BrowserId != "" {
+				return fmt.Errorf("expected openid client to have browserId set to empty, but got %s", client.AuthenticationFlowBindingOverrides.BrowserId)
+			}
+
+			if client.AuthenticationFlowBindingOverrides.DirectGrantId != "" {
+				return fmt.Errorf("expected openid client to have directGrantId set to empty, but got %s", client.AuthenticationFlowBindingOverrides.DirectGrantId)
+			}
+
+		} else {
+			flow, err := getAuthenticationFlowFromState(s, flowResourceName)
+			if err != nil {
+				return err
+			}
+
+			if client.AuthenticationFlowBindingOverrides.BrowserId != flow.Id {
+				return fmt.Errorf("expected openid client to have browserId set to %s, but got %s", flow.Id, client.AuthenticationFlowBindingOverrides.BrowserId)
+			}
+
+			if client.AuthenticationFlowBindingOverrides.DirectGrantId != flow.Id {
+				return fmt.Errorf("expected openid client to have directGrantId set to %s, but got %s", flow.Id, client.AuthenticationFlowBindingOverrides.DirectGrantId)
+			}
 		}
 
 		return nil
@@ -679,6 +736,51 @@ resource "keycloak_saml_client" "saml_client" {
 
 	encrypt_assertions      = true
 	include_authn_statement = true
+}
+	`, testAccRealm.Realm, clientId)
+}
+
+func testKeycloakSamlClient_authenticationFlowBindingOverrides(clientId string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_authentication_flow" "another_flow" {
+  alias       = "anotherFlow"
+  realm_id    = data.keycloak_realm.realm.id
+  description = "this is another flow"
+}
+
+resource "keycloak_saml_client" "client" {
+	client_id = "%s"
+	realm_id  = data.keycloak_realm.realm.id
+	name      = "test-saml-client"
+
+	authentication_flow_binding_overrides {
+		browser_id      = keycloak_authentication_flow.another_flow.id
+		direct_grant_id = keycloak_authentication_flow.another_flow.id
+	}
+}
+	`, testAccRealm.Realm, clientId)
+}
+
+func testKeycloakSamlClient_withoutFlowBindingOverrides(clientId string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_authentication_flow" "another_flow" {
+  alias       = "anotherFlow"
+  realm_id    = data.keycloak_realm.realm.id
+  description = "this is another flow"
+}
+
+resource "keycloak_saml_client" "client" {
+	client_id = "%s"
+	realm_id  = data.keycloak_realm.realm.id
+	name      = "test-saml-client"
 }
 	`, testAccRealm.Realm, clientId)
 }
