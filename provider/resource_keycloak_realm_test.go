@@ -56,8 +56,6 @@ func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteRealm(realmName)
 					if err != nil {
 						t.Fatal(err)
@@ -921,8 +919,6 @@ func testAccCheckKeycloakRealmDestroy() resource.TestCheckFunc {
 			}
 
 			realmName := rs.Primary.ID
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			realm, _ := keycloakClient.GetRealm(realmName)
 			if realm != nil {
 				return fmt.Errorf("realm %s still exists", realmName)
@@ -934,8 +930,6 @@ func testAccCheckKeycloakRealmDestroy() resource.TestCheckFunc {
 }
 
 func getRealmFromState(s *terraform.State, resourceName string) (*keycloak.Realm, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

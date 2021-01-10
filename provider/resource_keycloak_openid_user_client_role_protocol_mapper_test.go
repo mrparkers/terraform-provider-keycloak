@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_basicClient(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-client-role-mapper-" + acctest.RandString(5)
 
@@ -24,7 +24,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_basicClient(t *testing.T)
 		CheckDestroy:      testAccKeycloakOpenIdUserClientRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 		},
@@ -32,7 +32,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_basicClient(t *testing.T)
 }
 
 func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_basicClientScope(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-client-role-mapper-" + acctest.RandString(5)
 
@@ -44,7 +44,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_basicClientScope(t *testi
 		CheckDestroy:      testAccKeycloakOpenIdUserClientRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_clientScope(clientScopeId, mapperName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 		},
@@ -52,7 +52,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_basicClientScope(t *testi
 }
 
 func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_import(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	clientId := "terraform-openid-client-" + acctest.RandString(10)
 	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-client-role-mapper-" + acctest.RandString(5)
@@ -66,7 +66,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_import(t *testing.T) {
 		CheckDestroy:      testAccKeycloakOpenIdUserClientRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_import(realmName, clientId, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_import(clientId, clientScopeId, mapperName),
 				Check: resource.ComposeTestCheckFunc(
 					testKeycloakOpenIdUserClientRoleProtocolMapperExists(clientResourceName),
 					testKeycloakOpenIdUserClientRoleProtocolMapperExists(clientScopeResourceName),
@@ -89,7 +89,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_update(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-client-role-mapper-" + acctest.RandString(5)
 
@@ -104,11 +104,11 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_update(t *testing.T) {
 		CheckDestroy:      testAccKeycloakOpenIdUserClientRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(realmName, clientId, mapperName, claimName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(clientId, mapperName, claimName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(realmName, clientId, mapperName, updatedClaimName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(clientId, mapperName, updatedClaimName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 		},
@@ -116,9 +116,9 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.OpenIdUserClientRoleProtocolMapper{}
 
-	realmName := "terraform-realm-" + acctest.RandString(10)
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-client-role-mapper-" + acctest.RandString(5)
 
@@ -130,19 +130,17 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_createAfterManualDestroy(
 		CheckDestroy:      testAccKeycloakOpenIdUserClientRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperFetch(resourceName, mapper),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteOpenIdUserClientRoleProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
 				},
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 		},
@@ -150,7 +148,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_createAfterManualDestroy(
 }
 
 func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_validateClaimValueType(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	mapperName := "terraform-openid-connect-user-client-role-mapper-" + acctest.RandString(10)
 	invalidClaimValueType := acctest.RandString(5)
 
@@ -160,7 +158,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_validateClaimValueType(t 
 		CheckDestroy:      testAccKeycloakOpenIdUserClientRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenIdUserClientRoleProtocolMapper_validateClaimValueType(realmName, mapperName, invalidClaimValueType),
+				Config:      testKeycloakOpenIdUserClientRoleProtocolMapper_validateClaimValueType(mapperName, invalidClaimValueType),
 				ExpectError: regexp.MustCompile("expected claim_value_type to be one of .+ got " + invalidClaimValueType),
 			},
 		},
@@ -168,7 +166,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_validateClaimValueType(t 
 }
 
 func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_updateClientIdForceNew(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	clientId := "terraform-client-" + acctest.RandString(10)
 	updatedClientId := "terraform-client-update-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-client-role-mapper-" + acctest.RandString(5)
@@ -182,11 +180,11 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_updateClientIdForceNew(t 
 		CheckDestroy:      testAccKeycloakOpenIdUserClientRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(realmName, clientId, mapperName, claimName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(clientId, mapperName, claimName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(realmName, updatedClientId, mapperName, claimName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(updatedClientId, mapperName, claimName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 		},
@@ -194,7 +192,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_updateClientIdForceNew(t 
 }
 
 func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_updateClientScopeForceNew(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	mapperName := "terraform-openid-connect-user-client-role-mapper-" + acctest.RandString(5)
 	clientScopeId := "terraform-client-" + acctest.RandString(10)
 	newClientScopeId := "terraform-client-scope-" + acctest.RandString(10)
@@ -206,11 +204,11 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_updateClientScopeForceNew
 		CheckDestroy:      testAccKeycloakOpenIdUserClientRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_clientScope(clientScopeId, mapperName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_clientScope(realmName, newClientScopeId, mapperName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_basic_clientScope(newClientScopeId, mapperName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 		},
@@ -218,8 +216,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_updateClientScopeForceNew
 }
 
 func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_updateRealmIdForceNew(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	newRealmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	clientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-client-role-mapper-" + acctest.RandString(5)
 
@@ -232,11 +229,11 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_updateRealmIdForceNew(t *
 		CheckDestroy:      testAccKeycloakOpenIdUserClientRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(realmName, clientId, mapperName, claimName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(clientId, mapperName, claimName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(newRealmName, clientId, mapperName, claimName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_claim(clientId, mapperName, claimName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 		},
@@ -244,7 +241,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_updateRealmIdForceNew(t *
 }
 
 func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignment(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	clientId := "terraform-client-" + acctest.RandString(10)
 	assignedClientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-client-role-mapper-" + acctest.RandString(5)
@@ -256,11 +253,11 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignment(t *testi
 		CheckDestroy:      testAccKeycloakOpenIdUserClientRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignment(realmName, clientId, assignedClientId, mapperName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignment(clientId, assignedClientId, mapperName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignment(realmName, clientId, assignedClientId, mapperName),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignment(clientId, assignedClientId, mapperName),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 		},
@@ -268,7 +265,7 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignment(t *testi
 }
 
 func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignmentRolePrefix(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	clientId := "terraform-client-" + acctest.RandString(10)
 	assignedClientId := "terraform-client-" + acctest.RandString(10)
 	mapperName := "terraform-openid-connect-user-client-role-mapper-" + acctest.RandString(5)
@@ -281,11 +278,11 @@ func TestAccKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignmentRolePrefi
 		CheckDestroy:      testAccKeycloakOpenIdUserClientRoleProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignmentRolePrefix(realmName, clientId, assignedClientId, mapperName, rolePrefix),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignmentRolePrefix(clientId, assignedClientId, mapperName, rolePrefix),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignmentRolePrefix(realmName, clientId, assignedClientId, mapperName, rolePrefix),
+				Config: testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignmentRolePrefix(clientId, assignedClientId, mapperName, rolePrefix),
 				Check:  testKeycloakOpenIdUserClientRoleProtocolMapperExists(resourceName),
 			},
 		},
@@ -348,173 +345,171 @@ func getUserClientRoleMapperUsingState(state *terraform.State, resourceName stri
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	return keycloakClient.GetOpenIdUserClientRoleProtocolMapper(realm, clientId, clientScopeId, id)
 }
 
-func testKeycloakOpenIdUserClientRoleProtocolMapper_basic_client(realmName, clientId, mapperName string) string {
+func testKeycloakOpenIdUserClientRoleProtocolMapper_basic_client(clientId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 	access_type = "BEARER-ONLY"
 }
 resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper_client" {
 	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	client_id        = "${keycloak_openid_client.openid_client.id}"
 	claim_name       = "foo"
 	claim_value_type = "String"
-}`, realmName, clientId, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName)
 }
 
-func testKeycloakOpenIdUserClientRoleProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName string) string {
+func testKeycloakOpenIdUserClientRoleProtocolMapper_basic_clientScope(clientScopeId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper_client_scope" {
 	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	client_scope_id  = "${keycloak_openid_client_scope.client_scope.id}"
 	claim_name       = "foo"
 	claim_value_type = "String"
-}`, realmName, clientScopeId, mapperName)
+}`, testAccRealm.Realm, clientScopeId, mapperName)
 }
 
-func testKeycloakOpenIdUserClientRoleProtocolMapper_claim(realmName, clientId, mapperName, claimName string) string {
+func testKeycloakOpenIdUserClientRoleProtocolMapper_claim(clientId, mapperName, claimName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 	access_type = "BEARER-ONLY"
 }
 resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper" {
 	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	client_id        = "${keycloak_openid_client.openid_client.id}"
 	claim_name       = "%s"
 	claim_value_type = "String"
-}`, realmName, clientId, mapperName, claimName)
+}`, testAccRealm.Realm, clientId, mapperName, claimName)
 }
 
-func testKeycloakOpenIdUserClientRoleProtocolMapper_import(realmName, clientId, clientScopeId, mapperName string) string {
+func testKeycloakOpenIdUserClientRoleProtocolMapper_import(clientId, clientScopeId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 resource "keycloak_openid_client" "openid_client" {
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	client_id   = "%s"
 	access_type = "BEARER-ONLY"
 }
 resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper_client" {
 	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	client_id        = "${keycloak_openid_client.openid_client.id}"
 	claim_name       = "foo"
 	claim_value_type = "String"
 }
 resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper_client_scope" {
 	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	client_scope_id  = "${keycloak_openid_client_scope.client_scope.id}"
 	claim_name       = "foo"
 	claim_value_type = "String"
-}`, realmName, clientId, mapperName, clientScopeId, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName, clientScopeId, mapperName)
 }
 
-func testKeycloakOpenIdUserClientRoleProtocolMapper_validateClaimValueType(realmName, mapperName, claimValueType string) string {
+func testKeycloakOpenIdUserClientRoleProtocolMapper_validateClaimValueType(mapperName, claimValueType string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "openid-client"
 	access_type = "BEARER-ONLY"
 }
 resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper_validation" {
 	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	client_id        = "${keycloak_openid_client.openid_client.id}"
 	claim_name      = "foo"
 	claim_value_type = "%s"
-}`, realmName, mapperName, claimValueType)
+}`, testAccRealm.Realm, mapperName, claimValueType)
 }
 
-func testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignment(realmName, clientId, assignedClientId, mapperName string) string {
+func testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignment(clientId, assignedClientId, mapperName string) string {
 	return fmt.Sprintf(`
-	resource "keycloak_realm" "realm" {
-		realm = "%s"
-	}
-
-	resource "keycloak_openid_client" "openid_client" {
-		realm_id  = "${keycloak_realm.realm.id}"
-		client_id = "%s"
-
-		access_type = "BEARER-ONLY"
-	}
-	resource "keycloak_openid_client" "openid_client_assigned" {
-		realm_id  = "${keycloak_realm.realm.id}"
-		client_id = "%s"
-
-		access_type = "BEARER-ONLY"
-	}
-
-	resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper_validation" {
-		name             = "%s"
-		realm_id         = "${keycloak_realm.realm.id}"
-		client_id        = "${keycloak_openid_client.openid_client.id}"
-
-		claim_name      = "foo"
-		claim_value_type = "String"
-		client_id_for_role_mappings = "${keycloak_openid_client.openid_client_assigned.id}"
-	}`, realmName, clientId, assignedClientId, mapperName)
+data "keycloak_realm" "realm" {
+	realm = "%s"
 }
 
-func testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignmentRolePrefix(realmName, clientId, assignedClientId, mapperName, rolePrefix string) string {
+resource "keycloak_openid_client" "openid_client" {
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = "%s"
+
+	access_type = "BEARER-ONLY"
+}
+resource "keycloak_openid_client" "openid_client_assigned" {
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = "%s"
+
+	access_type = "BEARER-ONLY"
+}
+
+resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper_validation" {
+	name             = "%s"
+	realm_id         = data.keycloak_realm.realm.id
+	client_id        = "${keycloak_openid_client.openid_client.id}"
+
+	claim_name      = "foo"
+	claim_value_type = "String"
+	client_id_for_role_mappings = "${keycloak_openid_client.openid_client_assigned.id}"
+}`, testAccRealm.Realm, clientId, assignedClientId, mapperName)
+}
+
+func testKeycloakOpenIdUserClientRoleProtocolMapper_clientAssignmentRolePrefix(clientId, assignedClientId, mapperName, rolePrefix string) string {
 	return fmt.Sprintf(`
-	resource "keycloak_realm" "realm" {
-		realm = "%s"
-	}
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
 
-	resource "keycloak_openid_client" "openid_client" {
-		realm_id  = "${keycloak_realm.realm.id}"
-		client_id = "%s"
+resource "keycloak_openid_client" "openid_client" {
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = "%s"
 
-		access_type = "BEARER-ONLY"
-	}
-	resource "keycloak_openid_client" "openid_client_assigned" {
-		realm_id  = "${keycloak_realm.realm.id}"
-		client_id = "%s"
+	access_type = "BEARER-ONLY"
+}
+resource "keycloak_openid_client" "openid_client_assigned" {
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = "%s"
 
-		access_type = "BEARER-ONLY"
-	}
+	access_type = "BEARER-ONLY"
+}
 
-	resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper_validation" {
-		name             = "%s"
-		realm_id         = "${keycloak_realm.realm.id}"
-		client_id        = "${keycloak_openid_client.openid_client.id}"
+resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_mapper_validation" {
+	name             = "%s"
+	realm_id         = data.keycloak_realm.realm.id
+	client_id        = "${keycloak_openid_client.openid_client.id}"
 
-		claim_name      = "foo"
-		claim_value_type = "String"
-		client_id_for_role_mappings = "${keycloak_openid_client.openid_client_assigned.id}"
-		client_role_prefix= "%s"
-	}`, realmName, clientId, assignedClientId, mapperName, rolePrefix)
+	claim_name      = "foo"
+	claim_value_type = "String"
+	client_id_for_role_mappings = "${keycloak_openid_client.openid_client_assigned.id}"
+	client_role_prefix= "%s"
+}`, testAccRealm.Realm, clientId, assignedClientId, mapperName, rolePrefix)
 }

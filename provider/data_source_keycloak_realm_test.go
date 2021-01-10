@@ -42,6 +42,6 @@ resource "keycloak_realm" "my_realm" {
 }
 
 data "keycloak_realm" "realm" {
-	realm = "${keycloak_realm.my_realm.id}"
+	realm = keycloak_realm.my_realm.id
 }`, realm)
 }

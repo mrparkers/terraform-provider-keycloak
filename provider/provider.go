@@ -10,7 +10,7 @@ import (
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-func KeycloakProvider() *schema.Provider {
+func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 	provider := &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{
 			"keycloak_group":                              dataSourceKeycloakGroup(),
@@ -160,6 +160,10 @@ func KeycloakProvider() *schema.Provider {
 	}
 
 	provider.ConfigureContextFunc = func(_ context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		if client != nil {
+			return client, nil
+		}
+
 		url := data.Get("url").(string)
 		basePath := data.Get("base_path").(string)
 		clientId := data.Get("client_id").(string)
@@ -175,6 +179,7 @@ func KeycloakProvider() *schema.Provider {
 		var diags diag.Diagnostics
 
 		userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", provider.TerraformVersion, meta.SDKVersionString())
+
 		keycloakClient, err := keycloak.NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
