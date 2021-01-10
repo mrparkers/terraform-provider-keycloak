@@ -15,8 +15,8 @@ import (
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_basicClient(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
 
@@ -35,8 +35,8 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_basicClient(t *testing.T) {
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_import(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-saml-client-" + acctest.RandString(10)
-	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	clientResourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
 
@@ -61,11 +61,11 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_import(t *testing.T) {
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_update(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
-	userAttribute := "attr-" + acctest.RandString(10)
-	updatedUserAttribute := "attr-update-" + acctest.RandString(10)
+	userAttribute := acctest.RandomWithPrefix("tf-acc")
+	updatedUserAttribute := acctest.RandomWithPrefix("tf-acc")
 	resourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
 
 	resource.Test(t, resource.TestCase{
@@ -89,8 +89,8 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_createAfterManualDestroy(t *
 	t.Parallel()
 	var mapper = &keycloak.SamlUserAttributeProtocolMapper{}
 
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
 
@@ -119,9 +119,9 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_createAfterManualDestroy(t *
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_validateClaimValueType(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(10)
-	invalidSamlNameFormat := acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	invalidSamlNameFormat := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -138,11 +138,11 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_validateClaimValueType(t *te
 
 func TestAccKeycloakSamlUserAttributeProtocolMapper_updateClientIdForceNew(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-client-" + acctest.RandString(10)
-	updatedClientId := "terraform-client-update-" + acctest.RandString(10)
-	mapperName := "terraform-saml-user-attribute-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	updatedClientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
-	userAttribute := "attr-" + acctest.RandString(10)
+	userAttribute := acctest.RandomWithPrefix("tf-acc")
 	resourceName := "keycloak_saml_user_attribute_protocol_mapper.saml_user_attribute_mapper"
 
 	resource.Test(t, resource.TestCase{

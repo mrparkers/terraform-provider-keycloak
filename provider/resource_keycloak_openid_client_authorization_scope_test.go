@@ -11,8 +11,8 @@ import (
 
 func TestAccKeycloakOpenidClientAuthorizationScope_basic(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
-	scopeName := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	scopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -31,8 +31,8 @@ func TestAccKeycloakOpenidClientAuthorizationScope_createAfterManualDestroy(t *t
 	t.Parallel()
 	var authorizationScope = &keycloak.OpenidClientAuthorizationScope{}
 
-	clientId := "terraform-" + acctest.RandString(10)
-	scopeName := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	scopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -59,7 +59,7 @@ func TestAccKeycloakOpenidClientAuthorizationScope_createAfterManualDestroy(t *t
 
 func TestAccKeycloakOpenidClientAuthorizationScope_basicUpdateAll(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	firstAuthrorizationScope := &keycloak.OpenidClientAuthorizationScope{
 		RealmId:     testAccRealm.Realm,

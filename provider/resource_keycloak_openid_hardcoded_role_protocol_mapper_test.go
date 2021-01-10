@@ -11,9 +11,9 @@ import (
 
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_client(t *testing.T) {
 	t.Parallel()
-	role := "terraform-role-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-role-mapper-" + acctest.RandString(5)
+	role := acctest.RandomWithPrefix("tf-acc")
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client"
 
@@ -32,10 +32,10 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_client(t *t
 
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicClientRole_client(t *testing.T) {
 	t.Parallel()
-	clientIdForRole := "terraform-client-" + acctest.RandString(10)
-	role := "terraform-role-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-role-mapper-" + acctest.RandString(5)
+	clientIdForRole := acctest.RandomWithPrefix("tf-acc")
+	role := acctest.RandomWithPrefix("tf-acc")
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client"
 
@@ -54,9 +54,9 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicClientRole_client(t *
 
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_clientScope(t *testing.T) {
 	t.Parallel()
-	role := "terraform-role-" + acctest.RandString(10)
-	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-role-mapper-" + acctest.RandString(5)
+	role := acctest.RandomWithPrefix("tf-acc")
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client_scope"
 
@@ -75,10 +75,10 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_basicRealmRole_clientScope
 
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_import(t *testing.T) {
 	t.Parallel()
-	role := "terraform-role-" + acctest.RandString(10)
-	clientId := "terraform-openid-client-" + acctest.RandString(10)
-	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-role-mapper-" + acctest.RandString(5)
+	role := acctest.RandomWithPrefix("tf-acc")
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	clientResourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client"
 	clientScopeResourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client_scope"
@@ -113,10 +113,10 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_import(t *testing.T) {
 
 func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_update(t *testing.T) {
 	t.Parallel()
-	roleOne := "terraform-role-" + acctest.RandString(10)
-	roleTwo := "terraform-role-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-role-mapper-" + acctest.RandString(5)
+	roleOne := acctest.RandomWithPrefix("tf-acc")
+	roleTwo := acctest.RandomWithPrefix("tf-acc")
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client"
 
@@ -141,9 +141,9 @@ func TestAccKeycloakOpenIdHardcodedRoleProtocolMapper_createAfterManualDestroy(t
 	t.Parallel()
 	var mapper = &keycloak.OpenIdHardcodedRoleProtocolMapper{}
 
-	role := "terraform-role-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-role-mapper-" + acctest.RandString(5)
+	role := acctest.RandomWithPrefix("tf-acc")
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_hardcoded_role_protocol_mapper.hardcoded_role_mapper_client"
 

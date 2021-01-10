@@ -11,9 +11,9 @@ import (
 )
 
 func TestAccKeycloakRealm_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -41,9 +41,9 @@ func TestAccKeycloakRealm_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -69,9 +69,9 @@ func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_import(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -92,8 +92,8 @@ func TestAccKeycloakRealm_import(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_SmtpServer(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realm := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -113,7 +113,7 @@ func TestAccKeycloakRealm_SmtpServer(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_SmtpServerUpdate(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
+	realm := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -133,7 +133,7 @@ func TestAccKeycloakRealm_SmtpServerUpdate(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_SmtpServerInvalid(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
+	realm := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -189,7 +189,7 @@ func TestAccKeycloakRealm_themes(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_themesValidation(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
+	realm := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -217,7 +217,7 @@ func TestAccKeycloakRealm_themesValidation(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_InternationalizationValidation(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
+	realm := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -237,8 +237,8 @@ func TestAccKeycloakRealm_InternationalizationValidation(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_Internationalization(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realm := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -262,8 +262,8 @@ func TestAccKeycloakRealm_Internationalization(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_InternationalizationDisabled(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realm := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -323,7 +323,7 @@ func TestAccKeycloakRealm_loginConfigBasic(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_loginConfigValidation(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -347,8 +347,8 @@ func TestAccKeycloakRealm_loginConfigValidation(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -373,9 +373,9 @@ func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -426,9 +426,9 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_securityDefensesHeaders(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -456,9 +456,9 @@ func TestAccKeycloakRealm_securityDefensesHeaders(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_securityDefensesBruteForceDetection(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -491,9 +491,9 @@ func TestAccKeycloakRealm_securityDefensesBruteForceDetection(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -553,9 +553,9 @@ func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 	passwordPolicyStringValid1 := "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
 	passwordPolicyStringValid2 := "upperCase(1) and length(8)"
 	passwordPolicyStringValid3 := "lowerCase(2)"
@@ -590,9 +590,9 @@ func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_browserFlow(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 	newBrowserFlow := "registration"
 
 	resource.Test(t, resource.TestCase{
@@ -617,10 +617,10 @@ func TestAccKeycloakRealm_browserFlow(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_customAttribute(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	key := "terraform-" + acctest.RandString(10)
-	value := "terraform-" + acctest.RandString(10)
-	value2 := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	key := acctest.RandomWithPrefix("tf-acc")
+	value := acctest.RandomWithPrefix("tf-acc")
+	value2 := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -640,9 +640,9 @@ func TestAccKeycloakRealm_customAttribute(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 	passwordPolicyStringInvalid1 := "unknownpolicy(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
 	passwordPolicyStringInvalid2 := "lowerCase(1) and length(8) and unknownpolicy(365) and notUsername"
 	passwordPolicyStringInvalid3 := "unknownpolicy(2)"
@@ -673,8 +673,8 @@ func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_internalId(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	internalId := acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	internalId := acctest.RandomWithPrefix("tf-acc")
 	realm := &keycloak.Realm{
 		Realm: realmName,
 		Id:    internalId,
@@ -703,11 +703,11 @@ func TestAccKeycloakRealm_internalId(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_webauthn(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
-	rpName := "terraform-" + acctest.RandString(10)
-	rpId := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
+	rpName := acctest.RandomWithPrefix("tf-acc")
+	rpId := acctest.RandomWithPrefix("tf-acc")
 	attestationConveyancePreference := randomStringInSlice([]string{"none", "indirect", "not specified"})
 	authenticatorAttachment := randomStringInSlice([]string{"platform", "cross-platform", "not specified"})
 	requireResidentKey := randomStringInSlice([]string{"Yes", "No", "not specified"})

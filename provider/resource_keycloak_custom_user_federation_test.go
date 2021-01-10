@@ -15,7 +15,7 @@ func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
 
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
 
-	name := "terraform-" + acctest.RandString(10)
+	name := acctest.RandomWithPrefix("tf-acc")
 	providerId := "custom"
 
 	resource.Test(t, resource.TestCase{
@@ -42,8 +42,8 @@ func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
 
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
 
-	name := "terraform-" + acctest.RandString(10)
-	configValue := "value-" + acctest.RandString(10)
+	name := acctest.RandomWithPrefix("tf-acc")
+	configValue := acctest.RandomWithPrefix("tf-acc")
 	providerId := "custom"
 
 	resource.Test(t, resource.TestCase{
@@ -80,7 +80,7 @@ func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) 
 
 	var customFederation = &keycloak.CustomUserFederation{}
 
-	name := "terraform-" + acctest.RandString(10)
+	name := acctest.RandomWithPrefix("tf-acc")
 	providerId := "custom"
 
 	resource.Test(t, resource.TestCase{
@@ -109,8 +109,8 @@ func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) 
 func TestAccKeycloakCustomUserFederation_validation(t *testing.T) {
 	t.Parallel()
 
-	name := "terraform-" + acctest.RandString(10)
-	providerId := acctest.RandString(10)
+	name := acctest.RandomWithPrefix("tf-acc")
+	providerId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -126,9 +126,9 @@ func TestAccKeycloakCustomUserFederation_validation(t *testing.T) {
 }
 
 func TestAccKeycloakCustomUserFederation_ParentIdDifferentFromRealmName(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	internalId := acctest.RandString(10)
-	name := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	internalId := acctest.RandomWithPrefix("tf-acc")
+	name := acctest.RandomWithPrefix("tf-acc")
 	providerId := "custom"
 
 	realm := &keycloak.Realm{

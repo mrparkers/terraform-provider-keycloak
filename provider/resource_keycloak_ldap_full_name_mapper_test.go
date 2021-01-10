@@ -13,7 +13,7 @@ import (
 func TestAccKeycloakLdapFullNameMapper_basic(t *testing.T) {
 	t.Parallel()
 
-	fullNameMapperName := "terraform-" + acctest.RandString(10)
+	fullNameMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -39,7 +39,7 @@ func TestAccKeycloakLdapFullNameMapper_createAfterManualDestroy(t *testing.T) {
 
 	var mapper = &keycloak.LdapFullNameMapper{}
 
-	fullNameMapperName := "terraform-" + acctest.RandString(10)
+	fullNameMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -90,7 +90,7 @@ func TestAccKeycloakLdapFullNameMapper_readWriteValidation(t *testing.T) {
 func TestAccKeycloakLdapFullNameMapper_writableValidation(t *testing.T) {
 	t.Parallel()
 
-	mapperName := "terraform-" + acctest.RandString(10)
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -112,7 +112,7 @@ func TestAccKeycloakLdapFullNameMapper_writableValidation(t *testing.T) {
 func TestAccKeycloakLdapFullNameMapper_updateLdapUserFederation(t *testing.T) {
 	t.Parallel()
 
-	mapperName := "terraform-" + acctest.RandString(10)
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

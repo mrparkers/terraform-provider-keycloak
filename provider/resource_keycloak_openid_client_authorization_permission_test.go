@@ -12,10 +12,10 @@ import (
 
 func TestAccKeycloakOpenidClientAuthorizationPermission_basic(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
-	resourceName := "terraform-" + acctest.RandString(10)
-	permissionName := "terraform-" + acctest.RandString(10)
-	scopeName := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	resourceName := acctest.RandomWithPrefix("tf-acc")
+	permissionName := acctest.RandomWithPrefix("tf-acc")
+	scopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -34,10 +34,10 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_createAfterManualDestroy
 	t.Parallel()
 	var authorizationPermission = &keycloak.OpenidClientAuthorizationPermission{}
 
-	clientId := "terraform-" + acctest.RandString(10)
-	resourceName := "terraform-" + acctest.RandString(10)
-	permissionName := "terraform-" + acctest.RandString(10)
-	scopeName := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	resourceName := acctest.RandomWithPrefix("tf-acc")
+	permissionName := acctest.RandomWithPrefix("tf-acc")
+	scopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -64,8 +64,8 @@ func TestAccKeycloakOpenidClientAuthorizationPermission_createAfterManualDestroy
 
 func TestAccKeycloakOpenidClientAuthorizationPermission_basicUpdateAll(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
-	scopeName := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	scopeName := acctest.RandomWithPrefix("tf-acc")
 
 	firstAuthrorizationPermission := &keycloak.OpenidClientAuthorizationPermission{
 		RealmId:     testAccRealm.Realm,

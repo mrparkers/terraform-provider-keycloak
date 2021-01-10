@@ -12,7 +12,7 @@ import (
 
 func TestAccKeycloakDataSourceSamlClientInstallationProvider_basic(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_saml_client.saml_client"
 	dataSourceName := "data.keycloak_saml_client_installation_provider.saml_sp_descriptor"

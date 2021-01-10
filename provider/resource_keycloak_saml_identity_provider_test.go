@@ -11,8 +11,8 @@ import (
 )
 
 func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	samlName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	samlName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -30,8 +30,8 @@ func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
 func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) {
 	var saml = &keycloak.IdentityProvider{}
 
-	realmName := "terraform-" + acctest.RandString(10)
-	samlName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	samlName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -57,9 +57,9 @@ func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) 
 }
 
 func TestAccKeycloakSamlIdentityProvider_basicUpdateRealm(t *testing.T) {
-	firstRealm := "terraform-" + acctest.RandString(10)
-	secondRealm := "terraform-" + acctest.RandString(10)
-	samlName := "terraform-" + acctest.RandString(10)
+	firstRealm := acctest.RandomWithPrefix("tf-acc")
+	secondRealm := acctest.RandomWithPrefix("tf-acc")
+	samlName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -85,7 +85,7 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateRealm(t *testing.T) {
 }
 
 func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	firstEnabled := randomBool()
 	firstBackchannel := randomBool()
 	firstValidateSignature := randomBool()

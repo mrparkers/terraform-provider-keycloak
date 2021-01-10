@@ -11,8 +11,8 @@ import (
 
 func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_basicClient(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-group-membership-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client"
 
@@ -31,8 +31,8 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_basicClient(t *testing.T
 
 func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_basicClientScope(t *testing.T) {
 	t.Parallel()
-	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-group-membership-mapper-" + acctest.RandString(5)
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client_scope"
 
@@ -51,9 +51,9 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_basicClientScope(t *test
 
 func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_import(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-openid-client-" + acctest.RandString(10)
-	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-group-membership-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	clientResourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client"
 	clientScopeResourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client_scope"
@@ -131,8 +131,8 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_createAfterManualDestroy
 	t.Parallel()
 	var mapper = &keycloak.OpenIdGroupMembershipProtocolMapper{}
 
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-group-membership-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client"
 
@@ -161,9 +161,9 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_createAfterManualDestroy
 
 func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_updateMapperNameForceNew(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperNameOne := acctest.RandString(10)
-	mapperNameTwo := acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperNameOne := acctest.RandomWithPrefix("tf-acc")
+	mapperNameTwo := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client"
 
@@ -186,8 +186,8 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_updateMapperNameForceNew
 
 func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_updateClientIdForceNew(t *testing.T) {
 	t.Parallel()
-	clientIdOne := "terraform-client-" + acctest.RandString(10)
-	clientIdTwo := "terraform-client-" + acctest.RandString(10)
+	clientIdOne := acctest.RandomWithPrefix("tf-acc")
+	clientIdTwo := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client"
 
@@ -210,8 +210,8 @@ func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_updateClientIdForceNew(t
 
 func TestAccKeycloakOpenIdGroupMembershipProtocolMapper_updateClientScopeForceNew(t *testing.T) {
 	t.Parallel()
-	clientScopeOne := "terraform-client-scope-" + acctest.RandString(10)
-	clientScopeTwo := "terraform-client-scope-" + acctest.RandString(10)
+	clientScopeOne := acctest.RandomWithPrefix("tf-acc")
+	clientScopeTwo := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_group_membership_protocol_mapper.group_membership_mapper_client_scope"
 

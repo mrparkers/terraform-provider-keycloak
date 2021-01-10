@@ -14,8 +14,8 @@ import (
 func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
 	t.Parallel()
 
-	groupName := "terraform-group-" + acctest.RandString(10)
-	username := "terraform-user-" + acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
+	username := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -38,7 +38,7 @@ func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
 func TestAccKeycloakGroupMemberships_moreThan100members(t *testing.T) {
 	t.Parallel()
 
-	groupName := "terraform-group-" + acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -54,10 +54,10 @@ func TestAccKeycloakGroupMemberships_moreThan100members(t *testing.T) {
 func TestAccKeycloakGroupMemberships_updateGroupForceNew(t *testing.T) {
 	t.Parallel()
 
-	groupOne := "terraform-group-" + acctest.RandString(10)
-	groupTwo := "terraform-group-" + acctest.RandString(10)
+	groupOne := acctest.RandomWithPrefix("tf-acc")
+	groupTwo := acctest.RandomWithPrefix("tf-acc")
 
-	username := "terraform-user-" + acctest.RandString(10)
+	username := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -78,7 +78,7 @@ func TestAccKeycloakGroupMemberships_updateGroupForceNew(t *testing.T) {
 func TestAccKeycloakGroupMemberships_updateInPlace(t *testing.T) {
 	t.Parallel()
 
-	groupName := "terraform-group-" + acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
 
 	allUsersForTest := []string{
 		"terraform-user-" + acctest.RandString(10),
@@ -124,8 +124,8 @@ func TestAccKeycloakGroupMemberships_updateInPlace(t *testing.T) {
 func TestAccKeycloakGroupMemberships_userDoesNotExist(t *testing.T) {
 	t.Parallel()
 
-	groupName := "terraform-group-" + acctest.RandString(10)
-	username := "terraform-user-" + acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
+	username := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -143,7 +143,7 @@ func TestAccKeycloakGroupMemberships_userDoesNotExist(t *testing.T) {
 func TestAccKeycloakGroupMemberships_authoritativeAdd(t *testing.T) {
 	t.Parallel()
 
-	groupName := "terraform-group-" + acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
 
 	usersInGroup := []string{
 		"terraform-user-" + acctest.RandString(10),
@@ -184,7 +184,7 @@ func TestAccKeycloakGroupMemberships_authoritativeAdd(t *testing.T) {
 func TestAccKeycloakGroupMemberships_authoritativeRemove(t *testing.T) {
 	t.Parallel()
 
-	groupName := "terraform-group-" + acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
 
 	allUsersForTest := []string{
 		"terraform-user-" + acctest.RandString(10),
@@ -236,8 +236,8 @@ func TestAccKeycloakGroupMemberships_authoritativeRemove(t *testing.T) {
 func TestAccKeycloakGroupMemberships_noImportNeeded(t *testing.T) {
 	t.Parallel()
 
-	groupName := "terraform-group-" + acctest.RandString(10)
-	username := "terraform-user-" + acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
+	username := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -269,8 +269,8 @@ func TestAccKeycloakGroupMemberships_noImportNeeded(t *testing.T) {
 func TestAccKeycloakGroupMemberships_validateLowercaseUsernames(t *testing.T) {
 	t.Parallel()
 
-	groupName := "terraform-group-" + acctest.RandString(10)
-	randomString := acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
+	randomString := acctest.RandomWithPrefix("tf-acc")
 	username := "terraform-user-" + randomString
 	usernameWithUppercaseCharacters := "terraform-user-" + strings.ToUpper(randomString)
 
@@ -289,8 +289,8 @@ func TestAccKeycloakGroupMemberships_validateLowercaseUsernames(t *testing.T) {
 func TestAccKeycloakGroupMemberships_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 
-	groupName := "terraform-group-" + acctest.RandString(10)
-	username := "terraform-user-" + acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
+	username := acctest.RandomWithPrefix("tf-acc")
 	resourceName := "keycloak_group_memberships.group_members"
 
 	var groupId *string

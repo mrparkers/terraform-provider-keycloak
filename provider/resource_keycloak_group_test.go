@@ -14,9 +14,9 @@ import (
 func TestAccKeycloakGroup_basic(t *testing.T) {
 	t.Parallel()
 
-	groupName := "terraform-group-" + acctest.RandString(10)
-	attributeName := "terraform-attribute-" + acctest.RandString(10)
-	attributeValue := acctest.RandString(250)
+	groupName := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
 
 	runTestBasicGroup(t, groupName, attributeName, attributeValue)
 }
@@ -24,9 +24,9 @@ func TestAccKeycloakGroup_basic(t *testing.T) {
 func TestAccKeycloakGroup_basicGroupNameContainsBackSlash(t *testing.T) {
 	t.Parallel()
 
-	groupName := "terraform/group/" + acctest.RandString(10)
-	attributeName := "terraform-attribute-" + acctest.RandString(10)
-	attributeValue := acctest.RandString(250)
+	groupName := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
 
 	runTestBasicGroup(t, groupName, attributeName, attributeValue)
 }
@@ -56,9 +56,9 @@ func TestAccKeycloakGroup_createAfterManualDestroy(t *testing.T) {
 
 	var group = &keycloak.Group{}
 
-	groupName := "terraform-group-" + acctest.RandString(10)
-	attributeName := "terraform-attribute-" + acctest.RandString(10)
-	attributeValue := acctest.RandString(250)
+	groupName := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -89,10 +89,10 @@ func TestAccKeycloakGroup_createAfterManualDestroy(t *testing.T) {
 func TestAccKeycloakGroup_updateGroupName(t *testing.T) {
 	t.Parallel()
 
-	groupNameBefore := "terraform-group-" + acctest.RandString(10)
-	groupNameAfter := "terraform-group-" + acctest.RandString(10)
-	attributeName := "terraform-attribute-" + acctest.RandString(10)
-	attributeValue := acctest.RandString(250)
+	groupNameBefore := acctest.RandomWithPrefix("tf-acc")
+	groupNameAfter := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -120,7 +120,7 @@ func TestAccKeycloakGroup_updateGroupName(t *testing.T) {
 func TestAccKeycloakGroup_updateRealm(t *testing.T) {
 	t.Parallel()
 
-	group := "terraform-group-" + acctest.RandString(10)
+	group := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -148,9 +148,9 @@ func TestAccKeycloakGroup_updateRealm(t *testing.T) {
 func TestAccKeycloakGroup_nested(t *testing.T) {
 	t.Parallel()
 
-	parentGroupName := "terraform-parent-group-" + acctest.RandString(10)
-	firstChildGroupName := "terraform-child-group-" + acctest.RandString(10)
-	secondChildGroupName := "terraform-child-group-" + acctest.RandString(10)
+	parentGroupName := acctest.RandomWithPrefix("tf-acc")
+	firstChildGroupName := acctest.RandomWithPrefix("tf-acc")
+	secondChildGroupName := acctest.RandomWithPrefix("tf-acc")
 
 	runTestNestedGroup(t, parentGroupName, firstChildGroupName, secondChildGroupName)
 }
@@ -158,9 +158,9 @@ func TestAccKeycloakGroup_nested(t *testing.T) {
 func TestAccKeycloakGroup_nestedGroupNameContainsBackSlash(t *testing.T) {
 	t.Parallel()
 
-	parentGroupName := "terraform/parent/group/" + acctest.RandString(10)
-	firstChildGroupName := "terraform/child/group/" + acctest.RandString(10)
-	secondChildGroupName := "terraform/child/group/" + acctest.RandString(10)
+	parentGroupName := acctest.RandomWithPrefix("tf-acc")
+	firstChildGroupName := acctest.RandomWithPrefix("tf-acc")
+	secondChildGroupName := acctest.RandomWithPrefix("tf-acc")
 
 	runTestNestedGroup(t, parentGroupName, firstChildGroupName, secondChildGroupName)
 }
@@ -242,7 +242,7 @@ func runTestNestedGroup(t *testing.T, parentGroupName, firstChildGroupName, seco
 func TestAccKeycloakGroup_unsetOptionalAttributes(t *testing.T) {
 	t.Parallel()
 
-	attributeName := "terraform-attribute-" + acctest.RandString(10)
+	attributeName := acctest.RandomWithPrefix("tf-acc")
 	groupWithOptionalAttributes := &keycloak.Group{
 		RealmId: "terraform-" + acctest.RandString(10),
 		Name:    "terraform-group-" + acctest.RandString(10),

@@ -13,12 +13,12 @@ import (
 func TestAccKeycloakGroupRoles_basic(t *testing.T) {
 	t.Parallel()
 
-	realmRoleName := "terraform-role-" + acctest.RandString(10)
-	openIdClientName := "terraform-openid-client-" + acctest.RandString(10)
-	openIdRoleName := "terraform-role-" + acctest.RandString(10)
-	samlClientName := "terraform-saml-client-" + acctest.RandString(10)
-	samlRoleName := "terraform-role-" + acctest.RandString(10)
-	groupName := "terraform-group-" + acctest.RandString(10)
+	realmRoleName := acctest.RandomWithPrefix("tf-acc")
+	openIdClientName := acctest.RandomWithPrefix("tf-acc")
+	openIdRoleName := acctest.RandomWithPrefix("tf-acc")
+	samlClientName := acctest.RandomWithPrefix("tf-acc")
+	samlRoleName := acctest.RandomWithPrefix("tf-acc")
+	groupName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -45,15 +45,15 @@ func TestAccKeycloakGroupRoles_basic(t *testing.T) {
 func TestAccKeycloakGroupRoles_update(t *testing.T) {
 	t.Parallel()
 
-	realmRoleOneName := "terraform-role-" + acctest.RandString(10)
-	realmRoleTwoName := "terraform-role-" + acctest.RandString(10)
-	openIdClientName := "terraform-openid-client-" + acctest.RandString(10)
-	openIdRoleOneName := "terraform-role-" + acctest.RandString(10)
-	openIdRoleTwoName := "terraform-role-" + acctest.RandString(10)
-	samlClientName := "terraform-saml-client-" + acctest.RandString(10)
-	samlRoleOneName := "terraform-role-" + acctest.RandString(10)
-	samlRoleTwoName := "terraform-role-" + acctest.RandString(10)
-	groupName := "terraform-group-" + acctest.RandString(10)
+	realmRoleOneName := acctest.RandomWithPrefix("tf-acc")
+	realmRoleTwoName := acctest.RandomWithPrefix("tf-acc")
+	openIdClientName := acctest.RandomWithPrefix("tf-acc")
+	openIdRoleOneName := acctest.RandomWithPrefix("tf-acc")
+	openIdRoleTwoName := acctest.RandomWithPrefix("tf-acc")
+	samlClientName := acctest.RandomWithPrefix("tf-acc")
+	samlRoleOneName := acctest.RandomWithPrefix("tf-acc")
+	samlRoleTwoName := acctest.RandomWithPrefix("tf-acc")
+	groupName := acctest.RandomWithPrefix("tf-acc")
 
 	allRoleIds := []string{
 		"${keycloak_role.realm_role_one.id}",

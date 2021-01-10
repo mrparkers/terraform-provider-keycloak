@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
-	oidcName := "terraform-" + acctest.RandString(10)
+	oidcName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -26,8 +26,8 @@ func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOidcIdentityProvider_extra_config(t *testing.T) {
-	oidcName := "terraform-" + acctest.RandString(10)
-	customConfigValue := "terraform-" + acctest.RandString(10)
+	oidcName := acctest.RandomWithPrefix("tf-acc")
+	customConfigValue := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -45,7 +45,7 @@ func TestAccKeycloakOidcIdentityProvider_extra_config(t *testing.T) {
 }
 
 func TestAccKeycloakOidcIdentityProvider_keyDefaultScopes(t *testing.T) {
-	oidcName := "terraform-" + acctest.RandString(10)
+	oidcName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -66,7 +66,7 @@ func TestAccKeycloakOidcIdentityProvider_keyDefaultScopes(t *testing.T) {
 func TestAccKeycloakOidcIdentityProvider_createAfterManualDestroy(t *testing.T) {
 	var oidc = &keycloak.IdentityProvider{}
 
-	oidcName := "terraform-" + acctest.RandString(10)
+	oidcName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

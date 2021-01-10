@@ -12,8 +12,8 @@ import (
 func TestAccKeycloakAuthenticationSubFlow_basic(t *testing.T) {
 	t.Parallel()
 
-	parentAuthFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
-	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
+	parentAuthFlowAlias := acctest.RandomWithPrefix("tf-acc")
+	authFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -39,8 +39,8 @@ func TestAccKeycloakAuthenticationSubFlow_createAfterManualDestroy(t *testing.T)
 
 	var authenticationSubFlow = &keycloak.AuthenticationSubFlow{}
 
-	authParentFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
-	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
+	authParentFlowAlias := acctest.RandomWithPrefix("tf-acc")
+	authFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -71,9 +71,9 @@ func TestAccKeycloakAuthenticationSubFlow_createAfterManualDestroy(t *testing.T)
 func TestAccKeycloakAuthenticationSubFlow_updateAuthenticationSubFlow(t *testing.T) {
 	t.Parallel()
 
-	authParentFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
-	authFlowAliasBefore := "terraform-flow-before-" + acctest.RandString(10)
-	authFlowAliasAfter := "terraform-flow-after-" + acctest.RandString(10)
+	authParentFlowAlias := acctest.RandomWithPrefix("tf-acc")
+	authFlowAliasBefore := acctest.RandomWithPrefix("tf-acc")
+	authFlowAliasAfter := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -101,8 +101,8 @@ func TestAccKeycloakAuthenticationSubFlow_updateAuthenticationSubFlow(t *testing
 func TestAccKeycloakAuthenticationSubFlow_updateAuthenticationSubFlowRequirement(t *testing.T) {
 	t.Parallel()
 
-	authParentFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
-	authFlowAlias := "terraform-flow-" + acctest.RandString(10)
+	authParentFlowAlias := acctest.RandomWithPrefix("tf-acc")
+	authFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
