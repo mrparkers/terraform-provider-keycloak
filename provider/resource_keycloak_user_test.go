@@ -246,9 +246,9 @@ func TestAccKeycloakUser_unsetOptionalAttributes(t *testing.T) {
 
 func TestAccKeycloakUser_validateLowercaseUsernames(t *testing.T) {
 	t.Parallel()
-	username := acctest.RandomWithPrefix("tf-acc")
-	attributeName := acctest.RandomWithPrefix("tf-acc")
-	attributeValue := acctest.RandomWithPrefix("tf-acc")
+	username := "terraform-user-" + strings.ToUpper(acctest.RandString(10))
+	attributeName := "terraform-attribute-" + acctest.RandString(10)
+	attributeValue := acctest.RandString(250)
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

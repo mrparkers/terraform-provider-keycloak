@@ -138,7 +138,7 @@ func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
 	t.Parallel()
 
 	groupMapperName := acctest.RandomWithPrefix("tf-acc")
-	groupsLdapFilter := acctest.RandomWithPrefix("tf-acc")
+	groupsLdapFilter := "(" + acctest.RandString(10) + ")"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

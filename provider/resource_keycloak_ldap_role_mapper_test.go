@@ -137,7 +137,7 @@ func TestAccKeycloakLdapRoleMapper_rolesLdapFilterValidation(t *testing.T) {
 	t.Parallel()
 
 	roleMapperName := acctest.RandomWithPrefix("tf-acc")
-	rolesLdapFilter := acctest.RandomWithPrefix("tf-acc")
+	rolesLdapFilter := "(" + acctest.RandString(10) + ")"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
