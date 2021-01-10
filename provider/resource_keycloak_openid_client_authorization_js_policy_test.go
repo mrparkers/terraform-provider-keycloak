@@ -12,7 +12,6 @@ import (
 
 func TestAccKeycloakOpenidClientAuthorizationJSPolicy(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -21,7 +20,7 @@ func TestAccKeycloakOpenidClientAuthorizationJSPolicy(t *testing.T) {
 		CheckDestroy:      testResourceKeycloakOpenidClientAuthorizationJSPolicyDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testResourceKeycloakOpenidClientAuthorizationJSPolicy_basic(realmName, clientId),
+				Config: testResourceKeycloakOpenidClientAuthorizationJSPolicy_basic(clientId),
 				Check:  testResourceKeycloakOpenidClientAuthorizationJSPolicyExists("keycloak_openid_client_js_policy.test"),
 			},
 		},
@@ -79,30 +78,30 @@ func testResourceKeycloakOpenidClientAuthorizationJSPolicyExists(resourceName st
 	}
 }
 
-func testResourceKeycloakOpenidClientAuthorizationJSPolicy_basic(realm, clientId string) string {
+func testResourceKeycloakOpenidClientAuthorizationJSPolicy_basic(clientId string) string {
 	return fmt.Sprintf(`
-	resource keycloak_realm test {
-		realm = "%s"
-	}
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
 
-	resource keycloak_openid_client test {
-		client_id                = "%s"
-		realm_id                 = "${keycloak_realm.test.id}"
-		access_type              = "CONFIDENTIAL"
-		service_accounts_enabled = true
-		authorization {
-			policy_enforcement_mode = "ENFORCING"
-		}
+resource keycloak_openid_client test {
+	client_id                = "%s"
+	realm_id                 = data.keycloak_realm.realm.id
+	access_type              = "CONFIDENTIAL"
+	service_accounts_enabled = true
+	authorization {
+		policy_enforcement_mode = "ENFORCING"
 	}
+}
 
-	resource keycloak_openid_client_js_policy test {
-		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
-		realm_id = "${keycloak_realm.test.id}"
-		name = "client_js_policy_test"
-		logic = "POSITIVE"
-		decision_strategy = "UNANIMOUS"
-		code = "test"
-		description = "description"
-	}
-	`, realm, clientId)
+resource keycloak_openid_client_js_policy test {
+	resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
+	realm_id = data.keycloak_realm.realm.id
+	name = "client_js_policy_test"
+	logic = "POSITIVE"
+	decision_strategy = "UNANIMOUS"
+	code = "test"
+	description = "description"
+}
+	`, testAccRealm.Realm, clientId)
 }
