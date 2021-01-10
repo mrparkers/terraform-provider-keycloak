@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccKeycloakDataSourceRealmKeys_basic(t *testing.T) {
-	realm := acctest.RandomWithPrefix("tf-acc-test")
+	t.Parallel()
 	dataSourceName := "data.keycloak_realm_keys.test_keys"
 
 	resource.Test(t, resource.TestCase{
@@ -18,7 +17,7 @@ func TestAccKeycloakDataSourceRealmKeys_basic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeycloakRealmKeysConfig(realm),
+				Config: testAccKeycloakRealmKeysConfig(),
 				Check:  testKeycloakRealmKeysCheck_basic(dataSourceName),
 			},
 		},
@@ -26,7 +25,7 @@ func TestAccKeycloakDataSourceRealmKeys_basic(t *testing.T) {
 }
 
 func TestAccKeycloakDataSourceRealmKeys_filterByAlgorithms(t *testing.T) {
-	realm := acctest.RandomWithPrefix("tf-acc-test")
+	t.Parallel()
 	dataSourceName := "data.keycloak_realm_keys.test_keys"
 
 	resource.Test(t, resource.TestCase{
@@ -34,7 +33,7 @@ func TestAccKeycloakDataSourceRealmKeys_filterByAlgorithms(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeycloakRealmKeysConfig_filterByAlgorithms(realm),
+				Config: testAccKeycloakRealmKeysConfig_filterByAlgorithms(),
 				Check:  testKeycloakRealmKeysCheck_filterByAlgorithms(dataSourceName),
 			},
 		},
@@ -85,31 +84,27 @@ func testKeycloakRealmKeysCheck_filterByAlgorithms(dataSourceName string) resour
 	}
 }
 
-func testAccKeycloakRealmKeysConfig(realm string) string {
+func testAccKeycloakRealmKeysConfig() string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "test" {
-  realm                = "%s"
-  enabled              = true
-  display_name         = "test"
+data "keycloak_realm" "realm" {
+	realm = "%s"
 }
 
 data "keycloak_realm_keys" "test_keys" {
-  realm_id  = keycloak_realm.test.id
+	realm_id = data.keycloak_realm.realm.id
 }
-`, realm)
+`, testAccRealm.Realm)
 }
 
-func testAccKeycloakRealmKeysConfig_filterByAlgorithms(realm string) string {
+func testAccKeycloakRealmKeysConfig_filterByAlgorithms() string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "test" {
-  realm                = "%s"
-  enabled              = true
-  display_name         = "test"
+data "keycloak_realm" "realm" {
+	realm = "%s"
 }
 
 data "keycloak_realm_keys" "test_keys" {
-  realm_id  = keycloak_realm.test.id
-  algorithms = ["RS256", "AES"]
+	realm_id   = data.keycloak_realm.realm.id
+	algorithms = ["RS256", "AES"]
 }
-`, realm)
+`, testAccRealm.Realm)
 }

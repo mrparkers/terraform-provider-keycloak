@@ -19,9 +19,8 @@ func TestAccKeycloakProvider_passwordGrant(t *testing.T) {
 		os.Unsetenv("KEYCLOAK_PASSWORD")
 	}()
 
-	provider := KeycloakProvider()
+	provider := KeycloakProvider(keycloakClient)
 
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -33,7 +32,7 @@ func TestAccKeycloakProvider_passwordGrant(t *testing.T) {
 		PreCheck: func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_basic(realmName, clientId),
+				Config: testKeycloakOpenidClient_basic(clientId),
 			},
 		},
 	})

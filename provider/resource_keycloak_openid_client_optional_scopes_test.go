@@ -21,7 +21,7 @@ func getPreAssignedOptionalClientScopes() []string {
 }
 
 func TestAccKeycloakOpenidClientOptionalScopes_basic(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
@@ -32,13 +32,13 @@ func TestAccKeycloakOpenidClientOptionalScopes_basic(t *testing.T) {
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope),
+				Config: testKeycloakOpenidClientOptionalScopes_basic(client, clientScope),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", clientScopes),
 			},
 			// we need a separate test step for destroy instead of using CheckDestroy because this resource is implicitly
 			// destroyed at the end of each test via destroying clients
 			{
-				Config: testKeycloakOpenidClientOptionalScopes_noOptionalScopes(realm, client, clientScope),
+				Config: testKeycloakOpenidClientOptionalScopes_noOptionalScopes(client, clientScope),
 				Check:  testAccCheckKeycloakOpenidClientHasNoOptionalScopes("keycloak_openid_client.client"),
 			},
 		},
@@ -46,7 +46,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClientOptionalScopes_updateClientForceNew(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	clientOne := "terraform-client-" + acctest.RandString(10)
 	clientTwo := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
@@ -58,11 +58,11 @@ func TestAccKeycloakOpenidClientOptionalScopes_updateClientForceNew(t *testing.T
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientOptionalScopes_basic(realm, clientOne, clientScope),
+				Config: testKeycloakOpenidClientOptionalScopes_basic(clientOne, clientScope),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", clientScopes),
 			},
 			{
-				Config: testKeycloakOpenidClientOptionalScopes_basic(realm, clientTwo, clientScope),
+				Config: testKeycloakOpenidClientOptionalScopes_basic(clientTwo, clientScope),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", clientScopes),
 			},
 		},
@@ -70,7 +70,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_updateClientForceNew(t *testing.T
 }
 
 func TestAccKeycloakOpenidClientOptionalScopes_updateInPlace(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
@@ -90,17 +90,17 @@ func TestAccKeycloakOpenidClientOptionalScopes_updateInPlace(t *testing.T) {
 		Steps: []resource.TestStep{
 			// init
 			{
-				Config: testKeycloakOpenidClientOptionalScopes_listOfScopes(realm, client, clientScope, allClientScopes),
+				Config: testKeycloakOpenidClientOptionalScopes_listOfScopes(client, clientScope, allClientScopes),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", allClientScopes),
 			},
 			// remove
 			{
-				Config: testKeycloakOpenidClientOptionalScopes_listOfScopes(realm, client, clientScope, subsetOfClientScopes),
+				Config: testKeycloakOpenidClientOptionalScopes_listOfScopes(client, clientScope, subsetOfClientScopes),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", subsetOfClientScopes),
 			},
 			// add
 			{
-				Config: testKeycloakOpenidClientOptionalScopes_listOfScopes(realm, client, clientScope, allClientScopes),
+				Config: testKeycloakOpenidClientOptionalScopes_listOfScopes(client, clientScope, allClientScopes),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", allClientScopes),
 			},
 		},
@@ -108,7 +108,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_updateInPlace(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClientOptionalScopes_validateClientDoesNotExist(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
@@ -117,7 +117,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_validateClientDoesNotExist(t *tes
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenidClientOptionalScopes_validationNoClient(realm, client, clientScope),
+				Config:      testKeycloakOpenidClientOptionalScopes_validationNoClient(client, clientScope),
 				ExpectError: regexp.MustCompile("validation error: client with id .+ does not exist"),
 			},
 		},
@@ -125,7 +125,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_validateClientDoesNotExist(t *tes
 }
 
 func TestAccKeycloakOpenidClientOptionalScopes_validateClientAccessType(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
@@ -134,7 +134,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_validateClientAccessType(t *testi
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenidClientOptionalScopes_validationBearerOnlyClient(realm, client, clientScope),
+				Config:      testKeycloakOpenidClientOptionalScopes_validationBearerOnlyClient(client, clientScope),
 				ExpectError: regexp.MustCompile("validation error: client with id .+ uses access type BEARER-ONLY which does not use scopes"),
 			},
 		},
@@ -143,7 +143,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_validateClientAccessType(t *testi
 
 // if a optional client scope is manually detached from a client with optional scopes controlled by this resource, terraform should add it again
 func TestAccKeycloakOpenidClientOptionalScopes_authoritativeAdd(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScopes := append(getPreAssignedOptionalClientScopes(),
 		"terraform-client-scope-"+acctest.RandString(10),
@@ -156,25 +156,23 @@ func TestAccKeycloakOpenidClientOptionalScopes_authoritativeAdd(t *testing.T) {
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientOptionalScopes_multipleClientScopes(realm, client, clientScopes, clientScopes),
+				Config: testKeycloakOpenidClientOptionalScopes_multipleClientScopes(client, clientScopes, clientScopes),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", clientScopes),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
-					client, err := keycloakClient.GetOpenidClientByClientId(realm, client)
+					client, err := keycloakClient.GetOpenidClientByClientId(testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
 					clientToManuallyDetach := clientScopes[acctest.RandIntRange(0, len(clientScopes)-1)]
-					err = keycloakClient.DetachOpenidClientOptionalScopes(realm, client.Id, []string{clientToManuallyDetach})
+					err = keycloakClient.DetachOpenidClientOptionalScopes(testAccRealm.Realm, client.Id, []string{clientToManuallyDetach})
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakOpenidClientOptionalScopes_multipleClientScopes(realm, client, clientScopes, clientScopes),
+				Config: testKeycloakOpenidClientOptionalScopes_multipleClientScopes(client, clientScopes, clientScopes),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", clientScopes),
 			},
 		},
@@ -183,7 +181,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_authoritativeAdd(t *testing.T) {
 
 // if an optional client scope is manually attached to a client with optional scopes controlled by this resource, terraform should detach it
 func TestAccKeycloakOpenidClientOptionalScopes_authoritativeRemove(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	client := "terraform-client-" + acctest.RandString(10)
 
 	randomClientScopes := []string{
@@ -206,24 +204,22 @@ func TestAccKeycloakOpenidClientOptionalScopes_authoritativeRemove(t *testing.T)
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientOptionalScopes_multipleClientScopes(realm, client, allClientScopes, attachedClientScopes),
+				Config: testKeycloakOpenidClientOptionalScopes_multipleClientScopes(client, allClientScopes, attachedClientScopes),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", attachedClientScopes),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
-					client, err := keycloakClient.GetOpenidClientByClientId(realm, client)
+					client, err := keycloakClient.GetOpenidClientByClientId(testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachOpenidClientOptionalScopes(realm, client.Id, []string{clientToManuallyAttach})
+					err = keycloakClient.AttachOpenidClientOptionalScopes(testAccRealm.Realm, client.Id, []string{clientToManuallyAttach})
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakOpenidClientOptionalScopes_multipleClientScopes(realm, client, allClientScopes, attachedClientScopes),
+				Config: testKeycloakOpenidClientOptionalScopes_multipleClientScopes(client, allClientScopes, attachedClientScopes),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", attachedClientScopes),
 					testAccCheckKeycloakOpenidClientOptionalScopeIsNotAttached("keycloak_openid_client_optional_scopes.optional_scopes", clientToManuallyAttach),
@@ -235,7 +231,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_authoritativeRemove(t *testing.T)
 
 // this resource doesn't support import because it can be created even if the desired state already exists in keycloak
 func TestAccKeycloakOpenidClientOptionalScopes_noImportNeeded(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
@@ -246,24 +242,22 @@ func TestAccKeycloakOpenidClientOptionalScopes_noImportNeeded(t *testing.T) {
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientOptionalScopes_noOptionalScopes(realm, client, clientScope),
+				Config: testKeycloakOpenidClientOptionalScopes_noOptionalScopes(client, clientScope),
 				Check:  testAccCheckKeycloakOpenidClientOptionalScopeIsNotAttached("keycloak_openid_client.client", clientScope),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
-					openidClient, err := keycloakClient.GetOpenidClientByClientId(realm, client)
+					openidClient, err := keycloakClient.GetOpenidClientByClientId(testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachOpenidClientOptionalScopes(realm, openidClient.Id, clientScopes)
+					err = keycloakClient.AttachOpenidClientOptionalScopes(testAccRealm.Realm, openidClient.Id, clientScopes)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope),
+				Config: testKeycloakOpenidClientOptionalScopes_basic(client, clientScope),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", clientScopes),
 			},
 		},
@@ -277,7 +271,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_noImportNeeded(t *testing.T) {
 // as terraform will think it needs to remove these scopes, which is okay to do
 // during an update
 func TestAccKeycloakOpenidClientOptionalScopes_profileAndEmailOptionalScopes(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
@@ -286,7 +280,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_profileAndEmailOptionalScopes(t *
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config:             testKeycloakOpenidClientOptionalScopes_listOfScopes(realm, client, clientScope, []string{clientScope}),
+				Config:             testKeycloakOpenidClientOptionalScopes_listOfScopes(client, clientScope, []string{clientScope}),
 				Check:              testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client.client", append(getPreAssignedOptionalClientScopes(), clientScope)),
 				ExpectNonEmptyPlan: true,
 			},
@@ -296,7 +290,7 @@ func TestAccKeycloakOpenidClientOptionalScopes_profileAndEmailOptionalScopes(t *
 
 // Keycloak throws a 500 if you attempt to attach an optional scope that is already attached as a default scope
 func TestAccKeycloakOpenidClientOptionalScopes_validateDuplicateScopeAssignment(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
+	t.Parallel()
 	client := "terraform-client-" + acctest.RandString(10)
 	clientScope := "terraform-client-scope-" + acctest.RandString(10)
 
@@ -308,12 +302,12 @@ func TestAccKeycloakOpenidClientOptionalScopes_validateDuplicateScopeAssignment(
 		Steps: []resource.TestStep{
 			// attach default scopes, including the custom scope
 			{
-				Config: testKeycloakOpenidClientDefaultScopes_basic(realm, client, clientScope),
+				Config: testKeycloakOpenidClientDefaultScopes_basic(client, clientScope),
 				Check:  testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", defaultClientScopes),
 			},
 			// attach optional scopes with the custom scope, expect an error since it is already in use
 			{
-				Config:      testKeycloakOpenidClientOptionalScopes_duplicateScopeAssignment(realm, client, clientScope),
+				Config:      testKeycloakOpenidClientOptionalScopes_duplicateScopeAssignment(client, clientScope),
 				ExpectError: regexp.MustCompile("validation error: scope .+ is already attached to client as a default scope"),
 			},
 		},
@@ -321,8 +315,6 @@ func TestAccKeycloakOpenidClientOptionalScopes_validateDuplicateScopeAssignment(
 }
 
 func getOptionalClientScopesFromState(resourceName string, s *terraform.State) ([]*keycloak.OpenidClientScope, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -404,28 +396,28 @@ func testAccCheckKeycloakOpenidClientOptionalScopeIsNotAttached(resourceName, cl
 	}
 }
 
-func testKeycloakOpenidClientOptionalScopes_basic(realm, client, clientScope string) string {
+func testKeycloakOpenidClientOptionalScopes_basic(client, clientScope string) string {
 	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
 		return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "PUBLIC"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
 
 resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	client_id      = "${keycloak_openid_client.client.id}"
 	optional_scopes = [
 		"address",
@@ -435,28 +427,28 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
-	`, realm, client, clientScope)
+	`, testAccRealm.Realm, client, clientScope)
 	} else {
 		return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "PUBLIC"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
 
 resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	client_id      = "${keycloak_openid_client.client.id}"
 	optional_scopes = [
 		"address",
@@ -465,76 +457,76 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
-	`, realm, client, clientScope)
+	`, testAccRealm.Realm, client, clientScope)
 	}
 }
 
-func testKeycloakOpenidClientOptionalScopes_noOptionalScopes(realm, client, clientScope string) string {
+func testKeycloakOpenidClientOptionalScopes_noOptionalScopes(client, clientScope string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "PUBLIC"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
-	`, realm, client, clientScope)
+	`, testAccRealm.Realm, client, clientScope)
 }
 
-func testKeycloakOpenidClientOptionalScopes_listOfScopes(realm, client, clientScope string, listOfOptionalScopes []string) string {
+func testKeycloakOpenidClientOptionalScopes_listOfScopes(client, clientScope string, listOfOptionalScopes []string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "PUBLIC"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
 
 resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	client_id      = "${keycloak_openid_client.client.id}"
 	optional_scopes = %s
 
 	depends_on = ["keycloak_openid_client_scope.client_scope"]
 }
-	`, realm, client, clientScope, arrayOfStringsForTerraformResource(listOfOptionalScopes))
+	`, testAccRealm.Realm, client, clientScope, arrayOfStringsForTerraformResource(listOfOptionalScopes))
 }
 
-func testKeycloakOpenidClientOptionalScopes_validationNoClient(realm, client, clientScope string) string {
+func testKeycloakOpenidClientOptionalScopes_validationNoClient(client, clientScope string) string {
 	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
 		return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
 
 resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	client_id      = "%s"
 	optional_scopes = [
 		"address",
@@ -544,22 +536,22 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
-	`, realm, clientScope, client)
+	`, testAccRealm.Realm, clientScope, client)
 	} else {
 		return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
 
 resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	client_id      = "%s"
 	optional_scopes = [
 		"address",
@@ -568,32 +560,32 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
-	`, realm, clientScope, client)
+	`, testAccRealm.Realm, clientScope, client)
 	}
 }
 
-func testKeycloakOpenidClientOptionalScopes_validationBearerOnlyClient(realm, client, clientScope string) string {
+func testKeycloakOpenidClientOptionalScopes_validationBearerOnlyClient(client, clientScope string) string {
 	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
 		return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "BEARER-ONLY"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
 
 resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	client_id      = "${keycloak_openid_client.client.id}"
 	optional_scopes = [
 		"address",
@@ -603,28 +595,28 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
-	`, realm, client, clientScope)
+	`, testAccRealm.Realm, client, clientScope)
 	} else {
 		return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "BEARER-ONLY"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
 
 resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	client_id      = "${keycloak_openid_client.client.id}"
 	optional_scopes = [
 		"address",
@@ -633,18 +625,18 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
-	`, realm, client, clientScope)
+	`, testAccRealm.Realm, client, clientScope)
 	}
 }
 
-func testKeycloakOpenidClientOptionalScopes_multipleClientScopes(realm, client string, allClientScopes, attachedClientScopes []string) string {
+func testKeycloakOpenidClientOptionalScopes_multipleClientScopes(client string, allClientScopes, attachedClientScopes []string) string {
 	var clientScopeResources strings.Builder
 	for _, clientScope := range allClientScopes {
 		if strings.HasPrefix(clientScope, "terraform") {
 			clientScopeResources.WriteString(fmt.Sprintf(`
 resource "keycloak_openid_client_scope" "client_scope_%s" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 }
 		`, clientScope, clientScope))
 		}
@@ -660,33 +652,33 @@ resource "keycloak_openid_client_scope" "client_scope_%s" {
 	}
 
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "PUBLIC"
 }
 
 %s
 
 resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	client_id      = "${keycloak_openid_client.client.id}"
 	optional_scopes = %s
 }
-	`, realm, client, clientScopeResources.String(), arrayOfStringsForTerraformResource(attachedClientScopesInterpolated))
+	`, testAccRealm.Realm, client, clientScopeResources.String(), arrayOfStringsForTerraformResource(attachedClientScopesInterpolated))
 }
 
-func testKeycloakOpenidClientOptionalScopes_duplicateScopeAssignment(realm, client, clientScope string) string {
+func testKeycloakOpenidClientOptionalScopes_duplicateScopeAssignment(client, clientScope string) string {
 	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
 		return fmt.Sprintf(`
 %s
 
 resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	client_id      = "${keycloak_openid_client.client.id}"
 	optional_scopes = [
 		"address",
@@ -696,13 +688,13 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
-	`, testKeycloakOpenidClientDefaultScopes_basic(realm, client, clientScope))
+	`, testKeycloakOpenidClientDefaultScopes_basic(client, clientScope))
 	} else {
 		return fmt.Sprintf(`
 %s
 
 resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	client_id      = "${keycloak_openid_client.client.id}"
 	optional_scopes = [
 		"address",
@@ -711,6 +703,6 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 		"${keycloak_openid_client_scope.client_scope.name}"
 	]
 }
-	`, testKeycloakOpenidClientDefaultScopes_basic(realm, client, clientScope))
+	`, testKeycloakOpenidClientDefaultScopes_basic(client, clientScope))
 	}
 }
