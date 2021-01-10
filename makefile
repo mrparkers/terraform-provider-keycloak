@@ -25,7 +25,7 @@ test: fmtcheck vet
 	go test $(TEST)
 
 testacc: fmtcheck vet
-	TF_ACC=1 CHECKPOINT_DISABLE=1 go test -timeout 30m $(TEST) -v $(TESTARGS)
+	TF_ACC=1 CHECKPOINT_DISABLE=1 go test -v -timeout 30m -parallel 4 $(TEST) $(TESTARGS)
 
 fmtcheck:
 	lineCount=$(shell gofmt -l -s $(GOFMT_FILES) | wc -l | tr -d ' ') && exit $$lineCount

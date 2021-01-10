@@ -2,16 +2,22 @@ package provider
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func TestAccKeycloakAuthenticationExecutionConfig_basic(t *testing.T) {
-	realmName := "terraform-r-" + acctest.RandString(10)
+	t.Parallel()
+
+	flowAlias := acctest.RandomWithPrefix("tf-acc")
+	configAlias := acctest.RandomWithPrefix("tf-acc")
+	configProviderOne := acctest.RandomWithPrefix("tf-acc")
+	configProviderTwo := acctest.RandomWithPrefix("tf-acc")
+
 	var config1, config2 keycloak.AuthenticationExecutionConfig
 
 	resource.Test(t, resource.TestCase{
@@ -20,23 +26,23 @@ func TestAccKeycloakAuthenticationExecutionConfig_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeycloakAuthenticationExecutionConfig(realmName),
+				Config: testAccKeycloakAuthenticationExecutionConfig(flowAlias, configAlias, configProviderOne),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationExecutionConfigExists("keycloak_authentication_execution_config.config", &config1),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "realm_id", realmName),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "alias", "some-config-alias"),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "realm_id", testAccRealm.Realm),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "alias", configAlias),
 					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.%", "1"),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.defaultProvider", "some-config-default-idp"),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.defaultProvider", configProviderOne),
 				),
 			},
 			{
-				Config: testAccKeycloakAuthenticationExecutionConfigUpdatedConfig(realmName),
+				Config: testAccKeycloakAuthenticationExecutionConfig(flowAlias, configAlias, configProviderTwo),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationExecutionConfigExists("keycloak_authentication_execution_config.config", &config2),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "realm_id", realmName),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "alias", "some-config-alias"),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "realm_id", testAccRealm.Realm),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "alias", configAlias),
 					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.%", "1"),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.defaultProvider", "some-updated-config-default-idp"),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.defaultProvider", configProviderTwo),
 					testAccCheckKeycloakAuthenticationExecutionConfigForceNew(&config1, &config2, false),
 				),
 			},
@@ -45,7 +51,13 @@ func TestAccKeycloakAuthenticationExecutionConfig_basic(t *testing.T) {
 }
 
 func TestAccKeycloakAuthenticationExecutionConfig_updateForcesNew(t *testing.T) {
-	realmName := "terraform-r-" + acctest.RandString(10)
+	t.Parallel()
+
+	flowAlias := acctest.RandomWithPrefix("tf-acc")
+	configAliasOne := acctest.RandomWithPrefix("tf-acc")
+	configAliasTwo := acctest.RandomWithPrefix("tf-acc")
+	configProvider := acctest.RandomWithPrefix("tf-acc")
+
 	var config1, config2 keycloak.AuthenticationExecutionConfig
 
 	resource.Test(t, resource.TestCase{
@@ -54,23 +66,23 @@ func TestAccKeycloakAuthenticationExecutionConfig_updateForcesNew(t *testing.T) 
 		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeycloakAuthenticationExecutionConfig(realmName),
+				Config: testAccKeycloakAuthenticationExecutionConfig(flowAlias, configAliasOne, configProvider),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationExecutionConfigExists("keycloak_authentication_execution_config.config", &config1),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "realm_id", realmName),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "alias", "some-config-alias"),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "realm_id", testAccRealm.Realm),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "alias", configAliasOne),
 					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.%", "1"),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.defaultProvider", "some-config-default-idp"),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.defaultProvider", configProvider),
 				),
 			},
 			{
-				Config: testAccKeycloakAuthenticationExecutionConfigUpdatedAlias(realmName),
+				Config: testAccKeycloakAuthenticationExecutionConfig(flowAlias, configAliasTwo, configProvider),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationExecutionConfigExists("keycloak_authentication_execution_config.config", &config2),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "realm_id", realmName),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "alias", "some-updated-config-alias"),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "realm_id", testAccRealm.Realm),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "alias", configAliasTwo),
 					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.%", "1"),
-					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.defaultProvider", "some-config-default-idp"),
+					resource.TestCheckResourceAttr("keycloak_authentication_execution_config.config", "config.defaultProvider", configProvider),
 					testAccCheckKeycloakAuthenticationExecutionConfigForceNew(&config1, &config2, true),
 				),
 			},
@@ -79,7 +91,11 @@ func TestAccKeycloakAuthenticationExecutionConfig_updateForcesNew(t *testing.T) 
 }
 
 func TestAccKeycloakAuthenticationExecutionConfig_import(t *testing.T) {
-	realmName := "terraform-r-" + acctest.RandString(10)
+	t.Parallel()
+
+	flowAlias := acctest.RandomWithPrefix("tf-acc")
+	configAlias := acctest.RandomWithPrefix("tf-acc")
+	configProvider := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -87,7 +103,7 @@ func TestAccKeycloakAuthenticationExecutionConfig_import(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeycloakAuthenticationExecutionConfig(realmName),
+				Config: testAccKeycloakAuthenticationExecutionConfig(flowAlias, configAlias, configProvider),
 			},
 			{
 				ResourceName:      "keycloak_authentication_execution_config.config",
@@ -125,7 +141,6 @@ func testAccCheckKeycloakAuthenticationExecutionConfigExists(resourceName string
 		config.ExecutionId = rs.Primary.Attributes["execution_id"]
 		config.Id = rs.Primary.ID
 
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 		if err := keycloakClient.GetAuthenticationExecutionConfig(config); err != nil {
 			return fmt.Errorf("error fetching authentication execution config: %v", err)
 		}
@@ -135,8 +150,6 @@ func testAccCheckKeycloakAuthenticationExecutionConfigExists(resourceName string
 }
 
 func testAccCheckKeycloakAuthenticationExecutionConfigDestroy(s *terraform.State) error {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "keycloak_authentication_execution_config" {
 			continue
@@ -171,83 +184,29 @@ func testAccCheckKeycloakAuthenticationExecutionConfigForceNew(old, new *keycloa
 	}
 }
 
-func testAccKeycloakAuthenticationExecutionConfig(realm string) string {
+func testAccKeycloakAuthenticationExecutionConfig(flowAlias, configAlias, configProvider string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_authentication_flow" "flow" {
-	realm_id = "${keycloak_realm.realm.id}"
-	alias    = "some-flow-alias"
+	realm_id = data.keycloak_realm.realm.id
+	alias    = "%s"
 }
 
 resource "keycloak_authentication_execution" "execution" {
-	realm_id          = "${keycloak_realm.realm.id}"
-	parent_flow_alias = "${keycloak_authentication_flow.flow.alias}"
+	realm_id          = data.keycloak_realm.realm.id
+	parent_flow_alias = keycloak_authentication_flow.flow.alias
 	authenticator     = "identity-provider-redirector"
 }
 
 resource "keycloak_authentication_execution_config" "config" {
-	realm_id     = "${keycloak_realm.realm.id}"
-	execution_id = "${keycloak_authentication_execution.execution.id}"
-	alias        = "some-config-alias"
+	realm_id     = data.keycloak_realm.realm.id
+	execution_id = keycloak_authentication_execution.execution.id
+	alias        = "%s"
 	config = {
-		defaultProvider = "some-config-default-idp"
+		defaultProvider = "%s"
 	}
-}`, realm)
-}
-
-func testAccKeycloakAuthenticationExecutionConfigUpdatedConfig(realm string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm = "%s"
-}
-
-resource "keycloak_authentication_flow" "flow" {
-	realm_id = "${keycloak_realm.realm.id}"
-	alias    = "some-flow-alias"
-}
-
-resource "keycloak_authentication_execution" "execution" {
-	realm_id          = "${keycloak_realm.realm.id}"
-	parent_flow_alias = "${keycloak_authentication_flow.flow.alias}"
-	authenticator     = "identity-provider-redirector"
-}
-
-resource "keycloak_authentication_execution_config" "config" {
-	realm_id     = "${keycloak_realm.realm.id}"
-	execution_id = "${keycloak_authentication_execution.execution.id}"
-	alias        = "some-config-alias"
-	config = {
-		defaultProvider = "some-updated-config-default-idp"
-	}
-}`, realm)
-}
-
-func testAccKeycloakAuthenticationExecutionConfigUpdatedAlias(realm string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm = "%s"
-}
-
-resource "keycloak_authentication_flow" "flow" {
-	realm_id = "${keycloak_realm.realm.id}"
-	alias    = "some-flow-alias"
-}
-
-resource "keycloak_authentication_execution" "execution" {
-	realm_id          = "${keycloak_realm.realm.id}"
-	parent_flow_alias = "${keycloak_authentication_flow.flow.alias}"
-	authenticator     = "identity-provider-redirector"
-}
-
-resource "keycloak_authentication_execution_config" "config" {
-	realm_id     = "${keycloak_realm.realm.id}"
-	execution_id = "${keycloak_authentication_execution.execution.id}"
-	alias        = "some-updated-config-alias"
-	config = {
-		defaultProvider = "some-config-default-idp"
-	}
-}`, realm)
+}`, testAccRealm.Realm, flowAlias, configAlias, configProvider)
 }

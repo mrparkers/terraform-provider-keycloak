@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 	"testing"
 )
@@ -182,7 +181,6 @@ resource "keycloak_required_action" "required_action2" {
 
 func testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realm, requiredActionAlias string, priority int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 		action, err := keycloakClient.GetRequiredAction(realm, requiredActionAlias)
 		if err != nil {
 			return fmt.Errorf("required action not found: %s", requiredActionAlias)
@@ -198,7 +196,6 @@ func testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realm, required
 
 func testAccCheckKeycloakRequiresActionExists(realm, requiredActionAlias string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 		_, err := keycloakClient.GetRequiredAction(realm, requiredActionAlias)
 		if err != nil {
 			return fmt.Errorf("required action not found: %s", requiredActionAlias)
