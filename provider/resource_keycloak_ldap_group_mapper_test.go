@@ -12,7 +12,7 @@ import (
 
 func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -21,7 +21,7 @@ func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapGroupMapper_basic(realmName, groupMapperName),
+				Config: testKeycloakLdapGroupMapper_basic(groupMapperName),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 			{
@@ -36,9 +36,9 @@ func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
 
 func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
+
 	var mapper = &keycloak.LdapGroupMapper{}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -47,7 +47,7 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapGroupMapper_basic(realmName, groupMapperName),
+				Config: testKeycloakLdapGroupMapper_basic(groupMapperName),
 				Check:  testAccCheckKeycloakLdapGroupMapperFetch("keycloak_ldap_group_mapper.group_mapper", mapper),
 			},
 			{
@@ -58,7 +58,7 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakLdapGroupMapper_basic(realmName, groupMapperName),
+				Config: testKeycloakLdapGroupMapper_basic(groupMapperName),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
@@ -67,7 +67,7 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 
 func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	groupMapperName := "terraform-" + acctest.RandString(10)
 	mode := randomStringInSlice(keycloakLdapGroupMapperModes)
 
@@ -77,11 +77,11 @@ func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "mode", acctest.RandString(10)),
+				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(groupMapperName, "mode", acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("expected mode to be one of .+ got .+"),
 			},
 			{
-				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "mode", mode),
+				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(groupMapperName, "mode", mode),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
@@ -90,7 +90,7 @@ func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
 
 func TestAccKeycloakLdapGroupMapper_membershipAttributeTypeValidation(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	groupMapperName := "terraform-" + acctest.RandString(10)
 	membershipAttributeType := randomStringInSlice(keycloakLdapGroupMapperMembershipAttributeTypes)
 
@@ -100,11 +100,11 @@ func TestAccKeycloakLdapGroupMapper_membershipAttributeTypeValidation(t *testing
 		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "membership_attribute_type", acctest.RandString(10)),
+				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(groupMapperName, "membership_attribute_type", acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("expected membership_attribute_type to be one of .+ got .+"),
 			},
 			{
-				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "membership_attribute_type", membershipAttributeType),
+				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(groupMapperName, "membership_attribute_type", membershipAttributeType),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
@@ -113,7 +113,7 @@ func TestAccKeycloakLdapGroupMapper_membershipAttributeTypeValidation(t *testing
 
 func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	groupMapperName := "terraform-" + acctest.RandString(10)
 	userRolesRetrieveStrategy := randomStringInSlice(keycloakLdapGroupMapperUserRolesRetrieveStrategies)
 
@@ -123,11 +123,11 @@ func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testi
 		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "user_roles_retrieve_strategy", acctest.RandString(10)),
+				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(groupMapperName, "user_roles_retrieve_strategy", acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("expected user_roles_retrieve_strategy to be one of .+ got .+"),
 			},
 			{
-				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "user_roles_retrieve_strategy", userRolesRetrieveStrategy),
+				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(groupMapperName, "user_roles_retrieve_strategy", userRolesRetrieveStrategy),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
@@ -136,7 +136,7 @@ func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testi
 
 func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	groupMapperName := "terraform-" + acctest.RandString(10)
 	groupsLdapFilter := "(" + acctest.RandString(10) + ")"
 
@@ -146,11 +146,11 @@ func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "groups_ldap_filter", acctest.RandString(10)),
+				Config:      testKeycloakLdapGroupMapper_basicWithAttrValidation(groupMapperName, "groups_ldap_filter", acctest.RandString(10)),
 				ExpectError: regexp.MustCompile(`validation error: groups ldap filter must start with '\(' and end with '\)'`),
 			},
 			{
-				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(realmName, groupMapperName, "groups_ldap_filter", groupsLdapFilter),
+				Config: testKeycloakLdapGroupMapper_basicWithAttrValidation(groupMapperName, "groups_ldap_filter", groupsLdapFilter),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
@@ -159,7 +159,7 @@ func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
 
 func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -168,7 +168,7 @@ func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakLdapGroupMapper_groupInheritanceValidation(realmName, groupMapperName),
+				Config:      testKeycloakLdapGroupMapper_groupInheritanceValidation(groupMapperName),
 				ExpectError: regexp.MustCompile("validation error: group inheritance cannot be preserved while membership attribute type is UID"),
 			},
 		},
@@ -177,8 +177,7 @@ func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
 
 func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationForceNew(t *testing.T) {
 	t.Parallel()
-	realmOne := "terraform-" + acctest.RandString(10)
-	realmTwo := "terraform-" + acctest.RandString(10)
+
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -187,11 +186,11 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationForceNew(t *testing.
 		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapGroupMapper_updateLdapUserFederationBefore(realmOne, realmTwo, groupMapperName),
+				Config: testKeycloakLdapGroupMapper_updateLdapUserFederationBefore(groupMapperName),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 			{
-				Config: testKeycloakLdapGroupMapper_updateLdapUserFederationAfter(realmOne, realmTwo, groupMapperName),
+				Config: testKeycloakLdapGroupMapper_updateLdapUserFederationAfter(groupMapperName),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
@@ -200,14 +199,14 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationForceNew(t *testing.
 
 func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T) {
 	t.Parallel()
-	realm := "terraform-" + acctest.RandString(10)
+
 	preserveGroupInheritance := true
 	ignoreMissingGroups := randomBool()
 	dropNonExistingGroupsDuringSync := randomBool()
 
 	groupMapperOne := &keycloak.LdapGroupMapper{
 		Name:                            acctest.RandString(10),
-		RealmId:                         realm,
+		RealmId:                         testAccRealm.Realm,
 		LdapGroupsDn:                    acctest.RandString(10),
 		GroupNameLdapAttribute:          acctest.RandString(10),
 		GroupObjectClasses:              []string{acctest.RandString(10), acctest.RandString(10)},
@@ -226,7 +225,7 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 
 	groupMapperTwo := &keycloak.LdapGroupMapper{
 		Name:                            acctest.RandString(10),
-		RealmId:                         realm,
+		RealmId:                         testAccRealm.Realm,
 		LdapGroupsDn:                    acctest.RandString(10),
 		GroupNameLdapAttribute:          acctest.RandString(10),
 		GroupObjectClasses:              []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
@@ -249,11 +248,11 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapGroupMapper_basicFromInterface(realm, groupMapperOne),
+				Config: testKeycloakLdapGroupMapper_basicFromInterface(groupMapperOne),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 			{
-				Config: testKeycloakLdapGroupMapper_basicFromInterface(realm, groupMapperTwo),
+				Config: testKeycloakLdapGroupMapper_basicFromInterface(groupMapperTwo),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
@@ -262,11 +261,11 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 
 func TestAccKeycloakLdapGroupMapper_groupsPath(t *testing.T) {
 	t.Parallel()
+
 	if !keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {
 		t.Skip()
 	}
 
-	realmName := "terraform-" + acctest.RandString(10)
 	groupName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
@@ -276,7 +275,7 @@ func TestAccKeycloakLdapGroupMapper_groupsPath(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapGroupMapper_groupsPath(realmName, groupName, groupMapperName),
+				Config: testKeycloakLdapGroupMapper_groupsPath(groupName, groupMapperName),
 				Check:  testAccCheckKeycloakLdapGroupMapperExists("keycloak_ldap_group_mapper.group_mapper"),
 			},
 		},
@@ -345,15 +344,15 @@ func getLdapGroupMapperFromState(s *terraform.State, resourceName string) (*keyc
 	return ldapGroupMapper, nil
 }
 
-func testKeycloakLdapGroupMapper_basic(realm, groupMapperName string) string {
+func testKeycloakLdapGroupMapper_basic(groupMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -372,7 +371,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm.id}"
+	realm_id                    = data.keycloak_realm.realm.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
 	ldap_groups_dn                 = "dc=example,dc=org"
@@ -385,18 +384,18 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	membership_user_ldap_attribute = "cn"
 	memberof_ldap_attribute        = "memberOf"
 }
-	`, realm, groupMapperName)
+	`, testAccRealm.Realm, groupMapperName)
 }
 
-func testKeycloakLdapGroupMapper_basicWithAttrValidation(realm, groupMapperName, attr, val string) string {
+func testKeycloakLdapGroupMapper_basicWithAttrValidation(groupMapperName, attr, val string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -415,7 +414,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm.id}"
+	realm_id                    = data.keycloak_realm.realm.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
 	%s                          = "%s"
@@ -430,18 +429,18 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	memberof_ldap_attribute        = "memberOf"
 	groups_path                    = "/"
 }
-	`, realm, groupMapperName, attr, val)
+	`, testAccRealm.Realm, groupMapperName, attr, val)
 }
 
-func testKeycloakLdapGroupMapper_groupInheritanceValidation(realm, groupMapperName string) string {
+func testKeycloakLdapGroupMapper_groupInheritanceValidation(groupMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -460,7 +459,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm.id}"
+	realm_id                    = data.keycloak_realm.realm.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
 	membership_attribute_type      = "UID"
@@ -476,18 +475,18 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	memberof_ldap_attribute        = "memberOf"
 	groups_path                    = "/"
 }
-	`, realm, groupMapperName)
+	`, testAccRealm.Realm, groupMapperName)
 }
 
-func testKeycloakLdapGroupMapper_basicFromInterface(realm string, mapper *keycloak.LdapGroupMapper) string {
+func testKeycloakLdapGroupMapper_basicFromInterface(mapper *keycloak.LdapGroupMapper) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -506,7 +505,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm.id}"
+	realm_id                    = data.keycloak_realm.realm.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
 	ldap_groups_dn                       = "%s"
@@ -524,22 +523,22 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	mapped_group_attributes              = %s
 	drop_non_existing_groups_during_sync = %t
 }
-	`, realm, mapper.Name, mapper.LdapGroupsDn, mapper.GroupNameLdapAttribute, arrayOfStringsForTerraformResource(mapper.GroupObjectClasses), mapper.PreserveGroupInheritance, mapper.IgnoreMissingGroups, mapper.MembershipLdapAttribute, mapper.MembershipAttributeType, mapper.MembershipUserLdapAttribute, mapper.GroupsLdapFilter, mapper.Mode, mapper.UserRolesRetrieveStrategy, mapper.MemberofLdapAttribute, arrayOfStringsForTerraformResource(mapper.MappedGroupAttributes), mapper.DropNonExistingGroupsDuringSync)
+	`, testAccRealm.Realm, mapper.Name, mapper.LdapGroupsDn, mapper.GroupNameLdapAttribute, arrayOfStringsForTerraformResource(mapper.GroupObjectClasses), mapper.PreserveGroupInheritance, mapper.IgnoreMissingGroups, mapper.MembershipLdapAttribute, mapper.MembershipAttributeType, mapper.MembershipUserLdapAttribute, mapper.GroupsLdapFilter, mapper.Mode, mapper.UserRolesRetrieveStrategy, mapper.MemberofLdapAttribute, arrayOfStringsForTerraformResource(mapper.MappedGroupAttributes), mapper.DropNonExistingGroupsDuringSync)
 }
 
-func testKeycloakLdapGroupMapper_updateLdapUserFederationBefore(realmOne, realmTwo, groupMapperName string) string {
+func testKeycloakLdapGroupMapper_updateLdapUserFederationBefore(groupMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_one" {
+data "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_two" {
+data "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap_one" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_one.id}"
+	realm_id                = data.keycloak_realm.realm_one.id
 
 	enabled                 = true
 
@@ -558,7 +557,7 @@ resource "keycloak_ldap_user_federation" "openldap_one" {
 
 resource "keycloak_ldap_user_federation" "openldap_two" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_two.id}"
+	realm_id                = data.keycloak_realm.realm_two.id
 
 	enabled                 = true
 
@@ -577,7 +576,7 @@ resource "keycloak_ldap_user_federation" "openldap_two" {
 
 resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm_one.id}"
+	realm_id                    = data.keycloak_realm.realm_one.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap_one.id}"
 
 	ldap_groups_dn                 = "dc=example,dc=org"
@@ -591,22 +590,22 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	memberof_ldap_attribute        = "memberOf"
 	groups_path                    = "/"
 }
-	`, realmOne, realmTwo, groupMapperName)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, groupMapperName)
 }
 
-func testKeycloakLdapGroupMapper_updateLdapUserFederationAfter(realmOne, realmTwo, groupMapperName string) string {
+func testKeycloakLdapGroupMapper_updateLdapUserFederationAfter(groupMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_one" {
+data "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_two" {
+data "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap_one" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_one.id}"
+	realm_id                = data.keycloak_realm.realm_one.id
 
 	enabled                 = true
 
@@ -625,7 +624,7 @@ resource "keycloak_ldap_user_federation" "openldap_one" {
 
 resource "keycloak_ldap_user_federation" "openldap_two" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_two.id}"
+	realm_id                = data.keycloak_realm.realm_two.id
 
 	enabled                 = true
 
@@ -644,7 +643,7 @@ resource "keycloak_ldap_user_federation" "openldap_two" {
 
 resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm_two.id}"
+	realm_id                    = data.keycloak_realm.realm_two.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap_two.id}"
 
 	ldap_groups_dn                 = "dc=example,dc=org"
@@ -657,23 +656,23 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 	membership_user_ldap_attribute = "cn"
 	memberof_ldap_attribute        = "memberOf"
 }
-	`, realmOne, realmTwo, groupMapperName)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, groupMapperName)
 }
 
-func testKeycloakLdapGroupMapper_groupsPath(realm, groupName, groupMapperName string) string {
+func testKeycloakLdapGroupMapper_groupsPath(groupName, groupMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_group" "group" {
-	realm_id = keycloak_realm.realm.id
+	realm_id = data.keycloak_realm.realm.id
 	name = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = keycloak_realm.realm.id
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -692,7 +691,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 resource "keycloak_ldap_group_mapper" "group_mapper" {
 	name                        = "%s"
-	realm_id                    = keycloak_realm.realm.id
+	realm_id                    = data.keycloak_realm.realm.id
 	ldap_user_federation_id     = keycloak_ldap_user_federation.openldap.id
 
 	ldap_groups_dn                 = "dc=example,dc=org"
@@ -707,5 +706,5 @@ resource "keycloak_ldap_group_mapper" "group_mapper" {
 
 	groups_path = keycloak_group.group.path
 }
-	`, realm, groupName, groupMapperName)
+	`, testAccRealm.Realm, groupName, groupMapperName)
 }
