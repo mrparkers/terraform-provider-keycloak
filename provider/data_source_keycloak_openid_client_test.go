@@ -8,7 +8,7 @@ import (
 )
 
 func TestAccKeycloakDataSourceOpenidClient_basic(t *testing.T) {
-	realm := acctest.RandomWithPrefix("tf-acc-test")
+	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc-test")
 	dataSourceName := "data.keycloak_openid_client.test"
 	resourceName := "keycloak_openid_client.test"
@@ -18,7 +18,7 @@ func TestAccKeycloakDataSourceOpenidClient_basic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeycloakOpenidClientConfig(realm, clientId),
+				Config: testAccKeycloakOpenidClientConfig(clientId),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceName, "client_id", resourceName, "client_id"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "realm_id", resourceName, "realm_id"),
@@ -39,40 +39,40 @@ func TestAccKeycloakDataSourceOpenidClient_basic(t *testing.T) {
 	})
 }
 
-func testAccKeycloakOpenidClientConfig(realm, clientId string) string {
+func testAccKeycloakOpenidClientConfig(clientId string) string {
 	return fmt.Sprintf(`
-resource keycloak_realm test {
-  realm                = "%s"
-  enabled              = true
-  display_name         = "foo"
-  account_theme        = "base"
-  access_code_lifespan = "30m"
+data "keycloak_realm" "realm" {
+	realm = "%s"
 }
 
-resource keycloak_openid_client test {
-  name                  	= "%s"
-  client_id 					= "%s"
-  realm_id              	= "${keycloak_realm.test.id}"
-  description           	= "a test openid client"
-  standard_flow_enabled    = true
-  access_type              = "CONFIDENTIAL"
-  service_accounts_enabled = true
-  client_secret            = "secret"
-  valid_redirect_uris      = [
-   	"http://localhost:5555/callback",
-  ]
-  authorization {
-  		policy_enforcement_mode = "ENFORCING"
-  }
-  web_origins              = [
+resource "keycloak_openid_client" "test" {
+	name                     = "%s"
+	client_id                = "%s"
+	realm_id                 = data.keycloak_realm.realm.id
+	description              = "a test openid client"
+	standard_flow_enabled    = true
+	access_type              = "CONFIDENTIAL"
+	service_accounts_enabled = true
+	client_secret            = "secret"
+	valid_redirect_uris      = [
+		"http://localhost:5555/callback",
+	]
+	authorization {
+		policy_enforcement_mode = "ENFORCING"
+	}
+	web_origins              = [
 		"http://localhost"
-  ]
-  full_scope_allowed       = false
+	]
+	full_scope_allowed       = false
 }
 
-data keycloak_openid_client test {
-  client_id = "${keycloak_openid_client.test.client_id}"
-  realm_id  = "${keycloak_realm.test.id}"
+data "keycloak_openid_client" "test" {
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = keycloak_openid_client.test.client_id
+
+	depends_on = [
+		keycloak_openid_client.test,
+	]
 }
-`, realm, clientId, clientId)
+`, testAccRealm.Realm, clientId, clientId)
 }
