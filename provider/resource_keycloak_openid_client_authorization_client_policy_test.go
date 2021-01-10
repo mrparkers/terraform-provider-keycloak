@@ -12,9 +12,7 @@ import (
 
 func TestAccKeycloakOpenidClientAuthorizationClientPolicy(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
 	clientId := "terraform-" + acctest.RandString(10)
-	roleName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -22,7 +20,7 @@ func TestAccKeycloakOpenidClientAuthorizationClientPolicy(t *testing.T) {
 		CheckDestroy:      testResourceKeycloakOpenidClientAuthorizationClientPolicyDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testResourceKeycloakOpenidClientAuthorizationClientPolicy_basic(realmName, roleName, clientId),
+				Config: testResourceKeycloakOpenidClientAuthorizationClientPolicy_basic(clientId),
 				Check:  testResourceKeycloakOpenidClientAuthorizationClientPolicyExists("keycloak_openid_client_client_policy.test"),
 			},
 		},
@@ -80,30 +78,30 @@ func testResourceKeycloakOpenidClientAuthorizationClientPolicyExists(resourceNam
 	}
 }
 
-func testResourceKeycloakOpenidClientAuthorizationClientPolicy_basic(realm, roleName, clientId string) string {
+func testResourceKeycloakOpenidClientAuthorizationClientPolicy_basic(clientId string) string {
 
 	return fmt.Sprintf(`
-	resource keycloak_realm test {
-		realm = "%s"
-	}
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
 
-	resource keycloak_openid_client test {
-		client_id                = "%s"
-		realm_id                 = "${keycloak_realm.test.id}"
-		access_type              = "CONFIDENTIAL"
-		service_accounts_enabled = true
-		authorization {
-			policy_enforcement_mode = "ENFORCING"
-		}
+resource keycloak_openid_client test {
+	client_id                = "%s"
+	realm_id                 = data.keycloak_realm.realm.id
+	access_type              = "CONFIDENTIAL"
+	service_accounts_enabled = true
+	authorization {
+		policy_enforcement_mode = "ENFORCING"
 	}
+}
 
-	resource keycloak_openid_client_client_policy test {
-		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
-		realm_id = "${keycloak_realm.test.id}"
-		name = "keycloak_openid_client_client_policy"
-		decision_strategy = "AFFIRMATIVE"
-		logic = "POSITIVE"
-		clients = ["${keycloak_openid_client.test.resource_server_id}"]
-	}
-	`, realm, clientId)
+resource keycloak_openid_client_client_policy test {
+	resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
+	realm_id = data.keycloak_realm.realm.id
+	name = "keycloak_openid_client_client_policy"
+	decision_strategy = "AFFIRMATIVE"
+	logic = "POSITIVE"
+	clients = ["${keycloak_openid_client.test.resource_server_id}"]
+}
+	`, testAccRealm.Realm, clientId)
 }
