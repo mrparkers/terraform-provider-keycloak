@@ -12,7 +12,7 @@ import (
 
 func TestAccKeycloakLdapHardcodedGroupMapper_basic(t *testing.T) {
 	t.Parallel()
-	realmName := "terraform-" + acctest.RandString(10)
+	groupName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -21,7 +21,7 @@ func TestAccKeycloakLdapHardcodedGroupMapper_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapHardcodedGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapHardcodedGroupMapper(realmName, groupMapperName),
+				Config: testKeycloakLdapHardcodedGroupMapper(groupName, groupMapperName),
 				Check:  testAccCheckKeycloakLdapHardcodedGroupMapperExists("keycloak_ldap_hardcoded_group_mapper.hardcoded_group_mapper"),
 			},
 			{
@@ -38,7 +38,7 @@ func TestAccKeycloakLdapHardcodedGroupMapper_createAfterManualDestroy(t *testing
 	t.Parallel()
 	var mapper = &keycloak.LdapHardcodedGroupMapper{}
 
-	realmName := "terraform-" + acctest.RandString(10)
+	groupName := "terraform-" + acctest.RandString(10)
 	groupMapperName := "terraform-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -47,7 +47,7 @@ func TestAccKeycloakLdapHardcodedGroupMapper_createAfterManualDestroy(t *testing
 		CheckDestroy:      testAccCheckKeycloakLdapHardcodedGroupMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapHardcodedGroupMapper(realmName, groupMapperName),
+				Config: testKeycloakLdapHardcodedGroupMapper(groupName, groupMapperName),
 				Check:  testAccCheckKeycloakLdapHardcodedGroupMapperFetch("keycloak_ldap_hardcoded_group_mapper.hardcoded_group_mapper", mapper),
 			},
 			{
@@ -57,7 +57,7 @@ func TestAccKeycloakLdapHardcodedGroupMapper_createAfterManualDestroy(t *testing
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakLdapHardcodedGroupMapper(realmName, groupMapperName),
+				Config: testKeycloakLdapHardcodedGroupMapper(groupName, groupMapperName),
 				Check:  testAccCheckKeycloakLdapHardcodedGroupMapperExists("keycloak_ldap_hardcoded_group_mapper.hardcoded_group_mapper"),
 			},
 		},
@@ -126,15 +126,15 @@ func getLdapHardcodedGroupMapperFromState(s *terraform.State, resourceName strin
 	return ldapMapper, nil
 }
 
-func testKeycloakLdapHardcodedGroupMapper(realm, groupMapperName string) string {
+func testKeycloakLdapHardcodedGroupMapper(groupName, groupMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = keycloak_realm.realm.id
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -152,15 +152,15 @@ resource "keycloak_ldap_user_federation" "openldap" {
 }
 
 resource "keycloak_group" "hardcoded_group_mapper_test" {
-    realm_id    = keycloak_realm.realm.id
-    name        = "hardcoded-group-test"
+    realm_id    = data.keycloak_realm.realm.id
+    name        = "%s"
 }
 
 resource "keycloak_ldap_hardcoded_group_mapper" "hardcoded_group_mapper" {
-	name                        = "%s"
-	realm_id                    = keycloak_realm.realm.id
-	ldap_user_federation_id     = keycloak_ldap_user_federation.openldap.id
-	group                        = keycloak_group.hardcoded_group_mapper_test.name
+	name                    = "%s"
+	realm_id                = data.keycloak_realm.realm.id
+	ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
+	group                   = keycloak_group.hardcoded_group_mapper_test.name
 }
-	`, realm, groupMapperName)
+	`, testAccRealm.Realm, groupName, groupMapperName)
 }
