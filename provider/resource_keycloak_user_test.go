@@ -17,9 +17,9 @@ import (
 
 func TestAccKeycloakUser_basic(t *testing.T) {
 	t.Parallel()
-	username := "terraform-user-" + acctest.RandString(10)
-	attributeName := "terraform-attribute-" + acctest.RandString(10)
-	attributeValue := acctest.RandString(250)
+	username := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_user.user"
 
@@ -44,9 +44,9 @@ func TestAccKeycloakUser_basic(t *testing.T) {
 
 func TestAccKeycloakUser_withInitialPassword(t *testing.T) {
 	t.Parallel()
-	username := "terraform-user-" + acctest.RandString(10)
-	password := "terraform-password-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
+	username := acctest.RandomWithPrefix("tf-acc")
+	password := acctest.RandomWithPrefix("tf-acc")
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_user.user"
 
@@ -70,9 +70,9 @@ func TestAccKeycloakUser_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var user = &keycloak.User{}
 
-	username := "terraform-user-" + acctest.RandString(10)
-	attributeName := "terraform-attribute-" + acctest.RandString(10)
-	attributeValue := acctest.RandString(250)
+	username := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
 	resourceName := "keycloak_user.user"
 
 	resource.Test(t, resource.TestCase{
@@ -103,10 +103,10 @@ func TestAccKeycloakUser_createAfterManualDestroy(t *testing.T) {
 
 func TestAccKeycloakUser_updateUsername(t *testing.T) {
 	t.Parallel()
-	usernameOne := "terraform-user-" + acctest.RandString(10)
-	usernameTwo := "terraform-user-" + acctest.RandString(10)
-	attributeName := "terraform-attribute-" + acctest.RandString(10)
-	attributeValue := acctest.RandString(250)
+	usernameOne := acctest.RandomWithPrefix("tf-acc")
+	usernameTwo := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_user.user"
 
@@ -135,10 +135,10 @@ func TestAccKeycloakUser_updateUsername(t *testing.T) {
 
 func TestAccKeycloakUser_updateWithInitialPasswordChangeDoesNotReset(t *testing.T) {
 	t.Parallel()
-	username := "terraform-user-" + acctest.RandString(10)
-	passwordOne := "terraform-password1-" + acctest.RandString(10)
-	passwordTwo := "terraform-password2-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
+	username := acctest.RandomWithPrefix("tf-acc")
+	passwordOne := acctest.RandomWithPrefix("tf-acc")
+	passwordTwo := acctest.RandomWithPrefix("tf-acc")
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -204,7 +204,7 @@ func TestAccKeycloakUser_updateInPlace(t *testing.T) {
 
 func TestAccKeycloakUser_unsetOptionalAttributes(t *testing.T) {
 	t.Parallel()
-	attributeName := "terraform-attribute-" + acctest.RandString(10)
+	attributeName := acctest.RandomWithPrefix("tf-acc")
 	userWithOptionalAttributes := &keycloak.User{
 		RealmId:   "terraform-" + acctest.RandString(10),
 		Username:  "terraform-user-" + acctest.RandString(10),
@@ -264,9 +264,9 @@ func TestAccKeycloakUser_validateLowercaseUsernames(t *testing.T) {
 }
 
 func TestAccKeycloakUser_federatedLink(t *testing.T) {
-	sourceUserName := "terraform-source-user-" + acctest.RandString(10)
-	sourceUserName2 := "terraform-source-user2-" + acctest.RandString(10)
-	destinationRealmName := "terraform-dest-" + acctest.RandString(10)
+	sourceUserName := acctest.RandomWithPrefix("tf-acc")
+	sourceUserName2 := acctest.RandomWithPrefix("tf-acc")
+	destinationRealmName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_user.destination_user"
 

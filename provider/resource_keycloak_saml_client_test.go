@@ -126,12 +126,12 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 	frontChannelLogout := randomBool()
 	clientSignatureRequired := "true"
 
-	encryptionCertificateBefore := acctest.RandString(20)
-	encryptionCertificateAfter := acctest.RandString(20)
-	signingCertificateBefore := acctest.RandString(20)
-	signingCertificateAfter := acctest.RandString(20)
-	signingPrivateKeyBefore := acctest.RandString(20)
-	signingPrivateKeyAfter := acctest.RandString(20)
+	encryptionCertificateBefore := acctest.RandomWithPrefix("tf-acc")
+	encryptionCertificateAfter := acctest.RandomWithPrefix("tf-acc")
+	signingCertificateBefore := acctest.RandomWithPrefix("tf-acc")
+	signingCertificateAfter := acctest.RandomWithPrefix("tf-acc")
+	signingPrivateKeyBefore := acctest.RandomWithPrefix("tf-acc")
+	signingPrivateKeyAfter := acctest.RandomWithPrefix("tf-acc")
 
 	samlClientBefore := &keycloak.SamlClient{
 		RealmId:  testAccRealm.Realm,

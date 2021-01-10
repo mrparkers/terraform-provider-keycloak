@@ -13,9 +13,9 @@ import (
 func TestAccKeycloakGenericRoleMapper_basic(t *testing.T) {
 	t.Parallel()
 
-	parentClientName := "client1-" + acctest.RandString(10)
-	parentRoleName := "role-" + acctest.RandString(10)
-	childClientName := "client2-" + acctest.RandString(10)
+	parentClientName := acctest.RandomWithPrefix("tf-acc")
+	parentRoleName := acctest.RandomWithPrefix("tf-acc")
+	childClientName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -35,9 +35,9 @@ func TestAccKeycloakGenericRoleMapper_createAfterManualDestroy(t *testing.T) {
 	var role = &keycloak.Role{}
 	var childClient = &keycloak.GenericClient{}
 
-	parentClientName := "client1-" + acctest.RandString(10)
-	parentRoleName := "role-" + acctest.RandString(10)
-	childClientName := "client2-" + acctest.RandString(10)
+	parentClientName := acctest.RandomWithPrefix("tf-acc")
+	parentRoleName := acctest.RandomWithPrefix("tf-acc")
+	childClientName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -68,9 +68,9 @@ func TestAccKeycloakGenericRoleMapper_createAfterManualDestroy(t *testing.T) {
 func TestAccKeycloakGenericRoleMapper_import(t *testing.T) {
 	t.Parallel()
 
-	parentClientName := "client1-" + acctest.RandString(10)
-	parentRoleName := "role-" + acctest.RandString(10)
-	childClientName := "client2-" + acctest.RandString(10)
+	parentClientName := acctest.RandomWithPrefix("tf-acc")
+	parentRoleName := acctest.RandomWithPrefix("tf-acc")
+	childClientName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_generic_client_role_mapper.child-client-with-parent-client-role"
 
@@ -95,9 +95,9 @@ func TestAccKeycloakGenericRoleMapper_import(t *testing.T) {
 func TestAccKeycloakGenericRoleMapperClientScope_basic(t *testing.T) {
 	t.Parallel()
 
-	clientName := "client-" + acctest.RandString(10)
-	roleName := "role-" + acctest.RandString(10)
-	clientScopeName := "clientscope-" + acctest.RandString(10)
+	clientName := acctest.RandomWithPrefix("tf-acc")
+	roleName := acctest.RandomWithPrefix("tf-acc")
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -114,9 +114,9 @@ func TestAccKeycloakGenericRoleMapperClientScope_basic(t *testing.T) {
 func TestAccKeycloakGenericRoleMapperClientScope_import(t *testing.T) {
 	t.Parallel()
 
-	clientName := "client-" + acctest.RandString(10)
-	roleName := "role-" + acctest.RandString(10)
-	clientScopeName := "clientscope-" + acctest.RandString(10)
+	clientName := acctest.RandomWithPrefix("tf-acc")
+	roleName := acctest.RandomWithPrefix("tf-acc")
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_generic_client_role_mapper.clientscope-with-client-role"
 
@@ -141,8 +141,8 @@ func TestAccKeycloakGenericRoleMapperClientScope_import(t *testing.T) {
 func TestAccKeycloakGenericRealmLevelRoleMapperClientScope_basic(t *testing.T) {
 	t.Parallel()
 
-	roleName := "role-" + acctest.RandString(10)
-	clientScopeName := "clientscope-" + acctest.RandString(10)
+	roleName := acctest.RandomWithPrefix("tf-acc")
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -162,8 +162,8 @@ func TestAccKeycloakGenericRealmLevelRoleMapperClientScope_createAfterManualDest
 	var role = &keycloak.Role{}
 	var clientScope = &keycloak.OpenidClientScope{}
 
-	roleName := "role-" + acctest.RandString(10)
-	clientScopeName := "clientscope-" + acctest.RandString(10)
+	roleName := acctest.RandomWithPrefix("tf-acc")
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -197,9 +197,9 @@ func TestAccKeycloakGenericRoleMapperClientScope_createAfterManualDestroy(t *tes
 	var role = &keycloak.Role{}
 	var clientScope = &keycloak.OpenidClientScope{}
 
-	clientName := "client-" + acctest.RandString(10)
-	roleName := "role-" + acctest.RandString(10)
-	clientScopeName := "clientscope-" + acctest.RandString(10)
+	clientName := acctest.RandomWithPrefix("tf-acc")
+	roleName := acctest.RandomWithPrefix("tf-acc")
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

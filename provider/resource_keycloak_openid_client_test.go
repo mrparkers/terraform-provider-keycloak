@@ -13,7 +13,7 @@ import (
 
 func TestAccKeycloakOpenidClient_basic(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -39,7 +39,7 @@ func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var client = &keycloak.OpenidClient{}
 
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -70,7 +70,7 @@ func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 	t.Parallel()
 
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -97,7 +97,7 @@ func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -122,7 +122,7 @@ func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_adminUrl(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	adminUrl := "https://www.example.com/admin"
 
 	resource.Test(t, resource.TestCase{
@@ -140,7 +140,7 @@ func TestAccKeycloakOpenidClient_adminUrl(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	baseUrl := "https://www.example.com"
 
 	resource.Test(t, resource.TestCase{
@@ -158,7 +158,7 @@ func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_rootUrl(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	rootUrl := "https://www.example.com"
 
 	resource.Test(t, resource.TestCase{
@@ -176,7 +176,7 @@ func TestAccKeycloakOpenidClient_rootUrl(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	enabled := randomBool()
 	standardFlowEnabled := randomBool()
 	implicitFlowEnabled := randomBool()
@@ -254,7 +254,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	accessTokenLifespan := "1800"
 
@@ -280,7 +280,7 @@ func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	offlineSessionIdleTimeout := "1800"
 	offlineSessionMaxLifespan := "1900"
@@ -312,8 +312,8 @@ func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_secret(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
-	clientSecret := acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	clientSecret := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -340,7 +340,7 @@ func TestAccKeycloakOpenidClient_secret(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	accessType := randomStringInSlice([]string{"PUBLIC", "CONFIDENTIAL"})
 
 	resource.Test(t, resource.TestCase{
@@ -362,7 +362,7 @@ func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_publicClientCredentialsValidation(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -379,7 +379,7 @@ func TestAccKeycloakOpenidClient_publicClientCredentialsValidation(t *testing.T)
 
 func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -408,7 +408,7 @@ func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -453,7 +453,7 @@ func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
 
 func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -494,7 +494,7 @@ func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.
 
 func TestAccKeycloakOpenidClient_authenticationFlowBindingOverrides(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -515,10 +515,10 @@ func TestAccKeycloakOpenidClient_authenticationFlowBindingOverrides(t *testing.T
 
 func TestAccKeycloakOpenidClient_loginTheme(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	loginThemeKeycloak := "keycloak"
 	loginThemeBase := "base"
-	loginThemeRandom := "theme-" + acctest.RandString(10)
+	loginThemeRandom := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

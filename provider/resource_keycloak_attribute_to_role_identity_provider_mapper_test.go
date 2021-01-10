@@ -12,11 +12,11 @@ import (
 
 func TestAccKeycloakAttributeToRoleIdentityProviderMapper_basic(t *testing.T) {
 	t.Parallel()
-	mapperName := "terraform-" + acctest.RandString(10)
-	alias := "terraform-" + acctest.RandString(10)
-	role := "terraform-" + acctest.RandString(10)
-	claimName := "terraform-" + acctest.RandString(10)
-	claimValue := "terraform-" + acctest.RandString(10)
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	alias := acctest.RandomWithPrefix("tf-acc")
+	role := acctest.RandomWithPrefix("tf-acc")
+	claimName := acctest.RandomWithPrefix("tf-acc")
+	claimValue := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -33,12 +33,12 @@ func TestAccKeycloakAttributeToRoleIdentityProviderMapper_basic(t *testing.T) {
 
 func TestAccKeycloakAttributeToRoleIdentityProviderMapper_withExtraConfig(t *testing.T) {
 	t.Parallel()
-	mapperName := "terraform-" + acctest.RandString(10)
-	alias := "terraform-" + acctest.RandString(10)
-	role := "terraform-" + acctest.RandString(10)
-	claimName := "terraform-" + acctest.RandString(10)
-	claimValue := "terraform-" + acctest.RandString(10)
-	syncMode := "terraform-" + acctest.RandString(10)
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	alias := acctest.RandomWithPrefix("tf-acc")
+	role := acctest.RandomWithPrefix("tf-acc")
+	claimName := acctest.RandomWithPrefix("tf-acc")
+	claimValue := acctest.RandomWithPrefix("tf-acc")
+	syncMode := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -57,11 +57,11 @@ func TestAccKeycloakAttributeToRoleIdentityProviderMapper_createAfterManualDestr
 	t.Parallel()
 	var mapper = &keycloak.IdentityProviderMapper{}
 
-	mapperName := "terraform-" + acctest.RandString(10)
-	alias := "terraform-" + acctest.RandString(10)
-	role := "terraform-" + acctest.RandString(10)
-	claimName := "terraform-" + acctest.RandString(10)
-	claimValue := "terraform-" + acctest.RandString(10)
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	alias := acctest.RandomWithPrefix("tf-acc")
+	role := acctest.RandomWithPrefix("tf-acc")
+	claimName := acctest.RandomWithPrefix("tf-acc")
+	claimValue := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -90,12 +90,12 @@ func TestAccKeycloakAttributeToRoleIdentityProviderMapper_withExtraConfig_create
 	t.Parallel()
 	var mapper = &keycloak.IdentityProviderMapper{}
 
-	mapperName := "terraform-" + acctest.RandString(10)
-	alias := "terraform-" + acctest.RandString(10)
-	role := "terraform-" + acctest.RandString(10)
-	claimName := "terraform-" + acctest.RandString(10)
-	claimValue := "terraform-" + acctest.RandString(10)
-	syncMode := "terraform-" + acctest.RandString(10)
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	alias := acctest.RandomWithPrefix("tf-acc")
+	role := acctest.RandomWithPrefix("tf-acc")
+	claimName := acctest.RandomWithPrefix("tf-acc")
+	claimValue := acctest.RandomWithPrefix("tf-acc")
+	syncMode := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -122,7 +122,7 @@ func TestAccKeycloakAttributeToRoleIdentityProviderMapper_withExtraConfig_create
 
 func TestAccKeycloakAttributeToRoleIdentityProviderMapper_basicUpdateAll(t *testing.T) {
 	t.Parallel()
-	identityProviderAliasName := "terraform-" + acctest.RandString(10)
+	identityProviderAliasName := acctest.RandomWithPrefix("tf-acc")
 
 	firstMapper := &keycloak.IdentityProviderMapper{
 		Realm:                 testAccRealm.Realm,

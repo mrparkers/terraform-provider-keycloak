@@ -11,7 +11,7 @@ import (
 
 func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
 	t.Parallel()
-	group := "terraform-group-" + acctest.RandString(10)
+	group := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -35,8 +35,8 @@ func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
 
 func TestAccKeycloakDataSourceGroup_nested(t *testing.T) {
 	t.Parallel()
-	group := "terraform-group-" + acctest.RandString(10)
-	groupNested := "terraform-group-nested-" + acctest.RandString(10)
+	group := acctest.RandomWithPrefix("tf-acc")
+	groupNested := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

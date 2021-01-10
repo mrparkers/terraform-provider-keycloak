@@ -13,8 +13,8 @@ import (
 func TestAccKeycloakOpenIdScriptProtocolMapper_basicClient(t *testing.T) {
 	t.Parallel()
 
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_script_protocol_mapper.script_mapper_client"
 
@@ -34,8 +34,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_basicClient(t *testing.T) {
 func TestAccKeycloakOpenIdScriptProtocolMapper_basicClientScope(t *testing.T) {
 	t.Parallel()
 
-	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_script_protocol_mapper.script_mapper_client_scope"
 
@@ -55,9 +55,9 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_basicClientScope(t *testing.T) {
 func TestAccKeycloakOpenIdScriptProtocolMapper_import(t *testing.T) {
 	t.Parallel()
 
-	clientId := "terraform-openid-client-" + acctest.RandString(10)
-	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	clientResourceName := "keycloak_openid_script_protocol_mapper.script_mapper_client"
 	clientScopeResourceName := "keycloak_openid_script_protocol_mapper.script_mapper_client_scope"
@@ -93,11 +93,11 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_import(t *testing.T) {
 func TestAccKeycloakOpenIdScriptProtocolMapper_update(t *testing.T) {
 	t.Parallel()
 
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
-	attributeName := "claim-" + acctest.RandString(10)
-	updatedAttributeName := "claim-update-" + acctest.RandString(10)
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	updatedAttributeName := acctest.RandomWithPrefix("tf-acc")
 	resourceName := "keycloak_openid_script_protocol_mapper.script_mapper"
 
 	resource.Test(t, resource.TestCase{
@@ -122,8 +122,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_createAfterManualDestroy(t *testi
 
 	var mapper = &keycloak.OpenIdScriptProtocolMapper{}
 
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_script_protocol_mapper.script_mapper_client"
 
@@ -155,8 +155,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_createAfterManualDestroy(t *testi
 func TestAccKeycloakOpenIdScriptProtocolMapper_validateClaimValueType(t *testing.T) {
 	t.Parallel()
 
-	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(10)
-	invalidClaimValueType := acctest.RandString(5)
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	invalidClaimValueType := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -174,11 +174,11 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_validateClaimValueType(t *testing
 func TestAccKeycloakOpenIdScriptProtocolMapper_updateClientIdForceNew(t *testing.T) {
 	t.Parallel()
 
-	clientId := "terraform-client-" + acctest.RandString(10)
-	updatedClientId := "terraform-client-update-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	updatedClientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
-	attributeName := "claim-" + acctest.RandString(10)
+	attributeName := acctest.RandomWithPrefix("tf-acc")
 	resourceName := "keycloak_openid_script_protocol_mapper.script_mapper"
 
 	resource.Test(t, resource.TestCase{
@@ -201,9 +201,9 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_updateClientIdForceNew(t *testing
 func TestAccKeycloakOpenIdScriptProtocolMapper_updateClientScopeForceNew(t *testing.T) {
 	t.Parallel()
 
-	mapperName := "terraform-openid-connect-script-mapper-" + acctest.RandString(5)
-	clientScopeId := "terraform-client-" + acctest.RandString(10)
-	newClientScopeId := "terraform-client-scope-" + acctest.RandString(10)
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	newClientScopeId := acctest.RandomWithPrefix("tf-acc")
 	resourceName := "keycloak_openid_script_protocol_mapper.script_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{

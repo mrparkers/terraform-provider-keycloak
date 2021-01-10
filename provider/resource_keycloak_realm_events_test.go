@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccKeycloakRealmEvents_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -25,7 +25,7 @@ func TestAccKeycloakRealmEvents_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRealmEvents_destroy(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -67,7 +67,7 @@ func TestAccKeycloakRealmEvents_destroy(t *testing.T) {
 }
 
 func TestAccKeycloakRealmEvents_update(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	before := &keycloak.RealmEventsConfig{
 		AdminEventsDetailsEnabled: true,
@@ -126,7 +126,7 @@ func TestAccKeycloakRealmEvents_update(t *testing.T) {
 }
 
 func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	before := &keycloak.RealmEventsConfig{
 		AdminEventsDetailsEnabled: true,

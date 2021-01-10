@@ -24,7 +24,7 @@ func TestAccKeycloakOidcGoogleIdentityProvider_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOidcGoogleIdentityProvider_customConfig(t *testing.T) {
-	customConfigValue := "terraform-" + acctest.RandString(10)
+	customConfigValue := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

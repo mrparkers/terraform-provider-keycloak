@@ -11,8 +11,8 @@ import (
 
 func TestAccKeycloakOpenidClientAuthorizationResource_basic(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
-	resourceName := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	resourceName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -31,8 +31,8 @@ func TestAccKeycloakOpenidClientAuthorizationResource_createAfterManualDestroy(t
 	t.Parallel()
 	var authorizationResource = &keycloak.OpenidClientAuthorizationResource{}
 
-	clientId := "terraform-" + acctest.RandString(10)
-	resourceName := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	resourceName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -59,7 +59,7 @@ func TestAccKeycloakOpenidClientAuthorizationResource_createAfterManualDestroy(t
 
 func TestAccKeycloakOpenidClientAuthorizationResource_basicUpdateAll(t *testing.T) {
 	t.Parallel()
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	ownerManagedAccess := randomBool()
 
 	firstAuthrorizationResource := &keycloak.OpenidClientAuthorizationResource{

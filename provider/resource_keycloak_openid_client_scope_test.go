@@ -13,7 +13,7 @@ import (
 
 func TestAccKeycloakClientScope_basic(t *testing.T) {
 	t.Parallel()
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -38,7 +38,7 @@ func TestAccKeycloakClientScope_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var clientScope = &keycloak.OpenidClientScope{}
 
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -68,7 +68,7 @@ func TestAccKeycloakClientScope_createAfterManualDestroy(t *testing.T) {
 
 func TestAccKeycloakClientScope_updateRealm(t *testing.T) {
 	t.Parallel()
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -95,7 +95,7 @@ func TestAccKeycloakClientScope_updateRealm(t *testing.T) {
 
 func TestAccKeycloakClientScope_consentScreenText(t *testing.T) {
 	t.Parallel()
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -120,7 +120,7 @@ func TestAccKeycloakClientScope_consentScreenText(t *testing.T) {
 
 func TestAccKeycloakClientScope_includeInTokenScope(t *testing.T) {
 	t.Parallel()
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 	includeInTokenScope := false
 
 	resource.Test(t, resource.TestCase{
@@ -149,7 +149,7 @@ func TestAccKeycloakClientScope_includeInTokenScope(t *testing.T) {
 
 func TestAccKeycloakClientScope_guiOrder(t *testing.T) {
 	t.Parallel()
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 	guiOrder := acctest.RandIntRange(0, 1000)
 
 	resource.Test(t, resource.TestCase{

@@ -11,7 +11,7 @@ import (
 
 func TestAccKeycloakDataSourceUser(t *testing.T) {
 	t.Parallel()
-	username := acctest.RandString(10)
+	username := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

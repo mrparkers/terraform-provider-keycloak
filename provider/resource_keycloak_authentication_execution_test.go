@@ -12,7 +12,7 @@ import (
 
 func TestAccKeycloakAuthenticationExecution_basic(t *testing.T) {
 	t.Parallel()
-	parentAuthFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
+	parentAuthFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -37,7 +37,7 @@ func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.
 	t.Parallel()
 	var authenticationExecution = &keycloak.AuthenticationExecution{}
 
-	authParentFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
+	authParentFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -67,7 +67,7 @@ func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.
 
 func TestAccKeycloakAuthenticationExecution_updateAuthenticationExecutionRequirement(t *testing.T) {
 	t.Parallel()
-	authParentFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
+	authParentFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

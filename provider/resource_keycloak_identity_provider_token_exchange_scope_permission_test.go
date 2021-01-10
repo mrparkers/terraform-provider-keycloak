@@ -108,10 +108,6 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_updatePolicyMultipleClients(
 				),
 			},
 			{
-				Config: testKeycloakIdpTokenExchangeScopePermission_basic(providerAlias, providerClientId, webappClientId2),
-				Check:  testAccCheckKeycloakIdpTokenExchangeScopePermissionClientPolicyHasClient("keycloak_identity_provider_token_exchange_scope_permission.my_permission", webappClientId2),
-			},
-			{
 				Config: testKeycloakIdpTokenExchangeScopePermission_basic(providerAlias, providerClientId, webappClientId),
 				Check:  testAccCheckKeycloakIdpTokenExchangeScopePermissionClientPolicyHasClient("keycloak_identity_provider_token_exchange_scope_permission.my_permission", webappClientId),
 			},

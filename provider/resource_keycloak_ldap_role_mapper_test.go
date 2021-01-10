@@ -13,7 +13,7 @@ import (
 func TestAccKeycloakLdapRoleMapper_basic(t *testing.T) {
 	t.Parallel()
 
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -39,7 +39,7 @@ func TestAccKeycloakLdapRoleMapper_createAfterManualDestroy(t *testing.T) {
 
 	var mapper = &keycloak.LdapRoleMapper{}
 
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -67,7 +67,7 @@ func TestAccKeycloakLdapRoleMapper_createAfterManualDestroy(t *testing.T) {
 func TestAccKeycloakLdapRoleMapper_modeValidation(t *testing.T) {
 	t.Parallel()
 
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	mode := randomStringInSlice(keycloakLdapRoleMapperModes)
 
 	resource.Test(t, resource.TestCase{
@@ -90,7 +90,7 @@ func TestAccKeycloakLdapRoleMapper_modeValidation(t *testing.T) {
 func TestAccKeycloakLdapRoleMapper_membershipAttributeTypeValidation(t *testing.T) {
 	t.Parallel()
 
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	membershipAttributeType := randomStringInSlice(keycloakLdapRoleMapperMembershipAttributeTypes)
 
 	resource.Test(t, resource.TestCase{
@@ -113,7 +113,7 @@ func TestAccKeycloakLdapRoleMapper_membershipAttributeTypeValidation(t *testing.
 func TestAccKeycloakLdapRoleMapper_userRolesRetrieveStrategyValidation(t *testing.T) {
 	t.Parallel()
 
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	userRolesRetrieveStrategy := randomStringInSlice(keycloakLdapRoleMapperUserRolesRetrieveStrategies)
 
 	resource.Test(t, resource.TestCase{
@@ -136,7 +136,7 @@ func TestAccKeycloakLdapRoleMapper_userRolesRetrieveStrategyValidation(t *testin
 func TestAccKeycloakLdapRoleMapper_rolesLdapFilterValidation(t *testing.T) {
 	t.Parallel()
 
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	rolesLdapFilter := "(" + acctest.RandString(10) + ")"
 
 	resource.Test(t, resource.TestCase{
@@ -159,7 +159,7 @@ func TestAccKeycloakLdapRoleMapper_rolesLdapFilterValidation(t *testing.T) {
 func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationForceNew(t *testing.T) {
 	t.Parallel()
 
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -181,7 +181,7 @@ func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationForceNew(t *testing.T
 func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationInPlace(t *testing.T) {
 	t.Parallel()
 
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	useRealmRolesMapping := randomBool()
 
 	roleMapperOne := &keycloak.LdapRoleMapper{

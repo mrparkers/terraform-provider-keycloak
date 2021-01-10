@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccKeycloakRequiredAction_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	requiredActionAlias := "CONFIGURE_TOTP"
 
 	resource.Test(t, resource.TestCase{
@@ -26,7 +26,7 @@ func TestAccKeycloakRequiredAction_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_unregisteredAction(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	requiredActionAlias := "webauthn-register"
 
 	resource.Test(t, resource.TestCase{
@@ -42,8 +42,8 @@ func TestAccKeycloakRequiredAction_unregisteredAction(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_invalidAlias(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	randomReqActionAlias := "randomRequiredAction-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	randomReqActionAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -58,7 +58,7 @@ func TestAccKeycloakRequiredAction_invalidAlias(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_import(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	requiredActionAlias := "terms_and_conditions"
 
 	resource.Test(t, resource.TestCase{
@@ -80,7 +80,7 @@ func TestAccKeycloakRequiredAction_import(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_disabledDefault(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	requiredActionAlias := "terms_and_conditions"
 
 	resource.Test(t, resource.TestCase{
@@ -95,7 +95,7 @@ func TestAccKeycloakRequiredAction_disabledDefault(t *testing.T) {
 	})
 }
 func TestAccKeycloakRequiredAction_computedPriority(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	requiredActionAlias := "terms_and_conditions"
 
 	resource.Test(t, resource.TestCase{

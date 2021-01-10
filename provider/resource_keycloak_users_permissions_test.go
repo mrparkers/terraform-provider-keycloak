@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccKeycloakUsersPermission_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

@@ -14,8 +14,8 @@ import (
 func TestAccKeycloakGenericClientProtocolMapper_basicClient(t *testing.T) {
 	t.Parallel()
 
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_generic_client_protocol_mapper.client_protocol_mapper"
 
@@ -35,8 +35,8 @@ func TestAccKeycloakGenericClientProtocolMapper_basicClient(t *testing.T) {
 func TestAccKeycloakGenericClientProtocolMapper_basicClientScope(t *testing.T) {
 	t.Parallel()
 
-	clientScopeId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_generic_client_protocol_mapper.client_protocol_mapper"
 
@@ -56,8 +56,8 @@ func TestAccKeycloakGenericClientProtocolMapper_basicClientScope(t *testing.T) {
 func TestAccKeycloakGenericClientProtocolMapper_import(t *testing.T) {
 	t.Parallel()
 
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_generic_client_protocol_mapper.client_protocol_mapper"
 
@@ -83,15 +83,15 @@ func TestAccKeycloakGenericClientProtocolMapper_import(t *testing.T) {
 func TestAccKeycloakGenericClientProtocolMapper_update(t *testing.T) {
 	t.Parallel()
 
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_generic_client_protocol_mapper.client_protocol_mapper"
 
-	oldAttributeName := "attribute-name-" + acctest.RandString(10)
-	oldAttributeValue := "attribute-name-" + acctest.RandString(10)
-	newAttributeName := "attribute-value-" + acctest.RandString(10)
-	newAttributeValue := "attribute-value-" + acctest.RandString(10)
+	oldAttributeName := acctest.RandomWithPrefix("tf-acc")
+	oldAttributeValue := acctest.RandomWithPrefix("tf-acc")
+	newAttributeName := acctest.RandomWithPrefix("tf-acc")
+	newAttributeValue := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

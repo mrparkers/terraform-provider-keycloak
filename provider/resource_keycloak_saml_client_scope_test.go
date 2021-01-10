@@ -13,7 +13,7 @@ import (
 
 func TestAccKeycloakSamlClientScope_basic(t *testing.T) {
 	t.Parallel()
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -38,7 +38,7 @@ func TestAccKeycloakSamlClientScope_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var clientScope = &keycloak.SamlClientScope{}
 
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -68,7 +68,7 @@ func TestAccKeycloakSamlClientScope_createAfterManualDestroy(t *testing.T) {
 
 func TestAccKeycloakSamlClientScope_updateRealm(t *testing.T) {
 	t.Parallel()
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -95,7 +95,7 @@ func TestAccKeycloakSamlClientScope_updateRealm(t *testing.T) {
 
 func TestAccKeycloakSamlClientScope_consentScreenText(t *testing.T) {
 	t.Parallel()
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -120,7 +120,7 @@ func TestAccKeycloakSamlClientScope_consentScreenText(t *testing.T) {
 
 func TestAccKeycloakSamlClientScope_guiOrder(t *testing.T) {
 	t.Parallel()
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 	guiOrder := acctest.RandIntRange(0, 1000)
 
 	resource.Test(t, resource.TestCase{

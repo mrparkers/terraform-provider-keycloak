@@ -12,7 +12,7 @@ import (
 func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_basic(t *testing.T) {
 	t.Parallel()
 
-	msadLdsUacMapperName := "terraform-" + acctest.RandString(10)
+	msadLdsUacMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -38,7 +38,7 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy
 
 	var mapper = &keycloak.LdapMsadLdsUserAccountControlMapper{}
 
-	msadLdsUacMapperName := "terraform-" + acctest.RandString(10)
+	msadLdsUacMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -66,7 +66,7 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy
 func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederation(t *testing.T) {
 	t.Parallel()
 
-	msadLdsUacMapperName := "terraform-" + acctest.RandString(10)
+	msadLdsUacMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

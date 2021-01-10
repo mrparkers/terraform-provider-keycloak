@@ -12,8 +12,8 @@ import (
 
 func TestAccKeycloakLdapHardcodedGroupMapper_basic(t *testing.T) {
 	t.Parallel()
-	groupName := "terraform-" + acctest.RandString(10)
-	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
+	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -38,8 +38,8 @@ func TestAccKeycloakLdapHardcodedGroupMapper_createAfterManualDestroy(t *testing
 	t.Parallel()
 	var mapper = &keycloak.LdapHardcodedGroupMapper{}
 
-	groupName := "terraform-" + acctest.RandString(10)
-	groupMapperName := "terraform-" + acctest.RandString(10)
+	groupName := acctest.RandomWithPrefix("tf-acc")
+	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
