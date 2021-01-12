@@ -4,23 +4,23 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-func TestResourceKeycloakOpenidClientAuthorizationUserPolicy(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
+func TestAccKeycloakOpenidClientAuthorizationUserPolicy(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testResourceKeycloakOpenidClientAuthorizationUserPolicyDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testResourceKeycloakOpenidClientAuthorizationUserPolicyDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(realmName, clientId),
+				Config: testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(clientId),
 				Check:  testResourceKeycloakOpenidClientAuthorizationUserPolicyExists("keycloak_openid_client_user_policy.test"),
 			},
 		},
@@ -28,8 +28,6 @@ func TestResourceKeycloakOpenidClientAuthorizationUserPolicy(t *testing.T) {
 }
 
 func getResourceKeycloakOpenidClientAuthorizationUserPolicyFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClientAuthorizationUserPolicy, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -58,8 +56,6 @@ func testResourceKeycloakOpenidClientAuthorizationUserPolicyDestroy() resource.T
 			resourceServerId := rs.Primary.Attributes["resource_server_id"]
 			policyId := rs.Primary.ID
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			policy, _ := keycloakClient.GetOpenidClientAuthorizationUserPolicy(realm, resourceServerId, policyId)
 			if policy != nil {
 				return fmt.Errorf("policy config with id %s still exists", policyId)
@@ -82,15 +78,15 @@ func testResourceKeycloakOpenidClientAuthorizationUserPolicyExists(resourceName 
 	}
 }
 
-func testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(realm, clientId string) string {
+func testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(clientId string) string {
 	return fmt.Sprintf(`
-	resource keycloak_realm test {
+	data "keycloak_realm" "realm" {
 		realm = "%s"
 	}
-	
+
 	resource keycloak_openid_client test {
 		client_id                = "%s"
-		realm_id                 = "${keycloak_realm.test.id}"
+		realm_id                 = data.keycloak_realm.realm.id
 		access_type              = "CONFIDENTIAL"
 		service_accounts_enabled = true
 		authorization {
@@ -99,9 +95,9 @@ func testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(realm, client
 	}
 
 	resource keycloak_user test {
-		realm_id = "${keycloak_realm.test.id}"
+		realm_id = data.keycloak_realm.realm.id
 		username = "test-user"
-	
+
 		email      = "test-user@fakedomain.com"
 		first_name = "Testy"
 		last_name  = "Tester"
@@ -109,11 +105,11 @@ func testResourceKeycloakOpenidClientAuthorizationUserPolicy_basic(realm, client
 
 	resource keycloak_openid_client_user_policy test {
 		resource_server_id = "${keycloak_openid_client.test.resource_server_id}"
-		realm_id = "${keycloak_realm.test.id}"
+		realm_id = data.keycloak_realm.realm.id
 		name = "client_user_policy_test"
 		users = ["${keycloak_user.test.id}"]
 		logic = "POSITIVE"
 		decision_strategy = "UNANIMOUS"
 	}
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }

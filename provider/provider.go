@@ -1,12 +1,16 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
+	"context"
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-func KeycloakProvider() *schema.Provider {
+func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 	provider := &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{
 			"keycloak_group":                              dataSourceKeycloakGroup(),
@@ -16,7 +20,9 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_realm":                              dataSourceKeycloakRealm(),
 			"keycloak_realm_keys":                         dataSourceKeycloakRealmKeys(),
 			"keycloak_role":                               dataSourceKeycloakRole(),
+			"keycloak_user":                               dataSourceKeycloakUser(),
 			"keycloak_saml_client_installation_provider":  dataSourceKeycloakSamlClientInstallationProvider(),
+			"keycloak_authentication_execution":           dataSourceKeycloakAuthenticationExecution(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_realm":                                             resourceKeycloakRealm(),
@@ -50,6 +56,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_user_realm_role_protocol_mapper":            resourceKeycloakOpenIdUserRealmRoleProtocolMapper(),
 			"keycloak_openid_user_client_role_protocol_mapper":           resourceKeycloakOpenIdUserClientRoleProtocolMapper(),
 			"keycloak_openid_user_session_note_protocol_mapper":          resourceKeycloakOpenIdUserSessionNoteProtocolMapper(),
+			"keycloak_openid_script_protocol_mapper":                     resourceKeycloakOpenIdScriptProtocolMapper(),
 			"keycloak_openid_client_default_scopes":                      resourceKeycloakOpenidClientDefaultScopes(),
 			"keycloak_openid_client_optional_scopes":                     resourceKeycloakOpenidClientOptionalScopes(),
 			"keycloak_saml_client":                                       resourceKeycloakSamlClient(),
@@ -85,6 +92,8 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_authentication_execution":                          resourceKeycloakAuthenticationExecution(),
 			"keycloak_authentication_execution_config":                   resourceKeycloakAuthenticationExecutionConfig(),
 			"keycloak_identity_provider_token_exchange_scope_permission": resourceKeycloakIdentityProviderTokenExchangeScopePermission(),
+			"keycloak_openid_client_permissions":                         resourceKeycloakOpenidClientPermissions(),
+			"keycloak_users_permissions":                                 resourceKeycloakUsersPermissions(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -150,34 +159,38 @@ func KeycloakProvider() *schema.Provider {
 		},
 	}
 
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
-		terraformVersion := provider.TerraformVersion
-		if terraformVersion == "" {
-			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
-			terraformVersion = "0.11+compatible"
+	provider.ConfigureContextFunc = func(_ context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		if client != nil {
+			return client, nil
 		}
 
-		userAgent := httpclient.TerraformUserAgent(terraformVersion)
+		url := data.Get("url").(string)
+		basePath := data.Get("base_path").(string)
+		clientId := data.Get("client_id").(string)
+		clientSecret := data.Get("client_secret").(string)
+		username := data.Get("username").(string)
+		password := data.Get("password").(string)
+		realm := data.Get("realm").(string)
+		initialLogin := data.Get("initial_login").(bool)
+		clientTimeout := data.Get("client_timeout").(int)
+		tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
+		rootCaCertificate := data.Get("root_ca_certificate").(string)
 
-		return configureKeycloakProvider(d, userAgent)
+		var diags diag.Diagnostics
+
+		userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", provider.TerraformVersion, meta.SDKVersionString())
+
+		keycloakClient, err := keycloak.NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "error initializing keycloak provider",
+				Detail:   err.Error(),
+			})
+		}
+
+		return keycloakClient, diags
 	}
 
 	return provider
-}
-
-func configureKeycloakProvider(data *schema.ResourceData, userAgent string) (interface{}, error) {
-	url := data.Get("url").(string)
-	basePath := data.Get("base_path").(string)
-	clientId := data.Get("client_id").(string)
-	clientSecret := data.Get("client_secret").(string)
-	username := data.Get("username").(string)
-	password := data.Get("password").(string)
-	realm := data.Get("realm").(string)
-	initialLogin := data.Get("initial_login").(bool)
-	clientTimeout := data.Get("client_timeout").(int)
-	tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
-	rootCaCertificate := data.Get("root_ca_certificate").(string)
-
-	return keycloak.NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
 }

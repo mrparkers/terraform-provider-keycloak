@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -84,7 +84,6 @@ func getLdapUserAttributeMapperFromData(data *schema.ResourceData) *keycloak.Lda
 func setLdapUserAttributeMapperData(data *schema.ResourceData, ldapUserAttributeMapper *keycloak.LdapUserAttributeMapper) {
 	data.SetId(ldapUserAttributeMapper.Id)
 
-	data.Set("id", ldapUserAttributeMapper.Id)
 	data.Set("name", ldapUserAttributeMapper.Name)
 	data.Set("realm_id", ldapUserAttributeMapper.RealmId)
 	data.Set("ldap_user_federation_id", ldapUserAttributeMapper.LdapUserFederationId)

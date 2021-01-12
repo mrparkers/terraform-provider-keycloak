@@ -2,23 +2,23 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 	"testing"
 )
 
 func TestAccKeycloakRealm_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
@@ -41,14 +41,14 @@ func TestAccKeycloakRealm_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
@@ -56,8 +56,6 @@ func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteRealm(realmName)
 					if err != nil {
 						t.Fatal(err)
@@ -71,14 +69,14 @@ func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_import(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
@@ -94,13 +92,13 @@ func TestAccKeycloakRealm_import(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_SmtpServer(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realm := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_WithSmtpServer(realm, "myhost.com", "My Host", "user"),
@@ -115,12 +113,12 @@ func TestAccKeycloakRealm_SmtpServer(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_SmtpServerUpdate(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
+	realm := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_WithSmtpServer(realm, "myhost.com", "My Host", "user"),
@@ -135,20 +133,20 @@ func TestAccKeycloakRealm_SmtpServerUpdate(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_SmtpServerInvalid(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
+	realm := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakRealm_WithSmtpServerWithoutHost(realm, "My Host"),
-				ExpectError: regexp.MustCompile("config is invalid: Missing required argument: The argument \"host\" is required, but no definition was found."),
+				ExpectError: regexp.MustCompile("The argument \"host\" is required, but no definition was found."),
 			},
 			{
 				Config:      testKeycloakRealm_WithSmtpServerWithoutFrom(realm, "myhost.com"),
-				ExpectError: regexp.MustCompile("config is invalid: Missing required argument: The argument \"from\" is required, but no definition was found."),
+				ExpectError: regexp.MustCompile("The argument \"from\" is required, but no definition was found."),
 			},
 		},
 	})
@@ -174,9 +172,9 @@ func TestAccKeycloakRealm_themes(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_themes(realmOne),
@@ -191,12 +189,12 @@ func TestAccKeycloakRealm_themes(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_themesValidation(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
+	realm := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakRealm_themesValidation(realm, "login", acctest.RandString(10)),
@@ -219,16 +217,16 @@ func TestAccKeycloakRealm_themesValidation(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_InternationalizationValidation(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
+	realm := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testKeycloakRealm_internationalizationValidationWithoutSupportedLocales(realm, "en"),
-				ExpectError: regexp.MustCompile("config is invalid: Missing required argument: The argument \"supported_locales\" is required, but no definition was found."),
+				ExpectError: regexp.MustCompile("The argument \"supported_locales\" is required, but no definition was found."),
 			},
 			{
 				Config:      testKeycloakRealm_internationalizationValidation(realm, "en", "de"),
@@ -239,13 +237,13 @@ func TestAccKeycloakRealm_InternationalizationValidation(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_Internationalization(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realm := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_internationalizationValidation(realm, "en", "en"),
@@ -264,13 +262,13 @@ func TestAccKeycloakRealm_Internationalization(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_InternationalizationDisabled(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realm := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realm, realm, realmDisplayNameHtml),
@@ -308,9 +306,9 @@ func TestAccKeycloakRealm_loginConfigBasic(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_loginConfigBasic(realm),
@@ -325,17 +323,13 @@ func TestAccKeycloakRealm_loginConfigBasic(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_loginConfigValidation(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
-			{
-				Config:      testKeycloakRealm_invalidRegistrationEmailAsUsernameWithoutRegistrationAllowed(realmName),
-				ExpectError: regexp.MustCompile("validation error: RegistrationEmailAsUsername cannot be true if RegistrationAllowed is false"),
-			},
 			{
 				Config:      testKeycloakRealm_invalidRegistrationEmailAsUsernameAndDuplicateEmailsAllowed(realmName),
 				ExpectError: regexp.MustCompile("validation error: DuplicateEmailsAllowed cannot be true if RegistrationEmailAsUsername is true"),
@@ -353,13 +347,13 @@ func TestAccKeycloakRealm_loginConfigValidation(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmName, realmDisplayNameHtml),
@@ -379,14 +373,14 @@ func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
@@ -432,14 +426,14 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_securityDefensesHeaders(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
@@ -462,14 +456,14 @@ func TestAccKeycloakRealm_securityDefensesHeaders(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_securityDefensesBruteForceDetection(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
@@ -497,14 +491,14 @@ func TestAccKeycloakRealm_securityDefensesBruteForceDetection(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
@@ -559,17 +553,17 @@ func TestAccKeycloakRealm_securityDefenses(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 	passwordPolicyStringValid1 := "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
 	passwordPolicyStringValid2 := "upperCase(1) and length(8)"
 	passwordPolicyStringValid3 := "lowerCase(2)"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
@@ -596,15 +590,15 @@ func TestAccKeycloakRealm_passwordPolicy(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_browserFlow(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 	newBrowserFlow := "registration"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
@@ -623,15 +617,15 @@ func TestAccKeycloakRealm_browserFlow(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_customAttribute(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	key := "terraform-" + acctest.RandString(10)
-	value := "terraform-" + acctest.RandString(10)
-	value2 := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	key := acctest.RandomWithPrefix("tf-acc")
+	value := acctest.RandomWithPrefix("tf-acc")
+	value2 := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_withCustomAttribute(realmName, key, value),
@@ -646,17 +640,17 @@ func TestAccKeycloakRealm_customAttribute(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	realmDisplayName := "terraform-" + acctest.RandString(10)
-	realmDisplayNameHtml := "<b>terraform-" + acctest.RandString(10) + "</b>"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
 	passwordPolicyStringInvalid1 := "unknownpolicy(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
 	passwordPolicyStringInvalid2 := "lowerCase(1) and length(8) and unknownpolicy(365) and notUsername"
 	passwordPolicyStringInvalid3 := "unknownpolicy(2)"
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
@@ -664,46 +658,79 @@ func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
 			},
 			{
 				Config:      testKeycloakRealm_passwordPolicy(realmName, realmDisplayName, passwordPolicyStringInvalid1),
-				ExpectError: regexp.MustCompile("errors during apply: validation error: password-policy .+ does not exist on the server, installed providers: .+"),
+				ExpectError: regexp.MustCompile("validation error: password-policy .+ does not exist on the server, installed providers: .+"),
 			},
 			{
 				Config:      testKeycloakRealm_passwordPolicy(realmName, realmDisplayName, passwordPolicyStringInvalid2),
-				ExpectError: regexp.MustCompile("errors during apply: validation error: password-policy .+ does not exist on the server, installed providers: .+"),
+				ExpectError: regexp.MustCompile("validation error: password-policy .+ does not exist on the server, installed providers: .+"),
 			},
 			{
 				Config:      testKeycloakRealm_passwordPolicy(realmName, realmDisplayName, passwordPolicyStringInvalid3),
-				ExpectError: regexp.MustCompile("errors during apply: validation error: password-policy .+ does not exist on the server, installed providers: .+"),
+				ExpectError: regexp.MustCompile("validation error: password-policy .+ does not exist on the server, installed providers: .+"),
 			},
 		},
 	})
 }
 
 func TestAccKeycloakRealm_internalId(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	internalId := acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	internalId := acctest.RandomWithPrefix("tf-acc")
 	realm := &keycloak.Realm{
 		Realm: realmName,
 		Id:    internalId,
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakRealmDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
 		Steps: []resource.TestStep{
 			{
 				ResourceName:  "keycloak_realm.realm",
 				ImportStateId: realmName,
 				ImportState:   true,
+				Config:        testKeycloakRealm_basic(realmName, "foo", "<b>foo</b>"),
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.NewRealm(realm)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
 				Check: testAccCheckKeycloakRealmWithInternalId(realmName, internalId),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_webauthn(t *testing.T) {
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
+	rpName := acctest.RandomWithPrefix("tf-acc")
+	rpId := acctest.RandomWithPrefix("tf-acc")
+	attestationConveyancePreference := randomStringInSlice([]string{"none", "indirect", "not specified"})
+	authenticatorAttachment := randomStringInSlice([]string{"platform", "cross-platform", "not specified"})
+	requireResidentKey := randomStringInSlice([]string{"Yes", "No", "not specified"})
+	userVerificationRequirement := randomStringInSlice([]string{"not specified", "required", "preferred", "discouraged"})
+	signatureAlgorithms := randomStringSliceSubset([]string{"ES256", "ES384", "ES512", "RS256", "ES384", "ES512"})
+	avoidSameAuthenticatorRegister := randomBool()
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_webauthn_policy(realmName, realmDisplayName, realmDisplayNameHtml, rpName, rpId, attestationConveyancePreference, authenticatorAttachment, requireResidentKey, userVerificationRequirement, signatureAlgorithms, avoidSameAuthenticatorRegister),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+			{
+				Config: testKeycloakRealm_webauthn_passwordless_policy(realmName, realmDisplayName, realmDisplayNameHtml, rpName, rpId, attestationConveyancePreference, authenticatorAttachment, requireResidentKey, userVerificationRequirement, signatureAlgorithms, avoidSameAuthenticatorRegister),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
 			},
 		},
 	})
@@ -892,8 +919,6 @@ func testAccCheckKeycloakRealmDestroy() resource.TestCheckFunc {
 			}
 
 			realmName := rs.Primary.ID
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			realm, _ := keycloakClient.GetRealm(realmName)
 			if realm != nil {
 				return fmt.Errorf("realm %s still exists", realmName)
@@ -905,8 +930,6 @@ func testAccCheckKeycloakRealmDestroy() resource.TestCheckFunc {
 }
 
 func getRealmFromState(s *terraform.State, resourceName string) (*keycloak.Realm, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -1194,17 +1217,6 @@ resource "keycloak_realm" "realm" {
 	`, realm.Realm, realm.RegistrationAllowed, realm.RegistrationEmailAsUsername, realm.EditUsernameAllowed, realm.ResetPasswordAllowed, realm.RememberMe, realm.VerifyEmail, realm.LoginWithEmailAllowed, realm.DuplicateEmailsAllowed, realm.SslRequired)
 }
 
-func testKeycloakRealm_invalidRegistrationEmailAsUsernameWithoutRegistrationAllowed(realm string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm                          = "%s"
-
-	registration_allowed           = false
-	registration_email_as_username = true
-}
-	`, realm)
-}
-
 func testKeycloakRealm_invalidRegistrationEmailAsUsernameAndDuplicateEmailsAllowed(realm string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -1241,6 +1253,8 @@ func testKeycloakRealm_tokenSettings(realm string) string {
 	defaultSignatureAlgorithm := "RS256"
 	ssoSessionIdleTimeout := randomDurationString()
 	ssoSessionMaxLifespan := randomDurationString()
+	ssoSessionIdleTimeoutRememberMe := randomDurationString()
+	ssoSessionMaxLifespanRememberMe := randomDurationString()
 	offlineSessionIdleTimeout := randomDurationString()
 	offlineSessionMaxLifespan := randomDurationString()
 	accessTokenLifespan := randomDurationString()
@@ -1260,8 +1274,11 @@ resource "keycloak_realm" "realm" {
 	default_signature_algorithm              = "%s"
 	sso_session_idle_timeout                 = "%s"
 	sso_session_max_lifespan                 = "%s"
+	sso_session_idle_timeout_remember_me     = "%s"
+	sso_session_max_lifespan_remember_me     = "%s"
 	offline_session_idle_timeout             = "%s"
 	offline_session_max_lifespan             = "%s"
+	offline_session_max_lifespan_enabled     = true
 	access_token_lifespan                    = "%s"
 	access_token_lifespan_for_implicit_flow  = "%s"
 	access_code_lifespan                     = "%s"
@@ -1270,7 +1287,7 @@ resource "keycloak_realm" "realm" {
 	action_token_generated_by_user_lifespan  = "%s"
 	action_token_generated_by_admin_lifespan = "%s"
 }
-	`, realm, realm, defaultSignatureAlgorithm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, offlineSessionIdleTimeout, offlineSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
+	`, realm, realm, defaultSignatureAlgorithm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, ssoSessionIdleTimeoutRememberMe, ssoSessionMaxLifespanRememberMe, offlineSessionIdleTimeout, offlineSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
 }
 
 func testKeycloakRealm_securityDefensesHeaders(realm, realmDisplayName, xFrameOptions string) string {
@@ -1377,4 +1394,50 @@ resource "keycloak_realm" "realm" {
 	}
 }
 	`, realm, key, value)
+}
+
+func testKeycloakRealm_webauthn_policy(realm, realmDisplayName, realmDisplayNameHtml, rpName, rpId, attestationConveyancePreference, authenticatorAttachment, requireResidentKey, userVerificationRequirement string, signatureAlgorithms []string, avoidSameAuthenticatorRegister bool) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        		= "%s"
+	enabled     	 	= true
+	display_name 		= "%s"
+	display_name_html 	= "%s"
+
+	web_authn_policy {
+		relying_party_entity_name         = "%s"
+		relying_party_id                  = "%s"
+		signature_algorithms              = %s
+
+		attestation_conveyance_preference = "%s"
+		authenticator_attachment          = "%s"
+		avoid_same_authenticator_register = %t
+		require_resident_key              = "%s"
+		user_verification_requirement     = "%s"
+	}
+}
+	`, realm, realmDisplayName, realmDisplayNameHtml, rpName, rpId, arrayOfStringsForTerraformResource(signatureAlgorithms), attestationConveyancePreference, authenticatorAttachment, avoidSameAuthenticatorRegister, requireResidentKey, userVerificationRequirement)
+}
+
+func testKeycloakRealm_webauthn_passwordless_policy(realm, realmDisplayName, realmDisplayNameHtml, rpName, rpId, attestationConveyancePreference, authenticatorAttachment, requireResidentKey, userVerificationRequirement string, signatureAlgorithms []string, avoidSameAuthenticatorRegister bool) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        		= "%s"
+	enabled     	 	= true
+	display_name 		= "%s"
+	display_name_html 	= "%s"
+
+	web_authn_passwordless_policy {
+		relying_party_entity_name         = "%s"
+		relying_party_id                  = "%s"
+		signature_algorithms              = %s
+
+		attestation_conveyance_preference = "%s"
+		authenticator_attachment          = "%s"
+		avoid_same_authenticator_register = %t
+		require_resident_key              = "%s"
+		user_verification_requirement     = "%s"
+	}
+}
+	`, realm, realmDisplayName, realmDisplayNameHtml, rpName, rpId, arrayOfStringsForTerraformResource(signatureAlgorithms), attestationConveyancePreference, authenticatorAttachment, avoidSameAuthenticatorRegister, requireResidentKey, userVerificationRequirement)
 }

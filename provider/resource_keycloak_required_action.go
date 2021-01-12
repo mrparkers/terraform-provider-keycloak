@@ -2,7 +2,7 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
 )
@@ -79,6 +79,19 @@ func resourceKeycloakRequiredActionsCreate(data *schema.ResourceData, meta inter
 	action, err := getRequiredActionFromData(data)
 	if err != nil {
 		return err
+	}
+
+	unregisteredRequiredActions, err := keycloakClient.GetUnregisteredRequiredActions(action.RealmId)
+	if err != nil {
+		return err
+	}
+	for _, unregisteredRequiredAction := range unregisteredRequiredActions {
+		if unregisteredRequiredAction.ProviderId == action.Alias {
+			if err := keycloakClient.RegisterRequiredAction(unregisteredRequiredAction); err != nil {
+				return err
+			}
+			break
+		}
 	}
 
 	err = keycloakClient.CreateRequiredAction(action)

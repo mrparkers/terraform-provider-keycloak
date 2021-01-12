@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	samlName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	samlName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakSamlIdentityProviderDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlIdentityProvider_basic(realmName, samlName),
@@ -30,13 +30,13 @@ func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
 func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) {
 	var saml = &keycloak.IdentityProvider{}
 
-	realmName := "terraform-" + acctest.RandString(10)
-	samlName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	samlName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakSamlIdentityProviderDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlIdentityProvider_basic(realmName, samlName),
@@ -44,8 +44,6 @@ func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) 
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteIdentityProvider(saml.Realm, saml.Alias)
 					if err != nil {
 						t.Fatal(err)
@@ -59,14 +57,14 @@ func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) 
 }
 
 func TestAccKeycloakSamlIdentityProvider_basicUpdateRealm(t *testing.T) {
-	firstRealm := "terraform-" + acctest.RandString(10)
-	secondRealm := "terraform-" + acctest.RandString(10)
-	samlName := "terraform-" + acctest.RandString(10)
+	firstRealm := acctest.RandomWithPrefix("tf-acc")
+	secondRealm := acctest.RandomWithPrefix("tf-acc")
+	samlName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakSamlIdentityProviderDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlIdentityProvider_basic(firstRealm, samlName),
@@ -87,7 +85,7 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateRealm(t *testing.T) {
 }
 
 func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	firstEnabled := randomBool()
 	firstBackchannel := randomBool()
 	firstValidateSignature := randomBool()
@@ -146,9 +144,9 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		Providers:    testAccProviders,
-		PreCheck:     func() { testAccPreCheck(t) },
-		CheckDestroy: testAccCheckKeycloakSamlIdentityProviderDestroy(),
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakSamlIdentityProvider_basicFromInterface(firstSaml),
@@ -197,8 +195,6 @@ func testAccCheckKeycloakSamlIdentityProviderDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			saml, _ := keycloakClient.GetIdentityProvider(realm, id)
 			if saml != nil {
 				return fmt.Errorf("saml config with id %s still exists", id)
@@ -210,8 +206,6 @@ func testAccCheckKeycloakSamlIdentityProviderDestroy() resource.TestCheckFunc {
 }
 
 func getKeycloakSamlIdentityProviderFromState(s *terraform.State, resourceName string) (*keycloak.IdentityProvider, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)

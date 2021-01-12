@@ -1,8 +1,8 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -104,7 +104,18 @@ func setOpenidClientAuthorizationRolePolicyResourceData(data *schema.ResourceDat
 	data.Set("logic", policy.Logic)
 	data.Set("type", policy.Type)
 	data.Set("description", policy.Description)
-	data.Set("roles", policy.Roles)
+
+	var roles []interface{}
+	for _, r := range policy.Roles {
+		role := map[string]interface{}{
+			"id":       r.Id,
+			"required": r.Required,
+		}
+
+		roles = append(roles, role)
+	}
+
+	data.Set("role", roles)
 }
 
 func resourceKeycloakOpenidClientAuthorizationRolePolicyCreate(data *schema.ResourceData, meta interface{}) error {

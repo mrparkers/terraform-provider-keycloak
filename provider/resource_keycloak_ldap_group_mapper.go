@@ -1,14 +1,14 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 )
 
 var (
-	keycloakLdapGroupMapperModes                       = []string{"READ_ONLY", "LDAP_ONLY"}
+	keycloakLdapGroupMapperModes                       = []string{"READ_ONLY", "LDAP_ONLY", "IMPORT"}
 	keycloakLdapGroupMapperMembershipAttributeTypes    = []string{"DN", "UID"}
 	keycloakLdapGroupMapperUserRolesRetrieveStrategies = []string{"LOAD_GROUPS_BY_MEMBER_ATTRIBUTE", "GET_GROUPS_FROM_USER_MEMBEROF_ATTRIBUTE", "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE_RECURSIVELY"}
 )
@@ -111,11 +111,16 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"groups_path": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
 
-func getLdapGroupMapperFromData(data *schema.ResourceData) *keycloak.LdapGroupMapper {
+func getLdapGroupMapperFromData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData) *keycloak.LdapGroupMapper {
 	var groupObjectClasses []string
 
 	for _, groupObjectClass := range data.Get("group_object_classes").([]interface{}) {
@@ -128,7 +133,7 @@ func getLdapGroupMapperFromData(data *schema.ResourceData) *keycloak.LdapGroupMa
 		mappedGroupAttributes = append(mappedGroupAttributes, mappedGroupAttribute.(string))
 	}
 
-	return &keycloak.LdapGroupMapper{
+	mapper := &keycloak.LdapGroupMapper{
 		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
 		RealmId:              data.Get("realm_id").(string),
@@ -149,9 +154,15 @@ func getLdapGroupMapperFromData(data *schema.ResourceData) *keycloak.LdapGroupMa
 		MappedGroupAttributes:           mappedGroupAttributes,
 		DropNonExistingGroupsDuringSync: data.Get("drop_non_existing_groups_during_sync").(bool),
 	}
+
+	if groupsPath, ok := data.GetOk("groups_path"); ok && keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {
+		mapper.GroupsPath = groupsPath.(string)
+	}
+
+	return mapper
 }
 
-func setLdapGroupMapperData(data *schema.ResourceData, ldapGroupMapper *keycloak.LdapGroupMapper) {
+func setLdapGroupMapperData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData, ldapGroupMapper *keycloak.LdapGroupMapper) {
 	data.SetId(ldapGroupMapper.Id)
 
 	data.Set("name", ldapGroupMapper.Name)
@@ -172,12 +183,16 @@ func setLdapGroupMapperData(data *schema.ResourceData, ldapGroupMapper *keycloak
 	data.Set("memberof_ldap_attribute", ldapGroupMapper.MemberofLdapAttribute)
 	data.Set("mapped_group_attributes", ldapGroupMapper.MappedGroupAttributes)
 	data.Set("drop_non_existing_groups_during_sync", ldapGroupMapper.DropNonExistingGroupsDuringSync)
+
+	if ldapGroupMapper.GroupsPath != "" && keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {
+		data.Set("groups_path", ldapGroupMapper.GroupsPath)
+	}
 }
 
 func resourceKeycloakLdapGroupMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapGroupMapper := getLdapGroupMapperFromData(data)
+	ldapGroupMapper := getLdapGroupMapperFromData(keycloakClient, data)
 
 	err := keycloakClient.ValidateLdapGroupMapper(ldapGroupMapper)
 	if err != nil {
@@ -189,7 +204,7 @@ func resourceKeycloakLdapGroupMapperCreate(data *schema.ResourceData, meta inter
 		return err
 	}
 
-	setLdapGroupMapperData(data, ldapGroupMapper)
+	setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
 
 	return resourceKeycloakLdapGroupMapperRead(data, meta)
 }
@@ -205,7 +220,7 @@ func resourceKeycloakLdapGroupMapperRead(data *schema.ResourceData, meta interfa
 		return handleNotFoundError(err, data)
 	}
 
-	setLdapGroupMapperData(data, ldapGroupMapper)
+	setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
 
 	return nil
 }
@@ -213,7 +228,7 @@ func resourceKeycloakLdapGroupMapperRead(data *schema.ResourceData, meta interfa
 func resourceKeycloakLdapGroupMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapGroupMapper := getLdapGroupMapperFromData(data)
+	ldapGroupMapper := getLdapGroupMapperFromData(keycloakClient, data)
 
 	err := keycloakClient.ValidateLdapGroupMapper(ldapGroupMapper)
 	if err != nil {
@@ -225,7 +240,7 @@ func resourceKeycloakLdapGroupMapperUpdate(data *schema.ResourceData, meta inter
 		return err
 	}
 
-	setLdapGroupMapperData(data, ldapGroupMapper)
+	setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
 
 	return nil
 }

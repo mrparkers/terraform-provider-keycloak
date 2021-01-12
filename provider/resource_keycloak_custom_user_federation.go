@@ -2,8 +2,8 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
 )
@@ -82,7 +82,7 @@ func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.Custom
 	config := map[string][]string{}
 	if v, ok := data.GetOk("config"); ok {
 		for key, value := range v.(map[string]interface{}) {
-			config[key] = strings.Split(value.(string), ",")
+			config[key] = []string{value.(string)}
 		}
 	}
 	parentId := ""
@@ -122,7 +122,13 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 	data.Set("priority", custom.Priority)
 
 	data.Set("cache_policy", custom.CachePolicy)
-	data.Set("config", custom.Config)
+
+	config := make(map[string]interface{})
+	for k, v := range custom.Config {
+		config[k] = v[0]
+	}
+
+	data.Set("config", config)
 }
 
 func resourceKeycloakCustomUserFederationCreate(data *schema.ResourceData, meta interface{}) error {

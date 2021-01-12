@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    keycloak = {
+      source  = "terraform.local/mrparkers/keycloak"
+      version = ">= 2.0"
+    }
+  }
+}
+
 provider "keycloak" {
   client_id     = "terraform"
   client_secret = "884e0f95-0f42-4a63-9b1f-94274655669e"
@@ -67,6 +76,18 @@ resource "keycloak_realm" "test" {
   attributes = {
     mycustomAttribute = "myCustomValue"
   }
+
+  web_authn_policy {
+    relying_party_entity_name = "Example"
+    relying_party_id = "keycloak.example.com"
+    signature_algorithms = ["ES256", "RS256"]
+  }
+
+  web_authn_passwordless_policy {
+    relying_party_entity_name = "Example"
+    relying_party_id = "keycloak.example.com"
+    signature_algorithms = ["ES256", "RS256"]
+  }
 }
 
 resource "keycloak_required_action" "custom-terms-and-conditions" {
@@ -84,6 +105,13 @@ resource "keycloak_required_action" "custom-configured_totp" {
   enabled        = true
   name           = "Custom configure totp"
   priority       = keycloak_required_action.custom-terms-and-conditions.priority + 15
+}
+
+resource "keycloak_required_action" "required_action" {
+  realm_id  = keycloak_realm.test.realm
+  alias     = "webauthn-register"
+  enabled   = true
+  name      = "Webauthn Register"
 }
 
 resource "keycloak_group" "foo" {
@@ -441,7 +469,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 
 	claim_name         = "foo"
 	claim_value_type   = "String"
-	session_note_label = "bar"
+	session_note       = "bar"
 
   add_to_id_token     = true
   add_to_access_token = false
@@ -454,7 +482,7 @@ resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_
 
 	claim_name         = "foo2"
 	claim_value_type   = "String"
-	session_note_label = "bar2"
+	session_note       = "bar2"
 
   add_to_id_token     = true
   add_to_access_token = false
@@ -567,10 +595,10 @@ resource keycloak_attribute_importer_identity_provider_mapper oidc {
   claim_name              = "upn"
   identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
   user_attribute          = "email"
-  
+
   #KC10 support
   extra_config = {
-    syncMode = "INHERIT"    
+    syncMode = "INHERIT"
   }
 }
 
@@ -584,8 +612,8 @@ resource keycloak_attribute_to_role_identity_provider_mapper oidc {
 
   #KC10 support
   extra_config = {
-    syncMode = "INHERIT"    
-  }  
+    syncMode = "INHERIT"
+  }
 }
 
 resource keycloak_user_template_importer_identity_provider_mapper oidc {
@@ -596,8 +624,8 @@ resource keycloak_user_template_importer_identity_provider_mapper oidc {
 
   #KC10 support
   extra_config = {
-    syncMode = "INHERIT"    
-  }  
+    syncMode = "INHERIT"
+  }
 }
 
 resource keycloak_hardcoded_role_identity_provider_mapper oidc {
@@ -608,8 +636,8 @@ resource keycloak_hardcoded_role_identity_provider_mapper oidc {
 
   #KC10 support
   extra_config = {
-    syncMode = "INHERIT"    
-  }  
+    syncMode = "INHERIT"
+  }
 }
 
 resource keycloak_hardcoded_attribute_identity_provider_mapper oidc {
@@ -622,8 +650,8 @@ resource keycloak_hardcoded_attribute_identity_provider_mapper oidc {
 
   #KC10 support
   extra_config = {
-    syncMode = "INHERIT"    
-  }  
+    syncMode = "INHERIT"
+  }
 }
 
 resource keycloak_saml_identity_provider saml {
@@ -641,7 +669,7 @@ resource keycloak_attribute_importer_identity_provider_mapper saml {
 
   #KC10 support
   extra_config = {
-    syncMode = "INHERIT"    
+    syncMode = "INHERIT"
   }
 }
 
@@ -655,7 +683,7 @@ resource keycloak_attribute_to_role_identity_provider_mapper saml {
 
   #KC10 support
   extra_config = {
-    syncMode = "INHERIT"    
+    syncMode = "INHERIT"
   }
 }
 
@@ -667,8 +695,8 @@ resource keycloak_user_template_importer_identity_provider_mapper saml {
 
   #KC10 support
   extra_config = {
-    syncMode = "INHERIT"    
-  }  
+    syncMode = "INHERIT"
+  }
 }
 
 resource keycloak_hardcoded_role_identity_provider_mapper saml {
@@ -679,8 +707,8 @@ resource keycloak_hardcoded_role_identity_provider_mapper saml {
 
   #KC10 support
   extra_config = {
-    syncMode = "INHERIT"    
-  }  
+    syncMode = "INHERIT"
+  }
 }
 
 resource keycloak_hardcoded_attribute_identity_provider_mapper saml {
@@ -690,11 +718,11 @@ resource keycloak_hardcoded_attribute_identity_provider_mapper saml {
   attribute_name          = "attribute"
   attribute_value         = "value"
   user_session            = false
-  
+
   #KC10 support
   extra_config = {
-    syncMode = "INHERIT"    
-  }  
+    syncMode = "INHERIT"
+  }
 }
 
 data "keycloak_openid_client" "broker" {
