@@ -10,7 +10,7 @@ type FederatedIdentity struct {
 	UserName         string `json:"userName"`
 }
 
-type FederatedIdentities []FederatedIdentity
+type FederatedIdentities []*FederatedIdentity
 
 type User struct {
 	Id      string `json:"id,omitempty"`
