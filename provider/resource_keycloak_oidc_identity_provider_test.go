@@ -10,8 +10,7 @@ import (
 )
 
 func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	oidcName := "terraform-" + acctest.RandString(10)
+	oidcName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -19,39 +18,16 @@ func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOidcIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOidcIdentityProvider_basic(realmName, oidcName),
+				Config: testKeycloakOidcIdentityProvider_basic(oidcName),
 				Check:  testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
 			},
 		},
 	})
 }
 
-func TestAccKeycloakOidcIdentityProvider_custom(t *testing.T) {
-	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom idp in CI
-	//This test does not work in keycloak 10, because the interfaces that our customIdp implements, have changed in the keycloak latest version.
-	//We need to decide which keycloak version we going to support and test for the customIdp
-	realmName := "terraform-" + acctest.RandString(10)
-	oidcName := "terraform-" + acctest.RandString(10)
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakOidcIdentityProviderDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakOidcIdentityProvider_custom(realmName, oidcName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
-				),
-			},
-		},
-	})
-}
-
 func TestAccKeycloakOidcIdentityProvider_extra_config(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	oidcName := "terraform-" + acctest.RandString(10)
-	customConfigValue := "terraform-" + acctest.RandString(10)
+	oidcName := acctest.RandomWithPrefix("tf-acc")
+	customConfigValue := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -59,7 +35,7 @@ func TestAccKeycloakOidcIdentityProvider_extra_config(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOidcIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOidcIdentityProvider_extra_config(realmName, oidcName, customConfigValue),
+				Config: testKeycloakOidcIdentityProvider_extra_config(oidcName, customConfigValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOidcIdentityProviderHasCustomConfigValue("keycloak_oidc_identity_provider.oidc", customConfigValue),
 				),
@@ -69,8 +45,7 @@ func TestAccKeycloakOidcIdentityProvider_extra_config(t *testing.T) {
 }
 
 func TestAccKeycloakOidcIdentityProvider_keyDefaultScopes(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	oidcName := "terraform-" + acctest.RandString(10)
+	oidcName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -78,7 +53,7 @@ func TestAccKeycloakOidcIdentityProvider_keyDefaultScopes(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOidcIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOidcIdentityProvider_keyDefaultScopes(realmName, oidcName, "openid random"),
+				Config: testKeycloakOidcIdentityProvider_keyDefaultScopes(oidcName, "openid random"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
 					testAccCheckKeycloakOidcIdentityProviderDefaultScopes("keycloak_oidc_identity_provider.oidc", "openid random"),
@@ -91,8 +66,7 @@ func TestAccKeycloakOidcIdentityProvider_keyDefaultScopes(t *testing.T) {
 func TestAccKeycloakOidcIdentityProvider_createAfterManualDestroy(t *testing.T) {
 	var oidc = &keycloak.IdentityProvider{}
 
-	realmName := "terraform-" + acctest.RandString(10)
-	oidcName := "terraform-" + acctest.RandString(10)
+	oidcName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -100,59 +74,28 @@ func TestAccKeycloakOidcIdentityProvider_createAfterManualDestroy(t *testing.T) 
 		CheckDestroy:      testAccCheckKeycloakOidcIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOidcIdentityProvider_basic(realmName, oidcName),
+				Config: testKeycloakOidcIdentityProvider_basic(oidcName),
 				Check:  testAccCheckKeycloakOidcIdentityProviderFetch("keycloak_oidc_identity_provider.oidc", oidc),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteIdentityProvider(oidc.Realm, oidc.Alias)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakOidcIdentityProvider_basic(realmName, oidcName),
+				Config: testKeycloakOidcIdentityProvider_basic(oidcName),
 				Check:  testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
 			},
 		},
 	})
 }
 
-func TestAccKeycloakOidcIdentityProvider_basicUpdateRealm(t *testing.T) {
-	firstRealm := "terraform-" + acctest.RandString(10)
-	secondRealm := "terraform-" + acctest.RandString(10)
-	oidcName := "terraform-" + acctest.RandString(10)
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakOidcIdentityProviderDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakOidcIdentityProvider_basic(firstRealm, oidcName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
-					resource.TestCheckResourceAttr("keycloak_oidc_identity_provider.oidc", "realm", firstRealm),
-				),
-			},
-			{
-				Config: testKeycloakOidcIdentityProvider_basic(secondRealm, oidcName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakOidcIdentityProviderExists("keycloak_oidc_identity_provider.oidc"),
-					resource.TestCheckResourceAttr("keycloak_oidc_identity_provider.oidc", "realm", secondRealm),
-				),
-			},
-		},
-	})
-}
-
 func TestAccKeycloakOidcIdentityProvider_basicUpdateAll(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
 	firstEnabled := randomBool()
 
 	firstOidc := &keycloak.IdentityProvider{
-		Realm:   realmName,
+		Realm:   testAccRealm.Realm,
 		Alias:   acctest.RandString(10),
 		Enabled: firstEnabled,
 		Config: &keycloak.IdentityProviderConfig{
@@ -164,7 +107,7 @@ func TestAccKeycloakOidcIdentityProvider_basicUpdateAll(t *testing.T) {
 	}
 
 	secondOidc := &keycloak.IdentityProvider{
-		Realm:   realmName,
+		Realm:   testAccRealm.Realm,
 		Alias:   acctest.RandString(10),
 		Enabled: !firstEnabled,
 		Config: &keycloak.IdentityProviderConfig{
@@ -257,8 +200,6 @@ func testAccCheckKeycloakOidcIdentityProviderDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			oidc, _ := keycloakClient.GetIdentityProvider(realm, id)
 			if oidc != nil {
 				return fmt.Errorf("oidc config with id %s still exists", id)
@@ -270,8 +211,6 @@ func testAccCheckKeycloakOidcIdentityProviderDestroy() resource.TestCheckFunc {
 }
 
 func getKeycloakOidcIdentityProviderFromState(s *terraform.State, resourceName string) (*keycloak.IdentityProvider, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -288,49 +227,31 @@ func getKeycloakOidcIdentityProviderFromState(s *terraform.State, resourceName s
 	return oidc, nil
 }
 
-func testKeycloakOidcIdentityProvider_basic(realm, oidc string) string {
+func testKeycloakOidcIdentityProvider_basic(oidc string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_identity_provider" "oidc" {
-	realm             = "${keycloak_realm.realm.id}"
+	realm             = data.keycloak_realm.realm.id
 	alias             = "%s"
 	authorization_url = "https://example.com/auth"
 	token_url         = "https://example.com/token"
 	client_id         = "example_id"
 	client_secret     = "example_token"
 }
-	`, realm, oidc)
+	`, testAccRealm.Realm, oidc)
 }
 
-func testKeycloakOidcIdentityProvider_custom(realm, alias string) string {
+func testKeycloakOidcIdentityProvider_extra_config(alias, customConfigValue string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_identity_provider" "oidc" {
-	realm             = "${keycloak_realm.realm.id}"
-	provider_id       = "customIdp"
-	alias             = "%s"
-	authorization_url = "https://example.com/auth"
-	token_url         = "https://example.com/token"
-	client_id         = "example_id"
-	client_secret     = "example_token"
-}
-	`, realm, alias)
-}
-
-func testKeycloakOidcIdentityProvider_extra_config(realm, alias, customConfigValue string) string {
-	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm = "%s"
-}
-
-resource "keycloak_oidc_identity_provider" "oidc" {
-	realm             = "${keycloak_realm.realm.id}"
+	realm             = data.keycloak_realm.realm.id
 	provider_id       = "oidc"
 	alias             = "%s"
 	authorization_url = "https://example.com/auth"
@@ -341,17 +262,17 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 		dummyConfig = "%s"
 	}
 }
-	`, realm, alias, customConfigValue)
+	`, testAccRealm.Realm, alias, customConfigValue)
 }
 
-func testKeycloakOidcIdentityProvider_keyDefaultScopes(realm, alias, value string) string {
+func testKeycloakOidcIdentityProvider_keyDefaultScopes(alias, value string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_identity_provider" "oidc" {
-	realm             = "${keycloak_realm.realm.id}"
+	realm             = data.keycloak_realm.realm.id
 	provider_id       = "oidc"
 	alias             = "%s"
 	authorization_url = "https://example.com/auth"
@@ -360,17 +281,17 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	client_secret     = "example_token"
 	default_scopes    = "%s"
 }
-	`, realm, alias, value)
+	`, testAccRealm.Realm, alias, value)
 }
 
 func testKeycloakOidcIdentityProvider_basicFromInterface(oidc *keycloak.IdentityProvider) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_identity_provider" "oidc" {
-	realm             = "${keycloak_realm.realm.id}"
+	realm             = data.keycloak_realm.realm.id
 	alias             = "%s"
 	enabled           = %t
 	authorization_url = "%s"
@@ -378,5 +299,5 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	client_id         = "%s"
 	client_secret     = "%s"
 }
-	`, oidc.Realm, oidc.Alias, oidc.Enabled, oidc.Config.AuthorizationUrl, oidc.Config.TokenUrl, oidc.Config.ClientId, oidc.Config.ClientSecret)
+	`, testAccRealm.Realm, oidc.Alias, oidc.Enabled, oidc.Config.AuthorizationUrl, oidc.Config.TokenUrl, oidc.Config.ClientId, oidc.Config.ClientSecret)
 }

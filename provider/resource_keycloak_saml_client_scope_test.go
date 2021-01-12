@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccKeycloakSamlClientScope_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -21,24 +21,24 @@ func TestAccKeycloakSamlClientScope_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientScope_basic(realmName, clientScopeName),
+				Config: testKeycloakSamlClientScope_basic(clientScopeName),
 				Check:  testAccCheckKeycloakSamlClientScopeExistsWithCorrectProtocol("keycloak_saml_client_scope.client_scope"),
 			},
 			{
 				ResourceName:        "keycloak_saml_client_scope.client_scope",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 		},
 	})
 }
 
 func TestAccKeycloakSamlClientScope_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var clientScope = &keycloak.SamlClientScope{}
 
-	realmName := "terraform-" + acctest.RandString(10)
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -46,7 +46,7 @@ func TestAccKeycloakSamlClientScope_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientScope_basic(realmName, clientScopeName),
+				Config: testKeycloakSamlClientScope_basic(clientScopeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientScopeExistsWithCorrectProtocol("keycloak_saml_client_scope.client_scope"),
 					testAccCheckKeycloakSamlClientScopeFetch("keycloak_saml_client_scope.client_scope", clientScope),
@@ -54,14 +54,12 @@ func TestAccKeycloakSamlClientScope_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteSamlClientScope(clientScope.RealmId, clientScope.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakSamlClientScope_basic(realmName, clientScopeName),
+				Config: testKeycloakSamlClientScope_basic(clientScopeName),
 				Check:  testAccCheckKeycloakSamlClientScopeExistsWithCorrectProtocol("keycloak_saml_client_scope.client_scope"),
 			},
 		},
@@ -69,9 +67,8 @@ func TestAccKeycloakSamlClientScope_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientScope_updateRealm(t *testing.T) {
-	realmOne := "terraform-" + acctest.RandString(10)
-	realmTwo := "terraform-" + acctest.RandString(10)
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -79,17 +76,17 @@ func TestAccKeycloakSamlClientScope_updateRealm(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientScope_updateRealmBefore(realmOne, realmTwo, clientScopeName),
+				Config: testKeycloakSamlClientScope_updateRealmBefore(clientScopeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientScopeExistsWithCorrectProtocol("keycloak_saml_client_scope.client_scope"),
-					testAccCheckKeycloakSamlClientScopeBelongsToRealm("keycloak_saml_client_scope.client_scope", realmOne),
+					testAccCheckKeycloakSamlClientScopeBelongsToRealm("keycloak_saml_client_scope.client_scope", testAccRealm.Realm),
 				),
 			},
 			{
-				Config: testKeycloakSamlClientScope_updateRealmAfter(realmOne, realmTwo, clientScopeName),
+				Config: testKeycloakSamlClientScope_updateRealmAfter(clientScopeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientScopeExistsWithCorrectProtocol("keycloak_saml_client_scope.client_scope"),
-					testAccCheckKeycloakSamlClientScopeBelongsToRealm("keycloak_saml_client_scope.client_scope", realmTwo),
+					testAccCheckKeycloakSamlClientScopeBelongsToRealm("keycloak_saml_client_scope.client_scope", testAccRealmTwo.Realm),
 				),
 			},
 		},
@@ -97,8 +94,8 @@ func TestAccKeycloakSamlClientScope_updateRealm(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientScope_consentScreenText(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -106,15 +103,15 @@ func TestAccKeycloakSamlClientScope_consentScreenText(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientScope_basic(realmName, clientScopeName),
+				Config: testKeycloakSamlClientScope_basic(clientScopeName),
 				Check:  testAccCheckKeycloakSamlClientScopeExistsWithCorrectProtocol("keycloak_saml_client_scope.client_scope"),
 			},
 			{
-				Config: testKeycloakSamlClientScope_withConsentText(realmName, clientScopeName, acctest.RandString(10)),
+				Config: testKeycloakSamlClientScope_withConsentText(clientScopeName, acctest.RandString(10)),
 				Check:  testAccCheckKeycloakSamlClientScopeExistsWithCorrectProtocol("keycloak_saml_client_scope.client_scope"),
 			},
 			{
-				Config: testKeycloakSamlClientScope_basic(realmName, clientScopeName),
+				Config: testKeycloakSamlClientScope_basic(clientScopeName),
 				Check:  testAccCheckKeycloakSamlClientScopeExistsWithCorrectProtocol("keycloak_saml_client_scope.client_scope"),
 			},
 		},
@@ -122,8 +119,8 @@ func TestAccKeycloakSamlClientScope_consentScreenText(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientScope_guiOrder(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	clientScopeName := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	clientScopeName := acctest.RandomWithPrefix("tf-acc")
 	guiOrder := acctest.RandIntRange(0, 1000)
 
 	resource.Test(t, resource.TestCase{
@@ -132,18 +129,18 @@ func TestAccKeycloakSamlClientScope_guiOrder(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientScope_basic(realmName, clientScopeName),
+				Config: testKeycloakSamlClientScope_basic(clientScopeName),
 				Check:  testAccCheckKeycloakSamlClientScopeExistsWithCorrectProtocol("keycloak_saml_client_scope.client_scope"),
 			},
 			{
-				Config: testKeycloakSamlClientScope_withGuiOrder(realmName, clientScopeName, guiOrder),
+				Config: testKeycloakSamlClientScope_withGuiOrder(clientScopeName, guiOrder),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientScopeExistsWithCorrectProtocol("keycloak_saml_client_scope.client_scope"),
 					testAccCheckKeycloakSamlClientScopeExistsWithCorrectGuiOrder("keycloak_saml_client_scope.client_scope", guiOrder),
 				),
 			},
 			{
-				Config: testKeycloakSamlClientScope_basic(realmName, clientScopeName),
+				Config: testKeycloakSamlClientScope_basic(clientScopeName),
 				Check:  testAccCheckKeycloakSamlClientScopeExistsWithCorrectProtocol("keycloak_saml_client_scope.client_scope"),
 			},
 		},
@@ -219,8 +216,6 @@ func testAccCheckKeycloakSamlClientScopeDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			clientScope, _ := keycloakClient.GetSamlClientScope(realm, id)
 			if clientScope != nil {
 				return fmt.Errorf("saml client scope %s still exists", id)
@@ -250,85 +245,85 @@ func getSamlClientScopeFromState(s *terraform.State, resourceName string) (*keyc
 	return clientScope, nil
 }
 
-func testKeycloakSamlClientScope_basic(realm, clientScopeName string) string {
+func testKeycloakSamlClientScope_basic(clientScopeName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
-	`, realm, clientScopeName)
+	`, testAccRealm.Realm, clientScopeName)
 }
 
-func testKeycloakSamlClientScope_withConsentText(realm, clientScopeName, consentText string) string {
+func testKeycloakSamlClientScope_withConsentText(clientScopeName, consentText string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client_scope" "client_scope" {
 	name                = "%s"
-	realm_id            = "${keycloak_realm.realm.id}"
+	realm_id            = data.keycloak_realm.realm.id
 
 	description         = "test description"
 
 	consent_screen_text = "%s"
 }
-	`, realm, clientScopeName, consentText)
+	`, testAccRealm.Realm, clientScopeName, consentText)
 }
 
-func testKeycloakSamlClientScope_withGuiOrder(realm, clientScopeName string, guiOrder int) string {
+func testKeycloakSamlClientScope_withGuiOrder(clientScopeName string, guiOrder int) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client_scope" "client_scope" {
 	name                = "%s"
-	realm_id            = "${keycloak_realm.realm.id}"
+	realm_id            = data.keycloak_realm.realm.id
 
 	description         = "test description"
 
 	gui_order           = %d
 }
-	`, realm, clientScopeName, guiOrder)
+	`, testAccRealm.Realm, clientScopeName, guiOrder)
 }
 
-func testKeycloakSamlClientScope_updateRealmBefore(realmOne, realmTwo, clientScopeName string) string {
+func testKeycloakSamlClientScope_updateRealmBefore(clientScopeName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
+data "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_2" {
+data "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client_scope" "client_scope" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm_1.id}"
+	realm_id  = data.keycloak_realm.realm_1.id
 }
-	`, realmOne, realmTwo, clientScopeName)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, clientScopeName)
 }
 
-func testKeycloakSamlClientScope_updateRealmAfter(realmOne, realmTwo, clientScopeName string) string {
+func testKeycloakSamlClientScope_updateRealmAfter(clientScopeName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
+data "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_2" {
+data "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client_scope" "client_scope" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm_2.id}"
+	realm_id  = data.keycloak_realm.realm_2.id
 }
-	`, realmOne, realmTwo, clientScopeName)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, clientScopeName)
 }

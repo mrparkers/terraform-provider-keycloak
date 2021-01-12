@@ -16,9 +16,9 @@ import (
 var preAssignedDefaultSamlClientScopes = []string{"role_list"}
 
 func TestAccKeycloakSamlClientDefaultScopes_basic(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	t.Parallel()
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	clientScopes := append(preAssignedDefaultSamlClientScopes, clientScope)
 
@@ -27,13 +27,13 @@ func TestAccKeycloakSamlClientDefaultScopes_basic(t *testing.T) {
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientDefaultScopes_basic(realm, client, clientScope),
+				Config: testKeycloakSamlClientDefaultScopes_basic(client, clientScope),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", clientScopes),
 			},
 			// we need a separate test step for destroy instead of using CheckDestroy because this resource is implicitly
 			// destroyed at the end of each test via destroying clients
 			{
-				Config: testKeycloakSamlClientDefaultScopes_noDefaultScopes(realm, client, clientScope),
+				Config: testKeycloakSamlClientDefaultScopes_noDefaultScopes(client, clientScope),
 				Check:  testAccCheckKeycloakSamlClientHasNoDefaultScopes("keycloak_saml_client.client"),
 			},
 		},
@@ -41,10 +41,10 @@ func TestAccKeycloakSamlClientDefaultScopes_basic(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientDefaultScopes_updateClientForceNew(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
-	clientOne := "terraform-client-" + acctest.RandString(10)
-	clientTwo := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	t.Parallel()
+	clientOne := acctest.RandomWithPrefix("tf-acc")
+	clientTwo := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	clientScopes := append(preAssignedDefaultSamlClientScopes, clientScope)
 
@@ -53,11 +53,11 @@ func TestAccKeycloakSamlClientDefaultScopes_updateClientForceNew(t *testing.T) {
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientDefaultScopes_basic(realm, clientOne, clientScope),
+				Config: testKeycloakSamlClientDefaultScopes_basic(clientOne, clientScope),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", clientScopes),
 			},
 			{
-				Config: testKeycloakSamlClientDefaultScopes_basic(realm, clientTwo, clientScope),
+				Config: testKeycloakSamlClientDefaultScopes_basic(clientTwo, clientScope),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", clientScopes),
 			},
 		},
@@ -65,9 +65,9 @@ func TestAccKeycloakSamlClientDefaultScopes_updateClientForceNew(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientDefaultScopes_updateInPlace(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	t.Parallel()
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	allClientScopes := append(preAssignedDefaultSamlClientScopes, clientScope)
 
@@ -85,17 +85,17 @@ func TestAccKeycloakSamlClientDefaultScopes_updateInPlace(t *testing.T) {
 		Steps: []resource.TestStep{
 			// init
 			{
-				Config: testKeycloakSamlClientDefaultScopes_listOfScopes(realm, client, clientScope, allClientScopes),
+				Config: testKeycloakSamlClientDefaultScopes_listOfScopes(client, clientScope, allClientScopes),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", allClientScopes),
 			},
 			// remove
 			{
-				Config: testKeycloakSamlClientDefaultScopes_listOfScopes(realm, client, clientScope, subsetOfClientScopes),
+				Config: testKeycloakSamlClientDefaultScopes_listOfScopes(client, clientScope, subsetOfClientScopes),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", subsetOfClientScopes),
 			},
 			// add
 			{
-				Config: testKeycloakSamlClientDefaultScopes_listOfScopes(realm, client, clientScope, allClientScopes),
+				Config: testKeycloakSamlClientDefaultScopes_listOfScopes(client, clientScope, allClientScopes),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", allClientScopes),
 			},
 		},
@@ -103,16 +103,16 @@ func TestAccKeycloakSamlClientDefaultScopes_updateInPlace(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClientDefaultScopes_validateClientDoesNotExist(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	t.Parallel()
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakSamlClientDefaultScopes_validationNoClient(realm, client, clientScope),
+				Config:      testKeycloakSamlClientDefaultScopes_validationNoClient(client, clientScope),
 				ExpectError: regexp.MustCompile("validation error: client with id .+ does not exist"),
 			},
 		},
@@ -121,8 +121,8 @@ func TestAccKeycloakSamlClientDefaultScopes_validateClientDoesNotExist(t *testin
 
 // if a default client scope is manually detached from a client with default scopes controlled by this resource, terraform should add it again
 func TestAccKeycloakSamlClientDefaultScopes_authoritativeAdd(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
-	client := "terraform-client-" + acctest.RandString(10)
+	t.Parallel()
+	client := acctest.RandomWithPrefix("tf-acc")
 	clientScopes := append(preAssignedDefaultSamlClientScopes,
 		"terraform-client-scope-"+acctest.RandString(10),
 		"terraform-client-scope-"+acctest.RandString(10),
@@ -134,25 +134,23 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeAdd(t *testing.T) {
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientDefaultScopes_multipleClientScopes(realm, client, clientScopes, clientScopes),
+				Config: testKeycloakSamlClientDefaultScopes_multipleClientScopes(client, clientScopes, clientScopes),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", clientScopes),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
-					client, err := keycloakClient.GetSamlClientByClientId(realm, client)
+					client, err := keycloakClient.GetSamlClientByClientId(testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
 					clientToManuallyDetach := clientScopes[acctest.RandIntRange(0, len(clientScopes)-1)]
-					err = keycloakClient.DetachSamlClientDefaultScopes(realm, client.Id, []string{clientToManuallyDetach})
+					err = keycloakClient.DetachSamlClientDefaultScopes(testAccRealm.Realm, client.Id, []string{clientToManuallyDetach})
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakSamlClientDefaultScopes_multipleClientScopes(realm, client, clientScopes, clientScopes),
+				Config: testKeycloakSamlClientDefaultScopes_multipleClientScopes(client, clientScopes, clientScopes),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", clientScopes),
 			},
 		},
@@ -161,8 +159,8 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeAdd(t *testing.T) {
 
 // if a default client scope is manually attached to a client with default scopes controlled by this resource, terraform should detach it
 func TestAccKeycloakSamlClientDefaultScopes_authoritativeRemove(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
-	client := "terraform-client-" + acctest.RandString(10)
+	t.Parallel()
+	client := acctest.RandomWithPrefix("tf-acc")
 
 	randomClientScopes := []string{
 		"terraform-client-scope-" + acctest.RandString(10),
@@ -184,24 +182,22 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeRemove(t *testing.T) {
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientDefaultScopes_multipleClientScopes(realm, client, allClientScopes, attachedClientScopes),
+				Config: testKeycloakSamlClientDefaultScopes_multipleClientScopes(client, allClientScopes, attachedClientScopes),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", attachedClientScopes),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
-					client, err := keycloakClient.GetSamlClientByClientId(realm, client)
+					client, err := keycloakClient.GetSamlClientByClientId(testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachSamlClientDefaultScopes(realm, client.Id, []string{clientToManuallyAttach})
+					err = keycloakClient.AttachSamlClientDefaultScopes(testAccRealm.Realm, client.Id, []string{clientToManuallyAttach})
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakSamlClientDefaultScopes_multipleClientScopes(realm, client, allClientScopes, attachedClientScopes),
+				Config: testKeycloakSamlClientDefaultScopes_multipleClientScopes(client, allClientScopes, attachedClientScopes),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", attachedClientScopes),
 					testAccCheckKeycloakSamlClientDefaultScopeIsNotAttached("keycloak_saml_client_default_scopes.default_scopes", clientToManuallyAttach),
@@ -213,9 +209,9 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeRemove(t *testing.T) {
 
 // this resource doesn't support import because it can be created even if the desired state already exists in keycloak
 func TestAccKeycloakSamlClientDefaultScopes_noImportNeeded(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	t.Parallel()
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	clientScopes := append(preAssignedDefaultSamlClientScopes, clientScope)
 
@@ -224,24 +220,22 @@ func TestAccKeycloakSamlClientDefaultScopes_noImportNeeded(t *testing.T) {
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientDefaultScopes_noDefaultScopes(realm, client, clientScope),
+				Config: testKeycloakSamlClientDefaultScopes_noDefaultScopes(client, clientScope),
 				Check:  testAccCheckKeycloakSamlClientDefaultScopeIsNotAttached("keycloak_saml_client.client", clientScope),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
-					samlClient, err := keycloakClient.GetSamlClientByClientId(realm, client)
+					samlClient, err := keycloakClient.GetSamlClientByClientId(testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachSamlClientDefaultScopes(realm, samlClient.Id, clientScopes)
+					err = keycloakClient.AttachSamlClientDefaultScopes(testAccRealm.Realm, samlClient.Id, clientScopes)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakSamlClientDefaultScopes_basic(realm, client, clientScope),
+				Config: testKeycloakSamlClientDefaultScopes_basic(client, clientScope),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", clientScopes),
 			},
 		},
@@ -254,16 +248,16 @@ func TestAccKeycloakSamlClientDefaultScopes_noImportNeeded(t *testing.T) {
 // result in anything destructive. thus, a following plan will not be empty, as terraform
 // will think it needs to remove these scopes, which is okay to do during an update
 func TestAccKeycloakSamlClientDefaultScopes_profileAndEmailDefaultScopes(t *testing.T) {
-	realm := "terraform-realm-" + acctest.RandString(10)
-	client := "terraform-client-" + acctest.RandString(10)
-	clientScope := "terraform-client-scope-" + acctest.RandString(10)
+	t.Parallel()
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config:             testKeycloakSamlClientDefaultScopes_listOfScopes(realm, client, clientScope, []string{clientScope}),
+				Config:             testKeycloakSamlClientDefaultScopes_listOfScopes(client, clientScope, []string{clientScope}),
 				Check:              testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client.client", append(preAssignedDefaultSamlClientScopes, clientScope)),
 				ExpectNonEmptyPlan: true,
 			},
@@ -272,14 +266,10 @@ func TestAccKeycloakSamlClientDefaultScopes_profileAndEmailDefaultScopes(t *test
 }
 
 func getDefaultSamlClientScopesFromState(resourceName string, s *terraform.State) ([]*keycloak.SamlClientScope, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
 	}
-
-	realm := rs.Primary.Attributes["realm_id"]
 
 	var client string
 	if strings.HasPrefix(resourceName, "keycloak_saml_client_default_scopes") {
@@ -288,7 +278,7 @@ func getDefaultSamlClientScopesFromState(resourceName string, s *terraform.State
 		client = rs.Primary.ID
 	}
 
-	keycloakDefaultSamlClientScopes, err := keycloakClient.GetSamlClientDefaultScopes(realm, client)
+	keycloakDefaultSamlClientScopes, err := keycloakClient.GetSamlClientDefaultScopes(testAccRealm.Realm, client)
 	if err != nil {
 		return nil, err
 	}
@@ -355,136 +345,136 @@ func testAccCheckKeycloakSamlClientDefaultScopeIsNotAttached(resourceName, clien
 	}
 }
 
-func testKeycloakSamlClientDefaultScopes_basic(realm, client, clientScope string) string {
+func testKeycloakSamlClientDefaultScopes_basic(client, clientScope string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	sign_documents          = false
 	sign_assertions         = true
 	include_authn_statement = true
 
-	signing_certificate     = "${file("misc/saml-cert.pem")}"
-	signing_private_key     = "${file("misc/saml-key.pem")}"
+	signing_certificate     = file("misc/saml-cert.pem")
+	signing_private_key     = file("misc/saml-key.pem")
 }
 
 resource "keycloak_saml_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
 
 resource "keycloak_saml_client_default_scopes" "default_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
-	client_id      = "${keycloak_saml_client.client.id}"
+	realm_id       = data.keycloak_realm.realm.id
+	client_id      = keycloak_saml_client.client.id
 	default_scopes = [
 		"role_list",
-		"${keycloak_saml_client_scope.client_scope.name}"
+		keycloak_saml_client_scope.client_scope.name
 	]
 }
-	`, realm, client, clientScope)
+	`, testAccRealm.Realm, client, clientScope)
 }
 
-func testKeycloakSamlClientDefaultScopes_noDefaultScopes(realm, client, clientScope string) string {
+func testKeycloakSamlClientDefaultScopes_noDefaultScopes(client, clientScope string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	sign_documents          = false
 	sign_assertions         = true
 	include_authn_statement = true
 
-	signing_certificate     = "${file("misc/saml-cert.pem")}"
-	signing_private_key     = "${file("misc/saml-key.pem")}"
+	signing_certificate     = file("misc/saml-cert.pem")
+	signing_private_key     = file("misc/saml-key.pem")
 }
 
 resource "keycloak_saml_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
-	`, realm, client, clientScope)
+	`, testAccRealm.Realm, client, clientScope)
 }
 
-func testKeycloakSamlClientDefaultScopes_listOfScopes(realm, client, clientScope string, listOfDefaultScopes []string) string {
+func testKeycloakSamlClientDefaultScopes_listOfScopes(client, clientScope string, listOfDefaultScopes []string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	sign_documents          = false
 	sign_assertions         = true
 	include_authn_statement = true
 
-	signing_certificate     = "${file("misc/saml-cert.pem")}"
-	signing_private_key     = "${file("misc/saml-key.pem")}"
+	signing_certificate     = file("misc/saml-cert.pem")
+	signing_private_key     = file("misc/saml-key.pem")
 }
 
 resource "keycloak_saml_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
 
 resource "keycloak_saml_client_default_scopes" "default_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
-	client_id      = "${keycloak_saml_client.client.id}"
+	realm_id       = data.keycloak_realm.realm.id
+	client_id      = keycloak_saml_client.client.id
 	default_scopes = %s
 
 	depends_on = ["keycloak_saml_client_scope.client_scope"]
 }
-	`, realm, client, clientScope, arrayOfStringsForTerraformResource(listOfDefaultScopes))
+	`, testAccRealm.Realm, client, clientScope, arrayOfStringsForTerraformResource(listOfDefaultScopes))
 }
 
-func testKeycloakSamlClientDefaultScopes_validationNoClient(realm, client, clientScope string) string {
+func testKeycloakSamlClientDefaultScopes_validationNoClient(client, clientScope string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client_scope" "client_scope" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	description = "test description"
 }
 
 resource "keycloak_saml_client_default_scopes" "default_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
+	realm_id       = data.keycloak_realm.realm.id
 	client_id      = "%s"
 	default_scopes = [
 		"role_list",
-		"${keycloak_saml_client_scope.client_scope.name}"
+		keycloak_saml_client_scope.client_scope.name
 	]
 }
-	`, realm, clientScope, client)
+	`, testAccRealm.Realm, clientScope, client)
 }
 
-func testKeycloakSamlClientDefaultScopes_multipleClientScopes(realm, client string, allClientScopes, attachedClientScopes []string) string {
+func testKeycloakSamlClientDefaultScopes_multipleClientScopes(client string, allClientScopes, attachedClientScopes []string) string {
 	var clientScopeResources strings.Builder
 	for _, clientScope := range allClientScopes {
 		if strings.HasPrefix(clientScope, "terraform") {
 			clientScopeResources.WriteString(fmt.Sprintf(`
 resource "keycloak_saml_client_scope" "client_scope_%s" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 }
 		`, clientScope, clientScope))
 		}
@@ -500,28 +490,28 @@ resource "keycloak_saml_client_scope" "client_scope_%s" {
 	}
 
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 
 	sign_documents          = false
 	sign_assertions         = true
 	include_authn_statement = true
 
-	signing_certificate     = "${file("misc/saml-cert.pem")}"
-	signing_private_key     = "${file("misc/saml-key.pem")}"
+	signing_certificate     = file("misc/saml-cert.pem")
+	signing_private_key     = file("misc/saml-key.pem")
 }
 
 %s
 
 resource "keycloak_saml_client_default_scopes" "default_scopes" {
-	realm_id       = "${keycloak_realm.realm.id}"
-	client_id      = "${keycloak_saml_client.client.id}"
+	realm_id       = data.keycloak_realm.realm.id
+	client_id      = keycloak_saml_client.client.id
 	default_scopes = %s
 }
-	`, realm, client, clientScopeResources.String(), arrayOfStringsForTerraformResource(attachedClientScopesInterpolated))
+	`, testAccRealm.Realm, client, clientScopeResources.String(), arrayOfStringsForTerraformResource(attachedClientScopesInterpolated))
 }

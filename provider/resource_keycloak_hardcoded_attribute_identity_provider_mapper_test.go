@@ -11,11 +11,11 @@ import (
 )
 
 func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	mapperName := "terraform-" + acctest.RandString(10)
-	alias := "terraform-" + acctest.RandString(10)
-	attributeName := "terraform-" + acctest.RandString(10)
-	attributeValue := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	alias := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
 	userSession := randomBool()
 
 	resource.Test(t, resource.TestCase{
@@ -24,7 +24,7 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_basic(t *testing.T)
 		CheckDestroy:      testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(realmName, alias, mapperName, attributeName, attributeValue, userSession),
+				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(alias, mapperName, attributeName, attributeValue, userSession),
 				Check:  testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperExists("keycloak_hardcoded_attribute_identity_provider_mapper.oidc"),
 			},
 		},
@@ -32,13 +32,13 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_basic(t *testing.T)
 }
 
 func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	mapperName := "terraform-" + acctest.RandString(10)
-	alias := "terraform-" + acctest.RandString(10)
-	attributeName := "terraform-" + acctest.RandString(10)
-	attributeValue := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	alias := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
 	userSession := randomBool()
-	syncMode := "terraform-" + acctest.RandString(10)
+	syncMode := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -46,7 +46,7 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(t *
 		CheckDestroy:      testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(realmName, alias, mapperName, attributeName, attributeValue, userSession, syncMode),
+				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(alias, mapperName, attributeName, attributeValue, userSession, syncMode),
 				Check:  testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperExists("keycloak_hardcoded_attribute_identity_provider_mapper.oidc"),
 			},
 		},
@@ -54,13 +54,13 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(t *
 }
 
 func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.IdentityProviderMapper{}
 
-	realmName := "terraform-" + acctest.RandString(10)
-	mapperName := "terraform-" + acctest.RandString(10)
-	alias := "terraform-" + acctest.RandString(10)
-	attributeName := "terraform-" + acctest.RandString(10)
-	attributeValue := "terraform-" + acctest.RandString(10)
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	alias := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
 	userSession := randomBool()
 
 	resource.Test(t, resource.TestCase{
@@ -69,19 +69,17 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_createAfterManualDe
 		CheckDestroy:      testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(realmName, alias, mapperName, attributeName, attributeValue, userSession),
+				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(alias, mapperName, attributeName, attributeValue, userSession),
 				Check:  testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperFetch("keycloak_hardcoded_attribute_identity_provider_mapper.oidc", mapper),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteIdentityProviderMapper(mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(realmName, alias, mapperName, attributeName, attributeValue, userSession),
+				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(alias, mapperName, attributeName, attributeValue, userSession),
 				Check:  testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperExists("keycloak_hardcoded_attribute_identity_provider_mapper.oidc"),
 			},
 		},
@@ -89,15 +87,15 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_createAfterManualDe
 }
 
 func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.IdentityProviderMapper{}
 
-	realmName := "terraform-" + acctest.RandString(10)
-	mapperName := "terraform-" + acctest.RandString(10)
-	alias := "terraform-" + acctest.RandString(10)
-	attributeName := "terraform-" + acctest.RandString(10)
-	attributeValue := "terraform-" + acctest.RandString(10)
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	alias := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
 	userSession := randomBool()
-	syncMode := "terraform-" + acctest.RandString(10)
+	syncMode := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -105,63 +103,30 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig_cre
 		CheckDestroy:      testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(realmName, alias, mapperName, attributeName, attributeValue, userSession, syncMode),
+				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(alias, mapperName, attributeName, attributeValue, userSession, syncMode),
 				Check:  testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperFetch("keycloak_hardcoded_attribute_identity_provider_mapper.oidc", mapper),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteIdentityProviderMapper(mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(realmName, alias, mapperName, attributeName, attributeValue, userSession),
+				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(alias, mapperName, attributeName, attributeValue, userSession),
 				Check:  testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperExists("keycloak_hardcoded_attribute_identity_provider_mapper.oidc"),
-			},
-		},
-	})
-}
-func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_basicUpdateRealm(t *testing.T) {
-	firstRealm := "terraform-" + acctest.RandString(10)
-	secondRealm := "terraform-" + acctest.RandString(10)
-	mapperName := "terraform-" + acctest.RandString(10)
-	alias := "terraform-" + acctest.RandString(10)
-	attributeName := "terraform-" + acctest.RandString(10)
-	attributeValue := "terraform-" + acctest.RandString(10)
-	userSession := randomBool()
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(firstRealm, alias, mapperName, attributeName, attributeValue, userSession),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperExists("keycloak_hardcoded_attribute_identity_provider_mapper.oidc"),
-					resource.TestCheckResourceAttr("keycloak_hardcoded_attribute_identity_provider_mapper.oidc", "realm", firstRealm),
-				),
-			},
-			{
-				Config: testKeycloakHardcodedAttributeIdentityProviderMapper_basic(secondRealm, alias, mapperName, attributeName, attributeValue, userSession),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperExists("keycloak_hardcoded_attribute_identity_provider_mapper.oidc"),
-					resource.TestCheckResourceAttr("keycloak_hardcoded_attribute_identity_provider_mapper.oidc", "realm", secondRealm),
-				),
 			},
 		},
 	})
 }
 
 func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_basicUpdateAll(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	identityProviderAliasName := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	identityProviderAliasName := acctest.RandomWithPrefix("tf-acc")
 	userSession := randomBool()
 
 	firstMapper := &keycloak.IdentityProviderMapper{
-		Realm:                  realmName,
+		Realm:                  testAccRealm.Realm,
 		IdentityProviderAlias:  identityProviderAliasName,
 		Name:                   acctest.RandString(10),
 		IdentityProviderMapper: getHardcodedAttributeIdentityProviderMapperType(userSession),
@@ -172,7 +137,7 @@ func TestAccKeycloakHardcodedAttributeIdentityProviderMapper_basicUpdateAll(t *t
 	}
 
 	secondMapper := &keycloak.IdentityProviderMapper{
-		Realm:                  realmName,
+		Realm:                  testAccRealm.Realm,
 		IdentityProviderAlias:  identityProviderAliasName,
 		Name:                   acctest.RandString(10),
 		IdentityProviderMapper: getHardcodedAttributeIdentityProviderMapperType(!userSession),
@@ -236,8 +201,6 @@ func testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy() resou
 			alias := rs.Primary.Attributes["identity_provider_alias"]
 			id := rs.Primary.ID
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			mapper, _ := keycloakClient.GetIdentityProviderMapper(realm, alias, id)
 			if mapper != nil {
 				return fmt.Errorf("oidc config with id %s still exists", id)
@@ -249,8 +212,6 @@ func testAccCheckKeycloakHardcodedAttributeIdentityProviderMapperDestroy() resou
 }
 
 func getKeycloakHardcodedAttributeIdentityProviderMapperFromState(s *terraform.State, resourceName string) (*keycloak.IdentityProviderMapper, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -268,14 +229,14 @@ func getKeycloakHardcodedAttributeIdentityProviderMapperFromState(s *terraform.S
 	return mapper, nil
 }
 
-func testKeycloakHardcodedAttributeIdentityProviderMapper_basic(realm, alias, name, attributeName, attributeValue string, userSession bool) string {
+func testKeycloakHardcodedAttributeIdentityProviderMapper_basic(alias, name, attributeName, attributeValue string, userSession bool) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_identity_provider" "oidc" {
-	realm             = "${keycloak_realm.realm.id}"
+	realm             = data.keycloak_realm.realm.id
 	alias             = "%s"
 	authorization_url = "https://example.com/auth"
 	token_url         = "https://example.com/token"
@@ -284,24 +245,24 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 }
 
 resource keycloak_hardcoded_attribute_identity_provider_mapper oidc {
-	realm                   = "${keycloak_realm.realm.id}"
+	realm                   = data.keycloak_realm.realm.id
 	name                    = "%s"
-	identity_provider_alias = "${keycloak_oidc_identity_provider.oidc.alias}"
+	identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
 	attribute_name          = "%s"
 	attribute_value         = "%s"
 	user_session            = %t
 }
-	`, realm, alias, name, attributeName, attributeValue, userSession)
+	`, testAccRealm.Realm, alias, name, attributeName, attributeValue, userSession)
 }
 
-func testKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(realm, alias, name, attributeName, attributeValue string, userSession bool, syncMode string) string {
+func testKeycloakHardcodedAttributeIdentityProviderMapper_withExtraConfig(alias, name, attributeName, attributeValue string, userSession bool, syncMode string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_identity_provider" "oidc" {
-	realm             = "${keycloak_realm.realm.id}"
+	realm             = data.keycloak_realm.realm.id
 	alias             = "%s"
 	authorization_url = "https://example.com/auth"
 	token_url         = "https://example.com/token"
@@ -310,9 +271,9 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 }
 
 resource keycloak_hardcoded_attribute_identity_provider_mapper oidc {
-	realm                   = "${keycloak_realm.realm.id}"
+	realm                   = data.keycloak_realm.realm.id
 	name                    = "%s"
-	identity_provider_alias = "${keycloak_oidc_identity_provider.oidc.alias}"
+	identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
 	attribute_name          = "%s"
 	attribute_value         = "%s"
 	user_session            = %t
@@ -320,28 +281,28 @@ resource keycloak_hardcoded_attribute_identity_provider_mapper oidc {
 		syncMode = "%s"
 	}
 }
-	`, realm, alias, name, attributeName, attributeValue, userSession, syncMode)
+	`, testAccRealm.Realm, alias, name, attributeName, attributeValue, userSession, syncMode)
 }
 
 func testKeycloakHardcodedAttributeIdentityProviderMapper_basicFromInterface(mapper *keycloak.IdentityProviderMapper, userSession bool) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_identity_provider" "saml" {
-	realm                      = "${keycloak_realm.realm.id}"
+	realm                      = data.keycloak_realm.realm.id
 	alias                      = "%s"
 	single_sign_on_service_url = "https://example.com/auth"
 }
 
 resource keycloak_hardcoded_attribute_identity_provider_mapper saml {
-	realm                   = "${keycloak_realm.realm.id}"
+	realm                   = data.keycloak_realm.realm.id
 	name                    = "%s"
-	identity_provider_alias = "${keycloak_saml_identity_provider.saml.alias}"
+	identity_provider_alias = keycloak_saml_identity_provider.saml.alias
 	attribute_name          = "%s"
 	attribute_value         = "%s"
 	user_session            = %t
 }
-	`, mapper.Realm, mapper.IdentityProviderAlias, mapper.Name, mapper.Config.Attribute, mapper.Config.AttributeValue, userSession)
+	`, testAccRealm.Realm, mapper.IdentityProviderAlias, mapper.Name, mapper.Config.Attribute, mapper.Config.AttributeValue, userSession)
 }

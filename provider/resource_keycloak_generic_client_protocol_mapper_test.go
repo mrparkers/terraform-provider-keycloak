@@ -11,16 +11,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-const (
-	TF_RESOURCE_NAME = "client_protocol_mapper"
-)
-
 func TestAccKeycloakGenericClientProtocolMapper_basicClient(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)
+	t.Parallel()
 
-	resourceName := "keycloak_generic_client_protocol_mapper." + TF_RESOURCE_NAME
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+
+	resourceName := "keycloak_generic_client_protocol_mapper.client_protocol_mapper"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -28,7 +25,7 @@ func TestAccKeycloakGenericClientProtocolMapper_basicClient(t *testing.T) {
 		CheckDestroy:      testAccKeycloakGenericClientProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakGenericClientProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakGenericClientProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakGenericClientProtocolMapperExists(resourceName),
 			},
 		},
@@ -36,11 +33,12 @@ func TestAccKeycloakGenericClientProtocolMapper_basicClient(t *testing.T) {
 }
 
 func TestAccKeycloakGenericClientProtocolMapper_basicClientScope(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientScopeId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)
+	t.Parallel()
 
-	resourceName := "keycloak_generic_client_protocol_mapper." + TF_RESOURCE_NAME
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+
+	resourceName := "keycloak_generic_client_protocol_mapper.client_protocol_mapper"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -48,7 +46,7 @@ func TestAccKeycloakGenericClientProtocolMapper_basicClientScope(t *testing.T) {
 		CheckDestroy:      testAccKeycloakGenericClientProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakGenericClientProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
+				Config: testKeycloakGenericClientProtocolMapper_basic_clientScope(clientScopeId, mapperName),
 				Check:  testKeycloakGenericClientProtocolMapperExists(resourceName),
 			},
 		},
@@ -56,11 +54,12 @@ func TestAccKeycloakGenericClientProtocolMapper_basicClientScope(t *testing.T) {
 }
 
 func TestAccKeycloakGenericClientProtocolMapper_import(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)
+	t.Parallel()
 
-	resourceName := "keycloak_generic_client_protocol_mapper." + TF_RESOURCE_NAME
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+
+	resourceName := "keycloak_generic_client_protocol_mapper.client_protocol_mapper"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -68,7 +67,7 @@ func TestAccKeycloakGenericClientProtocolMapper_import(t *testing.T) {
 		CheckDestroy:      testAccKeycloakGenericClientProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakGenericClientProtocolMapper_import(realmName, clientId, mapperName),
+				Config: testKeycloakGenericClientProtocolMapper_import(clientId, mapperName),
 				Check:  testKeycloakGenericClientProtocolMapperExists(resourceName),
 			},
 			{
@@ -81,17 +80,18 @@ func TestAccKeycloakGenericClientProtocolMapper_import(t *testing.T) {
 	})
 }
 
-func TestGenericClientProtocolMapper_update(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-generic-client-protocol-mapper-" + acctest.RandString(5)
+func TestAccKeycloakGenericClientProtocolMapper_update(t *testing.T) {
+	t.Parallel()
 
-	resourceName := "keycloak_generic_client_protocol_mapper." + TF_RESOURCE_NAME
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
-	oldAttributeName := "attribute-name-" + acctest.RandString(10)
-	oldAttributeValue := "attribute-name-" + acctest.RandString(10)
-	newAttributeName := "attribute-value-" + acctest.RandString(10)
-	newAttributeValue := "attribute-value-" + acctest.RandString(10)
+	resourceName := "keycloak_generic_client_protocol_mapper.client_protocol_mapper"
+
+	oldAttributeName := acctest.RandomWithPrefix("tf-acc")
+	oldAttributeValue := acctest.RandomWithPrefix("tf-acc")
+	newAttributeName := acctest.RandomWithPrefix("tf-acc")
+	newAttributeValue := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -99,11 +99,11 @@ func TestGenericClientProtocolMapper_update(t *testing.T) {
 		CheckDestroy:      testAccKeycloakGenericClientProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakGenericClientProtocolMapper_update(realmName, clientId, mapperName, oldAttributeName, oldAttributeValue),
+				Config: testKeycloakGenericClientProtocolMapper_update(clientId, mapperName, oldAttributeName, oldAttributeValue),
 				Check:  testKeycloakGenericClientProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakGenericClientProtocolMapper_update(realmName, clientId, mapperName, newAttributeName, newAttributeValue),
+				Config: testKeycloakGenericClientProtocolMapper_update(clientId, mapperName, newAttributeName, newAttributeValue),
 				Check: resource.ComposeTestCheckFunc(
 					testKeycloakGenericClientProtocolMapperExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "config.attribute.name", newAttributeName),
@@ -113,9 +113,6 @@ func TestGenericClientProtocolMapper_update(t *testing.T) {
 	})
 }
 
-/*  =================================================================================================================
-    Helper functions
-    ================================================================================================================= */
 func testAccKeycloakGenericClientProtocolMapperDestroy() resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		for resourceName, rs := range state.RootModule().Resources {
@@ -145,111 +142,109 @@ func getGenericClientProtocolMapperUsingState(state *terraform.State, resourceNa
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	return keycloakClient.GetGenericClientProtocolMapper(realmId, clientId, clientScopeId, mapperId)
 }
 
-func testKeycloakGenericClientProtocolMapper_basic_client(realmName string, clientId string, mapperName string) string {
+func testKeycloakGenericClientProtocolMapper_basic_client(clientId string, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-  realm = "%s"
+data "keycloak_realm" "realm" {
+	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
-  realm_id  = "${keycloak_realm.realm.id}"
-  client_id = "%s"
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = "%s"
 }
 
-resource "keycloak_generic_client_protocol_mapper" "%s" {
-  client_id       = "${keycloak_saml_client.saml_client.id}"
-  name            = "%s"
-  protocol        = "saml"
-  protocol_mapper = "saml-hardcode-attribute-mapper"
-  realm_id        = "${keycloak_realm.realm.id}"
-  config = {
-    "attribute.name"       = "name"
-    "attribute.nameformat" = "Basic"
-    "attribute.value"      = "value"
-    "friendly.name"        = "%s"
-  }
-}`, realmName, clientId, TF_RESOURCE_NAME, mapperName, mapperName)
+resource "keycloak_generic_client_protocol_mapper" "client_protocol_mapper" {
+	client_id       = keycloak_saml_client.saml_client.id
+	name            = "%s"
+	protocol        = "saml"
+	protocol_mapper = "saml-hardcode-attribute-mapper"
+	realm_id        = data.keycloak_realm.realm.id
+	config = {
+		"attribute.name"       = "name"
+		"attribute.nameformat" = "Basic"
+		"attribute.value"      = "value"
+		"friendly.name"        = "%s"
+	}
+}`, testAccRealm.Realm, clientId, mapperName, mapperName)
 }
 
-func testKeycloakGenericClientProtocolMapper_basic_clientScope(realmName string, clientScopeId string, mapperName string) string {
+func testKeycloakGenericClientProtocolMapper_basic_clientScope(clientScopeId string, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-  realm = "%s"
+data "keycloak_realm" "realm" {
+	realm = "%s"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
-resource "keycloak_generic_client_protocol_mapper" "%s" {
+resource "keycloak_generic_client_protocol_mapper" "client_protocol_mapper" {
 	name            = "%s"
-	realm_id        = "${keycloak_realm.realm.id}"
-	client_scope_id = "${keycloak_openid_client_scope.client_scope.id}"
+	realm_id        = data.keycloak_realm.realm.id
+	client_scope_id = keycloak_openid_client_scope.client_scope.id
 	protocol        = "openid-connect"
 	protocol_mapper = "oidc-usermodel-property-mapper"
 	config = {
 		"user.attribute" = "foo"
 		"claim.name"     = "bar"
 	}
-}`, realmName, clientScopeId, TF_RESOURCE_NAME, mapperName)
+}`, testAccRealm.Realm, clientScopeId, mapperName)
 }
 
-func testKeycloakGenericClientProtocolMapper_import(realmName string, clientId string, mapperName string) string {
+func testKeycloakGenericClientProtocolMapper_import(clientId string, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-  realm = "%s"
+data "keycloak_realm" "realm" {
+	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
-  realm_id  = "${keycloak_realm.realm.id}"
+  realm_id  = data.keycloak_realm.realm.id
   client_id = "%s"
 }
 
-resource "keycloak_generic_client_protocol_mapper" "%s" {
-  client_id       = "${keycloak_saml_client.saml_client.id}"
+resource "keycloak_generic_client_protocol_mapper" "client_protocol_mapper" {
+  client_id       = keycloak_saml_client.saml_client.id
   name            = "%s"
   protocol        = "saml"
   protocol_mapper = "saml-hardcode-attribute-mapper"
-  realm_id        = "${keycloak_realm.realm.id}"
+  realm_id        = data.keycloak_realm.realm.id
   config = {
     "attribute.name"       = "name"
     "attribute.nameformat" = "Basic"
     "attribute.value"      = "value"
     "friendly.name"        = "%s"
   }
-}`, realmName, clientId, TF_RESOURCE_NAME, mapperName, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName, mapperName)
 }
 
-func testKeycloakGenericClientProtocolMapper_update(realmName string, clientId string, mapperName string, attributeName string, attributeValue string) string {
+func testKeycloakGenericClientProtocolMapper_update(clientId string, mapperName string, attributeName string, attributeValue string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-  realm = "%s"
+data "keycloak_realm" "realm" {
+	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
-  realm_id  = "${keycloak_realm.realm.id}"
+  realm_id  = data.keycloak_realm.realm.id
   client_id = "%s"
 }
 
-resource "keycloak_generic_client_protocol_mapper" "%s" {
-  client_id       = "${keycloak_saml_client.saml_client.id}"
+resource "keycloak_generic_client_protocol_mapper" "client_protocol_mapper" {
+  client_id       = keycloak_saml_client.saml_client.id
   name            = "%s"
   protocol        = "saml"
   protocol_mapper = "saml-hardcode-attribute-mapper"
-  realm_id        = "${keycloak_realm.realm.id}"
+  realm_id        = data.keycloak_realm.realm.id
   config = {
     "attribute.name"       = "%s"
     "attribute.nameformat" = "Basic"
     "attribute.value"      = "%s"
     "friendly.name"        = "%s"
   }
-}`, realmName, clientId, TF_RESOURCE_NAME, mapperName, attributeName, attributeValue, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName, attributeName, attributeValue, mapperName)
 }
 
 func testKeycloakGenericClientProtocolMapperExists(resourceName string) resource.TestCheckFunc {

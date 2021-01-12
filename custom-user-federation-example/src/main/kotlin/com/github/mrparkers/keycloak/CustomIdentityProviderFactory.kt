@@ -1,6 +1,5 @@
 package com.github.mrparkers.keycloak
 
-
 import org.keycloak.broker.oidc.OIDCIdentityProviderConfig
 import org.keycloak.broker.provider.AbstractIdentityProviderFactory
 import org.keycloak.models.IdentityProviderModel
@@ -42,5 +41,9 @@ class CustomIdentityProviderFactory : AbstractIdentityProviderFactory<CustomIden
 			config.jwksUrl = rep.jwksUri
 		}
 		return config.config
+	}
+
+	override fun createConfig(): IdentityProviderModel {
+		return IdentityProviderModel()
 	}
 }

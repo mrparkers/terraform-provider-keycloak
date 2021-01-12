@@ -11,8 +11,8 @@ import (
 )
 
 func TestAccKeycloakAuthenticationExecution_basic(t *testing.T) {
-	realmName := "terraform-r-" + acctest.RandString(10)
-	parentAuthFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
+	t.Parallel()
+	parentAuthFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -20,7 +20,7 @@ func TestAccKeycloakAuthenticationExecution_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakAuthenticationExecution_basic(realmName, parentAuthFlowAlias),
+				Config: testKeycloakAuthenticationExecution_basic(parentAuthFlowAlias),
 				Check:  testAccCheckKeycloakAuthenticationExecutionExists("keycloak_authentication_execution.execution"),
 			},
 			{
@@ -34,10 +34,10 @@ func TestAccKeycloakAuthenticationExecution_basic(t *testing.T) {
 }
 
 func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var authenticationExecution = &keycloak.AuthenticationExecution{}
 
-	realmName := "terraform-" + acctest.RandString(10)
-	authParentFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
+	authParentFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -45,7 +45,7 @@ func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.
 		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakAuthenticationExecution_basic(realmName, authParentFlowAlias),
+				Config: testKeycloakAuthenticationExecution_basic(authParentFlowAlias),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationExecutionExists("keycloak_authentication_execution.execution"),
 					testAccCheckKeycloakAuthenticationExecutionFetch("keycloak_authentication_execution.execution", authenticationExecution),
@@ -53,14 +53,12 @@ func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteAuthenticationExecution(authenticationExecution.RealmId, authenticationExecution.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakAuthenticationExecution_basic(realmName, authParentFlowAlias),
+				Config: testKeycloakAuthenticationExecution_basic(authParentFlowAlias),
 				Check:  testAccCheckKeycloakAuthenticationExecutionExists("keycloak_authentication_execution.execution"),
 			},
 		},
@@ -68,8 +66,8 @@ func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.
 }
 
 func TestAccKeycloakAuthenticationExecution_updateAuthenticationExecutionRequirement(t *testing.T) {
-	realmName := "terraform-r-" + acctest.RandString(10)
-	authParentFlowAlias := "terraform-parent-flow-" + acctest.RandString(10)
+	t.Parallel()
+	authParentFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -77,21 +75,21 @@ func TestAccKeycloakAuthenticationExecution_updateAuthenticationExecutionRequire
 		CheckDestroy:      testAccCheckKeycloakAuthenticationSubFlowDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakAuthenticationExecution_basic(realmName, authParentFlowAlias),
+				Config: testKeycloakAuthenticationExecution_basic(authParentFlowAlias),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationExecutionExists("keycloak_authentication_execution.execution"),
 					resource.TestCheckResourceAttr("keycloak_authentication_execution.execution", "requirement", "DISABLED"),
 				),
 			},
 			{
-				Config: testKeycloakAuthenticationExecution_basicWithRequirement(realmName, authParentFlowAlias, "REQUIRED"),
+				Config: testKeycloakAuthenticationExecution_basicWithRequirement(authParentFlowAlias, "REQUIRED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationExecutionExists("keycloak_authentication_execution.execution"),
 					resource.TestCheckResourceAttr("keycloak_authentication_execution.execution", "requirement", "REQUIRED"),
 				),
 			},
 			{
-				Config: testKeycloakAuthenticationExecution_basicWithRequirement(realmName, authParentFlowAlias, "DISABLED"),
+				Config: testKeycloakAuthenticationExecution_basicWithRequirement(authParentFlowAlias, "DISABLED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakAuthenticationExecutionExists("keycloak_authentication_execution.execution"),
 					resource.TestCheckResourceAttr("keycloak_authentication_execution.execution", "requirement", "DISABLED"),
@@ -138,8 +136,6 @@ func testAccCheckKeycloakAuthenticationExecutionDestroy() resource.TestCheckFunc
 			realm := rs.Primary.Attributes["realm_id"]
 			parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			authenticationExecution, _ := keycloakClient.GetAuthenticationExecution(realm, parentFlowAlias, id)
 			if authenticationExecution != nil {
 				return fmt.Errorf("authentication flow with id %s still exists", id)
@@ -151,8 +147,6 @@ func testAccCheckKeycloakAuthenticationExecutionDestroy() resource.TestCheckFunc
 }
 
 func getAuthenticationExecutionFromState(s *terraform.State, resourceName string) (*keycloak.AuthenticationExecution, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -186,41 +180,41 @@ func getExecutionImportId(resourceName string) resource.ImportStateIdFunc {
 	}
 }
 
-func testKeycloakAuthenticationExecution_basic(realm, parentAlias string) string {
+func testKeycloakAuthenticationExecution_basic(parentAlias string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_authentication_flow" "flow" {
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 	alias    = "%s"
 }
 
 resource "keycloak_authentication_execution" "execution" {
-	realm_id = "${keycloak_realm.realm.id}"
-	parent_flow_alias = "${keycloak_authentication_flow.flow.alias}"
-	authenticator = "auth-cookie"
+	realm_id          = data.keycloak_realm.realm.id
+	parent_flow_alias = keycloak_authentication_flow.flow.alias
+	authenticator     = "auth-cookie"
 }
-	`, realm, parentAlias)
+	`, testAccRealm.Realm, parentAlias)
 }
 
-func testKeycloakAuthenticationExecution_basicWithRequirement(realm, parentAlias, requirement string) string {
+func testKeycloakAuthenticationExecution_basicWithRequirement(parentAlias, requirement string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_authentication_flow" "flow" {
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 	alias    = "%s"
 }
 
 resource "keycloak_authentication_execution" "execution" {
-	realm_id = "${keycloak_realm.realm.id}"
-	parent_flow_alias = "${keycloak_authentication_flow.flow.alias}"
-	authenticator = "auth-cookie"
-	requirement = "%s"
+	realm_id          = data.keycloak_realm.realm.id
+	parent_flow_alias = keycloak_authentication_flow.flow.alias
+	authenticator     = "auth-cookie"
+	requirement       = "%s"
 }
-	`, realm, parentAlias, requirement)
+	`, testAccRealm.Realm, parentAlias, requirement)
 }

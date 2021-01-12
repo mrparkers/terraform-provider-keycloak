@@ -167,6 +167,23 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"authentication_flow_binding_overrides": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"browser_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"direct_grant_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -277,6 +294,15 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		Attributes:              samlAttributes,
 	}
 
+	if v, ok := data.GetOk("authentication_flow_binding_overrides"); ok {
+		authenticationFlowBindingOverridesData := v.(*schema.Set).List()[0]
+		authenticationFlowBindingOverrides := authenticationFlowBindingOverridesData.(map[string]interface{})
+		samlClient.AuthenticationFlowBindingOverrides = keycloak.SamlAuthenticationFlowBindingOverrides{
+			BrowserId:     authenticationFlowBindingOverrides["browser_id"].(string),
+			DirectGrantId: authenticationFlowBindingOverrides["direct_grant_id"].(string),
+		}
+	}
+
 	return samlClient
 }
 
@@ -355,6 +381,15 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 
 	if _, exists := data.GetOkExists("signing_certificate"); client.Attributes.SigningPrivateKey != nil && exists {
 		data.Set("signing_private_key", *client.Attributes.SigningPrivateKey)
+	}
+
+	if (keycloak.SamlAuthenticationFlowBindingOverrides{}) == client.AuthenticationFlowBindingOverrides {
+		data.Set("authentication_flow_binding_overrides", nil)
+	} else {
+		authenticationFlowBindingOverridesSettings := make(map[string]interface{})
+		authenticationFlowBindingOverridesSettings["browser_id"] = client.AuthenticationFlowBindingOverrides.BrowserId
+		authenticationFlowBindingOverridesSettings["direct_grant_id"] = client.AuthenticationFlowBindingOverrides.DirectGrantId
+		data.Set("authentication_flow_binding_overrides", []interface{}{authenticationFlowBindingOverridesSettings})
 	}
 
 	data.Set("client_id", client.ClientId)

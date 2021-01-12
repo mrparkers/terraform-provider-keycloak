@@ -11,9 +11,9 @@ import (
 )
 
 func TestAccKeycloakIdpTokenExchangeScopePermission_basic(t *testing.T) {
-	realmName := "tf_token_exchange-" + acctest.RandString(10)
-	providerAlias := "tf-" + acctest.RandString(10)
-	webappClientId := "tf-" + acctest.RandString(10)
+	providerAlias := acctest.RandomWithPrefix("tf-acc")
+	providerClientId := acctest.RandomWithPrefix("tf-acc")
+	webappClientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -21,7 +21,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakIdpTokenExchangeScopePermissionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdpTokenExchangeScopePermission_basic(realmName, providerAlias, webappClientId),
+				Config: testKeycloakIdpTokenExchangeScopePermission_basic(providerAlias, providerClientId, webappClientId),
 				Check:  testAccCheckKeycloakIdpTokenExchangeScopePermissionExists("keycloak_identity_provider_token_exchange_scope_permission.my_permission"),
 			},
 		},
@@ -31,9 +31,9 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_basic(t *testing.T) {
 func TestAccKeycloakIdpTokenExchangeScopePermission_createAfterManualDestroy(t *testing.T) {
 	var idpPermissions = &keycloak.IdentityProviderPermissions{}
 
-	realmName := "tf_token_exchange-" + acctest.RandString(10)
-	providerAlias := "tf-" + acctest.RandString(10)
-	webappClientId := "tf-" + acctest.RandString(10)
+	providerAlias := acctest.RandomWithPrefix("tf-acc")
+	providerClientId := acctest.RandomWithPrefix("tf-acc")
+	webappClientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -41,7 +41,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_createAfterManualDestroy(t *
 		CheckDestroy:      testAccCheckKeycloakIdpTokenExchangeScopePermissionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdpTokenExchangeScopePermission_basic(realmName, providerAlias, webappClientId),
+				Config: testKeycloakIdpTokenExchangeScopePermission_basic(providerAlias, providerClientId, webappClientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakIdpTokenExchangeScopePermissionExists("keycloak_identity_provider_token_exchange_scope_permission.my_permission"),
 					testAccCheckKeycloakIdpPermissionFetch("keycloak_identity_provider_token_exchange_scope_permission.my_permission", idpPermissions),
@@ -49,13 +49,12 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_createAfterManualDestroy(t *
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 					err := keycloakClient.DisableIdentityProviderPermissions(idpPermissions.RealmId, idpPermissions.ProviderAlias)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakIdpTokenExchangeScopePermission_basic(realmName, providerAlias, webappClientId),
+				Config: testKeycloakIdpTokenExchangeScopePermission_basic(providerAlias, providerClientId, webappClientId),
 				Check:  testAccCheckKeycloakIdpTokenExchangeScopePermissionExists("keycloak_identity_provider_token_exchange_scope_permission.my_permission"),
 			},
 		},
@@ -63,9 +62,9 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_createAfterManualDestroy(t *
 }
 
 func TestAccKeycloakIdpTokenExchangeScopePermission_import(t *testing.T) {
-	realmName := "tf_token_exchange-" + acctest.RandString(10)
-	providerAlias := "tf-" + acctest.RandString(10)
-	webappClientId := "tf-" + acctest.RandString(10)
+	providerAlias := acctest.RandomWithPrefix("tf-acc")
+	providerClientId := acctest.RandomWithPrefix("tf-acc")
+	webappClientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -73,7 +72,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_import(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakIdpTokenExchangeScopePermissionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdpTokenExchangeScopePermission_basic(realmName, providerAlias, webappClientId),
+				Config: testKeycloakIdpTokenExchangeScopePermission_basic(providerAlias, providerClientId, webappClientId),
 				Check:  testAccCheckKeycloakIdpTokenExchangeScopePermissionExists("keycloak_identity_provider_token_exchange_scope_permission.my_permission"),
 			},
 			{
@@ -87,10 +86,10 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_import(t *testing.T) {
 }
 
 func TestAccKeycloakIdpTokenExchangeScopePermission_updatePolicyMultipleClients(t *testing.T) {
-	realmName := "tf_token_exchange-" + acctest.RandString(10)
-	providerAlias := "tf-" + acctest.RandString(10)
-	webappClientId := "tf-" + acctest.RandString(10)
-	webappClientId2 := "tf-" + acctest.RandString(10)
+	providerAlias := acctest.RandomWithPrefix("tf-acc")
+	providerClientId := acctest.RandomWithPrefix("tf-acc")
+	webappClientId := acctest.RandomWithPrefix("tf-acc")
+	webappClientId2 := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -98,22 +97,18 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_updatePolicyMultipleClients(
 		CheckDestroy:      testAccCheckKeycloakIdpTokenExchangeScopePermissionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakIdpTokenExchangeScopePermission_basic(realmName, providerAlias, webappClientId),
+				Config: testKeycloakIdpTokenExchangeScopePermission_basic(providerAlias, providerClientId, webappClientId),
 				Check:  testAccCheckKeycloakIdpTokenExchangeScopePermissionClientPolicyHasClient("keycloak_identity_provider_token_exchange_scope_permission.my_permission", webappClientId),
 			},
 			{
-				Config: testKeycloakIdpTokenExchangeScopePermission_multipleClients(realmName, providerAlias, webappClientId, webappClientId2),
+				Config: testKeycloakIdpTokenExchangeScopePermission_multipleClients(providerAlias, providerClientId, webappClientId, webappClientId2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakIdpTokenExchangeScopePermissionClientPolicyHasClient("keycloak_identity_provider_token_exchange_scope_permission.my_permission", webappClientId),
 					testAccCheckKeycloakIdpTokenExchangeScopePermissionClientPolicyHasClient("keycloak_identity_provider_token_exchange_scope_permission.my_permission", webappClientId2),
 				),
 			},
 			{
-				Config: testKeycloakIdpTokenExchangeScopePermission_basic(realmName, providerAlias, webappClientId2),
-				Check:  testAccCheckKeycloakIdpTokenExchangeScopePermissionClientPolicyHasClient("keycloak_identity_provider_token_exchange_scope_permission.my_permission", webappClientId2),
-			},
-			{
-				Config: testKeycloakIdpTokenExchangeScopePermission_basic(realmName, providerAlias, webappClientId),
+				Config: testKeycloakIdpTokenExchangeScopePermission_basic(providerAlias, providerClientId, webappClientId),
 				Check:  testAccCheckKeycloakIdpTokenExchangeScopePermissionClientPolicyHasClient("keycloak_identity_provider_token_exchange_scope_permission.my_permission", webappClientId),
 			},
 		},
@@ -121,9 +116,9 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_updatePolicyMultipleClients(
 }
 
 func TestAccKeycloakIdpTokenExchangeScopePermission_rolePolicy(t *testing.T) {
-	realmName := "tf_token_exchange-" + acctest.RandString(10)
-	providerAlias := "tf-" + acctest.RandString(10)
-	webappClientId := "tf-" + acctest.RandString(10)
+	providerAlias := acctest.RandomWithPrefix("tf-acc")
+	providerClientId := acctest.RandomWithPrefix("tf-acc")
+	webappClientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -131,7 +126,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_rolePolicy(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakIdpTokenExchangeScopePermissionDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakIdpTokenExchangeScopePermission_rolePolicy(realmName, providerAlias, webappClientId),
+				Config:      testKeycloakIdpTokenExchangeScopePermission_rolePolicy(providerAlias, providerClientId, webappClientId),
 				ExpectError: regexp.MustCompile(".*expected policy_type to be one of.*"),
 			},
 		},
@@ -152,7 +147,6 @@ func testAccCheckKeycloakIdpTokenExchangeScopePermissionDestroy() resource.TestC
 			authorizationIdpResourceId := rs.Primary.Attributes["authorization_idp_resource_id"]
 			authorizationTokenExchangeScopePermissionId := rs.Primary.Attributes["authorization_token_exchange_scope_permission_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 			permissions, _ := keycloakClient.GetIdentityProviderPermissions(realmId, providerAlias)
 			if permissions != nil {
 				return fmt.Errorf("idp permissions for realm id %s and provider alias %s still exists", realmId, providerAlias)
@@ -308,8 +302,6 @@ func testAccCheckKeycloakIdpPermissionFetch(resourceName string, idpPermissions 
 }
 
 func getIdpPermissionsFromState(s *terraform.State, resourceName string) (*keycloak.IdentityProviderPermissions, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -326,122 +318,129 @@ func getIdpPermissionsFromState(s *terraform.State, resourceName string) (*keycl
 	return permissions, nil
 }
 
-func testKeycloakIdpTokenExchangeScopePermission_basic(realmId, providerAlias, webappClientId string) string {
+func testKeycloakIdpTokenExchangeScopePermission_basic(providerAlias, providerClientId, webappClientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_identity_provider" "my_idp" {
-  realm              = keycloak_realm.realm.id
-  alias              = "%s"
-  authorization_url  = "http://localhost:8080/auth/realms/something/protocol/openid-connect/auth"
-  token_url          = "http://localhost:8080/auth/realms/something/protocol/openid-connect/token"
-  client_id          = "clientid"
-  client_secret      = "secret"
+	realm              = data.keycloak_realm.realm.id
+	alias              = "%s"
+	authorization_url  = "http://localhost:8080/auth/realms/something/protocol/openid-connect/auth"
+	token_url          = "http://localhost:8080/auth/realms/something/protocol/openid-connect/token"
+	client_id          = "%s"
+	client_secret      = "secret"
 }
 
 resource "keycloak_openid_client" "webapp_client" {
-  realm_id              = keycloak_realm.realm.id
-  name                  = "webapp_client"
-  client_id             = "%s"
-  client_secret         = "secret"
-  access_type           = "CONFIDENTIAL"
-  standard_flow_enabled = true
-  valid_redirect_uris = [
-    "http://localhost:8080/*",
-  ]
+	realm_id              = data.keycloak_realm.realm.id
+	name                  = "webapp_client"
+	client_id             = "%s"
+	client_secret         = "secret"
+	access_type           = "CONFIDENTIAL"
+	standard_flow_enabled = true
+	valid_redirect_uris = [
+		"http://localhost:8080/*",
+	]
 }
 
 resource "keycloak_identity_provider_token_exchange_scope_permission" "my_permission" {
-  realm_id       = keycloak_realm.realm.id
-  provider_alias = keycloak_oidc_identity_provider.my_idp.alias
-  policy_type    = "client"
-  clients        = [keycloak_openid_client.webapp_client.id]
+	realm_id       = data.keycloak_realm.realm.id
+	provider_alias = keycloak_oidc_identity_provider.my_idp.alias
+	policy_type    = "client"
+	clients        = [
+		keycloak_openid_client.webapp_client.id
+	]
 }
-	`, realmId, providerAlias, webappClientId)
+	`, testAccRealm.Realm, providerAlias, providerClientId, webappClientId)
 }
 
-func testKeycloakIdpTokenExchangeScopePermission_multipleClients(realmId, providerAlias, webappClientId, webappClientId2 string) string {
+func testKeycloakIdpTokenExchangeScopePermission_multipleClients(providerAlias, providerClientId, webappClientId, webappClientId2 string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_identity_provider" "my_idp" {
-  realm              = keycloak_realm.realm.id
-  alias              = "%s"
-  authorization_url  = "http://localhost:8080/auth/realms/something/protocol/openid-connect/auth"
-  token_url          = "http://localhost:8080/auth/realms/something/protocol/openid-connect/token"
-  client_id          = "clientid"
-  client_secret      = "secret"
+	realm              = data.keycloak_realm.realm.id
+	alias              = "%s"
+	authorization_url  = "http://localhost:8080/auth/realms/something/protocol/openid-connect/auth"
+	token_url          = "http://localhost:8080/auth/realms/something/protocol/openid-connect/token"
+	client_id          = "%s"
+	client_secret      = "secret"
 }
 
 resource "keycloak_openid_client" "webapp_client" {
-  realm_id              = keycloak_realm.realm.id
-  name                  = "webapp_client"
-  client_id             = "%s"
-  client_secret         = "secret"
-  access_type           = "CONFIDENTIAL"
-  standard_flow_enabled = true
-  valid_redirect_uris = [
-    "http://localhost:8080/*",
-  ]
+	realm_id              = data.keycloak_realm.realm.id
+	name                  = "webapp_client"
+	client_id             = "%s"
+	client_secret         = "secret"
+	access_type           = "CONFIDENTIAL"
+	standard_flow_enabled = true
+	valid_redirect_uris = [
+		"http://localhost:8080/*",
+	]
 }
 
 resource "keycloak_openid_client" "webapp_client2" {
-  realm_id              = keycloak_realm.realm.id
-  name                  = "webapp_client"
-  client_id             = "%s"
-  client_secret         = "secret"
-  access_type           = "CONFIDENTIAL"
-  standard_flow_enabled = true
-  valid_redirect_uris = [
-    "http://localhost:8080/*",
-  ]
+	realm_id              = data.keycloak_realm.realm.id
+	name                  = "webapp_client"
+	client_id             = "%s"
+	client_secret         = "secret"
+	access_type           = "CONFIDENTIAL"
+	standard_flow_enabled = true
+	valid_redirect_uris = [
+		"http://localhost:8080/*",
+	]
 }
 
 resource "keycloak_identity_provider_token_exchange_scope_permission" "my_permission" {
-  realm_id       = keycloak_realm.realm.id
-  provider_alias = keycloak_oidc_identity_provider.my_idp.alias
-  policy_type    = "client"
-  clients        = [keycloak_openid_client.webapp_client.id, keycloak_openid_client.webapp_client2.id]
+	realm_id       = data.keycloak_realm.realm.id
+	provider_alias = keycloak_oidc_identity_provider.my_idp.alias
+	policy_type    = "client"
+	clients        = [
+		keycloak_openid_client.webapp_client.id,
+		keycloak_openid_client.webapp_client2.id,
+	]
 }
-	`, realmId, providerAlias, webappClientId, webappClientId2)
+	`, testAccRealm.Realm, providerAlias, providerClientId, webappClientId, webappClientId2)
 }
 
-func testKeycloakIdpTokenExchangeScopePermission_rolePolicy(realmId, providerAlias, webappClientId string) string {
+func testKeycloakIdpTokenExchangeScopePermission_rolePolicy(providerAlias, providerClientId, webappClientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_oidc_identity_provider" "my_idp" {
-  realm              = keycloak_realm.realm.id
-  alias              = "%s"
-  authorization_url  = "http://localhost:8080/auth/realms/something/protocol/openid-connect/auth"
-  token_url          = "http://localhost:8080/auth/realms/something/protocol/openid-connect/token"
-  client_id          = "clientid"
-  client_secret      = "secret"
+	realm              = data.keycloak_realm.realm.id
+	alias              = "%s"
+	authorization_url  = "http://localhost:8080/auth/realms/something/protocol/openid-connect/auth"
+	token_url          = "http://localhost:8080/auth/realms/something/protocol/openid-connect/token"
+	client_id          = "%s"
+	client_secret      = "secret"
 }
 
 resource "keycloak_openid_client" "webapp_client" {
-  realm_id              = keycloak_realm.realm.id
-  name                  = "webapp_client"
-  client_id             = "%s"
-  client_secret         = "secret"
-  access_type           = "CONFIDENTIAL"
-  standard_flow_enabled = true
-  valid_redirect_uris = [
-    "http://localhost:8080/*",
-  ]
+	realm_id              = data.keycloak_realm.realm.id
+	name                  = "webapp_client"
+	client_id             = "%s"
+	client_secret         = "secret"
+	access_type           = "CONFIDENTIAL"
+	standard_flow_enabled = true
+	valid_redirect_uris = [
+		"http://localhost:8080/*",
+	]
 }
 
 resource "keycloak_identity_provider_token_exchange_scope_permission" "my_permission" {
-  realm_id       = keycloak_realm.realm.id
-  provider_alias = keycloak_oidc_identity_provider.my_idp.alias
-  policy_type    = "role"
-  clients        = [keycloak_openid_client.webapp_client.id]
+	realm_id       = data.keycloak_realm.realm.id
+	provider_alias = keycloak_oidc_identity_provider.my_idp.alias
+	policy_type    = "role"
+	clients        = [
+		keycloak_openid_client.webapp_client.id
+	]
 }
-	`, realmId, providerAlias, webappClientId)
+	`, testAccRealm.Realm, providerAlias, providerClientId, webappClientId)
 }

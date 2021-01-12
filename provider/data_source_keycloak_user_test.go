@@ -7,12 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func TestAccKeycloakDataSourceUser(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
-	username := acctest.RandString(10)
+	t.Parallel()
+	username := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -20,7 +19,7 @@ func TestAccKeycloakDataSourceUser(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testDataSourceKeycloakUser(realm, username),
+				Config: testDataSourceKeycloakUser(username),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakUserExists("keycloak_user.user"),
 					resource.TestCheckResourceAttrPair("keycloak_user.user", "id", "data.keycloak_user.user", "id"),
@@ -40,8 +39,6 @@ func testAccCheckDataKeycloakUser(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("resource not found: %s", resourceName)
 		}
 
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 		id := rs.Primary.ID
 		realmID := rs.Primary.Attributes["realm_id"]
 		username := rs.Primary.Attributes["username"]
@@ -59,15 +56,15 @@ func testAccCheckDataKeycloakUser(resourceName string) resource.TestCheckFunc {
 	}
 }
 
-func testDataSourceKeycloakUser(realm, username string) string {
+func testDataSourceKeycloakUser(username string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
-	realm 		= "%s"
+data "keycloak_realm" "realm" {
+	realm = "%s"
 }
 
 resource "keycloak_user" "user" {
 	username    = "%s"
-	realm_id 	= "${keycloak_realm.realm.id}"
+	realm_id 	= data.keycloak_realm.realm.id
 	enabled    	= true
 
     email      	= "bob@domain.com"
@@ -76,8 +73,12 @@ resource "keycloak_user" "user" {
 }
 
 data "keycloak_user" "user" {
-	realm_id 	= "${keycloak_realm.realm.id}"
-	username    = "${keycloak_user.user.username}"
+	realm_id 	= data.keycloak_realm.realm.id
+	username    = keycloak_user.user.username
+
+	depends_on = [
+		keycloak_user.user
+	]
 }
-	`, realm, username)
+	`, testAccRealm.Realm, username)
 }

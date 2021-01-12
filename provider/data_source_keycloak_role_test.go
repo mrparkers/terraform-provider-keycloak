@@ -5,15 +5,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"testing"
 )
 
 func TestAccKeycloakDataSourceRole_basic(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
-	client := "terraform-client-" + acctest.RandString(10)
-	realmRole := "terraform-role-" + acctest.RandString(10)
-	clientRole := "terraform-role-" + acctest.RandString(10)
+	t.Parallel()
+	client := acctest.RandomWithPrefix("tf-acc")
+	realmRole := acctest.RandomWithPrefix("tf-acc")
+	clientRole := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -21,7 +20,7 @@ func TestAccKeycloakDataSourceRole_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testDataSourceKeycloakRole_basic(realm, client, realmRole, clientRole),
+				Config: testDataSourceKeycloakRole_basic(client, realmRole, clientRole),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakRoleExists("keycloak_role.realm_role"),
 					testAccCheckKeycloakRoleExists("keycloak_role.client_role"),
@@ -39,7 +38,7 @@ func TestAccKeycloakDataSourceRole_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("keycloak_role.client_role", "description", "data.keycloak_role.client_role", "description"),
 					testAccCheckDataKeycloakRole("data.keycloak_role.client_role"),
 					// offline_access
-					resource.TestCheckResourceAttrPair("keycloak_realm.realm", "realm", "data.keycloak_role.realm_offline_access", "realm_id"),
+					resource.TestCheckResourceAttrPair("data.keycloak_realm.realm", "realm", "data.keycloak_role.realm_offline_access", "realm_id"),
 					resource.TestCheckResourceAttr("data.keycloak_role.realm_offline_access", "name", "offline_access"),
 					testAccCheckDataKeycloakRole("data.keycloak_role.realm_offline_access"),
 				),
@@ -54,8 +53,6 @@ func testAccCheckDataKeycloakRole(resourceName string) resource.TestCheckFunc {
 		if !ok {
 			return fmt.Errorf("resource not found: %s", resourceName)
 		}
-
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 		id := rs.Primary.ID
 		realmId := rs.Primary.Attributes["realm_id"]
@@ -74,43 +71,51 @@ func testAccCheckDataKeycloakRole(resourceName string) resource.TestCheckFunc {
 	}
 }
 
-func testDataSourceKeycloakRole_basic(realm, client, realmRole, clientRole string) string {
+func testDataSourceKeycloakRole_basic(client, realmRole, clientRole string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
 }
 
 resource "keycloak_role" "realm_role" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_role" "client_role" {
 	name      = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
-	client_id = "${keycloak_openid_client.client.id}"
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = keycloak_openid_client.client.id
 }
 
 data "keycloak_role" "realm_role" {
-	realm_id = "${keycloak_realm.realm.id}"
-	name     = "${keycloak_role.realm_role.name}"
+	realm_id = data.keycloak_realm.realm.id
+	name     = keycloak_role.realm_role.name
+
+	depends_on = [
+		keycloak_role.realm_role
+	]
 }
 
 data "keycloak_role" "client_role" {
-	realm_id  = "${keycloak_realm.realm.id}"
-	client_id = "${keycloak_openid_client.client.id}"
-	name      = "${keycloak_role.client_role.name}"
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = keycloak_openid_client.client.id
+	name      = keycloak_role.client_role.name
+
+	depends_on = [
+		keycloak_role.client_role
+	]
 }
 
 data "keycloak_role" "realm_offline_access" {
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 	name     = "offline_access"
 }
-	`, realm, client, realmRole, clientRole)
+	`, testAccRealm.Realm, client, realmRole, clientRole)
 }

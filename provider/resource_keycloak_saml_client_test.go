@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccKeycloakSamlClient_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -22,24 +22,24 @@ func TestAccKeycloakSamlClient_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClient_basic(realmName, clientId),
+				Config: testKeycloakSamlClient_basic(clientId),
 				Check:  testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 			},
 			{
 				ResourceName:        "keycloak_saml_client.saml_client",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateIdPrefix: realmName + "/",
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
 			},
 		},
 	})
 }
 
 func TestAccKeycloakSamlClient_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var client = &keycloak.SamlClient{}
 
-	realmName := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -47,7 +47,7 @@ func TestAccKeycloakSamlClient_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClient_basic(realmName, clientId),
+				Config: testKeycloakSamlClient_basic(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 					testAccCheckKeycloakSamlClientFetch("keycloak_saml_client.saml_client", client),
@@ -55,14 +55,12 @@ func TestAccKeycloakSamlClient_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteSamlClient(client.RealmId, client.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakSamlClient_basic(realmName, clientId),
+				Config: testKeycloakSamlClient_basic(clientId),
 				Check:  testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 			},
 		},
@@ -70,9 +68,9 @@ func TestAccKeycloakSamlClient_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClient_updateRealm(t *testing.T) {
-	realmOne := "terraform-" + acctest.RandString(10)
-	realmTwo := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -80,17 +78,17 @@ func TestAccKeycloakSamlClient_updateRealm(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClient_updateRealmBefore(realmOne, realmTwo, clientId),
+				Config: testKeycloakSamlClient_updateRealmBefore(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
-					resource.TestCheckResourceAttr("keycloak_saml_client.saml_client", "realm_id", realmOne),
+					resource.TestCheckResourceAttr("keycloak_saml_client.saml_client", "realm_id", testAccRealm.Realm),
 				),
 			},
 			{
-				Config: testKeycloakSamlClient_updateRealmAfter(realmOne, realmTwo, clientId),
+				Config: testKeycloakSamlClient_updateRealmAfter(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
-					resource.TestCheckResourceAttr("keycloak_saml_client.saml_client", "realm_id", realmTwo),
+					resource.TestCheckResourceAttr("keycloak_saml_client.saml_client", "realm_id", testAccRealmTwo.Realm),
 				),
 			},
 		},
@@ -100,8 +98,8 @@ func TestAccKeycloakSamlClient_updateRealm(t *testing.T) {
 // Keycloak typically sets some values as default if they aren't provided
 // This test asserts that these default values are present if none are provided
 func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -109,7 +107,7 @@ func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClient_basic(realmName, clientId),
+				Config: testKeycloakSamlClient_basic(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 					testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes("keycloak_saml_client.saml_client"),
@@ -122,21 +120,21 @@ func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	enabled := randomBool()
 	frontChannelLogout := randomBool()
 	clientSignatureRequired := "true"
 
-	encryptionCertificateBefore := acctest.RandString(20)
-	encryptionCertificateAfter := acctest.RandString(20)
-	signingCertificateBefore := acctest.RandString(20)
-	signingCertificateAfter := acctest.RandString(20)
-	signingPrivateKeyBefore := acctest.RandString(20)
-	signingPrivateKeyAfter := acctest.RandString(20)
+	encryptionCertificateBefore := acctest.RandomWithPrefix("tf-acc")
+	encryptionCertificateAfter := acctest.RandomWithPrefix("tf-acc")
+	signingCertificateBefore := acctest.RandomWithPrefix("tf-acc")
+	signingCertificateAfter := acctest.RandomWithPrefix("tf-acc")
+	signingPrivateKeyBefore := acctest.RandomWithPrefix("tf-acc")
+	signingPrivateKeyAfter := acctest.RandomWithPrefix("tf-acc")
 
 	samlClientBefore := &keycloak.SamlClient{
-		RealmId:  realmName,
+		RealmId:  testAccRealm.Realm,
 		ClientId: clientId,
 		Name:     acctest.RandString(10),
 
@@ -177,7 +175,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 	}
 
 	samlClientAfter := &keycloak.SamlClient{
-		RealmId:  realmName,
+		RealmId:  testAccRealm.Realm,
 		ClientId: clientId,
 		Name:     acctest.RandString(10),
 
@@ -233,8 +231,8 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -242,7 +240,7 @@ func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClient_signingCertificateAndKey(realmName, clientId),
+				Config: testKeycloakSamlClient_signingCertificateAndKey(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 					testAccCheckKeycloakSamlClientHasSigningCertificate("keycloak_saml_client.saml_client"),
@@ -250,7 +248,7 @@ func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
 				),
 			},
 			{
-				Config: testKeycloakSamlClient_signingCertificateNoKey(realmName, clientId),
+				Config: testKeycloakSamlClient_signingCertificateNoKey(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 					testAccCheckKeycloakSamlClientHasSigningCertificate("keycloak_saml_client.saml_client"),
@@ -262,8 +260,8 @@ func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
 }
 
 func TestAccKeycloakSamlClient_encryptionCertificate(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -271,18 +269,40 @@ func TestAccKeycloakSamlClient_encryptionCertificate(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClient_encryptionCertificate(realmName, clientId),
+				Config: testKeycloakSamlClient_encryptionCertificate(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 					testAccCheckKeycloakSamlClientHasEncryptionCertificate("keycloak_saml_client.saml_client"),
 				),
 			},
 			{
-				Config: testKeycloakSamlClient_NoEncryptionCertificate(realmName, clientId),
+				Config: testKeycloakSamlClient_NoEncryptionCertificate(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 					resource.TestCheckResourceAttr("keycloak_saml_client.saml_client", "encryption_certificate", ""),
 				),
+			},
+		},
+	})
+}
+
+func TestAccCheckKeycloakSamlClient_authenticationFlowBindingOverrides(t *testing.T) {
+	t.Parallel()
+
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlClient_authenticationFlowBindingOverrides(clientId),
+				Check:  testAccCheckKeycloakSamlClientAuthenticationFlowBindingOverrides("keycloak_saml_client.client", "keycloak_authentication_flow.another_flow"),
+			},
+			{
+				Config: testKeycloakSamlClient_withoutFlowBindingOverrides(clientId),
+				Check:  testAccCheckKeycloakSamlClientAuthenticationFlowBindingOverrides("keycloak_saml_client.client", ""),
 			},
 		},
 	})
@@ -396,8 +416,6 @@ func testAccCheckKeycloakSamlClientDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			client, _ := keycloakClient.GetSamlClient(realm, id)
 			if client != nil {
 				return fmt.Errorf("saml client %s still exists", id)
@@ -409,8 +427,6 @@ func testAccCheckKeycloakSamlClientDestroy() resource.TestCheckFunc {
 }
 
 func getSamlClientFromState(s *terraform.State, resourceName string) (*keycloak.SamlClient, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -477,6 +493,41 @@ func testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes(resourceName stri
 	}
 }
 
+func testAccCheckKeycloakSamlClientAuthenticationFlowBindingOverrides(resourceName, flowResourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getSamlClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if flowResourceName == "" {
+			if client.AuthenticationFlowBindingOverrides.BrowserId != "" {
+				return fmt.Errorf("expected openid client to have browserId set to empty, but got %s", client.AuthenticationFlowBindingOverrides.BrowserId)
+			}
+
+			if client.AuthenticationFlowBindingOverrides.DirectGrantId != "" {
+				return fmt.Errorf("expected openid client to have directGrantId set to empty, but got %s", client.AuthenticationFlowBindingOverrides.DirectGrantId)
+			}
+
+		} else {
+			flow, err := getAuthenticationFlowFromState(s, flowResourceName)
+			if err != nil {
+				return err
+			}
+
+			if client.AuthenticationFlowBindingOverrides.BrowserId != flow.Id {
+				return fmt.Errorf("expected openid client to have browserId set to %s, but got %s", flow.Id, client.AuthenticationFlowBindingOverrides.BrowserId)
+			}
+
+			if client.AuthenticationFlowBindingOverrides.DirectGrantId != flow.Id {
+				return fmt.Errorf("expected openid client to have directGrantId set to %s, but got %s", flow.Id, client.AuthenticationFlowBindingOverrides.DirectGrantId)
+			}
+		}
+
+		return nil
+	}
+}
+
 func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
 	if b == "" {
 		return false, nil
@@ -491,61 +542,61 @@ func randomBoolAsStringPointer() *string {
 	return &s
 }
 
-func testKeycloakSamlClient_basic(realm, clientId string) string {
+func testKeycloakSamlClient_basic(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
 	client_id = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }
 
-func testKeycloakSamlClient_updateRealmBefore(realmOne, realmTwo, clientId string) string {
+func testKeycloakSamlClient_updateRealmBefore(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
+data "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_2" {
+data "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
 	client_id = "%s"
-	realm_id  = "${keycloak_realm.realm_1.id}"
+	realm_id  = data.keycloak_realm.realm_1.id
 }
-	`, realmOne, realmTwo, clientId)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, clientId)
 }
 
-func testKeycloakSamlClient_updateRealmAfter(realmOne, realmTwo, clientId string) string {
+func testKeycloakSamlClient_updateRealmAfter(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_1" {
+data "keycloak_realm" "realm_1" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_2" {
+data "keycloak_realm" "realm_2" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
 	client_id = "%s"
-	realm_id  = "${keycloak_realm.realm_2.id}"
+	realm_id  = data.keycloak_realm.realm_2.id
 }
-	`, realmOne, realmTwo, clientId)
+	`, testAccRealm.Realm, testAccRealmTwo.Realm, clientId)
 }
 
 func testKeycloakSamlClient_fromInterface(client *keycloak.SamlClient) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	client_id   = "%s"
 	name        = "%s"
 	description = "%s"
@@ -610,15 +661,15 @@ resource "keycloak_saml_client" "saml_client" {
 	)
 }
 
-func testKeycloakSamlClient_signingCertificateAndKey(realm, clientId string) string {
+func testKeycloakSamlClient_signingCertificateAndKey(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
 	client_id               = "%s"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 	name                    = "test-saml-client"
 
 	sign_documents          = false
@@ -626,21 +677,21 @@ resource "keycloak_saml_client" "saml_client" {
 	encrypt_assertions      = false
 	include_authn_statement = true
 
-	signing_certificate     = "${file("misc/saml-cert.pem")}"
-	signing_private_key     = "${file("misc/saml-key.pem")}"
+	signing_certificate     = file("misc/saml-cert.pem")
+	signing_private_key     = file("misc/saml-key.pem")
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }
 
-func testKeycloakSamlClient_signingCertificateNoKey(realm, clientId string) string {
+func testKeycloakSamlClient_signingCertificateNoKey(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
 	client_id               = "%s"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 	name                    = "test-saml-client"
 
 	sign_documents          = false
@@ -648,43 +699,88 @@ resource "keycloak_saml_client" "saml_client" {
 	encrypt_assertions      = false
 	include_authn_statement = true
 
-	signing_certificate     = "${file("misc/saml-cert.pem")}"
+	signing_certificate     = file("misc/saml-cert.pem")
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }
 
-func testKeycloakSamlClient_encryptionCertificate(realm, clientId string) string {
+func testKeycloakSamlClient_encryptionCertificate(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
 	client_id               = "%s"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 	name                    = "test-saml-client"
 
 	encrypt_assertions      = true
 	include_authn_statement = true
 
-	encryption_certificate     = "${file("misc/saml-cert.pem")}"
+	encryption_certificate     = file("misc/saml-cert.pem")
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }
 
-func testKeycloakSamlClient_NoEncryptionCertificate(realm, clientId string) string {
+func testKeycloakSamlClient_NoEncryptionCertificate(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
 	client_id               = "%s"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 	name                    = "test-saml-client"
 
 	encrypt_assertions      = true
 	include_authn_statement = true
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
+}
+
+func testKeycloakSamlClient_authenticationFlowBindingOverrides(clientId string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_authentication_flow" "another_flow" {
+  alias       = "anotherFlow"
+  realm_id    = data.keycloak_realm.realm.id
+  description = "this is another flow"
+}
+
+resource "keycloak_saml_client" "client" {
+	client_id = "%s"
+	realm_id  = data.keycloak_realm.realm.id
+	name      = "test-saml-client"
+
+	authentication_flow_binding_overrides {
+		browser_id      = keycloak_authentication_flow.another_flow.id
+		direct_grant_id = keycloak_authentication_flow.another_flow.id
+	}
+}
+	`, testAccRealm.Realm, clientId)
+}
+
+func testKeycloakSamlClient_withoutFlowBindingOverrides(clientId string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_authentication_flow" "another_flow" {
+  alias       = "anotherFlow"
+  realm_id    = data.keycloak_realm.realm.id
+  description = "this is another flow"
+}
+
+resource "keycloak_saml_client" "client" {
+	client_id = "%s"
+	realm_id  = data.keycloak_realm.realm.id
+	name      = "test-saml-client"
+}
+	`, testAccRealm.Realm, clientId)
 }

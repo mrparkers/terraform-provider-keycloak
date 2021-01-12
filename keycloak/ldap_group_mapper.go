@@ -27,6 +27,8 @@ type LdapGroupMapper struct {
 	MappedGroupAttributes       []string
 
 	DropNonExistingGroupsDuringSync bool
+
+	GroupsPath string
 }
 
 func convertFromLdapGroupMapperToComponent(ldapGroupMapper *LdapGroupMapper) *component {
@@ -66,6 +68,9 @@ func convertFromLdapGroupMapperToComponent(ldapGroupMapper *LdapGroupMapper) *co
 		},
 		"drop.non.existing.groups.during.sync": {
 			strconv.FormatBool(ldapGroupMapper.DropNonExistingGroupsDuringSync),
+		},
+		"groups.path": {
+			ldapGroupMapper.GroupsPath,
 		},
 	}
 
@@ -126,6 +131,7 @@ func convertFromComponentToLdapGroupMapper(component *component, realmId string)
 		UserRolesRetrieveStrategy:       component.getConfig("user.roles.retrieve.strategy"),
 		MemberofLdapAttribute:           component.getConfig("memberof.ldap.attribute"),
 		DropNonExistingGroupsDuringSync: dropNonExistingGroupsDuringSync,
+		GroupsPath:                      component.getConfig("groups.path"),
 	}
 
 	if groupsLdapFilter := component.getConfig("groups.ldap.filter"); groupsLdapFilter != "" {

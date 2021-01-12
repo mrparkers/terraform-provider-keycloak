@@ -11,8 +11,9 @@ import (
 )
 
 func TestAccKeycloakLdapRoleMapper_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -20,7 +21,7 @@ func TestAccKeycloakLdapRoleMapper_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapRoleMapper_basic(realmName, roleMapperName),
+				Config: testKeycloakLdapRoleMapper_basic(roleMapperName),
 				Check:  testAccCheckKeycloakLdapRoleMapperExists("keycloak_ldap_role_mapper.role_mapper"),
 			},
 			{
@@ -34,10 +35,11 @@ func TestAccKeycloakLdapRoleMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
+
 	var mapper = &keycloak.LdapRoleMapper{}
 
-	realmName := "terraform-" + acctest.RandString(10)
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -45,19 +47,17 @@ func TestAccKeycloakLdapRoleMapper_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapRoleMapper_basic(realmName, roleMapperName),
+				Config: testKeycloakLdapRoleMapper_basic(roleMapperName),
 				Check:  testAccCheckKeycloakLdapRoleMapperFetch("keycloak_ldap_role_mapper.role_mapper", mapper),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteLdapRoleMapper(mapper.RealmId, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakLdapRoleMapper_basic(realmName, roleMapperName),
+				Config: testKeycloakLdapRoleMapper_basic(roleMapperName),
 				Check:  testAccCheckKeycloakLdapRoleMapperExists("keycloak_ldap_role_mapper.role_mapper"),
 			},
 		},
@@ -65,8 +65,9 @@ func TestAccKeycloakLdapRoleMapper_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_modeValidation(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	mode := randomStringInSlice(keycloakLdapRoleMapperModes)
 
 	resource.Test(t, resource.TestCase{
@@ -75,11 +76,11 @@ func TestAccKeycloakLdapRoleMapper_modeValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "mode", acctest.RandString(10)),
+				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(roleMapperName, "mode", acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("expected mode to be one of .+ got .+"),
 			},
 			{
-				Config: testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "mode", mode),
+				Config: testKeycloakLdapRoleMapper_basicWithAttrValidation(roleMapperName, "mode", mode),
 				Check:  testAccCheckKeycloakLdapRoleMapperExists("keycloak_ldap_role_mapper.role_mapper"),
 			},
 		},
@@ -87,8 +88,9 @@ func TestAccKeycloakLdapRoleMapper_modeValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_membershipAttributeTypeValidation(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	membershipAttributeType := randomStringInSlice(keycloakLdapRoleMapperMembershipAttributeTypes)
 
 	resource.Test(t, resource.TestCase{
@@ -97,11 +99,11 @@ func TestAccKeycloakLdapRoleMapper_membershipAttributeTypeValidation(t *testing.
 		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "membership_attribute_type", acctest.RandString(10)),
+				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(roleMapperName, "membership_attribute_type", acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("expected membership_attribute_type to be one of .+ got .+"),
 			},
 			{
-				Config: testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "membership_attribute_type", membershipAttributeType),
+				Config: testKeycloakLdapRoleMapper_basicWithAttrValidation(roleMapperName, "membership_attribute_type", membershipAttributeType),
 				Check:  testAccCheckKeycloakLdapRoleMapperExists("keycloak_ldap_role_mapper.role_mapper"),
 			},
 		},
@@ -109,8 +111,9 @@ func TestAccKeycloakLdapRoleMapper_membershipAttributeTypeValidation(t *testing.
 }
 
 func TestAccKeycloakLdapRoleMapper_userRolesRetrieveStrategyValidation(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	userRolesRetrieveStrategy := randomStringInSlice(keycloakLdapRoleMapperUserRolesRetrieveStrategies)
 
 	resource.Test(t, resource.TestCase{
@@ -119,11 +122,11 @@ func TestAccKeycloakLdapRoleMapper_userRolesRetrieveStrategyValidation(t *testin
 		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "user_roles_retrieve_strategy", acctest.RandString(10)),
+				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(roleMapperName, "user_roles_retrieve_strategy", acctest.RandString(10)),
 				ExpectError: regexp.MustCompile("expected user_roles_retrieve_strategy to be one of .+ got .+"),
 			},
 			{
-				Config: testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "user_roles_retrieve_strategy", userRolesRetrieveStrategy),
+				Config: testKeycloakLdapRoleMapper_basicWithAttrValidation(roleMapperName, "user_roles_retrieve_strategy", userRolesRetrieveStrategy),
 				Check:  testAccCheckKeycloakLdapRoleMapperExists("keycloak_ldap_role_mapper.role_mapper"),
 			},
 		},
@@ -131,8 +134,9 @@ func TestAccKeycloakLdapRoleMapper_userRolesRetrieveStrategyValidation(t *testin
 }
 
 func TestAccKeycloakLdapRoleMapper_rolesLdapFilterValidation(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	rolesLdapFilter := "(" + acctest.RandString(10) + ")"
 
 	resource.Test(t, resource.TestCase{
@@ -141,11 +145,11 @@ func TestAccKeycloakLdapRoleMapper_rolesLdapFilterValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "roles_ldap_filter", acctest.RandString(10)),
+				Config:      testKeycloakLdapRoleMapper_basicWithAttrValidation(roleMapperName, "roles_ldap_filter", acctest.RandString(10)),
 				ExpectError: regexp.MustCompile(`validation error: roles ldap filter must start with '\(' and end with '\)'`),
 			},
 			{
-				Config: testKeycloakLdapRoleMapper_basicWithAttrValidation(realmName, roleMapperName, "roles_ldap_filter", rolesLdapFilter),
+				Config: testKeycloakLdapRoleMapper_basicWithAttrValidation(roleMapperName, "roles_ldap_filter", rolesLdapFilter),
 				Check:  testAccCheckKeycloakLdapRoleMapperExists("keycloak_ldap_role_mapper.role_mapper"),
 			},
 		},
@@ -153,9 +157,9 @@ func TestAccKeycloakLdapRoleMapper_rolesLdapFilterValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationForceNew(t *testing.T) {
-	realmOne := "terraform-" + acctest.RandString(10)
-	realmTwo := "terraform-" + acctest.RandString(10)
-	roleMapperName := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+
+	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -163,11 +167,11 @@ func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationForceNew(t *testing.T
 		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapRoleMapper_updateLdapUserFederationBefore(realmOne, realmTwo, roleMapperName),
+				Config: testKeycloakLdapRoleMapper_updateLdapUserFederationBefore(roleMapperName),
 				Check:  testAccCheckKeycloakLdapRoleMapperExists("keycloak_ldap_role_mapper.role_mapper"),
 			},
 			{
-				Config: testKeycloakLdapRoleMapper_updateLdapUserFederationAfter(realmOne, realmTwo, roleMapperName),
+				Config: testKeycloakLdapRoleMapper_updateLdapUserFederationAfter(roleMapperName),
 				Check:  testAccCheckKeycloakLdapRoleMapperExists("keycloak_ldap_role_mapper.role_mapper"),
 			},
 		},
@@ -175,13 +179,14 @@ func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationForceNew(t *testing.T
 }
 
 func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationInPlace(t *testing.T) {
-	realm := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
+	t.Parallel()
+
+	clientId := acctest.RandomWithPrefix("tf-acc")
 	useRealmRolesMapping := randomBool()
 
 	roleMapperOne := &keycloak.LdapRoleMapper{
 		Name:                        acctest.RandString(10),
-		RealmId:                     realm,
+		RealmId:                     testAccRealmUserFederation.Realm,
 		LdapRolesDn:                 acctest.RandString(10),
 		RoleNameLdapAttribute:       acctest.RandString(10),
 		RoleObjectClasses:           []string{acctest.RandString(10), acctest.RandString(10)},
@@ -198,7 +203,7 @@ func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationInPlace(t *testing.T)
 
 	roleMapperTwo := &keycloak.LdapRoleMapper{
 		Name:                        acctest.RandString(10),
-		RealmId:                     realm,
+		RealmId:                     testAccRealmUserFederation.Realm,
 		LdapRolesDn:                 acctest.RandString(10),
 		RoleNameLdapAttribute:       acctest.RandString(10),
 		RoleObjectClasses:           []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
@@ -219,11 +224,11 @@ func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationInPlace(t *testing.T)
 		CheckDestroy:      testAccCheckKeycloakLdapRoleMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakLdapRoleMapper_basicFromInterface(realm, roleMapperOne),
+				Config: testKeycloakLdapRoleMapper_basicFromInterface(roleMapperOne),
 				Check:  testAccCheckKeycloakLdapRoleMapperExists("keycloak_ldap_role_mapper.role_mapper"),
 			},
 			{
-				Config: testKeycloakLdapRoleMapper_basicFromInterface(realm, roleMapperTwo),
+				Config: testKeycloakLdapRoleMapper_basicFromInterface(roleMapperTwo),
 				Check:  testAccCheckKeycloakLdapRoleMapperExists("keycloak_ldap_role_mapper.role_mapper"),
 			},
 		},
@@ -265,8 +270,6 @@ func testAccCheckKeycloakLdapRoleMapperDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 			ldapRoleMapper, _ := keycloakClient.GetLdapRoleMapper(realm, id)
 			if ldapRoleMapper != nil {
 				return fmt.Errorf("ldap role mapper with id %s still exists", id)
@@ -278,8 +281,6 @@ func testAccCheckKeycloakLdapRoleMapperDestroy() resource.TestCheckFunc {
 }
 
 func getLdapRoleMapperFromState(s *terraform.State, resourceName string) (*keycloak.LdapRoleMapper, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -296,15 +297,15 @@ func getLdapRoleMapperFromState(s *terraform.State, resourceName string) (*keycl
 	return ldapRoleMapper, nil
 }
 
-func testKeycloakLdapRoleMapper_basic(realm, roleMapperName string) string {
+func testKeycloakLdapRoleMapper_basic(roleMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -323,7 +324,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 resource "keycloak_ldap_role_mapper" "role_mapper" {
 	name                    = "%s"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 	ldap_user_federation_id = "${keycloak_ldap_user_federation.openldap.id}"
 
 	ldap_roles_dn                 = "dc=example,dc=org"
@@ -335,18 +336,18 @@ resource "keycloak_ldap_role_mapper" "role_mapper" {
         membership_user_ldap_attribute = "sAMAccountName"
         memberof_ldap_attribute        = "memberOf"
 }
-	`, realm, roleMapperName)
+	`, testAccRealmUserFederation.Realm, roleMapperName)
 }
 
-func testKeycloakLdapRoleMapper_basicWithAttrValidation(realm, roleMapperName, attr, val string) string {
+func testKeycloakLdapRoleMapper_basicWithAttrValidation(roleMapperName, attr, val string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -365,7 +366,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 resource "keycloak_ldap_role_mapper" "role_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm.id}"
+	realm_id                    = data.keycloak_realm.realm.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
 	%s                          = "%s"
@@ -379,18 +380,18 @@ resource "keycloak_ldap_role_mapper" "role_mapper" {
 	membership_user_ldap_attribute = "sAMAccountName"
 	memberof_ldap_attribute        = "memberOf"
 }
-	`, realm, roleMapperName, attr, val)
+	`, testAccRealmUserFederation.Realm, roleMapperName, attr, val)
 }
 
-func testKeycloakLdapRoleMapper_basicFromInterface(realm string, mapper *keycloak.LdapRoleMapper) string {
+func testKeycloakLdapRoleMapper_basicFromInterface(mapper *keycloak.LdapRoleMapper) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm.id}"
+	realm_id                = data.keycloak_realm.realm.id
 
 	enabled                 = true
 
@@ -409,7 +410,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 
 resource "keycloak_ldap_role_mapper" "role_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm.id}"
+	realm_id                    = data.keycloak_realm.realm.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
 	ldap_roles_dn                  = "%s"
@@ -425,22 +426,22 @@ resource "keycloak_ldap_role_mapper" "role_mapper" {
 	use_realm_roles_mapping        = %t
 	client_id                      = "%s"
 }
-	`, realm, mapper.Name, mapper.LdapRolesDn, mapper.RoleNameLdapAttribute, arrayOfStringsForTerraformResource(mapper.RoleObjectClasses), mapper.MembershipLdapAttribute, mapper.MembershipAttributeType, mapper.MembershipUserLdapAttribute, mapper.RolesLdapFilter, mapper.Mode, mapper.UserRolesRetrieveStrategy, mapper.MemberofLdapAttribute, mapper.UseRealmRolesMapping, mapper.ClientId)
+	`, testAccRealmUserFederation.Realm, mapper.Name, mapper.LdapRolesDn, mapper.RoleNameLdapAttribute, arrayOfStringsForTerraformResource(mapper.RoleObjectClasses), mapper.MembershipLdapAttribute, mapper.MembershipAttributeType, mapper.MembershipUserLdapAttribute, mapper.RolesLdapFilter, mapper.Mode, mapper.UserRolesRetrieveStrategy, mapper.MemberofLdapAttribute, mapper.UseRealmRolesMapping, mapper.ClientId)
 }
 
-func testKeycloakLdapRoleMapper_updateLdapUserFederationBefore(realmOne, realmTwo, roleMapperName string) string {
+func testKeycloakLdapRoleMapper_updateLdapUserFederationBefore(roleMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_one" {
+data "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_two" {
+data "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap_one" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_one.id}"
+	realm_id                = data.keycloak_realm.realm_one.id
 
 	enabled                 = true
 
@@ -459,7 +460,7 @@ resource "keycloak_ldap_user_federation" "openldap_one" {
 
 resource "keycloak_ldap_user_federation" "openldap_two" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_two.id}"
+	realm_id                = data.keycloak_realm.realm_two.id
 
 	enabled                 = true
 
@@ -478,7 +479,7 @@ resource "keycloak_ldap_user_federation" "openldap_two" {
 
 resource "keycloak_ldap_role_mapper" "role_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm_one.id}"
+	realm_id                    = data.keycloak_realm.realm_one.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap_one.id}"
 
 	ldap_roles_dn                 = "dc=example,dc=org"
@@ -491,22 +492,22 @@ resource "keycloak_ldap_role_mapper" "role_mapper" {
 	membership_user_ldap_attribute = "sAMAccountName"
 	memberof_ldap_attribute        = "memberOf"
 }
-	`, realmOne, realmTwo, roleMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, roleMapperName)
 }
 
-func testKeycloakLdapRoleMapper_updateLdapUserFederationAfter(realmOne, realmTwo, roleMapperName string) string {
+func testKeycloakLdapRoleMapper_updateLdapUserFederationAfter(roleMapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm_one" {
+data "keycloak_realm" "realm_one" {
 	realm = "%s"
 }
 
-resource "keycloak_realm" "realm_two" {
+data "keycloak_realm" "realm_two" {
 	realm = "%s"
 }
 
 resource "keycloak_ldap_user_federation" "openldap_one" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_one.id}"
+	realm_id                = data.keycloak_realm.realm_one.id
 
 	enabled                 = true
 
@@ -525,7 +526,7 @@ resource "keycloak_ldap_user_federation" "openldap_one" {
 
 resource "keycloak_ldap_user_federation" "openldap_two" {
 	name                    = "openldap"
-	realm_id                = "${keycloak_realm.realm_two.id}"
+	realm_id                = data.keycloak_realm.realm_two.id
 
 	enabled                 = true
 
@@ -544,7 +545,7 @@ resource "keycloak_ldap_user_federation" "openldap_two" {
 
 resource "keycloak_ldap_role_mapper" "role_mapper" {
 	name                        = "%s"
-	realm_id                    = "${keycloak_realm.realm_two.id}"
+	realm_id                    = data.keycloak_realm.realm_two.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap_two.id}"
 
 	ldap_roles_dn                 = "dc=example,dc=org"
@@ -557,5 +558,5 @@ resource "keycloak_ldap_role_mapper" "role_mapper" {
 	membership_user_ldap_attribute = "sAMAccountName"
 	memberof_ldap_attribute        = "memberOf"
 }
-	`, realmOne, realmTwo, roleMapperName)
+	`, testAccRealmUserFederation.Realm, testAccRealmTwo.Realm, roleMapperName)
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-func KeycloakProvider() *schema.Provider {
+func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 	provider := &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{
 			"keycloak_group":                              dataSourceKeycloakGroup(),
@@ -56,6 +56,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_openid_user_realm_role_protocol_mapper":            resourceKeycloakOpenIdUserRealmRoleProtocolMapper(),
 			"keycloak_openid_user_client_role_protocol_mapper":           resourceKeycloakOpenIdUserClientRoleProtocolMapper(),
 			"keycloak_openid_user_session_note_protocol_mapper":          resourceKeycloakOpenIdUserSessionNoteProtocolMapper(),
+			"keycloak_openid_script_protocol_mapper":                     resourceKeycloakOpenIdScriptProtocolMapper(),
 			"keycloak_openid_client_default_scopes":                      resourceKeycloakOpenidClientDefaultScopes(),
 			"keycloak_openid_client_optional_scopes":                     resourceKeycloakOpenidClientOptionalScopes(),
 			"keycloak_saml_client":                                       resourceKeycloakSamlClient(),
@@ -92,6 +93,7 @@ func KeycloakProvider() *schema.Provider {
 			"keycloak_authentication_execution_config":                   resourceKeycloakAuthenticationExecutionConfig(),
 			"keycloak_identity_provider_token_exchange_scope_permission": resourceKeycloakIdentityProviderTokenExchangeScopePermission(),
 			"keycloak_openid_client_permissions":                         resourceKeycloakOpenidClientPermissions(),
+			"keycloak_users_permissions":                                 resourceKeycloakUsersPermissions(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -158,6 +160,10 @@ func KeycloakProvider() *schema.Provider {
 	}
 
 	provider.ConfigureContextFunc = func(_ context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		if client != nil {
+			return client, nil
+		}
+
 		url := data.Get("url").(string)
 		basePath := data.Get("base_path").(string)
 		clientId := data.Get("client_id").(string)
@@ -173,6 +179,7 @@ func KeycloakProvider() *schema.Provider {
 		var diags diag.Diagnostics
 
 		userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", provider.TerraformVersion, meta.SDKVersionString())
+
 		keycloakClient, err := keycloak.NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{

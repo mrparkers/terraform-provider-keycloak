@@ -11,9 +11,9 @@ import (
 )
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClient(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper_client"
 
@@ -23,7 +23,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClient(t *testing.T)
 		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperExists(resourceName),
 			},
 		},
@@ -31,9 +31,9 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClient(t *testing.T)
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClientScope(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
+	t.Parallel()
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper_client_scope"
 
@@ -43,7 +43,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClientScope(t *testi
 		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_clientScope(clientScopeId, mapperName),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperExists(resourceName),
 			},
 		},
@@ -51,10 +51,10 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_basicClientScope(t *testi
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_import(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-openid-client-" + acctest.RandString(10)
-	clientScopeId := "terraform-client-scope-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	clientResourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper_client"
 	clientScopeResourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper_client_scope"
@@ -65,7 +65,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_import(t *testing.T) {
 		CheckDestroy:      testAccKeycloakOpenIdFullNameProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_import(realmName, clientId, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_import(clientId, clientScopeId, mapperName),
 				Check: resource.ComposeTestCheckFunc(
 					testKeycloakOpenIdHardcodedClaimProtocolMapperExists(clientResourceName),
 					testKeycloakOpenIdHardcodedClaimProtocolMapperExists(clientScopeResourceName),
@@ -88,14 +88,14 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_update(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
-	claimName := "claim-name-" + acctest.RandString(10)
-	updatedClaimName := "claim-name-update-" + acctest.RandString(10)
-	claimValue := "claim-value-" + acctest.RandString(10)
-	updatedClaimValue := "claim-value-update-" + acctest.RandString(10)
+	claimName := acctest.RandomWithPrefix("tf-acc")
+	updatedClaimName := acctest.RandomWithPrefix("tf-acc")
+	claimValue := acctest.RandomWithPrefix("tf-acc")
+	updatedClaimValue := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper"
 
@@ -105,11 +105,11 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_update(t *testing.T) {
 		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(realmName, clientId, mapperName, claimName, claimValue),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(clientId, mapperName, claimName, claimValue),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(realmName, clientId, mapperName, updatedClaimName, updatedClaimValue),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(clientId, mapperName, updatedClaimName, updatedClaimValue),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperExists(resourceName),
 			},
 		},
@@ -117,11 +117,11 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
 	var mapper = &keycloak.OpenIdHardcodedClaimProtocolMapper{}
 
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper_client"
 
@@ -131,19 +131,17 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_createAfterManualDestroy(
 		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperFetch(resourceName, mapper),
 			},
 			{
 				PreConfig: func() {
-					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 					err := keycloakClient.DeleteOpenIdHardcodedClaimProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
 				},
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_client(realmName, clientId, mapperName),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_client(clientId, mapperName),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperExists(resourceName),
 			},
 		},
@@ -151,9 +149,9 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_createAfterManualDestroy(
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_validateClaimValueType(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(10)
-	invalidClaimValueType := acctest.RandString(5)
+	t.Parallel()
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	invalidClaimValueType := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -161,7 +159,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_validateClaimValueType(t 
 		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenIdHardcodedClaimProtocolMapper_validateClaimValueType(realmName, mapperName, invalidClaimValueType),
+				Config:      testKeycloakOpenIdHardcodedClaimProtocolMapper_validateClaimValueType(mapperName, invalidClaimValueType),
 				ExpectError: regexp.MustCompile("expected claim_value_type to be one of .+ got " + invalidClaimValueType),
 			},
 		},
@@ -169,13 +167,13 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_validateClaimValueType(t 
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientIdForceNew(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	updatedClientId := "terraform-client-update-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	updatedClientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
-	claimName := "claim-name-" + acctest.RandString(10)
-	claimValue := "claim-value-" + acctest.RandString(10)
+	claimName := acctest.RandomWithPrefix("tf-acc")
+	claimValue := acctest.RandomWithPrefix("tf-acc")
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper"
 
 	resource.Test(t, resource.TestCase{
@@ -184,11 +182,11 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientIdForceNew(t 
 		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(realmName, clientId, mapperName, claimName, claimValue),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(clientId, mapperName, claimName, claimValue),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(realmName, updatedClientId, mapperName, claimName, claimValue),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(updatedClientId, mapperName, claimName, claimValue),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperExists(resourceName),
 			},
 		},
@@ -196,10 +194,10 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientIdForceNew(t 
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientScopeForceNew(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
-	clientScopeId := "terraform-client-" + acctest.RandString(10)
-	newClientScopeId := "terraform-client-scope-" + acctest.RandString(10)
+	t.Parallel()
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	clientScopeId := acctest.RandomWithPrefix("tf-acc")
+	newClientScopeId := acctest.RandomWithPrefix("tf-acc")
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper_client_scope"
 
 	resource.Test(t, resource.TestCase{
@@ -208,11 +206,11 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientScopeForceNew
 		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_clientScope(clientScopeId, mapperName),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_clientScope(realmName, newClientScopeId, mapperName),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_clientScope(newClientScopeId, mapperName),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperExists(resourceName),
 			},
 		},
@@ -220,13 +218,12 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateClientScopeForceNew
 }
 
 func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateRealmIdForceNew(t *testing.T) {
-	realmName := "terraform-realm-" + acctest.RandString(10)
-	newRealmName := "terraform-realm-" + acctest.RandString(10)
-	clientId := "terraform-client-" + acctest.RandString(10)
-	mapperName := "terraform-openid-connect-hardcoded-claim-mapper-" + acctest.RandString(5)
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	mapperName := acctest.RandomWithPrefix("tf-acc")
 
-	claimName := "claim-name-" + acctest.RandString(10)
-	claimValue := "claim-value-" + acctest.RandString(10)
+	claimName := acctest.RandomWithPrefix("tf-acc")
+	claimValue := acctest.RandomWithPrefix("tf-acc")
 	resourceName := "keycloak_openid_hardcoded_claim_protocol_mapper.hardcoded_claim_mapper"
 
 	resource.Test(t, resource.TestCase{
@@ -235,11 +232,11 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_updateRealmIdForceNew(t *
 		CheckDestroy:      testAccKeycloakOpenIdHardcodedClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(realmName, clientId, mapperName, claimName, claimValue),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(clientId, mapperName, claimName, claimValue),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(newRealmName, clientId, mapperName, claimName, claimValue),
+				Config: testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(clientId, mapperName, claimName, claimValue),
 				Check:  testKeycloakOpenIdHardcodedClaimProtocolMapperExists(resourceName),
 			},
 		},
@@ -302,19 +299,17 @@ func getHardcodedClaimMapperUsingState(state *terraform.State, resourceName stri
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	return keycloakClient.GetOpenIdHardcodedClaimProtocolMapper(realm, clientId, clientScopeId, id)
 }
 
-func testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_client(realmName, clientId, mapperName string) string {
+func testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_client(clientId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 
 	access_type = "BEARER-ONLY"
@@ -322,45 +317,45 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_mapper_client" {
 	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	client_id        = "${keycloak_openid_client.openid_client.id}"
 
 	claim_name       = "foo"
 	claim_value      = "bar"
 	claim_value_type = "String"
-}`, realmName, clientId, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName)
 }
 
-func testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_clientScope(realmName, clientScopeId, mapperName string) string {
+func testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_clientScope(clientScopeId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_mapper_client_scope" {
 	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	client_scope_id  = "${keycloak_openid_client_scope.client_scope.id}"
 
 	claim_name       = "foo"
 	claim_value      = "bar"
 	claim_value_type = "String"
-}`, realmName, clientScopeId, mapperName)
+}`, testAccRealm.Realm, clientScopeId, mapperName)
 }
 
-func testKeycloakOpenIdHardcodedClaimProtocolMapper_import(realmName, clientId, clientScopeId, mapperName string) string {
+func testKeycloakOpenIdHardcodedClaimProtocolMapper_import(clientId, clientScopeId, mapperName string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	client_id   = "%s"
 
 	access_type = "BEARER-ONLY"
@@ -368,7 +363,7 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_mapper_client" {
 	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	client_id        = "${keycloak_openid_client.openid_client.id}"
 
 	claim_name       = "foo"
@@ -378,28 +373,28 @@ resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_mapp
 
 resource "keycloak_openid_client_scope" "client_scope" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = data.keycloak_realm.realm.id
 }
 
 resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_mapper_client_scope" {
 	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	client_scope_id  = "${keycloak_openid_client_scope.client_scope.id}"
 
 	claim_name       = "foo"
 	claim_value      = "bar"
 	claim_value_type = "String"
-}`, realmName, clientId, mapperName, clientScopeId, mapperName)
+}`, testAccRealm.Realm, clientId, mapperName, clientScopeId, mapperName)
 }
 
-func testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(realmName, clientId, mapperName, claimName, claimValue string) string {
+func testKeycloakOpenIdHardcodedClaimProtocolMapper_claimNameAndValue(clientId, mapperName, claimName, claimValue string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "%s"
 
 	access_type = "BEARER-ONLY"
@@ -407,22 +402,22 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_mapper" {
 	name        = "%s"
-	realm_id    = "${keycloak_realm.realm.id}"
+	realm_id    = data.keycloak_realm.realm.id
 	client_id   = "${keycloak_openid_client.openid_client.id}"
 
 	claim_name  = "%s"
 	claim_value = "%s"
-}`, realmName, clientId, mapperName, claimName, claimValue)
+}`, testAccRealm.Realm, clientId, mapperName, claimName, claimValue)
 }
 
-func testKeycloakOpenIdHardcodedClaimProtocolMapper_validateClaimValueType(realmName, mapperName, claimValueType string) string {
+func testKeycloakOpenIdHardcodedClaimProtocolMapper_validateClaimValueType(mapperName, claimValueType string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_openid_client" "openid_client" {
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 	client_id = "openid-client"
 
 	access_type = "BEARER-ONLY"
@@ -430,11 +425,11 @@ resource "keycloak_openid_client" "openid_client" {
 
 resource "keycloak_openid_hardcoded_claim_protocol_mapper" "hardcoded_claim_mapper_validation" {
 	name             = "%s"
-	realm_id         = "${keycloak_realm.realm.id}"
+	realm_id         = data.keycloak_realm.realm.id
 	client_id        = "${keycloak_openid_client.openid_client.id}"
 
 	claim_value      = "foo"
 	claim_name       = "bar"
 	claim_value_type = "%s"
-}`, realmName, mapperName, claimValueType)
+}`, testAccRealm.Realm, mapperName, claimValueType)
 }

@@ -11,8 +11,8 @@ import (
 )
 
 func TestAccKeycloakDefaultGroups_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	groupName := "terraform-group-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	groupName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -33,8 +33,8 @@ func TestAccKeycloakDefaultGroups_basic(t *testing.T) {
 }
 
 func TestAccKeycloakDefaultGroups_import(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	groupName := "terraform-group-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	groupName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -55,7 +55,7 @@ func TestAccKeycloakDefaultGroups_import(t *testing.T) {
 }
 
 func TestAccKeycloakDefaultGroups_updateInPlace(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	allGroupsForTest := []string{
 		"terraform-group-" + acctest.RandString(10),
@@ -158,8 +158,6 @@ func testAccNoDefaultGroups(resourceName string, groupNames []string) resource.T
 }
 
 func testAccGetGroupsFromDefaultGroup(resourceName string, s *terraform.State) ([]keycloak.Group, error) {
-	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
-
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", resourceName)
@@ -178,12 +176,14 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_group" "group" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = keycloak_realm.realm.id
 }
 
 resource "keycloak_default_groups" "group_default" {
-	realm_id = "${keycloak_realm.realm.id}"
-	group_ids = ["${keycloak_group.group.id}"]
+	realm_id = keycloak_realm.realm.id
+	group_ids = [
+		keycloak_group.group.id
+	]
 }
 	`, realmName, groupName)
 }
@@ -196,7 +196,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_group" "group" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = keycloak_realm.realm.id
 }`, realmName, groupName)
 }
 
@@ -211,7 +211,7 @@ resource "keycloak_realm" "realm" {
 		out += fmt.Sprintf(`
 resource "keycloak_group" "%s" {
 	name     = "%s"
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = keycloak_realm.realm.id
 }`, group, group)
 	}
 
@@ -222,7 +222,7 @@ resource "keycloak_group" "%s" {
 
 	out += fmt.Sprintf(`
 resource "keycloak_default_groups" "group_default" {
-	realm_id = "${keycloak_realm.realm.id}"
+	realm_id = keycloak_realm.realm.id
 	group_ids = %s
 }`, arrayOfStringsForTerraformResource(defaultGroupResources))
 

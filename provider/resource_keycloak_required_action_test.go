@@ -5,13 +5,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"regexp"
 	"testing"
 )
 
 func TestAccKeycloakRequiredAction_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	requiredActionAlias := "CONFIGURE_TOTP"
 
 	resource.Test(t, resource.TestCase{
@@ -27,7 +26,7 @@ func TestAccKeycloakRequiredAction_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_unregisteredAction(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	requiredActionAlias := "webauthn-register"
 
 	resource.Test(t, resource.TestCase{
@@ -43,8 +42,8 @@ func TestAccKeycloakRequiredAction_unregisteredAction(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_invalidAlias(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	randomReqActionAlias := "randomRequiredAction-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	randomReqActionAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -59,7 +58,7 @@ func TestAccKeycloakRequiredAction_invalidAlias(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_import(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	requiredActionAlias := "terms_and_conditions"
 
 	resource.Test(t, resource.TestCase{
@@ -81,7 +80,7 @@ func TestAccKeycloakRequiredAction_import(t *testing.T) {
 }
 
 func TestAccKeycloakRequiredAction_disabledDefault(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	requiredActionAlias := "terms_and_conditions"
 
 	resource.Test(t, resource.TestCase{
@@ -96,7 +95,7 @@ func TestAccKeycloakRequiredAction_disabledDefault(t *testing.T) {
 	})
 }
 func TestAccKeycloakRequiredAction_computedPriority(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
+	realmName := acctest.RandomWithPrefix("tf-acc")
 	requiredActionAlias := "terms_and_conditions"
 
 	resource.Test(t, resource.TestCase{
@@ -182,7 +181,6 @@ resource "keycloak_required_action" "required_action2" {
 
 func testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realm, requiredActionAlias string, priority int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 		action, err := keycloakClient.GetRequiredAction(realm, requiredActionAlias)
 		if err != nil {
 			return fmt.Errorf("required action not found: %s", requiredActionAlias)
@@ -198,7 +196,6 @@ func testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realm, required
 
 func testAccCheckKeycloakRequiresActionExists(realm, requiredActionAlias string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 		_, err := keycloakClient.GetRequiredAction(realm, requiredActionAlias)
 		if err != nil {
 			return fmt.Errorf("required action not found: %s", requiredActionAlias)

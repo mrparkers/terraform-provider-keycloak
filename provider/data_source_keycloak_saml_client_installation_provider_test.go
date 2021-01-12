@@ -10,9 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccKeycloakSamlClientInstallationProvider_basic(t *testing.T) {
-	realmName := "terraform-" + acctest.RandString(10)
-	clientId := "terraform-" + acctest.RandString(10)
+func TestAccKeycloakDataSourceSamlClientInstallationProvider_basic(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_saml_client.saml_client"
 	dataSourceName := "data.keycloak_saml_client_installation_provider.saml_sp_descriptor"
@@ -23,7 +23,7 @@ func TestAccKeycloakSamlClientInstallationProvider_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testDataSourceKeycloakSamlClientInstallationProvider_basic(realmName, clientId),
+				Config: testDataSourceKeycloakSamlClientInstallationProvider_basic(clientId),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceName, "realm_id", resourceName, "realm_id"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "client_id", resourceName, "id"),
@@ -53,21 +53,21 @@ func testAccCheckDataKeycloakSamlClientInstallationProvider(resourceName string)
 	}
 }
 
-func testDataSourceKeycloakSamlClientInstallationProvider_basic(realm, clientId string) string {
+func testDataSourceKeycloakSamlClientInstallationProvider_basic(clientId string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_client" "saml_client" {
 	client_id = "%s"
-	realm_id  = "${keycloak_realm.realm.id}"
+	realm_id  = data.keycloak_realm.realm.id
 }
 
 data "keycloak_saml_client_installation_provider" "saml_sp_descriptor" {
-  realm_id    = "${keycloak_realm.realm.id}"
-  client_id   = "${keycloak_saml_client.saml_client.id}"
+  realm_id    = data.keycloak_realm.realm.id
+  client_id   = keycloak_saml_client.saml_client.id
   provider_id = "saml-sp-descriptor"
 }
-	`, realm, clientId)
+	`, testAccRealm.Realm, clientId)
 }
