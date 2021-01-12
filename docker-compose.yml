@@ -32,8 +32,13 @@ services:
     - DB_USER=keycloak
     - DB_DATABASE=keycloak
     - DB_PASSWORD=password
+# Enable for remote java debugging
+#    - PREPEND_JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8787
     ports:
     - 8080:8080
+# Enable for remote java debugging
+#    - 8787:8787
     volumes:
-    - ./custom-user-federation-example/build/libs:/opt/jboss/keycloak/providers/
+# Make the custom-user-federation-example extension available to Keycloak. The :z option is required and tells Docker that the volume content will be shared between containers.
+    - ./custom-user-federation-example/build/libs/custom-user-federation-example.jar:/opt/jboss/keycloak/standalone/deployments/custom-user-federation-example.jar:z
 
