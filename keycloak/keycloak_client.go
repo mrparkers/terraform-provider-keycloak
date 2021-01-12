@@ -157,10 +157,10 @@ func (keycloakClient *KeycloakClient) login() error {
 		return err
 	}
 
-  server_version := info.SystemInfo.ServerVersion
-  if strings.Contains(server_version, ".GA") {
-    server_version = strings.ReplaceAll(info.SystemInfo.ServerVersion, ".GA", "")
-  }
+	server_version := info.SystemInfo.ServerVersion
+	if strings.Contains(server_version, ".GA") {
+		server_version = strings.ReplaceAll(info.SystemInfo.ServerVersion, ".GA", "")
+	}
 
 	v, err := version.NewVersion(server_version)
 	if err != nil {
