@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -65,6 +66,9 @@ func dataSourceKeycloakUserRead(data *schema.ResourceData, meta interface{}) err
 	user, err := keycloakClient.GetUserByUsername(realmID, username)
 	if err != nil {
 		return err
+	}
+	if user == nil {
+		return fmt.Errorf("user with username %s not found", username)
 	}
 
 	mapFromUserToData(data, user)
