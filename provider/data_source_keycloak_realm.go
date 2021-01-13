@@ -429,7 +429,22 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-
+			// default default client scopes
+			"default_default_client_scopes": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+				Optional: true,
+				ForceNew: false,
+			},
+			// default optional client scopes
+			"default_optional_client_scopes": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+				Optional: true,
+				ForceNew: false,
+			},
 			// WebAuthn
 			"web_authn_policy": {
 				Type:     schema.TypeList,

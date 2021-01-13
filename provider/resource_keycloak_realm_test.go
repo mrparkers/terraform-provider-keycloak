@@ -702,6 +702,131 @@ func TestAccKeycloakRealm_internalId(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_default_client_scopes(t *testing.T) {
+
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	defaultDefaultClientScope := []string{"profile"}
+	defaultOptionalClientScope := []string{"email", "roles"}
+
+	realm := &keycloak.Realm{
+		Realm: realmName,
+	}
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				ResourceName:  "keycloak_realm.realm",
+				ImportStateId: realmName,
+				ImportState:   true,
+				Config:        testKeycloakRealm_default_client_scopes(realmName, defaultDefaultClientScope, defaultOptionalClientScope),
+				PreConfig: func() {
+					err := keycloakClient.NewRealm(realm)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Check: testAccCheckKeycloakRealm_default_client_scopes(realmName, defaultDefaultClientScope, defaultOptionalClientScope),
+			},
+		},
+	})
+
+	// test empty default client scope configuration
+	realmName2 := acctest.RandomWithPrefix("tf-acc")
+	defaultDefaultClientScope2 := []string{}  // deliberately empty
+	defaultOptionalClientScope2 := []string{} // deliberately empty
+
+	realm2 := &keycloak.Realm{
+		Realm: realmName2,
+	}
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				ResourceName:  "keycloak_realm.realm",
+				ImportStateId: realmName2,
+				ImportState:   true,
+				Config:        testKeycloakRealm_default_client_scopes(realmName2, defaultDefaultClientScope2, defaultOptionalClientScope2),
+				PreConfig: func() {
+					err := keycloakClient.NewRealm(realm2)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Check: testAccCheckKeycloakRealm_default_client_scopes(realmName2, defaultDefaultClientScope2, defaultOptionalClientScope2),
+			},
+		},
+	})
+}
+
+func testKeycloakRealm_default_client_scopes(realm string, defaultDefaultClientScopes []string, defaultOptionalClientScopes []string) string {
+
+	defaultDefaultClientScopesString := fmt.Sprintf("%s", arrayOfStringsForTerraformResource(defaultDefaultClientScopes))
+	defaultOptionalClientScopesString := fmt.Sprintf("%s", arrayOfStringsForTerraformResource(defaultOptionalClientScopes))
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm                          = "%s"
+	enabled                        = true
+	default_default_client_scopes  = %s
+	default_optional_client_scopes = %s
+}
+	`, realm, defaultDefaultClientScopesString, defaultOptionalClientScopesString)
+}
+
+func testAccCheckKeycloakRealm_default_client_scopes(resourceName string, defaultDefaultClientScope, defaultOptionalClientScope []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if len(defaultDefaultClientScope) == 0 {
+			if len(realm.DefaultDefaultClientScopes) != 0 {
+				return fmt.Errorf("expected realm %s to have empty default default client scopes but was %s", realm.Realm, realm.DefaultDefaultClientScopes)
+			}
+		} else {
+			for _, expectedScope := range defaultDefaultClientScope {
+				found := false
+				for _, s := range realm.DefaultDefaultClientScopes {
+					if expectedScope == s {
+						found = true
+						break
+					}
+				}
+				if !found {
+					return fmt.Errorf("expected realm %s to have default default client scopes with value %s but was %s", realm.Realm, defaultDefaultClientScope, realm.DefaultDefaultClientScopes)
+				}
+			}
+		}
+
+		if len(defaultOptionalClientScope) == 0 {
+			if len(realm.DefaultOptionalClientScopes) != 0 {
+				return fmt.Errorf("expected realm %s to have empty default optional client scopes but was %s", realm.Realm, realm.DefaultOptionalClientScopes)
+			}
+		} else {
+			for _, expectedScope := range defaultOptionalClientScope {
+				found := false
+				for _, s := range realm.DefaultOptionalClientScopes {
+					if expectedScope == s {
+						found = true
+						break
+					}
+				}
+				if !found {
+					return fmt.Errorf("expected realm %s to have default optional client scopes with value %s but was %s", realm.Realm, defaultOptionalClientScope, realm.DefaultOptionalClientScopes)
+				}
+			}
+		}
+
+		return nil
+	}
+}
+
 func TestAccKeycloakRealm_webauthn(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
 	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
