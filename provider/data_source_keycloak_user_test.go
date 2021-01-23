@@ -13,6 +13,7 @@ import (
 func TestAccKeycloakDataSourceUser(t *testing.T) {
 	t.Parallel()
 	username := acctest.RandomWithPrefix("tf-acc")
+	email := acctest.RandomWithPrefix("tf-acc") + "@fakedomain.com"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -20,7 +21,7 @@ func TestAccKeycloakDataSourceUser(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakUserDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testDataSourceKeycloakUser(username),
+				Config: testDataSourceKeycloakUser(username, email),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakUserExists("keycloak_user.user"),
 					resource.TestCheckResourceAttrPair("keycloak_user.user", "id", "data.keycloak_user.user", "id"),
@@ -74,7 +75,7 @@ func testAccCheckDataKeycloakUser(resourceName string) resource.TestCheckFunc {
 	}
 }
 
-func testDataSourceKeycloakUser(username string) string {
+func testDataSourceKeycloakUser(username, email string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -85,7 +86,7 @@ resource "keycloak_user" "user" {
 	realm_id 	= data.keycloak_realm.realm.id
 	enabled    	= true
 
-    email      	= "bob@domain.com"
+    email      	= "%s"
     first_name 	= "Bob"
     last_name  	= "Bobson"
 }
@@ -98,7 +99,7 @@ data "keycloak_user" "user" {
 		keycloak_user.user
 	]
 }
-	`, testAccRealm.Realm, username)
+	`, testAccRealm.Realm, username, email)
 }
 
 func testDataSourceKeycloakUser_NoUser(username string) string {
