@@ -75,6 +75,10 @@ type Realm struct {
 	//extra attributes of a realm
 	Attributes map[string]interface{} `json:"attributes"`
 
+	// client-scope mapping defaults
+	DefaultDefaultClientScopes  []string `json:"defaultDefaultClientScopes,omitempty"`
+	DefaultOptionalClientScopes []string `json:"defaultOptionalClientScopes,omitempty"`
+
 	BrowserSecurityHeaders BrowserSecurityHeaders `json:"browserSecurityHeaders"`
 
 	BruteForceProtected          bool `json:"bruteForceProtected"`

@@ -524,6 +524,22 @@ func resourceKeycloakRealm() *schema.Resource {
 				Optional: true,
 			},
 
+			// default default client scopes
+			"default_default_client_scopes": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				ForceNew: false,
+			},
+
+			// default optional client scopes
+			"default_optional_client_scopes": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				ForceNew: false,
+			},
+
 			// WebAuthn
 			"web_authn_policy": {
 				Type:     schema.TypeList,
@@ -857,6 +873,22 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	}
 	realm.Attributes = attributes
 
+	defaultDefaultClientScopes := make([]string, 0)
+	if v, ok := data.GetOk("default_default_client_scopes"); ok {
+		for _, defaultDefaultClientScope := range v.(*schema.Set).List() {
+			defaultDefaultClientScopes = append(defaultDefaultClientScopes, defaultDefaultClientScope.(string))
+		}
+	}
+	realm.DefaultDefaultClientScopes = defaultDefaultClientScopes
+
+	defaultOptionalClientScopes := make([]string, 0)
+	if v, ok := data.GetOk("default_optional_client_scopes"); ok {
+		for _, defaultOptionalClientScope := range v.(*schema.Set).List() {
+			defaultOptionalClientScopes = append(defaultOptionalClientScopes, defaultOptionalClientScope.(string))
+		}
+	}
+	realm.DefaultOptionalClientScopes = defaultOptionalClientScopes
+
 	//WebAuthn
 	if v, ok := data.GetOk("web_authn_policy"); ok {
 		webAuthnPolicy := v.([]interface{})[0].(map[string]interface{})
@@ -1116,6 +1148,10 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 		}
 	}
 	data.Set("attributes", attributes)
+
+	// default and optional client scope mappings
+	data.Set("default_default_client_scopes", realm.DefaultDefaultClientScopes)
+	data.Set("default_optional_client_scopes", realm.DefaultOptionalClientScopes)
 }
 
 func getBruteForceDetectionSettings(realm *keycloak.Realm) map[string]interface{} {

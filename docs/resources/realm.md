@@ -222,6 +222,11 @@ Each of these attributes are blocks with the following attributes:
 
 - `internal_id` - (Computed) When importing realms created outside of this terraform provider, they could use generated arbitrary IDs for the internal realm id. Realms created by this provider always use the realm's name for its internal id.
 
+## Default Client Scopes
+
+- `default_default_client_scopes` - (Optional) A list of default default client scopes to be used for client definitions. Defaults to `[]` or keycloak's built-in default default client-scopes.
+- `default_optional_client_scopes` - (Optional) A list of default optional client scopes to be used for client definitions. Defaults to `[]` or keycloak's built-in default optional client-scopes.
+
 ## Import
 
 Realms can be imported using their name.
