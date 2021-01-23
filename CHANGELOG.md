@@ -1,3 +1,20 @@
+## v2.2.0 (January 23, 2021)
+
+FEATURES:
+
+- add new `keycloak_realm` attributes for handling default client scopes ([#464](https://github.com/mrparkers/terraform-provider-keycloak/pull/464))
+- new data source: `keycloak_saml_client` ([#468](https://github.com/mrparkers/terraform-provider-keycloak/pull/468))
+
+IMPROVEMENTS:
+
+- revised the configuration for the custom user federation example ([#425](https://github.com/mrparkers/terraform-provider-keycloak/pull/425))
+- increased the default http client timeout to 15 seconds ([#469](https://github.com/mrparkers/terraform-provider-keycloak/pull/469))
+
+BUG FIXES:
+
+- fix panic when using `keycloak_user` data source with invalid username ([#460](https://github.com/mrparkers/terraform-provider-keycloak/pull/460))
+- fix version handling with RedHat SSO ([#462](https://github.com/mrparkers/terraform-provider-keycloak/pull/462))
+
 ## v2.1.0 (January 10, 2021)
 
 FEATURES:
