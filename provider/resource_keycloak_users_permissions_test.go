@@ -12,6 +12,8 @@ import (
 
 func TestAccKeycloakUsersPermission_basic(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
+	username := acctest.RandomWithPrefix("tf-acc")
+	email := acctest.RandomWithPrefix("tf-acc") + "@fakedomain.com"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -19,7 +21,7 @@ func TestAccKeycloakUsersPermission_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakUsersPermissionsAreDisabled(realmName),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakUsersPermission_basic(realmName),
+				Config: testKeycloakUsersPermission_basic(realmName, username, email),
 				Check:  testAccCheckKeycloakUsersPermissionExists("keycloak_users_permissions.my_permission"),
 			},
 			{
@@ -139,7 +141,7 @@ func getUsersPermissionsFromState(s *terraform.State, resourceName string) (*key
 	return permissions, nil
 }
 
-func testKeycloakUsersPermission_basic(realmId string) string {
+func testKeycloakUsersPermission_basic(realmId, username, email string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
@@ -157,9 +159,9 @@ resource "keycloak_openid_client_permissions" "realm_management_permission" {
 
 resource "keycloak_user" "test" {
 	realm_id = keycloak_realm.realm.id
-	username = "test-user"
+	username = "%s"
 
-	email      = "test-user@fakedomain.com"
+	email      = "%s"
 	first_name = "Testy"
 	last_name  = "Tester"
 }
@@ -215,5 +217,5 @@ resource "keycloak_users_permissions" "my_permission" {
 		decision_strategy = "UNANIMOUS"
 	}
 }
-	`, realmId)
+	`, realmId, username, email)
 }

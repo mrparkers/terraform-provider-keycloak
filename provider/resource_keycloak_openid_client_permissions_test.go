@@ -13,17 +13,19 @@ import (
 func TestAccKeycloakOpenidClientPermission_basic(t *testing.T) {
 	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
+	username := acctest.RandomWithPrefix("tf-acc")
+	email := acctest.RandomWithPrefix("tf-acc") + "@fakedomain.com"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientPermission_basic(clientId),
+				Config: testKeycloakOpenidClientPermission_basic(clientId, username, email),
 				Check:  testAccCheckKeycloakOpenidClientPermissionExists("keycloak_openid_client_permissions.my_permission"),
 			},
 			{
-				Config: testKeycloakOpenidClientPermissionDelete_basic(clientId),
+				Config: testKeycloakOpenidClientPermissionDelete_basic(clientId, username, email),
 				Check:  testAccCheckKeycloakOpenidClientPermissionsAreDisabled(clientId),
 			},
 		},
@@ -115,7 +117,7 @@ func getOpenidClientPermissionsFromState(s *terraform.State, resourceName string
 	return permissions, nil
 }
 
-func testKeycloakOpenidClientPermission_basic(clientId string) string {
+func testKeycloakOpenidClientPermission_basic(clientId, username, email string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -146,9 +148,9 @@ resource keycloak_openid_client_permissions "realm-management_permission" {
 
 resource keycloak_user test {
 	realm_id = data.keycloak_realm.realm.id
-	username = "test-user"
+	username = "%s"
 
-	email      = "test-user@fakedomain.com"
+	email      = "%s"
 	first_name = "Testy"
 	last_name  = "Tester"
 }
@@ -181,10 +183,10 @@ resource "keycloak_openid_client_permissions" "my_permission" {
 		description       = "view_scope"
 		decision_strategy = "CONSENSUS"
 	}
-}`, testAccRealm.Realm, clientId)
+}`, testAccRealm.Realm, clientId, username, email)
 }
 
-func testKeycloakOpenidClientPermissionDelete_basic(clientId string) string {
+func testKeycloakOpenidClientPermissionDelete_basic(clientId, username, email string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -215,9 +217,9 @@ resource keycloak_openid_client_permissions "realm-management_permission" {
 
 resource keycloak_user test {
 	realm_id = data.keycloak_realm.realm.id
-	username = "test-user"
+	username = "%s"
 
-	email      = "test-user@fakedomain.com"
+	email      = "%s"
 	first_name = "Testy"
 	last_name  = "Tester"
 }
@@ -237,5 +239,5 @@ resource keycloak_openid_client_user_policy test {
 	depends_on = [
 		keycloak_openid_client_permissions.realm-management_permission,
 	]
-}`, testAccRealm.Realm, clientId)
+}`, testAccRealm.Realm, clientId, username, email)
 }

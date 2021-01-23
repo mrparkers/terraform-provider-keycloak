@@ -137,7 +137,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 				Optional:    true,
 				Type:        schema.TypeInt,
 				Description: "Timeout (in seconds) of the Keycloak client",
-				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_TIMEOUT", 5),
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_TIMEOUT", 15),
 			},
 			"root_ca_certificate": {
 				Optional:    true,
