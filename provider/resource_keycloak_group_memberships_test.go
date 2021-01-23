@@ -425,7 +425,9 @@ resource "keycloak_group_memberships" "group_members" {
 }
 
 func testKeycloakGroupMemberships_moreThan100members(group string) string {
+	username := acctest.RandomWithPrefix("tf-acc")
 	count := 110
+
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -440,7 +442,7 @@ resource "keycloak_user" "users" {
 	count = %d
 
 	realm_id = data.keycloak_realm.realm.id
-	username = "terraform-user-${count.index}"
+	username = "%s-${count.index}"
 }
 
 resource "keycloak_group_memberships" "group_members" {
@@ -450,7 +452,7 @@ resource "keycloak_group_memberships" "group_members" {
 	members = keycloak_user.users.*.username
 }
 
-        `, testAccRealm.Realm, group, count)
+        `, testAccRealm.Realm, group, count, username)
 }
 
 func testKeycloakGroupMemberships_updateGroupForceNew(groupOne, groupTwo, username, currentGroup string) string {
