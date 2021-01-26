@@ -51,6 +51,32 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(t *t
 	})
 }
 
+func TestAccKeycloakAttributeImporterIdentityProviderMapper_socialOidcProvider(t *testing.T) {
+	t.Parallel()
+	for _, providerId := range []string{"facebook", "github", "google", "instagram", "linkedin", "microsoft", "paypal", "stackoverflow"} {
+		providerId := providerId
+		t.Run("", func(t *testing.T) {
+			t.Parallel()
+			mapperName := acctest.RandomWithPrefix("tf-acc")
+			alias := providerId
+			userAttribute := acctest.RandomWithPrefix("tf-acc")
+			claimName := acctest.RandomWithPrefix("tf-acc")
+
+			resource.Test(t, resource.TestCase{
+				ProviderFactories: testAccProviderFactories,
+				PreCheck:          func() { testAccPreCheck(t) },
+				CheckDestroy:      testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
+				Steps: []resource.TestStep{
+					{
+						Config: testKeycloakAttributeImporterIdentityProviderMapper_socialOidcProvider(alias, mapperName, userAttribute, claimName),
+						Check:  testAccCheckKeycloakAttributeImporterIdentityProviderMapperExists("keycloak_attribute_importer_identity_provider_mapper.social_oidc"),
+					},
+				},
+			})
+		})
+	}
+}
+
 func TestAccKeycloakAttributeImporterIdentityProviderMapper_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var mapper = &keycloak.IdentityProviderMapper{}
@@ -273,6 +299,35 @@ resource keycloak_attribute_importer_identity_provider_mapper oidc {
 	}
 }
 	`, testAccRealm.Realm, alias, name, userAttribute, claimName, syncMode)
+}
+
+func testKeycloakAttributeImporterIdentityProviderMapper_socialOidcProvider(alias, name, userAttribute, claimName string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_oidc_identity_provider" "social_oidc" {
+	realm             = data.keycloak_realm.realm.id
+	alias             = "%s"
+	provider_id       = "%s"
+	client_id         = "example_id"
+	client_secret     = "example_token"
+	token_url         = ""
+	authorization_url = ""
+}
+
+resource "keycloak_attribute_importer_identity_provider_mapper" "social_oidc" {
+	realm                   = data.keycloak_realm.realm.id
+	name                    = "%s"
+	identity_provider_alias = keycloak_oidc_identity_provider.social_oidc.alias
+	user_attribute          = "%s"
+	extra_config = {
+		userAttribute = "%s"
+		jsonField = "%s"
+	}
+}
+`, testAccRealm.Realm, alias, alias, name, userAttribute, userAttribute, claimName)
 }
 
 func testKeycloakAttributeImporterIdentityProviderMapper_basicFromInterface(mapper *keycloak.IdentityProviderMapper) string {
