@@ -35,6 +35,13 @@ var principalTypes = []string{
 	"FRIENDLY_ATTRIBUTE",
 }
 
+var authnComparisonTypes = []string{
+	"exact",
+	"minimum",
+	"maximum",
+	"better",
+}
+
 func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	samlSchema := map[string]*schema.Schema{
 		"backchannel_supported": {
@@ -139,6 +146,22 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Default:     "",
 			Description: "Principal Attribute",
 		},
+		"authn_context_class_refs": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "AuthnContext ClassRefs",
+		},
+		"authn_context_decl_refs": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "AuthnContext DeclRefs",
+		},
+		"authn_context_comparison_type": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: validation.StringInSlice(authnComparisonTypes, false),
+			Description:  "AuthnContext Comparison",
+		},
 	}
 	samlResource := resourceKeycloakIdentityProvider()
 	samlResource.Schema = mergeSchemas(samlResource.Schema, samlSchema)
@@ -171,6 +194,9 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
 		PrincipalType:                    data.Get("principal_type").(string),
 		PrincipalAttribute:               data.Get("principal_attribute").(string),
+		AuthnContextClassRefs:            data.Get("authn_context_class_refs").(string),
+		AuthnContextComparisonType:       data.Get("authn_context_comparison_type").(string),
+		AuthnContextDeclRefs:             data.Get("authn_context_decl_refs").(string),
 	}
 
 	if _, ok := data.GetOk("signature_algorithm"); ok {
@@ -207,6 +233,9 @@ func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("want_assertions_encrypted", identityProvider.Config.WantAssertionsEncrypted)
 	data.Set("principal_type", identityProvider.Config.PrincipalType)
 	data.Set("principal_attribute", identityProvider.Config.PrincipalAttribute)
+	data.Set("authn_context_class_refs", identityProvider.Config.AuthnContextClassRefs)
+	data.Set("authn_context_comparison_type", identityProvider.Config.AuthnContextComparisonType)
+	data.Set("authn_context_decl_refs", identityProvider.Config.AuthnContextDeclRefs)
 
 	return nil
 }

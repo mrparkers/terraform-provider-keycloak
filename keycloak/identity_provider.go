@@ -50,6 +50,9 @@ type IdentityProviderConfig struct {
 	GuiOrder                         string                 `json:"guiOrder,omitempty"`
 	SyncMode                         string                 `json:"syncMode,omitempty"`
 	ExtraConfig                      map[string]interface{} `json:"-"`
+	AuthnContextClassRefs            string                 `json:"authnContextClassRefs,omitempty"`
+	AuthnContextComparisonType       string                 `json:"authnContextComparisonType,omitempty"`
+	AuthnContextDeclRefs             string                 `json:"authnContextDeclRefs,omitempty"`
 }
 
 type IdentityProvider struct {
