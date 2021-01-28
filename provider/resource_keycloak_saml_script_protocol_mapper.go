@@ -77,7 +77,7 @@ func mapFromDataToSamlScriptProtocolMapper(data *schema.ResourceData) *keycloak.
 
 		SingleValueAttribute: data.Get("single_value_attribute").(bool),
 
-		Script:                  data.Get("script").(string),
+		SamlScript:              data.Get("script").(string),
 		FriendlyName:            data.Get("friendly_name").(string),
 		SamlAttributeName:       data.Get("saml_attribute_name").(string),
 		SamlAttributeNameFormat: data.Get("saml_attribute_name_format").(string),
@@ -96,7 +96,7 @@ func mapFromSamlScriptMapperToData(mapper *keycloak.SamlScriptProtocolMapper, da
 	}
 
 	data.Set("single_value_attribute", mapper.SingleValueAttribute)
-	data.Set("script", mapper.Script)
+	data.Set("script", mapper.SamlScript)
 	data.Set("friendly_name", mapper.FriendlyName)
 	data.Set("saml_attribute_name", mapper.SamlAttributeName)
 	data.Set("saml_attribute_name_format", mapper.SamlAttributeNameFormat)

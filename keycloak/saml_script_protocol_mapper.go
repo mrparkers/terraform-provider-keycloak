@@ -14,7 +14,7 @@ type SamlScriptProtocolMapper struct {
 
 	SingleValueAttribute bool
 
-	Script                  string
+	SamlScript              string
 	FriendlyName            string
 	SamlAttributeName       string
 	SamlAttributeNameFormat string
@@ -30,7 +30,7 @@ func (mapper *SamlScriptProtocolMapper) convertToGenericProtocolMapper() *protoc
 			attributeNameField:        mapper.SamlAttributeName,
 			attributeNameFormatField:  mapper.SamlAttributeNameFormat,
 			friendlyNameField:         mapper.FriendlyName,
-			samlScriptField:           mapper.Script,
+			samlScriptField:           mapper.SamlScript,
 			singleValueAttributeField: strconv.FormatBool(mapper.SingleValueAttribute),
 		},
 	}
@@ -51,7 +51,7 @@ func (protocolMapper *protocolMapper) convertToSamlScriptProtocolMapper(realmId,
 
 		SingleValueAttribute: singleValueAttribute,
 
-		Script:                  protocolMapper.Config[samlScriptField],
+		SamlScript:              protocolMapper.Config[samlScriptField],
 		FriendlyName:            protocolMapper.Config[friendlyNameField],
 		SamlAttributeName:       protocolMapper.Config[attributeNameField],
 		SamlAttributeNameFormat: protocolMapper.Config[attributeNameFormatField],
