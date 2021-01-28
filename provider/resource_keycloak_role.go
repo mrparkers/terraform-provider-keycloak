@@ -85,7 +85,6 @@ func mapFromRoleToData(data *schema.ResourceData, role *keycloak.Role) {
 	attributes := map[string]interface{}{}
 	if v, ok := data.GetOk("attributes"); ok {
 		for key := range v.(map[string]interface{}) {
-			// as := role.Attributes[key].([]interface{})
 			attributes[key] = role.Attributes[key].([]interface{})[0]
 		}
 	}
@@ -231,9 +230,7 @@ func resourceKeycloakRoleUpdate(data *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	mapFromRoleToData(data, role)
-
-	return nil
+	return resourceKeycloakRoleRead(data, meta)
 }
 
 func resourceKeycloakRoleDelete(data *schema.ResourceData, meta interface{}) error {
