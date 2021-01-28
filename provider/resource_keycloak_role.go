@@ -57,9 +57,7 @@ func mapFromDataToRole(data *schema.ResourceData) *keycloak.Role {
 	attributes := map[string]interface{}{}
 	if v, ok := data.GetOk("attributes"); ok {
 		for key, value := range v.(map[string]interface{}) {
-			var value_as_array [1]string
-			value_as_array[0] = value.(string)
-			attributes[key] = value_as_array
+			attributes[key] = [1]string{value.(string)}
 		}
 	}
 
