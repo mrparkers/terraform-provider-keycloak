@@ -16,6 +16,8 @@ type Role struct {
 	ClientRole  bool   `json:"clientRole"`
 	ContainerId string `json:"containerId"`
 	Composite   bool   `json:"composite"`
+	//extra attributes of a role
+	Attributes map[string]interface{} `json:"attributes"`
 }
 
 type UsersInRole struct {

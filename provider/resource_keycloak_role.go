@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 func resourceKeycloakRole() *schema.Resource {
@@ -43,17 +44,32 @@ func resourceKeycloakRole() *schema.Resource {
 				Set:      schema.HashString,
 				Optional: true,
 			},
+			// misc attributes
+			"attributes": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func mapFromDataToRole(data *schema.ResourceData) *keycloak.Role {
+	attributes := map[string]interface{}{}
+	if v, ok := data.GetOk("attributes"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			var value_as_array [1]string
+			value_as_array[0] = value.(string)
+			attributes[key] = value_as_array
+		}
+	}
+
 	role := &keycloak.Role{
 		Id:          data.Id(),
 		RealmId:     data.Get("realm_id").(string),
 		ClientId:    data.Get("client_id").(string),
 		Name:        data.Get("name").(string),
 		Description: data.Get("description").(string),
+		Attributes:  attributes,
 	}
 
 	return role
@@ -66,6 +82,15 @@ func mapFromRoleToData(data *schema.ResourceData, role *keycloak.Role) {
 	data.Set("client_id", role.ClientId)
 	data.Set("name", role.Name)
 	data.Set("description", role.Description)
+	attributes := map[string]interface{}{}
+	if v, ok := data.GetOk("attributes"); ok {
+		for key := range v.(map[string]interface{}) {
+			// as := role.Attributes[key].([]interface{})
+			attributes[key] = role.Attributes[key].([]interface{})[0]
+		}
+	}
+
+	data.Set("attributes", attributes)
 }
 
 func resourceKeycloakRoleCreate(data *schema.ResourceData, meta interface{}) error {
