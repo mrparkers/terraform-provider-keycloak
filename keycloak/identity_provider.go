@@ -47,9 +47,9 @@ type IdentityProviderConfig struct {
 	GuiOrder                         string                 `json:"guiOrder,omitempty"`
 	SyncMode                         string                 `json:"syncMode,omitempty"`
 	ExtraConfig                      map[string]interface{} `json:"-"`
-	AuthnContextClassRefs            string                 `json:"authnContextClassRefs,omitempty"`
+	AuthnContextClassRefs            []interface{}          `json:"authnContextClassRefs,omitempty"`
 	AuthnContextComparisonType       string                 `json:"authnContextComparisonType,omitempty"`
-	AuthnContextDeclRefs             string                 `json:"authnContextDeclRefs,omitempty"`
+	AuthnContextDeclRefs             []interface{}          `json:"authnContextDeclRefs,omitempty"`
 }
 
 type IdentityProvider struct {
@@ -69,8 +69,70 @@ type IdentityProvider struct {
 	Config                    *IdentityProviderConfig `json:"config"`
 }
 
-func (keycloakClient *KeycloakClient) NewIdentityProvider(ctx context.Context, identityProvider *IdentityProvider) error {
-	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances", identityProvider.Realm), identityProvider)
+func (f *IdentityProviderConfig) UnmarshalJSON(data []byte) error {
+	f.ExtraConfig = map[string]interface{}{}
+	err := json.Unmarshal(data, &f.ExtraConfig)
+	if err != nil {
+		return err
+	}
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		structField := v.Type().Field(i)
+		jsonKey := strings.Split(structField.Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			value, ok := f.ExtraConfig[jsonKey]
+			if ok {
+				field := v.FieldByName(structField.Name)
+				if field.IsValid() && field.CanSet() {
+					if field.Kind() == reflect.String {
+						field.SetString(value.(string))
+					} else if field.Kind() == reflect.Bool {
+						boolVal, err := strconv.ParseBool(value.(string))
+						if err == nil {
+							field.Set(reflect.ValueOf(KeycloakBoolQuoted(boolVal)))
+						}
+					} else if field.Kind() == reflect.Slice {
+						var unmarshaledSlice []interface{}
+						json.Unmarshal([]byte(value.(string)), &unmarshaledSlice)
+						field.Set(reflect.ValueOf(unmarshaledSlice))
+					}
+					delete(f.ExtraConfig, jsonKey)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (f *IdentityProviderConfig) MarshalJSON() ([]byte, error) {
+	out := map[string]interface{}{}
+
+	for k, v := range f.ExtraConfig {
+		out[k] = v
+	}
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		jsonKey := strings.Split(v.Type().Field(i).Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			field := v.Field(i)
+			if field.IsValid() && field.CanSet() {
+				if field.Kind() == reflect.String {
+					out[jsonKey] = field.String()
+				} else if field.Kind() == reflect.Bool {
+					out[jsonKey] = KeycloakBoolQuoted(field.Bool())
+				} else if field.Kind() == reflect.Slice {
+					out[jsonKey] = KeycloakSliceQuoted(field.Interface().([]interface{}))
+				}
+			}
+		}
+	}
+	return json.Marshal(out)
+}
+
+func (keycloakClient *KeycloakClient) NewIdentityProvider(identityProvider *IdentityProvider) error {
+	log.Printf("[WARN] Realm: %s", identityProvider.Realm)
+
+	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/identity-provider/instances", identityProvider.Realm), identityProvider)
 	if err != nil {
 		return err
 	}
