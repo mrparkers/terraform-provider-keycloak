@@ -147,12 +147,14 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Description: "Principal Attribute",
 		},
 		"authn_context_class_refs": {
-			Type:        schema.TypeString,
+			Type:        schema.TypeList,
+			Elem:        &schema.Schema{Type: schema.TypeString},
 			Optional:    true,
 			Description: "AuthnContext ClassRefs",
 		},
 		"authn_context_decl_refs": {
-			Type:        schema.TypeString,
+			Type:        schema.TypeList,
+			Elem:        &schema.Schema{Type: schema.TypeString},
 			Optional:    true,
 			Description: "AuthnContext DeclRefs",
 		},
@@ -194,9 +196,9 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
 		PrincipalType:                    data.Get("principal_type").(string),
 		PrincipalAttribute:               data.Get("principal_attribute").(string),
-		AuthnContextClassRefs:            data.Get("authn_context_class_refs").(string),
+		AuthnContextClassRefs:            data.Get("authn_context_class_refs").([]interface{}),
 		AuthnContextComparisonType:       data.Get("authn_context_comparison_type").(string),
-		AuthnContextDeclRefs:             data.Get("authn_context_decl_refs").(string),
+		AuthnContextDeclRefs:             data.Get("authn_context_decl_refs").([]interface{}),
 	}
 
 	if _, ok := data.GetOk("signature_algorithm"); ok {

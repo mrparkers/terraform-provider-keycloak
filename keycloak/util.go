@@ -2,12 +2,14 @@ package keycloak
 
 import (
 	"bytes"
+	"encoding/json"
 	"strconv"
 	"strings"
 	"time"
 )
 
 type KeycloakBoolQuoted bool
+type KeycloakSliceQuoted []interface{}
 
 func (c KeycloakBoolQuoted) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
@@ -32,6 +34,41 @@ func (c *KeycloakBoolQuoted) UnmarshalJSON(in []byte) error {
 	}
 	res := KeycloakBoolQuoted(b)
 	*c = res
+	return nil
+}
+
+func (s KeycloakSliceQuoted) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	if s == nil {
+		buf.WriteString(`""`)
+	} else {
+		sliceAsString := make([]string, len(s))
+		for i, v := range s {
+			sliceAsString[i] = v.(string)
+		}
+
+		stringAsJSON, _ := json.Marshal(sliceAsString)
+		buf.WriteString(strconv.Quote(string(stringAsJSON)))
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (s *KeycloakSliceQuoted) UnmarshalJSON(in []byte) error {
+	value := string(in)
+
+	if value == `""` {
+		*s = make([]interface{}, len(in))
+		return nil
+	}
+
+	unquoted, err := strconv.Unquote(value)
+	if err != nil {
+		return err
+	}
+
+	json.Unmarshal([]byte(unquoted), s)
+
 	return nil
 }
 
