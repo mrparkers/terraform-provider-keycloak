@@ -105,6 +105,10 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 	firstPostBindingLogout := randomBool()
 	firstPostBindingResponse := randomBool()
 	firstPostBindingRequest := randomBool()
+	firstAuthnContextClassRefs := make([]interface{}, 1)
+	firstAuthnContextClassRefs[0] = `"foo"`
+	firstAuthnContextDeclRefs := make([]interface{}, 1)
+	firstAuthnContextDeclRefs[0] = `"foo"`
 
 	firstSaml := &keycloak.IdentityProvider{
 		Realm:   realmName,
@@ -129,6 +133,9 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(firstAssertionsEncrypted),
 			GuiOrder:                         strconv.Itoa(acctest.RandIntRange(1, 3)),
 			SyncMode:                         randomStringInSlice(syncModes),
+			AuthnContextClassRefs:            keycloak.KeycloakSliceQuoted(firstAuthnContextClassRefs),
+			AuthnContextDeclRefs:             keycloak.KeycloakSliceQuoted(firstAuthnContextDeclRefs),
+			AuthnContextComparisonType:       "exact",
 		},
 	}
 
@@ -155,6 +162,9 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(!firstAssertionsEncrypted),
 			GuiOrder:                         strconv.Itoa(acctest.RandIntRange(1, 3)),
 			SyncMode:                         randomStringInSlice(syncModes),
+			AuthnContextClassRefs:            keycloak.KeycloakSliceQuoted(firstAuthnContextClassRefs),
+			AuthnContextDeclRefs:             keycloak.KeycloakSliceQuoted(firstAuthnContextDeclRefs),
+			AuthnContextComparisonType:       "exact",
 		},
 	}
 
@@ -313,6 +323,9 @@ resource "keycloak_saml_identity_provider" "saml" {
 	want_assertions_encrypted  = %t
 	gui_order                  = %s
 	sync_mode                  = "%s"
+	authn_context_class_refs   = %v
+	authn_context_decl_refs = %v
+	authn_context_comparison_type = "%s"
 }
-	`, testAccRealm.Realm, saml.Alias, saml.Enabled, saml.Config.EntityId, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSignKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted), saml.Config.GuiOrder, saml.Config.SyncMode)
+	`, testAccRealm.Realm, saml.Alias, saml.Enabled, saml.Config.EntityId, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSignKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted), saml.Config.GuiOrder, saml.Config.SyncMode, saml.Config.AuthnContextClassRefs, saml.Config.AuthnContextDeclRefs, saml.Config.AuthnContextComparisonType)
 }
