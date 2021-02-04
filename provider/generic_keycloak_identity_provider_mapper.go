@@ -51,6 +51,9 @@ func getIdentityProviderMapperFromData(data *schema.ResourceData) (*keycloak.Ide
 		Name:                  data.Get("name").(string),
 		IdentityProviderAlias: data.Get("identity_provider_alias").(string),
 	}
+	if v, ok := data.GetOk("identity_provider_mapper"); ok {
+		rec.IdentityProviderMapper = v.(string)
+	}
 	return rec, nil
 }
 
@@ -59,6 +62,7 @@ func setIdentityProviderMapperData(data *schema.ResourceData, identityProviderMa
 	data.Set("realm", identityProviderMapper.Realm)
 	data.Set("name", identityProviderMapper.Name)
 	data.Set("identity_provider_alias", identityProviderMapper.IdentityProviderAlias)
+	data.Set("identity_provider_mapper", identityProviderMapper.IdentityProviderMapper)
 	return nil
 }
 
