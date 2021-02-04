@@ -32,7 +32,7 @@ func getUserTemplateImporterIdentityProviderMapperFromData(data *schema.Resource
 			extraConfig[key] = value
 		}
 	}
-	if &rec.IdentityProviderMapper != nil {
+	if &rec.IdentityProviderMapper == nil {
 		identityProvider, err := keycloakClient.GetIdentityProvider(rec.Realm, rec.IdentityProviderAlias)
 		if err != nil {
 			return nil, handleNotFoundError(err, data)
