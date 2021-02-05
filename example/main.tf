@@ -628,6 +628,19 @@ resource keycloak_user_template_importer_identity_provider_mapper oidc {
   }
 }
 
+resource keycloak_user_template_importer_identity_provider_mapper oidc {
+  realm                    = keycloak_realm.test.id
+  name                     = "userTemplate"
+  identity_provider_alias  = keycloak_oidc_identity_provider.oidc.alias
+  identity_provider_mapper = "oidc-username-idp-mapper"
+  template                 = "$${UUID}"
+
+  extra_config = {
+    syncMode = "IMPORT"
+    target = "LOCAL"
+  }
+}
+
 resource keycloak_hardcoded_role_identity_provider_mapper oidc {
   realm                   = keycloak_realm.test.id
   name                    = "hardcodedRole"

@@ -9,6 +9,12 @@ import (
 
 func resourceKeycloakUserTemplateImporterIdentityProviderMapper() *schema.Resource {
 	mapperSchema := map[string]*schema.Schema{
+		"identity_provider_mapper": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			ForceNew:    true,
+			Description: "IDP Mapper Alias",
+		},
 		"template": {
 			Type:        schema.TypeString,
 			Optional:    true,
@@ -26,17 +32,25 @@ func resourceKeycloakUserTemplateImporterIdentityProviderMapper() *schema.Resour
 func getUserTemplateImporterIdentityProviderMapperFromData(data *schema.ResourceData, meta interface{}) (*keycloak.IdentityProviderMapper, error) {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	rec, _ := getIdentityProviderMapperFromData(data)
+
 	extraConfig := map[string]interface{}{}
 	if v, ok := data.GetOk("extra_config"); ok {
 		for key, value := range v.(map[string]interface{}) {
 			extraConfig[key] = value
 		}
 	}
+
 	identityProvider, err := keycloakClient.GetIdentityProvider(rec.Realm, rec.IdentityProviderAlias)
 	if err != nil {
 		return nil, handleNotFoundError(err, data)
 	}
+
 	rec.IdentityProviderMapper = fmt.Sprintf("%s-username-idp-mapper", identityProvider.ProviderId)
+
+	if v, ok := data.GetOk("identity_provider_mapper"); ok && v.(string) != "" {
+		rec.IdentityProviderMapper = v.(string)
+	}
+
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
 		Template:    data.Get("template").(string),
 		ExtraConfig: extraConfig,
@@ -48,5 +62,6 @@ func setUserTemplateImporterIdentityProviderMapperData(data *schema.ResourceData
 	setIdentityProviderMapperData(data, identityProviderMapper)
 	data.Set("template", identityProviderMapper.Config.Template)
 	data.Set("extra_config", identityProviderMapper.Config.ExtraConfig)
+	data.Set("identity_provider_mapper", identityProviderMapper.IdentityProviderMapper)
 	return nil
 }

@@ -49,6 +49,26 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_withExtraConfig(t *testin
 	})
 }
 
+func TestAccKeycloakUserTemplateIdentityProviderMapper_withMapper(t *testing.T) {
+	t.Parallel()
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	mapper := acctest.RandomWithPrefix("tf-acc")
+	alias := acctest.RandomWithPrefix("tf-acc")
+	template := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserTemplateIdentityProviderMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakUserTemplateIdentityProviderMapper_withMapper(alias, mapperName, mapper, template),
+				Check:  testAccCheckKeycloakUserTemplateIdentityProviderMapperExists("keycloak_user_template_importer_identity_provider_mapper.oidc"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakUserTemplateIdentityProviderMapper_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var mapper = &keycloak.IdentityProviderMapper{}
@@ -265,6 +285,31 @@ resource keycloak_user_template_importer_identity_provider_mapper oidc {
 	}
 }
 	`, testAccRealm.Realm, alias, name, template, syncMode)
+}
+
+func testKeycloakUserTemplateIdentityProviderMapper_withMapper(alias, name, mapper, template string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_oidc_identity_provider" "oidc" {
+	realm             = data.keycloak_realm.realm.id
+	alias             = "%s"
+	authorization_url = "https://example.com/auth"
+	token_url         = "https://example.com/token"
+	client_id         = "example_id"
+	client_secret     = "example_token"
+}
+
+resource keycloak_user_template_importer_identity_provider_mapper oidc {
+	realm                    = data.keycloak_realm.realm.id
+	name                     = "%s"
+	identity_provider_alias  = "${keycloak_oidc_identity_provider.oidc.alias}"
+	identity_provider_mapper = "%s"
+	template                 = "%s"
+}
+	`, testAccRealm.Realm, alias, name, mapper, template)
 }
 
 func testKeycloakUserTemplateIdentityProviderMapper_basicFromInterface(mapper *keycloak.IdentityProviderMapper) string {
