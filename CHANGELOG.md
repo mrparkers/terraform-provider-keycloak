@@ -1,3 +1,8 @@
+## v2.2.1 (February 5, 2021)
+
+IMPROVEMENTS:
+- make `keycloak_attribute_importer_identity_provider_mapper` and `keycloak_user_template_importer_identity_provider_mapper` work for the google/facebook identity providers ([#482](https://github.com/mrparkers/terraform-provider-keycloak/pull/482))
+
 ## v2.2.0 (January 23, 2021)
 
 FEATURES:
