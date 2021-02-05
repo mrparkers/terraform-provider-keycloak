@@ -70,7 +70,12 @@ func getAttributeImporterIdentityProviderMapperFromData(data *schema.ResourceDat
 		if _, ok := data.GetOk("claim_name"); !ok {
 			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_importer_identity_provider_mapper: %s: "claim_name": should be set for %s identity provider`, data.Get("name").(string), identityProvider.ProviderId)
 		}
+
 		rec.Config.Claim = data.Get("claim_name").(string)
+	} else if identityProvider.ProviderId == "facebook" || identityProvider.ProviderId == "google" {
+		rec.IdentityProviderMapper = fmt.Sprintf("%s-user-attribute-mapper", identityProvider.ProviderId)
+		rec.Config.JsonField = data.Get("claim_name").(string)
+		rec.Config.UserAttributeName = data.Get("user_attribute").(string)
 	} else {
 		return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_importer_identity_provider_mapper: %s: "%s" identity provider is not supported yet`, data.Get("name").(string), identityProvider.ProviderId)
 	}

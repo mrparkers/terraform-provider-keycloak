@@ -11,6 +11,7 @@ import (
 
 type IdentityProviderMapperConfig struct {
 	UserAttribute         string                 `json:"user.attribute,omitempty"`
+	UserAttributeName     string                 `json:"userAttribute,omitempty"`
 	Claim                 string                 `json:"claim,omitempty"`
 	ClaimValue            string                 `json:"claim.value,omitempty"`
 	HardcodedAttribute    string                 `json:"attribute,omitempty"`
@@ -19,6 +20,7 @@ type IdentityProviderMapperConfig struct {
 	AttributeFriendlyName string                 `json:"attribute.friendly.name,omitempty"`
 	Template              string                 `json:"template,omitempty"`
 	Role                  string                 `json:"role,omitempty"`
+	JsonField             string                 `json:"jsonField,omitEmpty"`
 	ExtraConfig           map[string]interface{} `json:"-"`
 }
 
