@@ -9,20 +9,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for CircleCI tests
-        uses: "WyriHaximus/github-action-wait-for-status@v1.1.2"
-        with:
-          ignoreActions: release
-          checkInterval: 30
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v2
-      - name: Import GPG key
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v2
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Get tag name
         id: get_tag_name
         run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
@@ -41,4 +28,3 @@ jobs:
           args: release --rm-dist --release-notes=${{ steps.build_release_notes.outputs.NOTES }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
