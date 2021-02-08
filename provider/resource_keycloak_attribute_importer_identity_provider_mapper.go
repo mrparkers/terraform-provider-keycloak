@@ -84,10 +84,16 @@ func getAttributeImporterIdentityProviderMapperFromData(data *schema.ResourceDat
 
 func setAttributeImporterIdentityProviderMapperData(data *schema.ResourceData, identityProviderMapper *keycloak.IdentityProviderMapper) error {
 	setIdentityProviderMapperData(data, identityProviderMapper)
+
+	claimName := identityProviderMapper.Config.Claim
+	if claimName == "" {
+		claimName = identityProviderMapper.Config.JsonField
+	}
+
 	data.Set("attribute_name", identityProviderMapper.Config.Attribute)
 	data.Set("user_attribute", identityProviderMapper.Config.UserAttribute)
 	data.Set("attribute_friendly_name", identityProviderMapper.Config.AttributeFriendlyName)
-	data.Set("claim_name", identityProviderMapper.Config.Claim)
+	data.Set("claim_name", claimName)
 	data.Set("extra_config", identityProviderMapper.Config.ExtraConfig)
 	return nil
 }
