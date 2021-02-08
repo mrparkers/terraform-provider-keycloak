@@ -1,3 +1,8 @@
+## v2.2.2 (February 5, 2021)
+
+IMPROVEMENTS:
+- make `keycloak_attribute_importer_identity_provider_mapper` use `jsonField` when reading back claim name ([#482](https://github.com/mrparkers/terraform-provider-keycloak/pull/482/commits/e8b2fd531da7cd3e64872174af4f6d7aa4340887))
+
 ## v2.2.1 (February 5, 2021)
 
 IMPROVEMENTS:
