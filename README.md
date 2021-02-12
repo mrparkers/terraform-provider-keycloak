@@ -31,6 +31,17 @@ Or, follow the [old instructions for installing third-party plugins](https://www
 
 If you are using any version below v2.0.0, you can also follow the [old instructions for installing third-party plugins](https://www.terraform.io/docs/configuration-0-11/providers.html#third-party-plugins).
 
+## Upgrade from terraform 0.12 and keycloak provider 1.x
+
+Please read https://www.terraform.io/upgrade-guides/0-13.html first. For a keycloak project follow the following steps in order:
+
+* `terraform -v` should print 0.13 and list no keycloak provider
+* `terraform state replace-provider registry.terraform.io/-/keycloak mrparkers/keycloak`
+* find all `provider keycloak {...}` blocks in `*.tf` (also in all modules you are including) and delete the `version` line
+* add the `terraform { required_provides { keycloak = { ...` block mentioned in "Installation" to `terraform.tf` (also in all module directories you are including). Be sure to also always add "source" or else the Terraform looks for "hashicorp/keycloak"!   
+* `terraform 0.13upgrade`
+* `terraform init`
+
 ## Supported Versions
 
 This provider will officially support the latest three major versions of Keycloak, although older versions may still work.
