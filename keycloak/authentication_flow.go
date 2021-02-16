@@ -53,6 +53,29 @@ func (keycloakClient *KeycloakClient) GetAuthenticationFlow(realmId, id string) 
 	return &authenticationFlow, nil
 }
 
+func (keycloakClient *KeycloakClient) GetAuthenticationFlowFromAlias(realmId, alias string) (*AuthenticationFlow, error) {
+	var authenticationFlows []*AuthenticationFlow
+	var authenticationFlow *AuthenticationFlow = nil
+
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows", realmId), &authenticationFlows, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, authFlow := range authenticationFlows {
+		if authFlow.Alias == alias {
+			authenticationFlow = authFlow
+		}
+	}
+
+	if authenticationFlow == nil {
+		return nil, fmt.Errorf("no authentication flow found for alias %s", alias)
+	}
+	authenticationFlow.RealmId = realmId
+
+	return authenticationFlow, nil
+}
+
 func (keycloakClient *KeycloakClient) UpdateAuthenticationFlow(authenticationFlow *AuthenticationFlow) error {
 	authenticationFlow.TopLevel = true
 	authenticationFlow.BuiltIn = false
