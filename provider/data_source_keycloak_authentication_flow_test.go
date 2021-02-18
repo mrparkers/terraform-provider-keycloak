@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -53,6 +54,23 @@ func testAccCheckDataKeycloakAuthenticationFlow(resourceName string) resource.Te
 	}
 }
 
+func TestAccKeycloakDataSourceAuthenticationExecution_wrongAlias(t *testing.T) {
+	t.Parallel()
+	alias := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testDataSourceKeycloakAuthenticationFlow_wrongAlias(alias),
+				ExpectError: regexp.MustCompile("no authentication flow found for alias .*"),
+			},
+		},
+	})
+}
+
 func testDataSourceKeycloakAuthenticationFlow_basic(alias string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
@@ -66,7 +84,29 @@ resource "keycloak_authentication_flow" "flow" {
 
 data "keycloak_authentication_flow" "flow" {
 	realm_id 			= data.keycloak_realm.realm.id
-	alias   = keycloak_authentication_flow.flow.alias
+	alias   			= keycloak_authentication_flow.flow.alias
+
+	depends_on = [
+		keycloak_authentication_flow.flow,
+	]
+}
+	`, testAccRealm.Realm, alias)
+}
+
+func testDataSourceKeycloakAuthenticationFlow_wrongAlias(alias string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_authentication_flow" "flow" {
+	realm_id = data.keycloak_realm.realm.id
+	alias    = "%s"
+}
+
+data "keycloak_authentication_flow" "flow" {
+	realm_id 			= data.keycloak_realm.realm.id
+	alias   			= "foo"
 
 	depends_on = [
 		keycloak_authentication_flow.flow,
