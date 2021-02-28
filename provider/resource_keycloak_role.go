@@ -54,10 +54,10 @@ func resourceKeycloakRole() *schema.Resource {
 }
 
 func mapFromDataToRole(data *schema.ResourceData) *keycloak.Role {
-	attributes := map[string]interface{}{}
+	attributes := map[string][]string{}
 	if v, ok := data.GetOk("attributes"); ok {
 		for key, value := range v.(map[string]interface{}) {
-			attributes[key] = [1]string{value.(string)}
+			attributes[key] = splitLen(value.(string), MAX_ATTRIBUTE_VALUE_LEN)
 		}
 	}
 
@@ -74,19 +74,16 @@ func mapFromDataToRole(data *schema.ResourceData) *keycloak.Role {
 }
 
 func mapFromRoleToData(data *schema.ResourceData, role *keycloak.Role) {
+	attributes := map[string]string{}
+	for k, v := range role.Attributes {
+		attributes[k] = strings.Join(v, "")
+	}
 	data.SetId(role.Id)
 
 	data.Set("realm_id", role.RealmId)
 	data.Set("client_id", role.ClientId)
 	data.Set("name", role.Name)
 	data.Set("description", role.Description)
-	attributes := map[string]interface{}{}
-	if v, ok := data.GetOk("attributes"); ok {
-		for key := range v.(map[string]interface{}) {
-			attributes[key] = role.Attributes[key].([]interface{})[0]
-		}
-	}
-
 	data.Set("attributes", attributes)
 }
 

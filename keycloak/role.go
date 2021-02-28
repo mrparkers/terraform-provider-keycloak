@@ -17,7 +17,7 @@ type Role struct {
 	ContainerId string `json:"containerId"`
 	Composite   bool   `json:"composite"`
 	//extra attributes of a role
-	Attributes map[string]interface{} `json:"attributes"`
+	Attributes map[string][]string `json:"attributes"`
 }
 
 type UsersInRole struct {
@@ -60,7 +60,8 @@ func (keycloakClient *KeycloakClient) CreateRole(role *Role) error {
 
 	role.Id = createdRole.Id
 
-	return nil
+	// seems like role attributes aren't respected on create, so a following update is needed
+	return keycloakClient.UpdateRole(role)
 }
 
 func (keycloakClient *KeycloakClient) GetRealmRoles(realmId string) ([]*Role, error) {
