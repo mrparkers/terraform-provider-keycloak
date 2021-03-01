@@ -61,7 +61,7 @@ func TestAccKeycloakDataSourceAuthenticationExecution_wrongAlias(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionConfigDestroy,
+		CheckDestroy:      testAccCheckKeycloakAuthenticationFlowDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testDataSourceKeycloakAuthenticationFlow_wrongAlias(alias),
