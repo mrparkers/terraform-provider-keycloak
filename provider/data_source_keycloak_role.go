@@ -25,6 +25,16 @@ func dataSourceKeycloakRole() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"composite_roles": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+				Computed: true,
+			},
+			"attributes": {
+				Type:     schema.TypeMap,
+				Computed: true,
+			},
 		},
 	}
 }

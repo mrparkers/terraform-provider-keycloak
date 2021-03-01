@@ -6,15 +6,15 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/go-version"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
+
+	"github.com/hashicorp/go-version"
 
 	"golang.org/x/net/publicsuffix"
 )
@@ -27,7 +27,6 @@ type KeycloakClient struct {
 	initialLogin      bool
 	userAgent         string
 	version           *version.Version
-	mu                sync.Mutex
 }
 
 type ClientCredentials struct {
@@ -95,7 +94,6 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 		initialLogin:      initialLogin,
 		realm:             realm,
 		userAgent:         userAgent,
-		mu:                sync.Mutex{},
 	}
 
 	if keycloakClient.initialLogin {
@@ -109,9 +107,6 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 }
 
 func (keycloakClient *KeycloakClient) login() error {
-	keycloakClient.mu.Lock()
-	defer keycloakClient.mu.Unlock()
-
 	accessTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	accessTokenData := keycloakClient.getAuthenticationFormData()
 
@@ -173,9 +168,6 @@ func (keycloakClient *KeycloakClient) login() error {
 }
 
 func (keycloakClient *KeycloakClient) refresh() error {
-	keycloakClient.mu.Lock()
-	defer keycloakClient.mu.Unlock()
-
 	refreshTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	refreshTokenData := keycloakClient.getAuthenticationFormData()
 

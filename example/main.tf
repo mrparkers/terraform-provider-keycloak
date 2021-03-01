@@ -532,6 +532,16 @@ resource "keycloak_saml_client" "saml_client" {
   signing_private_key = file("../provider/misc/saml-key.pem")
 }
 
+resource "keycloak_saml_script_protocol_mapper" "saml_script_mapper" {
+  realm_id  = keycloak_realm.test.id
+  client_id = keycloak_saml_client.saml_client.id
+  name      = "script-mapper"
+
+  script                     = "exports = 'foo';"
+  saml_attribute_name        = "bar"
+  saml_attribute_name_format = "Unspecified"
+}
+
 resource "keycloak_saml_user_attribute_protocol_mapper" "saml_user_attribute_mapper" {
   realm_id  = keycloak_realm.test.id
   client_id = keycloak_saml_client.saml_client.id

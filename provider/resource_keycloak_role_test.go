@@ -263,6 +263,34 @@ func TestAccKeycloakRole_composites(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRole_basicWithAttributes(t *testing.T) {
+	t.Parallel()
+	roleName := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRoleDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRole_basicWithAttributes(roleName, attributeName, attributeValue),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRoleExists("keycloak_role.role"),
+					testAccCheckKeycloakRoleHasAttribute("keycloak_role.role", attributeName, attributeValue),
+				),
+			},
+			{
+				ResourceName:        "keycloak_role.role",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateIdPrefix: testAccRealm.Realm + "/",
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakRoleExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getRoleFromState(s, resourceName)
@@ -305,6 +333,21 @@ func testAccCheckKeycloakRoleFetch(resourceName string, role *keycloak.Role) res
 		role.Name = fetchedRole.Name
 		role.RealmId = fetchedRole.RealmId
 		role.ClientId = fetchedRole.ClientId
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRoleHasAttribute(resourceName, attributeName, attributeValue string) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		role, err := getRoleFromState(state, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if len(role.Attributes) != 1 || role.Attributes[attributeName][0] != attributeValue {
+			return fmt.Errorf("expected role %s to have attribute %s with value %s", role.Name, attributeName, attributeValue)
+		}
 
 		return nil
 	}
@@ -518,4 +561,20 @@ resource "keycloak_role" "role_with_composites" {
 	%s
 }
 	`, testAccRealm.Realm, clientOne, clientTwo, roleOne, roleTwo, roleThree, roleFour, roleWithComposites, tfComposites)
+}
+
+func testKeycloakRole_basicWithAttributes(role, attributeName, attributeValue string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_role" "role" {
+	name     = "%s"
+	realm_id = data.keycloak_realm.realm.id
+	attributes = {
+		"%s" = "%s"
+	}
+}
+	`, testAccRealm.Realm, role, attributeName, attributeValue)
 }
