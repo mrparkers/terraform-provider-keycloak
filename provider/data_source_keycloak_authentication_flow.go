@@ -32,7 +32,7 @@ func dataSourceKeycloakAuthenticationFlowRead(data *schema.ResourceData, meta in
 		return err
 	}
 
-	mapFromAuthenticationFlowToData(data, authenticationFlow)
+	mapFromAuthenticationFlowInfoToData(data, authenticationFlow)
 
 	return nil
 }
