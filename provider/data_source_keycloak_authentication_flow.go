@@ -27,12 +27,12 @@ func dataSourceKeycloakAuthenticationFlowRead(data *schema.ResourceData, meta in
 	realmID := data.Get("realm_id").(string)
 	alias := data.Get("alias").(string)
 
-	authenticationFlow, err := keycloakClient.GetAuthenticationFlowFromAlias(realmID, alias)
+	authenticationFlowInfo, err := keycloakClient.GetAuthenticationFlowFromAlias(realmID, alias)
 	if err != nil {
 		return err
 	}
 
-	mapFromAuthenticationFlowInfoToData(data, authenticationFlow)
+	mapFromAuthenticationFlowInfoToData(data, authenticationFlowInfo)
 
 	return nil
 }

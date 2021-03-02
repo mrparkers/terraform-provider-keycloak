@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"fmt"
+	"time"
 )
 
 type AuthenticationFlow struct {
@@ -60,6 +61,27 @@ func (keycloakClient *KeycloakClient) GetAuthenticationFlowFromAlias(realmId, al
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows", realmId), &authenticationFlows, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	// Retry 3 more times if not found, sometimes it took split milliseconds the Authentication to populate
+	if len(authenticationFlows) == 0 {
+		for i := 0; i < 3; i++ {
+			err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows", realmId), &authenticationFlows, nil)
+
+			if len(authenticationFlows) > 0 {
+				break
+			}
+
+			if err != nil {
+				return nil, err
+			}
+
+			time.Sleep(time.Millisecond * 50)
+		}
+
+		if len(authenticationFlows) == 0 {
+			return nil, fmt.Errorf("no authentication flow found for alias %s", alias)
+		}
 	}
 
 	for _, authFlow := range authenticationFlows {

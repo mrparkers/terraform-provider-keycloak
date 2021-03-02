@@ -65,8 +65,6 @@ func mapFromAuthenticationFlowInfoToData(data *schema.ResourceData, authenticati
 	data.SetId(authenticationFlow.Id)
 	data.Set("realm_id", authenticationFlow.RealmId)
 	data.Set("alias", authenticationFlow.Alias)
-	data.Set("provider_id", authenticationFlow.ProviderId)
-	data.Set("description", authenticationFlow.Description)
 }
 
 func resourceKeycloakAuthenticationFlowCreate(data *schema.ResourceData, meta interface{}) error {
