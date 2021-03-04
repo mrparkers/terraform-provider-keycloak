@@ -220,14 +220,12 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 			validRedirectUris = append(validRedirectUris, validRedirectUri.(string))
 		}
 	}
-
 	extraConfig := map[string]interface{}{}
 	if v, ok := data.GetOk("extra_config"); ok {
 		for key, value := range v.(map[string]interface{}) {
 			extraConfig[key] = value
 		}
 	}
-
 	samlAttributes := &keycloak.SamlClientAttributes{
 		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
 		NameIdFormat:                    data.Get("name_id_format").(string),
@@ -237,8 +235,6 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		AssertionConsumerRedirectURL:    data.Get("assertion_consumer_redirect_url").(string),
 		LogoutServicePostBindingURL:     data.Get("logout_service_post_binding_url").(string),
 		LogoutServiceRedirectBindingURL: data.Get("logout_service_redirect_binding_url").(string),
-		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
-		SignatureCanonicalizationMethod: data.Get("saml_signature_canonicalization_method").(string),
 		ExtraConfig:                     extraConfig,
 	}
 
@@ -322,6 +318,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 
 func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlClient) error {
 	data.SetId(client.Id)
+
 	if client.Attributes.IncludeAuthnStatement != nil {
 		includeAuthnStatement, err := strconv.ParseBool(*client.Attributes.IncludeAuthnStatement)
 		if err != nil {
@@ -424,8 +421,6 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("logout_service_post_binding_url", client.Attributes.LogoutServicePostBindingURL)
 	data.Set("logout_service_redirect_binding_url", client.Attributes.LogoutServiceRedirectBindingURL)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
-	data.Set("signature_algorithm", client.Attributes.SignatureAlgorithm)
-	data.Set("saml_signature_canonicalization_method", client.Attributes.SignatureCanonicalizationMethod)
 	data.Set("extra_config", client.Attributes.ExtraConfig)
 
 	return nil
@@ -435,6 +430,7 @@ func resourceKeycloakSamlClientCreate(data *schema.ResourceData, meta interface{
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	client := mapToSamlClientFromData(data)
+
 	err := keycloakClient.NewSamlClient(client)
 	if err != nil {
 		return err
@@ -468,6 +464,7 @@ func resourceKeycloakSamlClientUpdate(data *schema.ResourceData, meta interface{
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	client := mapToSamlClientFromData(data)
+
 	err := keycloakClient.UpdateSamlClient(client)
 	if err != nil {
 		return err
