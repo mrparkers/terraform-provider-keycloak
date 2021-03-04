@@ -1,8 +1,8 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -128,7 +128,6 @@ func setOpenidClientAuthorizationTimePolicyResourceData(data *schema.ResourceDat
 	data.Set("name", policy.Name)
 	data.Set("decision_strategy", policy.DecisionStrategy)
 	data.Set("logic", policy.Logic)
-	data.Set("type", policy.Type)
 	data.Set("description", policy.Description)
 	data.Set("not_on_or_after", policy.NotOnOrAfter)
 	data.Set("not_before", policy.NotBefore)

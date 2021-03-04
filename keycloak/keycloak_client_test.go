@@ -1,7 +1,7 @@
 package keycloak
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"io/ioutil"
 	"log"
 	"os"
@@ -23,6 +23,8 @@ var requiredEnvironmentVariables = []string{
 //
 // Any action that returns a 403 or a 401 could be used for this test
 // Creating a realm is just the only one I'm aware of
+//
+// This appears to have been fixed as of Keycloak 12.x
 func TestAccKeycloakApiClientRefresh(t *testing.T) {
 	for _, requiredEnvironmentVariable := range requiredEnvironmentVariables {
 		if value := os.Getenv(requiredEnvironmentVariable); value == "" {
@@ -51,9 +53,14 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		t.Fatal("KEYCLOAK_CLIENT_TIMEOUT must be an integer")
 	}
 
-	keycloakClient, err := NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), os.Getenv("KEYCLOAK_USER"), os.Getenv("KEYCLOAK_PASSWORD"), true, clientTimeout, "", false, "")
+	keycloakClient, err := NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), "/auth", os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), os.Getenv("KEYCLOAK_USER"), os.Getenv("KEYCLOAK_PASSWORD"), true, clientTimeout, "", false, "")
 	if err != nil {
 		t.Fatalf("%s", err)
+	}
+
+	// skip test if running 12.x or greater
+	if keycloakClient.VersionIsGreaterThanOrEqualTo(Version_12) {
+		t.Skip()
 	}
 
 	realmName := "terraform-" + acctest.RandString(10)

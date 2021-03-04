@@ -25,12 +25,15 @@ var (
 	includedClientAudienceField          = "included.client.audience"
 	includedCustomAudienceField          = "included.custom.audience"
 	multivaluedField                     = "multivalued"
+	samlScriptField                      = "Script" // needs to start with uppercase S for SAML script mapper
+	scriptField                          = "script"
+	singleValueAttributeField            = "single"
 	userAttributeField                   = "user.attribute"
 	userPropertyField                    = "user.attribute"
 	userRealmRoleMappingRolePrefixField  = "usermodel.realmRoleMapping.rolePrefix"
 	userClientRoleMappingClientIdField   = "usermodel.clientRoleMapping.clientId"
 	userClientRoleMappingRolePrefixField = "usermodel.clientRoleMapping.rolePrefix"
-	userSessionModelNoteLabelField       = "userSession.modelNote.label"
+	userSessionNoteField                 = "user.session.note"
 	aggregateAttributeValuesField        = "aggregate.attrs"
 )
 

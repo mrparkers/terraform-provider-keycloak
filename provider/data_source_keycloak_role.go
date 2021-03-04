@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -23,6 +23,16 @@ func dataSourceKeycloakRole() *schema.Resource {
 			},
 			"description": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"composite_roles": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+				Computed: true,
+			},
+			"attributes": {
+				Type:     schema.TypeMap,
 				Computed: true,
 			},
 		},

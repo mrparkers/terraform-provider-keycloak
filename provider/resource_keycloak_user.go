@@ -2,7 +2,7 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
 )
@@ -145,7 +145,7 @@ func getUserFederatedIdentitiesFromData(data []interface{}) *keycloak.FederatedI
 	var federatedIdentities keycloak.FederatedIdentities
 	for _, d := range data {
 		federatedIdentitiesData := d.(map[string]interface{})
-		federatedIdentity := keycloak.FederatedIdentity{
+		federatedIdentity := &keycloak.FederatedIdentity{
 			IdentityProvider: federatedIdentitiesData["identity_provider"].(string),
 			UserId:           federatedIdentitiesData["user_id"].(string),
 			UserName:         federatedIdentitiesData["user_name"].(string),

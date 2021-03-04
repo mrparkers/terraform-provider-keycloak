@@ -2,9 +2,11 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strconv"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakOpenidClientScope() *schema.Resource {
@@ -35,6 +37,15 @@ func resourceKeycloakOpenidClientScope() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"include_in_token_scope": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"gui_order": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -49,9 +60,16 @@ func getClientScopeFromData(data *schema.ResourceData) *keycloak.OpenidClientSco
 
 	if consentScreenText, ok := data.GetOk("consent_screen_text"); ok {
 		clientScope.Attributes.ConsentScreenText = consentScreenText.(string)
-		clientScope.Attributes.DisplayOnConsentScreen = "true"
+		clientScope.Attributes.DisplayOnConsentScreen = true
 	} else {
-		clientScope.Attributes.DisplayOnConsentScreen = "false"
+		clientScope.Attributes.DisplayOnConsentScreen = false
+	}
+
+	clientScope.Attributes.IncludeInTokenScope = keycloak.KeycloakBoolQuoted(data.Get("include_in_token_scope").(bool))
+
+	// Treat 0 as an empty string for the purpose of omitting the attribute to reset the order
+	if guiOrder := data.Get("gui_order").(int); guiOrder != 0 {
+		clientScope.Attributes.GuiOrder = strconv.Itoa(guiOrder)
 	}
 
 	return clientScope
@@ -64,8 +82,13 @@ func setClientScopeData(data *schema.ResourceData, clientScope *keycloak.OpenidC
 	data.Set("name", clientScope.Name)
 	data.Set("description", clientScope.Description)
 
-	if clientScope.Attributes.DisplayOnConsentScreen == "true" {
+	if clientScope.Attributes.DisplayOnConsentScreen {
 		data.Set("consent_screen_text", clientScope.Attributes.ConsentScreenText)
+	}
+
+	data.Set("include_in_token_scope", clientScope.Attributes.IncludeInTokenScope)
+	if guiOrder, err := strconv.Atoi(clientScope.Attributes.GuiOrder); err == nil {
+		data.Set("gui_order", guiOrder)
 	}
 }
 

@@ -15,9 +15,9 @@ type OpenIdUserSessionNoteProtocolMapper struct {
 	AddToIdToken     bool
 	AddToAccessToken bool
 
-	ClaimName            string
-	ClaimValueType       string
-	UserSessionNoteLabel string
+	ClaimName       string
+	ClaimValueType  string
+	UserSessionNote string
 }
 
 func (mapper *OpenIdUserSessionNoteProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
@@ -27,11 +27,11 @@ func (mapper *OpenIdUserSessionNoteProtocolMapper) convertToGenericProtocolMappe
 		Protocol:       "openid-connect",
 		ProtocolMapper: "oidc-usersessionmodel-note-mapper",
 		Config: map[string]string{
-			addToIdTokenField:              strconv.FormatBool(mapper.AddToIdToken),
-			addToAccessTokenField:          strconv.FormatBool(mapper.AddToAccessToken),
-			claimNameField:                 mapper.ClaimName,
-			claimValueTypeField:            mapper.ClaimValueType,
-			userSessionModelNoteLabelField: mapper.UserSessionNoteLabel,
+			addToIdTokenField:     strconv.FormatBool(mapper.AddToIdToken),
+			addToAccessTokenField: strconv.FormatBool(mapper.AddToAccessToken),
+			claimNameField:        mapper.ClaimName,
+			claimValueTypeField:   mapper.ClaimValueType,
+			userSessionNoteField:  mapper.UserSessionNote,
 		},
 	}
 }
@@ -57,9 +57,9 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserSessionNoteProtocolMapp
 		AddToIdToken:     addToIdToken,
 		AddToAccessToken: addToAccessToken,
 
-		ClaimName:            protocolMapper.Config[claimNameField],
-		ClaimValueType:       protocolMapper.Config[claimValueTypeField],
-		UserSessionNoteLabel: protocolMapper.Config[userSessionModelNoteLabelField],
+		ClaimName:       protocolMapper.Config[claimNameField],
+		ClaimValueType:  protocolMapper.Config[claimValueTypeField],
+		UserSessionNote: protocolMapper.Config[userSessionNoteField],
 	}, nil
 }
 

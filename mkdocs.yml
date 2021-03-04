@@ -38,6 +38,8 @@ nav:
   - keycloak_saml_client: resources/keycloak_saml_client.md
   - keycloak_saml_user_attribute_protocol_mapper: resources/keycloak_saml_user_attribute_protocol_mapper.md
   - keycloak_saml_user_property_protocol_mapper: resources/keycloak_saml_user_property_protocol_mapper.md
+  - keycloak_saml_client_default_scopes: resources/keycloak_saml_client_default_scopes.md
+  - keycloak_saml_client_scope: resources/keycloak_saml_client_scope.md
   - keycloak_generic_client_protocol_mapper: resources/keycloak_generic_client_protocol_mapper.md
   - keycloak_ldap_user_federation: resources/keycloak_ldap_user_federation.md
   - keycloak_ldap_full_name_mapper: resources/keycloak_ldap_full_name_mapper.md
@@ -53,5 +55,6 @@ nav:
   - keycloak_attribute_importer_identity_provider_mapper: resources/keycloak_attribute_importer_identity_provider_mapper.md
   - keycloak_authentication_execution: resources/keycloak_authentication_execution.md
   - keycloak_authentication_execution_config: resources/keycloak_authentication_execution_config.md
+  - keycloak_identity_provider_token_exchange_scope_permission: resources/keycloak_identity_provider_token_exchange_scope_permission.md
 theme: readthedocs
 extra_css: [index.css]

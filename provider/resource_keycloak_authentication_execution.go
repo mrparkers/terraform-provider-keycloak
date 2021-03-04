@@ -2,10 +2,11 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakAuthenticationExecution() *schema.Resource {
@@ -62,6 +63,13 @@ func mapFromAuthenticationExecutionToData(data *schema.ResourceData, authenticat
 	data.Set("parent_flow_alias", authenticationExecution.ParentFlowAlias)
 	data.Set("authenticator", authenticationExecution.Authenticator)
 	data.Set("requirement", authenticationExecution.Requirement)
+}
+
+func mapFromAuthenticationExecutionInfoToData(data *schema.ResourceData, authenticationExecutionInfo *keycloak.AuthenticationExecutionInfo) {
+	data.SetId(authenticationExecutionInfo.Id)
+
+	data.Set("realm_id", authenticationExecutionInfo.RealmId)
+	data.Set("parent_flow_alias", authenticationExecutionInfo.ParentFlowAlias)
 }
 
 func resourceKeycloakAuthenticationExecutionCreate(data *schema.ResourceData, meta interface{}) error {
