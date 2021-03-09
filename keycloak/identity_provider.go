@@ -44,6 +44,8 @@ type IdentityProviderConfig struct {
 	HostedDomain                     string                 `json:"hostedDomain,omitempty"`
 	UserIp                           KeycloakBoolQuoted     `json:"userIp,omitempty"`
 	OfflineAccess                    KeycloakBoolQuoted     `json:"offlineAccess,omitempty"`
+	PrincipalType                    string                 `json:"principalType,omitempty"`
+	PrincipalAttribute               string                 `json:"principalAttribute,omitempty"`
 	ExtraConfig                      map[string]interface{} `json:"-"`
 }
 

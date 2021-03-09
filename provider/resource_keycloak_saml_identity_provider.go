@@ -28,6 +28,12 @@ var keyNameTransformers = []string{
 	"CERT_SUBJECT",
 }
 
+var principalTypes = []string{
+	"SUBJECT",
+	"ATTRIBUTE",
+	"FRIENDLY_ATTRIBUTE",
+}
+
 func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	samlSchema := map[string]*schema.Schema{
 		"backchannel_supported": {
@@ -114,6 +120,19 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Optional:    true,
 			Description: "Want Assertions Encrypted.",
 		},
+		"principal_type": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Default:      "",
+			ValidateFunc: validation.StringInSlice(principalTypes, false),
+			Description:  "Principal Type",
+		},
+		"principal_attribute": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "",
+			Description: "Principal Attribute",
+		},
 	}
 	samlResource := resourceKeycloakIdentityProvider()
 	samlResource.Schema = mergeSchemas(samlResource.Schema, samlSchema)
@@ -142,6 +161,8 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		ForceAuthn:                       keycloak.KeycloakBoolQuoted(data.Get("force_authn").(bool)),
 		WantAssertionsSigned:             keycloak.KeycloakBoolQuoted(data.Get("want_assertions_signed").(bool)),
 		WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
+		PrincipalType:                    data.Get("principal_type").(string),
+		PrincipalAttribute:               data.Get("principal_attribute").(string),
 	}
 	if _, ok := data.GetOk("signature_algorithm"); ok {
 		rec.Config.WantAuthnRequestsSigned = true
@@ -166,5 +187,7 @@ func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("force_authn", identityProvider.Config.ForceAuthn)
 	data.Set("want_assertions_signed", identityProvider.Config.WantAssertionsSigned)
 	data.Set("want_assertions_encrypted", identityProvider.Config.WantAssertionsEncrypted)
+	data.Set("principal_type", identityProvider.Config.PrincipalType)
+	data.Set("principal_attribute", identityProvider.Config.PrincipalAttribute)
 	return nil
 }
