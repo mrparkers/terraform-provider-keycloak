@@ -55,7 +55,7 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_socialOidcProvider(t
 	t.Parallel()
 	for _, providerId := range []string{"facebook", "github", "google", "instagram", "linkedin", "microsoft", "paypal", "stackoverflow"} {
 		providerId := providerId
-		t.Run("", func(t *testing.T) {
+		t.Run(providerId, func(t *testing.T) {
 			t.Parallel()
 			mapperName := acctest.RandomWithPrefix("tf-acc")
 			alias := providerId

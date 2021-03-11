@@ -58,7 +58,7 @@ The following arguments are supported:
 - `claim_name` - (Optional) For OIDC based providers, this is the name of the claim to use.
 - `extra_config` - (Optional) Key/value attributes to add to the identity provider mapper model that is persisted to Keycloak. This can be used to extend the base model with new Keycloak features.
 - `extra_config.jsonField` - (Optional) Social profile JSON field path for social identity providers.
-- `extra_config.attributeName` - (Optional) User attribute name for social identity providers.
+- `extra_config.userAttribute` - (Optional) User attribute name for social identity providers.
 
 ## Import
 
