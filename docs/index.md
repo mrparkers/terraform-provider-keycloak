@@ -21,7 +21,7 @@ like to manage your entire Keycloak instance, or in any other realm if you only 
     1. Set `Standard Flow Enabled` to `OFF`.
     1. Set `Direct Access Grants Enabled` to `OFF`
     1. Set `Service Accounts Enabled` to `ON`.
-1. Grant required roles for managing Keycloak via the `Service Account Roles` tab in the client you created in step 1. To do this, select `realm-management` in the `Client Roles` drop down menu and add required roles to the client or just assign `realm-admin` for full access.
+1. Grant required roles for managing Keycloak via the `Service Account Roles` tab in the client you created in step 1, see [Assigning Roles](#assigning-roles) section below.
 
 ### Password Grant Setup
 
