@@ -34,6 +34,12 @@ var principalTypes = []string{
 	"FRIENDLY_ATTRIBUTE",
 }
 
+var syncModes = []string{
+	"IMPORT",
+	"FORCE",
+	"LEGACY",
+}
+
 func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	samlSchema := map[string]*schema.Schema{
 		"backchannel_supported": {
@@ -139,6 +145,13 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Default:     "",
 			Description: "GUI Order",
 		},
+		"sync_mode": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Default:      "",
+			ValidateFunc: validation.StringInSlice(syncModes, false),
+			Description:  "Sync Mode",
+		},
 	}
 	samlResource := resourceKeycloakIdentityProvider()
 	samlResource.Schema = mergeSchemas(samlResource.Schema, samlSchema)
@@ -170,6 +183,7 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		PrincipalType:                    data.Get("principal_type").(string),
 		PrincipalAttribute:               data.Get("principal_attribute").(string),
 		GuiOrder:                         data.Get("gui_order").(string),
+		SyncMode:                         data.Get("sync_mode").(string),
 	}
 	if _, ok := data.GetOk("signature_algorithm"); ok {
 		rec.Config.WantAuthnRequestsSigned = true
@@ -197,5 +211,6 @@ func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("principal_type", identityProvider.Config.PrincipalType)
 	data.Set("principal_attribute", identityProvider.Config.PrincipalAttribute)
 	data.Set("gui_order", identityProvider.Config.GuiOrder)
+	data.Set("sync_mode", identityProvider.Config.SyncMode)
 	return nil
 }

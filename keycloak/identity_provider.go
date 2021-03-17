@@ -47,6 +47,7 @@ type IdentityProviderConfig struct {
 	PrincipalType                    string                 `json:"principalType,omitempty"`
 	PrincipalAttribute               string                 `json:"principalAttribute,omitempty"`
 	GuiOrder                         string                 `json:"guiOrder,omitempty"`
+	SyncMode                         string                 `json:"syncMode,omitempty"`
 	ExtraConfig                      map[string]interface{} `json:"-"`
 }
 
