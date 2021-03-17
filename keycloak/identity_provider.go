@@ -46,6 +46,7 @@ type IdentityProviderConfig struct {
 	OfflineAccess                    KeycloakBoolQuoted     `json:"offlineAccess,omitempty"`
 	PrincipalType                    string                 `json:"principalType,omitempty"`
 	PrincipalAttribute               string                 `json:"principalAttribute,omitempty"`
+	GuiOrder                         string                 `json:"guiOrder,omitempty"`
 	ExtraConfig                      map[string]interface{} `json:"-"`
 }
 
