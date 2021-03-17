@@ -17,7 +17,7 @@ services:
     ports:
     - 8389:389
   keycloak:
-    image:  jboss/keycloak:12.0.1
+    image:  jboss/keycloak:12.0.4
     command: -b 0.0.0.0 -Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.profile.feature.admin_fine_grained_authz=enabled -Dkeycloak.profile.feature.token_exchange=enabled
     depends_on:
     - postgres
