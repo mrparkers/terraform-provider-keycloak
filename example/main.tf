@@ -346,6 +346,16 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_c
   claim_name     = "description"
 }
 
+resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_permissions_attributes_client" {
+  name           = "tf-test-open-id-user-multivalue-attribute-protocol-mapper-client"
+  realm_id       = keycloak_realm.test.id
+  client_id      = keycloak_openid_client.test_client.id
+  user_attribute = "permissions"
+  claim_name     = "permissions"
+  multivalued    = true
+}
+
+
 resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_client_scope" {
   name            = "tf-test-open-id-user-attribute-protocol-mapper-client-scope"
   realm_id        = keycloak_realm.test.id
@@ -804,6 +814,19 @@ resource "keycloak_openid_client_authorization_scope" "resource" {
   resource_server_id = keycloak_openid_client.test_client_auth.resource_server_id
   name               = "test-openid-client1"
   realm_id           = keycloak_realm.test.id
+}
+
+resource "keycloak_user" "user_with_multivalueattributes" {
+  realm_id = keycloak_realm.test.id
+  username = "user-with-mutivalueattributes"
+
+  attributes = {
+    "permissions" = "permission1##permission2"
+  }
+  initial_password {
+    value     = "My password"
+    temporary = false
+  }
 }
 
 resource "keycloak_user" "resource" {
