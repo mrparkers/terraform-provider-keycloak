@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 type FederatedIdentity struct {
@@ -214,5 +215,33 @@ func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId stri
 		}
 	}
 
+	return nil
+}
+
+func (keycloakClient *KeycloakClient) AddUserToGroups(groupIds *schema.Set, userId string, realmId string) error {
+	for _, groupId := range groupIds.List() {
+		var user User
+		user.Id = userId
+		user.RealmId = realmId
+		err := keycloakClient.AddUserToGroup(&user, groupId.(string))
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (keycloakClient *KeycloakClient) RemoveUserFromGroups(groupIds *schema.Set, userId string, realmId string) error {
+	for _, groupId := range groupIds.List() {
+		var user User
+		user.Id = userId
+		user.RealmId = realmId
+		err := keycloakClient.RemoveUserFromGroup(&user, groupId.(string))
+
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
