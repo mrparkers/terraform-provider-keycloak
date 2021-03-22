@@ -160,7 +160,18 @@ func (keycloakClient *KeycloakClient) GetUserByUsername(realmId, username string
 	return nil, nil
 }
 
-func (keycloakClient *KeycloakClient) addUserToGroup(user *User, groupId string) error {
+func (keycloakClient *KeycloakClient) GetUserGroups(realmId, userId string) ([]*Group, error) {
+	var groups []*Group
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/groups/", realmId, userId), &groups, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return groups, nil
+}
+
+func (keycloakClient *KeycloakClient) AddUserToGroup(user *User, groupId string) error {
 	return keycloakClient.put(fmt.Sprintf("/realms/%s/users/%s/groups/%s", user.RealmId, user.Id, groupId), nil)
 }
 
@@ -174,7 +185,7 @@ func (keycloakClient *KeycloakClient) AddUsersToGroup(realmId, groupId string, u
 			return fmt.Errorf("user with username %s does not exist", username.(string))
 		}
 
-		err = keycloakClient.addUserToGroup(user, groupId)
+		err = keycloakClient.AddUserToGroup(user, groupId)
 		if err != nil {
 			return err
 		}
