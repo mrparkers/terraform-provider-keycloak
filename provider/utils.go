@@ -1,30 +1,12 @@
 package provider
 
 import (
-	"bytes"
 	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
-
-func splitLen(s string, n int) []string {
-	sub := ""
-	subs := []string{}
-	runes := bytes.Runes([]byte(s))
-	l := len(runes)
-	for i, r := range runes {
-		sub = sub + string(r)
-		if (i+1)%n == 0 {
-			subs = append(subs, sub)
-			sub = ""
-		} else if (i + 1) == l {
-			subs = append(subs, sub)
-		}
-	}
-	return subs
-}
 
 func keys(data map[string]string) []string {
 	var result = []string{}
