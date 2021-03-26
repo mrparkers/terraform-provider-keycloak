@@ -49,7 +49,7 @@ func mapFromDataToGroup(data *schema.ResourceData) *keycloak.Group {
 	attributes := map[string][]string{}
 	if v, ok := data.GetOk("attributes"); ok {
 		for key, value := range v.(map[string]interface{}) {
-			attributes[key] = splitLen(value.(string), MAX_ATTRIBUTE_VALUE_LEN)
+			attributes[key] = strings.Split(value.(string), MULTIVALUE_ATTRIBUTE_SEPARATOR)
 		}
 	}
 
@@ -67,7 +67,7 @@ func mapFromDataToGroup(data *schema.ResourceData) *keycloak.Group {
 func mapFromGroupToData(data *schema.ResourceData, group *keycloak.Group) {
 	attributes := map[string]string{}
 	for k, v := range group.Attributes {
-		attributes[k] = strings.Join(v, "")
+		attributes[k] = strings.Join(v, MULTIVALUE_ATTRIBUTE_SEPARATOR)
 	}
 	data.SetId(group.Id)
 	data.Set("realm_id", group.RealmId)

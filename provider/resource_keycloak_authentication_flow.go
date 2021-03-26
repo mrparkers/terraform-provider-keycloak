@@ -61,6 +61,12 @@ func mapFromAuthenticationFlowToData(data *schema.ResourceData, authenticationFl
 	data.Set("description", authenticationFlow.Description)
 }
 
+func mapFromAuthenticationFlowInfoToData(data *schema.ResourceData, authenticationFlow *keycloak.AuthenticationFlow) {
+	data.SetId(authenticationFlow.Id)
+	data.Set("realm_id", authenticationFlow.RealmId)
+	data.Set("alias", authenticationFlow.Alias)
+}
+
 func resourceKeycloakAuthenticationFlowCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 

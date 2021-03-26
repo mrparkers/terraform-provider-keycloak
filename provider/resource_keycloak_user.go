@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const MAX_ATTRIBUTE_VALUE_LEN = 255
+const MULTIVALUE_ATTRIBUTE_SEPARATOR = "##"
 
 func resourceKeycloakUser() *schema.Resource {
 	return &schema.Resource{
@@ -117,7 +117,7 @@ func mapFromDataToUser(data *schema.ResourceData) *keycloak.User {
 	attributes := map[string][]string{}
 	if v, ok := data.GetOk("attributes"); ok {
 		for key, value := range v.(map[string]interface{}) {
-			attributes[key] = splitLen(value.(string), MAX_ATTRIBUTE_VALUE_LEN)
+			attributes[key] = strings.Split(value.(string), MULTIVALUE_ATTRIBUTE_SEPARATOR)
 		}
 	}
 
@@ -167,7 +167,7 @@ func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
 	}
 	attributes := map[string]string{}
 	for k, v := range user.Attributes {
-		attributes[k] = strings.Join(v, "")
+		attributes[k] = strings.Join(v, MULTIVALUE_ATTRIBUTE_SEPARATOR)
 	}
 	data.SetId(user.Id)
 	data.Set("realm_id", user.RealmId)

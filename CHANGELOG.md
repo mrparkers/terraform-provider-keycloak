@@ -1,3 +1,17 @@
+## v2.3.0 (March 1, 2021)
+
+FEATURES:
+
+- new resource: `keycloak_saml_script_protocol_mapper` ([#473](https://github.com/mrparkers/terraform-provider-keycloak/pull/473))
+
+IMPROVEMENTS:
+
+- support custom attributes in `keycloak_role` resource ([#475](https://github.com/mrparkers/terraform-provider-keycloak/pull/475))
+
+BUG FIXES:
+
+- remove mutex usage in keycloak client, which in some cases resulted in deadlock when retrieving tokens from Keycloak ([#489](https://github.com/mrparkers/terraform-provider-keycloak/pull/489))
+
 ## v2.2.0 (January 23, 2021)
 
 FEATURES:
