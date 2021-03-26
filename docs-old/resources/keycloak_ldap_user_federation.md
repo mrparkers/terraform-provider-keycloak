@@ -69,6 +69,7 @@ The following arguments are supported:
     - `ONE_LEVEL`: Only search for users in the DN specified by `user_dn`.
     - `SUBTREE`: Search entire LDAP subtree.
 - `validate_password_policy` - (Optional) When `true`, Keycloak will validate passwords using the realm policy before updating it.
+- `trust_email` - (Optional) If enabled, email provided by this provider is not verified even if verification is enabled for the realm.
 - `use_truststore_spi` - (Optional) Can be one of `ALWAYS`, `ONLY_FOR_LDAPS`, or `NEVER`:
     - `ALWAYS` - Always use the truststore SPI for LDAP connections.
     - `NEVER` - Never use the truststore SPI for LDAP connections.
