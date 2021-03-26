@@ -28,6 +28,13 @@ var keyNameTransformers = []string{
 	"CERT_SUBJECT",
 }
 
+var authnComparisonTypes = []string{
+	"exact",
+	"minimum",
+	"maximum",
+	"better",
+}
+
 func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	samlSchema := map[string]*schema.Schema{
 		"backchannel_supported": {
@@ -114,6 +121,24 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Optional:    true,
 			Description: "Want Assertions Encrypted.",
 		},
+		"authn_context_class_refs": {
+			Type:        schema.TypeList,
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Description: "AuthnContext ClassRefs",
+		},
+		"authn_context_decl_refs": {
+			Type:        schema.TypeList,
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Description: "AuthnContext DeclRefs",
+		},
+		"authn_context_comparison_type": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: validation.StringInSlice(authnComparisonTypes, false),
+			Description:  "AuthnContext Comparison",
+		},
 	}
 	samlResource := resourceKeycloakIdentityProvider()
 	samlResource.Schema = mergeSchemas(samlResource.Schema, samlSchema)
@@ -142,6 +167,9 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		ForceAuthn:                       keycloak.KeycloakBoolQuoted(data.Get("force_authn").(bool)),
 		WantAssertionsSigned:             keycloak.KeycloakBoolQuoted(data.Get("want_assertions_signed").(bool)),
 		WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
+		AuthnContextClassRefs:            data.Get("authn_context_class_refs").([]interface{}),
+		AuthnContextComparisonType:       data.Get("authn_context_comparison_type").(string),
+		AuthnContextDeclRefs:             data.Get("authn_context_decl_refs").([]interface{}),
 	}
 	if _, ok := data.GetOk("signature_algorithm"); ok {
 		rec.Config.WantAuthnRequestsSigned = true
@@ -166,5 +194,9 @@ func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("force_authn", identityProvider.Config.ForceAuthn)
 	data.Set("want_assertions_signed", identityProvider.Config.WantAssertionsSigned)
 	data.Set("want_assertions_encrypted", identityProvider.Config.WantAssertionsEncrypted)
+	data.Set("authn_context_class_refs", identityProvider.Config.AuthnContextClassRefs)
+	data.Set("authn_context_comparison_type", identityProvider.Config.AuthnContextComparisonType)
+	data.Set("authn_context_decl_refs", identityProvider.Config.AuthnContextDeclRefs)
+
 	return nil
 }

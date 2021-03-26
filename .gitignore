@@ -6,6 +6,9 @@
 *.dylib
 terraform-provider-keycloak
 
+.vscode
+.envrc
+
 # Test binary, build with `go test -c`
 *.test
 

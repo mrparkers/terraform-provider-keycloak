@@ -96,6 +96,10 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 	firstPostBindingLogout := randomBool()
 	firstPostBindingResponse := randomBool()
 	firstPostBindingRequest := randomBool()
+	firstAuthnContextClassRefs := make([]interface{}, 1)
+	firstAuthnContextClassRefs[0] = `"foo"`
+	firstAuthnContextDeclRefs := make([]interface{}, 1)
+	firstAuthnContextDeclRefs[0] = `"foo"`
 
 	firstSaml := &keycloak.IdentityProvider{
 		Realm:   realmName,
@@ -117,6 +121,9 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			ForceAuthn:                       keycloak.KeycloakBoolQuoted(firstForceAuthn),
 			WantAssertionsSigned:             keycloak.KeycloakBoolQuoted(firstAssertionsSigned),
 			WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(firstAssertionsEncrypted),
+			AuthnContextClassRefs:            keycloak.KeycloakSliceQuoted(firstAuthnContextClassRefs),
+			AuthnContextDeclRefs:             keycloak.KeycloakSliceQuoted(firstAuthnContextDeclRefs),
+			AuthnContextComparisonType:       "exact",
 		},
 	}
 
@@ -140,6 +147,9 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			ForceAuthn:                       keycloak.KeycloakBoolQuoted(!firstForceAuthn),
 			WantAssertionsSigned:             keycloak.KeycloakBoolQuoted(!firstAssertionsSigned),
 			WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(!firstAssertionsEncrypted),
+			AuthnContextClassRefs:            keycloak.KeycloakSliceQuoted(firstAuthnContextClassRefs),
+			AuthnContextDeclRefs:             keycloak.KeycloakSliceQuoted(firstAuthnContextDeclRefs),
+			AuthnContextComparisonType:       "exact",
 		},
 	}
 
@@ -261,6 +271,9 @@ resource "keycloak_saml_identity_provider" "saml" {
 	force_authn                = %t
 	want_assertions_signed     = %t
 	want_assertions_encrypted  = %t
+	authn_context_class_refs   = %v
+	authn_context_decl_refs = %v
+	authn_context_comparison_type = "%s"
 }
-	`, saml.Realm, saml.Alias, saml.Enabled, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSignKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted))
+	`, saml.Realm, saml.Alias, saml.Enabled, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSignKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted), saml.Config.AuthnContextClassRefs, saml.Config.AuthnContextDeclRefs, saml.Config.AuthnContextComparisonType)
 }

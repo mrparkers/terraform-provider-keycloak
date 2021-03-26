@@ -1,6 +1,7 @@
 module github.com/mrparkers/terraform-provider-keycloak
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.0.2-0.20200817173939-b72757e734f6
