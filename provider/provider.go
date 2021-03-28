@@ -97,6 +97,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 			"keycloak_identity_provider_token_exchange_scope_permission": resourceKeycloakIdentityProviderTokenExchangeScopePermission(),
 			"keycloak_openid_client_permissions":                         resourceKeycloakOpenidClientPermissions(),
 			"keycloak_users_permissions":                                 resourceKeycloakUsersPermissions(),
+			"keycloak_role_permissions":                                  resourceKeycloakRolePermissions(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
