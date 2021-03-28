@@ -71,10 +71,28 @@ func getAttributeImporterIdentityProviderMapperFromData(data *schema.ResourceDat
 			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_importer_identity_provider_mapper: %s: "claim_name": should be set for %s identity provider`, data.Get("name").(string), identityProvider.ProviderId)
 		}
 		rec.Config.Claim = data.Get("claim_name").(string)
+
+	} else if isAttributeImportEnabledSocialProvider(identityProvider.ProviderId) {
+		rec.IdentityProviderMapper = fmt.Sprintf("%s-user-attribute-mapper", identityProvider.ProviderId)
+		if _, ok := rec.Config.ExtraConfig["jsonField"]; !ok {
+			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_importer_identity_provider_mapper: %s: "extra_config.jsonField": should be set for %s identity provider`, data.Get("name").(string), identityProvider.ProviderId)
+		}
+		if _, ok := rec.Config.ExtraConfig["userAttribute"]; !ok {
+			return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_importer_identity_provider_mapper: %s: "extra_config.userAttribute": should be set for %s identity provider`, data.Get("name").(string), identityProvider.ProviderId)
+		}
 	} else {
 		return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_importer_identity_provider_mapper: %s: "%s" identity provider is not supported yet`, data.Get("name").(string), identityProvider.ProviderId)
 	}
 	return rec, nil
+}
+
+func isAttributeImportEnabledSocialProvider(providerIdOrAlias string) bool {
+	for _, supportedId := range []string{"facebook", "github", "google", "instagram", "linkedin", "microsoft", "paypal", "stackoverflow"} {
+		if providerIdOrAlias == supportedId {
+			return true
+		}
+	}
+	return false
 }
 
 func setAttributeImporterIdentityProviderMapperData(data *schema.ResourceData, identityProviderMapper *keycloak.IdentityProviderMapper) error {
