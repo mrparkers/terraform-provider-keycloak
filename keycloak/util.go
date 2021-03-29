@@ -11,11 +11,7 @@ type KeycloakBoolQuoted bool
 
 func (c KeycloakBoolQuoted) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
-	if c == false {
-		buf.WriteString(`""`)
-	} else {
-		buf.WriteString(strconv.Quote(strconv.FormatBool(bool(c))))
-	}
+	buf.WriteString(strconv.Quote(strconv.FormatBool(bool(c))))
 	return buf.Bytes(), nil
 }
 

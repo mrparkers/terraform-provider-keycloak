@@ -39,6 +39,7 @@ resource "keycloak_user" "user_with_initial_password" {
 
   attributes = {
     foo = "bar"
+    multivalue = "value1##value2"
   }
 
   initial_password {
@@ -60,7 +61,7 @@ resource "keycloak_user" "user_with_initial_password" {
 - `email_verified` - (Optional) Whether the email address was validated or not. Default to `false`.
 - `first_name` - (Optional) The user's first name.
 - `last_name` - (Optional) The user's last name.
-- `attributes` - (Optional) A map representing attributes for the user
+- `attributes` - (Optional) A map representing attributes for the user. In order to add multivalue attributes, use `##` to seperate the values. Max length for each value is 255 chars
 - `federated_identity` - (Optional) When specified, the user will be linked to a federated identity provider. Refer to the [federated user example](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/example/federated_user_example.tf) for more details.
   - `identity_provider` - (Required) The name of the identity provider
   - `user_id` - (Required) The ID of the user defined in the identity provider
