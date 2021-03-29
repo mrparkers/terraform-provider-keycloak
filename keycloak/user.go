@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 type FederatedIdentity struct {
@@ -172,7 +171,7 @@ func (keycloakClient *KeycloakClient) GetUserGroups(realmId, userId string) ([]*
 	return groups, nil
 }
 
-func (keycloakClient *KeycloakClient) AddUserToGroup(user *User, groupId string) error {
+func (keycloakClient *KeycloakClient) addUserToGroup(user *User, groupId string) error {
 	return keycloakClient.put(fmt.Sprintf("/realms/%s/users/%s/groups/%s", user.RealmId, user.Id, groupId), nil)
 }
 
@@ -186,7 +185,7 @@ func (keycloakClient *KeycloakClient) AddUsersToGroup(realmId, groupId string, u
 			return fmt.Errorf("user with username %s does not exist", username.(string))
 		}
 
-		err = keycloakClient.AddUserToGroup(user, groupId)
+		err = keycloakClient.addUserToGroup(user, groupId)
 		if err != nil {
 			return err
 		}
@@ -218,12 +217,12 @@ func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId stri
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) AddUserToGroups(groupIds *schema.Set, userId string, realmId string) error {
-	for _, groupId := range groupIds.List() {
+func (keycloakClient *KeycloakClient) AddUserToGroups(groupIds []string, userId string, realmId string) error {
+	for _, groupId := range groupIds {
 		var user User
 		user.Id = userId
 		user.RealmId = realmId
-		err := keycloakClient.AddUserToGroup(&user, groupId.(string))
+		err := keycloakClient.addUserToGroup(&user, groupId)
 
 		if err != nil {
 			return err
@@ -232,12 +231,12 @@ func (keycloakClient *KeycloakClient) AddUserToGroups(groupIds *schema.Set, user
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) RemoveUserFromGroups(groupIds *schema.Set, userId string, realmId string) error {
-	for _, groupId := range groupIds.List() {
+func (keycloakClient *KeycloakClient) RemoveUserFromGroups(groupIds []string, userId string, realmId string) error {
+	for _, groupId := range groupIds {
 		var user User
 		user.Id = userId
 		user.RealmId = realmId
-		err := keycloakClient.RemoveUserFromGroup(&user, groupId.(string))
+		err := keycloakClient.RemoveUserFromGroup(&user, groupId)
 
 		if err != nil {
 			return err
