@@ -27,6 +27,7 @@ type KeycloakClient struct {
 	initialLogin      bool
 	userAgent         string
 	version           *version.Version
+	additionalHeaders map[string]string
 }
 
 type ClientCredentials struct {
@@ -45,7 +46,7 @@ const (
 	tokenUrl = "%s/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string) (*KeycloakClient, error) {
+func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string, additionalHeaders map[string]string) (*KeycloakClient, error) {
 	cookieJar, err := cookiejar.New(&cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	})
@@ -94,6 +95,7 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 		initialLogin:      initialLogin,
 		realm:             realm,
 		userAgent:         userAgent,
+		additionalHeaders: additionalHeaders,
 	}
 
 	if keycloakClient.initialLogin {
@@ -115,6 +117,10 @@ func (keycloakClient *KeycloakClient) login() error {
 	accessTokenRequest, err := http.NewRequest(http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
 	if err != nil {
 		return err
+	}
+
+	for header, value := range keycloakClient.additionalHeaders {
+		accessTokenRequest.Header.Set(header, value)
 	}
 
 	accessTokenRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
