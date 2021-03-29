@@ -42,6 +42,43 @@ func TestAccKeycloakGroupRoles_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakGroupRoles_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
+
+	var group = &keycloak.Group{}
+
+	realmRoleName := acctest.RandomWithPrefix("tf-acc")
+	openIdClientName := acctest.RandomWithPrefix("tf-acc")
+	openIdRoleName := acctest.RandomWithPrefix("tf-acc")
+	samlClientName := acctest.RandomWithPrefix("tf-acc")
+	samlRoleName := acctest.RandomWithPrefix("tf-acc")
+	groupName := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGroupRoles_basic(openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+					testAccCheckKeycloakGroupFetch("keycloak_group.group", group),
+				),
+			},
+			{
+				PreConfig: func() {
+					err := keycloakClient.DeleteGroup(group.RealmId, group.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakGroupRoles_basic(openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName),
+				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakGroupRoles_update(t *testing.T) {
 	t.Parallel()
 
