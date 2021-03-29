@@ -78,6 +78,17 @@ func resourceKeycloakUserGroupsReconcile(data *schema.ResourceData, meta interfa
 	groupIds := interfaceSliceToStringSlice(data.Get("group_ids").(*schema.Set).List())
 	exhaustive := data.Get("exhaustive").(bool)
 
+	if data.HasChange("group_ids") {
+		o, n := data.GetChange("group_ids")
+		os := o.(*schema.Set)
+		ns := n.(*schema.Set)
+		remove := interfaceSliceToStringSlice(os.Difference(ns).List())
+
+		if err := keycloakClient.RemoveUserFromGroups(remove, userId, realmId); err != nil {
+			return err
+		}
+	}
+
 	userGroups, err := keycloakClient.GetUserGroups(realmId, userId)
 	if err != nil {
 		return err
