@@ -80,3 +80,4 @@ The following arguments are supported:
 - `tls_insecure_skip_verify` - (Optional) Allows ignoring insecure certificates when set to true. Defaults to false. Disabling security check is dangerous and should be avoided.
 - `root_ca_certificate` - (Optional) Allows x509 calls using an unknown CA certificate (for development purposes)
 - `base_path` - (Optional) The base path used for accessing the Keycloak REST API.  Defaults to `/auth`
+- `additional_headers` - (Optional) A map of custom headers to add to each requests, to work with proxy filtering requests without these headers for example. Defaults to an empty map.
