@@ -22,6 +22,7 @@ resource "keycloak_role" "realm_role" {
   description = "My Realm Role"
   attributes = {
     key = "value"
+    multivalue = "value1##value2"
   }
 }
 ```
@@ -150,7 +151,7 @@ resource "keycloak_role" "admin_role" {
 - `client_id` - (Optional) When specified, this role will be created as a client role attached to the client with the provided ID
 - `description` - (Optional) The description of the role
 - `composite_roles` - (Optional) When specified, this role will be a composite role, composed of all roles that have an ID present within this list.
-- `attributes` - (Optional) Attribute key/value pairs 
+- `attributes` - (Optional) A map representing attributes for the role. In order to add multivalue attributes, use `##` to seperate the values. Max length for each value is 255 chars
 
 
 ## Import
