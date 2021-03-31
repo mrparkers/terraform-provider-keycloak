@@ -92,13 +92,30 @@ func resourceKeycloakGroupRolesReconcile(data *schema.ResourceData, meta interfa
 
 	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
+	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
+	exhaustive := data.Get("exhaustive").(bool)
 
 	group, err := keycloakClient.GetGroup(realmId, groupId)
 	if err != nil {
 		return err
 	}
 
-	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
+	if data.HasChange("role_ids") {
+		o, n := data.GetChange("role_ids")
+		os := o.(*schema.Set)
+		ns := n.(*schema.Set)
+		remove := interfaceSliceToStringSlice(os.Difference(ns).List())
+
+		tfRolesToRemove, err := getExtendedRoleMapping(keycloakClient, realmId, remove)
+		if err != nil {
+			return err
+		}
+
+		if err = removeRolesFromGroup(keycloakClient, tfRolesToRemove.clientRoles, tfRolesToRemove.realmRoles, group); err != nil {
+			return err
+		}
+	}
+
 	tfRoles, err := getExtendedRoleMapping(keycloakClient, realmId, roleIds)
 	if err != nil {
 		return err
@@ -116,7 +133,7 @@ func resourceKeycloakGroupRolesReconcile(data *schema.ResourceData, meta interfa
 		return err
 	}
 
-	if data.Get("exhaustive").(bool) {
+	if exhaustive {
 		// remove roles
 		err = removeRolesFromGroup(keycloakClient, updates.clientRolesToRemove, updates.realmRolesToRemove, group)
 		if err != nil {
