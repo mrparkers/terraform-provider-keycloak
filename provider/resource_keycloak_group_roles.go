@@ -143,6 +143,7 @@ func resourceKeycloakGroupRolesRead(data *schema.ResourceData, meta interface{})
 	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
 	sortedRoleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
+	exhaustive := data.Get("exhaustive").(bool)
 
 	// check if group exists, remove from state if not found
 	if _, err := keycloakClient.GetGroup(realmId, groupId); err != nil {
@@ -157,14 +158,14 @@ func resourceKeycloakGroupRolesRead(data *schema.ResourceData, meta interface{})
 	var roleIds []string
 
 	for _, realmRole := range roles.RealmMappings {
-		if data.Get("exhaustive").(bool) || containsAString(sortedRoleIds, realmRole.Id) {
+		if exhaustive || containsAString(sortedRoleIds, realmRole.Id) {
 			roleIds = append(roleIds, realmRole.Id)
 		}
 	}
 
 	for _, clientRoleMapping := range roles.ClientMappings {
 		for _, clientRole := range clientRoleMapping.Mappings {
-			if data.Get("exhaustive").(bool) || containsAString(sortedRoleIds, clientRole.Id) {
+			if exhaustive || containsAString(sortedRoleIds, clientRole.Id) {
 				roleIds = append(roleIds, clientRole.Id)
 			}
 		}
