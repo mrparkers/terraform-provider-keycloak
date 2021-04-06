@@ -20,6 +20,7 @@ resource "keycloak_saml_identity_provider" "realm_saml_identity_provider" {
   realm = keycloak_realm.realm.id
   alias = "my-saml-idp"
 
+  entity_id                  = "https://domain.com/entity_id"
   single_sign_on_service_url = "https://domain.com/adfs/ls/"
   single_logout_service_url  = "https://domain.com/adfs/ls/?wa=wsignout1.0"
 
@@ -47,7 +48,8 @@ resource "keycloak_saml_identity_provider" "realm_saml_identity_provider" {
 - `first_broker_login_flow_alias` - (Optional) Alias of authentication flow, which is triggered after first login with this identity provider. Term 'First Login' means that there is not yet existing Keycloak account linked with the authenticated identity provider account. Defaults to `first broker login`.
 - `post_broker_login_flow_alias` - (Optional) Alias of authentication flow, which is triggered after each login with this identity provider. Useful if you want additional verification of each user authenticated with this identity provider (for example OTP). Leave this empty if you don't want any additional authenticators to be triggered after login with this identity provider. Also note, that authenticator implementations must assume that user is already set in ClientSession as identity provider already set it. Defaults to empty.
 - `authenticate_by_default` - (Optional) Authenticate users by default. Defaults to `false`.
-- `single_sign_on_service_url` - (Optional) The Url that must be used to send authentication requests (SAML AuthnRequest).
+- `entity_id` - (Required) The Entity ID that will be used to uniquely identify this SAML Service Provider.
+- `single_sign_on_service_url` - (Required) The Url that must be used to send authentication requests (SAML AuthnRequest).
 - `single_logout_service_url` - (Optional) The Url that must be used to send logout requests.
 - `backchannel_supported` - (Optional) Does the external IDP support back-channel logout ?.
 - `name_id_policy_format` - (Optional) Specifies the URI reference corresponding to a name identifier format. Defaults to empty.
