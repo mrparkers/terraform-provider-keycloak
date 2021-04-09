@@ -73,3 +73,24 @@ func interfaceSliceToStringSlice(iv []interface{}) []string {
 
 	return sv
 }
+
+func stringArrayDifference(a, b []string) []string {
+	var aWithoutB []string
+
+	for _, s := range a {
+		if !stringArrayContains(b, s) {
+			aWithoutB = append(aWithoutB, s)
+		}
+	}
+
+	return aWithoutB
+}
+
+func stringArrayContains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
