@@ -36,7 +36,13 @@ func getUserTemplateImporterIdentityProviderMapperFromData(data *schema.Resource
 	if err != nil {
 		return nil, handleNotFoundError(err, data)
 	}
-	rec.IdentityProviderMapper = fmt.Sprintf("%s-username-idp-mapper", identityProvider.ProviderId)
+
+	if identityProvider.ProviderId == "facebook" || identityProvider.ProviderId == "google" {
+		rec.IdentityProviderMapper = "oidc-username-idp-mapper"
+	} else {
+		rec.IdentityProviderMapper = fmt.Sprintf("%s-username-idp-mapper", identityProvider.ProviderId)
+	}
+
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
 		Template:    data.Get("template").(string),
 		ExtraConfig: extraConfig,
