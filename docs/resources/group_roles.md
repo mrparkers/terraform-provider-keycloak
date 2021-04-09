@@ -123,7 +123,7 @@ resource "keycloak_group_roles" "group_role_association2" {
 - `realm_id` - (Required) The realm this group exists in.
 - `group_id` - (Required) The ID of the group this resource should manage roles for.
 - `role_ids` - (Required) A list of role IDs to map to the group.
-- `exhaustive` - (Optional) Indicate if the list of roles is exhaustive. In this case, roles that are manually added to the group will be removed. Default `true`.
+- `exhaustive` - (Optional) Indicates if the list of roles is exhaustive. In this case, roles that are manually added to the group will be removed. Defaults to `true`.
 
 ## Import
 

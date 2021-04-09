@@ -86,7 +86,7 @@ resource "keycloak_user_groups" "user_groups_association_1" {
 - `realm_id` - (Required) The realm this group exists in.
 - `user_id` - (Required) The ID of the user this resource should manage groups for.
 - `group_ids` - (Required) A list of group IDs that the user is member of.
-- `exhaustive` - (Optional)
+- `exhaustive` - (Optional) Indicates if the list of the user's groups is exhaustive. In this case, groups that are manually added to the user will be removed. Defaults to `true`.
 
 ## Import
 
