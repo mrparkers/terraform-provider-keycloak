@@ -6,14 +6,14 @@ page_title: "keycloak_user_roles Resource"
 
 Allows you to manage roles assigned to a Keycloak user.
 
-Note that this resource attempts to be an **authoritative** source over user roles. When this resource takes control over
-a user's roles, roles that are manually assigned to the user will be removed, and roles that are manually removed from the
-user will be assigned upon the next run of `terraform apply`.
+If `exhaustive` is true, this resource attempts to be an **authoritative** source over user roles: roles that are manually added to the user will be removed, and roles that are manually removed from the
+user will be added upon the next run of `terraform apply`.
+If `exhaustive` is false, this resource is a partial assignation of roles to a user. As a result, you can use multiple `keycloak_user_roles` for the same `user_id`.
 
 Note that when assigning composite roles to a user, you may see a non-empty plan following a `terraform apply` if you assign
 a role and a composite that includes that role to the same user.
 
-## Example Usage
+## Example Usage (exhaustive roles)
 
 ```hcl
 resource "keycloak_realm" "realm" {
@@ -70,6 +70,7 @@ resource "keycloak_user_roles" "user_roles" {
 - `realm_id` - (Required) The realm this user exists in.
 - `user_id` - (Required) The ID of the user this resource should manage roles for.
 - `role_ids` - (Required) A list of role IDs to map to the user
+- `exhaustive` - (Optional) Indicates if the list of roles is exhaustive. In this case, roles that are manually added to the user will be removed. Defaults to `true`.
 
 ## Import
 

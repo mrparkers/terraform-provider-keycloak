@@ -34,6 +34,11 @@ func resourceKeycloakUserRoles() *schema.Resource {
 				Set:      schema.HashString,
 				Required: true,
 			},
+			"exhaustive": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 		},
 	}
 }
@@ -87,13 +92,30 @@ func resourceKeycloakUserRolesReconcile(data *schema.ResourceData, meta interfac
 
 	realmId := data.Get("realm_id").(string)
 	userId := data.Get("user_id").(string)
+	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
+	exhaustive := data.Get("exhaustive").(bool)
 
 	user, err := keycloakClient.GetUser(realmId, userId)
 	if err != nil {
 		return err
 	}
 
-	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
+	if data.HasChange("role_ids") {
+		o, n := data.GetChange("role_ids")
+		os := o.(*schema.Set)
+		ns := n.(*schema.Set)
+		remove := interfaceSliceToStringSlice(os.Difference(ns).List())
+
+		tfRolesToRemove, err := getExtendedRoleMapping(keycloakClient, realmId, remove)
+		if err != nil {
+			return err
+		}
+
+		if err = removeRolesFromUser(keycloakClient, tfRolesToRemove.clientRoles, tfRolesToRemove.realmRoles, user); err != nil {
+			return err
+		}
+	}
+
 	tfRoles, err := getExtendedRoleMapping(keycloakClient, realmId, roleIds)
 	if err != nil {
 		return err
@@ -112,10 +134,12 @@ func resourceKeycloakUserRolesReconcile(data *schema.ResourceData, meta interfac
 		return err
 	}
 
-	// remove roles
-	err = removeRolesFromUser(keycloakClient, updates.clientRolesToRemove, updates.realmRolesToRemove, user)
-	if err != nil {
-		return err
+	// remove roles if exhaustive (authoritative)
+	if exhaustive {
+		err = removeRolesFromUser(keycloakClient, updates.clientRolesToRemove, updates.realmRolesToRemove, user)
+		if err != nil {
+			return err
+		}
 	}
 
 	data.SetId(userRolesId(realmId, userId))
@@ -127,6 +151,13 @@ func resourceKeycloakUserRolesRead(data *schema.ResourceData, meta interface{}) 
 
 	realmId := data.Get("realm_id").(string)
 	userId := data.Get("user_id").(string)
+	sortedRoleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
+	exhaustive := data.Get("exhaustive").(bool)
+
+	// check if user exists, remove from state if not found
+	if _, err := keycloakClient.GetUser(realmId, userId); err != nil {
+		return handleNotFoundError(err, data)
+	}
 
 	roles, err := keycloakClient.GetUserRoleMappings(realmId, userId)
 	if err != nil {
@@ -136,12 +167,16 @@ func resourceKeycloakUserRolesRead(data *schema.ResourceData, meta interface{}) 
 	var roleIds []string
 
 	for _, realmRole := range roles.RealmMappings {
-		roleIds = append(roleIds, realmRole.Id)
+		if exhaustive || stringSliceContains(sortedRoleIds, realmRole.Id) {
+			roleIds = append(roleIds, realmRole.Id)
+		}
 	}
 
 	for _, clientRoleMapping := range roles.ClientMappings {
 		for _, clientRole := range clientRoleMapping.Mappings {
-			roleIds = append(roleIds, clientRole.Id)
+			if exhaustive || stringSliceContains(sortedRoleIds, clientRole.Id) {
+				roleIds = append(roleIds, clientRole.Id)
+			}
 		}
 	}
 
