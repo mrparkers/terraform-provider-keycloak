@@ -680,6 +680,7 @@ resource keycloak_hardcoded_attribute_identity_provider_mapper oidc {
 resource keycloak_saml_identity_provider saml {
   realm                      = keycloak_realm.test.id
   alias                      = "saml"
+  entity_id                  = "https://example.com/entity_id"
   single_sign_on_service_url = "https://example.com/auth"
 }
 

@@ -10,6 +10,7 @@ SAML (Security Assertion Markup Language) identity providers allows to authentic
 resource "keycloak_saml_identity_provider" "realm_identity_provider" {
   realm = "my-realm"
   alias = "my-idp"
+  entity_id = "https://domain.com/entity_id"
   single_sign_on_service_url = "https://domain.com/adfs/ls/"
   single_logout_service_url = "https://domain.com/adfs/ls/?wa=wsignout1.0"
   backchannel_supported = true
@@ -41,7 +42,8 @@ The following arguments are supported:
 
 #### SAML Configuration
 
-- `single_sign_on_service_url` - (Optional) The Url that must be used to send authentication requests (SAML AuthnRequest).
+- `entity_id` - (Required) The Entity ID that will be used to uniquely identify this SAML Service Provider.
+- `single_sign_on_service_url` - (Required) The Url that must be used to send authentication requests (SAML AuthnRequest).
 - `single_logout_service_url` - (Optional) The Url that must be used to send logout requests.
 - `backchannel_supported` - (Optional) Does the external IDP support back-channel logout ?.
 - `name_id_policy_format` - (Optional) Specifies the URI reference corresponding to a name identifier format. Defaults to empty.

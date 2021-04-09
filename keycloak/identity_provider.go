@@ -20,6 +20,7 @@ type IdentityProviderConfig struct {
 	UserInfoUrl                      string                 `json:"userInfoUrl,omitempty"`
 	HideOnLoginPage                  KeycloakBoolQuoted     `json:"hideOnLoginPage"`
 	NameIDPolicyFormat               string                 `json:"nameIDPolicyFormat,omitempty"`
+	EntityId                         string                 `json:"entityId,omitempty"`
 	SingleLogoutServiceUrl           string                 `json:"singleLogoutServiceUrl,omitempty"`
 	SingleSignOnServiceUrl           string                 `json:"singleSignOnServiceUrl,omitempty"`
 	SigningCertificate               string                 `json:"signingCertificate,omitempty"`

@@ -102,12 +102,13 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 		Alias:   acctest.RandString(10),
 		Enabled: firstEnabled,
 		Config: &keycloak.IdentityProviderConfig{
-			SingleSignOnServiceUrl:           "https://example.com/signon/2",
+			EntityId:                         "https://example.com/entity_id/1",
+			SingleSignOnServiceUrl:           "https://example.com/signon/1",
 			BackchannelSupported:             keycloak.KeycloakBoolQuoted(firstBackchannel),
 			ValidateSignature:                keycloak.KeycloakBoolQuoted(firstValidateSignature),
 			HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(firstHideOnLogin),
 			NameIDPolicyFormat:               "Email",
-			SingleLogoutServiceUrl:           "https://example.com/logout/2",
+			SingleLogoutServiceUrl:           "https://example.com/logout/1",
 			SigningCertificate:               acctest.RandString(10),
 			SignatureAlgorithm:               "RSA_SHA512",
 			XmlSignKeyInfoKeyNameTransformer: "KEY_ID",
@@ -125,6 +126,7 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 		Alias:   acctest.RandString(10),
 		Enabled: !firstEnabled,
 		Config: &keycloak.IdentityProviderConfig{
+			EntityId:                         "https://example.com/entity_id/2",
 			SingleSignOnServiceUrl:           "https://example.com/signon/2",
 			BackchannelSupported:             keycloak.KeycloakBoolQuoted(!firstBackchannel),
 			ValidateSignature:                keycloak.KeycloakBoolQuoted(!firstValidateSignature),
@@ -231,6 +233,7 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_saml_identity_provider" "saml" {
 	realm             			= "${keycloak_realm.realm.id}"
 	alias             			= "%s"
+	entity_id					= "https://example.com/entity_id"
 	single_sign_on_service_url = "https://example.com/auth"
 }
 	`, realm, saml)
@@ -246,6 +249,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	realm             			= "${keycloak_realm.realm.id}"
 	alias             			= "%s"
 	enabled           			= %t
+	entity_id					= "%s"
 	single_sign_on_service_url = "%s"
 	backchannel_supported      = %t
 	validate_signature         = %t
@@ -262,5 +266,5 @@ resource "keycloak_saml_identity_provider" "saml" {
 	want_assertions_signed     = %t
 	want_assertions_encrypted  = %t
 }
-	`, saml.Realm, saml.Alias, saml.Enabled, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSignKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted))
+	`, saml.Realm, saml.Alias, saml.Enabled, saml.Config.EntityId, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSignKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted))
 }
