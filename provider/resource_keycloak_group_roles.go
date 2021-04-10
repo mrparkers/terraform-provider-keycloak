@@ -133,25 +133,16 @@ func resourceKeycloakGroupRolesReconcile(data *schema.ResourceData, meta interfa
 		return err
 	}
 
+	// remove roles if exhaustive (authoritative)
 	if exhaustive {
-		// remove roles
 		err = removeRolesFromGroup(keycloakClient, updates.clientRolesToRemove, updates.realmRolesToRemove, group)
 		if err != nil {
 			return err
 		}
 	}
+
 	data.SetId(groupRolesId(realmId, groupId))
 	return resourceKeycloakGroupRolesRead(data, meta)
-}
-
-// Helper function
-func containsAString(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }
 
 func resourceKeycloakGroupRolesRead(data *schema.ResourceData, meta interface{}) error {
@@ -175,14 +166,14 @@ func resourceKeycloakGroupRolesRead(data *schema.ResourceData, meta interface{})
 	var roleIds []string
 
 	for _, realmRole := range roles.RealmMappings {
-		if exhaustive || containsAString(sortedRoleIds, realmRole.Id) {
+		if exhaustive || stringSliceContains(sortedRoleIds, realmRole.Id) {
 			roleIds = append(roleIds, realmRole.Id)
 		}
 	}
 
 	for _, clientRoleMapping := range roles.ClientMappings {
 		for _, clientRole := range clientRoleMapping.Mappings {
-			if exhaustive || containsAString(sortedRoleIds, clientRole.Id) {
+			if exhaustive || stringSliceContains(sortedRoleIds, clientRole.Id) {
 				roleIds = append(roleIds, clientRole.Id)
 			}
 		}
