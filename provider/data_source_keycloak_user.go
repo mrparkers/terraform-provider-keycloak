@@ -43,12 +43,6 @@ func dataSourceKeycloakUser() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			"federated_identities": {
-				Type:       schema.TypeSet,
-				Elem:       &schema.Schema{Type: schema.TypeString},
-				Computed:   true,
-				Deprecated: "use federated_identity instead",
-			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -72,18 +66,6 @@ func dataSourceKeycloakUserRead(data *schema.ResourceData, meta interface{}) err
 	}
 
 	mapFromUserToData(data, user)
-
-	// handling deprecated "federated_identities" attribute
-	federatedIdentities := []interface{}{}
-	for _, federatedIdentity := range user.FederatedIdentities {
-		identity := map[string]interface{}{
-			"identity_provider": federatedIdentity.IdentityProvider,
-			"user_id":           federatedIdentity.UserId,
-			"user_name":         federatedIdentity.UserName,
-		}
-		federatedIdentities = append(federatedIdentities, identity)
-	}
-	data.Set("federated_identities", federatedIdentities)
 
 	return nil
 }
