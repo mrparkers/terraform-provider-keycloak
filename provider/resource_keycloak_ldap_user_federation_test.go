@@ -432,28 +432,6 @@ func TestAccKeycloakLdapUserFederation_useTrustStoreValidation(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakLdapUserFederation_cachePolicyValidation(t *testing.T) {
-	t.Parallel()
-	ldapName := acctest.RandomWithPrefix("tf-acc")
-	cachePolicy := randomStringInSlice(keycloakUserFederationCachePolicies)
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config:      testKeycloakLdapUserFederation_basicWithAttrValidation("cache_policy", ldapName, acctest.RandString(10)),
-				ExpectError: regexp.MustCompile("expected cache_policy to be one of .+ got .+"),
-			},
-			{
-				Config: testKeycloakLdapUserFederation_basicWithAttrValidation("cache_policy", ldapName, cachePolicy),
-				Check:  resource.TestCheckResourceAttr("keycloak_ldap_user_federation.openldap", "cache_policy", cachePolicy),
-			},
-		},
-	})
-}
-
 func TestAccKeycloakLdapUserFederation_bindValidation(t *testing.T) {
 	t.Parallel()
 	ldapName := acctest.RandomWithPrefix("tf-acc")

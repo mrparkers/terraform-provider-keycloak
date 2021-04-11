@@ -68,31 +68,16 @@ func resourceKeycloakOpenIdUserSessionNoteProtocolMapper() *schema.Resource {
 				Default:      "String",
 				ValidateFunc: validation.StringInSlice([]string{"JSON", "String", "long", "int", "boolean"}, true),
 			},
-			"session_note_label": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Deprecated:    "use session_note instead",
-				ConflictsWith: []string{"session_note"},
-				Description:   "String value being the name of stored user session note within the UserSessionModel.note map.",
-			},
 			"session_note": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"session_note_label"},
-				Description:   "String value being the name of stored user session note within the UserSessionModel.note map.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "String value being the name of stored user session note within the UserSessionModel.note map.",
 			},
 		},
 	}
 }
 
 func mapFromDataToOpenIdUserSessionNoteProtocolMapper(data *schema.ResourceData) *keycloak.OpenIdUserSessionNoteProtocolMapper {
-	var sessionNote string
-	if s, ok := data.GetOk("session_note_label"); ok {
-		sessionNote = s.(string)
-	} else {
-		sessionNote = data.Get("session_note").(string)
-	}
-
 	return &keycloak.OpenIdUserSessionNoteProtocolMapper{
 		Id:               data.Id(),
 		Name:             data.Get("name").(string),
@@ -104,7 +89,7 @@ func mapFromDataToOpenIdUserSessionNoteProtocolMapper(data *schema.ResourceData)
 
 		ClaimName:       data.Get("claim_name").(string),
 		ClaimValueType:  data.Get("claim_value_type").(string),
-		UserSessionNote: sessionNote,
+		UserSessionNote: data.Get("session_note").(string),
 	}
 }
 
@@ -123,12 +108,7 @@ func mapFromOpenIdUserSessionNoteMapperToData(mapper *keycloak.OpenIdUserSession
 	data.Set("add_to_access_token", mapper.AddToAccessToken)
 	data.Set("claim_name", mapper.ClaimName)
 	data.Set("claim_value_type", mapper.ClaimValueType)
-
-	if _, ok := data.GetOk("session_note_label"); ok {
-		data.Set("session_note_label", mapper.UserSessionNote)
-	} else {
-		data.Set("session_note", mapper.UserSessionNote)
-	}
+	data.Set("session_note", mapper.UserSessionNote)
 }
 
 func resourceKeycloakOpenIdUserSessionNoteProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
