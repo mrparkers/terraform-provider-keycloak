@@ -227,21 +227,11 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 					},
 				},
 			},
-
-			"cache_policy": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Default:       "DEFAULT",
-				Deprecated:    "use cache.policy instead",
-				ConflictsWith: []string{"cache"},
-				ValidateFunc:  validation.StringInSlice(keycloakUserFederationCachePolicies, false),
-			},
 			"cache": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				MaxItems:      1,
-				Description:   "Settings regarding cache policy for this realm.",
-				ConflictsWith: []string{"cache_policy"},
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Settings regarding cache policy for this realm.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"policy": {
@@ -338,8 +328,6 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 		BatchSizeForSync:  data.Get("batch_size_for_sync").(int),
 		FullSyncPeriod:    data.Get("full_sync_period").(int),
 		ChangedSyncPeriod: data.Get("changed_sync_period").(int),
-
-		CachePolicy: data.Get("cache_policy").(string),
 	}
 
 	if cache, ok := data.GetOk("cache"); ok {
@@ -443,8 +431,6 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 		cachePolicySettings["policy"] = ldap.CachePolicy
 
 		data.Set("cache", []interface{}{cachePolicySettings})
-	} else {
-		data.Set("cache_policy", ldap.CachePolicy)
 	}
 }
 
