@@ -2,7 +2,7 @@ terraform {
   required_providers {
     keycloak = {
       source  = "terraform.local/mrparkers/keycloak"
-      version = ">= 2.0"
+      version = ">= 3.0"
     }
   }
 }
@@ -280,7 +280,9 @@ resource "keycloak_ldap_user_federation" "openldap" {
     kerberos_realm = "FOO.LOCAL"
   }
 
-  cache_policy = "NO_CACHE"
+  cache {
+    policy = "NO_CACHE"
+  }
 }
 
 resource "keycloak_ldap_user_attribute_mapper" "description_attr_mapper" {

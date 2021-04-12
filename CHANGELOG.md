@@ -1,3 +1,33 @@
+## v3.0.0 (April 12, 2021)
+
+BREAKING CHANGES:
+
+- add a new required `entity_id` attribute for `keycloak_saml_identity_provider` resource ([#512](https://github.com/mrparkers/terraform-provider-keycloak/pull/512))
+- removed attributes that were deprecated in v2.0.0 ([#514](https://github.com/mrparkers/terraform-provider-keycloak/pull/514))
+  - `keycloak_openid_user_session_note_protocol_mapper` resource: remove `session_note_label` attribute
+  - `keycloak_user` data source: remove `federated_identities` attribute
+  - `keycloak_ldap_user_federation` resource: remove `cache_policy` attribute
+
+FEATURES:
+
+- new data source: `keycloak_authentication_flow` ([#486](https://github.com/mrparkers/terraform-provider-keycloak/pull/486))
+- new resource: `keycloak_user_groups` ([#505](https://github.com/mrparkers/terraform-provider-keycloak/pull/505))
+
+IMPROVEMENTS:
+
+- support multivalue attributes for users, groups and roles ([#499](https://github.com/mrparkers/terraform-provider-keycloak/pull/499))
+- add `trust_email` attribute to `keycloak_ldap_user_federation` resource ([#267](https://github.com/mrparkers/terraform-provider-keycloak/pull/267))
+- add `principal_type`, `principal_attribute`, `gui_order`, and `sync_mode` attributes to `keycloak_saml_identity_provider` resource ([#508](https://github.com/mrparkers/terraform-provider-keycloak/pull/508))
+- allows non-authoritative usage of `keycloak_group_roles` resource via `exhaustive` attribute ([#501](https://github.com/mrparkers/terraform-provider-keycloak/pull/501))
+- allows non-authoritative usage of `keycloak_user_roles` resource via `exhaustive` attribute ([#513](https://github.com/mrparkers/terraform-provider-keycloak/pull/513))
+- add ability to set additional request headers as provider config ([#507](https://github.com/mrparkers/terraform-provider-keycloak/pull/507))
+
+BUG FIXES:
+
+- fixed marshalling of `false` value in Keycloak API attributes that use quoted booleans ([#495](https://github.com/mrparkers/terraform-provider-keycloak/pull/495))
+- handle group not found for `keycloak_group_roles` resource ([#497](https://github.com/mrparkers/terraform-provider-keycloak/pull/497))
+- fix `keycloak_attribute_importer_identity_provider_mapper` and `keycloak_user_template_importer_identity_provider_mapper` resources for usage with Facebook/Google ([#482](https://github.com/mrparkers/terraform-provider-keycloak/pull/482))
+
 ## v2.3.0 (March 1, 2021)
 
 FEATURES:
