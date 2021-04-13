@@ -258,6 +258,7 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	token_url         = "https://example.com/token"
 	client_id         = "example_id"
 	client_secret     = "example_token"
+	sync_mode         = "IMPORT"
 	extra_config      = {
 		dummyConfig = "%s"
 	}
@@ -279,6 +280,7 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	token_url         = "https://example.com/token"
 	client_id         = "example_id"
 	client_secret     = "example_token"
+	sync_mode         = "IMPORT"
 	default_scopes    = "%s"
 }
 	`, testAccRealm.Realm, alias, value)
@@ -298,6 +300,7 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	token_url         = "%s"
 	client_id         = "%s"
 	client_secret     = "%s"
+	sync_mode         = "IMPORT"
 }
 	`, testAccRealm.Realm, oidc.Alias, oidc.Enabled, oidc.Config.AuthorizationUrl, oidc.Config.TokenUrl, oidc.Config.ClientId, oidc.Config.ClientSecret)
 }

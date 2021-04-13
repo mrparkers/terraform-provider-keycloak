@@ -62,6 +62,17 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 			Required:    true,
 			Description: "Token URL.",
 		},
+		"issuer": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Issuer Identifier",
+		},
+		"sync_mode": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Sync Mode",
+			Default:     "LEGACY",
+		},
 		"logout_url": {
 			Type:        schema.TypeString,
 			Optional:    true,
@@ -129,6 +140,8 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		ClientSecret:                data.Get("client_secret").(string),
 		HideOnLoginPage:             keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
 		TokenUrl:                    data.Get("token_url").(string),
+		Issuer:                      data.Get("issuer").(string),
+		SyncMode:                    data.Get("sync_mode").(string),
 		LogoutUrl:                   data.Get("logout_url").(string),
 		UILocales:                   keycloak.KeycloakBoolQuoted(data.Get("ui_locales").(bool)),
 		LoginHint:                   data.Get("login_hint").(string),
