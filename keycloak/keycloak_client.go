@@ -371,6 +371,19 @@ func (keycloakClient *KeycloakClient) getRaw(path string, params map[string]stri
 	return body, err
 }
 
+func (keycloakClient *KeycloakClient) sendRaw(path string, requestBody []byte) ([]byte, error) {
+	resourceUrl := keycloakClient.baseUrl + apiUrl + path
+
+	request, err := http.NewRequest(http.MethodPost, resourceUrl, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	body, _, err := keycloakClient.sendRequest(request, requestBody)
+
+	return body, err
+}
+
 func (keycloakClient *KeycloakClient) post(path string, requestBody interface{}) ([]byte, string, error) {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
