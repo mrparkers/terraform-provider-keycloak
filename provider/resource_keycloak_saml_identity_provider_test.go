@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
-	realmName := acctest.RandomWithPrefix("tf-acc")
 	samlName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -22,7 +21,7 @@ func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlIdentityProvider_basic(realmName, samlName),
+				Config: testKeycloakSamlIdentityProvider_basic(samlName),
 				Check:  testAccCheckKeycloakSamlIdentityProviderExists("keycloak_saml_identity_provider.saml"),
 			},
 		},
@@ -69,7 +68,6 @@ func TestAccKeycloakSamlIdentityProvider_extraConfigInvalid(t *testing.T) {
 func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) {
 	var saml = &keycloak.IdentityProvider{}
 
-	realmName := acctest.RandomWithPrefix("tf-acc")
 	samlName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -78,7 +76,7 @@ func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) 
 		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlIdentityProvider_basic(realmName, samlName),
+				Config: testKeycloakSamlIdentityProvider_basic(samlName),
 				Check:  testAccCheckKeycloakSamlIdentityProviderFetch("keycloak_saml_identity_provider.saml", saml),
 			},
 			{
@@ -88,36 +86,8 @@ func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) 
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakSamlIdentityProvider_basic(realmName, samlName),
+				Config: testKeycloakSamlIdentityProvider_basic(samlName),
 				Check:  testAccCheckKeycloakSamlIdentityProviderExists("keycloak_saml_identity_provider.saml"),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakSamlIdentityProvider_basicUpdateRealm(t *testing.T) {
-	firstRealm := acctest.RandomWithPrefix("tf-acc")
-	secondRealm := acctest.RandomWithPrefix("tf-acc")
-	samlName := acctest.RandomWithPrefix("tf-acc")
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakSamlIdentityProvider_basic(firstRealm, samlName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakSamlIdentityProviderExists("keycloak_saml_identity_provider.saml"),
-					resource.TestCheckResourceAttr("keycloak_saml_identity_provider.saml", "realm", firstRealm),
-				),
-			},
-			{
-				Config: testKeycloakSamlIdentityProvider_basic(secondRealm, samlName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakSamlIdentityProviderExists("keycloak_saml_identity_provider.saml"),
-					resource.TestCheckResourceAttr("keycloak_saml_identity_provider.saml", "realm", secondRealm),
-				),
 			},
 		},
 	})
@@ -282,7 +252,7 @@ func getKeycloakSamlIdentityProviderFromState(s *terraform.State, resourceName s
 	return saml, nil
 }
 
-func testKeycloakSamlIdentityProvider_basic(realm, saml string) string {
+func testKeycloakSamlIdentityProvider_basic(saml string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -294,7 +264,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	entity_id					= "https://example.com/entity_id"
 	single_sign_on_service_url  = "https://example.com/auth"
 }
-	`, realm, saml)
+	`, testAccRealm.Realm, saml)
 }
 
 func testKeycloakSamlIdentityProvider_extra_config(alias, configKey, configValue string) string {
@@ -344,5 +314,5 @@ resource "keycloak_saml_identity_provider" "saml" {
 	gui_order                  = %s
 	sync_mode                  = "%s"
 }
-	`, saml.Realm, saml.Alias, saml.Enabled, saml.Config.EntityId, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSignKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted), saml.Config.GuiOrder, saml.Config.SyncMode)
+	`, testAccRealm.Realm, saml.Alias, saml.Enabled, saml.Config.EntityId, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSignKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted), saml.Config.GuiOrder, saml.Config.SyncMode)
 }
