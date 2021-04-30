@@ -8,9 +8,9 @@ terraform {
 }
 
 provider "keycloak" {
-  client_id     = "terraform"
-  client_secret = "884e0f95-0f42-4a63-9b1f-94274655669e"
-  url           = "http://localhost:8080"
+  client_id          = "terraform"
+  client_secret      = "884e0f95-0f42-4a63-9b1f-94274655669e"
+  url                = "http://localhost:8080"
   additional_headers = {
     foo = "bar"
   }
@@ -76,20 +76,24 @@ resource "keycloak_realm" "test" {
 
   ssl_required    = "external"
   password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
-  attributes = {
+  attributes      = {
     mycustomAttribute = "myCustomValue"
   }
 
   web_authn_policy {
     relying_party_entity_name = "Example"
-    relying_party_id = "keycloak.example.com"
-    signature_algorithms = ["ES256", "RS256"]
+    relying_party_id          = "keycloak.example.com"
+    signature_algorithms      = [
+      "ES256",
+      "RS256"]
   }
 
   web_authn_passwordless_policy {
     relying_party_entity_name = "Example"
-    relying_party_id = "keycloak.example.com"
-    signature_algorithms = ["ES256", "RS256"]
+    relying_party_id          = "keycloak.example.com"
+    signature_algorithms      = [
+      "ES256",
+      "RS256"]
   }
 }
 
@@ -111,10 +115,10 @@ resource "keycloak_required_action" "custom-configured_totp" {
 }
 
 resource "keycloak_required_action" "required_action" {
-  realm_id  = keycloak_realm.test.realm
-  alias     = "webauthn-register"
-  enabled   = true
-  name      = "Webauthn Register"
+  realm_id = keycloak_realm.test.realm
+  alias    = "webauthn-register"
+  enabled  = true
+  name     = "Webauthn Register"
 }
 
 resource "keycloak_group" "foo" {
@@ -182,7 +186,8 @@ resource "keycloak_group" "baz" {
 
 resource "keycloak_default_groups" "default" {
   realm_id  = keycloak_realm.test.id
-  group_ids = [keycloak_group.baz.id]
+  group_ids = [
+    keycloak_group.baz.id]
 }
 
 resource "keycloak_openid_client" "test_client" {
@@ -274,10 +279,10 @@ resource "keycloak_ldap_user_federation" "openldap" {
   read_timeout       = "10s"
 
   kerberos {
-    server_principal = "HTTP/keycloak.local@FOO.LOCAL"
+    server_principal                         = "HTTP/keycloak.local@FOO.LOCAL"
     use_kerberos_for_password_authentication = false
-    key_tab = "/etc/keycloak.keytab"
-    kerberos_realm = "FOO.LOCAL"
+    key_tab                                  = "/etc/keycloak.keytab"
+    kerberos_realm                           = "FOO.LOCAL"
   }
 
   cache {
@@ -450,15 +455,15 @@ resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_cl
   realm_id  = keycloak_realm.test.id
   client_id = keycloak_openid_client.test_client.id
 
-  claim_name = "foo"
+  claim_name  = "foo"
   multivalued = false
 
-  client_id_for_role_mappings   = keycloak_openid_client.bearer_only_client.client_id
-  client_role_prefix = "prefixValue"
+  client_id_for_role_mappings = keycloak_openid_client.bearer_only_client.client_id
+  client_role_prefix          = "prefixValue"
 
   add_to_id_token     = true
   add_to_access_token = false
-  add_to_userinfo = false
+  add_to_userinfo     = false
 }
 
 resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_client_scope" {
@@ -469,35 +474,35 @@ resource "keycloak_openid_user_client_role_protocol_mapper" "user_client_role_cl
   claim_name  = "foo"
   multivalued = false
 
-  client_id_for_role_mappings   = keycloak_openid_client.bearer_only_client.client_id
-  client_role_prefix = "prefixValue"
+  client_id_for_role_mappings = keycloak_openid_client.bearer_only_client.client_id
+  client_role_prefix          = "prefixValue"
 
   add_to_id_token     = true
   add_to_access_token = false
-  add_to_userinfo    = false
+  add_to_userinfo     = false
 }
 
 resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_client" {
-	name               = "tf-test-open-id-user-session-note-protocol-mapper-client"
-	realm_id           = keycloak_realm.test.id
-	client_id          = keycloak_openid_client.test_client.id
+  name      = "tf-test-open-id-user-session-note-protocol-mapper-client"
+  realm_id  = keycloak_realm.test.id
+  client_id = keycloak_openid_client.test_client.id
 
-	claim_name         = "foo"
-	claim_value_type   = "String"
-	session_note       = "bar"
+  claim_name       = "foo"
+  claim_value_type = "String"
+  session_note     = "bar"
 
   add_to_id_token     = true
   add_to_access_token = false
 }
 
 resource "keycloak_openid_user_session_note_protocol_mapper" "user_session_note_client_scope" {
-	name               = "tf-test-open-id-user-session-note-protocol-mapper-client-scope"
-	realm_id           = keycloak_realm.test.id
-	client_scope_id    = keycloak_openid_client_scope.test_default_client_scope.id
+  name            = "tf-test-open-id-user-session-note-protocol-mapper-client-scope"
+  realm_id        = keycloak_realm.test.id
+  client_scope_id = keycloak_openid_client_scope.test_default_client_scope.id
 
-	claim_name         = "foo2"
-	claim_value_type   = "String"
-	session_note       = "bar2"
+  claim_name       = "foo2"
+  claim_value_type = "String"
+  session_note     = "bar2"
 
   add_to_id_token     = true
   add_to_access_token = false
@@ -586,6 +591,8 @@ resource keycloak_oidc_identity_provider oidc {
   client_id         = "example_id"
   client_secret     = "example_token"
   default_scopes    = "openid random profile"
+  sync_mode         = "FORCE"
+  gui_order         = 1
 }
 
 resource keycloak_oidc_google_identity_provider google {
@@ -596,6 +603,8 @@ resource keycloak_oidc_google_identity_provider google {
   request_refresh_token                   = true
   default_scopes                          = "openid random profile"
   accepts_prompt_none_forward_from_client = false
+  sync_mode                               = "FORCE"
+  gui_order                               = 2
 }
 
 //This example does not work in keycloak 10, because the interfaces that our customIdp implements, have changed in the keycloak latest version.
@@ -684,6 +693,8 @@ resource keycloak_saml_identity_provider saml {
   alias                      = "saml"
   entity_id                  = "https://example.com/entity_id"
   single_sign_on_service_url = "https://example.com/auth"
+  sync_mode                  = "FORCE"
+  gui_order                  = 3
 }
 
 resource keycloak_attribute_importer_identity_provider_mapper saml {
@@ -852,61 +863,61 @@ resource "keycloak_openid_client_service_account_role" "read_token" {
 }
 
 resource "keycloak_authentication_flow" "browser-copy-flow" {
-  alias    = "browserCopyFlow"
-  realm_id = keycloak_realm.test.id
+  alias       = "browserCopyFlow"
+  realm_id    = keycloak_realm.test.id
   description = "browser based authentication"
 }
 
 resource "keycloak_authentication_execution" "browser-copy-cookie" {
-  realm_id = keycloak_realm.test.id
+  realm_id          = keycloak_realm.test.id
   parent_flow_alias = keycloak_authentication_flow.browser-copy-flow.alias
-  authenticator = "auth-cookie"
-  requirement = "ALTERNATIVE"
-  depends_on = [
+  authenticator     = "auth-cookie"
+  requirement       = "ALTERNATIVE"
+  depends_on        = [
     keycloak_authentication_execution.browser-copy-kerberos
   ]
 }
 
 resource "keycloak_authentication_execution" "browser-copy-kerberos" {
-  realm_id = keycloak_realm.test.id
+  realm_id          = keycloak_realm.test.id
   parent_flow_alias = keycloak_authentication_flow.browser-copy-flow.alias
-  authenticator = "auth-spnego"
-  requirement = "DISABLED"
+  authenticator     = "auth-spnego"
+  requirement       = "DISABLED"
 }
 
 resource "keycloak_authentication_execution" "browser-copy-idp-redirect" {
-  realm_id = keycloak_realm.test.id
+  realm_id          = keycloak_realm.test.id
   parent_flow_alias = keycloak_authentication_flow.browser-copy-flow.alias
-  authenticator = "identity-provider-redirector"
-  requirement = "ALTERNATIVE"
-  depends_on = [
+  authenticator     = "identity-provider-redirector"
+  requirement       = "ALTERNATIVE"
+  depends_on        = [
     keycloak_authentication_execution.browser-copy-cookie
   ]
 }
 
 resource "keycloak_authentication_subflow" "browser-copy-flow-forms" {
-  realm_id = keycloak_realm.test.id
+  realm_id          = keycloak_realm.test.id
   parent_flow_alias = keycloak_authentication_flow.browser-copy-flow.alias
-  alias    = "browser-copy-flow-forms"
-  requirement = "ALTERNATIVE"
-  depends_on = [
+  alias             = "browser-copy-flow-forms"
+  requirement       = "ALTERNATIVE"
+  depends_on        = [
     keycloak_authentication_execution.browser-copy-idp-redirect
   ]
 }
 
 resource "keycloak_authentication_execution" "browser-copy-auth-username-password-form" {
-  realm_id = keycloak_realm.test.id
+  realm_id          = keycloak_realm.test.id
   parent_flow_alias = keycloak_authentication_subflow.browser-copy-flow-forms.alias
-  authenticator = "auth-username-password-form"
-  requirement = "REQUIRED"
+  authenticator     = "auth-username-password-form"
+  requirement       = "REQUIRED"
 }
 
 resource "keycloak_authentication_execution" "browser-copy-otp" {
-  realm_id = keycloak_realm.test.id
+  realm_id          = keycloak_realm.test.id
   parent_flow_alias = keycloak_authentication_subflow.browser-copy-flow-forms.alias
-  authenticator = "auth-otp-form"
-  requirement = "REQUIRED"
-  depends_on = [
+  authenticator     = "auth-otp-form"
+  requirement       = "REQUIRED"
+  depends_on        = [
     keycloak_authentication_execution.browser-copy-auth-username-password-form
   ]
 }
@@ -915,7 +926,7 @@ resource "keycloak_authentication_execution_config" "config" {
   realm_id     = keycloak_realm.test.id
   execution_id = keycloak_authentication_execution.browser-copy-idp-redirect.id
   alias        = "idp-XXX-config"
-  config = {
+  config       = {
     defaultProvider = "idp-XXX"
   }
 }

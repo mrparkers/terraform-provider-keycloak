@@ -3,6 +3,7 @@ package provider
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/imdario/mergo"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -32,12 +33,6 @@ var principalTypes = []string{
 	"SUBJECT",
 	"ATTRIBUTE",
 	"FRIENDLY_ATTRIBUTE",
-}
-
-var syncModes = []string{
-	"IMPORT",
-	"FORCE",
-	"LEGACY",
 }
 
 func resourceKeycloakSamlIdentityProvider() *schema.Resource {
@@ -144,19 +139,6 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Default:     "",
 			Description: "Principal Attribute",
 		},
-		"gui_order": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Default:     "",
-			Description: "GUI Order",
-		},
-		"sync_mode": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			Default:      "",
-			ValidateFunc: validation.StringInSlice(syncModes, false),
-			Description:  "Sync Mode",
-		},
 	}
 	samlResource := resourceKeycloakIdentityProvider()
 	samlResource.Schema = mergeSchemas(samlResource.Schema, samlSchema)
@@ -167,9 +149,10 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 }
 
 func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
-	rec, _ := getIdentityProviderFromData(data)
+	rec, defaultConfig := getIdentityProviderFromData(data)
 	rec.ProviderId = "saml"
-	rec.Config = &keycloak.IdentityProviderConfig{
+
+	samlIdentityProviderConfig := &keycloak.IdentityProviderConfig{
 		ValidateSignature:                keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
 		BackchannelSupported:             keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
@@ -188,17 +171,24 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
 		PrincipalType:                    data.Get("principal_type").(string),
 		PrincipalAttribute:               data.Get("principal_attribute").(string),
-		GuiOrder:                         data.Get("gui_order").(string),
-		SyncMode:                         data.Get("sync_mode").(string),
 	}
+
 	if _, ok := data.GetOk("signature_algorithm"); ok {
-		rec.Config.WantAuthnRequestsSigned = true
+		samlIdentityProviderConfig.WantAuthnRequestsSigned = true
 	}
+
+	if err := mergo.Merge(samlIdentityProviderConfig, defaultConfig); err != nil {
+		return nil, err
+	}
+
+	rec.Config = samlIdentityProviderConfig
+
 	return rec, nil
 }
 
 func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *keycloak.IdentityProvider) error {
 	setIdentityProviderData(data, identityProvider)
+
 	data.Set("backchannel_supported", identityProvider.Config.BackchannelSupported)
 	data.Set("validate_signature", identityProvider.Config.ValidateSignature)
 	data.Set("hide_on_login_page", identityProvider.Config.HideOnLoginPage)
@@ -217,7 +207,6 @@ func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("want_assertions_encrypted", identityProvider.Config.WantAssertionsEncrypted)
 	data.Set("principal_type", identityProvider.Config.PrincipalType)
 	data.Set("principal_attribute", identityProvider.Config.PrincipalAttribute)
-	data.Set("gui_order", identityProvider.Config.GuiOrder)
-	data.Set("sync_mode", identityProvider.Config.SyncMode)
+
 	return nil
 }

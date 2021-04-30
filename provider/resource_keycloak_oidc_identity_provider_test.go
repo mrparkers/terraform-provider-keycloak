@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
+	"strconv"
 	"testing"
 )
 
@@ -25,7 +27,7 @@ func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakOidcIdentityProvider_extra_config(t *testing.T) {
+func TestAccKeycloakOidcIdentityProvider_extraConfig(t *testing.T) {
 	oidcName := acctest.RandomWithPrefix("tf-acc")
 	customConfigValue := acctest.RandomWithPrefix("tf-acc")
 
@@ -35,10 +37,28 @@ func TestAccKeycloakOidcIdentityProvider_extra_config(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOidcIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOidcIdentityProvider_extra_config(oidcName, customConfigValue),
+				Config: testKeycloakOidcIdentityProvider_extra_config(oidcName, "dummyConfig", customConfigValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOidcIdentityProviderHasCustomConfigValue("keycloak_oidc_identity_provider.oidc", customConfigValue),
 				),
+			},
+		},
+	})
+}
+
+// ensure that extra_config keys which are covered by top-level attributes are not allowed
+func TestAccKeycloakOidcIdentityProvider_extraConfigInvalid(t *testing.T) {
+	oidcName := acctest.RandomWithPrefix("tf-acc")
+	customConfigValue := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOidcIdentityProviderDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOidcIdentityProvider_extra_config(oidcName, "syncMode", customConfigValue),
+				ExpectError: regexp.MustCompile("extra_config key \"syncMode\" is not allowed"),
 			},
 		},
 	})
@@ -103,6 +123,8 @@ func TestAccKeycloakOidcIdentityProvider_basicUpdateAll(t *testing.T) {
 			TokenUrl:         "https://example.com/token",
 			ClientId:         acctest.RandString(10),
 			ClientSecret:     acctest.RandString(10),
+			GuiOrder:         strconv.Itoa(acctest.RandIntRange(1, 3)),
+			SyncMode:         randomStringInSlice(syncModes),
 		},
 	}
 
@@ -115,6 +137,8 @@ func TestAccKeycloakOidcIdentityProvider_basicUpdateAll(t *testing.T) {
 			TokenUrl:         "https://example.com/token",
 			ClientId:         acctest.RandString(10),
 			ClientSecret:     acctest.RandString(10),
+			GuiOrder:         strconv.Itoa(acctest.RandIntRange(1, 3)),
+			SyncMode:         randomStringInSlice(syncModes),
 		},
 	}
 
@@ -244,7 +268,7 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	`, testAccRealm.Realm, oidc)
 }
 
-func testKeycloakOidcIdentityProvider_extra_config(alias, customConfigValue string) string {
+func testKeycloakOidcIdentityProvider_extra_config(alias, configKey, configValue string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -259,10 +283,10 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	client_id         = "example_id"
 	client_secret     = "example_token"
 	extra_config      = {
-		dummyConfig = "%s"
+		%s = "%s"
 	}
 }
-	`, testAccRealm.Realm, alias, customConfigValue)
+	`, testAccRealm.Realm, alias, configKey, configValue)
 }
 
 func testKeycloakOidcIdentityProvider_keyDefaultScopes(alias, value string) string {
@@ -298,6 +322,8 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	token_url         = "%s"
 	client_id         = "%s"
 	client_secret     = "%s"
+	gui_order         = %s
+	sync_mode         = "%s"
 }
-	`, testAccRealm.Realm, oidc.Alias, oidc.Enabled, oidc.Config.AuthorizationUrl, oidc.Config.TokenUrl, oidc.Config.ClientId, oidc.Config.ClientSecret)
+	`, testAccRealm.Realm, oidc.Alias, oidc.Enabled, oidc.Config.AuthorizationUrl, oidc.Config.TokenUrl, oidc.Config.ClientId, oidc.Config.ClientSecret, oidc.Config.GuiOrder, oidc.Config.SyncMode)
 }
