@@ -46,7 +46,7 @@ func resourceKeycloakOpenidClientAuthorizationRolePolicy() *schema.Resource {
 				Optional: true,
 			},
 			"role": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				MinItems: 1,
 				Elem: &schema.Resource{
@@ -68,8 +68,8 @@ func resourceKeycloakOpenidClientAuthorizationRolePolicy() *schema.Resource {
 
 func getOpenidClientAuthorizationRolePolicyResourceFromData(data *schema.ResourceData) *keycloak.OpenidClientAuthorizationRolePolicy {
 	var rolesList []keycloak.OpenidClientAuthorizationRole
-	if v, ok := data.Get("role").([]interface{}); ok {
-		for _, role := range v {
+	if v, ok := data.Get("role").(*schema.Set); ok {
+		for _, role := range v.List() {
 			roleMap := role.(map[string]interface{})
 			tempRole := keycloak.OpenidClientAuthorizationRole{
 				Id:       roleMap["id"].(string),
