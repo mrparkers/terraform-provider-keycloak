@@ -33,6 +33,7 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_basic(t *testing.T) 
 func TestAccKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(t *testing.T) {
 	t.Parallel()
 	mapperName := acctest.RandomWithPrefix("tf-acc")
+	mapperType := "oidc-user-attribute-idp-mapper"
 	alias := acctest.RandomWithPrefix("tf-acc")
 	userAttribute := acctest.RandomWithPrefix("tf-acc")
 	claimName := acctest.RandomWithPrefix("tf-acc")
@@ -44,7 +45,7 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(t *t
 		CheckDestroy:      testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(alias, mapperName, userAttribute, claimName, syncMode),
+				Config: testKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(alias, mapperName, mapperType, userAttribute, claimName, syncMode),
 				Check:  testAccCheckKeycloakAttributeImporterIdentityProviderMapperExists("keycloak_attribute_importer_identity_provider_mapper.oidc"),
 			},
 		},
@@ -88,6 +89,7 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig_crea
 	var mapper = &keycloak.IdentityProviderMapper{}
 
 	mapperName := acctest.RandomWithPrefix("tf-acc")
+	mapperType := "oidc-user-attribute-idp-mapper"
 	alias := acctest.RandomWithPrefix("tf-acc")
 	userAttribute := acctest.RandomWithPrefix("tf-acc")
 	claimName := acctest.RandomWithPrefix("tf-acc")
@@ -99,7 +101,7 @@ func TestAccKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig_crea
 		CheckDestroy:      testAccCheckKeycloakAttributeImporterIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(alias, mapperName, userAttribute, claimName, syncMode),
+				Config: testKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(alias, mapperName, userAttribute, mapperType, claimName, syncMode),
 				Check:  testAccCheckKeycloakAttributeImporterIdentityProviderMapperFetch("keycloak_attribute_importer_identity_provider_mapper.oidc", mapper),
 			},
 			{
@@ -247,7 +249,7 @@ resource keycloak_attribute_importer_identity_provider_mapper oidc {
 	`, testAccRealm.Realm, alias, name, userAttribute, claimName)
 }
 
-func testKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(alias, name, userAttribute, claimName, syncMode string) string {
+func testKeycloakAttributeImporterIdentityProviderMapper_withExtraConfig(alias, name, mapper, userAttribute, claimName, syncMode string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -263,16 +265,17 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 }
 
 resource keycloak_attribute_importer_identity_provider_mapper oidc {
-	realm                   = data.keycloak_realm.realm.id
-	name                    = "%s"
-	identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
-	user_attribute          = "%s"
-	claim_name              = "%s"
+	realm                    = data.keycloak_realm.realm.id
+	name                     = "%s"
+	identity_provider_alias  = keycloak_oidc_identity_provider.oidc.alias
+	identity_provider_mapper = "%s"
+	user_attribute           = "%s"
+	claim_name               = "%s"
 	extra_config 			= {
 		syncMode = "%s"
 	}
 }
-	`, testAccRealm.Realm, alias, name, userAttribute, claimName, syncMode)
+	`, testAccRealm.Realm, alias, name, mapper, userAttribute, claimName, syncMode)
 }
 
 func testKeycloakAttributeImporterIdentityProviderMapper_basicFromInterface(mapper *keycloak.IdentityProviderMapper) string {

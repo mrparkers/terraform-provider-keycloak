@@ -32,11 +32,12 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 }
 
 resource "keycloak_attribute_importer_identity_provider_mapper" "oidc" {
-  realm                   = keycloak_realm.realm.id
-  name                    = "email-attribute-importer"
-  claim_name              = "my-email-claim"
-  identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
-  user_attribute          = "email"
+  realm                    = keycloak_realm.realm.id
+  name                     = "email-attribute-importer"
+  claim_name               = "my-email-claim"
+  user_attribute           = "email"
+  identity_provider_alias  = keycloak_oidc_identity_provider.oidc.alias
+  identity_provider_mapper = "%s-user-attribute-idp-mapper"
 
   # extra_config with syncMode is required in Keycloak 10+
   extra_config = {
@@ -51,8 +52,9 @@ The following arguments are supported:
 
 - `realm` - (Required) The name of the realm.
 - `name` - (Required) The name of the mapper.
-- `identity_provider_alias` - (Required) The alias of the associated identity provider.
 - `user_attribute` - (Required) The user attribute or property name to store the mapped result.
+- `identity_provider_alias` - (Required) The alias of the associated identity provider.
+- `identity_provider_mapper` - (Optional) The type of the identity provider mapper.
 - `attribute_name` - (Optional) For SAML based providers, this is the name of the attribute to search for in the assertion. Conflicts with `attribute_friendly_name`.
 - `attribute_friendly_name` - (Optional) For SAML based providers, this is the friendly name of the attribute to search for in the assertion. Conflicts with `attribute_name`.
 - `claim_name` - (Optional) For OIDC based providers, this is the name of the claim to use.

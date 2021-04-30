@@ -36,6 +36,11 @@ func resourceKeycloakIdentityProviderMapper() *schema.Resource {
 				ForceNew:    true,
 				Description: "IDP Alias",
 			},
+			"identity_provider_mapper": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "IDP Mapper Type",
+			},
 			"extra_config": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -51,6 +56,10 @@ func getIdentityProviderMapperFromData(data *schema.ResourceData) (*keycloak.Ide
 		Name:                  data.Get("name").(string),
 		IdentityProviderAlias: data.Get("identity_provider_alias").(string),
 	}
+
+	if _, ok := data.GetOk("identity_provider_mapper"); ok {
+		rec.IdentityProviderMapper = data.Get("identity_provider_mapper").(string)
+	}
 	return rec, nil
 }
 
@@ -59,6 +68,10 @@ func setIdentityProviderMapperData(data *schema.ResourceData, identityProviderMa
 	data.Set("realm", identityProviderMapper.Realm)
 	data.Set("name", identityProviderMapper.Name)
 	data.Set("identity_provider_alias", identityProviderMapper.IdentityProviderAlias)
+
+	if _, ok := data.GetOk("identity_provider_mapper"); ok {
+		data.Set("identity_provider_mapper", identityProviderMapper.IdentityProviderMapper)
+	}
 	return nil
 }
 
