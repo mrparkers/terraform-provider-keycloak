@@ -58,7 +58,9 @@ resource "keycloak_oidc_identity_provider" "realm_identity_provider" {
 - `ui_locales` - (Optional) Pass current locale to identity provider. Defaults to `false`.
 - `accepts_prompt_none_forward_from_client` (Optional) When `true`, the IDP will accept forwarded authentication requests that contain the `prompt=none` query parameter. Defaults to `false`.
 - `default_scopes` - (Optional) The scopes to be sent when asking for authorization. It can be a space-separated list of scopes. Defaults to `openid`.
-- `extra_config` - (Optional) A map of key/value pairs to add extra configuration to this identity provider. This can be used for custom oidc provider implementations, or to add configuration that is not yet supported by this Terraform provider.
+- `sync_mode` - (Optional) The default sync mode to use for all mappers attached to this identity provider. Can be once of `IMPORT`, `FORCE`, or `LEGACY`.
+- `gui_order` - (Optional) A number defining the order of this identity provider in the GUI.
+- `extra_config` - (Optional) A map of key/value pairs to add extra configuration to this identity provider. This can be used for custom oidc provider implementations, or to add configuration that is not yet supported by this Terraform provider. Use this attribute at your own risk, as custom attributes may conflict with top-level configuration attributes in future provider updates.
     - `clientAuthMethod` (Optional) The client authentication method. Since Keycloak 8, this is a required attribute if OIDC provider is created using the Keycloak GUI. It accepts the values `client_secret_post` (Client secret sent as post), `client_secret_basic` (Client secret sent as basic auth), `client_secret_jwt` (Client secret as jwt) and `private_key_jwt ` (JTW signed with private key)
 
 ## Attribute Reference

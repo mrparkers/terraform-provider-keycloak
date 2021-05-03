@@ -2,6 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -11,7 +13,6 @@ import (
 )
 
 func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
-	realmName := acctest.RandomWithPrefix("tf-acc")
 	samlName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -20,8 +21,45 @@ func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlIdentityProvider_basic(realmName, samlName),
+				Config: testKeycloakSamlIdentityProvider_basic(samlName),
 				Check:  testAccCheckKeycloakSamlIdentityProviderExists("keycloak_saml_identity_provider.saml"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakSamlIdentityProvider_extraConfig(t *testing.T) {
+	samlName := acctest.RandomWithPrefix("tf-acc")
+	customConfigValue := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlIdentityProvider_extra_config(samlName, "dummyConfig", customConfigValue),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakSamlIdentityProviderHasCustomConfigValue("keycloak_saml_identity_provider.saml", customConfigValue),
+				),
+			},
+		},
+	})
+}
+
+// ensure that extra_config keys which are covered by top-level attributes are not allowed
+func TestAccKeycloakSamlIdentityProvider_extraConfigInvalid(t *testing.T) {
+	samlName := acctest.RandomWithPrefix("tf-acc")
+	customConfigValue := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakSamlIdentityProvider_extra_config(samlName, "syncMode", customConfigValue),
+				ExpectError: regexp.MustCompile("extra_config key \"syncMode\" is not allowed"),
 			},
 		},
 	})
@@ -30,7 +68,6 @@ func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
 func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) {
 	var saml = &keycloak.IdentityProvider{}
 
-	realmName := acctest.RandomWithPrefix("tf-acc")
 	samlName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -39,7 +76,7 @@ func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) 
 		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlIdentityProvider_basic(realmName, samlName),
+				Config: testKeycloakSamlIdentityProvider_basic(samlName),
 				Check:  testAccCheckKeycloakSamlIdentityProviderFetch("keycloak_saml_identity_provider.saml", saml),
 			},
 			{
@@ -49,36 +86,8 @@ func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) 
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakSamlIdentityProvider_basic(realmName, samlName),
+				Config: testKeycloakSamlIdentityProvider_basic(samlName),
 				Check:  testAccCheckKeycloakSamlIdentityProviderExists("keycloak_saml_identity_provider.saml"),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakSamlIdentityProvider_basicUpdateRealm(t *testing.T) {
-	firstRealm := acctest.RandomWithPrefix("tf-acc")
-	secondRealm := acctest.RandomWithPrefix("tf-acc")
-	samlName := acctest.RandomWithPrefix("tf-acc")
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakSamlIdentityProvider_basic(firstRealm, samlName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakSamlIdentityProviderExists("keycloak_saml_identity_provider.saml"),
-					resource.TestCheckResourceAttr("keycloak_saml_identity_provider.saml", "realm", firstRealm),
-				),
-			},
-			{
-				Config: testKeycloakSamlIdentityProvider_basic(secondRealm, samlName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakSamlIdentityProviderExists("keycloak_saml_identity_provider.saml"),
-					resource.TestCheckResourceAttr("keycloak_saml_identity_provider.saml", "realm", secondRealm),
-				),
 			},
 		},
 	})
@@ -118,6 +127,8 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			ForceAuthn:                       keycloak.KeycloakBoolQuoted(firstForceAuthn),
 			WantAssertionsSigned:             keycloak.KeycloakBoolQuoted(firstAssertionsSigned),
 			WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(firstAssertionsEncrypted),
+			GuiOrder:                         strconv.Itoa(acctest.RandIntRange(1, 3)),
+			SyncMode:                         randomStringInSlice(syncModes),
 		},
 	}
 
@@ -142,6 +153,8 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			ForceAuthn:                       keycloak.KeycloakBoolQuoted(!firstForceAuthn),
 			WantAssertionsSigned:             keycloak.KeycloakBoolQuoted(!firstAssertionsSigned),
 			WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(!firstAssertionsEncrypted),
+			GuiOrder:                         strconv.Itoa(acctest.RandIntRange(1, 3)),
+			SyncMode:                         randomStringInSlice(syncModes),
 		},
 	}
 
@@ -187,6 +200,21 @@ func testAccCheckKeycloakSamlIdentityProviderFetch(resourceName string, saml *ke
 	}
 }
 
+func testAccCheckKeycloakSamlIdentityProviderHasCustomConfigValue(resourceName, customConfigValue string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedSaml, err := getKeycloakSamlIdentityProviderFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if fetchedSaml.Config.ExtraConfig["dummyConfig"].(string) != customConfigValue {
+			return fmt.Errorf("expected custom saml provider to have config with a custom key 'dummyConfig' with a value %s, but value was %s", customConfigValue, fetchedSaml.Config.ExtraConfig["dummyConfig"].(string))
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakSamlIdentityProviderDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -224,29 +252,47 @@ func getKeycloakSamlIdentityProviderFromState(s *terraform.State, resourceName s
 	return saml, nil
 }
 
-func testKeycloakSamlIdentityProvider_basic(realm, saml string) string {
+func testKeycloakSamlIdentityProvider_basic(saml string) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_identity_provider" "saml" {
-	realm             			= "${keycloak_realm.realm.id}"
+	realm             			= data.keycloak_realm.realm.id
 	alias             			= "%s"
 	entity_id					= "https://example.com/entity_id"
-	single_sign_on_service_url = "https://example.com/auth"
+	single_sign_on_service_url  = "https://example.com/auth"
 }
-	`, realm, saml)
+	`, testAccRealm.Realm, saml)
+}
+
+func testKeycloakSamlIdentityProvider_extra_config(alias, configKey, configValue string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_saml_identity_provider" "saml" {
+	realm             			= data.keycloak_realm.realm.id
+	alias             			= "%s"
+	entity_id					= "https://example.com/entity_id"
+	single_sign_on_service_url  = "https://example.com/auth"
+	extra_config                = {
+		%s = "%s"
+	}
+}
+	`, testAccRealm.Realm, alias, configKey, configValue)
 }
 
 func testKeycloakSamlIdentityProvider_basicFromInterface(saml *keycloak.IdentityProvider) string {
 	return fmt.Sprintf(`
-resource "keycloak_realm" "realm" {
+data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_saml_identity_provider" "saml" {
-	realm             			= "${keycloak_realm.realm.id}"
+	realm             			= data.keycloak_realm.realm.id
 	alias             			= "%s"
 	enabled           			= %t
 	entity_id					= "%s"
@@ -265,6 +311,8 @@ resource "keycloak_saml_identity_provider" "saml" {
 	force_authn                = %t
 	want_assertions_signed     = %t
 	want_assertions_encrypted  = %t
+	gui_order                  = %s
+	sync_mode                  = "%s"
 }
-	`, saml.Realm, saml.Alias, saml.Enabled, saml.Config.EntityId, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSignKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted))
+	`, testAccRealm.Realm, saml.Alias, saml.Enabled, saml.Config.EntityId, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSignKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted), saml.Config.GuiOrder, saml.Config.SyncMode)
 }

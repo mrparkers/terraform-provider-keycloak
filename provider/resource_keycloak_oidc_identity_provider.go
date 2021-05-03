@@ -2,6 +2,7 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/imdario/mergo"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -96,10 +97,6 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 			Default:     false,
 			Description: "Disable usage of User Info service to obtain additional user information?  Default is to use this OIDC service.",
 		},
-		"extra_config": {
-			Type:     schema.TypeMap,
-			Optional: true,
-		},
 	}
 	oidcResource := resourceKeycloakIdentityProvider()
 	oidcResource.Schema = mergeSchemas(oidcResource.Schema, oidcSchema)
@@ -110,18 +107,11 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 }
 
 func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
-	rec, _ := getIdentityProviderFromData(data)
+	rec, defaultConfig := getIdentityProviderFromData(data)
 	rec.ProviderId = data.Get("provider_id").(string)
 	_, useJwksUrl := data.GetOk("jwks_url")
 
-	extraConfig := map[string]interface{}{}
-	if v, ok := data.GetOk("extra_config"); ok {
-		for key, value := range v.(map[string]interface{}) {
-			extraConfig[key] = value
-		}
-	}
-
-	rec.Config = &keycloak.IdentityProviderConfig{
+	oidcIdentityProviderConfig := &keycloak.IdentityProviderConfig{
 		BackchannelSupported:        keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
 		ValidateSignature:           keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		AuthorizationUrl:            data.Get("authorization_url").(string),
@@ -134,12 +124,17 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		LoginHint:                   data.Get("login_hint").(string),
 		JwksUrl:                     data.Get("jwks_url").(string),
 		UserInfoUrl:                 data.Get("user_info_url").(string),
-		ExtraConfig:                 extraConfig,
 		UseJwksUrl:                  keycloak.KeycloakBoolQuoted(useJwksUrl),
 		DisableUserInfo:             keycloak.KeycloakBoolQuoted(data.Get("disable_user_info").(bool)),
 		DefaultScope:                data.Get("default_scopes").(string),
 		AcceptsPromptNoneForwFrmClt: keycloak.KeycloakBoolQuoted(data.Get("accepts_prompt_none_forward_from_client").(bool)),
 	}
+
+	if err := mergo.Merge(oidcIdentityProviderConfig, defaultConfig); err != nil {
+		return nil, err
+	}
+
+	rec.Config = oidcIdentityProviderConfig
 
 	return rec, nil
 }
@@ -158,6 +153,5 @@ func setOidcIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("token_url", identityProvider.Config.TokenUrl)
 	data.Set("login_hint", identityProvider.Config.LoginHint)
 	data.Set("ui_locales", identityProvider.Config.UILocales)
-	data.Set("extra_config", identityProvider.Config.ExtraConfig)
 	return nil
 }
