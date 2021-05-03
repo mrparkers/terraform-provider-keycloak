@@ -23,6 +23,10 @@ resource "keycloak_oidc_google_identity_provider" "google" {
   trust_email   = true
   hosted_domain = "example.com"
   sync_mode     = "IMPORT"
+
+  extra_config = {
+    "myCustomConfigKey" = "myValue"
+  }
 }
 ```
 
@@ -48,7 +52,7 @@ resource "keycloak_oidc_google_identity_provider" "google" {
 - `hide_on_login_page` - (Optional) When `true`, this identity provider will be hidden on the login page. Defaults to `false`.
 - `sync_mode` - (Optional) The default sync mode to use for all mappers attached to this identity provider. Can be once of `IMPORT`, `FORCE`, or `LEGACY`.
 - `gui_order` - (Optional) A number defining the order of this identity provider in the GUI.
-- `extra_config` - (Optional) A map of key/value pairs to add extra configuration to this identity provider. This can be used for custom oidc provider implementations, or to add configuration that is not yet supported by this Terraform provider.
+- `extra_config` - (Optional) A map of key/value pairs to add extra configuration to this identity provider. This can be used for custom oidc provider implementations, or to add configuration that is not yet supported by this Terraform provider. Use this attribute at your own risk, as custom attributes may conflict with top-level configuration attributes in future provider updates.
 
 ## Attribute Reference
 
