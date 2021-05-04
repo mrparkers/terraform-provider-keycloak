@@ -24,7 +24,7 @@ fmt:
 	gofmt -w -s $(GOFMT_FILES)
 
 test: fmtcheck vet
-	go test $(TEST)
+	go test -v $(TEST)
 
 testacc: fmtcheck vet
 	TF_ACC=1 CHECKPOINT_DISABLE=1 go test -v -timeout 30m -parallel 4 $(TEST) $(TESTARGS)
