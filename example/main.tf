@@ -170,8 +170,8 @@ resource "keycloak_user" "user_with_password" {
 }
 
 resource "keycloak_group_memberships" "foo_members" {
-  realm_id   = keycloak_realm.test.id
-  group_id   = keycloak_group.foo.id
+  realm_id = keycloak_realm.test.id
+  group_id = keycloak_group.foo.id
 
   members = [
     keycloak_user.user.username,

@@ -211,6 +211,7 @@ func (keycloakClient *KeycloakClient) GetGroupMembers(realmId, groupId string) (
 	var iterationUsers []*User
 
 	for ok := true; ok; ok = (len(iterationUsers) > 0) {
+		iterationUsers = nil
 		err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s/members?max=%d&first=%d", realmId, groupId, pagination, first), &iterationUsers, nil)
 		if err != nil {
 			return nil, err
