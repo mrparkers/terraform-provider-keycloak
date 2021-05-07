@@ -1,3 +1,11 @@
+## v3.0.1 (May 5, 2021)
+
+BUG FIXES:
+
+- add validation for `extra_config` attribute for identity providers to prevent conflicts with the top-level identity provider schema ([#523](https://github.com/mrparkers/terraform-provider-keycloak/pull/523))
+  - note: this may cause errors with existing provider configuration that uses this attribute. however, any provider configuration that breaks here was most likely not working in the first place.
+- fix definition of roles in `keycloak_openid_client_role_policy` resource to use a set instead of a list ([#524](https://github.com/mrparkers/terraform-provider-keycloak/pull/524))
+
 ## v3.0.0 (April 12, 2021)
 
 BREAKING CHANGES:
