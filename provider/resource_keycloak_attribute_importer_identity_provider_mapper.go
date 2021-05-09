@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -54,13 +53,7 @@ func getAttributeImporterIdentityProviderMapperFromData(data *schema.ResourceDat
 	if err != nil {
 		return nil, handleNotFoundError(err, data)
 	}
-	if _, ok := data.GetOk("identity_provider_mapper"); !ok {
-		rec.IdentityProviderMapper = fmt.Sprintf("%s-user-attribute-idp-mapper", identityProvider.ProviderId)
-	} else {
-		if strings.Contains(rec.IdentityProviderMapper, "%s") {
-			rec.IdentityProviderMapper = fmt.Sprintf(rec.IdentityProviderMapper, identityProvider.ProviderId)
-		}
-	}
+	rec.IdentityProviderMapper = fmt.Sprintf("%s-user-attribute-idp-mapper", identityProvider.ProviderId)
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
 		UserAttribute: data.Get("user_attribute").(string),
 		ExtraConfig:   extraConfig,
