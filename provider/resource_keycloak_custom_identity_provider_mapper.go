@@ -37,14 +37,11 @@ func getCustomIdentityProviderMapperFromData(data *schema.ResourceData, meta int
 	if err != nil {
 		return nil, handleNotFoundError(err, data)
 	}
-	if identityProviderMapper, ok := data.GetOk("identity_provider_mapper"); !ok {
-		return nil, fmt.Errorf(`provider.keycloak: keycloak_custom_identity_provider_mapper: %s: "identity_provider_mapper": should be set`, data.Get("name").(string))
+	identityProviderMapper := data.Get("identity_provider_mapper").(string)
+	if strings.Contains(identityProviderMapper, "%s") {
+		rec.IdentityProviderMapper = fmt.Sprintf(identityProviderMapper, identityProvider.ProviderId)
 	} else {
-		if strings.Contains(identityProviderMapper.(string), "%s") {
-			rec.IdentityProviderMapper = fmt.Sprintf(identityProviderMapper.(string), identityProvider.ProviderId)
-		} else {
-			rec.IdentityProviderMapper = identityProviderMapper.(string)
-		}
+		rec.IdentityProviderMapper = identityProviderMapper
 	}
 	rec.Config = &keycloak.IdentityProviderMapperConfig{
 		ExtraConfig: extraConfig,

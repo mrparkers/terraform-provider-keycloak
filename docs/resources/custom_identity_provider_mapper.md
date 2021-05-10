@@ -7,6 +7,7 @@ page_title: "keycloak_custom_identity_provider_mapper Resource"
 Allows for creating and managing custom identity provider mapper within Keycloak.
 
 The custom identity provider mapper can be used to define custom mapper type for the imported Keycloak user.
+If `identity_provider_mapper` field has %s, it will be replaced by providerId (oidc, saml) of the identity provider.
 
 ~> If you are using Keycloak 10 or higher, you will need to specify the `extra_config` argument in order to define a `syncMode` for the mapper.
 
