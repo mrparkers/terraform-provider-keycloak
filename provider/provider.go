@@ -74,6 +74,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 			"keycloak_attribute_importer_identity_provider_mapper":       resourceKeycloakAttributeImporterIdentityProviderMapper(),
 			"keycloak_attribute_to_role_identity_provider_mapper":        resourceKeycloakAttributeToRoleIdentityProviderMapper(),
 			"keycloak_user_template_importer_identity_provider_mapper":   resourceKeycloakUserTemplateImporterIdentityProviderMapper(),
+			"keycloak_custom_identity_provider_mapper":                   resourceKeycloakCustomIdentityProviderMapper(),
 			"keycloak_saml_identity_provider":                            resourceKeycloakSamlIdentityProvider(),
 			"keycloak_oidc_google_identity_provider":                     resourceKeycloakOidcGoogleIdentityProvider(),
 			"keycloak_oidc_identity_provider":                            resourceKeycloakOidcIdentityProvider(),
