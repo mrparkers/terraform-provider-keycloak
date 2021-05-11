@@ -13,6 +13,7 @@ import (
 var (
 	keycloakSamlClientNameIdFormats       = []string{"username", "email", "transient", "persistent"}
 	keycloakSamlClientSignatureAlgorithms = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA512", "DSA_SHA1"}
+	keycloakSamlClientSignatureKeyName    = []string{"NONE", "KEY_ID", "CERT_SUBJECT"}
 )
 
 func resourceKeycloakSamlClient() *schema.Resource {
@@ -92,6 +93,12 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(keycloakSamlClientSignatureAlgorithms, false),
+			},
+			"signature_key_name": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice(keycloakSamlClientSignatureKeyName, false),
 			},
 			"name_id_format": {
 				Type:         schema.TypeString,
