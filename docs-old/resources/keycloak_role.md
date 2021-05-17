@@ -40,7 +40,7 @@ resource "keycloak_openid_client" "client" {
 
 resource "keycloak_role" "client_role" {
     realm_id    = keycloak_realm.realm.id
-    client_id   = keycloak_client.client.id
+    client_id   = keycloak_openid_client.client.id
     name        = "my-client-role"
     description = "My Client Role"
 }
