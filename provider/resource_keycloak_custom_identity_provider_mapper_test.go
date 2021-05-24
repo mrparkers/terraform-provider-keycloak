@@ -295,6 +295,7 @@ data "keycloak_realm" "realm" {
 resource "keycloak_saml_identity_provider" "saml" {
 	realm                      = data.keycloak_realm.realm.id
 	alias                      = "%s"
+	entity_id                  = "https://example.com/entity_id"
 	single_sign_on_service_url = "https://example.com/auth"
 }
 
