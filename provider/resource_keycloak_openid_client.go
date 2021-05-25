@@ -206,6 +206,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"import": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 		CustomizeDiff: customdiff.ComputedIf("service_account_user_id", func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 			return d.HasChange("service_accounts_enabled")
@@ -401,9 +406,23 @@ func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interfac
 		return err
 	}
 
-	err = keycloakClient.NewOpenidClient(client)
-	if err != nil {
-		return err
+	if data.Get("import").(bool) {
+		existingClient, err := keycloakClient.GetOpenidClientByClientId(client.RealmId, client.ClientId)
+		if err != nil {
+			return err
+		}
+		rootUrlString := data.Get("root_url").(string)
+		client.Id = existingClient.Id
+		client.RootUrl = &rootUrlString
+		err = keycloakClient.UpdateOpenidClient(client)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = keycloakClient.NewOpenidClient(client)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = setOpenidClientData(keycloakClient, data, client)
@@ -460,6 +479,10 @@ func resourceKeycloakOpenidClientUpdate(data *schema.ResourceData, meta interfac
 }
 
 func resourceKeycloakOpenidClientDelete(data *schema.ResourceData, meta interface{}) error {
+	if data.Get("import").(bool) {
+		return nil
+	}
+
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
