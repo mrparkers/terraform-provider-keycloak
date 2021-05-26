@@ -16,7 +16,9 @@ Also note that you should not use `keycloak_group_memberships` with a group has 
 This resource **should not** be used to control membership of a group that has its members federated from an external
 source via group mapping.
 
-To non-exclusivly manage the group's of a user, see the [`keycloak_user_groups` resource][1]
+To non-exclusively manage the group's of a user, see the [`keycloak_user_groups` resource][1]
+
+This resource paginates its data loading on refresh by 50 items.
 
 ## Example Usage
 
