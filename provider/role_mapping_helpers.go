@@ -34,6 +34,11 @@ func getExtendedRoleMapping(keycloakClient *keycloak.KeycloakClient, realmId str
 	for _, roleId := range roleIds {
 		role, err := keycloakClient.GetRole(realmId, roleId)
 		if err != nil {
+			// if the role doesn't exist anymore, skip it
+			if keycloak.ErrorIs404(err) {
+				continue
+			}
+
 			return nil, err
 		}
 
