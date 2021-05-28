@@ -290,6 +290,27 @@ func TestAccKeycloakGroupRoles_updateNonExhaustive(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakGroupRoles_simultaneousRoleAndAssignmentUpdate(t *testing.T) {
+	t.Parallel()
+
+	groupName := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakGroupRoles_simultaneousRoleAndAssignmentUpdate(groupName, 1),
+				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles", true),
+			},
+			{
+				Config: testKeycloakGroupRoles_simultaneousRoleAndAssignmentUpdate(groupName, 2),
+				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles", true),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakGroupHasRoles(resourceName string, exhaustive bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resourceName]
@@ -701,4 +722,31 @@ resource "keycloak_group_roles" "group_roles2" {
 	%s
 }
 	`, testAccRealm.Realm, openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, groupName, tfRoleIds1, tfRoleIds2)
+}
+
+func testKeycloakGroupRoles_simultaneousRoleAndAssignmentUpdate(groupName string, id int) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_role" "realm_role_%[2]d" {
+	name     = "role-%[2]d"
+	realm_id = data.keycloak_realm.realm.id
+}
+
+resource "keycloak_group" "group" {
+	realm_id = data.keycloak_realm.realm.id
+	name     = "%s"
+}
+
+resource "keycloak_group_roles" "group_roles" {
+	realm_id = data.keycloak_realm.realm.id
+	group_id = keycloak_group.group.id
+
+	role_ids = [
+		keycloak_role.realm_role_%[2]d.id
+	]
+}
+`, testAccRealm.Realm, id, groupName)
 }
