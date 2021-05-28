@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// https://www.keycloak.org/docs-api/6.0/javadocs/org/keycloak/representations/idm/ClientRepresentation.html
 type GenericClientRepresentation struct {
 	Access                             map[string]string              `json:"access"`
 	AdminUrl                           string                         `json:"adminUrl"`
