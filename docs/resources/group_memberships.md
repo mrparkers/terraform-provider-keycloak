@@ -59,4 +59,4 @@ resource "keycloak_group_memberships" "group_members" {
 This resource does not support import. Instead of importing, feel free to create this resource
 as if it did not already exist on the server.
 
-[1]: /docs/resources/user_groups.html
+[1]: providers/mrparkers/keycloak/latest/docs/resources/group_memberships
