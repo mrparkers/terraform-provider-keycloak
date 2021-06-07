@@ -87,7 +87,7 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
   - `max_lifespan` - (Optional) Max lifespan of cache entry (duration string).
   - `eviction_day` - (Optional) Day of the week the entry will become invalid on
   - `eviction_hour` - (Optional) Hour of day the entry will become invalid on.
-  - `eviction_day` - (Optional) Minute of day the entry will become invalid on.
+  - `eviction_minute` - (Optional) Minute of day the entry will become invalid on.
 - `kerberos` - (Optional) A block containing the kerberos settings.
   - `kerberos_realm` - (Required) The name of the kerberos realm, e.g. FOO.LOCAL.
   - `server_principal` - (Required) The kerberos server principal, e.g. 'HTTP/host.foo.com@FOO.LOCAL'.
