@@ -1,4 +1,12 @@
+## v3.1.1 (June 8, 2021)
+
+There was an internal problem with the v3.1.0 release, causing a checksum error when running `terraform init`.  Please use
+this release instead.
+
 ## v3.1.0 (June 8, 2021)
+
+An internal error during the release process caused this release to fail when running `terraform init`.  Please use v3.1.1
+instead.
 
 FEATURES:
 
