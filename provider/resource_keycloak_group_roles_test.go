@@ -195,11 +195,6 @@ func TestAccKeycloakGroupRoles_basicNonExhaustive(t *testing.T) {
 				Config: testKeycloakGroupRoles_nonExhaustive(openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName),
 				Check:  testAccCheckKeycloakGroupHasRoles("keycloak_group_roles.group_roles1", false),
 			},
-			{
-				ResourceName:      "keycloak_group_roles.group_roles1",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 			// check destroy
 			{
 				Config: testKeycloakGroupRoles_noGroupRoles(openIdClientName, samlClientName, realmRoleName, openIdRoleName, samlRoleName, groupName),
