@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strings"
 	"testing"
 )
 
@@ -304,8 +305,8 @@ func testAccCheckKeycloakRoleExists(resourceName string) resource.TestCheckFunc 
 
 func testAccCheckKeycloakRoleDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_role" {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "keycloak_role" || strings.HasPrefix(name, "data") {
 				continue
 			}
 
@@ -314,7 +315,7 @@ func testAccCheckKeycloakRoleDestroy() resource.TestCheckFunc {
 
 			role, _ := keycloakClient.GetRole(realm, id)
 			if role != nil {
-				return fmt.Errorf("role with id %s still exists", id)
+				return fmt.Errorf("%s with id %s still exists", name, id)
 			}
 		}
 
