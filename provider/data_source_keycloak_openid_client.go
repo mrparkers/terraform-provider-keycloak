@@ -91,6 +91,22 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"client_offline_session_idle_timeout": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"client_offline_session_max_lifespan": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"client_session_idle_timeout": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"client_session_max_lifespan": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"exclude_session_state_from_auth_response": {
 				Type:     schema.TypeBool,
 				Computed: true,
