@@ -207,17 +207,19 @@ func resourceKeycloakGroupRolesDelete(data *schema.ResourceData, meta interface{
 	return nil
 }
 
-func resourceKeycloakGroupRolesImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakGroupRolesImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import format: {{realm}}/{{groupId}}.")
 	}
 
-	d.Set("realm_id", parts[0])
-	d.Set("group_id", parts[1])
+	realmId := parts[0]
+	groupId := parts[1]
 
-	d.SetId(groupRolesId(parts[0], parts[1]))
+	d.Set("realm_id", realmId)
+	d.Set("group_id", groupId)
+	d.Set("exhaustive", true)
 
-	return []*schema.ResourceData{d}, nil
+	return []*schema.ResourceData{d}, resourceKeycloakGroupRolesRead(d, meta)
 }
