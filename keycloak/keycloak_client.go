@@ -367,7 +367,19 @@ func (keycloakClient *KeycloakClient) getRaw(path string, params map[string]stri
 		request.URL.RawQuery = query.Encode()
 	}
 
-	body, _, err := keycloakClient.sendRequest(request, nil)
+	retries := 3
+	backoff, _ := time.ParseDuration("30ms")
+	var body []byte = nil
+
+	for i := 0; i < retries; i++ {
+		body, _, err := keycloakClient.sendRequest(request, nil)
+		if err == nil {
+			return body, err
+		}
+
+		time.Sleep(backoff)
+	}
+
 	return body, err
 }
 
