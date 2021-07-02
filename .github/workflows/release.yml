@@ -35,7 +35,7 @@ jobs:
           echo "[Release Notes](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/CHANGELOG.md#${releaseVersion}-${releaseDate})" > ${tmp}/release-notes.md
           echo ::set-output name=NOTES::${tmp}/release-notes.md
       - name: GoReleaser
-        uses: goreleaser/goreleaser-action@v1
+        uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
           args: release --rm-dist --release-notes=${{ steps.build_release_notes.outputs.NOTES }}
