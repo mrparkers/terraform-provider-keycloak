@@ -42,7 +42,7 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
   kerberos {
     kerberos_realm   = "FOO.LOCAL"
     server_principal = "HTTP/host.foo.com@FOO.LOCAL"
-    keytab           = "/etc/host.keytab"
+    key_tab          = "/etc/host.keytab"
   }
 }
 ```
