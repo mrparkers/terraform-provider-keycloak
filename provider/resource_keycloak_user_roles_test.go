@@ -62,7 +62,6 @@ func TestAccKeycloakUserRoles_update(t *testing.T) {
 		"${keycloak_role.openid_client_role_two.id}",
 		"${keycloak_role.saml_client_role_one.id}",
 		"${keycloak_role.saml_client_role_two.id}",
-		"${data.keycloak_role.offline_access.id}",
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -85,7 +84,6 @@ func TestAccKeycloakUserRoles_update(t *testing.T) {
 					"${keycloak_role.realm_role_two.id}",
 					"${keycloak_role.openid_client_role_one.id}",
 					"${keycloak_role.openid_client_role_two.id}",
-					"${data.keycloak_role.offline_access.id}",
 				}),
 				Check: testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles", true),
 			},
@@ -104,7 +102,6 @@ func TestAccKeycloakUserRoles_update(t *testing.T) {
 					"${keycloak_role.saml_client_role_one.id}",
 					"${keycloak_role.openid_client_role_two.id}",
 					"${keycloak_role.realm_role_two.id}",
-					"${data.keycloak_role.offline_access.id}",
 				}),
 				Check: testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles", true),
 			},
@@ -186,7 +183,6 @@ func TestAccKeycloakUserRoles_updateNonExhaustive(t *testing.T) {
 			// add some and remove some
 			{
 				Config: testKeycloakUserRoles_updateNonExhaustive(openIdClientName, samlClientName, realmRoleOneName, realmRoleTwoName, openIdRoleOneName, openIdRoleTwoName, samlRoleOneName, samlRoleTwoName, userName, []string{
-					"${data.keycloak_role.offline_access.id}",
 					"${keycloak_role.saml_client_role_one.id}",
 				}, allRoleIdSet2),
 				Check: testAccCheckKeycloakUserHasRoles("keycloak_user_roles.user_roles1", false),
@@ -436,11 +432,6 @@ resource "keycloak_role" "saml_client_role" {
 	client_id = keycloak_saml_client.saml_client.id
 }
 
-data "keycloak_role" "offline_access" {
-	realm_id  = data.keycloak_realm.realm.id
-	name      = "offline_access"
-}
-
 resource "keycloak_user" "user" {
 	realm_id = data.keycloak_realm.realm.id
 	username = "%s"
@@ -499,11 +490,6 @@ resource "keycloak_role" "saml_client_role_two" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 	client_id = keycloak_saml_client.saml_client.id
-}
-
-data "keycloak_role" "offline_access" {
-	realm_id  = data.keycloak_realm.realm.id
-	name      = "offline_access"
 }
 
 resource "keycloak_user" "user" {
@@ -572,11 +558,6 @@ resource "keycloak_role" "saml_client_role_two" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 	client_id = keycloak_saml_client.saml_client.id
-}
-
-data "keycloak_role" "offline_access" {
-	realm_id  = data.keycloak_realm.realm.id
-	name      = "offline_access"
 }
 
 resource "keycloak_user" "user" {
