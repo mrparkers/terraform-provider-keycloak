@@ -93,6 +93,9 @@ func resourceKeycloakIdentityProviderMapperCreate(getIdentityProviderMapperFromD
 		if err != nil {
 			return err
 		}
+		if identityProvider == nil {
+			return fmt.Errorf("identity provider with alias %s not found", data.Get("identity_provider_alias").(string))
+		}
 		if err = keycloakClient.NewIdentityProviderMapper(identityProvider); err != nil {
 			return err
 		}
