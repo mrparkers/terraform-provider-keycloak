@@ -100,7 +100,7 @@ func resourceKeycloakUserRolesReconcile(data *schema.ResourceData, meta interfac
 		return err
 	}
 
-	if data.HasChange("role_ids") {
+	if data.HasChange("role_ids") && !data.IsNewResource() {
 		o, n := data.GetChange("role_ids")
 		os := o.(*schema.Set)
 		ns := n.(*schema.Set)
