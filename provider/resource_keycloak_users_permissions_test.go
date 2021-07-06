@@ -18,7 +18,6 @@ func TestAccKeycloakUsersPermission_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakUsersPermissionsAreDisabled(realmName),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakUsersPermission_basic(realmName, username, email),
@@ -29,6 +28,11 @@ func TestAccKeycloakUsersPermission_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateId:     realmName,
+			},
+			// check destroy
+			{
+				Config: testKeycloakUsersPermission_checkDestroy(realmName, username, email),
+				Check:  testAccCheckKeycloakUsersPermissionsAreDisabled(realmName),
 			},
 		},
 	})
@@ -216,6 +220,64 @@ resource "keycloak_users_permissions" "my_permission" {
 		description       = "manage_scope"
 		decision_strategy = "UNANIMOUS"
 	}
+}
+	`, realmId, username, email)
+}
+
+func testKeycloakUsersPermission_checkDestroy(realmId, username, email string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+data "keycloak_openid_client" "realm_management" {
+	realm_id  = keycloak_realm.realm.id
+	client_id = "realm-management"
+}
+
+resource "keycloak_openid_client_permissions" "realm_management_permission" {
+	realm_id   = keycloak_realm.realm.id
+	client_id  = data.keycloak_openid_client.realm_management.id
+}
+
+resource "keycloak_user" "test" {
+	realm_id = keycloak_realm.realm.id
+	username = "%s"
+
+	email      = "%s"
+	first_name = "Testy"
+	last_name  = "Tester"
+}
+
+resource "keycloak_openid_client_user_policy" "test" {
+	realm_id           = keycloak_realm.realm.id
+	resource_server_id = data.keycloak_openid_client.realm_management.id
+	name               = "client_user_policy_test"
+
+	users             = [
+		keycloak_user.test.id
+	]
+	logic             = "POSITIVE"
+	decision_strategy = "UNANIMOUS"
+
+	depends_on = [
+		keycloak_openid_client_permissions.realm_management_permission,
+	]
+}
+resource "keycloak_openid_client_user_policy" "test2" {
+	realm_id           = keycloak_realm.realm.id
+	resource_server_id = data.keycloak_openid_client.realm_management.id
+	name               = "client_user_policy_test2"
+
+	users             = [
+		keycloak_user.test.id
+	]
+	logic             = "POSITIVE"
+	decision_strategy = "UNANIMOUS"
+
+	depends_on = [
+		keycloak_openid_client_permissions.realm_management_permission,
+	]
 }
 	`, realmId, username, email)
 }
