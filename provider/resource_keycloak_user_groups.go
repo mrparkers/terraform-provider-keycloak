@@ -126,19 +126,21 @@ func resourceKeycloakUserGroupsDelete(data *schema.ResourceData, meta interface{
 	return keycloakClient.RemoveUserFromGroups(groupIds, userId, realmId)
 }
 
-func resourceKeycloakUserGroupsImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakUserGroupsImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import format: {{realm}}/{{userId}}.")
 	}
 
-	d.Set("realm_id", parts[0])
-	d.Set("user_id", parts[1])
+	realmId := parts[0]
+	userId := parts[1]
 
-	d.SetId(userGroupsId(parts[0], parts[1]))
+	d.Set("realm_id", realmId)
+	d.Set("user_id", userId)
+	d.Set("exhaustive", true)
 
-	return []*schema.ResourceData{d}, nil
+	return []*schema.ResourceData{d}, resourceKeycloakUserGroupsRead(d, meta)
 }
 
 func userGroupsId(realmId, userId string) string {

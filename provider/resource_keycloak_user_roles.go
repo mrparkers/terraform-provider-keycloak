@@ -100,7 +100,7 @@ func resourceKeycloakUserRolesReconcile(data *schema.ResourceData, meta interfac
 		return err
 	}
 
-	if data.HasChange("role_ids") {
+	if data.HasChange("role_ids") && !data.IsNewResource() {
 		o, n := data.GetChange("role_ids")
 		os := o.(*schema.Set)
 		ns := n.(*schema.Set)
@@ -208,17 +208,21 @@ func resourceKeycloakUserRolesDelete(data *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func resourceKeycloakUserRolesImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakUserRolesImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import format: {{realm}}/{{userId}}.")
 	}
 
-	d.Set("realm_id", parts[0])
-	d.Set("user_id", parts[1])
+	realmId := parts[0]
+	userId := parts[1]
 
-	d.SetId(userRolesId(parts[0], parts[1]))
+	d.Set("realm_id", realmId)
+	d.Set("user_id", userId)
+	d.Set("exhaustive", true)
 
-	return []*schema.ResourceData{d}, nil
+	d.SetId(userRolesId(realmId, userId))
+
+	return []*schema.ResourceData{d}, resourceKeycloakUserRolesRead(d, meta)
 }

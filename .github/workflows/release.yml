@@ -16,16 +16,26 @@ jobs:
           checkInterval: 30
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v2
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v2
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
       - name: Get tag name
         id: get_tag_name
         run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+
       - name: Build release notes link
         id: build_release_notes
         run: |
@@ -34,8 +44,9 @@ jobs:
           tmp=$(mktemp -d)
           echo "[Release Notes](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/CHANGELOG.md#${releaseVersion}-${releaseDate})" > ${tmp}/release-notes.md
           echo ::set-output name=NOTES::${tmp}/release-notes.md
+
       - name: GoReleaser
-        uses: goreleaser/goreleaser-action@v1
+        uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
           args: release --rm-dist --release-notes=${{ steps.build_release_notes.outputs.NOTES }}

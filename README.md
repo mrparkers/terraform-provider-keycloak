@@ -12,7 +12,7 @@ longer be kept up to date.
 
 ## Installation
 
-v2.0.0 and above can be installed automatically using Terraform 0.13 by using the `terraform` configuration block:
+v2.0.0 and above can be installed automatically using Terraform >=0.13 by using the `terraform` configuration block:
 
 ```hcl
 terraform {
@@ -38,7 +38,7 @@ Please read https://www.terraform.io/upgrade-guides/0-13.html first. For a keycl
 1. `terraform -v` should print 0.13 and list no keycloak provider
 1. `terraform state replace-provider registry.terraform.io/-/keycloak mrparkers/keycloak`
 1. find all `provider keycloak {...}` blocks in `*.tf` (also in all modules you are including) and delete the `version` line
-1. add the `terraform { required_provides { keycloak = { ...` block mentioned in "Installation" to `terraform.tf` (also in all module directories you are including). Be sure to also always add "source" or else the Terraform looks for "hashicorp/keycloak"!   
+1. add the `terraform { required_provides { keycloak = { ...` block mentioned in "Installation" to `terraform.tf` (also in all module directories you are including). Be sure to also always add "source" or else the Terraform looks for "hashicorp/keycloak"!
 1. `terraform 0.13upgrade`
 1. `terraform init`
 
@@ -48,9 +48,9 @@ This provider will officially support the latest three major versions of Keycloa
 
 The following versions are used when running acceptance tests in CI:
 
-- 12.0.4 (latest)
+- 13.0.1 (latest)
+- 12.0.4
 - 11.0.3
-- 10.0.2
 
 ## Releases
 
@@ -70,7 +70,7 @@ build you can use the `linux_amd64` build as long as `libc6-compat` is installed
 
 ## Development
 
-This project requires Go 1.15 and Terraform 0.13.
+This project requires Go 1.16 and Terraform >=0.13.
 This project uses [Go Modules](https://github.com/golang/go/wiki/Modules) for dependency management, which allows this project to exist outside of an existing GOPATH.
 
 After cloning the repository, you can build the project by running `make build`.

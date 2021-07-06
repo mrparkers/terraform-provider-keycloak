@@ -153,9 +153,9 @@ resource keycloak_openid_client test {
 }
 
 resource keycloak_openid_client_service_account_realm_role test {
-	service_account_user_id = "${keycloak_openid_client.test.service_account_user_id}"
-	realm_id 					= data.keycloak_realm.realm.id
-	role 						= "offline_access"
+	service_account_user_id = keycloak_openid_client.test.service_account_user_id
+	realm_id                = data.keycloak_realm.realm.id
+	role                    = "offline_access"
 }
 	`, testAccRealm.Realm, clientId)
 }
