@@ -77,6 +77,7 @@ is set to `true`.
     - `decision_strategy` - (Optional) Dictates how the policies associated with a given permission are evaluated and how a final decision is obtained. Could be one of `AFFIRMATIVE`, `CONSENSUS`, or `UNANIMOUS`. Applies to permissions.
     - `allow_remote_resource_management` - (Optional) When `true`, resources can be managed remotely by the resource server. Defaults to `false`.
     - `keep_defaults` - (Optional) When `true`, defaults set by Keycloak will be respected. Defaults to `false`.
+- `import` - (Optional) When `true`, the client with specified `client_id` must exists and it will be imported into terrafrom state instead of being created. This attribute is useful when dealing with clients created during realm creation (like `account`, `account-console`, etc). Note, that the client will not be removed during destruction if `import` is `true`.
 
 ## Attributes Reference
 
