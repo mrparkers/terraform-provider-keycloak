@@ -372,7 +372,7 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		ldap.MaxLifespan = maxLifespanString
 	}
 
-	defaultEvictioValue := -1
+	defaultEvictionValue := -1
 
 	if evictionDay, ok := component.getConfigOk("evictionDay"); ok {
 		evictionDayInt, err := strconv.Atoi(evictionDay)
@@ -382,7 +382,7 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 
 		ldap.EvictionDay = &evictionDayInt
 	} else {
-		ldap.EvictionDay = &defaultEvictioValue
+		ldap.EvictionDay = &defaultEvictionValue
 	}
 
 	if evictionHour, ok := component.getConfigOk("evictionHour"); ok {
@@ -393,7 +393,7 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 
 		ldap.EvictionHour = &evictionHourInt
 	} else {
-		ldap.EvictionHour = &defaultEvictioValue
+		ldap.EvictionHour = &defaultEvictionValue
 	}
 	if evictionMinute, ok := component.getConfigOk("evictionMinute"); ok {
 		evictionMinuteInt, err := strconv.Atoi(evictionMinute)
@@ -403,7 +403,7 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 
 		ldap.EvictionMinute = &evictionMinuteInt
 	} else {
-		ldap.EvictionMinute = &defaultEvictioValue
+		ldap.EvictionMinute = &defaultEvictionValue
 	}
 
 	return ldap, nil

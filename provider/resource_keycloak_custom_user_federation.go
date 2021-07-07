@@ -64,10 +64,56 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 			},
 
 			"cache_policy": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "DEFAULT",
-				ValidateFunc: validation.StringInSlice(keycloakUserFederationCachePolicies, false),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "DEFAULT",
+				Deprecated:    "use cache.policy instead",
+				ConflictsWith: []string{"cache"},
+				ValidateFunc:  validation.StringInSlice(keycloakUserFederationCachePolicies, false),
+			},
+			"cache": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
+				Description:   "Settings regarding cache policy for this realm.",
+				ConflictsWith: []string{"cache_policy"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"policy": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      "DEFAULT",
+							ValidateFunc: validation.StringInSlice(keycloakUserFederationCachePolicies, false),
+						},
+						"max_lifespan": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							DiffSuppressFunc: suppressDurationStringDiff,
+							Description:      "Max lifespan of cache entry (duration string).",
+						},
+						"eviction_day": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      "-1",
+							ValidateFunc: validation.All(validation.IntAtLeast(0), validation.IntAtMost(6)),
+							Description:  "Day of the week the entry will become invalid on.",
+						},
+						"eviction_hour": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      "-1",
+							ValidateFunc: validation.All(validation.IntAtLeast(0), validation.IntAtMost(23)),
+							Description:  "Hour of day the entry will become invalid on.",
+						},
+						"eviction_minute": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      "-1",
+							ValidateFunc: validation.All(validation.IntAtLeast(0), validation.IntAtMost(59)),
+							Description:  "Minute of day the entry will become invalid on.",
+						},
+					},
+				},
 			},
 
 			"config": {
@@ -93,7 +139,7 @@ func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.Custom
 		parentId = data.Get("realm_id").(string)
 	}
 
-	return &keycloak.CustomUserFederation{
+	custom := &keycloak.CustomUserFederation{
 		Id:         data.Id(),
 		Name:       data.Get("name").(string),
 		RealmId:    data.Get("realm_id").(string),
@@ -107,6 +153,24 @@ func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.Custom
 
 		Config: config,
 	}
+
+	if cache, ok := data.GetOk("cache"); ok {
+		cache := cache.([]interface{})
+		cacheData := cache[0].(map[string]interface{})
+
+		evictionDay := cacheData["eviction_day"].(int)
+		evictionHour := cacheData["eviction_hour"].(int)
+		evictionMinute := cacheData["eviction_minute"].(int)
+
+		custom.MaxLifespan = cacheData["max_lifespan"].(string)
+
+		custom.EvictionDay = &evictionDay
+		custom.EvictionHour = &evictionHour
+		custom.EvictionMinute = &evictionMinute
+		custom.CachePolicy = cacheData["policy"].(string)
+	}
+
+	return custom
 }
 
 func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.CustomUserFederation) {
@@ -121,7 +185,27 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 	data.Set("enabled", custom.Enabled)
 	data.Set("priority", custom.Priority)
 
-	data.Set("cache_policy", custom.CachePolicy)
+	if _, ok := data.GetOk("cache"); ok {
+		cachePolicySettings := make(map[string]interface{})
+
+		if custom.EvictionDay != nil {
+			cachePolicySettings["eviction_day"] = *custom.EvictionDay
+		}
+		if custom.EvictionHour != nil {
+			cachePolicySettings["eviction_hour"] = *custom.EvictionHour
+		}
+		if custom.EvictionMinute != nil {
+			cachePolicySettings["eviction_minute"] = *custom.EvictionMinute
+		}
+		if custom.MaxLifespan != "" {
+			cachePolicySettings["max_lifespan"] = custom.MaxLifespan
+		}
+		cachePolicySettings["policy"] = custom.CachePolicy
+
+		data.Set("cache", []interface{}{cachePolicySettings})
+	} else {
+		data.Set("cache_policy", custom.CachePolicy)
+	}
 
 	config := make(map[string]interface{})
 	for k, v := range custom.Config {

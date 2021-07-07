@@ -15,7 +15,11 @@ type CustomUserFederation struct {
 	Enabled  bool
 	Priority int
 
-	CachePolicy string
+	CachePolicy    string
+	MaxLifespan    string // duration string (ex: 1h30m)
+	EvictionDay    *int
+	EvictionHour   *int
+	EvictionMinute *int
 
 	Config map[string][]string
 }
@@ -39,6 +43,28 @@ func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *c
 	if custom.ParentId != "" {
 		parentId = custom.ParentId
 	}
+
+	componentConfig["evictionHour"] = []string{}
+	componentConfig["evictionMinute"] = []string{}
+	componentConfig["evictionDay"] = []string{}
+	componentConfig["maxLifespan"] = []string{}
+
+	if custom.CachePolicy != "" {
+		if custom.EvictionHour != nil {
+			componentConfig["evictionHour"] = []string{strconv.Itoa(*custom.EvictionHour)}
+		}
+		if custom.EvictionMinute != nil {
+			componentConfig["evictionMinute"] = []string{strconv.Itoa(*custom.EvictionMinute)}
+		}
+		if custom.EvictionDay != nil {
+			componentConfig["evictionDay"] = []string{strconv.Itoa(*custom.EvictionDay)}
+		}
+		if custom.MaxLifespan != "" {
+			maxLifespanMs, _ := getMillisecondsFromDurationString(custom.MaxLifespan)
+			componentConfig["maxLifespan"] = []string{maxLifespanMs}
+		}
+	}
+
 	return &component{
 		Id:           custom.Id,
 		Name:         custom.Name,
@@ -80,6 +106,46 @@ func convertFromComponentToCustomUserFederation(component *component, realmName 
 		CachePolicy: component.getConfig("cachePolicy"),
 
 		Config: config,
+	}
+
+	if maxLifespan, ok := component.getConfigOk("maxLifespan"); ok {
+		maxLifespanString, err := GetDurationStringFromMilliseconds(maxLifespan)
+		if err != nil {
+			return nil, err
+		}
+		custom.MaxLifespan = maxLifespanString
+	}
+
+	defaultEvictionValue := -1
+
+	if evictionDay, ok := component.getConfigOk("evictionDay"); ok {
+		evictionDayInt, err := strconv.Atoi(evictionDay)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse `evictionDay`: %w", err)
+		}
+		custom.EvictionDay = &evictionDayInt
+	} else {
+		custom.EvictionDay = &defaultEvictionValue
+	}
+
+	if evictionHour, ok := component.getConfigOk("evictionHour"); ok {
+		evictionHourInt, err := strconv.Atoi(evictionHour)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse `evictionHour`: %w", err)
+		}
+		custom.EvictionHour = &evictionHourInt
+	} else {
+		custom.EvictionHour = &defaultEvictionValue
+	}
+
+	if evictionMinute, ok := component.getConfigOk("evictionMinute"); ok {
+		evictionMinuteInt, err := strconv.Atoi(evictionMinute)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse `evictionMinute`: %w", err)
+		}
+		custom.EvictionMinute = &evictionMinuteInt
+	} else {
+		custom.EvictionMinute = &defaultEvictionValue
 	}
 
 	return custom, nil

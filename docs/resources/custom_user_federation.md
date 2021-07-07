@@ -38,7 +38,13 @@ resource "keycloak_custom_user_federation" "custom_user_federation" {
 - `provider_id` - (Required) The unique ID of the custom provider, specified in the `getId` implementation for the `UserStorageProviderFactory` interface.
 - `enabled` - (Optional) When `false`, this provider will not be used when performing queries for users. Defaults to `true`.
 - `priority` - (Optional) Priority of this provider when looking up users. Lower values are first. Defaults to `0`.
-- `cache_policy` - (Optional) Can be one of `DEFAULT`, `EVICT_DAILY`, `EVICT_WEEKLY`, `MAX_LIFESPAN`, or `NO_CACHE`. Defaults to `DEFAULT`.
+- `cache_policy` - (Optional) **Deprecated** Can be one of `DEFAULT`, `EVICT_DAILY`, `EVICT_WEEKLY`, `MAX_LIFESPAN`, or `NO_CACHE`. Defaults to `DEFAULT`.
+- `cache` - (Optional) A block containing the cache settings.
+  - `policy` - (Optional) Can be one of `DEFAULT`, `EVICT_DAILY`, `EVICT_WEEKLY`, `MAX_LIFESPAN`, or `NO_CACHE`. Defaults to `DEFAULT`.
+  - `max_lifespan` - (Optional) Max lifespan of cache entry (duration string).
+  - `eviction_day` - (Optional) Day of the week the entry will become invalid on
+  - `eviction_hour` - (Optional) Hour of day the entry will become invalid on.
+  - `eviction_day` - (Optional) Minute of day the entry will become invalid on.
 - `parent_id` - (Optional) Must be set to the realms' `internal_id`  when it differs from the realm. This can happen when existing resources are imported into the state.
 - `config` - (Optional) The provider configuration handed over to your custom user federation provider.
 
