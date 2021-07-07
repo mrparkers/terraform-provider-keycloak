@@ -354,8 +354,13 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("root_url", &client.RootUrl)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
 	data.Set("consent_required", client.ConsentRequired)
+
 	data.Set("access_token_lifespan", client.Attributes.AccessTokenLifespan)
 	data.Set("login_theme", client.Attributes.LoginTheme)
+	data.Set("client_offline_session_idle_timeout", client.Attributes.ClientOfflineSessionIdleTimeout)
+	data.Set("client_offline_session_max_lifespan", client.Attributes.ClientOfflineSessionMaxLifespan)
+	data.Set("client_session_idle_timeout", client.Attributes.ClientSessionIdleTimeout)
+	data.Set("client_session_max_lifespan", client.Attributes.ClientSessionMaxLifespan)
 
 	if client.AuthorizationServicesEnabled {
 		data.Set("resource_server_id", client.Id)
@@ -468,7 +473,7 @@ func resourceKeycloakOpenidClientDelete(data *schema.ResourceData, meta interfac
 	return keycloakClient.DeleteOpenidClient(realmId, id)
 }
 
-func resourceKeycloakOpenidClientImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakOpenidClientImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{openidClientId}}")
@@ -476,5 +481,5 @@ func resourceKeycloakOpenidClientImport(d *schema.ResourceData, _ interface{}) (
 	d.Set("realm_id", parts[0])
 	d.SetId(parts[1])
 
-	return []*schema.ResourceData{d}, nil
+	return []*schema.ResourceData{d}, resourceKeycloakOpenidClientRead(d, meta)
 }

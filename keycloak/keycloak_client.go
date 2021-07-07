@@ -85,7 +85,11 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 	} else if clientSecret != "" {
 		clientCredentials.GrantType = "client_credentials"
 	} else {
-		return nil, fmt.Errorf("must specify client id, username and password for password grant, or client id and secret for client credentials grant")
+		if initialLogin {
+			return nil, fmt.Errorf("must specify client id, username and password for password grant, or client id and secret for client credentials grant")
+		} else {
+			log.Printf("[WARN] missing required keycloak credentials, but proceeding anyways as initial_login is false")
+		}
 	}
 
 	keycloakClient := KeycloakClient{
@@ -99,7 +103,7 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 	}
 
 	if keycloakClient.initialLogin {
-		err := keycloakClient.login()
+		err = keycloakClient.login()
 		if err != nil {
 			return nil, err
 		}

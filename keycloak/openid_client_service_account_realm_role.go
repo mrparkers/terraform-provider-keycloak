@@ -44,7 +44,7 @@ func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRealmRole(rea
 			ServiceAccountUserId: serviceAccountUserId,
 		},
 	}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", realm, serviceAccountUserId), &serviceAccountRoles, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm/composite", realm, serviceAccountUserId), &serviceAccountRoles, nil)
 	if err != nil {
 		return nil, err
 	}

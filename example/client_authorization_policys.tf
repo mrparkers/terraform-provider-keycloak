@@ -194,3 +194,16 @@ resource "keycloak_users_permissions" "my_permission" {
     decision_strategy = "UNANIMOUS"
   }
 }
+
+resource "keycloak_openid_client_permissions" "my_permission" {
+  realm_id  = keycloak_realm.test_authorization.id
+  client_id = keycloak_openid_client.test.id
+
+  view_scope {
+    policies          = [
+      keycloak_openid_client_user_policy.test.id,
+    ]
+    description       = "my description"
+    decision_strategy = "UNANIMOUS"
+  }
+}

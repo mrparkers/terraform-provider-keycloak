@@ -120,60 +120,6 @@ func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakOpenidClient_adminUrl(t *testing.T) {
-	t.Parallel()
-	clientId := acctest.RandomWithPrefix("tf-acc")
-	adminUrl := "https://www.example.com/admin"
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakOpenidClient_adminUrl(clientId, adminUrl),
-				Check:  testAccCheckKeycloakOpenidClientAdminUrl("keycloak_openid_client.client", adminUrl),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakOpenidClient_baseUrl(t *testing.T) {
-	t.Parallel()
-	clientId := acctest.RandomWithPrefix("tf-acc")
-	baseUrl := "https://www.example.com"
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakOpenidClient_baseUrl(clientId, baseUrl),
-				Check:  testAccCheckKeycloakOpenidClientBaseUrl("keycloak_openid_client.client", baseUrl),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakOpenidClient_rootUrl(t *testing.T) {
-	t.Parallel()
-	clientId := acctest.RandomWithPrefix("tf-acc")
-	rootUrl := "https://www.example.com"
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakOpenidClient_rootUrl(clientId, rootUrl),
-				Check:  testAccCheckKeycloakOpenidClientRootUrl("keycloak_openid_client.client", rootUrl),
-			},
-		},
-	})
-}
-
 func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -637,36 +583,6 @@ func testAccCheckKeycloakOpenidClientAccessType(resourceName string, public, bea
 	}
 }
 
-func testAccCheckKeycloakOpenidClientBaseUrl(resourceName string, baseUrl string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		client, err := getOpenidClientFromState(s, resourceName)
-		if err != nil {
-			return err
-		}
-
-		if client.BaseUrl != baseUrl {
-			return fmt.Errorf("expected openid client to have baseUrl set to %s, but got %s", baseUrl, client.BaseUrl)
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckKeycloakOpenidClientRootUrl(resourceName string, rootUrl string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		client, err := getOpenidClientFromState(s, resourceName)
-		if err != nil {
-			return err
-		}
-
-		if *client.RootUrl != rootUrl {
-			return fmt.Errorf("expected openid client to have rootUrl set to %s, but got %s", rootUrl, *client.RootUrl)
-		}
-
-		return nil
-	}
-}
-
 func testAccCheckKeycloakOpenidClientBelongsToRealm(resourceName, realm string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -756,21 +672,6 @@ func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(reso
 
 		if client.Attributes.ExcludeSessionStateFromAuthResponse != excludeSessionStateFromAuthResponse {
 			return fmt.Errorf("expected openid client %s to have exclude_session_state_from_auth_response value of %t, but got %t", client.ClientId, excludeSessionStateFromAuthResponse, client.Attributes.ExcludeSessionStateFromAuthResponse)
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckKeycloakOpenidClientAdminUrl(resourceName string, adminUrl string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		client, err := getOpenidClientFromState(s, resourceName)
-		if err != nil {
-			return err
-		}
-
-		if client.AdminUrl != adminUrl {
-			return fmt.Errorf("expected openid client to have adminUrl set to %s, but got %s", adminUrl, client.AdminUrl)
 		}
 
 		return nil
@@ -906,54 +807,6 @@ resource "keycloak_openid_client" "client" {
 	access_type = "%s"
 }
 	`, testAccRealm.Realm, clientId, accessType)
-}
-
-func testKeycloakOpenidClient_adminUrl(clientId, adminUrl string) string {
-	return fmt.Sprintf(`
-data "keycloak_realm" "realm" {
-	realm = "%s"
-}
-resource "keycloak_openid_client" "client" {
-	client_id   = "%s"
-	realm_id    = data.keycloak_realm.realm.id
-	admin_url = "%s"
-	access_type = "PUBLIC"
-}
-	`, testAccRealm.Realm, clientId, adminUrl)
-}
-
-func testKeycloakOpenidClient_baseUrl(clientId, baseUrl string) string {
-	return fmt.Sprintf(`
-data "keycloak_realm" "realm" {
-	realm = "%s"
-}
-
-resource "keycloak_openid_client" "client" {
-	client_id   = "%s"
-	realm_id    = data.keycloak_realm.realm.id
-	base_url = "%s"
-	access_type = "PUBLIC"
-}
-	`, testAccRealm.Realm, clientId, baseUrl)
-}
-
-func testKeycloakOpenidClient_rootUrl(clientId, rootUrl string) string {
-	return fmt.Sprintf(`
-data "keycloak_realm" "realm" {
-	realm = "%s"
-}
-
-resource "keycloak_openid_client" "client" {
-	client_id             = "%s"
-	realm_id			  = data.keycloak_realm.realm.id
-	root_url			  = "%s"
-	valid_redirect_uris   = ["http://example.com"]
-	web_origins			  = ["http://example.com"]
-	admin_url			  = "http://example.com"
-	access_type           = "CONFIDENTIAL"
-	standard_flow_enabled = true
-}
-	`, testAccRealm.Realm, clientId, rootUrl)
 }
 
 func testKeycloakOpenidClient_pkceChallengeMethod(clientId, pkceChallengeMethod string) string {

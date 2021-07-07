@@ -52,11 +52,6 @@ func TestAccKeycloakUserGroups_basicNonExhaustive(t *testing.T) {
 				Config: testKeycloakUserGroups_nonExhaustive(groupName, userName),
 				Check:  testAccCheckKeycloakUserHasGroups("keycloak_user_groups.user_groups"),
 			},
-			{
-				ResourceName:      "keycloak_user_groups.user_groups",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 			// check destroy
 			{
 				Config: testKeycloakUserGroups_noUserGroups(groupName, userName),

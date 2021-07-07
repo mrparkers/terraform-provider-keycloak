@@ -12,6 +12,7 @@ const (
 	Version_10 Version = "10.0.0"
 	Version_11 Version = "11.0.0"
 	Version_12 Version = "12.0.0"
+	Version_13 Version = "13.0.0"
 )
 
 func (keycloakClient *KeycloakClient) VersionIsGreaterThanOrEqualTo(versionString Version) bool {
