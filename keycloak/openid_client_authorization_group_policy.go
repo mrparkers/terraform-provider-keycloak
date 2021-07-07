@@ -45,7 +45,7 @@ func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationGroupPolicy
 }
 
 func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationGroupPolicy(realmId, resourceServerId, policyId string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/role/%s", realmId, resourceServerId, policyId), nil)
+	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/group/%s", realmId, resourceServerId, policyId), nil)
 }
 
 func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationGroupPolicy(realmId, resourceServerId, policyId string) (*OpenidClientAuthorizationGroupPolicy, error) {
