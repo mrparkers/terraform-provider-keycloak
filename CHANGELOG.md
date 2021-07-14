@@ -1,3 +1,16 @@
+## v3.2.0 (July 14, 2021)
+
+IMPROVEMENTS:
+
+- stopped throwing an error for missing provider credentials when `initial_login` is set to `false`. this should help with scenarios where Keycloak itself is being created by Terraform (such as with the `helm_release` resource) ([#552](https://github.com/mrparkers/terraform-provider-keycloak/pull/552))
+- upgrade to go v1.16, bump terraform plugin SDK ([#551](https://github.com/mrparkers/terraform-provider-keycloak/pull/551))
+  - this enables builds for previously unsupported platforms, such as `darwin_arm64`
+  - this should fix any potential issues with using this provider with Terraform v1.0.1
+
+BUG FIXES:
+
+- fix possible panic when creating identity provider mappers ([#556](https://github.com/mrparkers/terraform-provider-keycloak/pull/556))
+
 ## v3.1.1 (June 8, 2021)
 
 There was an internal problem with the v3.1.0 release, causing a checksum error when running `terraform init`.  Please use
