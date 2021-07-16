@@ -10,7 +10,7 @@ import (
 var (
 	keycloakLdapRoleMapperModes                       = []string{"READ_ONLY", "LDAP_ONLY"}
 	keycloakLdapRoleMapperMembershipAttributeTypes    = []string{"DN", "UID"}
-	keycloakLdapRoleMapperUserRolesRetrieveStrategies = []string{"LOAD_ROLES_BY_MEMBER_ATTRIBUTE", "GET_ROLES_FROM_USER_MEMBEROF_ATTRIBUTE"}
+	keycloakLdapRoleMapperUserRolesRetrieveStrategies = []string{"LOAD_ROLES_BY_MEMBER_ATTRIBUTE", "GET_ROLES_FROM_USER_MEMBEROF_ATTRIBUTE", "LOAD_ROLES_BY_MEMBER_ATTRIBUTE_RECURSIVELY"}
 )
 
 func resourceKeycloakLdapRoleMapper() *schema.Resource {
