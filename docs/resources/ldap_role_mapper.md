@@ -65,7 +65,7 @@ resource "keycloak_ldap_role_mapper" "ldap_role_mapper" {
 - `membership_user_ldap_attribute` - (Required) The name of the LDAP attribute on a user that is used for membership mappings.
 - `roles_ldap_filter` - (Optional) When specified, adds an additional custom filter to be used when querying for roles. Must start with `(` and end with `)`.
 - `mode` - (Optional) Can be one of `READ_ONLY`, `LDAP_ONLY` or `IMPORT`. Defaults to `READ_ONLY`.
-- `user_roles_retrieve_strategy` - (Optional) Can be one of `LOAD_ROLES_BY_MEMBER_ATTRIBUTE` or `GET_ROLES_FROM_USER_MEMBEROF_ATTRIBUTE`. Defaults to `LOAD_ROLES_BY_MEMBER_ATTRIBUTE`.
+- `user_roles_retrieve_strategy` - (Optional) Can be one of `LOAD_ROLES_BY_MEMBER_ATTRIBUTE`, `GET_ROLES_FROM_USER_MEMBEROF_ATTRIBUTE`, or `LOAD_ROLES_BY_MEMBER_ATTRIBUTE_RECURSIVELY`. Defaults to `LOAD_ROLES_BY_MEMBER_ATTRIBUTE`.
 - `memberof_ldap_attribute` - (Optional) Specifies the name of the LDAP attribute on the LDAP user that contains the roles the user has. Defaults to `memberOf`. This is only used when
 - `use_realm_roles_mapping` - (Optional) When `true`, LDAP role mappings will be mapped to realm roles within Keycloak. Defaults to `true`.
 - `client_id` - (Optional) When specified, LDAP role mappings will be mapped to client role mappings tied to this client ID. Can only be set if `use_realm_roles_mapping` is `false`.
