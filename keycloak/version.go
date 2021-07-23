@@ -15,8 +15,18 @@ const (
 	Version_13 Version = "13.0.0"
 )
 
-func (keycloakClient *KeycloakClient) VersionIsGreaterThanOrEqualTo(versionString Version) bool {
-	v, _ := version.NewVersion(string(versionString))
+func (keycloakClient *KeycloakClient) VersionIsGreaterThanOrEqualTo(versionString Version) (bool, error) {
+	if keycloakClient.version == nil {
+		err := keycloakClient.login()
+		if err != nil {
+			return false, err
+		}
+	}
 
-	return keycloakClient.version.GreaterThanOrEqual(v)
+	v, err := version.NewVersion(string(versionString))
+	if err != nil {
+		return false, nil
+	}
+
+	return keycloakClient.version.GreaterThanOrEqual(v), nil
 }

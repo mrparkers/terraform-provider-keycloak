@@ -120,7 +120,7 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 	}
 }
 
-func getLdapGroupMapperFromData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData) *keycloak.LdapGroupMapper {
+func getLdapGroupMapperFromData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData) (*keycloak.LdapGroupMapper, error) {
 	var groupObjectClasses []string
 
 	for _, groupObjectClass := range data.Get("group_object_classes").([]interface{}) {
@@ -154,15 +154,19 @@ func getLdapGroupMapperFromData(keycloakClient *keycloak.KeycloakClient, data *s
 		MappedGroupAttributes:           mappedGroupAttributes,
 		DropNonExistingGroupsDuringSync: data.Get("drop_non_existing_groups_during_sync").(bool),
 	}
+	versionOk, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11)
+	if err != nil {
+		return nil, err
+	}
 
-	if groupsPath, ok := data.GetOk("groups_path"); ok && keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {
+	if groupsPath, ok := data.GetOk("groups_path"); ok && versionOk {
 		mapper.GroupsPath = groupsPath.(string)
 	}
 
-	return mapper
+	return mapper, nil
 }
 
-func setLdapGroupMapperData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData, ldapGroupMapper *keycloak.LdapGroupMapper) {
+func setLdapGroupMapperData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData, ldapGroupMapper *keycloak.LdapGroupMapper) error {
 	data.SetId(ldapGroupMapper.Id)
 
 	data.Set("name", ldapGroupMapper.Name)
@@ -184,17 +188,27 @@ func setLdapGroupMapperData(keycloakClient *keycloak.KeycloakClient, data *schem
 	data.Set("mapped_group_attributes", ldapGroupMapper.MappedGroupAttributes)
 	data.Set("drop_non_existing_groups_during_sync", ldapGroupMapper.DropNonExistingGroupsDuringSync)
 
-	if ldapGroupMapper.GroupsPath != "" && keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {
+	versionOk, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11)
+	if err != nil {
+		return err
+	}
+
+	if ldapGroupMapper.GroupsPath != "" && versionOk {
 		data.Set("groups_path", ldapGroupMapper.GroupsPath)
 	}
+
+	return nil
 }
 
 func resourceKeycloakLdapGroupMapperCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapGroupMapper := getLdapGroupMapperFromData(keycloakClient, data)
+	ldapGroupMapper, err := getLdapGroupMapperFromData(keycloakClient, data)
+	if err != nil {
+		return err
+	}
 
-	err := keycloakClient.ValidateLdapGroupMapper(ldapGroupMapper)
+	err = keycloakClient.ValidateLdapGroupMapper(ldapGroupMapper)
 	if err != nil {
 		return err
 	}
@@ -204,7 +218,10 @@ func resourceKeycloakLdapGroupMapperCreate(data *schema.ResourceData, meta inter
 		return err
 	}
 
-	setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
+	err = setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
+	if err != nil {
+		return err
+	}
 
 	return resourceKeycloakLdapGroupMapperRead(data, meta)
 }
@@ -220,7 +237,10 @@ func resourceKeycloakLdapGroupMapperRead(data *schema.ResourceData, meta interfa
 		return handleNotFoundError(err, data)
 	}
 
-	setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
+	err = setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -228,9 +248,12 @@ func resourceKeycloakLdapGroupMapperRead(data *schema.ResourceData, meta interfa
 func resourceKeycloakLdapGroupMapperUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapGroupMapper := getLdapGroupMapperFromData(keycloakClient, data)
+	ldapGroupMapper, err := getLdapGroupMapperFromData(keycloakClient, data)
+	if err != nil {
+		return err
+	}
 
-	err := keycloakClient.ValidateLdapGroupMapper(ldapGroupMapper)
+	err = keycloakClient.ValidateLdapGroupMapper(ldapGroupMapper)
 	if err != nil {
 		return err
 	}
@@ -240,7 +263,10 @@ func resourceKeycloakLdapGroupMapperUpdate(data *schema.ResourceData, meta inter
 		return err
 	}
 
-	setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
+	err = setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -262,7 +262,7 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 func TestAccKeycloakLdapGroupMapper_groupsPath(t *testing.T) {
 	t.Parallel()
 
-	if !keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11); !ok {
 		t.Skip()
 	}
 
