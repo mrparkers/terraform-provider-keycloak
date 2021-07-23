@@ -16,7 +16,7 @@ data "keycloak_realm" "master_realm" {
 // use the keycloak_user data source to grab the admin user's ID
 data "keycloak_user" "default_admin_user" {
   realm_id = data.keycloak_realm.master_realm.id
-  name     = "keycloak"
+  username = "keycloak"
 }
 
 output "keycloak_user_id" {
