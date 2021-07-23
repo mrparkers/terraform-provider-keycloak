@@ -1,3 +1,10 @@
+## v3.2.1 (July 23, 2021)
+
+BUG FIXES:
+
+- re-add previously removed `LOAD_ROLES_BY_MEMBER_ATTRIBUTE_RECURSIVELY` role retrieval strategy for the `keycloak_ldap_role_mapper` resource ([#560](https://github.com/mrparkers/terraform-provider-keycloak/pull/560))
+- perform initial login during version check if needed. this fixes a potential panic within the `keycloak_ldap_group_mapper` resource ([#564](https://github.com/mrparkers/terraform-provider-keycloak/pull/564))
+
 ## v3.2.0 (July 14, 2021)
 
 IMPROVEMENTS:
