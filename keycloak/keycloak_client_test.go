@@ -61,7 +61,7 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 	}
 
 	// skip test if running 12.x or greater
-	if keycloakClient.VersionIsGreaterThanOrEqualTo(Version_12) {
+	if v, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(Version_12); v {
 		t.Skip()
 	}
 

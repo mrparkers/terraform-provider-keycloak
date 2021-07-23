@@ -13,7 +13,7 @@ import (
 
 // All openid clients in Keycloak will automatically have these scopes listed as "optional client scopes".
 func getPreAssignedOptionalClientScopes() []string {
-	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6); ok {
 		return []string{"address", "phone", "offline_access", "microprofile-jwt"}
 	} else {
 		return []string{"address", "phone", "offline_access"}
@@ -397,7 +397,7 @@ func testAccCheckKeycloakOpenidClientOptionalScopeIsNotAttached(resourceName, cl
 }
 
 func testKeycloakOpenidClientOptionalScopes_basic(client, clientScope string) string {
-	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6); ok {
 		return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -512,7 +512,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_validationNoClient(client, clientScope string) string {
-	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6); ok {
 		return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -565,7 +565,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_validationBearerOnlyClient(client, clientScope string) string {
-	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6); ok {
 		return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -673,7 +673,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_duplicateScopeAssignment(client, clientScope string) string {
-	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6); ok {
 		return fmt.Sprintf(`
 %s
 
