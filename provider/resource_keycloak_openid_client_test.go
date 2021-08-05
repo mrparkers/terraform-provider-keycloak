@@ -491,6 +491,27 @@ func TestAccKeycloakOpenidClient_loginTheme(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_useRefreshTokens(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_useRefreshTokens(clientId, true),
+				Check:  testAccCheckKeycloakOpenidClientUseRefreshTokens("keycloak_openid_client.client", true),
+			},
+			{
+				Config: testKeycloakOpenidClient_useRefreshTokens(clientId, false),
+				Check:  testAccCheckKeycloakOpenidClientUseRefreshTokens("keycloak_openid_client.client", false),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -722,6 +743,21 @@ func testAccCheckKeycloakOpenidClientLoginTheme(resourceName string, loginTheme 
 
 		if client.Attributes.LoginTheme != loginTheme {
 			return fmt.Errorf("expected openid client to have login theme set to %s, but got %s", loginTheme, client.Attributes.LoginTheme)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientUseRefreshTokens(resourceName string, useRefreshTokens bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.UseRefreshTokens != keycloak.KeycloakBoolQuoted(useRefreshTokens) {
+			return fmt.Errorf("expected openid client to have use refresh tokens set to %t, but got %v", useRefreshTokens, client.Attributes.UseRefreshTokens)
 		}
 
 		return nil
@@ -1062,4 +1098,20 @@ resource "keycloak_openid_client" "client" {
 	login_theme = "%s"
 }
 	`, testAccRealm.Realm, clientId, loginTheme)
+}
+
+func testKeycloakOpenidClient_useRefreshTokens(clientId string, useRefreshTokens bool) string {
+
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = data.keycloak_realm.realm.id
+	access_type = "CONFIDENTIAL"
+	use_refresh_tokens = %t
+}
+	`, testAccRealm.Realm, clientId, useRefreshTokens)
 }
