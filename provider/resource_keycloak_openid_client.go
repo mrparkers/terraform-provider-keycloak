@@ -206,6 +206,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"use_refresh_tokens": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 		},
 		CustomizeDiff: customdiff.ComputedIf("service_account_user_id", func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 			return d.HasChange("service_accounts_enabled")
@@ -270,6 +275,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			ClientOfflineSessionMaxLifespan:     data.Get("client_offline_session_max_lifespan").(string),
 			ClientSessionIdleTimeout:            data.Get("client_session_idle_timeout").(string),
 			ClientSessionMaxLifespan:            data.Get("client_session_max_lifespan").(string),
+			UseRefreshTokens:                    keycloak.KeycloakBoolQuoted(data.Get("use_refresh_tokens").(bool)),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
@@ -357,6 +363,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 
 	data.Set("access_token_lifespan", client.Attributes.AccessTokenLifespan)
 	data.Set("login_theme", client.Attributes.LoginTheme)
+	data.Set("use_refresh_tokens", client.Attributes.UseRefreshTokens)
 	data.Set("client_offline_session_idle_timeout", client.Attributes.ClientOfflineSessionIdleTimeout)
 	data.Set("client_offline_session_max_lifespan", client.Attributes.ClientOfflineSessionMaxLifespan)
 	data.Set("client_session_idle_timeout", client.Attributes.ClientSessionIdleTimeout)
