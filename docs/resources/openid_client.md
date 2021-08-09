@@ -72,6 +72,7 @@ is set to `true`.
     - `direct_grant_id` - (Optional) Direct grant flow id (flow needs to exist)
 - `login_theme` - (Optional) The client login theme. This will override the default theme for the realm.
 - `exclude_session_state_from_auth_response` - (Optional) When `true`, the parameter `session_state` will not be included in OpenID Connect Authentication Response.
+- `use_refresh_tokens` - (Optional) If this is `true`, a refresh_token will be created and added to the token response. If this is `false` then no refresh_token will be generated.  Defaults to `true`.
 - `authorization` - (Optional) When this block is present, fine-grained authorization will be enabled for this client. The client's `access_type` must be `CONFIDENTIAL`, and `service_accounts_enabled` must be `true`. This block has the following arguments:
     - `policy_enforcement_mode` - (Required) Dictates how policies are enforced when evaluating authorization requests. Can be one of `ENFORCING`, `PERMISSIVE`, or `DISABLED`.
     - `decision_strategy` - (Optional) Dictates how the policies associated with a given permission are evaluated and how a final decision is obtained. Could be one of `AFFIRMATIVE`, `CONSENSUS`, or `UNANIMOUS`. Applies to permissions.

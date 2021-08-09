@@ -1,3 +1,10 @@
+## v3.3.0 (August 9, 2021)
+
+IMPROVEMENTS:
+
+- add `use_refresh_tokens` attribute to `keycloak_openid_client` resource ([#573](https://github.com/mrparkers/terraform-provider-keycloak/pull/573))
+
+
 ## v3.2.1 (July 23, 2021)
 
 BUG FIXES:

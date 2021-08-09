@@ -63,6 +63,7 @@ type OpenidClientAttributes struct {
 	ClientOfflineSessionMaxLifespan     string             `json:"client.offline.session.max.lifespan,omitempty"`
 	ClientSessionIdleTimeout            string             `json:"client.session.idle.timeout,omitempty"`
 	ClientSessionMaxLifespan            string             `json:"client.session.max.lifespan,omitempty"`
+	UseRefreshTokens                    KeycloakBoolQuoted `json:"use.refresh.tokens"`
 }
 
 type OpenidAuthenticationFlowBindingOverrides struct {
