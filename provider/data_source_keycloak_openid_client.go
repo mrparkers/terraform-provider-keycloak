@@ -167,6 +167,11 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"use_refresh_tokens": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 		},
 	}
 }
