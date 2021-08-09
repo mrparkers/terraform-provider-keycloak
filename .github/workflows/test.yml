@@ -1,0 +1,63 @@
+name: test
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        keycloak-version:
+          - '13.0.1'
+          - '12.0.4'
+          - '11.0.3'
+      fail-fast: false
+    env:
+      TEST_RESULTS: /tmp/test-results
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.16.5'
+      - name: Download Go modules
+        run: go mod download
+      - name: Install go-junit-report
+        run: |
+          go get github.com/jstemmer/go-junit-report
+          mkdir $TEST_RESULTS
+      - name: Install Terraform
+        working-directory: /tmp
+        run: |
+          curl -LO https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
+          unzip terraform_${TF_VERSION}_linux_amd64.zip
+          sudo mv terraform ${TF_ACC_TERRAFORM_PATH}
+          which terraform
+          terraform version
+        env:
+          TF_VERSION: '1.0.4'
+          TF_ACC_TERRAFORM_PATH: '/usr/local/bin/terraform'
+      - name: Initialize Keycloak
+        run: ./scripts/wait-for-local-keycloak.sh && ./scripts/create-terraform-client.sh
+      - name: Run Tests
+        run: |
+          trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
+          make testacc | tee ${TEST_RESULTS}/go-test.out
+        env:
+          KEYCLOAK_CLIENT_uuuiID: terraform
+          KEYCLOAK_CLIENT_SECRET: 884e0f95-0f42-4a63-9b1f-94274655669e
+          KEYCLOAK_CLIENT_TIMEOUT: 5
+          KEYCLOAK_REALM: master
+          KEYCLOAK_URL: "http://localhost:8080"
+        timeout-minutes: 3600
+    services:
+      keycloak:
+        image: jboss/keycloak:${{ matrix.keycloak-version }}
+        ports:
+          - 8080:8080
+        env:
+          DB_VENDOR: H2
+          KEYCLOAK_LOGLEVEL: INFO
+          KEYCLOAK_USER: keycloak
+          KEYCLOAK_PASSWORD: password
+          JAVA_OPTS: "-Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.profile.feature.admin_fine_grained_authz=enabled -Dkeycloak.profile.feature.token_exchange=enabled"
