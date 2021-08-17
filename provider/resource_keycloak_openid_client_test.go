@@ -291,6 +291,42 @@ func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_Device_basic(t *testing.T) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+		t.Skip()
+	}
+
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	oauth2DeviceCodeLifespan := "300"
+	oauth2DevicePollingInterval := "60"
+	oauth2DeviceAuthorizationGrantEnabled := true
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_oauth2DeviceTimes(clientId,
+					oauth2DeviceCodeLifespan, oauth2DevicePollingInterval, oauth2DeviceAuthorizationGrantEnabled,
+				),
+				Check: testAccCheckKeycloakOpenidClientOauth2Device("keycloak_openid_client.client",
+					oauth2DeviceCodeLifespan, oauth2DevicePollingInterval, oauth2DeviceAuthorizationGrantEnabled,
+				),
+			},
+			{
+				ResourceName:            "keycloak_openid_client.client",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     testAccRealm.Realm + "/",
+				ImportStateVerifyIgnore: []string{"exclude_session_state_from_auth_response"},
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_secret(t *testing.T) {
 	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -596,6 +632,31 @@ func TestAccKeycloakOpenidClient_extraConfigInvalid(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_oauth2DeviceAuthorizationGrantEnabled(t *testing.T) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+		t.Skip()
+	}
+
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_oauth2DeviceAuthorizationGrantEnabled(clientId, true),
+				Check:  testAccCheckKeycloakOpenidClientOauth2DeviceAuthorizationGrantEnabled("keycloak_openid_client.client", true),
+			},
+			{
+				Config: testKeycloakOpenidClient_oauth2DeviceAuthorizationGrantEnabled(clientId, false),
+				Check:  testAccCheckKeycloakOpenidClientOauth2DeviceAuthorizationGrantEnabled("keycloak_openid_client.client", false),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -672,6 +733,30 @@ func testAccCheckKeycloakOpenidClientExistsWithCorrectClientTimeouts(resourceNam
 
 		if client.Attributes.ClientSessionMaxLifespan != sessionMaxLifespan {
 			return fmt.Errorf("expected openid client to have client session max lifespan set to %s, but got %s", sessionMaxLifespan, client.Attributes.ClientSessionMaxLifespan)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientOauth2Device(resourceName string,
+	oauth2DeviceCodeLifespan string, Oauth2DevicePollingInterval string, oauth2DeviceAuthorizationGrantEnabled bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != keycloak.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
+			return fmt.Errorf("expected openid client to have device authorizationen granted enabled set to %t, but got %v", oauth2DeviceAuthorizationGrantEnabled, client.Attributes.Oauth2DeviceAuthorizationGrantEnabled)
+		}
+
+		if client.Attributes.Oauth2DeviceCodeLifespan != oauth2DeviceCodeLifespan {
+			return fmt.Errorf("expected openid client to have device code lifespan set to %s, but got %s", oauth2DeviceCodeLifespan, client.Attributes.Oauth2DeviceCodeLifespan)
+		}
+
+		if client.Attributes.Oauth2DevicePollingInterval != Oauth2DevicePollingInterval {
+			return fmt.Errorf("expected openid client to have device polling interval set to %s, but got %s", Oauth2DevicePollingInterval, client.Attributes.Oauth2DevicePollingInterval)
 		}
 
 		return nil
@@ -865,6 +950,21 @@ func testAccCheckKeycloakOpenidClientUseRefreshTokens(resourceName string, useRe
 
 		if client.Attributes.UseRefreshTokens != keycloak.KeycloakBoolQuoted(useRefreshTokens) {
 			return fmt.Errorf("expected openid client to have use refresh tokens set to %t, but got %v", useRefreshTokens, client.Attributes.UseRefreshTokens)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientOauth2DeviceAuthorizationGrantEnabled(resourceName string, oauth2DeviceAuthorizationGrantEnabled bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != keycloak.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
+			return fmt.Errorf("expected openid client to have device authorization grant enabled set to %t, but got %v", oauth2DeviceAuthorizationGrantEnabled, client.Attributes.Oauth2DeviceAuthorizationGrantEnabled)
 		}
 
 		return nil
@@ -1305,4 +1405,37 @@ resource "keycloak_openid_client" "client" {
 	extra_config = %s
 }
 	`, testAccRealm.Realm, clientId, sb.String())
+}
+
+func testKeycloakOpenidClient_oauth2DeviceAuthorizationGrantEnabled(clientId string, oauth2DeviceAuthorizationGrantEnabled bool) string {
+
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   							  = "%s"
+	realm_id    							  = data.keycloak_realm.realm.id
+	access_type 							  = "CONFIDENTIAL"
+	oauth2_device_authorization_grant_enabled = %t
+}
+	`, testAccRealm.Realm, clientId, oauth2DeviceAuthorizationGrantEnabled)
+}
+
+func testKeycloakOpenidClient_oauth2DeviceTimes(clientId, oauth2DeviceCodeLifespan, oauth2DevicePollingInterval string, oauth2DeviceAuthorizationGrantEnabled bool) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   			 					= "%s"
+	realm_id    		     					= data.keycloak_realm.realm.id
+	access_type 			 					= "CONFIDENTIAL"
+	oauth2_device_authorization_grant_enabled 	= %t
+	oauth2_device_code_lifespan 				= "%s"
+	oauth2_device_polling_interval 				= "%s"
+}
+	`, testAccRealm.Realm, clientId, oauth2DeviceAuthorizationGrantEnabled, oauth2DeviceCodeLifespan, oauth2DevicePollingInterval)
 }

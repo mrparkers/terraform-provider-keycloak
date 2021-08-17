@@ -132,6 +132,11 @@ The arguments below should be specified as [Go duration strings](https://golang.
 - `access_code_lifespan_user_action` - (Optional) The maximum amount of time a user has to complete login related actions, such as updating a password.
 - `action_token_generated_by_user_lifespan` - (Optional) The maximum time a user has to use a user-generated permit before it expires.
 - `action_token_generated_by_admin_lifespan` - (Optional) The maximum time a user has to use an admin-generated permit before it expires.
+- `oauth2_device_code_lifespan` - (Optional) The maximum amount of time a client has to finish the device code flow before it expires.
+
+The attributes below should be specified in seconds.
+
+- `oauth2_device_polling_interval` - (Optional) The minimum amount of time in seconds that the client should wait between polling requests to the token endpoint.
 
 ### SMTP
 
