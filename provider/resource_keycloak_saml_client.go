@@ -13,6 +13,7 @@ import (
 var (
 	keycloakSamlClientNameIdFormats       = []string{"username", "email", "transient", "persistent"}
 	keycloakSamlClientSignatureAlgorithms = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA512", "DSA_SHA1"}
+	keycloakSamlClientSignatureKeyName    = []string{"NONE", "KEY_ID", "CERT_SUBJECT"}
 )
 
 func resourceKeycloakSamlClient() *schema.Resource {
@@ -92,6 +93,12 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(keycloakSamlClientSignatureAlgorithms, false),
+			},
+			"signature_key_name": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice(keycloakSamlClientSignatureKeyName, false),
 			},
 			"name_id_format": {
 				Type:         schema.TypeString,
@@ -219,6 +226,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 
 	samlAttributes := &keycloak.SamlClientAttributes{
 		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
+		SignatureAlgorithm:              data.Get("signature_key_name").(string),
 		NameIdFormat:                    data.Get("name_id_format").(string),
 		IDPInitiatedSSOURLName:          data.Get("idp_initiated_sso_url_name").(string),
 		IDPInitiatedSSORelayState:       data.Get("idp_initiated_sso_relay_state").(string),
@@ -390,6 +398,9 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 		authenticationFlowBindingOverridesSettings["browser_id"] = client.AuthenticationFlowBindingOverrides.BrowserId
 		authenticationFlowBindingOverridesSettings["direct_grant_id"] = client.AuthenticationFlowBindingOverrides.DirectGrantId
 		data.Set("authentication_flow_binding_overrides", []interface{}{authenticationFlowBindingOverridesSettings})
+	}
+	if _, exists := data.GetOkExists("signature_key_name"); client.Attributes.KeycloakSamlClientSignatureKeyName != nil && exists {
+		data.Set("signature_key_name", *client.Attributes.KeycloakSamlClientSignatureKeyName)
 	}
 
 	data.Set("client_id", client.ClientId)
