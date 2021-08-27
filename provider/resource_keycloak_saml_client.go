@@ -184,6 +184,25 @@ func resourceKeycloakSamlClient() *schema.Resource {
 					},
 				},
 			},
+			"backchannel_logout_session_required": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"backchannel_logout_revoke_offline_tokens": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"saml_signature_canonicalization_method": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"extra_config": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -217,6 +236,13 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		}
 	}
 
+	extraConfig := map[string]interface{}{}
+	if v, ok := data.GetOk("extra_config"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			extraConfig[key] = value
+		}
+	}
+
 	samlAttributes := &keycloak.SamlClientAttributes{
 		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
 		NameIdFormat:                    data.Get("name_id_format").(string),
@@ -226,6 +252,8 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		AssertionConsumerRedirectURL:    data.Get("assertion_consumer_redirect_url").(string),
 		LogoutServicePostBindingURL:     data.Get("logout_service_post_binding_url").(string),
 		LogoutServiceRedirectBindingURL: data.Get("logout_service_redirect_binding_url").(string),
+		SignatureCanonicalizationMethod: data.Get("saml_signature_canonicalization_method").(string),
+		ExtraConfig:                     extraConfig,
 	}
 
 	if encryptionCertificate, ok := data.GetOkExists("encryption_certificate"); ok {
@@ -276,6 +304,16 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	if forcePostBinding, ok := data.GetOkExists("force_post_binding"); ok {
 		forcePostBindingString := strconv.FormatBool(forcePostBinding.(bool))
 		samlAttributes.ForcePostBinding = &forcePostBindingString
+	}
+
+	if backchannelLogoutSessionRequired, ok := data.GetOkExists("backchannel_logout_session_required"); ok {
+		backchannelLogoutSessionRequiredString := strconv.FormatBool(backchannelLogoutSessionRequired.(bool))
+		samlAttributes.BackchannelLogoutSessionRequired = &backchannelLogoutSessionRequiredString
+	}
+
+	if backchannelLogoutRevokeOfflineTokens, ok := data.GetOkExists("backchannel_logout_revoke_offline_tokens"); ok {
+		backchannelLogoutSessionRequiredString := strconv.FormatBool(backchannelLogoutRevokeOfflineTokens.(bool))
+		samlAttributes.BackchannelLogoutRevokeOfflineTokens = &backchannelLogoutSessionRequiredString
 	}
 
 	samlClient := &keycloak.SamlClient{
@@ -371,6 +409,24 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 		data.Set("force_post_binding", forcePostBinding)
 	}
 
+	if client.Attributes.BackchannelLogoutSessionRequired != nil {
+		backchannelLogoutSessionRequired, err := strconv.ParseBool(*client.Attributes.BackchannelLogoutSessionRequired)
+		if err != nil {
+			return err
+		}
+
+		data.Set("backchannel_logout_session_required", backchannelLogoutSessionRequired)
+	}
+
+	if client.Attributes.BackchannelLogoutRevokeOfflineTokens != nil {
+		backchannelLogoutRevokeOfflineTokens, err := strconv.ParseBool(*client.Attributes.BackchannelLogoutRevokeOfflineTokens)
+		if err != nil {
+			return err
+		}
+
+		data.Set("backchannel_logout_revoke_offline_tokens", backchannelLogoutRevokeOfflineTokens)
+	}
+
 	if _, exists := data.GetOkExists("encryption_certificate"); client.Attributes.EncryptionCertificate != nil && exists {
 		data.Set("encryption_certificate", client.Attributes.EncryptionCertificate)
 	}
@@ -411,6 +467,7 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("logout_service_post_binding_url", client.Attributes.LogoutServicePostBindingURL)
 	data.Set("logout_service_redirect_binding_url", client.Attributes.LogoutServiceRedirectBindingURL)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
+	data.Set("extra_config", client.Attributes.ExtraConfig)
 
 	return nil
 }
