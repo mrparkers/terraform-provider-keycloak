@@ -78,6 +78,9 @@ is set to `true`.
     - `decision_strategy` - (Optional) Dictates how the policies associated with a given permission are evaluated and how a final decision is obtained. Could be one of `AFFIRMATIVE`, `CONSENSUS`, or `UNANIMOUS`. Applies to permissions.
     - `allow_remote_resource_management` - (Optional) When `true`, resources can be managed remotely by the resource server. Defaults to `false`.
     - `keep_defaults` - (Optional) When `true`, defaults set by Keycloak will be respected. Defaults to `false`.
+- `backchannel_logout_url` - (Optional) The URL that will cause the client to log itself out when a logout request is sent to this realm. If omitted, no logout request will be sent to the client is this case.
+- `backchannel_logout_session_required` - (Optional) When `true`, a sid (session ID) claim will be included in the logout token when the backchannel logout URL is used. Defaults to `true`.
+- `backchannel_logout_revoke_offline_sessions` - (Optional) Specifying whether a "revoke_offline_access" event is included in the Logout Token when the Backchannel Logout URL is used. Keycloak will revoke offline sessions when receiving a Logout Token with this event.
 
 ## Attributes Reference
 
