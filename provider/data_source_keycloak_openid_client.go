@@ -93,19 +93,19 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 			},
 			"client_offline_session_idle_timeout": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"client_offline_session_max_lifespan": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"client_session_idle_timeout": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"client_session_max_lifespan": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"exclude_session_state_from_auth_response": {
 				Type:     schema.TypeBool,
@@ -169,8 +169,19 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 			},
 			"use_refresh_tokens": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
+				Computed: true,
+			},
+			"backchannel_logout_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"backchannel_logout_session_required": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"backchannel_logout_revoke_offline_sessions": {
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
 		},
 	}

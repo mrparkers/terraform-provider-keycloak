@@ -210,6 +210,10 @@ resource "keycloak_openid_client" "test_client" {
   pkce_code_challenge_method = "plain"
 
   login_theme = "keycloak"
+
+  backchannel_logout_url                     = "http://localhost:3333/backchannel"
+  backchannel_logout_session_required        = true
+  backchannel_logout_revoke_offline_sessions = true
 }
 
 resource "keycloak_openid_client_scope" "test_default_client_scope" {
