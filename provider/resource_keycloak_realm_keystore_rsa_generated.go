@@ -9,18 +9,18 @@ import (
 )
 
 var (
-	keycloakRealmKeyRsaGeneratedSize      = []int{1024, 2048, 4096}
-	keycloakRealmKeyRsaGeneratedAlgorithm = []string{"RS256", "RS384", "RS512", "PS256", "PS384", "PS512"}
+	keycloakRealmKeystoreRsaGeneratedSize      = []int{1024, 2048, 4096}
+	keycloakRealmKeystoreRsaGeneratedAlgorithm = []string{"RS256", "RS384", "RS512", "PS256", "PS384", "PS512"}
 )
 
-func resourceKeycloakRealmKeyRsaGenerated() *schema.Resource {
+func resourceKeycloakRealmKeystoreRsaGenerated() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakRealmKeyRsaGeneratedCreate,
-		Read:   resourceKeycloakRealmKeyRsaGeneratedRead,
-		Update: resourceKeycloakRealmKeyRsaGeneratedUpdate,
-		Delete: resourceKeycloakRealmKeyRsaGeneratedDelete,
+		Create: resourceKeycloakRealmKeystoreRsaGeneratedCreate,
+		Read:   resourceKeycloakRealmKeystoreRsaGeneratedRead,
+		Update: resourceKeycloakRealmKeystoreRsaGeneratedUpdate,
+		Delete: resourceKeycloakRealmKeystoreRsaGeneratedDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakRealmKeyRsaGeneratedImport,
+			State: resourceKeycloakRealmKeystoreRsaGeneratedImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -61,14 +61,14 @@ func resourceKeycloakRealmKeyRsaGenerated() *schema.Resource {
 			"algorithm": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice(keycloakRealmKeyRsaGeneratedAlgorithm, false),
+				ValidateFunc: validation.StringInSlice(keycloakRealmKeystoreRsaGeneratedAlgorithm, false),
 				Default:      "RS256",
 				Description:  "Intended algorithm for the key",
 			},
 			"key_size": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				ValidateFunc: validation.IntInSlice(keycloakRealmKeyRsaGeneratedSize),
+				ValidateFunc: validation.IntInSlice(keycloakRealmKeystoreRsaGeneratedSize),
 				Default:      2048,
 				Description:  "Size for the generated keys",
 			},
@@ -76,8 +76,8 @@ func resourceKeycloakRealmKeyRsaGenerated() *schema.Resource {
 	}
 }
 
-func getRealmKeyRsaGeneratedFromData(data *schema.ResourceData) (*keycloak.RealmKeyRsaGenerated, error) {
-	mapper := &keycloak.RealmKeyRsaGenerated{
+func getRealmKeystoreRsaGeneratedFromData(data *schema.ResourceData) (*keycloak.RealmKeystoreRsaGenerated, error) {
+	mapper := &keycloak.RealmKeystoreRsaGenerated{
 		Id:       data.Id(),
 		Name:     data.Get("name").(string),
 		RealmId:  data.Get("realm_id").(string),
@@ -93,7 +93,7 @@ func getRealmKeyRsaGeneratedFromData(data *schema.ResourceData) (*keycloak.Realm
 	return mapper, nil
 }
 
-func setRealmKeyRsaGeneratedData(data *schema.ResourceData, realmKey *keycloak.RealmKeyRsaGenerated) error {
+func setRealmKeystoreRsaGeneratedData(data *schema.ResourceData, realmKey *keycloak.RealmKeystoreRsaGenerated) error {
 	data.SetId(realmKey.Id)
 
 	data.Set("name", realmKey.Name)
@@ -103,45 +103,45 @@ func setRealmKeyRsaGeneratedData(data *schema.ResourceData, realmKey *keycloak.R
 	data.Set("active", realmKey.Active)
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
-	data.Set("keySize", realmKey.KeySize)
+	data.Set("key_size", realmKey.KeySize)
 	data.Set("algorithm", realmKey.Algorithm)
 
 	return nil
 }
 
-func resourceKeycloakRealmKeyRsaGeneratedCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreRsaGeneratedCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmKey, err := getRealmKeyRsaGeneratedFromData(data)
+	realmKey, err := getRealmKeystoreRsaGeneratedFromData(data)
 	if err != nil {
 		return err
 	}
 
-	err = keycloakClient.NewRealmKeyRsaGenerated(realmKey)
+	err = keycloakClient.NewRealmKeystoreRsaGenerated(realmKey)
 	if err != nil {
 		return err
 	}
 
-	err = setRealmKeyRsaGeneratedData(data, realmKey)
+	err = setRealmKeystoreRsaGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
 
-	return resourceKeycloakRealmKeyRsaGeneratedRead(data, meta)
+	return resourceKeycloakRealmKeystoreRsaGeneratedRead(data, meta)
 }
 
-func resourceKeycloakRealmKeyRsaGeneratedRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreRsaGeneratedRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	realmKey, err := keycloakClient.GetRealmKeyRsaGenerated(realmId, id)
+	realmKey, err := keycloakClient.GetRealmKeystoreRsaGenerated(realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
-	err = setRealmKeyRsaGeneratedData(data, realmKey)
+	err = setRealmKeystoreRsaGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
@@ -149,46 +149,45 @@ func resourceKeycloakRealmKeyRsaGeneratedRead(data *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceKeycloakRealmKeyRsaGeneratedUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreRsaGeneratedUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmKey, err := getRealmKeyRsaGeneratedFromData(data)
+	realmKey, err := getRealmKeystoreRsaGeneratedFromData(data)
 	if err != nil {
 		return err
 	}
 
-	err = keycloakClient.UpdateRealmKeyRsaGenerated(realmKey)
+	err = keycloakClient.UpdateRealmKeystoreRsaGenerated(realmKey)
 	if err != nil {
 		return err
 	}
 
-	err = setRealmKeyRsaGeneratedData(data, realmKey)
+	err = setRealmKeystoreRsaGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
 
-	return keycloakClient.UpdateRealmKeyRsaGenerated(realmKey)
+	return keycloakClient.UpdateRealmKeystoreRsaGenerated(realmKey)
 }
 
-func resourceKeycloakRealmKeyRsaGeneratedDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreRsaGeneratedDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteRealmKeyRsaGenerated(realmId, id)
+	return keycloakClient.DeleteRealmKeystoreRsaGenerated(realmId, id)
 }
 
-func resourceKeycloakRealmKeyRsaGeneratedImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakRealmKeystoreRsaGeneratedImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{realmKeyId}}")
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{keystoreId}}")
 	}
 
 	d.Set("realm_id", parts[0])
-	d.Set("id", parts[1])
-	d.SetId(parts[2])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }

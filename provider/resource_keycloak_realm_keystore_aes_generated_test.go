@@ -1,0 +1,252 @@
+package provider
+
+import (
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
+	"strconv"
+	"testing"
+)
+
+func TestAccKeycloakRealmKeystoreAesGenerated_basic(t *testing.T) {
+	t.Parallel()
+
+	aesName := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckRealmKeystoreAesGeneratedDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealmKeystoreAesGenerated_basic(aesName),
+				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_key_aes_generated.realm_aes"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealmKeystoreAesGenerated_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
+
+	var aes = &keycloak.RealmKeystoreAesGenerated{}
+
+	fullNameMapperName := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckRealmKeystoreAesGeneratedDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealmKeystoreAesGenerated_basic(fullNameMapperName),
+				Check:  testAccCheckRealmKeystoreAesGeneratedFetch("keycloak_realm_key_aes_generated.realm_aes", aes),
+			},
+			{
+				PreConfig: func() {
+					err := keycloakClient.DeleteRealmKeystoreAesGenerated(aes.RealmId, aes.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testKeycloakRealmKeystoreAesGenerated_basic(fullNameMapperName),
+				Check:  testAccCheckRealmKeystoreAesGeneratedFetch("keycloak_realm_key_aes_generated.realm_aes", aes),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealmKeystoreAesGenerated_secretSizeValidation(t *testing.T) {
+	t.Parallel()
+
+	aesName := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckRealmKeystoreAesGeneratedDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealmKeystoreAesGenerated_basicWithAttrValidation(aesName, "secret_size",
+					strconv.Itoa(acctest.RandIntRange(10, 100))),
+				ExpectError: regexp.MustCompile("expected secret_size to be one of .+ got .+"),
+			},
+			{
+				Config: testKeycloakRealmKeystoreAesGenerated_basicWithAttrValidation(aesName, "secret_size", "16"),
+				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_key_aes_generated.realm_aes"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealmKeystoreAesGenerated_updateRealmKeystoreAesGenerated(t *testing.T) {
+	t.Parallel()
+
+	enabled := randomBool()
+	active := randomBool()
+
+	groupMapperOne := &keycloak.RealmKeystoreAesGenerated{
+		Name:       acctest.RandString(10),
+		RealmId:    testAccRealmUserFederation.Realm,
+		Enabled:    enabled,
+		Active:     active,
+		Priority:   acctest.RandIntRange(0, 100),
+		SecretSize: 16,
+	}
+
+	groupMapperTwo := &keycloak.RealmKeystoreAesGenerated{
+		Name:       acctest.RandString(10),
+		RealmId:    testAccRealmUserFederation.Realm,
+		Enabled:    enabled,
+		Active:     active,
+		Priority:   acctest.RandIntRange(0, 100),
+		SecretSize: 32,
+	}
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckRealmKeystoreAesGeneratedDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealmKeystoreAesGenerated_basicFromInterface(groupMapperOne),
+				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_key_aes_generated.realm_aes"),
+			},
+			{
+				Config: testKeycloakRealmKeystoreAesGenerated_basicFromInterface(groupMapperTwo),
+				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_key_aes_generated.realm_aes"),
+			},
+		},
+	})
+}
+
+func testAccCheckRealmKeystoreAesGeneratedExists(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		_, err := getKeycloakRealmKeystoreAesGeneratedFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckRealmKeystoreAesGeneratedFetch(resourceName string, mapper *keycloak.RealmKeystoreAesGenerated) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedMapper, err := getKeycloakRealmKeystoreAesGeneratedFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		mapper.Id = fetchedMapper.Id
+		mapper.RealmId = fetchedMapper.RealmId
+
+		return nil
+	}
+}
+
+func testAccCheckRealmKeystoreAesGeneratedDestroy() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "keycloak_realm_key_aes_generated" {
+				continue
+			}
+
+			id := rs.Primary.ID
+			realm := rs.Primary.Attributes["realm_id"]
+
+			ldapGroupMapper, _ := keycloakClient.GetRealmKeystoreAesGenerated(realm, id)
+			if ldapGroupMapper != nil {
+				return fmt.Errorf("aes keystore with id %s still exists", id)
+			}
+		}
+
+		return nil
+	}
+}
+
+func getKeycloakRealmKeystoreAesGeneratedFromState(s *terraform.State,
+	resourceName string) (*keycloak.RealmKeystoreAesGenerated,
+	error) {
+	rs, ok := s.RootModule().Resources[resourceName]
+	if !ok {
+		return nil, fmt.Errorf("resource not found: %s", resourceName)
+	}
+
+	id := rs.Primary.ID
+	realm := rs.Primary.Attributes["realm_id"]
+
+	realmKeystore, err := keycloakClient.GetRealmKeystoreAesGenerated(realm, id)
+	if err != nil {
+		return nil, fmt.Errorf("error getting aes keystore with id %s: %s", id, err)
+	}
+
+	return realmKeystore, nil
+}
+
+func getRealmKeystoreAesGeneratedImportId(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		id := rs.Primary.ID
+		realmId := rs.Primary.Attributes["realm_id"]
+		providerId := "aes-generated"
+
+		return fmt.Sprintf("%s/%s/%s", realmId, providerId, id), nil
+	}
+}
+
+func testKeycloakRealmKeystoreAesGenerated_basic(aesName string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_realm_key_aes_generated" "realm_aes" {
+	name      = "%s"
+	realm_id  = data.keycloak_realm.realm.id
+	parent_id = data.keycloak_realm.realm.id
+
+    priority           = 100
+}
+	`, testAccRealmUserFederation.Realm, aesName)
+}
+
+func testKeycloakRealmKeystoreAesGenerated_basicWithAttrValidation(aesName, attr, val string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_realm_key_aes_generated" "realm_aes" {
+	name      = "%s"
+	realm_id  = data.keycloak_realm.realm.id
+	parent_id = data.keycloak_realm.realm.id
+
+	%s        = "%s"
+}
+	`, testAccRealmUserFederation.Realm, aesName, attr, val)
+}
+
+func testKeycloakRealmKeystoreAesGenerated_basicFromInterface(mapper *keycloak.RealmKeystoreAesGenerated) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_realm_key_aes_generated" "realm_aes" {
+	name      = "%s"
+	realm_id  = data.keycloak_realm.realm.id
+	parent_id = data.keycloak_realm.realm.id
+
+    priority    = "%s"
+    secret_size = "%s"
+}
+	`, testAccRealmUserFederation.Realm, mapper.Name, strconv.Itoa(mapper.Priority), strconv.Itoa(mapper.SecretSize))
+}

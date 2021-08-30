@@ -9,18 +9,17 @@ import (
 )
 
 var (
-	keycloakRealmKeyRsaAlgorithm = []string{"RS256", "RS384", "RS512", "PS256", "PS384", "PS512"}
-	keycloakRealmKeyRsaSize      = []int{1024, 2048, 4096}
+	keycloakRealmKeystoreJavaKeystoreAlgorithm = []string{"RS256", "RS384", "RS512", "PS256", "PS384", "PS512"}
 )
 
-func resourceKeycloakRealmKeyRsa() *schema.Resource {
+func resourceKeycloakRealmKeystoreJavaKeystore() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakRealmKeyRsaCreate,
-		Read:   resourceKeycloakRealmKeyRsaRead,
-		Update: resourceKeycloakRealmKeyRsaUpdate,
-		Delete: resourceKeycloakRealmKeyRsaDelete,
+		Create: resourceKeycloakRealmKeystoreJavaKeystoreCreate,
+		Read:   resourceKeycloakRealmKeystoreJavaKeystoreRead,
+		Update: resourceKeycloakRealmKeystoreJavaKeystoreUpdate,
+		Delete: resourceKeycloakRealmKeystoreJavaKeystoreDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakRealmKeyRsaImport,
+			State: resourceKeycloakRealmKeystoreJavaKeystoreImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -61,55 +60,54 @@ func resourceKeycloakRealmKeyRsa() *schema.Resource {
 			"algorithm": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice(keycloakRealmKeyRsaAlgorithm, false),
+				ValidateFunc: validation.StringInSlice(keycloakRealmKeystoreJavaKeystoreAlgorithm, false),
 				Default:      "RS256",
 				Description:  "Intended algorithm for the key",
 			},
-			"key_size": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ValidateFunc: validation.IntInSlice(keycloakRealmKeyRsaSize),
-				Default:      2048,
-				Description:  "Size for the generated keys",
-			},
-			"private_key": {
+			"keystore": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Private RSA Key encoded in PEM format",
+				Description: "Intended algorithm for the key",
 			},
-			"certificate": {
+			"keystore_password": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "X509 Certificate encoded in PEM format",
+				Description: "Size for the generated keys",
+			},
+			"key_alias": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Intended algorithm for the key",
+			},
+			"key_password": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Size for the generated keys",
 			},
 		},
 	}
 }
 
-func getRealmKeyRsaFromData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData) (*keycloak.RealmKeyRsa, error) {
-	mapper := &keycloak.RealmKeyRsa{
+func getRealmKeystoreJavaKeystoreFromData(data *schema.ResourceData) (*keycloak.RealmKeystoreJavaKeystore, error) {
+	mapper := &keycloak.RealmKeystoreJavaKeystore{
 		Id:       data.Id(),
 		Name:     data.Get("name").(string),
 		RealmId:  data.Get("realm_id").(string),
 		ParentId: data.Get("parent_id").(string),
 
-		Active:      data.Get("active").(bool),
-		Enabled:     data.Get("enabled").(bool),
-		Priority:    data.Get("priority").(int),
-		KeySize:     data.Get("keySize").(int),
-		Algorithm:   data.Get("algorithm").(string),
-		PrivateKey:  data.Get("privateKey").(string),
-		Certificate: data.Get("certificate").(string),
-	}
-	_, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11)
-	if err != nil {
-		return nil, err
+		Active:           data.Get("active").(bool),
+		Enabled:          data.Get("enabled").(bool),
+		Priority:         data.Get("priority").(int),
+		Keystore:         data.Get("keystore").(string),
+		KeystorePassword: data.Get("keystore_password").(string),
+		KeyAlias:         data.Get("key_alias").(string),
+		KeyPassword:      data.Get("key_password").(string),
 	}
 
 	return mapper, nil
 }
 
-func setRealmKeyRsaData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData, realmKey *keycloak.RealmKeyRsa) error {
+func setRealmKeystoreJavaKeystoreData(data *schema.ResourceData, realmKey *keycloak.RealmKeystoreJavaKeystore) error {
 	data.SetId(realmKey.Id)
 
 	data.Set("name", realmKey.Name)
@@ -119,52 +117,47 @@ func setRealmKeyRsaData(keycloakClient *keycloak.KeycloakClient, data *schema.Re
 	data.Set("active", realmKey.Active)
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
-	data.Set("keySize", realmKey.KeySize)
-	data.Set("algorithm", realmKey.Algorithm)
-	data.Set("privateKey", realmKey.PrivateKey)
-	data.Set("certificate", realmKey.Certificate)
-
-	_, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11)
-	if err != nil {
-		return err
-	}
+	data.Set("keystore", realmKey.Keystore)
+	data.Set("keystore_password", realmKey.KeystorePassword)
+	data.Set("key_alias", realmKey.KeyAlias)
+	data.Set("key_password", realmKey.KeyPassword)
 
 	return nil
 }
 
-func resourceKeycloakRealmKeyRsaCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreJavaKeystoreCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmKey, err := getRealmKeyRsaFromData(keycloakClient, data)
+	realmKey, err := getRealmKeystoreJavaKeystoreFromData(data)
 	if err != nil {
 		return err
 	}
 
-	err = keycloakClient.NewRealmKeyRsa(realmKey)
+	err = keycloakClient.NewRealmKeystoreJavaKeystore(realmKey)
 	if err != nil {
 		return err
 	}
 
-	err = setRealmKeyRsaData(keycloakClient, data, realmKey)
+	err = setRealmKeystoreJavaKeystoreData(data, realmKey)
 	if err != nil {
 		return err
 	}
 
-	return resourceKeycloakRealmKeyRsaRead(data, meta)
+	return resourceKeycloakRealmKeystoreJavaKeystoreRead(data, meta)
 }
 
-func resourceKeycloakRealmKeyRsaRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreJavaKeystoreRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	realmKey, err := keycloakClient.GetRealmKeyRsa(realmId, id)
+	realmKey, err := keycloakClient.GetRealmKeystoreJavaKeystore(realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
-	err = setRealmKeyRsaData(keycloakClient, data, realmKey)
+	err = setRealmKeystoreJavaKeystoreData(data, realmKey)
 	if err != nil {
 		return err
 	}
@@ -172,37 +165,37 @@ func resourceKeycloakRealmKeyRsaRead(data *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func resourceKeycloakRealmKeyRsaUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreJavaKeystoreUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmKey, err := getRealmKeyRsaFromData(keycloakClient, data)
+	realmKey, err := getRealmKeystoreJavaKeystoreFromData(data)
 	if err != nil {
 		return err
 	}
 
-	err = keycloakClient.UpdateRealmKeyRsa(realmKey)
+	err = keycloakClient.UpdateRealmKeystoreJavaKeystore(realmKey)
 	if err != nil {
 		return err
 	}
 
-	err = setRealmKeyRsaData(keycloakClient, data, realmKey)
+	err = setRealmKeystoreJavaKeystoreData(data, realmKey)
 	if err != nil {
 		return err
 	}
 
-	return keycloakClient.UpdateRealmKeyRsa(realmKey)
+	return keycloakClient.UpdateRealmKeystoreJavaKeystore(realmKey)
 }
 
-func resourceKeycloakRealmKeyRsaDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreJavaKeystoreDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteRealmKeyRsa(realmId, id)
+	return keycloakClient.DeleteRealmKeystoreJavaKeystore(realmId, id)
 }
 
-func resourceKeycloakRealmKeyRsaImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakRealmKeystoreJavaKeystoreImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 3 {

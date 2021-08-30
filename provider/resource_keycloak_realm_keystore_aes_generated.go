@@ -9,17 +9,17 @@ import (
 )
 
 var (
-	keycloakRealmKeyAesGeneratedSize = []int{16, 24, 32}
+	keycloakRealmKeystoreAesGeneratedSize = []int{16, 24, 32}
 )
 
-func resourceKeycloakRealmKeyAesGenerated() *schema.Resource {
+func resourceKeycloakRealmKeystoreAesGenerated() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakRealmKeyAesGeneratedCreate,
-		Read:   resourceKeycloakRealmKeyAesGeneratedRead,
-		Update: resourceKeycloakRealmKeyAesGeneratedUpdate,
-		Delete: resourceKeycloakRealmKeyAesGeneratedDelete,
+		Create: resourceKeycloakRealmKeystoreAesGeneratedCreate,
+		Read:   resourceKeycloakRealmKeystoreAesGeneratedRead,
+		Update: resourceKeycloakRealmKeystoreAesGeneratedUpdate,
+		Delete: resourceKeycloakRealmKeystoreAesGeneratedDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakRealmKeyAesGeneratedImport,
+			State: resourceKeycloakRealmKeystoreAesGeneratedImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -60,7 +60,7 @@ func resourceKeycloakRealmKeyAesGenerated() *schema.Resource {
 			"secret_size": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				ValidateFunc: validation.IntInSlice(keycloakRealmKeyAesGeneratedSize),
+				ValidateFunc: validation.IntInSlice(keycloakRealmKeystoreAesGeneratedSize),
 				Default:      16,
 				Description:  "Size in bytes for the generated AES Key. Size 16 is for AES-128, Size 24 for AES-192 and Size 32 for AES-256. WARN: Bigger keys then 128 bits are not allowed on some JDK implementations",
 			},
@@ -68,8 +68,8 @@ func resourceKeycloakRealmKeyAesGenerated() *schema.Resource {
 	}
 }
 
-func getRealmKeyAesGeneratedFromData(data *schema.ResourceData) (*keycloak.RealmKeyAesGenerated, error) {
-	mapper := &keycloak.RealmKeyAesGenerated{
+func getRealmKeystoreAesGeneratedFromData(data *schema.ResourceData) (*keycloak.RealmKeystoreAesGenerated, error) {
+	mapper := &keycloak.RealmKeystoreAesGenerated{
 		Id:       data.Id(),
 		Name:     data.Get("name").(string),
 		RealmId:  data.Get("realm_id").(string),
@@ -84,7 +84,7 @@ func getRealmKeyAesGeneratedFromData(data *schema.ResourceData) (*keycloak.Realm
 	return mapper, nil
 }
 
-func setRealmKeyAesGeneratedData(data *schema.ResourceData, realmKey *keycloak.RealmKeyAesGenerated) error {
+func setRealmKeystoreAesGeneratedData(data *schema.ResourceData, realmKey *keycloak.RealmKeystoreAesGenerated) error {
 	data.SetId(realmKey.Id)
 
 	data.Set("name", realmKey.Name)
@@ -94,44 +94,44 @@ func setRealmKeyAesGeneratedData(data *schema.ResourceData, realmKey *keycloak.R
 	data.Set("active", realmKey.Active)
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
-	data.Set("secretSize", realmKey.SecretSize)
+	data.Set("secret_size", realmKey.SecretSize)
 
 	return nil
 }
 
-func resourceKeycloakRealmKeyAesGeneratedCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreAesGeneratedCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmKey, err := getRealmKeyAesGeneratedFromData(data)
+	realmKey, err := getRealmKeystoreAesGeneratedFromData(data)
 	if err != nil {
 		return err
 	}
 
-	err = keycloakClient.NewRealmKeyAesGenerated(realmKey)
+	err = keycloakClient.NewRealmKeystoreAesGenerated(realmKey)
 	if err != nil {
 		return err
 	}
 
-	err = setRealmKeyAesGeneratedData(data, realmKey)
+	err = setRealmKeystoreAesGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
 
-	return resourceKeycloakRealmKeyAesGeneratedRead(data, meta)
+	return resourceKeycloakRealmKeystoreAesGeneratedRead(data, meta)
 }
 
-func resourceKeycloakRealmKeyAesGeneratedRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreAesGeneratedRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	realmKey, err := keycloakClient.GetRealmKeyAesGenerated(realmId, id)
+	realmKey, err := keycloakClient.GetRealmKeystoreAesGenerated(realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
-	err = setRealmKeyAesGeneratedData(data, realmKey)
+	err = setRealmKeystoreAesGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
@@ -139,46 +139,45 @@ func resourceKeycloakRealmKeyAesGeneratedRead(data *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceKeycloakRealmKeyAesGeneratedUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreAesGeneratedUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmKey, err := getRealmKeyAesGeneratedFromData(data)
+	realmKey, err := getRealmKeystoreAesGeneratedFromData(data)
 	if err != nil {
 		return err
 	}
 
-	err = keycloakClient.UpdateRealmKeyAesGenerated(realmKey)
+	err = keycloakClient.UpdateRealmKeystoreAesGenerated(realmKey)
 	if err != nil {
 		return err
 	}
 
-	err = setRealmKeyAesGeneratedData(data, realmKey)
+	err = setRealmKeystoreAesGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
 
-	return keycloakClient.UpdateRealmKeyAesGenerated(realmKey)
+	return keycloakClient.UpdateRealmKeystoreAesGenerated(realmKey)
 }
 
-func resourceKeycloakRealmKeyAesGeneratedDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreAesGeneratedDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteRealmKeyAesGenerated(realmId, id)
+	return keycloakClient.DeleteRealmKeystoreAesGenerated(realmId, id)
 }
 
-func resourceKeycloakRealmKeyAesGeneratedImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakRealmKeystoreAesGeneratedImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}/{{userFederationMapperId}}")
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{keystoreId}}")
 	}
 
 	d.Set("realm_id", parts[0])
-	d.Set("ldap_user_federation_id", parts[1])
-	d.SetId(parts[2])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }

@@ -9,17 +9,17 @@ import (
 )
 
 var (
-	keycloakRealmKeyEcdsaGeneratedEllipticCurve = []string{"P-256", "P-384", "P-521"}
+	keycloakRealmKeystoreEcdsaGeneratedEllipticCurve = []string{"P-256", "P-384", "P-521"}
 )
 
-func resourceKeycloakRealmKeyEcdsaGenerated() *schema.Resource {
+func resourceKeycloakRealmKeystoreEcdsaGenerated() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakRealmKeyEcdsaGeneratedCreate,
-		Read:   resourceKeycloakRealmKeyEcdsaGeneratedRead,
-		Update: resourceKeycloakRealmKeyEcdsaGeneratedUpdate,
-		Delete: resourceKeycloakRealmKeyEcdsaGeneratedDelete,
+		Create: resourceKeycloakRealmKeystoreEcdsaGeneratedCreate,
+		Read:   resourceKeycloakRealmKeystoreEcdsaGeneratedRead,
+		Update: resourceKeycloakRealmKeystoreEcdsaGeneratedUpdate,
+		Delete: resourceKeycloakRealmKeystoreEcdsaGeneratedDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakRealmKeyEcdsaGeneratedImport,
+			State: resourceKeycloakRealmKeystoreEcdsaGeneratedImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -60,7 +60,7 @@ func resourceKeycloakRealmKeyEcdsaGenerated() *schema.Resource {
 			"elliptic_curve_key": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice(keycloakRealmKeyEcdsaGeneratedEllipticCurve, false),
+				ValidateFunc: validation.StringInSlice(keycloakRealmKeystoreEcdsaGeneratedEllipticCurve, false),
 				Default:      "P-256",
 				Description:  "Elliptic Curve used in ECDSA",
 			},
@@ -68,8 +68,8 @@ func resourceKeycloakRealmKeyEcdsaGenerated() *schema.Resource {
 	}
 }
 
-func getRealmKeyEcdsaGeneratedFromData(data *schema.ResourceData) (*keycloak.RealmKeyEcdsaGenerated, error) {
-	mapper := &keycloak.RealmKeyEcdsaGenerated{
+func getRealmKeystoreEcdsaGeneratedFromData(data *schema.ResourceData) (*keycloak.RealmKeystoreEcdsaGenerated, error) {
+	mapper := &keycloak.RealmKeystoreEcdsaGenerated{
 		Id:       data.Id(),
 		Name:     data.Get("name").(string),
 		RealmId:  data.Get("realm_id").(string),
@@ -84,7 +84,7 @@ func getRealmKeyEcdsaGeneratedFromData(data *schema.ResourceData) (*keycloak.Rea
 	return mapper, nil
 }
 
-func setRealmKeyEcdsaGeneratedData(data *schema.ResourceData, realmKey *keycloak.RealmKeyEcdsaGenerated) error {
+func setRealmKeystoreEcdsaGeneratedData(data *schema.ResourceData, realmKey *keycloak.RealmKeystoreEcdsaGenerated) error {
 	data.SetId(realmKey.Id)
 
 	data.Set("name", realmKey.Name)
@@ -94,44 +94,44 @@ func setRealmKeyEcdsaGeneratedData(data *schema.ResourceData, realmKey *keycloak
 	data.Set("active", realmKey.Active)
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
-	data.Set("ecdsaEllipticCurveKey", realmKey.EllipticCurve)
+	data.Set("elliptic_curve_key", realmKey.EllipticCurve)
 
 	return nil
 }
 
-func resourceKeycloakRealmKeyEcdsaGeneratedCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreEcdsaGeneratedCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmKey, err := getRealmKeyEcdsaGeneratedFromData(data)
+	realmKey, err := getRealmKeystoreEcdsaGeneratedFromData(data)
 	if err != nil {
 		return err
 	}
 
-	err = keycloakClient.NewRealmKeyEcdsaGenerated(realmKey)
+	err = keycloakClient.NewRealmKeystoreEcdsaGenerated(realmKey)
 	if err != nil {
 		return err
 	}
 
-	err = setRealmKeyEcdsaGeneratedData(data, realmKey)
+	err = setRealmKeystoreEcdsaGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
 
-	return resourceKeycloakRealmKeyEcdsaGeneratedRead(data, meta)
+	return resourceKeycloakRealmKeystoreEcdsaGeneratedRead(data, meta)
 }
 
-func resourceKeycloakRealmKeyEcdsaGeneratedRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreEcdsaGeneratedRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	realmKey, err := keycloakClient.GetRealmKeyEcdsaGenerated(realmId, id)
+	realmKey, err := keycloakClient.GetRealmKeystoreEcdsaGenerated(realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
-	err = setRealmKeyEcdsaGeneratedData(data, realmKey)
+	err = setRealmKeystoreEcdsaGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
@@ -139,46 +139,45 @@ func resourceKeycloakRealmKeyEcdsaGeneratedRead(data *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceKeycloakRealmKeyEcdsaGeneratedUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreEcdsaGeneratedUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmKey, err := getRealmKeyEcdsaGeneratedFromData(data)
+	realmKey, err := getRealmKeystoreEcdsaGeneratedFromData(data)
 	if err != nil {
 		return err
 	}
 
-	err = keycloakClient.UpdateRealmKeyEcdsaGenerated(realmKey)
+	err = keycloakClient.UpdateRealmKeystoreEcdsaGenerated(realmKey)
 	if err != nil {
 		return err
 	}
 
-	err = setRealmKeyEcdsaGeneratedData(data, realmKey)
+	err = setRealmKeystoreEcdsaGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
 
-	return keycloakClient.UpdateRealmKeyEcdsaGenerated(realmKey)
+	return keycloakClient.UpdateRealmKeystoreEcdsaGenerated(realmKey)
 }
 
-func resourceKeycloakRealmKeyEcdsaGeneratedDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreEcdsaGeneratedDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteRealmKeyEcdsaGenerated(realmId, id)
+	return keycloakClient.DeleteRealmKeystoreEcdsaGenerated(realmId, id)
 }
 
-func resourceKeycloakRealmKeyEcdsaGeneratedImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakRealmKeystoreEcdsaGeneratedImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}/{{userFederationMapperId}}")
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{keystoreId}}")
 	}
 
 	d.Set("realm_id", parts[0])
-	d.Set("ldap_user_federation_id", parts[1])
-	d.SetId(parts[2])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }

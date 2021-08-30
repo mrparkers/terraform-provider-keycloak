@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-type RealmKeyRsaGenerated struct {
+type RealmKeystoreRsaGenerated struct {
 	Id       string
 	Name     string
 	RealmId  string
@@ -21,7 +21,7 @@ type RealmKeyRsaGenerated struct {
 	Certificate string
 }
 
-func convertFromRealmKeyRsaGeneratedToComponent(realmKey *RealmKeyRsaGenerated) *component {
+func convertFromRealmKeystoreRsaGeneratedToComponent(realmKey *RealmKeystoreRsaGenerated) *component {
 	componentConfig := map[string][]string{
 		"active": {
 			strconv.FormatBool(realmKey.Active),
@@ -50,7 +50,7 @@ func convertFromRealmKeyRsaGeneratedToComponent(realmKey *RealmKeyRsaGenerated) 
 	}
 }
 
-func convertFromComponentToRealmKeyRsaGenerated(component *component, realmId string) (*RealmKeyRsaGenerated, error) {
+func convertFromComponentToRealmKeystoreRsaGenerated(component *component, realmId string) (*RealmKeystoreRsaGenerated, error) {
 	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("active"))
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func convertFromComponentToRealmKeyRsaGenerated(component *component, realmId st
 		}
 	}
 
-	realmKey := &RealmKeyRsaGenerated{
+	realmKey := &RealmKeystoreRsaGenerated{
 		Id:       component.Id,
 		Name:     component.Name,
 		ParentId: component.ParentId,
@@ -95,8 +95,8 @@ func convertFromComponentToRealmKeyRsaGenerated(component *component, realmId st
 	return realmKey, nil
 }
 
-func (keycloakClient *KeycloakClient) NewRealmKeyRsaGenerated(realmKey *RealmKeyRsaGenerated) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", realmKey.RealmId), convertFromRealmKeyRsaGeneratedToComponent(realmKey))
+func (keycloakClient *KeycloakClient) NewRealmKeystoreRsaGenerated(realmKey *RealmKeystoreRsaGenerated) error {
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", realmKey.RealmId), convertFromRealmKeystoreRsaGeneratedToComponent(realmKey))
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (keycloakClient *KeycloakClient) NewRealmKeyRsaGenerated(realmKey *RealmKey
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetRealmKeyRsaGenerated(realmId, id string) (*RealmKeyRsaGenerated, error) {
+func (keycloakClient *KeycloakClient) GetRealmKeystoreRsaGenerated(realmId, id string) (*RealmKeystoreRsaGenerated, error) {
 	var component *component
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
@@ -114,13 +114,13 @@ func (keycloakClient *KeycloakClient) GetRealmKeyRsaGenerated(realmId, id string
 		return nil, err
 	}
 
-	return convertFromComponentToRealmKeyRsaGenerated(component, realmId)
+	return convertFromComponentToRealmKeystoreRsaGenerated(component, realmId)
 }
 
-func (keycloakClient *KeycloakClient) UpdateRealmKeyRsaGenerated(realmKey *RealmKeyRsaGenerated) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", realmKey.RealmId, realmKey.Id), convertFromRealmKeyRsaGeneratedToComponent(realmKey))
+func (keycloakClient *KeycloakClient) UpdateRealmKeystoreRsaGenerated(realmKey *RealmKeystoreRsaGenerated) error {
+	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", realmKey.RealmId, realmKey.Id), convertFromRealmKeystoreRsaGeneratedToComponent(realmKey))
 }
 
-func (keycloakClient *KeycloakClient) DeleteRealmKeyRsaGenerated(realmId, id string) error {
+func (keycloakClient *KeycloakClient) DeleteRealmKeystoreRsaGenerated(realmId, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

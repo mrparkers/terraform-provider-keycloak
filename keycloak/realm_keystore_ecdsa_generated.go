@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-type RealmKeyEcdsaGenerated struct {
+type RealmKeystoreEcdsaGenerated struct {
 	Id       string
 	Name     string
 	RealmId  string
@@ -17,7 +17,7 @@ type RealmKeyEcdsaGenerated struct {
 	EllipticCurve string
 }
 
-func convertFromRealmKeyEcdsaGeneratedToComponent(realmKey *RealmKeyEcdsaGenerated) *component {
+func convertFromRealmKeystoreEcdsaGeneratedToComponent(realmKey *RealmKeystoreEcdsaGenerated) *component {
 	componentConfig := map[string][]string{
 		"active": {
 			strconv.FormatBool(realmKey.Active),
@@ -43,7 +43,7 @@ func convertFromRealmKeyEcdsaGeneratedToComponent(realmKey *RealmKeyEcdsaGenerat
 	}
 }
 
-func convertFromComponentToRealmKeyEcdsaGenerated(component *component, realmId string) (*RealmKeyEcdsaGenerated, error) {
+func convertFromComponentToRealmKeystoreEcdsaGenerated(component *component, realmId string) (*RealmKeystoreEcdsaGenerated, error) {
 	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("active"))
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func convertFromComponentToRealmKeyEcdsaGenerated(component *component, realmId 
 		}
 	}
 
-	realmKey := &RealmKeyEcdsaGenerated{
+	realmKey := &RealmKeystoreEcdsaGenerated{
 		Id:       component.Id,
 		Name:     component.Name,
 		ParentId: component.ParentId,
@@ -77,8 +77,8 @@ func convertFromComponentToRealmKeyEcdsaGenerated(component *component, realmId 
 	return realmKey, nil
 }
 
-func (keycloakClient *KeycloakClient) NewRealmKeyEcdsaGenerated(realmKey *RealmKeyEcdsaGenerated) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", realmKey.RealmId), convertFromRealmKeyEcdsaGeneratedToComponent(realmKey))
+func (keycloakClient *KeycloakClient) NewRealmKeystoreEcdsaGenerated(realmKey *RealmKeystoreEcdsaGenerated) error {
+	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", realmKey.RealmId), convertFromRealmKeystoreEcdsaGeneratedToComponent(realmKey))
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (keycloakClient *KeycloakClient) NewRealmKeyEcdsaGenerated(realmKey *RealmK
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetRealmKeyEcdsaGenerated(realmId, id string) (*RealmKeyEcdsaGenerated, error) {
+func (keycloakClient *KeycloakClient) GetRealmKeystoreEcdsaGenerated(realmId, id string) (*RealmKeystoreEcdsaGenerated, error) {
 	var component *component
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
@@ -96,13 +96,13 @@ func (keycloakClient *KeycloakClient) GetRealmKeyEcdsaGenerated(realmId, id stri
 		return nil, err
 	}
 
-	return convertFromComponentToRealmKeyEcdsaGenerated(component, realmId)
+	return convertFromComponentToRealmKeystoreEcdsaGenerated(component, realmId)
 }
 
-func (keycloakClient *KeycloakClient) UpdateRealmKeyEcdsaGenerated(realmKey *RealmKeyEcdsaGenerated) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", realmKey.RealmId, realmKey.Id), convertFromRealmKeyEcdsaGeneratedToComponent(realmKey))
+func (keycloakClient *KeycloakClient) UpdateRealmKeystoreEcdsaGenerated(realmKey *RealmKeystoreEcdsaGenerated) error {
+	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", realmKey.RealmId, realmKey.Id), convertFromRealmKeystoreEcdsaGeneratedToComponent(realmKey))
 }
 
-func (keycloakClient *KeycloakClient) DeleteRealmKeyEcdsaGenerated(realmId, id string) error {
+func (keycloakClient *KeycloakClient) DeleteRealmKeystoreEcdsaGenerated(realmId, id string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

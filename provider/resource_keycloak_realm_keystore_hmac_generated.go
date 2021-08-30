@@ -9,18 +9,18 @@ import (
 )
 
 var (
-	keycloakRealmKeyHmacGeneratedSize      = []int{16, 24, 32, 64, 128, 256, 512}
-	keycloakRealmKeyHmacGeneratedAlgorithm = []string{"HS256", "HS384", "HS512"}
+	keycloakRealmKeystoreHmacGeneratedSize      = []int{16, 24, 32, 64, 128, 256, 512}
+	keycloakRealmKeystoreHmacGeneratedAlgorithm = []string{"HS256", "HS384", "HS512"}
 )
 
-func resourceKeycloakRealmKeyHmacGenerated() *schema.Resource {
+func resourceKeycloakRealmKeystoreHmacGenerated() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakRealmKeyHmacGeneratedCreate,
-		Read:   resourceKeycloakRealmKeyHmacGeneratedRead,
-		Update: resourceKeycloakRealmKeyHmacGeneratedUpdate,
-		Delete: resourceKeycloakRealmKeyHmacGeneratedDelete,
+		Create: resourceKeycloakRealmKeystoreHmacGeneratedCreate,
+		Read:   resourceKeycloakRealmKeystoreHmacGeneratedRead,
+		Update: resourceKeycloakRealmKeystoreHmacGeneratedUpdate,
+		Delete: resourceKeycloakRealmKeystoreHmacGeneratedDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakRealmKeyHmacGeneratedImport,
+			State: resourceKeycloakRealmKeystoreHmacGeneratedImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -61,14 +61,14 @@ func resourceKeycloakRealmKeyHmacGenerated() *schema.Resource {
 			"algorithm": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice(keycloakRealmKeyHmacGeneratedAlgorithm, false),
+				ValidateFunc: validation.StringInSlice(keycloakRealmKeystoreHmacGeneratedAlgorithm, false),
 				Default:      "HS256",
 				Description:  "Intended algorithm for the key",
 			},
 			"secret_size": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				ValidateFunc: validation.IntInSlice(keycloakRealmKeyHmacGeneratedSize),
+				ValidateFunc: validation.IntInSlice(keycloakRealmKeystoreHmacGeneratedSize),
 				Default:      64,
 				Description:  "Size in bytes for the generated secret",
 			},
@@ -76,8 +76,8 @@ func resourceKeycloakRealmKeyHmacGenerated() *schema.Resource {
 	}
 }
 
-func getRealmKeyHmacGeneratedFromData(data *schema.ResourceData) (*keycloak.RealmKeyHmacGenerated, error) {
-	mapper := &keycloak.RealmKeyHmacGenerated{
+func getRealmKeystoreHmacGeneratedFromData(data *schema.ResourceData) (*keycloak.RealmKeystoreHmacGenerated, error) {
+	mapper := &keycloak.RealmKeystoreHmacGenerated{
 		Id:       data.Id(),
 		Name:     data.Get("name").(string),
 		RealmId:  data.Get("realm_id").(string),
@@ -93,7 +93,7 @@ func getRealmKeyHmacGeneratedFromData(data *schema.ResourceData) (*keycloak.Real
 	return mapper, nil
 }
 
-func setRealmKeyHmacGeneratedData(data *schema.ResourceData, realmKey *keycloak.RealmKeyHmacGenerated) error {
+func setRealmKeystoreHmacGeneratedData(data *schema.ResourceData, realmKey *keycloak.RealmKeystoreHmacGenerated) error {
 	data.SetId(realmKey.Id)
 
 	data.Set("name", realmKey.Name)
@@ -103,45 +103,45 @@ func setRealmKeyHmacGeneratedData(data *schema.ResourceData, realmKey *keycloak.
 	data.Set("active", realmKey.Active)
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
-	data.Set("secretSize", realmKey.SecretSize)
+	data.Set("secret_size", realmKey.SecretSize)
 	data.Set("algorithm", realmKey.Algorithm)
 
 	return nil
 }
 
-func resourceKeycloakRealmKeyHmacGeneratedCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreHmacGeneratedCreate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmKey, err := getRealmKeyHmacGeneratedFromData(data)
+	realmKey, err := getRealmKeystoreHmacGeneratedFromData(data)
 	if err != nil {
 		return err
 	}
 
-	err = keycloakClient.NewRealmKeyHmacGenerated(realmKey)
+	err = keycloakClient.NewRealmKeystoreHmacGenerated(realmKey)
 	if err != nil {
 		return err
 	}
 
-	err = setRealmKeyHmacGeneratedData(data, realmKey)
+	err = setRealmKeystoreHmacGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
 
-	return resourceKeycloakRealmKeyHmacGeneratedRead(data, meta)
+	return resourceKeycloakRealmKeystoreHmacGeneratedRead(data, meta)
 }
 
-func resourceKeycloakRealmKeyHmacGeneratedRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreHmacGeneratedRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	realmKey, err := keycloakClient.GetRealmKeyHmacGenerated(realmId, id)
+	realmKey, err := keycloakClient.GetRealmKeystoreHmacGenerated(realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
-	err = setRealmKeyHmacGeneratedData(data, realmKey)
+	err = setRealmKeystoreHmacGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
@@ -149,46 +149,45 @@ func resourceKeycloakRealmKeyHmacGeneratedRead(data *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceKeycloakRealmKeyHmacGeneratedUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreHmacGeneratedUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realmKey, err := getRealmKeyHmacGeneratedFromData(data)
+	realmKey, err := getRealmKeystoreHmacGeneratedFromData(data)
 	if err != nil {
 		return err
 	}
 
-	err = keycloakClient.UpdateRealmKeyHmacGenerated(realmKey)
+	err = keycloakClient.UpdateRealmKeystoreHmacGenerated(realmKey)
 	if err != nil {
 		return err
 	}
 
-	err = setRealmKeyHmacGeneratedData(data, realmKey)
+	err = setRealmKeystoreHmacGeneratedData(data, realmKey)
 	if err != nil {
 		return err
 	}
 
-	return keycloakClient.UpdateRealmKeyHmacGenerated(realmKey)
+	return keycloakClient.UpdateRealmKeystoreHmacGenerated(realmKey)
 }
 
-func resourceKeycloakRealmKeyHmacGeneratedDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreHmacGeneratedDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteRealmKeyHmacGenerated(realmId, id)
+	return keycloakClient.DeleteRealmKeystoreHmacGenerated(realmId, id)
 }
 
-func resourceKeycloakRealmKeyHmacGeneratedImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakRealmKeystoreHmacGeneratedImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}/{{userFederationMapperId}}")
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{keystoreId}}")
 	}
 
 	d.Set("realm_id", parts[0])
-	d.Set("ldap_user_federation_id", parts[1])
-	d.SetId(parts[2])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }
