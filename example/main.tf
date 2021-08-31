@@ -214,6 +214,10 @@ resource "keycloak_openid_client" "test_client" {
   backchannel_logout_url                     = "http://localhost:3333/backchannel"
   backchannel_logout_session_required        = true
   backchannel_logout_revoke_offline_sessions = true
+
+  extra_config = {
+    customAttribute = "a test custom value"    
+  }
 }
 
 resource "keycloak_openid_client_scope" "test_default_client_scope" {

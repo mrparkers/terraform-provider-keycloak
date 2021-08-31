@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"testing"
 )
 
 func TestAccKeycloakDataSourceOpenidClient_basic(t *testing.T) {
@@ -72,6 +73,54 @@ data "keycloak_openid_client" "test" {
 
 	depends_on = [
 		keycloak_openid_client.test,
+	]
+}
+`, testAccRealm.Realm, clientId, clientId)
+}
+
+func TestAccKeycloakDataSourceOpenidClient_extraConfig(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc-test-extra-config")
+	dataSourceName := "data.keycloak_openid_client.test-extra-config"
+	resourceName := "keycloak_openid_client.test-extra-config"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKeycloakOpenidClientConfig_extraConfig(clientId),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceName, "key1", resourceName, "value1"),
+				),
+			},
+		},
+	})
+}
+
+func testAccKeycloakOpenidClientConfig_extraConfig(clientId string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "test-extra-config" {
+	name                     = "%s"
+	client_id                = "%s"
+	realm_id                 = data.keycloak_realm.realm.id
+	description              = "a test openid client with extra_conf"
+	access_type              = "CONFIDENTIAL"
+	extra_config             = {
+		"key1"				 = "value1"
+	}
+}
+
+data "keycloak_openid_client" "test-extra-config" {
+	realm_id  = data.keycloak_realm.realm.id
+	client_id = keycloak_openid_client.test-extra-config.client_id
+
+	depends_on = [
+		keycloak_openid_client.test-extra-config,
 	]
 }
 `, testAccRealm.Realm, clientId, clientId)
