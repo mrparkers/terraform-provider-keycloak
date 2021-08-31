@@ -226,7 +226,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 
 	samlAttributes := &keycloak.SamlClientAttributes{
 		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
-		SignatureAlgorithm:              data.Get("signature_key_name").(string),
+		SignatureKeyName:                data.Get("signature_key_name").(string),
 		NameIdFormat:                    data.Get("name_id_format").(string),
 		IDPInitiatedSSOURLName:          data.Get("idp_initiated_sso_url_name").(string),
 		IDPInitiatedSSORelayState:       data.Get("idp_initiated_sso_relay_state").(string),
@@ -399,9 +399,6 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 		authenticationFlowBindingOverridesSettings["direct_grant_id"] = client.AuthenticationFlowBindingOverrides.DirectGrantId
 		data.Set("authentication_flow_binding_overrides", []interface{}{authenticationFlowBindingOverridesSettings})
 	}
-	if _, exists := data.GetOkExists("signature_key_name"); client.Attributes.KeycloakSamlClientSignatureKeyName != nil && exists {
-		data.Set("signature_key_name", *client.Attributes.KeycloakSamlClientSignatureKeyName)
-	}
 
 	data.Set("client_id", client.ClientId)
 	data.Set("realm_id", client.RealmId)
@@ -414,6 +411,7 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("base_url", client.BaseUrl)
 	data.Set("master_saml_processing_url", client.MasterSamlProcessingUrl)
 	data.Set("signature_algorithm", client.Attributes.SignatureAlgorithm)
+	data.Set("signature_key_name", client.Attributes.SignatureKeyName)
 	data.Set("name_id_format", client.Attributes.NameIdFormat)
 	data.Set("idp_initiated_sso_url_name", client.Attributes.IDPInitiatedSSOURLName)
 	data.Set("idp_initiated_sso_relay_state", client.Attributes.IDPInitiatedSSORelayState)
