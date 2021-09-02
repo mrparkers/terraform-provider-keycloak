@@ -37,7 +37,7 @@ func TestAccKeycloakRealmKeystoreRsa_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreRsa_basic(rsaName, privateKey, certificate),
-				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa_generated.realm_rsa"),
+				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
 			},
 		},
 	})
@@ -62,7 +62,7 @@ func TestAccKeycloakRealmKeystoreRsa_createAfterManualDestroy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreRsa_basic(fullNameMapperName, privateKey, certificate),
-				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa_generated.realm_rsa", rsa),
+				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa.realm_rsa", rsa),
 			},
 			{
 				PreConfig: func() {
@@ -72,7 +72,7 @@ func TestAccKeycloakRealmKeystoreRsa_createAfterManualDestroy(t *testing.T) {
 					}
 				},
 				Config: testKeycloakRealmKeystoreRsa_basic(fullNameMapperName, privateKey, certificate),
-				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa_generated.realm_rsa", rsa),
+				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa.realm_rsa", rsa),
 			},
 		},
 	})
@@ -100,7 +100,7 @@ func TestAccKeycloakRealmKeystoreRsa_keySizeValidation(t *testing.T) {
 			{
 				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(rsaName, "key_size", "2048", privateKey,
 					certificate),
-				Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa_generated.realm_rsa"),
+				Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
 			},
 		},
 	})
@@ -128,7 +128,7 @@ func TestAccKeycloakRealmKeystoreRsa_algorithmValidation(t *testing.T) {
 			{
 				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(algorithm, "algorithm", algorithm,
 					privateKey, certificate),
-				Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa_generated.realm_rsa"),
+				Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
 			},
 		},
 	})
@@ -175,11 +175,11 @@ func TestAccKeycloakRealmKeystoreRsa_updateRsaKeystoreGenerated(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreRsa_basicFromInterface(groupMapperOne),
-				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa_generated.realm_rsa"),
+				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
 			},
 			{
 				Config: testKeycloakRealmKeystoreRsa_basicFromInterface(groupMapperTwo),
-				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa_generated.realm_rsa"),
+				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
 			},
 		},
 	})
@@ -213,7 +213,7 @@ func testAccCheckRealmKeystoreRsaFetch(resourceName string, mapper *keycloak.Rea
 func testAccCheckRealmKeystoreRsaDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_realm_key_rsa_generated" {
+			if rs.Type != "keycloak_realm_key_rsa" {
 				continue
 			}
 
