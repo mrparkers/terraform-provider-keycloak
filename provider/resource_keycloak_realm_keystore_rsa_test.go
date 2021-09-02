@@ -15,6 +15,7 @@ import (
 	"math/big"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -298,7 +299,7 @@ func generateKeyAndCert() (string, string, error) {
 		Bytes: cert,
 	})
 
-	return string(keyPem), string(certPem), nil
+	return strings.ReplaceAll(string(keyPem), "\n", "\\n"), strings.ReplaceAll(string(certPem), "\n", "\\n"), nil
 }
 
 func testKeycloakRealmKeystoreRsa_basic(rsaName, privateKey, certificate string) string {
@@ -307,7 +308,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_rsa_generated" "realm_rsa" {
+resource "keycloak_realm_key_rsa" "realm_rsa" {
 
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
@@ -328,7 +329,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_rsa_generated" "realm_rsa" {
+resource "keycloak_realm_key_rsa" "realm_rsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 	parent_id = data.keycloak_realm.realm.id
@@ -347,7 +348,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_rsa_generated" "realm_rsa" {
+resource "keycloak_realm_key_rsa" "realm_rsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 	parent_id = data.keycloak_realm.realm.id
