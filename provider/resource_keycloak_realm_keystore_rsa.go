@@ -119,9 +119,9 @@ func setRealmKeystoreRsaData(keycloakClient *keycloak.KeycloakClient, data *sche
 	data.Set("active", realmKey.Active)
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
-	data.Set("keySize", realmKey.KeySize)
+	data.Set("key_size", realmKey.KeySize)
 	data.Set("algorithm", realmKey.Algorithm)
-	data.Set("privateKey", realmKey.PrivateKey)
+	data.Set("private_key", realmKey.PrivateKey)
 	data.Set("certificate", realmKey.Certificate)
 
 	_, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11)
