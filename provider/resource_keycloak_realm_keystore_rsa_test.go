@@ -46,7 +46,7 @@ func TestAccKeycloakRealmKeystoreRsa_basic(t *testing.T) {
 func TestAccKeycloakRealmKeystoreRsa_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 
-	var rsa = &keycloak.RealmKeystoreRsa{}
+	var keystoreRsa = &keycloak.RealmKeystoreRsa{}
 
 	fullNameMapperName := acctest.RandomWithPrefix("tf-acc")
 
@@ -62,17 +62,17 @@ func TestAccKeycloakRealmKeystoreRsa_createAfterManualDestroy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreRsa_basic(fullNameMapperName, privateKey, certificate),
-				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa.realm_rsa", rsa),
+				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa.realm_rsa", keystoreRsa),
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRealmKeystoreRsa(rsa.RealmId, rsa.Id)
+					err := keycloakClient.DeleteRealmKeystoreRsa(keystoreRsa.RealmId, keystoreRsa.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
 				Config: testKeycloakRealmKeystoreRsa_basic(fullNameMapperName, privateKey, certificate),
-				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa.realm_rsa", rsa),
+				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa.realm_rsa", keystoreRsa),
 			},
 		},
 	})
@@ -299,7 +299,15 @@ func generateKeyAndCert() (string, string, error) {
 		Bytes: cert,
 	})
 
-	return strings.ReplaceAll(string(keyPem), "\n", "\\n"), strings.ReplaceAll(string(certPem), "\n", "\\n"), nil
+	return parsePemRealmKeystoreRsa(string(keyPem)), parsePemRealmKeystoreRsa(string(certPem)), nil
+}
+
+func parsePemRealmKeystoreRsa(input string) string {
+	headersRegexp := regexp.MustCompile(`-----(BEGIN|END).+-----\n`) // Header and footer like "-----BEGIN RSA PRIVATE KEY-----"
+	output := headersRegexp.ReplaceAllString(input, "")
+	output = strings.ReplaceAll(output, "\n", "\\n")
+
+	return output
 }
 
 func testKeycloakRealmKeystoreRsa_basic(rsaName, privateKey, certificate string) string {
