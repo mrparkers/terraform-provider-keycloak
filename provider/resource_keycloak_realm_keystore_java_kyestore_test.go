@@ -95,19 +95,19 @@ package provider
 //	active := randomBool()
 //
 //	groupMapperOne := &keycloak.RealmKeystoreJavaKeystore{
-//		Name:          acctest.RandString(10),
-//		RealmId:       testAccRealmUserFederation.Realm,
-//		Enabled:       enabled,
-//		Active:        active,
-//		Priority:      acctest.RandInt(),
+//		Name:     acctest.RandString(10),
+//		RealmId:  testAccRealmUserFederation.Realm,
+//		Enabled:  enabled,
+//		Active:   active,
+//		Priority: acctest.RandInt(),
 //	}
 //
 //	groupMapperTwo := &keycloak.RealmKeystoreJavaKeystore{
-//		Name:          acctest.RandString(10),
-//		RealmId:       testAccRealmUserFederation.Realm,
-//		Enabled:       enabled,
-//		Active:        active,
-//		Priority:      acctest.RandInt(),
+//		Name:     acctest.RandString(10),
+//		RealmId:  testAccRealmUserFederation.Realm,
+//		Enabled:  enabled,
+//		Active:   active,
+//		Priority: acctest.RandInt(),
 //	}
 //
 //	resource.Test(t, resource.TestCase{
@@ -217,8 +217,8 @@ package provider
 //	realm_id  = data.keycloak_realm.realm.id
 //	parent_id = data.keycloak_realm.realm.id
 //
-//    priority           = 100
-//    elliptic_curve_key = "P-384"
+//   priority           = 100
+//   elliptic_curve_key = "P-384"
 //}
 //	`, testAccRealmUserFederation.Realm, javaKeystoreName)
 //}
@@ -250,8 +250,8 @@ package provider
 //	realm_id  = data.keycloak_realm.realm.id
 //	parent_id = data.keycloak_realm.realm.id
 //
-//    priority           = "%s"
-//    elliptic_curve_key = "%s"
+//   priority           = "%s"
+//   elliptic_curve_key = "%s"
 //}
 //	`, testAccRealmUserFederation.Realm, mapper.Name, strconv.Itoa(mapper.Priority), mapper.EllipticCurve)
 //}

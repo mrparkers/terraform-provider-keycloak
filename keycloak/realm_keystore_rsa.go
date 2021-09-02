@@ -38,7 +38,7 @@ func convertFromRealmKeystoreRsaToComponent(realmKey *RealmKeystoreRsa) *compone
 		"keySize": {
 			strconv.Itoa(realmKey.KeySize),
 		},
-		"private_key": {
+		"privateKey": {
 			realmKey.PrivateKey,
 		},
 		"certificate": {
@@ -67,14 +67,20 @@ func convertFromComponentToRealmKeystoreRsa(component *component, realmId string
 		return nil, err
 	}
 
-	priority, err := strconv.Atoi(component.getConfig("priority"))
-	if err != nil {
-		return nil, err
+	priority := 0 // Default priority
+	if component.getConfig("priority") != "" {
+		priority, err = strconv.Atoi(component.getConfig("priority"))
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	keySize, err := strconv.Atoi(component.getConfig("keySize"))
-	if err != nil {
-		return nil, err
+	keySize := 2048 // Default key size for rsa key
+	if component.getConfig("keySize") != "" {
+		keySize, err = strconv.Atoi(component.getConfig("keySize"))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	realmKey := &RealmKeystoreRsa{

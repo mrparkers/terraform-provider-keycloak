@@ -96,9 +96,9 @@ func getRealmKeystoreRsaFromData(keycloakClient *keycloak.KeycloakClient, data *
 		Active:      data.Get("active").(bool),
 		Enabled:     data.Get("enabled").(bool),
 		Priority:    data.Get("priority").(int),
-		KeySize:     data.Get("keySize").(int),
+		KeySize:     data.Get("key_size").(int),
 		Algorithm:   data.Get("algorithm").(string),
-		PrivateKey:  data.Get("privateKey").(string),
+		PrivateKey:  data.Get("private_key").(string),
 		Certificate: data.Get("certificate").(string),
 	}
 	_, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11)
@@ -205,13 +205,12 @@ func resourceKeycloakRealmKeystoreRsaDelete(data *schema.ResourceData, meta inte
 func resourceKeycloakRealmKeystoreRsaImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}/{{userFederationMapperId}}")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{keystoreId}}")
 	}
 
 	d.Set("realm_id", parts[0])
-	d.Set("ldap_user_federation_id", parts[1])
-	d.SetId(parts[2])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }
