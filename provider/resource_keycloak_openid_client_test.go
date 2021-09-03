@@ -847,7 +847,16 @@ func testAccCheckKeycloakOpenidClientExtraConfigMissing(resourceName string, key
 			return err
 		}
 
-		if _, ok := client.Attributes.ExtraConfig[key]; ok {
+		if val, ok := client.Attributes.ExtraConfig[key]; ok {
+			// keycloak 13+ will remove attributes if set to empty string. on older versions, we'll just check if this value is empty
+			if versionOk, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !versionOk {
+				if val != "" {
+					return fmt.Errorf("expected openid client to have empty attribute %v", key)
+				}
+
+				return nil
+			}
+
 			return fmt.Errorf("expected openid client to not have attribute %v", key)
 		}
 
