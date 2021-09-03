@@ -151,18 +151,10 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 func getIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, *keycloak.IdentityProviderConfig) {
 	// some identity provider config is shared among all identity providers, so this default config will be used as a base to merge extra config into
 	defaultIdentityProviderConfig := &keycloak.IdentityProviderConfig{
-		GuiOrder: data.Get("gui_order").(string),
-		SyncMode: data.Get("sync_mode").(string),
+		GuiOrder:    data.Get("gui_order").(string),
+		SyncMode:    data.Get("sync_mode").(string),
+		ExtraConfig: getExtraConfigFromData(data),
 	}
-
-	extraConfig := map[string]interface{}{}
-	if v, ok := data.GetOk("extra_config"); ok {
-		for key, value := range v.(map[string]interface{}) {
-			extraConfig[key] = value
-		}
-	}
-
-	defaultIdentityProviderConfig.ExtraConfig = extraConfig
 
 	return &keycloak.IdentityProvider{
 		Realm:                     data.Get("realm").(string),
@@ -197,9 +189,9 @@ func setIdentityProviderData(data *schema.ResourceData, identityProvider *keyclo
 	data.Set("post_broker_login_flow_alias", identityProvider.PostBrokerLoginFlowAlias)
 
 	// identity provider config
-	data.Set("extra_config", identityProvider.Config.ExtraConfig)
 	data.Set("gui_order", identityProvider.Config.GuiOrder)
 	data.Set("sync_mode", identityProvider.Config.SyncMode)
+	setExtraConfigData(data, identityProvider.Config.ExtraConfig)
 }
 
 func resourceKeycloakIdentityProviderDelete(data *schema.ResourceData, meta interface{}) error {
