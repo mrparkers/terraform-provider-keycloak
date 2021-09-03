@@ -539,6 +539,23 @@ func TestAccKeycloakOpenidClient_extraConfig(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_extraConfigInvalid(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenidClient_extraConfig(clientId, "login_theme", "keycloak"),
+				ExpectError: regexp.MustCompile(`extra_config key "login_theme" is not allowed`),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
