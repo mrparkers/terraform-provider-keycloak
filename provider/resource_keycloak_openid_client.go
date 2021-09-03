@@ -7,8 +7,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -228,35 +226,9 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 			},
 			"extra_config": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				// you aren't allowed to specify any keys in extra_config that could be defined as top level attributes
-				ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
-					var diags diag.Diagnostics
-
-					extraConfig := v.(map[string]interface{})
-					value := reflect.ValueOf(&keycloak.OpenidClientAttributes{}).Elem()
-
-					for i := 0; i < value.NumField(); i++ {
-						field := value.Field(i)
-						jsonKey := strings.Split(value.Type().Field(i).Tag.Get("json"), ",")[0]
-
-						if jsonKey != "-" && field.CanSet() {
-							if _, ok := extraConfig[jsonKey]; ok {
-								diags = append(diags, diag.Diagnostic{
-									Severity: diag.Error,
-									Summary:  "Invalid extra_config key",
-									Detail:   fmt.Sprintf(`extra_config key "%s" is not allowed, as it conflicts with a top-level schema attribute`, jsonKey),
-									AttributePath: append(path, cty.IndexStep{
-										Key: cty.StringVal(jsonKey),
-									}),
-								})
-							}
-						}
-					}
-
-					return diags
-				},
+				Type:             schema.TypeMap,
+				Optional:         true,
+				ValidateDiagFunc: validateExtraConfig(reflect.ValueOf(&keycloak.OpenidClientAttributes{}).Elem()),
 			},
 		},
 		CustomizeDiff: customdiff.ComputedIf("service_account_user_id", func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {

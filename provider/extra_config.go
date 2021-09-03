@@ -1,7 +1,12 @@
 package provider
 
 import (
+	"fmt"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"reflect"
+	"strings"
 )
 
 func getExtraConfigFromData(data *schema.ResourceData) map[string]interface{} {
@@ -42,4 +47,34 @@ func setExtraConfigData(data *schema.ResourceData, extraConfig map[string]interf
 	}
 
 	data.Set("extra_config", c)
+}
+
+// validateExtraConfig takes a reflect value type to check its JSON schema in order to validate that extra_config
+// doesn't contain any attributes that could have been specified within the official schema
+func validateExtraConfig(reflectValue reflect.Value) func(interface{}, cty.Path) diag.Diagnostics {
+	return func(v interface{}, path cty.Path) diag.Diagnostics {
+		var diags diag.Diagnostics
+
+		extraConfig := v.(map[string]interface{})
+
+		for i := 0; i < reflectValue.NumField(); i++ {
+			field := reflectValue.Field(i)
+			jsonKey := strings.Split(reflectValue.Type().Field(i).Tag.Get("json"), ",")[0]
+
+			if jsonKey != "-" && field.CanSet() {
+				if _, ok := extraConfig[jsonKey]; ok {
+					diags = append(diags, diag.Diagnostic{
+						Severity: diag.Error,
+						Summary:  "Invalid extra_config key",
+						Detail:   fmt.Sprintf(`extra_config key "%s" is not allowed, as it conflicts with a top-level schema attribute`, jsonKey),
+						AttributePath: append(path, cty.IndexStep{
+							Key: cty.StringVal(jsonKey),
+						}),
+					})
+				}
+			}
+		}
+
+		return diags
+	}
 }
