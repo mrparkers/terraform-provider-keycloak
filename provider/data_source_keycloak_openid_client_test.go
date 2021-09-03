@@ -40,6 +40,26 @@ func TestAccKeycloakDataSourceOpenidClient_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakDataSourceOpenidClient_extraConfig(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc-test-extra-config")
+	dataSourceName := "data.keycloak_openid_client.test_extra_config"
+	resourceName := "keycloak_openid_client.test_extra_config"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKeycloakOpenidClientConfig_extraConfig(clientId),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceName, "key1", resourceName, "value1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccKeycloakOpenidClientConfig(clientId string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
@@ -78,33 +98,13 @@ data "keycloak_openid_client" "test" {
 `, testAccRealm.Realm, clientId, clientId)
 }
 
-func TestAccKeycloakDataSourceOpenidClient_extraConfig(t *testing.T) {
-	t.Parallel()
-	clientId := acctest.RandomWithPrefix("tf-acc-test-extra-config")
-	dataSourceName := "data.keycloak_openid_client.test-extra-config"
-	resourceName := "keycloak_openid_client.test-extra-config"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccKeycloakOpenidClientConfig_extraConfig(clientId),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttrPair(dataSourceName, "key1", resourceName, "value1"),
-				),
-			},
-		},
-	})
-}
-
 func testAccKeycloakOpenidClientConfig_extraConfig(clientId string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_openid_client" "test-extra-config" {
+resource "keycloak_openid_client" "test_extra_config" {
 	name                     = "%s"
 	client_id                = "%s"
 	realm_id                 = data.keycloak_realm.realm.id
@@ -115,12 +115,12 @@ resource "keycloak_openid_client" "test-extra-config" {
 	}
 }
 
-data "keycloak_openid_client" "test-extra-config" {
+data "keycloak_openid_client" "test_extra_config" {
 	realm_id  = data.keycloak_realm.realm.id
-	client_id = keycloak_openid_client.test-extra-config.client_id
+	client_id = keycloak_openid_client.test_extra_config.client_id
 
 	depends_on = [
-		keycloak_openid_client.test-extra-config,
+		keycloak_openid_client.test_extra_config,
 	]
 }
 `, testAccRealm.Realm, clientId, clientId)

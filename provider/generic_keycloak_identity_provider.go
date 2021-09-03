@@ -2,8 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -101,35 +99,9 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 			},
 			// all schema values below this point will be configuration values that are shared among all identity providers
 			"extra_config": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				// you aren't allowed to specify any keys in extra_config that could be defined as top level attributes
-				ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
-					var diags diag.Diagnostics
-
-					extraConfig := v.(map[string]interface{})
-					value := reflect.ValueOf(&keycloak.IdentityProviderConfig{}).Elem()
-
-					for i := 0; i < value.NumField(); i++ {
-						field := value.Field(i)
-						jsonKey := strings.Split(value.Type().Field(i).Tag.Get("json"), ",")[0]
-
-						if jsonKey != "-" && field.CanSet() {
-							if _, ok := extraConfig[jsonKey]; ok {
-								diags = append(diags, diag.Diagnostic{
-									Severity: diag.Error,
-									Summary:  "Invalid extra_config key",
-									Detail:   fmt.Sprintf(`extra_config key "%s" is not allowed, as it conflicts with a top-level schema attribute`, jsonKey),
-									AttributePath: append(path, cty.IndexStep{
-										Key: cty.StringVal(jsonKey),
-									}),
-								})
-							}
-						}
-					}
-
-					return diags
-				},
+				Type:             schema.TypeMap,
+				Optional:         true,
+				ValidateDiagFunc: validateExtraConfig(reflect.ValueOf(&keycloak.IdentityProviderConfig{}).Elem()),
 			},
 			"gui_order": {
 				Type:        schema.TypeString,
@@ -151,18 +123,10 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 func getIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, *keycloak.IdentityProviderConfig) {
 	// some identity provider config is shared among all identity providers, so this default config will be used as a base to merge extra config into
 	defaultIdentityProviderConfig := &keycloak.IdentityProviderConfig{
-		GuiOrder: data.Get("gui_order").(string),
-		SyncMode: data.Get("sync_mode").(string),
+		GuiOrder:    data.Get("gui_order").(string),
+		SyncMode:    data.Get("sync_mode").(string),
+		ExtraConfig: getExtraConfigFromData(data),
 	}
-
-	extraConfig := map[string]interface{}{}
-	if v, ok := data.GetOk("extra_config"); ok {
-		for key, value := range v.(map[string]interface{}) {
-			extraConfig[key] = value
-		}
-	}
-
-	defaultIdentityProviderConfig.ExtraConfig = extraConfig
 
 	return &keycloak.IdentityProvider{
 		Realm:                     data.Get("realm").(string),
@@ -197,9 +161,9 @@ func setIdentityProviderData(data *schema.ResourceData, identityProvider *keyclo
 	data.Set("post_broker_login_flow_alias", identityProvider.PostBrokerLoginFlowAlias)
 
 	// identity provider config
-	data.Set("extra_config", identityProvider.Config.ExtraConfig)
 	data.Set("gui_order", identityProvider.Config.GuiOrder)
 	data.Set("sync_mode", identityProvider.Config.SyncMode)
+	setExtraConfigData(data, identityProvider.Config.ExtraConfig)
 }
 
 func resourceKeycloakIdentityProviderDelete(data *schema.ResourceData, meta interface{}) error {

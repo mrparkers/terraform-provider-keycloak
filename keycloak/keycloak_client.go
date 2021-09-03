@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -28,6 +29,7 @@ type KeycloakClient struct {
 	userAgent         string
 	version           *version.Version
 	additionalHeaders map[string]string
+	debug             bool
 }
 
 type ClientCredentials struct {
@@ -106,6 +108,12 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 		err = keycloakClient.login()
 		if err != nil {
 			return nil, err
+		}
+	}
+
+	if tfLog, ok := os.LookupEnv("TF_LOG"); ok {
+		if tfLog == "DEBUG" {
+			keycloakClient.debug = true
 		}
 	}
 
@@ -391,7 +399,7 @@ func (keycloakClient *KeycloakClient) sendRaw(path string, requestBody []byte) (
 func (keycloakClient *KeycloakClient) post(path string, requestBody interface{}) ([]byte, string, error) {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
-	payload, err := json.Marshal(requestBody)
+	payload, err := keycloakClient.marshal(requestBody)
 	if err != nil {
 		return nil, "", err
 	}
@@ -409,7 +417,7 @@ func (keycloakClient *KeycloakClient) post(path string, requestBody interface{})
 func (keycloakClient *KeycloakClient) put(path string, requestBody interface{}) error {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
-	payload, err := json.Marshal(requestBody)
+	payload, err := keycloakClient.marshal(requestBody)
 	if err != nil {
 		return err
 	}
@@ -433,7 +441,7 @@ func (keycloakClient *KeycloakClient) delete(path string, requestBody interface{
 	)
 
 	if requestBody != nil {
-		payload, err = json.Marshal(requestBody)
+		payload, err = keycloakClient.marshal(requestBody)
 		if err != nil {
 			return err
 		}
@@ -447,4 +455,12 @@ func (keycloakClient *KeycloakClient) delete(path string, requestBody interface{
 	_, _, err = keycloakClient.sendRequest(request, payload)
 
 	return err
+}
+
+func (keycloakClient *KeycloakClient) marshal(requestBody interface{}) ([]byte, error) {
+	if keycloakClient.debug {
+		return json.MarshalIndent(requestBody, "", "    ")
+	}
+
+	return json.Marshal(requestBody)
 }

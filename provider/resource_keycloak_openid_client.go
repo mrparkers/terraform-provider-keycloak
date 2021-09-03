@@ -7,8 +7,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -228,35 +226,9 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 			},
 			"extra_config": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				// you aren't allowed to specify any keys in extra_config that could be defined as top level attributes
-				ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
-					var diags diag.Diagnostics
-
-					extraConfig := v.(map[string]interface{})
-					value := reflect.ValueOf(&keycloak.OpenidClientAttributes{}).Elem()
-
-					for i := 0; i < value.NumField(); i++ {
-						field := value.Field(i)
-						jsonKey := strings.Split(value.Type().Field(i).Tag.Get("json"), ",")[0]
-
-						if jsonKey != "-" && field.CanSet() {
-							if _, ok := extraConfig[jsonKey]; ok {
-								diags = append(diags, diag.Diagnostic{
-									Severity: diag.Error,
-									Summary:  "Invalid extra_config key",
-									Detail:   fmt.Sprintf(`extra_config key "%s" is not allowed, as it conflicts with a top-level schema attribute`, jsonKey),
-									AttributePath: append(path, cty.IndexStep{
-										Key: cty.StringVal(jsonKey),
-									}),
-								})
-							}
-						}
-					}
-
-					return diags
-				},
+				Type:             schema.TypeMap,
+				Optional:         true,
+				ValidateDiagFunc: validateExtraConfig(reflect.ValueOf(&keycloak.OpenidClientAttributes{}).Elem()),
 			},
 		},
 		CustomizeDiff: customdiff.ComputedIf("service_account_user_id", func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
@@ -300,13 +272,6 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		}
 	}
 
-	extraConfig := map[string]interface{}{}
-	if v, ok := data.GetOk("extra_config"); ok {
-		for key, value := range v.(map[string]interface{}) {
-			extraConfig[key] = value
-		}
-	}
-
 	openidClient := &keycloak.OpenidClient{
 		Id:                        data.Id(),
 		ClientId:                  data.Get("client_id").(string),
@@ -333,7 +298,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			BackchannelLogoutUrl:                 data.Get("backchannel_logout_url").(string),
 			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_session_required").(bool)),
 			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_revoke_offline_sessions").(bool)),
-			ExtraConfig:                          extraConfig,
+			ExtraConfig:                          getExtraConfigFromData(data),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
@@ -429,7 +394,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("backchannel_logout_url", client.Attributes.BackchannelLogoutUrl)
 	data.Set("backchannel_logout_session_required", client.Attributes.BackchannelLogoutRevokeOfflineTokens)
 	data.Set("backchannel_logout_revoke_offline_sessions", client.Attributes.BackchannelLogoutSessionRequired)
-	data.Set("extra_config", client.Attributes.ExtraConfig)
+	setExtraConfigData(data, client.Attributes.ExtraConfig)
 
 	if client.AuthorizationServicesEnabled {
 		data.Set("resource_server_id", client.Id)
