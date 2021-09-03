@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -532,8 +533,23 @@ func TestAccKeycloakOpenidClient_extraConfig(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClient_extraConfig(clientId, "key1", "value1"),
-				Check:  testAccCheckKeycloakOpenidClientExtraConfig("keycloak_openid_client.client", "key1", "value1"),
+				Config: testKeycloakOpenidClient_extraConfig(clientId, map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExtraConfig("keycloak_openid_client.client", "key1", "value1"),
+					testAccCheckKeycloakOpenidClientExtraConfig("keycloak_openid_client.client", "key2", "value2"),
+				),
+			},
+			{
+				Config: testKeycloakOpenidClient_extraConfig(clientId, map[string]string{
+					"key2": "value2",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExtraConfig("keycloak_openid_client.client", "key2", "value2"),
+					testAccCheckKeycloakOpenidClientExtraConfigMissing("keycloak_openid_client.client", "key1"),
+				),
 			},
 		},
 	})
@@ -549,7 +565,7 @@ func TestAccKeycloakOpenidClient_extraConfigInvalid(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakOpenidClient_extraConfig(clientId, "login_theme", "keycloak"),
+				Config:      testKeycloakOpenidClient_extraConfig(clientId, map[string]string{"login_theme": "keycloak"}),
 				ExpectError: regexp.MustCompile(`extra_config key "login_theme" is not allowed`),
 			},
 		},
@@ -817,6 +833,22 @@ func testAccCheckKeycloakOpenidClientExtraConfig(resourceName string, key string
 
 		if client.Attributes.ExtraConfig[key] != value {
 			return fmt.Errorf("expected openid client to have attribute %v set to %v, but got %v", key, value, client.Attributes.ExtraConfig[key])
+		}
+
+		return nil
+	}
+}
+
+// check that a particular extra config key is missing
+func testAccCheckKeycloakOpenidClientExtraConfigMissing(resourceName string, key string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if _, ok := client.Attributes.ExtraConfig[key]; ok {
+			return fmt.Errorf("expected openid client to not have attribute %v", key)
 		}
 
 		return nil
@@ -1179,7 +1211,13 @@ resource "keycloak_openid_client" "client" {
 	`, testAccRealm.Realm, clientId, useRefreshTokens)
 }
 
-func testKeycloakOpenidClient_extraConfig(clientId string, key string, value string) string {
+func testKeycloakOpenidClient_extraConfig(clientId string, extraConfig map[string]string) string {
+	var sb strings.Builder
+	sb.WriteString("{\n")
+	for k, v := range extraConfig {
+		sb.WriteString(fmt.Sprintf("\t\t\"%s\" = \"%s\"\n", k, v))
+	}
+	sb.WriteString("}")
 
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
@@ -1190,9 +1228,7 @@ resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
-	extra_config = {
-		"%s" = "%s"
-	}
+	extra_config = %s
 }
-	`, testAccRealm.Realm, clientId, key, value)
+	`, testAccRealm.Realm, clientId, sb.String())
 }

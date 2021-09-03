@@ -300,13 +300,6 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		}
 	}
 
-	extraConfig := map[string]interface{}{}
-	if v, ok := data.GetOk("extra_config"); ok {
-		for key, value := range v.(map[string]interface{}) {
-			extraConfig[key] = value
-		}
-	}
-
 	openidClient := &keycloak.OpenidClient{
 		Id:                        data.Id(),
 		ClientId:                  data.Get("client_id").(string),
@@ -333,7 +326,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			BackchannelLogoutUrl:                 data.Get("backchannel_logout_url").(string),
 			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_session_required").(bool)),
 			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_revoke_offline_sessions").(bool)),
-			ExtraConfig:                          extraConfig,
+			ExtraConfig:                          getExtraConfigFromData(data),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
@@ -429,7 +422,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("backchannel_logout_url", client.Attributes.BackchannelLogoutUrl)
 	data.Set("backchannel_logout_session_required", client.Attributes.BackchannelLogoutRevokeOfflineTokens)
 	data.Set("backchannel_logout_revoke_offline_sessions", client.Attributes.BackchannelLogoutSessionRequired)
-	data.Set("extra_config", client.Attributes.ExtraConfig)
+	setExtraConfigData(data, client.Attributes.ExtraConfig)
 
 	if client.AuthorizationServicesEnabled {
 		data.Set("resource_server_id", client.Id)
