@@ -522,6 +522,23 @@ func TestAccKeycloakOpenidClient_useRefreshTokens(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_extraConfig(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_extraConfig(clientId, "key1", "value1"),
+				Check:  testAccCheckKeycloakOpenidClientExtraConfig("keycloak_openid_client.client", "key1", "value1"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -768,6 +785,21 @@ func testAccCheckKeycloakOpenidClientUseRefreshTokens(resourceName string, useRe
 
 		if client.Attributes.UseRefreshTokens != keycloak.KeycloakBoolQuoted(useRefreshTokens) {
 			return fmt.Errorf("expected openid client to have use refresh tokens set to %t, but got %v", useRefreshTokens, client.Attributes.UseRefreshTokens)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientExtraConfig(resourceName string, key string, value string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.ExtraConfig[key] != value {
+			return fmt.Errorf("expected openid client to have attribute %v set to %v, but got %v", key, value, client.Attributes.ExtraConfig[key])
 		}
 
 		return nil
@@ -1128,4 +1160,22 @@ resource "keycloak_openid_client" "client" {
 	use_refresh_tokens = %t
 }
 	`, testAccRealm.Realm, clientId, useRefreshTokens)
+}
+
+func testKeycloakOpenidClient_extraConfig(clientId string, key string, value string) string {
+
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = data.keycloak_realm.realm.id
+	access_type = "CONFIDENTIAL"
+	extra_config = {
+		"%s" = "%s"
+	}
+}
+	`, testAccRealm.Realm, clientId, key, value)
 }

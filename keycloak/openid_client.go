@@ -1,7 +1,11 @@
 package keycloak
 
 import (
+	"encoding/json"
 	"fmt"
+	"reflect"
+	"strconv"
+	"strings"
 )
 
 type OpenidClientRole struct {
@@ -55,18 +59,19 @@ type OpenidClient struct {
 }
 
 type OpenidClientAttributes struct {
-	PkceCodeChallengeMethod              string             `json:"pkce.code.challenge.method"`
-	ExcludeSessionStateFromAuthResponse  KeycloakBoolQuoted `json:"exclude.session.state.from.auth.response"`
-	AccessTokenLifespan                  string             `json:"access.token.lifespan"`
-	LoginTheme                           string             `json:"login_theme"`
-	ClientOfflineSessionIdleTimeout      string             `json:"client.offline.session.idle.timeout,omitempty"`
-	ClientOfflineSessionMaxLifespan      string             `json:"client.offline.session.max.lifespan,omitempty"`
-	ClientSessionIdleTimeout             string             `json:"client.session.idle.timeout,omitempty"`
-	ClientSessionMaxLifespan             string             `json:"client.session.max.lifespan,omitempty"`
-	UseRefreshTokens                     KeycloakBoolQuoted `json:"use.refresh.tokens"`
-	BackchannelLogoutUrl                 string             `json:"backchannel.logout.url"`
-	BackchannelLogoutRevokeOfflineTokens KeycloakBoolQuoted `json:"backchannel.logout.revoke.offline.tokens"`
-	BackchannelLogoutSessionRequired     KeycloakBoolQuoted `json:"backchannel.logout.session.required"`
+	PkceCodeChallengeMethod              string                 `json:"pkce.code.challenge.method"`
+	ExcludeSessionStateFromAuthResponse  KeycloakBoolQuoted     `json:"exclude.session.state.from.auth.response"`
+	AccessTokenLifespan                  string                 `json:"access.token.lifespan"`
+	LoginTheme                           string                 `json:"login_theme"`
+	ClientOfflineSessionIdleTimeout      string                 `json:"client.offline.session.idle.timeout,omitempty"`
+	ClientOfflineSessionMaxLifespan      string                 `json:"client.offline.session.max.lifespan,omitempty"`
+	ClientSessionIdleTimeout             string                 `json:"client.session.idle.timeout,omitempty"`
+	ClientSessionMaxLifespan             string                 `json:"client.session.max.lifespan,omitempty"`
+	UseRefreshTokens                     KeycloakBoolQuoted     `json:"use.refresh.tokens"`
+	BackchannelLogoutUrl                 string                 `json:"backchannel.logout.url"`
+	BackchannelLogoutRevokeOfflineTokens KeycloakBoolQuoted     `json:"backchannel.logout.revoke.offline.tokens"`
+	BackchannelLogoutSessionRequired     KeycloakBoolQuoted     `json:"backchannel.logout.session.required"`
+	ExtraConfig                          map[string]interface{} `json:"-"`
 }
 
 type OpenidAuthenticationFlowBindingOverrides struct {
@@ -346,4 +351,58 @@ func (keycloakClient *KeycloakClient) DetachOpenidClientDefaultScopes(realmId, c
 
 func (keycloakClient *KeycloakClient) DetachOpenidClientOptionalScopes(realmId, clientId string, scopeNames []string) error {
 	return keycloakClient.detachOpenidClientScopes(realmId, clientId, "optional", scopeNames)
+}
+
+func (f *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
+	f.ExtraConfig = map[string]interface{}{}
+	err := json.Unmarshal(data, &f.ExtraConfig)
+	if err != nil {
+		return err
+	}
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		structField := v.Type().Field(i)
+		jsonKey := strings.Split(structField.Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			value, ok := f.ExtraConfig[jsonKey]
+			if ok {
+				field := v.FieldByName(structField.Name)
+				if field.IsValid() && field.CanSet() {
+					if field.Kind() == reflect.String {
+						field.SetString(value.(string))
+					} else if field.Kind() == reflect.Bool {
+						boolVal, err := strconv.ParseBool(value.(string))
+						if err == nil {
+							field.Set(reflect.ValueOf(KeycloakBoolQuoted(boolVal)))
+						}
+					}
+					delete(f.ExtraConfig, jsonKey)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (f *OpenidClientAttributes) MarshalJSON() ([]byte, error) {
+	out := map[string]interface{}{}
+
+	for k, v := range f.ExtraConfig {
+		out[k] = v
+	}
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		jsonKey := strings.Split(v.Type().Field(i).Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			field := v.Field(i)
+			if field.IsValid() && field.CanSet() {
+				if field.Kind() == reflect.String {
+					out[jsonKey] = field.String()
+				} else if field.Kind() == reflect.Bool {
+					out[jsonKey] = KeycloakBoolQuoted(field.Bool())
+				}
+			}
+		}
+	}
+	return json.Marshal(out)
 }
