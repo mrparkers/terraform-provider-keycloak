@@ -51,7 +51,7 @@ func setExtraConfigData(data *schema.ResourceData, extraConfig map[string]interf
 
 // validateExtraConfig takes a reflect value type to check its JSON schema in order to validate that extra_config
 // doesn't contain any attributes that could have been specified within the official schema
-func validateExtraConfig(reflectValue reflect.Value) func(interface{}, cty.Path) diag.Diagnostics {
+func validateExtraConfig(reflectValue reflect.Value) schema.SchemaValidateDiagFunc {
 	return func(v interface{}, path cty.Path) diag.Diagnostics {
 		var diags diag.Diagnostics
 
