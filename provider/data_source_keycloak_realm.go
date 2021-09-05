@@ -6,6 +6,34 @@ import (
 )
 
 func dataSourceKeycloakRealm() *schema.Resource {
+
+	otpPolicySchema := map[string]*schema.Schema{
+		"type": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"algorithm": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"digits": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"initial_counter": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"look_ahead_window": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"period": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+	}
+
 	webAuthnSchema := map[string]*schema.Schema{
 		"acceptable_aaguids": {
 			Type: schema.TypeSet,
@@ -444,6 +472,16 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Computed: true,
 				Optional: true,
 				ForceNew: false,
+			},
+			// OTPPolicy
+			"otp_policy": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: otpPolicySchema,
+				},
 			},
 			// WebAuthn
 			"web_authn_policy": {
