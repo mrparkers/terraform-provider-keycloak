@@ -48,7 +48,7 @@ resource "keycloak_saml_client" "saml_client" {
 - `name_id_format` - (Optional) Sets the Name ID format for the subject.
 - `force_name_id_format` - (Optional) Ignore requested NameID subject format and use the one defined in `name_id_format` instead. Defaults to `false`.
 - `signature_algorithm` - (Optional) The signature algorithm used to sign documents. Should be one of "RSA_SHA1", "RSA_SHA256", "RSA_SHA512", or "DSA_SHA1".
-- `saml_signature_key_name` - (Optional) The value of the `KeyName` element within the signed SAML document. Should be one of "NONE", "KEY_ID", or "CERT_SUBJECT". Defaults to "KEY_ID".
+- `signature_key_name` - (Optional) The value of the `KeyName` element within the signed SAML document. Should be one of "NONE", "KEY_ID", or "CERT_SUBJECT". Defaults to "KEY_ID".
 - `canonicalization_method` - (Optional) The Canonicalization Method for XML signatures. Should be one of "EXCLUSIVE", "EXCLUSIVE_WITH_COMMENTS", "INCLUSIVE", or "INCLUSIVE_WITH_COMMENTS". Defaults to "EXCLUSIVE".
 - `root_url` - (Optional) When specified, this value is prepended to all relative URLs.
 - `valid_redirect_uris` - (Optional) When specified, Keycloak will use this list to validate given Assertion Consumer URLs specified in the authentication request.
