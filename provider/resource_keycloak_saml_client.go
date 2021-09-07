@@ -120,6 +120,10 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"login_theme": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"master_saml_processing_url": {
 				Type:     schema.TypeString,
 				Optional: true,
