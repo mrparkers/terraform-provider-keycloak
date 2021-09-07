@@ -16,6 +16,16 @@ func keys(data map[string]string) []string {
 	return result
 }
 
+func mapKeyFromValue(m map[string]string, value string) (string, bool) {
+	for k, v := range m {
+		if v == value {
+			return k, true
+		}
+	}
+
+	return "", false
+}
+
 func mergeSchemas(a map[string]*schema.Schema, b map[string]*schema.Schema) map[string]*schema.Schema {
 	result := a
 	for k, v := range b {

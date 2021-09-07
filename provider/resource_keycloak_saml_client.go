@@ -2,7 +2,7 @@ package provider
 
 import (
 	"fmt"
-	"strconv"
+	"reflect"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -11,9 +11,15 @@ import (
 )
 
 var (
-	keycloakSamlClientNameIdFormats       = []string{"username", "email", "transient", "persistent"}
-	keycloakSamlClientSignatureAlgorithms = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA512", "DSA_SHA1"}
-	keycloakSamlClientSignatureKeyName    = []string{"NONE", "KEY_ID", "CERT_SUBJECT"}
+	keycloakSamlClientNameIdFormats           = []string{"username", "email", "transient", "persistent"}
+	keycloakSamlClientSignatureAlgorithms     = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA512", "DSA_SHA1"}
+	keycloakSamlClientSignatureKeyNames       = []string{"NONE", "KEY_ID", "CERT_SUBJECT"}
+	keycloakSamlClientCanonicalizationMethods = map[string]string{
+		"EXCLUSIVE":               "http://www.w3.org/2001/10/xml-exc-c14n#",
+		"EXCLUSIVE_WITH_COMMENTS": "http://www.w3.org/2001/10/xml-exc-c14n#WithComments",
+		"INCLUSIVE":               "http://www.w3.org/TR/2001/REC-xml-c14n-20010315",
+		"INCLUSIVE_WITH_COMMENTS": "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments",
+	}
 )
 
 func resourceKeycloakSamlClient() *schema.Resource {
@@ -97,8 +103,14 @@ func resourceKeycloakSamlClient() *schema.Resource {
 			"signature_key_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.StringInSlice(keycloakSamlClientSignatureKeyName, false),
+				Default:      "KEY_ID",
+				ValidateFunc: validation.StringInSlice(keycloakSamlClientSignatureKeyNames, false),
+			},
+			"canonicalization_method": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "EXCLUSIVE",
+				ValidateFunc: validation.StringInSlice(keys(keycloakSamlClientCanonicalizationMethods), false),
 			},
 			"name_id_format": {
 				Type:         schema.TypeString,
@@ -191,6 +203,11 @@ func resourceKeycloakSamlClient() *schema.Resource {
 					},
 				},
 			},
+			"extra_config": {
+				Type:             schema.TypeMap,
+				Optional:         true,
+				ValidateDiagFunc: validateExtraConfig(reflect.ValueOf(&keycloak.SamlClientAttributes{}).Elem()),
+			},
 		},
 	}
 }
@@ -225,8 +242,16 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	}
 
 	samlAttributes := &keycloak.SamlClientAttributes{
+		IncludeAuthnStatement:           keycloak.KeycloakBoolQuoted(data.Get("include_authn_statement").(bool)),
+		ForceNameIdFormat:               keycloak.KeycloakBoolQuoted(data.Get("force_name_id_format").(bool)),
+		SignDocuments:                   keycloak.KeycloakBoolQuoted(data.Get("sign_documents").(bool)),
+		SignAssertions:                  keycloak.KeycloakBoolQuoted(data.Get("sign_assertions").(bool)),
+		EncryptAssertions:               keycloak.KeycloakBoolQuoted(data.Get("encrypt_assertions").(bool)),
+		ClientSignatureRequired:         keycloak.KeycloakBoolQuoted(data.Get("client_signature_required").(bool)),
+		ForcePostBinding:                keycloak.KeycloakBoolQuoted(data.Get("force_post_binding").(bool)),
 		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
 		SignatureKeyName:                data.Get("signature_key_name").(string),
+		CanonicalizationMethod:          keycloakSamlClientCanonicalizationMethods[data.Get("canonicalization_method").(string)],
 		NameIdFormat:                    data.Get("name_id_format").(string),
 		IDPInitiatedSSOURLName:          data.Get("idp_initiated_sso_url_name").(string),
 		IDPInitiatedSSORelayState:       data.Get("idp_initiated_sso_relay_state").(string),
@@ -234,6 +259,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		AssertionConsumerRedirectURL:    data.Get("assertion_consumer_redirect_url").(string),
 		LogoutServicePostBindingURL:     data.Get("logout_service_post_binding_url").(string),
 		LogoutServiceRedirectBindingURL: data.Get("logout_service_redirect_binding_url").(string),
+		ExtraConfig:                     getExtraConfigFromData(data),
 	}
 
 	if encryptionCertificate, ok := data.GetOkExists("encryption_certificate"); ok {
@@ -249,41 +275,6 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	if signingPrivateKey, ok := data.GetOkExists("signing_private_key"); ok {
 		signingPrivateKeyString := formatSigningPrivateKey(signingPrivateKey.(string))
 		samlAttributes.SigningPrivateKey = &signingPrivateKeyString
-	}
-
-	if includeAuthnStatement, ok := data.GetOkExists("include_authn_statement"); ok {
-		includeAuthnStatementString := strconv.FormatBool(includeAuthnStatement.(bool))
-		samlAttributes.IncludeAuthnStatement = &includeAuthnStatementString
-	}
-
-	if forceNameIdFormat, ok := data.GetOkExists("force_name_id_format"); ok {
-		forceNameIdFormatString := strconv.FormatBool(forceNameIdFormat.(bool))
-		samlAttributes.ForceNameIdFormat = &forceNameIdFormatString
-	}
-
-	if signDocuments, ok := data.GetOkExists("sign_documents"); ok {
-		signDocumentsString := strconv.FormatBool(signDocuments.(bool))
-		samlAttributes.SignDocuments = &signDocumentsString
-	}
-
-	if signAssertions, ok := data.GetOkExists("sign_assertions"); ok {
-		signAssertionsString := strconv.FormatBool(signAssertions.(bool))
-		samlAttributes.SignAssertions = &signAssertionsString
-	}
-
-	if encryptAssertions, ok := data.GetOkExists("encrypt_assertions"); ok {
-		encryptAssertionsString := strconv.FormatBool(encryptAssertions.(bool))
-		samlAttributes.EncryptAssertions = &encryptAssertionsString
-	}
-
-	if clientSignatureRequired, ok := data.GetOkExists("client_signature_required"); ok {
-		clientSignatureRequiredString := strconv.FormatBool(clientSignatureRequired.(bool))
-		samlAttributes.ClientSignatureRequired = &clientSignatureRequiredString
-	}
-
-	if forcePostBinding, ok := data.GetOkExists("force_post_binding"); ok {
-		forcePostBindingString := strconv.FormatBool(forcePostBinding.(bool))
-		samlAttributes.ForcePostBinding = &forcePostBindingString
 	}
 
 	samlClient := &keycloak.SamlClient{
@@ -317,67 +308,13 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlClient) error {
 	data.SetId(client.Id)
 
-	if client.Attributes.IncludeAuthnStatement != nil {
-		includeAuthnStatement, err := strconv.ParseBool(*client.Attributes.IncludeAuthnStatement)
-		if err != nil {
-			return err
-		}
-
-		data.Set("include_authn_statement", includeAuthnStatement)
-	}
-	if client.Attributes.ForceNameIdFormat != nil {
-		forceNameIdFormat, err := strconv.ParseBool(*client.Attributes.ForceNameIdFormat)
-		if err != nil {
-			return err
-		}
-
-		data.Set("force_name_id_format", forceNameIdFormat)
-	}
-
-	if client.Attributes.SignDocuments != nil {
-		signDocuments, err := strconv.ParseBool(*client.Attributes.SignDocuments)
-		if err != nil {
-			return err
-		}
-
-		data.Set("sign_documents", signDocuments)
-	}
-
-	if client.Attributes.SignAssertions != nil {
-		signAssertions, err := strconv.ParseBool(*client.Attributes.SignAssertions)
-		if err != nil {
-			return err
-		}
-
-		data.Set("sign_assertions", signAssertions)
-	}
-
-	if client.Attributes.EncryptAssertions != nil {
-		encryptAssertions, err := strconv.ParseBool(*client.Attributes.EncryptAssertions)
-		if err != nil {
-			return err
-		}
-
-		data.Set("encrypt_assertions", encryptAssertions)
-	}
-
-	if client.Attributes.ClientSignatureRequired != nil {
-		clientSignatureRequired, err := strconv.ParseBool(*client.Attributes.ClientSignatureRequired)
-		if err != nil {
-			return err
-		}
-
-		data.Set("client_signature_required", clientSignatureRequired)
-	}
-
-	if client.Attributes.ForcePostBinding != nil {
-		forcePostBinding, err := strconv.ParseBool(*client.Attributes.ForcePostBinding)
-		if err != nil {
-			return err
-		}
-
-		data.Set("force_post_binding", forcePostBinding)
-	}
+	data.Set("include_authn_statement", client.Attributes.IncludeAuthnStatement)
+	data.Set("force_name_id_format", client.Attributes.ForceNameIdFormat)
+	data.Set("sign_documents", client.Attributes.SignDocuments)
+	data.Set("sign_assertions", client.Attributes.SignAssertions)
+	data.Set("encrypt_assertions", client.Attributes.EncryptAssertions)
+	data.Set("client_signature_required", client.Attributes.ClientSignatureRequired)
+	data.Set("force_post_binding", client.Attributes.ForcePostBinding)
 
 	if _, exists := data.GetOkExists("encryption_certificate"); client.Attributes.EncryptionCertificate != nil && exists {
 		data.Set("encryption_certificate", client.Attributes.EncryptionCertificate)
@@ -420,6 +357,12 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("logout_service_post_binding_url", client.Attributes.LogoutServicePostBindingURL)
 	data.Set("logout_service_redirect_binding_url", client.Attributes.LogoutServiceRedirectBindingURL)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
+
+	if canonicalizationMethod, ok := mapKeyFromValue(keycloakSamlClientCanonicalizationMethods, client.Attributes.CanonicalizationMethod); ok {
+		data.Set("canonicalization_method", canonicalizationMethod)
+	}
+
+	setExtraConfigData(data, client.Attributes.ExtraConfig)
 
 	return nil
 }
