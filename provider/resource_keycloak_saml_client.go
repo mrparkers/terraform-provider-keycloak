@@ -263,18 +263,15 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	}
 
 	if encryptionCertificate, ok := data.GetOkExists("encryption_certificate"); ok {
-		encryptionCertificateString := formatCertificate(encryptionCertificate.(string))
-		samlAttributes.EncryptionCertificate = &encryptionCertificateString
+		samlAttributes.EncryptionCertificate = formatCertificate(encryptionCertificate.(string))
 	}
 
 	if signingCertificate, ok := data.GetOkExists("signing_certificate"); ok {
-		signingCertificateString := formatCertificate(signingCertificate.(string))
-		samlAttributes.SigningCertificate = &signingCertificateString
+		samlAttributes.SigningCertificate = formatCertificate(signingCertificate.(string))
 	}
 
 	if signingPrivateKey, ok := data.GetOkExists("signing_private_key"); ok {
-		signingPrivateKeyString := formatSigningPrivateKey(signingPrivateKey.(string))
-		samlAttributes.SigningPrivateKey = &signingPrivateKeyString
+		samlAttributes.SigningPrivateKey = formatSigningPrivateKey(signingPrivateKey.(string))
 	}
 
 	samlClient := &keycloak.SamlClient{
@@ -316,16 +313,16 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("client_signature_required", client.Attributes.ClientSignatureRequired)
 	data.Set("force_post_binding", client.Attributes.ForcePostBinding)
 
-	if _, exists := data.GetOkExists("encryption_certificate"); client.Attributes.EncryptionCertificate != nil && exists {
+	if _, exists := data.GetOkExists("encryption_certificate"); exists {
 		data.Set("encryption_certificate", client.Attributes.EncryptionCertificate)
 	}
 
-	if _, exists := data.GetOkExists("signing_certificate"); client.Attributes.SigningCertificate != nil && exists {
-		data.Set("signing_certificate", *client.Attributes.SigningCertificate)
+	if _, exists := data.GetOkExists("signing_certificate"); exists {
+		data.Set("signing_certificate", client.Attributes.SigningCertificate)
 	}
 
-	if _, exists := data.GetOkExists("signing_certificate"); client.Attributes.SigningPrivateKey != nil && exists {
-		data.Set("signing_private_key", *client.Attributes.SigningPrivateKey)
+	if _, exists := data.GetOkExists("signing_certificate"); exists {
+		data.Set("signing_private_key", client.Attributes.SigningPrivateKey)
 	}
 
 	if (keycloak.SamlAuthenticationFlowBindingOverrides{}) == client.AuthenticationFlowBindingOverrides {

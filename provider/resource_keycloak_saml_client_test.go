@@ -164,9 +164,9 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			SignatureAlgorithm:              randomStringInSlice(keycloakSamlClientSignatureAlgorithms),
 			SignatureKeyName:                randomStringInSlice(keycloakSamlClientSignatureKeyName),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
-			EncryptionCertificate:           &encryptionCertificateBefore,
-			SigningCertificate:              &signingCertificateBefore,
-			SigningPrivateKey:               &signingPrivateKeyBefore,
+			EncryptionCertificate:           encryptionCertificateBefore,
+			SigningCertificate:              signingCertificateBefore,
+			SigningPrivateKey:               signingPrivateKeyBefore,
 			IDPInitiatedSSOURLName:          acctest.RandString(20),
 			IDPInitiatedSSORelayState:       acctest.RandString(20),
 			AssertionConsumerPostURL:        acctest.RandString(20),
@@ -204,9 +204,9 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			SignatureAlgorithm:              randomStringInSlice(keycloakSamlClientSignatureAlgorithms),
 			SignatureKeyName:                randomStringInSlice(keycloakSamlClientSignatureKeyName),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
-			EncryptionCertificate:           &encryptionCertificateAfter,
-			SigningCertificate:              &signingCertificateAfter,
-			SigningPrivateKey:               &signingPrivateKeyAfter,
+			EncryptionCertificate:           encryptionCertificateAfter,
+			SigningCertificate:              signingCertificateAfter,
+			SigningPrivateKey:               signingPrivateKeyAfter,
 			IDPInitiatedSSOURLName:          acctest.RandString(20),
 			IDPInitiatedSSORelayState:       acctest.RandString(20),
 			AssertionConsumerPostURL:        acctest.RandString(20),
@@ -384,15 +384,15 @@ func testAccCheckKeycloakSamlClientHasEncryptionCertificate(resourceName string)
 			return err
 		}
 
-		if *client.Attributes.EncryptionCertificate == "" {
+		if client.Attributes.EncryptionCertificate == "" {
 			return fmt.Errorf("expected saml client to have a encryption certificate")
 		}
 
-		if strings.Contains(*client.Attributes.EncryptionCertificate, "-----BEGIN CERTIFICATE-----") || strings.Contains(*client.Attributes.EncryptionCertificate, "-----END CERTIFICATE-----") {
+		if strings.Contains(client.Attributes.EncryptionCertificate, "-----BEGIN CERTIFICATE-----") || strings.Contains(client.Attributes.EncryptionCertificate, "-----END CERTIFICATE-----") {
 			return fmt.Errorf("expected saml client encryption certificate to not contain headers")
 		}
 
-		if strings.ContainsAny(*client.Attributes.EncryptionCertificate, "\n\r ") {
+		if strings.ContainsAny(client.Attributes.EncryptionCertificate, "\n\r ") {
 			return fmt.Errorf("expected saml client encryption certificate to not contain whitespace")
 		}
 
@@ -407,15 +407,15 @@ func testAccCheckKeycloakSamlClientHasSigningCertificate(resourceName string) re
 			return err
 		}
 
-		if *client.Attributes.SigningCertificate == "" {
+		if client.Attributes.SigningCertificate == "" {
 			return fmt.Errorf("expected saml client to have a signing certificate")
 		}
 
-		if strings.Contains(*client.Attributes.SigningCertificate, "-----BEGIN CERTIFICATE-----") || strings.Contains(*client.Attributes.SigningCertificate, "-----END CERTIFICATE-----") {
+		if strings.Contains(client.Attributes.SigningCertificate, "-----BEGIN CERTIFICATE-----") || strings.Contains(client.Attributes.SigningCertificate, "-----END CERTIFICATE-----") {
 			return fmt.Errorf("expected saml client signing certificate to not contain headers")
 		}
 
-		if strings.ContainsAny(*client.Attributes.SigningCertificate, "\n\r ") {
+		if strings.ContainsAny(client.Attributes.SigningCertificate, "\n\r ") {
 			return fmt.Errorf("expected saml client signing certificate to not contain whitespace")
 		}
 
@@ -430,15 +430,15 @@ func testAccCheckKeycloakSamlClientHasPrivateKey(resourceName string) resource.T
 			return err
 		}
 
-		if *client.Attributes.SigningPrivateKey == "" {
+		if client.Attributes.SigningPrivateKey == "" {
 			return fmt.Errorf("expected saml client to have a signing private key")
 		}
 
-		if strings.Contains(*client.Attributes.SigningPrivateKey, "-----BEGIN PRIVATE KEY-----") || strings.Contains(*client.Attributes.SigningPrivateKey, "-----END PRIVATE KEY-----") {
+		if strings.Contains(client.Attributes.SigningPrivateKey, "-----BEGIN PRIVATE KEY-----") || strings.Contains(client.Attributes.SigningPrivateKey, "-----END PRIVATE KEY-----") {
 			return fmt.Errorf("expected saml client signing private key to not contain headers")
 		}
 
-		if strings.ContainsAny(*client.Attributes.SigningPrivateKey, "\n\r ") {
+		if strings.ContainsAny(client.Attributes.SigningPrivateKey, "\n\r ") {
 			return fmt.Errorf("expected saml client signing private key to not contain whitespace")
 		}
 
@@ -745,9 +745,9 @@ resource "keycloak_saml_client" "saml_client" {
 		client.RootUrl,
 		arrayOfStringsForTerraformResource(client.ValidRedirectUris),
 		client.BaseUrl, client.MasterSamlProcessingUrl,
-		*client.Attributes.EncryptionCertificate,
-		*client.Attributes.SigningCertificate,
-		*client.Attributes.SigningPrivateKey,
+		client.Attributes.EncryptionCertificate,
+		client.Attributes.SigningCertificate,
+		client.Attributes.SigningPrivateKey,
 		client.Attributes.IDPInitiatedSSOURLName,
 		client.Attributes.IDPInitiatedSSORelayState,
 		client.Attributes.AssertionConsumerPostURL,
