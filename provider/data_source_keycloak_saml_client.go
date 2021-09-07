@@ -70,6 +70,14 @@ func dataSourceKeycloakSamlClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"saml_signature_key_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"canonicalization_method": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"name_id_format": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -147,6 +155,10 @@ func dataSourceKeycloakSamlClient() *schema.Resource {
 						},
 					},
 				},
+			},
+			"extra_config": {
+				Type:     schema.TypeMap,
+				Computed: true,
 			},
 		},
 	}
