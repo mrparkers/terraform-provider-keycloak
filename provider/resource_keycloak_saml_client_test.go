@@ -113,6 +113,7 @@ func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
 					testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes("keycloak_saml_client.saml_client"),
 					TestCheckResourceAttrNot("keycloak_saml_client.saml_client", "signing_certificate", ""),
 					TestCheckResourceAttrNot("keycloak_saml_client.saml_client", "signing_private_key", ""),
+					TestCheckResourceAttrNot("keycloak_saml_client.saml_client", "signature_key_name", "KEY_ID"),
 				),
 			},
 		},
