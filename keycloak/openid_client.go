@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type OpenidClientRole struct {
@@ -55,15 +56,19 @@ type OpenidClient struct {
 }
 
 type OpenidClientAttributes struct {
-	PkceCodeChallengeMethod             string             `json:"pkce.code.challenge.method"`
-	ExcludeSessionStateFromAuthResponse KeycloakBoolQuoted `json:"exclude.session.state.from.auth.response"`
-	AccessTokenLifespan                 string             `json:"access.token.lifespan"`
-	LoginTheme                          string             `json:"login_theme"`
-	ClientOfflineSessionIdleTimeout     string             `json:"client.offline.session.idle.timeout,omitempty"`
-	ClientOfflineSessionMaxLifespan     string             `json:"client.offline.session.max.lifespan,omitempty"`
-	ClientSessionIdleTimeout            string             `json:"client.session.idle.timeout,omitempty"`
-	ClientSessionMaxLifespan            string             `json:"client.session.max.lifespan,omitempty"`
-	UseRefreshTokens                    KeycloakBoolQuoted `json:"use.refresh.tokens"`
+	PkceCodeChallengeMethod              string                 `json:"pkce.code.challenge.method"`
+	ExcludeSessionStateFromAuthResponse  KeycloakBoolQuoted     `json:"exclude.session.state.from.auth.response"`
+	AccessTokenLifespan                  string                 `json:"access.token.lifespan"`
+	LoginTheme                           string                 `json:"login_theme"`
+	ClientOfflineSessionIdleTimeout      string                 `json:"client.offline.session.idle.timeout,omitempty"`
+	ClientOfflineSessionMaxLifespan      string                 `json:"client.offline.session.max.lifespan,omitempty"`
+	ClientSessionIdleTimeout             string                 `json:"client.session.idle.timeout,omitempty"`
+	ClientSessionMaxLifespan             string                 `json:"client.session.max.lifespan,omitempty"`
+	UseRefreshTokens                     KeycloakBoolQuoted     `json:"use.refresh.tokens"`
+	BackchannelLogoutUrl                 string                 `json:"backchannel.logout.url"`
+	BackchannelLogoutRevokeOfflineTokens KeycloakBoolQuoted     `json:"backchannel.logout.revoke.offline.tokens"`
+	BackchannelLogoutSessionRequired     KeycloakBoolQuoted     `json:"backchannel.logout.session.required"`
+	ExtraConfig                          map[string]interface{} `json:"-"`
 }
 
 type OpenidAuthenticationFlowBindingOverrides struct {
@@ -343,4 +348,12 @@ func (keycloakClient *KeycloakClient) DetachOpenidClientDefaultScopes(realmId, c
 
 func (keycloakClient *KeycloakClient) DetachOpenidClientOptionalScopes(realmId, clientId string, scopeNames []string) error {
 	return keycloakClient.detachOpenidClientScopes(realmId, clientId, "optional", scopeNames)
+}
+
+func (f *OpenidClientAttributes) UnmarshalJSON(data []byte) error {
+	return unmarshalExtraConfig(data, reflect.ValueOf(f).Elem(), &f.ExtraConfig)
+}
+
+func (f *OpenidClientAttributes) MarshalJSON() ([]byte, error) {
+	return marshalExtraConfig(reflect.ValueOf(f).Elem(), f.ExtraConfig)
 }
