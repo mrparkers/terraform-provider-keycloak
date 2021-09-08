@@ -238,7 +238,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		AssertionConsumerRedirectURL:    data.Get("assertion_consumer_redirect_url").(string),
 		LogoutServicePostBindingURL:     data.Get("logout_service_post_binding_url").(string),
 		LogoutServiceRedirectBindingURL: data.Get("logout_service_redirect_binding_url").(string),
-		LoginTheme: data.Get("login_theme").(string),
+		LoginTheme:                      data.Get("login_theme").(string),
 	}
 
 	if encryptionCertificate, ok := data.GetOkExists("encryption_certificate"); ok {
