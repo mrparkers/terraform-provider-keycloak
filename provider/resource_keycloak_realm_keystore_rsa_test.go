@@ -33,6 +33,7 @@ func TestAccKeycloakRealmKeystoreRsa_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreRsa_basic(rsaName, privateKey, certificate),
+				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
 			},
 		},
 	})
@@ -43,7 +44,7 @@ func TestAccKeycloakRealmKeystoreRsa_createAfterManualDestroy(t *testing.T) {
 
 	var keystoreRsa = &keycloak.RealmKeystoreRsa{}
 
-	fullNameMapperName := acctest.RandomWithPrefix("tf-acc")
+	fullNameKeystoreName := acctest.RandomWithPrefix("tf-acc")
 	privateKey, certificate := generateKeyAndCert(2048)
 
 	resource.Test(t, resource.TestCase{
@@ -52,7 +53,8 @@ func TestAccKeycloakRealmKeystoreRsa_createAfterManualDestroy(t *testing.T) {
 		CheckDestroy:      testAccCheckRealmKeystoreRsaDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmKeystoreRsa_basic(fullNameMapperName, privateKey, certificate),
+				Config: testKeycloakRealmKeystoreRsa_basic(fullNameKeystoreName, privateKey, certificate),
+				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa.realm_rsa", keystoreRsa),
 			},
 			{
 				PreConfig: func() {
@@ -61,7 +63,8 @@ func TestAccKeycloakRealmKeystoreRsa_createAfterManualDestroy(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakRealmKeystoreRsa_basic(fullNameMapperName, privateKey, certificate),
+				Config: testKeycloakRealmKeystoreRsa_basic(fullNameKeystoreName, privateKey, certificate),
+				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa.realm_rsa", keystoreRsa),
 			},
 		},
 	})
@@ -86,7 +89,7 @@ func TestAccKeycloakRealmKeystoreRsa_keySizeValidation(t *testing.T) {
 			{
 				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(rsaName, "key_size", "2048", privateKey,
 					certificate),
-				//Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
+				Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
 			},
 		},
 	})
@@ -111,53 +114,7 @@ func TestAccKeycloakRealmKeystoreRsa_algorithmValidation(t *testing.T) {
 			{
 				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(algorithm, "algorithm", algorithm,
 					privateKey, certificate),
-			},
-		},
-	})
-}
-
-func TestAccKeycloakRealmKeystoreRsa_updateRsaKeystoreGenerated(t *testing.T) {
-	t.Parallel()
-
-	enabled := randomBool()
-	active := randomBool()
-	keySize := 2048
-	privateKey, certificate := generateKeyAndCert(keySize)
-
-	groupMapperOne := &keycloak.RealmKeystoreRsa{
-		Name:        acctest.RandString(10),
-		RealmId:     testAccRealmUserFederation.Realm,
-		Enabled:     enabled,
-		Active:      active,
-		Priority:    acctest.RandIntRange(0, 100),
-		KeySize:     keySize,
-		Algorithm:   randomStringInSlice(keycloakRealmKeystoreRsaAlgorithm),
-		PrivateKey:  privateKey,
-		Certificate: certificate,
-	}
-
-	groupMapperTwo := &keycloak.RealmKeystoreRsa{
-		Name:        acctest.RandString(10),
-		RealmId:     testAccRealmUserFederation.Realm,
-		Enabled:     enabled,
-		Active:      active,
-		Priority:    acctest.RandIntRange(0, 100),
-		KeySize:     keySize,
-		Algorithm:   randomStringInSlice(keycloakRealmKeystoreRsaAlgorithm),
-		PrivateKey:  privateKey,
-		Certificate: certificate,
-	}
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckRealmKeystoreRsaDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakRealmKeystoreRsa_basicFromInterface(groupMapperOne),
-			},
-			{
-				Config: testKeycloakRealmKeystoreRsa_basicFromInterface(groupMapperTwo),
+				Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
 			},
 		},
 	})
@@ -174,15 +131,15 @@ func testAccCheckRealmKeystoreRsaExists(resourceName string) resource.TestCheckF
 	}
 }
 
-func testAccCheckRealmKeystoreRsaFetch(resourceName string, mapper *keycloak.RealmKeystoreRsa) resource.TestCheckFunc {
+func testAccCheckRealmKeystoreRsaFetch(resourceName string, keystore *keycloak.RealmKeystoreRsa) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		fetchedMapper, err := getKeycloakRealmKeystoreRsaFromState(s, resourceName)
+		fetchedKeystore, err := getKeycloakRealmKeystoreRsaFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
 
-		mapper.Id = fetchedMapper.Id
-		mapper.RealmId = fetchedMapper.RealmId
+		keystore.Id = fetchedKeystore.Id
+		keystore.RealmId = fetchedKeystore.RealmId
 
 		return nil
 	}
@@ -197,9 +154,8 @@ func testAccCheckRealmKeystoreRsaDestroy() resource.TestCheckFunc {
 
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
-
-			ldapGroupMapper, _ := keycloakClient.GetRealmKeystoreRsa(realm, id)
-			if ldapGroupMapper != nil {
+			keystoreRsa, _ := keycloakClient.GetRealmKeystoreRsa(realm, id)
+			if keystoreRsa != nil {
 				return fmt.Errorf("rsa keystore with id %s still exists", id)
 			}
 		}
@@ -304,6 +260,8 @@ resource "keycloak_realm_key_rsa" "realm_rsa" {
     algorithm   = "RS384"
     private_key = "%s"
     certificate = "%s"
+
+    disable_read = true
 }
 	`, testAccRealmUserFederation.Realm, rsaName, privateKey, certificate)
 }
@@ -324,11 +282,13 @@ resource "keycloak_realm_key_rsa" "realm_rsa" {
 
     private_key = "%s"
     certificate = "%s"
+
+    disable_read = true
 }
 	`, testAccRealmUserFederation.Realm, rsaName, attr, val, privateKey, certificate)
 }
 
-func testKeycloakRealmKeystoreRsa_basicFromInterface(mapper *keycloak.RealmKeystoreRsa) string {
+func testKeycloakRealmKeystoreRsa_basicFromInterface(keystore *keycloak.RealmKeystoreRsa) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -345,7 +305,9 @@ resource "keycloak_realm_key_rsa" "realm_rsa" {
 
     private_key = "%s"
     certificate = "%s"
+
+    disable_read = true
 }
-	`, testAccRealmUserFederation.Realm, mapper.Name, strconv.Itoa(mapper.Priority), mapper.Algorithm,
-		strconv.Itoa(mapper.KeySize), mapper.PrivateKey, mapper.Certificate)
+	`, testAccRealmUserFederation.Realm, keystore.Name, strconv.Itoa(keystore.Priority), keystore.Algorithm,
+		strconv.Itoa(keystore.KeySize), keystore.PrivateKey, keystore.Certificate)
 }

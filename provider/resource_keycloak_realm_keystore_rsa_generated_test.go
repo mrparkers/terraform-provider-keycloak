@@ -34,7 +34,7 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_createAfterManualDestroy(t *testin
 
 	var rsa = &keycloak.RealmKeystoreRsaGenerated{}
 
-	fullNameMapperName := acctest.RandomWithPrefix("tf-acc")
+	fullNameKeystoreName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -42,7 +42,7 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_createAfterManualDestroy(t *testin
 		CheckDestroy:      testAccCheckRealmKeystoreRsaGeneratedDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmKeystoreRsaGenerated_basic(fullNameMapperName),
+				Config: testKeycloakRealmKeystoreRsaGenerated_basic(fullNameKeystoreName),
 				Check:  testAccCheckRealmKeystoreRsaGeneratedFetch("keycloak_realm_key_rsa_generated.realm_rsa", rsa),
 			},
 			{
@@ -52,7 +52,7 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_createAfterManualDestroy(t *testin
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakRealmKeystoreRsaGenerated_basic(fullNameMapperName),
+				Config: testKeycloakRealmKeystoreRsaGenerated_basic(fullNameKeystoreName),
 				Check:  testAccCheckRealmKeystoreRsaGeneratedFetch("keycloak_realm_key_rsa_generated.realm_rsa", rsa),
 			},
 		},
@@ -111,7 +111,7 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_updateRsaKeystoreGenerated(t *test
 	enabled := randomBool()
 	active := randomBool()
 
-	groupMapperOne := &keycloak.RealmKeystoreRsaGenerated{
+	groupKeystoreOne := &keycloak.RealmKeystoreRsaGenerated{
 		Name:      acctest.RandString(10),
 		RealmId:   testAccRealmUserFederation.Realm,
 		Enabled:   enabled,
@@ -121,7 +121,7 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_updateRsaKeystoreGenerated(t *test
 		Algorithm: randomStringInSlice(keycloakRealmKeystoreRsaAlgorithm),
 	}
 
-	groupMapperTwo := &keycloak.RealmKeystoreRsaGenerated{
+	groupKeystoreTwo := &keycloak.RealmKeystoreRsaGenerated{
 		Name:      acctest.RandString(10),
 		RealmId:   testAccRealmUserFederation.Realm,
 		Enabled:   enabled,
@@ -137,11 +137,11 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_updateRsaKeystoreGenerated(t *test
 		CheckDestroy:      testAccCheckRealmKeystoreRsaGeneratedDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmKeystoreRsaGenerated_basicFromInterface(groupMapperOne),
+				Config: testKeycloakRealmKeystoreRsaGenerated_basicFromInterface(groupKeystoreOne),
 				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_key_rsa_generated.realm_rsa"),
 			},
 			{
-				Config: testKeycloakRealmKeystoreRsaGenerated_basicFromInterface(groupMapperTwo),
+				Config: testKeycloakRealmKeystoreRsaGenerated_basicFromInterface(groupKeystoreTwo),
 				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_key_rsa_generated.realm_rsa"),
 			},
 		},
@@ -159,15 +159,15 @@ func testAccCheckRealmKeystoreRsaGeneratedExists(resourceName string) resource.T
 	}
 }
 
-func testAccCheckRealmKeystoreRsaGeneratedFetch(resourceName string, mapper *keycloak.RealmKeystoreRsaGenerated) resource.TestCheckFunc {
+func testAccCheckRealmKeystoreRsaGeneratedFetch(resourceName string, keystore *keycloak.RealmKeystoreRsaGenerated) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		fetchedMapper, err := getKeycloakRealmKeystoreRsaGeneratedFromState(s, resourceName)
+		fetchedKeystore, err := getKeycloakRealmKeystoreRsaGeneratedFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
 
-		mapper.Id = fetchedMapper.Id
-		mapper.RealmId = fetchedMapper.RealmId
+		keystore.Id = fetchedKeystore.Id
+		keystore.RealmId = fetchedKeystore.RealmId
 
 		return nil
 	}
@@ -183,8 +183,8 @@ func testAccCheckRealmKeystoreRsaGeneratedDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapGroupMapper, _ := keycloakClient.GetRealmKeystoreRsaGenerated(realm, id)
-			if ldapGroupMapper != nil {
+			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreRsaGenerated(realm, id)
+			if ldapGroupKeystore != nil {
 				return fmt.Errorf("rsa keystore with id %s still exists", id)
 			}
 		}
@@ -261,7 +261,7 @@ resource "keycloak_realm_key_rsa_generated" "realm_rsa" {
 	`, testAccRealmUserFederation.Realm, rsaName, attr, val)
 }
 
-func testKeycloakRealmKeystoreRsaGenerated_basicFromInterface(mapper *keycloak.RealmKeystoreRsaGenerated) string {
+func testKeycloakRealmKeystoreRsaGenerated_basicFromInterface(keystore *keycloak.RealmKeystoreRsaGenerated) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -276,6 +276,6 @@ resource "keycloak_realm_key_rsa_generated" "realm_rsa" {
     algorithm = "%s"
     key_size  = %s
 }
-	`, testAccRealmUserFederation.Realm, mapper.Name, strconv.Itoa(mapper.Priority), mapper.Algorithm,
-		strconv.Itoa(mapper.KeySize))
+	`, testAccRealmUserFederation.Realm, keystore.Name, strconv.Itoa(keystore.Priority), keystore.Algorithm,
+		strconv.Itoa(keystore.KeySize))
 }

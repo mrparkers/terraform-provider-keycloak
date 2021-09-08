@@ -34,7 +34,7 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_createAfterManualDestroy(t *testi
 
 	var hmac = &keycloak.RealmKeystoreHmacGenerated{}
 
-	fullNameMapperName := acctest.RandomWithPrefix("tf-acc")
+	fullNameKeystoreName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -42,7 +42,7 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_createAfterManualDestroy(t *testi
 		CheckDestroy:      testAccCheckRealmKeystoreHmacGeneratedDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmKeystoreHmacGenerated_basic(fullNameMapperName),
+				Config: testKeycloakRealmKeystoreHmacGenerated_basic(fullNameKeystoreName),
 				Check:  testAccCheckRealmKeystoreHmacGeneratedFetch("keycloak_realm_key_hmac_generated.realm_hmac", hmac),
 			},
 			{
@@ -52,7 +52,7 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_createAfterManualDestroy(t *testi
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakRealmKeystoreHmacGenerated_basic(fullNameMapperName),
+				Config: testKeycloakRealmKeystoreHmacGenerated_basic(fullNameKeystoreName),
 				Check:  testAccCheckRealmKeystoreHmacGeneratedFetch("keycloak_realm_key_hmac_generated.realm_hmac", hmac),
 			},
 		},
@@ -90,7 +90,7 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_updateRealmKeystoreHmacGenerated(
 	enabled := randomBool()
 	active := randomBool()
 
-	groupMapperOne := &keycloak.RealmKeystoreHmacGenerated{
+	groupKeystoreOne := &keycloak.RealmKeystoreHmacGenerated{
 		Name:       acctest.RandString(10),
 		RealmId:    testAccRealmUserFederation.Realm,
 		Enabled:    enabled,
@@ -100,7 +100,7 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_updateRealmKeystoreHmacGenerated(
 		Algorithm:  randomStringInSlice(keycloakRealmKeystoreHmacGeneratedAlgorithm),
 	}
 
-	groupMapperTwo := &keycloak.RealmKeystoreHmacGenerated{
+	groupKeystoreTwo := &keycloak.RealmKeystoreHmacGenerated{
 		Name:       acctest.RandString(10),
 		RealmId:    testAccRealmUserFederation.Realm,
 		Enabled:    enabled,
@@ -116,11 +116,11 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_updateRealmKeystoreHmacGenerated(
 		CheckDestroy:      testAccCheckRealmKeystoreHmacGeneratedDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmKeystoreHmacGenerated_basicFromInterface(groupMapperOne),
+				Config: testKeycloakRealmKeystoreHmacGenerated_basicFromInterface(groupKeystoreOne),
 				Check:  testAccCheckRealmKeystoreHmacGeneratedExists("keycloak_realm_key_hmac_generated.realm_hmac"),
 			},
 			{
-				Config: testKeycloakRealmKeystoreHmacGenerated_basicFromInterface(groupMapperTwo),
+				Config: testKeycloakRealmKeystoreHmacGenerated_basicFromInterface(groupKeystoreTwo),
 				Check:  testAccCheckRealmKeystoreHmacGeneratedExists("keycloak_realm_key_hmac_generated.realm_hmac"),
 			},
 		},
@@ -138,15 +138,15 @@ func testAccCheckRealmKeystoreHmacGeneratedExists(resourceName string) resource.
 	}
 }
 
-func testAccCheckRealmKeystoreHmacGeneratedFetch(resourceName string, mapper *keycloak.RealmKeystoreHmacGenerated) resource.TestCheckFunc {
+func testAccCheckRealmKeystoreHmacGeneratedFetch(resourceName string, keystore *keycloak.RealmKeystoreHmacGenerated) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		fetchedMapper, err := getKeycloakRealmKeystoreHmacGeneratedFromState(s, resourceName)
+		fetchedKeystore, err := getKeycloakRealmKeystoreHmacGeneratedFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
 
-		mapper.Id = fetchedMapper.Id
-		mapper.RealmId = fetchedMapper.RealmId
+		keystore.Id = fetchedKeystore.Id
+		keystore.RealmId = fetchedKeystore.RealmId
 
 		return nil
 	}
@@ -162,8 +162,8 @@ func testAccCheckRealmKeystoreHmacGeneratedDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapGroupMapper, _ := keycloakClient.GetRealmKeystoreHmacGenerated(realm, id)
-			if ldapGroupMapper != nil {
+			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreHmacGenerated(realm, id)
+			if ldapGroupKeystore != nil {
 				return fmt.Errorf("hmac keystore with id %s still exists", id)
 			}
 		}
@@ -240,7 +240,7 @@ resource "keycloak_realm_key_hmac_generated" "realm_hmac" {
 	`, testAccRealmUserFederation.Realm, hmacName, attr, val)
 }
 
-func testKeycloakRealmKeystoreHmacGenerated_basicFromInterface(mapper *keycloak.RealmKeystoreHmacGenerated) string {
+func testKeycloakRealmKeystoreHmacGenerated_basicFromInterface(keystore *keycloak.RealmKeystoreHmacGenerated) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -255,5 +255,5 @@ resource "keycloak_realm_key_hmac_generated" "realm_hmac" {
     secret_size = "%s"
     algorithm   = "%s"
 }
-	`, testAccRealmUserFederation.Realm, mapper.Name, strconv.Itoa(mapper.Priority), strconv.Itoa(mapper.SecretSize), mapper.Algorithm)
+	`, testAccRealmUserFederation.Realm, keystore.Name, strconv.Itoa(keystore.Priority), strconv.Itoa(keystore.SecretSize), keystore.Algorithm)
 }

@@ -28,16 +28,14 @@ func resourceKeycloakRealmKeystoreJavaKeystore() *schema.Resource {
 				Description: "Display name of provider when linked in admin console.",
 			},
 			"realm_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The realm in which the ldap user federation provider exists.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"parent_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The realm in which the ldap user federation provider exists.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"active": {
 				Type:        schema.TypeBool,
@@ -89,7 +87,7 @@ func resourceKeycloakRealmKeystoreJavaKeystore() *schema.Resource {
 }
 
 func getRealmKeystoreJavaKeystoreFromData(data *schema.ResourceData) (*keycloak.RealmKeystoreJavaKeystore, error) {
-	mapper := &keycloak.RealmKeystoreJavaKeystore{
+	keystore := &keycloak.RealmKeystoreJavaKeystore{
 		Id:       data.Id(),
 		Name:     data.Get("name").(string),
 		RealmId:  data.Get("realm_id").(string),
@@ -104,7 +102,7 @@ func getRealmKeystoreJavaKeystoreFromData(data *schema.ResourceData) (*keycloak.
 		KeyPassword:      data.Get("key_password").(string),
 	}
 
-	return mapper, nil
+	return keystore, nil
 }
 
 func setRealmKeystoreJavaKeystoreData(data *schema.ResourceData, realmKey *keycloak.RealmKeystoreJavaKeystore) error {
@@ -198,13 +196,12 @@ func resourceKeycloakRealmKeystoreJavaKeystoreDelete(data *schema.ResourceData, 
 func resourceKeycloakRealmKeystoreJavaKeystoreImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}/{{userFederationMapperId}}")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{keystoreId}}")
 	}
 
 	d.Set("realm_id", parts[0])
-	d.Set("ldap_user_federation_id", parts[1])
-	d.SetId(parts[2])
+	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }

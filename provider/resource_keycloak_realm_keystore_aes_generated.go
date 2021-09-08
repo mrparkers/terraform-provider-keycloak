@@ -28,16 +28,14 @@ func resourceKeycloakRealmKeystoreAesGenerated() *schema.Resource {
 				Description: "Display name of provider when linked in admin console.",
 			},
 			"realm_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The realm in which the ldap user federation provider exists.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"parent_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The realm in which the ldap user federation provider exists.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"active": {
 				Type:        schema.TypeBool,
@@ -69,7 +67,7 @@ func resourceKeycloakRealmKeystoreAesGenerated() *schema.Resource {
 }
 
 func getRealmKeystoreAesGeneratedFromData(data *schema.ResourceData) (*keycloak.RealmKeystoreAesGenerated, error) {
-	mapper := &keycloak.RealmKeystoreAesGenerated{
+	keystore := &keycloak.RealmKeystoreAesGenerated{
 		Id:       data.Id(),
 		Name:     data.Get("name").(string),
 		RealmId:  data.Get("realm_id").(string),
@@ -81,7 +79,7 @@ func getRealmKeystoreAesGeneratedFromData(data *schema.ResourceData) (*keycloak.
 		SecretSize: data.Get("secret_size").(int),
 	}
 
-	return mapper, nil
+	return keystore, nil
 }
 
 func setRealmKeystoreAesGeneratedData(data *schema.ResourceData, realmKey *keycloak.RealmKeystoreAesGenerated) error {
@@ -172,7 +170,7 @@ func resourceKeycloakRealmKeystoreAesGeneratedDelete(data *schema.ResourceData, 
 func resourceKeycloakRealmKeystoreAesGeneratedImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	if len(parts) != 3 {
+	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{keystoreId}}")
 	}
 

@@ -19,6 +19,8 @@ type RealmKeystoreRsa struct {
 
 	PrivateKey  string
 	Certificate string
+
+	DisableRead bool
 }
 
 func convertFromRealmKeystoreRsaToComponent(realmKey *RealmKeystoreRsa) *component {

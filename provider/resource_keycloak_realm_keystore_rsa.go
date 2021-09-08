@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"log"
 	"strings"
 )
 
@@ -29,16 +30,14 @@ func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
 				Description: "Display name of provider when linked in admin console.",
 			},
 			"realm_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The realm in which the ldap user federation provider exists.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"parent_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The realm in which the ldap user federation provider exists.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"active": {
 				Type:        schema.TypeBool,
@@ -82,6 +81,11 @@ func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
 				Required:    true,
 				Description: "X509 Certificate encoded in PEM format",
 			},
+			"disable_read": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -100,6 +104,7 @@ func getRealmKeystoreRsaFromData(keycloakClient *keycloak.KeycloakClient, data *
 		Algorithm:   data.Get("algorithm").(string),
 		PrivateKey:  data.Get("private_key").(string),
 		Certificate: data.Get("certificate").(string),
+		DisableRead: data.Get("disable_read").(bool),
 	}
 	_, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11)
 	if err != nil {
@@ -109,7 +114,9 @@ func getRealmKeystoreRsaFromData(keycloakClient *keycloak.KeycloakClient, data *
 	return mapper, nil
 }
 
-func setRealmKeystoreRsaData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData, realmKey *keycloak.RealmKeystoreRsa) error {
+func setRealmKeystoreRsaData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData,
+	realmKey *keycloak.RealmKeystoreRsa, readFunc bool) error {
+	disableRead := fmt.Sprintf("%v", data.Get("disable_read"))
 	data.SetId(realmKey.Id)
 
 	data.Set("name", realmKey.Name)
@@ -121,8 +128,12 @@ func setRealmKeystoreRsaData(keycloakClient *keycloak.KeycloakClient, data *sche
 	data.Set("priority", realmKey.Priority)
 	data.Set("key_size", realmKey.KeySize)
 	data.Set("algorithm", realmKey.Algorithm)
-	data.Set("private_key", realmKey.PrivateKey)
-	data.Set("certificate", realmKey.Certificate)
+	if disableRead != "true" {
+		data.Set("private_key", realmKey.PrivateKey)
+		data.Set("certificate", realmKey.Certificate)
+	} else {
+		log.Printf("[WARN] keys does not refresh when disable_read is set to true")
+	}
 
 	_, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11)
 	if err != nil {
@@ -145,7 +156,7 @@ func resourceKeycloakRealmKeystoreRsaCreate(data *schema.ResourceData, meta inte
 		return err
 	}
 
-	err = setRealmKeystoreRsaData(keycloakClient, data, realmKey)
+	err = setRealmKeystoreRsaData(keycloakClient, data, realmKey, false)
 	if err != nil {
 		return err
 	}
@@ -164,7 +175,7 @@ func resourceKeycloakRealmKeystoreRsaRead(data *schema.ResourceData, meta interf
 		return handleNotFoundError(err, data)
 	}
 
-	err = setRealmKeystoreRsaData(keycloakClient, data, realmKey)
+	err = setRealmKeystoreRsaData(keycloakClient, data, realmKey, true)
 	if err != nil {
 		return err
 	}
@@ -185,7 +196,7 @@ func resourceKeycloakRealmKeystoreRsaUpdate(data *schema.ResourceData, meta inte
 		return err
 	}
 
-	err = setRealmKeystoreRsaData(keycloakClient, data, realmKey)
+	err = setRealmKeystoreRsaData(keycloakClient, data, realmKey, false)
 	if err != nil {
 		return err
 	}

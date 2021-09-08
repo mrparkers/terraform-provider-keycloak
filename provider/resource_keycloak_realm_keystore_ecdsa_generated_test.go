@@ -34,7 +34,7 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_createAfterManualDestroy(t *test
 
 	var ecdsa = &keycloak.RealmKeystoreEcdsaGenerated{}
 
-	fullNameMapperName := acctest.RandomWithPrefix("tf-acc")
+	fullNameKeystoreName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -42,7 +42,7 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_createAfterManualDestroy(t *test
 		CheckDestroy:      testAccCheckRealmKeystoreEcdsaGeneratedDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmKeystoreEcdsaGenerated_basic(fullNameMapperName),
+				Config: testKeycloakRealmKeystoreEcdsaGenerated_basic(fullNameKeystoreName),
 				Check:  testAccCheckRealmKeystoreEcdsaGeneratedFetch("keycloak_realm_key_ecdsa_generated.realm_ecdsa", ecdsa),
 			},
 			{
@@ -52,7 +52,7 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_createAfterManualDestroy(t *test
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakRealmKeystoreEcdsaGenerated_basic(fullNameMapperName),
+				Config: testKeycloakRealmKeystoreEcdsaGenerated_basic(fullNameKeystoreName),
 				Check:  testAccCheckRealmKeystoreEcdsaGeneratedFetch("keycloak_realm_key_ecdsa_generated.realm_ecdsa", ecdsa),
 			},
 		},
@@ -88,7 +88,7 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_updateRealmKeystoreEcdsaGenerate
 	enabled := randomBool()
 	active := randomBool()
 
-	groupMapperOne := &keycloak.RealmKeystoreEcdsaGenerated{
+	groupKeystoreOne := &keycloak.RealmKeystoreEcdsaGenerated{
 		Name:          acctest.RandString(10),
 		RealmId:       testAccRealmUserFederation.Realm,
 		Enabled:       enabled,
@@ -97,7 +97,7 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_updateRealmKeystoreEcdsaGenerate
 		EllipticCurve: randomStringInSlice(keycloakRealmKeystoreEcdsaGeneratedEllipticCurve),
 	}
 
-	groupMapperTwo := &keycloak.RealmKeystoreEcdsaGenerated{
+	groupKeystoreTwo := &keycloak.RealmKeystoreEcdsaGenerated{
 		Name:          acctest.RandString(10),
 		RealmId:       testAccRealmUserFederation.Realm,
 		Enabled:       enabled,
@@ -112,11 +112,11 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_updateRealmKeystoreEcdsaGenerate
 		CheckDestroy:      testAccCheckRealmKeystoreEcdsaGeneratedDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmKeystoreEcdsaGenerated_basicFromInterface(groupMapperOne),
+				Config: testKeycloakRealmKeystoreEcdsaGenerated_basicFromInterface(groupKeystoreOne),
 				Check:  testAccCheckRealmKeystoreEcdsaGeneratedExists("keycloak_realm_key_ecdsa_generated.realm_ecdsa"),
 			},
 			{
-				Config: testKeycloakRealmKeystoreEcdsaGenerated_basicFromInterface(groupMapperTwo),
+				Config: testKeycloakRealmKeystoreEcdsaGenerated_basicFromInterface(groupKeystoreTwo),
 				Check:  testAccCheckRealmKeystoreEcdsaGeneratedExists("keycloak_realm_key_ecdsa_generated.realm_ecdsa"),
 			},
 		},
@@ -134,15 +134,15 @@ func testAccCheckRealmKeystoreEcdsaGeneratedExists(resourceName string) resource
 	}
 }
 
-func testAccCheckRealmKeystoreEcdsaGeneratedFetch(resourceName string, mapper *keycloak.RealmKeystoreEcdsaGenerated) resource.TestCheckFunc {
+func testAccCheckRealmKeystoreEcdsaGeneratedFetch(resourceName string, keystore *keycloak.RealmKeystoreEcdsaGenerated) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		fetchedMapper, err := getKeycloakRealmKeystoreEcdsaGeneratedFromState(s, resourceName)
+		fetchedKeystore, err := getKeycloakRealmKeystoreEcdsaGeneratedFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
 
-		mapper.Id = fetchedMapper.Id
-		mapper.RealmId = fetchedMapper.RealmId
+		keystore.Id = fetchedKeystore.Id
+		keystore.RealmId = fetchedKeystore.RealmId
 
 		return nil
 	}
@@ -158,8 +158,8 @@ func testAccCheckRealmKeystoreEcdsaGeneratedDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapGroupMapper, _ := keycloakClient.GetRealmKeystoreEcdsaGenerated(realm, id)
-			if ldapGroupMapper != nil {
+			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreEcdsaGenerated(realm, id)
+			if ldapGroupKeystore != nil {
 				return fmt.Errorf("ecdsa keystore with id %s still exists", id)
 			}
 		}
@@ -235,7 +235,7 @@ resource "keycloak_realm_key_ecdsa_generated" "realm_ecdsa" {
 	`, testAccRealmUserFederation.Realm, ecdsaName, attr, val)
 }
 
-func testKeycloakRealmKeystoreEcdsaGenerated_basicFromInterface(mapper *keycloak.RealmKeystoreEcdsaGenerated) string {
+func testKeycloakRealmKeystoreEcdsaGenerated_basicFromInterface(keystore *keycloak.RealmKeystoreEcdsaGenerated) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -249,5 +249,5 @@ resource "keycloak_realm_key_ecdsa_generated" "realm_ecdsa" {
     priority           = "%s"
     elliptic_curve_key = "%s"
 }
-	`, testAccRealmUserFederation.Realm, mapper.Name, strconv.Itoa(mapper.Priority), mapper.EllipticCurve)
+	`, testAccRealmUserFederation.Realm, keystore.Name, strconv.Itoa(keystore.Priority), keystore.EllipticCurve)
 }
