@@ -50,6 +50,7 @@ func TestAccKeycloakDataSourceSamlClient_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceName, "logout_service_post_binding_url", resourceName, "logout_service_post_binding_url"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "logout_service_redirect_binding_url", resourceName, "logout_service_redirect_binding_url"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "full_scope_allowed", resourceName, "full_scope_allowed"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "login_theme", resourceName, "login_theme"),
 				),
 			},
 		},
