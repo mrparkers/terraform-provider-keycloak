@@ -38,6 +38,7 @@ resource "keycloak_saml_client" "saml_client" {
 - `name` - (Optional) The display name of this client in the GUI.
 - `enabled` - (Optional) When false, this client will not be able to initiate a login or obtain access tokens. Defaults to `true`.
 - `description` - (Optional) The description of this client in the GUI.
+- `login_theme` - (Optional) The login theme of this client.
 - `include_authn_statement` - (Optional) When `true`, an `AuthnStatement` will be included in the SAML response.
 - `sign_documents` - (Optional) When `true`, the SAML document will be signed by Keycloak using the realm's private key.
 - `sign_assertions` - (Optional) When `true`, the SAML assertions will be signed by Keycloak using the realm's private key, and embedded within the SAML XML Auth response.
