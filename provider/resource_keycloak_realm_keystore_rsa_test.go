@@ -83,7 +83,7 @@ func TestAccKeycloakRealmKeystoreRsa_keySizeValidation(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(rsaName, "key_size",
-					strconv.Itoa(acctest.RandIntRange(0, 10000)), privateKey, certificate),
+					strconv.Itoa(acctest.RandIntRange(0, 1000)*2+1), privateKey, certificate),
 				ExpectError: regexp.MustCompile("expected key_size to be one of .+ got .+"),
 			},
 			{

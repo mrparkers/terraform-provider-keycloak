@@ -158,8 +158,8 @@ func testAccCheckRealmKeystoreEcdsaGeneratedDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreEcdsaGenerated(realm, id)
-			if ldapGroupKeystore != nil {
+			ecdsa, _ := keycloakClient.GetRealmKeystoreEcdsaGenerated(realm, id)
+			if ecdsa != nil {
 				return fmt.Errorf("ecdsa keystore with id %s still exists", id)
 			}
 		}

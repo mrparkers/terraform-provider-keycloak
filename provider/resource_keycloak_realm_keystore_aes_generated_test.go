@@ -71,7 +71,7 @@ func TestAccKeycloakRealmKeystoreAesGenerated_secretSizeValidation(t *testing.T)
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreAesGenerated_basicWithAttrValidation(aesName, "secret_size",
-					strconv.Itoa(acctest.RandIntRange(10, 100))),
+					strconv.Itoa(acctest.RandIntRange(0, 1000)*2+1)),
 				ExpectError: regexp.MustCompile("expected secret_size to be one of .+ got .+"),
 			},
 			{
