@@ -13,6 +13,7 @@ import (
 var (
 	keycloakSamlClientNameIdFormats       = []string{"username", "email", "transient", "persistent"}
 	keycloakSamlClientSignatureAlgorithms = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA512", "DSA_SHA1"}
+	keycloakSamlClientSignatureKeyName    = []string{"NONE", "KEY_ID", "CERT_SUBJECT"}
 )
 
 func resourceKeycloakSamlClient() *schema.Resource {
@@ -92,6 +93,12 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(keycloakSamlClientSignatureAlgorithms, false),
+			},
+			"signature_key_name": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice(keycloakSamlClientSignatureKeyName, false),
 			},
 			"name_id_format": {
 				Type:         schema.TypeString,
@@ -219,6 +226,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 
 	samlAttributes := &keycloak.SamlClientAttributes{
 		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
+		SignatureKeyName:                data.Get("signature_key_name").(string),
 		NameIdFormat:                    data.Get("name_id_format").(string),
 		IDPInitiatedSSOURLName:          data.Get("idp_initiated_sso_url_name").(string),
 		IDPInitiatedSSORelayState:       data.Get("idp_initiated_sso_relay_state").(string),
@@ -403,6 +411,7 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("base_url", client.BaseUrl)
 	data.Set("master_saml_processing_url", client.MasterSamlProcessingUrl)
 	data.Set("signature_algorithm", client.Attributes.SignatureAlgorithm)
+	data.Set("signature_key_name", client.Attributes.SignatureKeyName)
 	data.Set("name_id_format", client.Attributes.NameIdFormat)
 	data.Set("idp_initiated_sso_url_name", client.Attributes.IDPInitiatedSSOURLName)
 	data.Set("idp_initiated_sso_relay_state", client.Attributes.IDPInitiatedSSORelayState)

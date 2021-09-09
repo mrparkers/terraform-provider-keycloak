@@ -50,6 +50,10 @@ func dataSourceKeycloakSamlClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"signature_key_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"force_post_binding": {
 				Type:     schema.TypeBool,
 				Computed: true,

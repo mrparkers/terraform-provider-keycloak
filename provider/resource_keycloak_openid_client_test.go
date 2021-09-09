@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -149,6 +150,11 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		AdminUrl:                  acctest.RandString(20),
 		BaseUrl:                   "http://localhost:2222/" + acctest.RandString(20),
 		RootUrl:                   &rootUrlBefore,
+		Attributes: keycloak.OpenidClientAttributes{
+			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
+			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(randomBool()),
+		},
 	}
 
 	standardFlowEnabled, implicitFlowEnabled = implicitFlowEnabled, standardFlowEnabled
@@ -169,6 +175,11 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		AdminUrl:                  acctest.RandString(20),
 		BaseUrl:                   "http://localhost:2222/" + acctest.RandString(20),
 		RootUrl:                   &rootUrlAfter,
+		Attributes: keycloak.OpenidClientAttributes{
+			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
+			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(randomBool()),
+		},
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -512,6 +523,55 @@ func TestAccKeycloakOpenidClient_useRefreshTokens(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_extraConfig(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_extraConfig(clientId, map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExtraConfig("keycloak_openid_client.client", "key1", "value1"),
+					testAccCheckKeycloakOpenidClientExtraConfig("keycloak_openid_client.client", "key2", "value2"),
+				),
+			},
+			{
+				Config: testKeycloakOpenidClient_extraConfig(clientId, map[string]string{
+					"key2": "value2",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExtraConfig("keycloak_openid_client.client", "key2", "value2"),
+					testAccCheckKeycloakOpenidClientExtraConfigMissing("keycloak_openid_client.client", "key1"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenidClient_extraConfigInvalid(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenidClient_extraConfig(clientId, map[string]string{"login_theme": "keycloak"}),
+				ExpectError: regexp.MustCompile(`extra_config key "login_theme" is not allowed`),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -764,6 +824,46 @@ func testAccCheckKeycloakOpenidClientUseRefreshTokens(resourceName string, useRe
 	}
 }
 
+func testAccCheckKeycloakOpenidClientExtraConfig(resourceName string, key string, value string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.ExtraConfig[key] != value {
+			return fmt.Errorf("expected openid client to have attribute %v set to %v, but got %v", key, value, client.Attributes.ExtraConfig[key])
+		}
+
+		return nil
+	}
+}
+
+// check that a particular extra config key is missing
+func testAccCheckKeycloakOpenidClientExtraConfigMissing(resourceName string, key string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if val, ok := client.Attributes.ExtraConfig[key]; ok {
+			// keycloak 13+ will remove attributes if set to empty string. on older versions, we'll just check if this value is empty
+			if versionOk, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !versionOk {
+				if val != "" {
+					return fmt.Errorf("expected openid client to have empty attribute %v", key)
+				}
+
+				return nil
+			}
+
+			return fmt.Errorf("expected openid client to not have attribute %v", key)
+		}
+
+		return nil
+	}
+}
+
 func getOpenidClientFromState(s *terraform.State, resourceName string) (*keycloak.OpenidClient, error) {
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
@@ -970,8 +1070,12 @@ resource "keycloak_openid_client" "client" {
 	admin_url					 = "%s"
 	base_url                     = "%s"
 	root_url                     = "%s"
+
+	backchannel_logout_url                     = "%s"
+	backchannel_logout_session_required        = %t
+	backchannel_logout_revoke_offline_sessions = %t
 }
-	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl)
+	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl, openidClient.Attributes.BackchannelLogoutUrl, openidClient.Attributes.BackchannelLogoutSessionRequired, openidClient.Attributes.BackchannelLogoutRevokeOfflineTokens)
 }
 
 func testKeycloakOpenidClient_secret(clientId, clientSecret string) string {
@@ -1114,4 +1218,26 @@ resource "keycloak_openid_client" "client" {
 	use_refresh_tokens = %t
 }
 	`, testAccRealm.Realm, clientId, useRefreshTokens)
+}
+
+func testKeycloakOpenidClient_extraConfig(clientId string, extraConfig map[string]string) string {
+	var sb strings.Builder
+	sb.WriteString("{\n")
+	for k, v := range extraConfig {
+		sb.WriteString(fmt.Sprintf("\t\t\"%s\" = \"%s\"\n", k, v))
+	}
+	sb.WriteString("}")
+
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = data.keycloak_realm.realm.id
+	access_type = "CONFIDENTIAL"
+	extra_config = %s
+}
+	`, testAccRealm.Realm, clientId, sb.String())
 }
