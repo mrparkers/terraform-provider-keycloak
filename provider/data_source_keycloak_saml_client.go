@@ -144,6 +144,11 @@ func dataSourceKeycloakSamlClient() *schema.Resource {
 					},
 				},
 			},
+			"extra_config": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }

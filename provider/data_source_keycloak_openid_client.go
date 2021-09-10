@@ -172,16 +172,6 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
-			"backchannel_logout_session_required": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
-			"backchannel_logout_revoke_offline_tokens": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
 			"extra_config": {
 				Type:     schema.TypeMap,
 				Optional: true,

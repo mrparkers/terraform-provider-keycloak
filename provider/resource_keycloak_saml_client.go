@@ -184,16 +184,6 @@ func resourceKeycloakSamlClient() *schema.Resource {
 					},
 				},
 			},
-			"backchannel_logout_session_required": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
-			"backchannel_logout_revoke_offline_tokens": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
 			"saml_signature_canonicalization_method": {
 				Type:     schema.TypeString,
 				Optional: true,

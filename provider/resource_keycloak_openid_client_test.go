@@ -1115,3 +1115,53 @@ resource "keycloak_openid_client" "client" {
 }
 	`, testAccRealm.Realm, clientId, useRefreshTokens)
 }
+
+func TestAccKeycloakOpenidClient_extraConfig(t *testing.T) {
+	realmName := "terraform-" + acctest.RandString(10)
+	clientId := "terraform-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_extraConfig(realmName, clientId, "foo", "bar"),
+				Check:  testAccCheckKeycloakOpenidClientHasAttributeWithValue("keycloak_openid_client.client", "foo", "bar"),
+			},
+		},
+	})
+}
+
+func testKeycloakOpenidClient_extraConfig(realm, clientId, attributeName string, attributeValue string) string {
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = "${keycloak_realm.realm.id}"
+	access_type = "CONFIDENTIAL"
+    extra_config = {
+		"%s" = "%s"
+	}
+}
+	`, realm, clientId, attributeName, attributeValue)
+}
+
+func testAccCheckKeycloakOpenidClientHasAttributeWithValue(resourceName, attributeName, attributeValue string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.ExtraConfig[attributeName] != attributeValue {
+			return fmt.Errorf("expected openid client %s to have extra config %s with value of %s, but got %s", client.ClientId, attributeName, attributeValue, client.Attributes.ExtraConfig[attributeName])
+		}
+
+		return nil
+	}
+}
