@@ -296,16 +296,6 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		samlAttributes.ForcePostBinding = &forcePostBindingString
 	}
 
-	if backchannelLogoutSessionRequired, ok := data.GetOkExists("backchannel_logout_session_required"); ok {
-		backchannelLogoutSessionRequiredString := strconv.FormatBool(backchannelLogoutSessionRequired.(bool))
-		samlAttributes.BackchannelLogoutSessionRequired = &backchannelLogoutSessionRequiredString
-	}
-
-	if backchannelLogoutRevokeOfflineTokens, ok := data.GetOkExists("backchannel_logout_revoke_offline_tokens"); ok {
-		backchannelLogoutSessionRequiredString := strconv.FormatBool(backchannelLogoutRevokeOfflineTokens.(bool))
-		samlAttributes.BackchannelLogoutRevokeOfflineTokens = &backchannelLogoutSessionRequiredString
-	}
-
 	samlClient := &keycloak.SamlClient{
 		Id:                      data.Id(),
 		ClientId:                data.Get("client_id").(string),
@@ -397,24 +387,6 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 		}
 
 		data.Set("force_post_binding", forcePostBinding)
-	}
-
-	if client.Attributes.BackchannelLogoutSessionRequired != nil {
-		backchannelLogoutSessionRequired, err := strconv.ParseBool(*client.Attributes.BackchannelLogoutSessionRequired)
-		if err != nil {
-			return err
-		}
-
-		data.Set("backchannel_logout_session_required", backchannelLogoutSessionRequired)
-	}
-
-	if client.Attributes.BackchannelLogoutRevokeOfflineTokens != nil {
-		backchannelLogoutRevokeOfflineTokens, err := strconv.ParseBool(*client.Attributes.BackchannelLogoutRevokeOfflineTokens)
-		if err != nil {
-			return err
-		}
-
-		data.Set("backchannel_logout_revoke_offline_tokens", backchannelLogoutRevokeOfflineTokens)
 	}
 
 	if _, exists := data.GetOkExists("encryption_certificate"); client.Attributes.EncryptionCertificate != nil && exists {

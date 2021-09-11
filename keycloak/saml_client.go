@@ -9,15 +9,13 @@ import (
 )
 
 type SamlClientAttributes struct {
-	IncludeAuthnStatement                *string `json:"saml.authnstatement"`
-	SignDocuments                        *string `json:"saml.server.signature"`
-	SignAssertions                       *string `json:"saml.assertion.signature"`
-	EncryptAssertions                    *string `json:"saml.encrypt"`
-	ClientSignatureRequired              *string `json:"saml.client.signature"`
-	ForcePostBinding                     *string `json:"saml.force.post.binding"`
-	ForceNameIdFormat                    *string `json:"saml_force_name_id_format"`
-	BackchannelLogoutSessionRequired     *string `json:"backchannel.logout.session.required"`
-	BackchannelLogoutRevokeOfflineTokens *string `json:"backchannel.logout.revoke.offline.tokens"`
+	IncludeAuthnStatement   *string `json:"saml.authnstatement"`
+	SignDocuments           *string `json:"saml.server.signature"`
+	SignAssertions          *string `json:"saml.assertion.signature"`
+	EncryptAssertions       *string `json:"saml.encrypt"`
+	ClientSignatureRequired *string `json:"saml.client.signature"`
+	ForcePostBinding        *string `json:"saml.force.post.binding"`
+	ForceNameIdFormat       *string `json:"saml_force_name_id_format"`
 
 	// attributes above are actually booleans, but the Keycloak API expects strings
 	SignatureAlgorithm              string                 `json:"saml.signature.algorithm"`
