@@ -59,5 +59,5 @@ Authentication executions can be imported using the formats: `{{realmId}}/{{pare
 Example:
 
 ```bash
-$ terraform import keycloak_authentication_execution my-realm/my-flow/30559fcf-6fb8-45ea-8c46-2b86f46ebc17
+$ terraform import keycloak_authentication_execution.execution_one my-realm/my-flow-alias/30559fcf-6fb8-45ea-8c46-2b86f46ebc17
 ```

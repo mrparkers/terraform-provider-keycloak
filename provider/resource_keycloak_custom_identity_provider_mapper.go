@@ -26,32 +26,27 @@ func resourceKeycloakCustomIdentityProviderMapper() *schema.Resource {
 
 func getCustomIdentityProviderMapperFromData(data *schema.ResourceData, meta interface{}) (*keycloak.IdentityProviderMapper, error) {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
+
 	rec, _ := getIdentityProviderMapperFromData(data)
-	extraConfig := map[string]interface{}{}
-	if v, ok := data.GetOk("extra_config"); ok {
-		for key, value := range v.(map[string]interface{}) {
-			extraConfig[key] = value
-		}
-	}
 	identityProvider, err := keycloakClient.GetIdentityProvider(rec.Realm, rec.IdentityProviderAlias)
 	if err != nil {
 		return nil, handleNotFoundError(err, data)
 	}
+
 	identityProviderMapper := data.Get("identity_provider_mapper").(string)
 	if strings.Contains(identityProviderMapper, "%s") {
 		rec.IdentityProviderMapper = fmt.Sprintf(identityProviderMapper, identityProvider.ProviderId)
 	} else {
 		rec.IdentityProviderMapper = identityProviderMapper
 	}
-	rec.Config = &keycloak.IdentityProviderMapperConfig{
-		ExtraConfig: extraConfig,
-	}
+
 	return rec, nil
 }
 
 func setCustomIdentityProviderMapperData(data *schema.ResourceData, identityProviderMapper *keycloak.IdentityProviderMapper) error {
 	setIdentityProviderMapperData(data, identityProviderMapper)
+	setExtraConfigData(data, identityProviderMapper.Config.ExtraConfig)
 	data.Set("identity_provider_mapper", identityProviderMapper.IdentityProviderMapper)
-	data.Set("extra_config", identityProviderMapper.Config.ExtraConfig)
+
 	return nil
 }
