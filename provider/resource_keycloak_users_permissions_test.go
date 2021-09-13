@@ -68,7 +68,7 @@ func testAccCheckKeycloakUsersPermissionExists(resourceName string) resource.Tes
 		viewScopeDescription := rs.Primary.Attributes["view_scope.0.description"]
 		viewScopeDecisionStrategy := rs.Primary.Attributes["view_scope.0.decision_strategy"]
 
-		authzClientView, err := keycloakClient.GetOpenidClientAuthorizationPermission(permissions.RealmId, realmManagementId, permissions.ScopePermissions["view"].(string))
+		authzClientView, err := keycloakClient.GetOpenidClientAuthorizationPermission(permissions.RealmId, realmManagementId, permissions.ScopePermissions["view"])
 		if err != nil {
 			return err
 		}
@@ -86,7 +86,7 @@ func testAccCheckKeycloakUsersPermissionExists(resourceName string) resource.Tes
 			return fmt.Errorf("decision strategy %s was not equal to %s", authzClientView.DecisionStrategy, viewScopeDecisionStrategy)
 		}
 
-		authzClientManage, err := keycloakClient.GetOpenidClientAuthorizationPermission(permissions.RealmId, realmManagementId, permissions.ScopePermissions["manage"].(string))
+		authzClientManage, err := keycloakClient.GetOpenidClientAuthorizationPermission(permissions.RealmId, realmManagementId, permissions.ScopePermissions["manage"])
 		if err != nil {
 			return err
 		}

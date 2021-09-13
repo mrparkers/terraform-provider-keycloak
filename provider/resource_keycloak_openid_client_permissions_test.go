@@ -61,7 +61,7 @@ func testAccCheckKeycloakOpenidClientPermissionExists(resourceName string) resou
 			return fmt.Errorf("computed authorizationResourceServerId %s was not equal to %s (the id of the realm-management client)", authorizationResourceServerId, realmManagementId)
 		}
 
-		authzClientView, err := keycloakClient.GetOpenidClientAuthorizationPermission(permissions.RealmId, realmManagementId, permissions.ScopePermissions["view"].(string))
+		authzClientView, err := keycloakClient.GetOpenidClientAuthorizationPermission(permissions.RealmId, realmManagementId, permissions.ScopePermissions["view"])
 		if err != nil {
 			return err
 		}
