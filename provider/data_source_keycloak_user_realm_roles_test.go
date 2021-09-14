@@ -39,23 +39,23 @@ resource "keycloak_user" "user" {
 	realm_id 	= data.keycloak_realm.realm.id
 	enabled    	= true
 
-    email      	= "%s"
-    first_name 	= "Bob"
-    last_name  	= "Bobson"
+	email      	= "%s"
+	first_name 	= "Bob"
+	last_name  	= "Bobson"
 }
 
 resource "keycloak_role" "realm_role" {
-    realm_id    = data.keycloak_realm.realm.id
-    name        = "%s"
+	realm_id    = data.keycloak_realm.realm.id
+	name        = "%s"
 }
 
 resource "keycloak_user_roles" "user_roles" {
 	realm_id 	= data.keycloak_realm.realm.id
 	user_id     = keycloak_user.user.id
 
-  	role_ids = [
-    	keycloak_role.realm_role.id,
-  	]
+	role_ids = [
+		keycloak_role.realm_role.id,
+	]
 }
 
 data "keycloak_user_realm_roles" "user_realm_roles" {
