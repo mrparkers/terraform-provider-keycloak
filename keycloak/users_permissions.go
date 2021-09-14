@@ -9,10 +9,10 @@ type UsersPermissionsInput struct {
 }
 
 type UsersPermissions struct {
-	RealmId          string                 `json:"-"`
-	Enabled          bool                   `json:"enabled"`
-	Resource         string                 `json:"resource"`
-	ScopePermissions map[string]interface{} `json:"scopePermissions"`
+	RealmId          string            `json:"-"`
+	Enabled          bool              `json:"enabled"`
+	Resource         string            `json:"resource"`
+	ScopePermissions map[string]string `json:"scopePermissions"`
 }
 
 func (keycloakClient *KeycloakClient) EnableUsersPermissions(realmId string) error {

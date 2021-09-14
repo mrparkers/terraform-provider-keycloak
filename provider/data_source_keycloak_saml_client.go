@@ -148,6 +148,10 @@ func dataSourceKeycloakSamlClient() *schema.Resource {
 					},
 				},
 			},
+			"login_theme": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
