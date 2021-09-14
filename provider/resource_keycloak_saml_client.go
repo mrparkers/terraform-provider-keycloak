@@ -120,6 +120,10 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"login_theme": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"master_saml_processing_url": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -234,6 +238,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		AssertionConsumerRedirectURL:    data.Get("assertion_consumer_redirect_url").(string),
 		LogoutServicePostBindingURL:     data.Get("logout_service_post_binding_url").(string),
 		LogoutServiceRedirectBindingURL: data.Get("logout_service_redirect_binding_url").(string),
+		LoginTheme:                      data.Get("login_theme").(string),
 	}
 
 	if encryptionCertificate, ok := data.GetOkExists("encryption_certificate"); ok {
@@ -420,6 +425,7 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("logout_service_post_binding_url", client.Attributes.LogoutServicePostBindingURL)
 	data.Set("logout_service_redirect_binding_url", client.Attributes.LogoutServiceRedirectBindingURL)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
+	data.Set("login_theme", client.Attributes.LoginTheme)
 
 	return nil
 }

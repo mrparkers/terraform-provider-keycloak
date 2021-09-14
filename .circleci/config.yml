@@ -6,9 +6,9 @@ workflows:
           matrix:
             parameters:
               keycloak-version:
+                - '15.0.2'
+                - '14.0.0'
                 - '13.0.1'
-                - '12.0.4'
-                - '11.0.3'
 
 defaults:
   go_image: &go_image
