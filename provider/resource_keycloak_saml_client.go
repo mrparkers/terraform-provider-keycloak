@@ -143,6 +143,7 @@ func resourceKeycloakSamlClient() *schema.Resource {
 			"encryption_certificate": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
 					return old == formatCertificate(new)
 				},
@@ -150,6 +151,7 @@ func resourceKeycloakSamlClient() *schema.Resource {
 			"signing_certificate": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
 					return old == formatCertificate(new)
 				},
@@ -157,6 +159,7 @@ func resourceKeycloakSamlClient() *schema.Resource {
 			"signing_private_key": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
 					return old == formatSigningPrivateKey(new)
 				},
@@ -317,18 +320,9 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("encrypt_assertions", client.Attributes.EncryptAssertions)
 	data.Set("client_signature_required", client.Attributes.ClientSignatureRequired)
 	data.Set("force_post_binding", client.Attributes.ForcePostBinding)
-
-	if _, exists := data.GetOkExists("encryption_certificate"); exists {
-		data.Set("encryption_certificate", client.Attributes.EncryptionCertificate)
-	}
-
-	if _, exists := data.GetOkExists("signing_certificate"); exists {
-		data.Set("signing_certificate", client.Attributes.SigningCertificate)
-	}
-
-	if _, exists := data.GetOkExists("signing_certificate"); exists {
-		data.Set("signing_private_key", client.Attributes.SigningPrivateKey)
-	}
+	data.Set("encryption_certificate", client.Attributes.EncryptionCertificate)
+	data.Set("signing_certificate", client.Attributes.SigningCertificate)
+	data.Set("signing_private_key", client.Attributes.SigningPrivateKey)
 
 	if (keycloak.SamlAuthenticationFlowBindingOverrides{}) == client.AuthenticationFlowBindingOverrides {
 		data.Set("authentication_flow_binding_overrides", nil)

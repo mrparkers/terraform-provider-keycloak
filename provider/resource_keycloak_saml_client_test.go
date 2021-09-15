@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -31,6 +30,27 @@ func TestAccKeycloakSamlClient_basic(t *testing.T) {
 				ImportState:         true,
 				ImportStateVerify:   true,
 				ImportStateIdPrefix: testAccRealm.Realm + "/",
+			},
+		},
+	})
+}
+
+func TestAccKeycloakSamlClient_generatedCertificate(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlClient_basic(clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
+					resource.TestCheckResourceAttrSet("keycloak_saml_client.saml_client", "signing_certificate"),
+					resource.TestCheckResourceAttrSet("keycloak_saml_client.saml_client", "signing_private_key"),
+				),
 			},
 		},
 	})
@@ -227,14 +247,6 @@ func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
 					testAccCheckKeycloakSamlClientHasPrivateKey("keycloak_saml_client.saml_client"),
 				),
 			},
-			{
-				Config: testKeycloakSamlClient_signingCertificateNoKey(clientId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
-					testAccCheckKeycloakSamlClientHasSigningCertificate("keycloak_saml_client.saml_client"),
-					resource.TestCheckResourceAttr("keycloak_saml_client.saml_client", "signing_private_key", ""),
-				),
-			},
 		},
 	})
 }
@@ -253,13 +265,6 @@ func TestAccKeycloakSamlClient_encryptionCertificate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 					testAccCheckKeycloakSamlClientHasEncryptionCertificate("keycloak_saml_client.saml_client"),
-				),
-			},
-			{
-				Config: testKeycloakSamlClient_NoEncryptionCertificate(clientId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
-					resource.TestCheckResourceAttr("keycloak_saml_client.saml_client", "encryption_certificate", ""),
 				),
 			},
 		},
@@ -549,20 +554,6 @@ func testAccCheckKeycloakSamlClientExtraConfigMissing(resourceName string, key s
 	}
 }
 
-func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
-	if b == "" {
-		return false, nil
-	}
-
-	return strconv.ParseBool(b)
-}
-
-func randomBoolAsStringPointer() *string {
-	s := strconv.FormatBool(randomBool())
-
-	return &s
-}
-
 func testKeycloakSamlClient_basic(clientId string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
@@ -572,6 +563,23 @@ data "keycloak_realm" "realm" {
 resource "keycloak_saml_client" "saml_client" {
 	client_id = "%s"
 	realm_id  = data.keycloak_realm.realm.id
+}
+	`, testAccRealm.Realm, clientId)
+}
+
+func testKeycloakSamlClient_generatedCertificate(clientId string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_saml_client" "saml_client" {
+	client_id = "%s"
+	realm_id  = data.keycloak_realm.realm.id
+
+	sign_documents          = false
+	sign_assertions         = true
+	include_authn_statement = true
 }
 	`, testAccRealm.Realm, clientId)
 }
