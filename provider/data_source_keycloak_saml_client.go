@@ -112,6 +112,18 @@ func dataSourceKeycloakSamlClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"encryption_certificate_sha1": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"signing_certificate_sha1": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"signing_private_key_sha1": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"idp_initiated_sso_url_name": {
 				Type:     schema.TypeString,
 				Computed: true,
