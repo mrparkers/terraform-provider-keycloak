@@ -91,6 +91,26 @@ func TestAccKeycloakRealm_import(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_OTP(t *testing.T) {
+	realm := acctest.RandomWithPrefix("tf-acc")
+
+	otpType := randomStringInSlice(keycloakRealmValidOTPTypes)
+	otpAlgorithm := randomStringInSlice(keycloakRealmValidOTPAlgorithms)
+	otpPeriod := acctest.RandIntRange(15, 45)
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_WithOTP(realm, otpType, otpAlgorithm, otpPeriod),
+				Check:  testAccCheckKeycloakRealmOTP("keycloak_realm.realm", otpType, otpAlgorithm, otpPeriod),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_SmtpServer(t *testing.T) {
 	realm := acctest.RandomWithPrefix("tf-acc")
 	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
@@ -991,6 +1011,29 @@ func testAccCheckKeycloakRealmSmtp(resourceName, host, from, user string) resour
 	}
 }
 
+func testAccCheckKeycloakRealmOTP(resourceName, otpType, algorithm string, period int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.OTPPolicyType != otpType {
+			return fmt.Errorf("expected realm %s to have OTP type set to %s, but was %s", realm.Realm, otpType, realm.OTPPolicyType)
+		}
+
+		if realm.OTPPolicyAlgorithm != algorithm {
+			return fmt.Errorf("expected realm %s to have OTP algorithm set to %s, but was %s", realm.Realm, algorithm, realm.OTPPolicyAlgorithm)
+		}
+
+		if realm.OTPPolicyPeriod != period {
+			return fmt.Errorf("expected realm %s to have OTP period set to %d, but was %d", realm.Realm, period, realm.OTPPolicyPeriod)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakRealmInternationalizationIsEnabled(resourceName string, defaultLocale string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		realm, err := getRealmFromState(s, resourceName)
@@ -1209,6 +1252,21 @@ resource "keycloak_realm" "realm" {
 	}
 }
 	`, realm, realm, host, from, user)
+}
+
+func testKeycloakRealm_WithOTP(realm, otpType, algorithm string, period int) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm   = "%s"
+	enabled = true
+
+	otp_policy {
+		type      = "%s"
+		algorithm = "%s"
+		period    = %d
+	}
+}
+	`, realm, otpType, algorithm, period)
 }
 
 func testKeycloakRealm_WithSmtpServerWithoutHost(realm, from string) string {

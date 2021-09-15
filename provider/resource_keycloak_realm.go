@@ -6,6 +6,11 @@ import (
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
+var (
+	keycloakRealmValidOTPTypes      = []string{"totp", "hotp"}
+	keycloakRealmValidOTPAlgorithms = []string{"HmacSHA1", "HmacSHA256", "HmacSHA512"}
+)
+
 func resourceKeycloakRealm() *schema.Resource {
 
 	otpPolicySchema := map[string]*schema.Schema{
@@ -14,14 +19,14 @@ func resourceKeycloakRealm() *schema.Resource {
 			Description:  "OTP Type, totp for Time-Based One Time Password or hotp for counter base one time password",
 			Optional:     true,
 			Default:      "totp",
-			ValidateFunc: validation.StringInSlice([]string{"totp", "hotp"}, false),
+			ValidateFunc: validation.StringInSlice(keycloakRealmValidOTPTypes, false),
 		},
 		"algorithm": {
 			Type:         schema.TypeString,
 			Description:  "What hashing algorithm should be used to generate the OTP.",
 			Optional:     true,
 			Default:      "HmacSHA1",
-			ValidateFunc: validation.StringInSlice([]string{"HmacSHA1", "HmacSHA256", "HmacSHA512"}, false),
+			ValidateFunc: validation.StringInSlice(keycloakRealmValidOTPAlgorithms, false),
 		},
 		"digits": {
 			Type: schema.TypeInt,
