@@ -26,6 +26,7 @@ type SamlClientAttributes struct {
 	AssertionConsumerRedirectURL    string             `json:"saml_assertion_consumer_url_redirect"`
 	LogoutServicePostBindingURL     string             `json:"saml_single_logout_service_url_post"`
 	LogoutServiceRedirectBindingURL string             `json:"saml_single_logout_service_url_redirect"`
+	LoginTheme                      string  `json:"login_theme"`
 
 	ExtraConfig map[string]interface{} `json:"-"`
 }

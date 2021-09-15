@@ -148,6 +148,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			AssertionConsumerRedirectURL:    acctest.RandString(20),
 			LogoutServicePostBindingURL:     acctest.RandString(20),
 			LogoutServiceRedirectBindingURL: acctest.RandString(20),
+			LoginTheme:                      "keycloak",
 		},
 	}
 
@@ -188,6 +189,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			AssertionConsumerRedirectURL:    acctest.RandString(20),
 			LogoutServicePostBindingURL:     acctest.RandString(20),
 			LogoutServiceRedirectBindingURL: acctest.RandString(20),
+			LoginTheme:                      "keycloak",
 		},
 	}
 
