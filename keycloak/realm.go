@@ -100,6 +100,14 @@ type Realm struct {
 	ClientAuthenticationFlow string `json:"clientAuthenticationFlow,omitempty"`
 	DockerAuthenticationFlow string `json:"dockerAuthenticationFlow,omitempty"`
 
+	// OTP Policy
+	OTPPolicyAlgorithm       string `json:"otpPolicyAlgorithm,omitempty"`
+	OTPPolicyDigits          int    `json:"otpPolicyDigits,omitempty"`
+	OTPPolicyInitialCounter  int    `json:"otpPolicyInitialCounter,omitempty"`
+	OTPPolicyLookAheadWindow int    `json:"otpPolicyLookAheadWindow,omitempty"`
+	OTPPolicyPeriod          int    `json:"otpPolicyPeriod,omitempty"`
+	OTPPolicyType            string `json:"otpPolicyType,omitempty"`
+
 	// WebAuthn
 	WebAuthnPolicyAcceptableAaguids               []string `json:"webAuthnPolicyAcceptableAaguids"`
 	WebAuthnPolicyAttestationConveyancePreference string   `json:"webAuthnPolicyAttestationConveyancePreference"`

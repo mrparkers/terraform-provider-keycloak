@@ -7,6 +7,56 @@ import (
 )
 
 func resourceKeycloakRealm() *schema.Resource {
+
+	otpPolicySchema := map[string]*schema.Schema{
+		"type": {
+			Type:         schema.TypeString,
+			Description:  "OTP Type, totp for Time-Based One Time Password or hotp for counter base one time password",
+			Optional:     true,
+			Default:      "totp",
+			ValidateFunc: validation.StringInSlice([]string{"totp", "hotp"}, false),
+		},
+		"algorithm": {
+			Type:         schema.TypeString,
+			Description:  "What hashing algorithm should be used to generate the OTP.",
+			Optional:     true,
+			Default:      "HmacSHA1",
+			ValidateFunc: validation.StringInSlice([]string{"HmacSHA1", "HmacSHA256", "HmacSHA512"}, false),
+		},
+		"digits": {
+			Type: schema.TypeInt,
+			Elem: &schema.Schema{
+				Type: schema.TypeInt,
+			},
+			Default:  6,
+			Optional: true,
+		},
+		"initial_counter": {
+			Type: schema.TypeInt,
+			Elem: &schema.Schema{
+				Type: schema.TypeInt,
+			},
+			Default:  2,
+			Optional: true,
+		},
+		"look_ahead_window": {
+			Type: schema.TypeInt,
+			Elem: &schema.Schema{
+				Type: schema.TypeInt,
+			},
+			Default:  1,
+			Optional: true,
+		},
+		"period": {
+			Type: schema.TypeInt,
+			Elem: &schema.Schema{
+				Type: schema.TypeInt,
+			},
+			Default:  30,
+			Optional: true,
+		},
+	}
+
 	webAuthnSchema := map[string]*schema.Schema{
 		"acceptable_aaguids": {
 			Type: schema.TypeSet,
@@ -540,6 +590,17 @@ func resourceKeycloakRealm() *schema.Resource {
 				ForceNew: false,
 			},
 
+			// OTPPolicy
+			"otp_policy": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: otpPolicySchema,
+				},
+			},
+
 			// WebAuthn
 			"web_authn_policy": {
 				Type:     schema.TypeList,
@@ -889,6 +950,35 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	}
 	realm.DefaultOptionalClientScopes = defaultOptionalClientScopes
 
+	//OTPPolicy
+	if v, ok := data.GetOk("otp_policy"); ok {
+		otpPolicy := v.([]interface{})[0].(map[string]interface{})
+
+		if otpPolicyAlgorithm, ok := otpPolicy["algorithm"]; ok {
+			realm.OTPPolicyAlgorithm = otpPolicyAlgorithm.(string)
+		}
+
+		if otpPolicyDigits, ok := otpPolicy["digits"]; ok {
+			realm.OTPPolicyDigits = otpPolicyDigits.(int)
+		}
+
+		if otpPolicyInitialCounter, ok := otpPolicy["initial_counter"]; ok {
+			realm.OTPPolicyInitialCounter = otpPolicyInitialCounter.(int)
+		}
+
+		if otpPolicyLookAheadWindow, ok := otpPolicy["look_ahead_window"]; ok {
+			realm.OTPPolicyLookAheadWindow = otpPolicyLookAheadWindow.(int)
+		}
+
+		if otpPolicyPeriod, ok := otpPolicy["period"]; ok {
+			realm.OTPPolicyPeriod = otpPolicyPeriod.(int)
+		}
+
+		if otpPolicyType, ok := otpPolicy["type"]; ok {
+			realm.OTPPolicyType = otpPolicyType.(string)
+		}
+	}
+
 	//WebAuthn
 	if v, ok := data.GetOk("web_authn_policy"); ok {
 		webAuthnPolicy := v.([]interface{})[0].(map[string]interface{})
@@ -1125,6 +1215,16 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	webAuthnPolicy["signature_algorithms"] = realm.WebAuthnPolicySignatureAlgorithms
 	webAuthnPolicy["user_verification_requirement"] = realm.WebAuthnPolicyUserVerificationRequirement
 	data.Set("web_authn_policy", []interface{}{webAuthnPolicy})
+
+	//OTP Policy
+	otpPolicy := make(map[string]interface{})
+	otpPolicy["type"] = realm.OTPPolicyType
+	otpPolicy["algorithm"] = realm.OTPPolicyAlgorithm
+	otpPolicy["digits"] = realm.OTPPolicyDigits
+	otpPolicy["initial_counter"] = realm.OTPPolicyInitialCounter
+	otpPolicy["look_ahead_window"] = realm.OTPPolicyLookAheadWindow
+	otpPolicy["period"] = realm.OTPPolicyPeriod
+	data.Set("otp_policy", []interface{}{otpPolicy})
 
 	//WebAuthn Passwordless
 	webAuthnPasswordlessPolicy := make(map[string]interface{})
