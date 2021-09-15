@@ -1,7 +1,11 @@
 package provider
 
 import (
+	"crypto/sha1"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 
@@ -164,6 +168,18 @@ func resourceKeycloakSamlClient() *schema.Resource {
 					return old == formatSigningPrivateKey(new)
 				},
 			},
+			"encryption_certificate_sha1": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"signing_certificate_sha1": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"signing_private_key_sha1": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"idp_initiated_sso_url_name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -270,15 +286,15 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		ExtraConfig:                     getExtraConfigFromData(data),
 	}
 
-	if encryptionCertificate, ok := data.GetOkExists("encryption_certificate"); ok {
+	if encryptionCertificate, ok := data.GetOk("encryption_certificate"); ok {
 		samlAttributes.EncryptionCertificate = formatCertificate(encryptionCertificate.(string))
 	}
 
-	if signingCertificate, ok := data.GetOkExists("signing_certificate"); ok {
+	if signingCertificate, ok := data.GetOk("signing_certificate"); ok {
 		samlAttributes.SigningCertificate = formatCertificate(signingCertificate.(string))
 	}
 
-	if signingPrivateKey, ok := data.GetOkExists("signing_private_key"); ok {
+	if signingPrivateKey, ok := data.GetOk("signing_private_key"); ok {
 		samlAttributes.SigningPrivateKey = formatSigningPrivateKey(signingPrivateKey.(string))
 	}
 
@@ -320,9 +336,6 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("encrypt_assertions", client.Attributes.EncryptAssertions)
 	data.Set("client_signature_required", client.Attributes.ClientSignatureRequired)
 	data.Set("force_post_binding", client.Attributes.ForcePostBinding)
-	data.Set("encryption_certificate", client.Attributes.EncryptionCertificate)
-	data.Set("signing_certificate", client.Attributes.SigningCertificate)
-	data.Set("signing_private_key", client.Attributes.SigningPrivateKey)
 
 	if (keycloak.SamlAuthenticationFlowBindingOverrides{}) == client.AuthenticationFlowBindingOverrides {
 		data.Set("authentication_flow_binding_overrides", nil)
@@ -361,7 +374,33 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 
 	setExtraConfigData(data, client.Attributes.ExtraConfig)
 
+	data.Set("encryption_certificate", client.Attributes.EncryptionCertificate)
+	data.Set("signing_certificate", client.Attributes.SigningCertificate)
+	data.Set("signing_private_key", client.Attributes.SigningPrivateKey)
+	resourceKeycloakSamlClientSetSha1(data, "encryption_certificate_sha1", client.Attributes.EncryptionCertificate)
+	resourceKeycloakSamlClientSetSha1(data, "signing_certificate_sha1", client.Attributes.SigningCertificate)
+	resourceKeycloakSamlClientSetSha1(data, "signing_private_key_sha1", client.Attributes.SigningPrivateKey)
+
 	return nil
+}
+
+func resourceKeycloakSamlClientSetSha1(data *schema.ResourceData, attribute, value string) {
+	if value != "" {
+		bytes, err := base64.StdEncoding.DecodeString(value)
+		if err != nil {
+			log.Printf("[WARN] Cannot compute sha1sum for attribute %s: %v", attribute, err)
+			data.Set(attribute, "")
+
+			return
+		}
+
+		hash := sha1.New()
+		hash.Write(bytes)
+
+		data.Set(attribute, hex.EncodeToString(hash.Sum(nil)))
+	} else {
+		data.Set(attribute, "")
+	}
 }
 
 func resourceKeycloakSamlClientCreate(data *schema.ResourceData, meta interface{}) error {
