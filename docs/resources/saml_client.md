@@ -39,16 +39,18 @@ resource "keycloak_saml_client" "saml_client" {
 - `enabled` - (Optional) When false, this client will not be able to initiate a login or obtain access tokens. Defaults to `true`.
 - `description` - (Optional) The description of this client in the GUI.
 - `login_theme` - (Optional) The login theme of this client.
-- `include_authn_statement` - (Optional) When `true`, an `AuthnStatement` will be included in the SAML response.
-- `sign_documents` - (Optional) When `true`, the SAML document will be signed by Keycloak using the realm's private key.
-- `sign_assertions` - (Optional) When `true`, the SAML assertions will be signed by Keycloak using the realm's private key, and embedded within the SAML XML Auth response.
-- `encrypt_assertions` - (Optional) When `true`, the SAML assertions will be encrypted by Keycloak using the client's public key.
-- `client_signature_required` - (Optional) When `true`, Keycloak will expect that documents originating from a client will be signed using the certificate and/or key configured via `signing_certificate` and `signing_private_key`.
-- `force_post_binding` - (Optional) When `true`, Keycloak will always respond to an authentication request via the SAML POST Binding.
-- `front_channel_logout` - (Optional) When `true`, this client will require a browser redirect in order to perform a logout.
+- `include_authn_statement` - (Optional) When `true`, an `AuthnStatement` will be included in the SAML response. Defaults to `true`.
+- `sign_documents` - (Optional) When `true`, the SAML document will be signed by Keycloak using the realm's private key. Defaults to `true`.
+- `sign_assertions` - (Optional) When `true`, the SAML assertions will be signed by Keycloak using the realm's private key, and embedded within the SAML XML Auth response. Defaults to `false`.
+- `encrypt_assertions` - (Optional) When `true`, the SAML assertions will be encrypted by Keycloak using the client's public key. Defaults to `false`.
+- `client_signature_required` - (Optional) When `true`, Keycloak will expect that documents originating from a client will be signed using the certificate and/or key configured via `signing_certificate` and `signing_private_key`. Defaults to `true`.
+- `force_post_binding` - (Optional) When `true`, Keycloak will always respond to an authentication request via the SAML POST Binding. Defaults to `true`.
+- `front_channel_logout` - (Optional) When `true`, this client will require a browser redirect in order to perform a logout. Defaults to `true`.
 - `name_id_format` - (Optional) Sets the Name ID format for the subject.
-- `force_name_id_format` - (Optional) Ignore requested NameID subject format and use the one defined in `name_id_format` instead.
+- `force_name_id_format` - (Optional) Ignore requested NameID subject format and use the one defined in `name_id_format` instead. Defaults to `false`.
 - `signature_algorithm` - (Optional) The signature algorithm used to sign documents. Should be one of "RSA_SHA1", "RSA_SHA256", "RSA_SHA512", or "DSA_SHA1".
+- `signature_key_name` - (Optional) The value of the `KeyName` element within the signed SAML document. Should be one of "NONE", "KEY_ID", or "CERT_SUBJECT". Defaults to "KEY_ID".
+- `canonicalization_method` - (Optional) The Canonicalization Method for XML signatures. Should be one of "EXCLUSIVE", "EXCLUSIVE_WITH_COMMENTS", "INCLUSIVE", or "INCLUSIVE_WITH_COMMENTS". Defaults to "EXCLUSIVE".
 - `root_url` - (Optional) When specified, this value is prepended to all relative URLs.
 - `valid_redirect_uris` - (Optional) When specified, Keycloak will use this list to validate given Assertion Consumer URLs specified in the authentication request.
 - `base_url` - (Optional) When specified, this URL will be used whenever Keycloak needs to link to this client.
@@ -66,6 +68,7 @@ resource "keycloak_saml_client" "saml_client" {
 - `authentication_flow_binding_overrides` - (Optional) Override realm authentication flow bindings
     - `browser_id` - (Optional) Browser flow id, (flow needs to exist)
     - `direct_grant_id` - (Optional) Direct grant flow id (flow needs to exist)
+- `extra_config` - (Optional) A map of key/value pairs to add extra configuration attributes to this client. This can be used for custom attributes, or to add configuration attributes that is not yet supported by this Terraform provider. Use this attribute at your own risk, as s may conflict with top-level configuration attributes in future provider updates.
 
 ## Import
 

@@ -35,18 +35,24 @@ func getExtraConfigFromData(data *schema.ResourceData) map[string]interface{} {
 }
 
 func setExtraConfigData(data *schema.ResourceData, extraConfig map[string]interface{}) {
-	c := map[string]interface{}{}
+	newExtraConfig := map[string]interface{}{}
+	extraConfigFromState := getExtraConfigFromData(data)
 
-	// when saving back to state, don't persist empty attributes that we're trying to remove from Keycloak
 	for k, v := range extraConfig {
+		// when saving back to state, don't persist empty attributes that we're trying to remove from Keycloak
 		if s, ok := v.(string); ok && s == "" {
 			continue
 		}
 
-		c[k] = v
+		// also, we don't want extra_config to be computed, so don't set anything that wasn't originally set by the user in the first place
+		if _, ok := extraConfigFromState[k]; !ok {
+			continue
+		}
+
+		newExtraConfig[k] = v
 	}
 
-	data.Set("extra_config", c)
+	data.Set("extra_config", newExtraConfig)
 }
 
 // validateExtraConfig takes a reflect value type to check its JSON schema in order to validate that extra_config
