@@ -70,6 +70,14 @@ resource "keycloak_saml_client" "saml_client" {
     - `direct_grant_id` - (Optional) Direct grant flow id (flow needs to exist)
 - `extra_config` - (Optional) A map of key/value pairs to add extra configuration attributes to this client. This can be used for custom attributes, or to add configuration attributes that is not yet supported by this Terraform provider. Use this attribute at your own risk, as s may conflict with top-level configuration attributes in future provider updates.
 
+## Attributes Reference
+
+In addition to the arguments listed above, the following computed attributes are exported:
+
+- `encryption_certificate_sha1` - (Computed) The sha1sum fingerprint of the encryption certificate. If the encryption certificate is not in correct base64 format, this will be left empty.
+- `signing_certificate_sha1` - (Computed) The sha1sum fingerprint of the signing certificate. If the signing certificate is not in correct base64 format, this will be left empty.
+- `signing_private_key_sha1` - (Computed) The sha1sum fingerprint of the signing private key. If the signing private key is not in correct base64 format, this will be left empty.
+
 ## Import
 
 Clients can be imported using the format `{{realm_id}}/{{client_keycloak_id}}`, where `client_keycloak_id` is the unique ID that Keycloak
