@@ -33,11 +33,6 @@ func resourceKeycloakRealmKeystoreHmacGenerated() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"parent_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
 			"active": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -76,10 +71,9 @@ func resourceKeycloakRealmKeystoreHmacGenerated() *schema.Resource {
 
 func getRealmKeystoreHmacGeneratedFromData(data *schema.ResourceData) (*keycloak.RealmKeystoreHmacGenerated, error) {
 	keystore := &keycloak.RealmKeystoreHmacGenerated{
-		Id:       data.Id(),
-		Name:     data.Get("name").(string),
-		RealmId:  data.Get("realm_id").(string),
-		ParentId: data.Get("parent_id").(string),
+		Id:      data.Id(),
+		Name:    data.Get("name").(string),
+		RealmId: data.Get("realm_id").(string),
 
 		Active:     data.Get("active").(bool),
 		Enabled:    data.Get("enabled").(bool),
@@ -96,7 +90,6 @@ func setRealmKeystoreHmacGeneratedData(data *schema.ResourceData, realmKey *keyc
 
 	data.Set("name", realmKey.Name)
 	data.Set("realm_id", realmKey.RealmId)
-	data.Set("parent_id", realmKey.ParentId)
 
 	data.Set("active", realmKey.Active)
 	data.Set("enabled", realmKey.Enabled)

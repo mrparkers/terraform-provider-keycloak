@@ -211,7 +211,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_aes_generated" "realm_aes" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
     priority           = 100
 }
@@ -227,7 +226,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_aes_generated" "realm_aes" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
 	%s        = "%s"
 }
@@ -243,7 +241,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_aes_generated" "realm_aes" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
     priority    = "%s"
     secret_size = "%s"

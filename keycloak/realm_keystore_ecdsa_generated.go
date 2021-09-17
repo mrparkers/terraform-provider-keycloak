@@ -6,10 +6,9 @@ import (
 )
 
 type RealmKeystoreEcdsaGenerated struct {
-	Id       string
-	Name     string
-	RealmId  string
-	ParentId string
+	Id      string
+	Name    string
+	RealmId string
 
 	Active        bool
 	Enabled       bool
@@ -36,7 +35,7 @@ func convertFromRealmKeystoreEcdsaGeneratedToComponent(realmKey *RealmKeystoreEc
 	return &component{
 		Id:           realmKey.Id,
 		Name:         realmKey.Name,
-		ParentId:     realmKey.ParentId,
+		ParentId:     realmKey.RealmId,
 		ProviderId:   "ecdsa-generated",
 		ProviderType: "org.keycloak.keys.KeyProvider",
 		Config:       componentConfig,
@@ -63,10 +62,9 @@ func convertFromComponentToRealmKeystoreEcdsaGenerated(component *component, rea
 	}
 
 	realmKey := &RealmKeystoreEcdsaGenerated{
-		Id:       component.Id,
-		Name:     component.Name,
-		ParentId: component.ParentId,
-		RealmId:  realmId,
+		Id:      component.Id,
+		Name:    component.Name,
+		RealmId: realmId,
 
 		Active:        active,
 		Enabled:       enabled,

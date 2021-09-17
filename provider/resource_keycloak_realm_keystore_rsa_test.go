@@ -254,7 +254,6 @@ resource "keycloak_realm_key_rsa" "realm_rsa" {
 
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
     priority    = 100
     algorithm   = "RS384"
@@ -276,7 +275,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_rsa" "realm_rsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
 	%s        = "%s"
 
@@ -297,7 +295,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_rsa" "realm_rsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
     priority  = %s
     algorithm = "%s"

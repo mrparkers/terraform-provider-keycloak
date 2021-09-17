@@ -32,11 +32,6 @@ func resourceKeycloakRealmKeystoreEcdsaGenerated() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"parent_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
 			"active": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -68,10 +63,9 @@ func resourceKeycloakRealmKeystoreEcdsaGenerated() *schema.Resource {
 
 func getRealmKeystoreEcdsaGeneratedFromData(data *schema.ResourceData) (*keycloak.RealmKeystoreEcdsaGenerated, error) {
 	keystore := &keycloak.RealmKeystoreEcdsaGenerated{
-		Id:       data.Id(),
-		Name:     data.Get("name").(string),
-		RealmId:  data.Get("realm_id").(string),
-		ParentId: data.Get("parent_id").(string),
+		Id:      data.Id(),
+		Name:    data.Get("name").(string),
+		RealmId: data.Get("realm_id").(string),
 
 		Active:        data.Get("active").(bool),
 		Enabled:       data.Get("enabled").(bool),
@@ -87,7 +81,6 @@ func setRealmKeystoreEcdsaGeneratedData(data *schema.ResourceData, realmKey *key
 
 	data.Set("name", realmKey.Name)
 	data.Set("realm_id", realmKey.RealmId)
-	data.Set("parent_id", realmKey.ParentId)
 
 	data.Set("active", realmKey.Active)
 	data.Set("enabled", realmKey.Enabled)

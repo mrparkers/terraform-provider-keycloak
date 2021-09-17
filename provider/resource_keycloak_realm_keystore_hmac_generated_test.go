@@ -215,7 +215,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_hmac_generated" "realm_hmac" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
     priority    = 100
     secret_size = 32
@@ -233,7 +232,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_hmac_generated" "realm_hmac" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
 	%s        = "%s"
 }
@@ -249,7 +247,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_hmac_generated" "realm_hmac" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
     priority    = "%s"
     secret_size = "%s"

@@ -211,7 +211,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_ecdsa_generated" "realm_ecdsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
     priority           = 100
     elliptic_curve_key = "P-384"
@@ -228,7 +227,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_ecdsa_generated" "realm_ecdsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
 	%s         = "%s"
 }
@@ -244,7 +242,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_ecdsa_generated" "realm_ecdsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
     priority           = "%s"
     elliptic_curve_key = "%s"

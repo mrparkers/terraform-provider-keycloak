@@ -218,10 +218,8 @@ data "keycloak_realm" "realm" {
 }
 
 resource "keycloak_realm_key_java_keystore" "realm_java_keystore" {
-
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
     keystore          = "misc/java-keystore.jks"
     keystore_password = "12345678"
@@ -243,7 +241,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_java_keystore" "realm_java_keystore" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
     keystore          = "misc/java-keystore.jks"
     keystore_password = "12345678"
@@ -264,7 +261,6 @@ data "keycloak_realm" "realm" {
 resource "keycloak_realm_key_java_keystore" "realm_java_keystore" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
-	parent_id = data.keycloak_realm.realm.id
 
     keystore          = "misc/java-keystore.jks"
     keystore_password = "12345678"

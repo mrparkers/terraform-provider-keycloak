@@ -6,10 +6,9 @@ import (
 )
 
 type RealmKeystoreJavaKeystore struct {
-	Id       string
-	Name     string
-	RealmId  string
-	ParentId string
+	Id      string
+	Name    string
+	RealmId string
 
 	Active    bool
 	Enabled   bool
@@ -20,6 +19,8 @@ type RealmKeystoreJavaKeystore struct {
 	KeystorePassword string
 	KeyAlias         string
 	KeyPassword      string
+
+	DisableRead bool
 }
 
 func convertFromRealmKeystoreJavaKeystoreToComponent(realmKey *RealmKeystoreJavaKeystore) *component {
@@ -53,7 +54,7 @@ func convertFromRealmKeystoreJavaKeystoreToComponent(realmKey *RealmKeystoreJava
 	return &component{
 		Id:           realmKey.Id,
 		Name:         realmKey.Name,
-		ParentId:     realmKey.ParentId,
+		ParentId:     realmKey.RealmId,
 		ProviderId:   "java-keystore",
 		ProviderType: "org.keycloak.keys.KeyProvider",
 		Config:       componentConfig,
@@ -80,10 +81,9 @@ func convertFromComponentToRealmKeystoreJavaKeystore(component *component, realm
 	}
 
 	realmKey := &RealmKeystoreJavaKeystore{
-		Id:       component.Id,
-		Name:     component.Name,
-		ParentId: component.ParentId,
-		RealmId:  realmId,
+		Id:      component.Id,
+		Name:    component.Name,
+		RealmId: realmId,
 
 		Active:           active,
 		Enabled:          enabled,

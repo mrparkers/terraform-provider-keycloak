@@ -34,11 +34,6 @@ func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"parent_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
 			"active": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -85,6 +80,7 @@ func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+				Description: "Don't attempt to read the keys from Keycloak if true; drift won't be detected",
 			},
 		},
 	}
@@ -92,10 +88,9 @@ func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
 
 func getRealmKeystoreRsaFromData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData) (*keycloak.RealmKeystoreRsa, error) {
 	mapper := &keycloak.RealmKeystoreRsa{
-		Id:       data.Id(),
-		Name:     data.Get("name").(string),
-		RealmId:  data.Get("realm_id").(string),
-		ParentId: data.Get("parent_id").(string),
+		Id:      data.Id(),
+		Name:    data.Get("name").(string),
+		RealmId: data.Get("realm_id").(string),
 
 		Active:      data.Get("active").(bool),
 		Enabled:     data.Get("enabled").(bool),
@@ -121,7 +116,6 @@ func setRealmKeystoreRsaData(keycloakClient *keycloak.KeycloakClient, data *sche
 
 	data.Set("name", realmKey.Name)
 	data.Set("realm_id", realmKey.RealmId)
-	data.Set("parent_id", realmKey.ParentId)
 
 	data.Set("active", realmKey.Active)
 	data.Set("enabled", realmKey.Enabled)

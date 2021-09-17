@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"log"
 	"strings"
 )
 
@@ -28,11 +29,6 @@ func resourceKeycloakRealmKeystoreJavaKeystore() *schema.Resource {
 				Description: "Display name of provider when linked in admin console.",
 			},
 			"realm_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"parent_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -82,16 +78,21 @@ func resourceKeycloakRealmKeystoreJavaKeystore() *schema.Resource {
 				Required:    true,
 				Description: "Size for the generated keys",
 			},
+			"disable_read": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				Description: "Don't attempt to read the keys from Keycloak if true; drift won't be detected",
+			},
 		},
 	}
 }
 
 func getRealmKeystoreJavaKeystoreFromData(data *schema.ResourceData) (*keycloak.RealmKeystoreJavaKeystore, error) {
 	keystore := &keycloak.RealmKeystoreJavaKeystore{
-		Id:       data.Id(),
-		Name:     data.Get("name").(string),
-		RealmId:  data.Get("realm_id").(string),
-		ParentId: data.Get("parent_id").(string),
+		Id:      data.Id(),
+		Name:    data.Get("name").(string),
+		RealmId: data.Get("realm_id").(string),
 
 		Active:           data.Get("active").(bool),
 		Enabled:          data.Get("enabled").(bool),
@@ -100,26 +101,31 @@ func getRealmKeystoreJavaKeystoreFromData(data *schema.ResourceData) (*keycloak.
 		KeystorePassword: data.Get("keystore_password").(string),
 		KeyAlias:         data.Get("key_alias").(string),
 		KeyPassword:      data.Get("key_password").(string),
+		DisableRead:      data.Get("disable_read").(bool),
 	}
 
 	return keystore, nil
 }
 
 func setRealmKeystoreJavaKeystoreData(data *schema.ResourceData, realmKey *keycloak.RealmKeystoreJavaKeystore) error {
+	disableRead := fmt.Sprintf("%v", data.Get("disable_read"))
+
 	data.SetId(realmKey.Id)
 
 	data.Set("name", realmKey.Name)
 	data.Set("realm_id", realmKey.RealmId)
-	data.Set("parent_id", realmKey.ParentId)
 
 	data.Set("active", realmKey.Active)
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
 	data.Set("keystore", realmKey.Keystore)
-	data.Set("keystore_password", realmKey.KeystorePassword)
 	data.Set("key_alias", realmKey.KeyAlias)
-	data.Set("key_password", realmKey.KeyPassword)
-
+	if disableRead != "true" {
+		data.Set("keystore_password", realmKey.KeystorePassword)
+		data.Set("key_password", realmKey.KeyPassword)
+	} else {
+		log.Printf("[WARN] keys does not refresh when disable_read is set to true")
+	}
 	return nil
 }
 
