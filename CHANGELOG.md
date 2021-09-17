@@ -28,12 +28,24 @@ BUG FIXES:
 
 - fix possible crash when using `keycloak_users_permissions` resource ([#591](https://github.com/mrparkers/terraform-provider-keycloak/pull/591))
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @cw1o
+- @daviddelannoy
+- @f-stibane
+- @jjarman-infinity
+- @nolte
+- @olivierboudet
+
 ## v3.3.0 (August 9, 2021)
 
 IMPROVEMENTS:
 
 - add `use_refresh_tokens` attribute to `keycloak_openid_client` resource ([#573](https://github.com/mrparkers/terraform-provider-keycloak/pull/573))
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @whiskeysierra
 
 ## v3.2.1 (July 23, 2021)
 
@@ -41,6 +53,11 @@ BUG FIXES:
 
 - re-add previously removed `LOAD_ROLES_BY_MEMBER_ATTRIBUTE_RECURSIVELY` role retrieval strategy for the `keycloak_ldap_role_mapper` resource ([#560](https://github.com/mrparkers/terraform-provider-keycloak/pull/560))
 - perform initial login during version check if needed. this fixes a potential panic within the `keycloak_ldap_group_mapper` resource ([#564](https://github.com/mrparkers/terraform-provider-keycloak/pull/564))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @DOboznyi
+- @Kent1
 
 ## v3.2.0 (July 14, 2021)
 
@@ -54,6 +71,10 @@ IMPROVEMENTS:
 BUG FIXES:
 
 - fix possible panic when creating identity provider mappers ([#556](https://github.com/mrparkers/terraform-provider-keycloak/pull/556))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @meckhardt
 
 ## v3.1.1 (June 8, 2021)
 
@@ -77,6 +98,14 @@ IMPROVEMENTS:
 BUG FIXES:
 
 - handle deleted role when removing role assignment from `keycloak_group_roles` resource ([#538](https://github.com/mrparkers/terraform-provider-keycloak/pull/538))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @bl00mber
+- @hamiltont
+- @Kyos
+- @pstanton237
+- @sl-benoitoyez
 
 ## v3.0.1 (May 5, 2021)
 
@@ -116,6 +145,19 @@ BUG FIXES:
 - handle group not found for `keycloak_group_roles` resource ([#497](https://github.com/mrparkers/terraform-provider-keycloak/pull/497))
 - fix `keycloak_attribute_importer_identity_provider_mapper` and `keycloak_user_template_importer_identity_provider_mapper` resources for usage with Facebook/Google ([#482](https://github.com/mrparkers/terraform-provider-keycloak/pull/482))
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @alex-hempel
+- @lathspell
+- @max-rocket-internet
+- @Photonios
+- @PSanetra
+- @sl-benoitoyez
+- @StatueFungus
+- @vlaurin
+- @yesteph
+- @Zeldhyr
+
 ## v2.3.0 (March 1, 2021)
 
 FEATURES:
@@ -129,6 +171,12 @@ IMPROVEMENTS:
 BUG FIXES:
 
 - remove mutex usage in keycloak client, which in some cases resulted in deadlock when retrieving tokens from Keycloak ([#489](https://github.com/mrparkers/terraform-provider-keycloak/pull/489))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @dbolack
+- @dullest
+- @lathspell
 
 ## v2.2.0 (January 23, 2021)
 
@@ -146,6 +194,11 @@ BUG FIXES:
 
 - fix panic when using `keycloak_user` data source with invalid username ([#460](https://github.com/mrparkers/terraform-provider-keycloak/pull/460))
 - fix version handling with RedHat SSO ([#462](https://github.com/mrparkers/terraform-provider-keycloak/pull/462))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @Filirom1
+- @thomasdarimont
 
 ## v2.1.0 (January 10, 2021)
 
@@ -170,6 +223,18 @@ BUG FIXES:
 - fix import for `keycloak_openid_client_service_account_realm_role` resource ([#441](https://github.com/mrparkers/terraform-provider-keycloak/pull/441))
 - remove unneeded validation checks for registration attributes for `keycloak_realm` resource ([#438](https://github.com/mrparkers/terraform-provider-keycloak/pull/438))
 - allow commas in `config` attribute for `keycloak_custom_user_federation` resource ([#455](https://github.com/mrparkers/terraform-provider-keycloak/pull/455))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @AdrienFromToulouse
+- @hcl31415
+- @jermarchand
+- @PaulGgithub
+- @pths
+- @randomswdev
+- @spirius
+- @toddkazakov
+- @xinau
 
 ## v2.0.0 (September 20, 2020)
 
@@ -211,6 +276,18 @@ BUG FIXES:
 - fix empty `path` sub-attribute under `groups` attribute within `keycloak_openid_client_authorization_group_policy` resource ([#369](https://github.com/mrparkers/terraform-provider-keycloak/pull/369))
 - fix `role` attribute for `keycloak_openid_client_authorization_role_policy` resource ([#369](https://github.com/mrparkers/terraform-provider-keycloak/pull/369))
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @cgroschupp
+- @gansb
+- @hcl31415
+- @jermarchand
+- @klausenbusk
+- @paulvollmer
+- @pmellati
+- @rjmasikome
+- @RomanNess
+
 ## 1.20.0 (July 20, 2020)
 
 FEATURES:
@@ -236,6 +313,20 @@ BUG FIXES:
 - fix `keycloak_group` data source to support nested groups ([#334](https://github.com/mrparkers/terraform-provider-keycloak/pull/334))
 - fix `keycloak_group` data source / resource to support group names with backslash character ([#337](https://github.com/mrparkers/terraform-provider-keycloak/pull/337))
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @chanhht
+- @dmeyerholt
+- @elmarx
+- @hcl31415
+- @hnnsngl
+- @jgrgt
+- @lathspell
+- @m-v-k
+- @tomrutsaert
+- @Useurmind
+- @wadahiro
+
 ## 1.19.0 (June 5, 2020)
 
 FEATURES:
@@ -259,6 +350,22 @@ IMPROVEMENTS:
 BUG FIXES:
 
 - fix: mark `group_id` attribute as required for `keycloak_group_roles` resource ([#292](https://github.com/mrparkers/terraform-provider-keycloak/pull/292))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @alevit33
+- @arminfelder
+- @awilliamsOM1
+- @dlechevalier
+- @dmeyerholt
+- @elmarx
+- @hawknewton
+- @javefang
+- @jgrgt
+- @pascal-hofmann
+- @tomrutsaert
+- @Useurmind
+- @wadahiro
 
 ## 1.18.0 (April 17, 2020)
 
@@ -284,11 +391,26 @@ BUG FIXES:
 * correctly handle manually deleted clients when refreshing a `keycloak_openid_client_default_scopes` resource ([#252](https://github.com/mrparkers/terraform-provider-keycloak/pull/252))
 * correctly handle manually deleted clients when refreshing a `keycloak_openid_client_optional_scopes` resource
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @dmeyerholt
+- @dwaynebailey
+- @Filirom1
+- @languitar
+- @lathspell
+- @tomrutsaert
+- @Trois-Six
+- @Xide
+
 ## 1.17.1 (March 12, 2020)
 
 BUG FIXES:
 
 * fix: allow `defaultScope` and `acceptsPromptNoneForwardFromClient` attributes to be set for `keycloak_oidc_identity_provider`. Previously, these attributes could only be set via `extra_config`, which stopped working as of v1.17.0. This release introduces these attributes as top-level attributes for the `keycloak_oidc_identity_provider` resource.
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @tomrutsaert
 
 ## 1.17.0 (March 10, 2020)
 
@@ -307,6 +429,18 @@ IMPROVEMENTS:
 * add `root_ca_certificate` attribute to provider config ([#227](https://github.com/mrparkers/terraform-provider-keycloak/pull/227))
 * add `scopes` attribute to `keycloak_openid_client_authorization_permission` resource ([#220](https://github.com/mrparkers/terraform-provider-keycloak/pull/220))
 * add `access_token_lifespan` attribute to `keycloak_openid_client` resource ([#233](https://github.com/mrparkers/terraform-provider-keycloak/pull/233))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @Amad27
+- @BernhardBerbuir
+- @Guarionex
+- @moritz31
+- @mukuru-shaun
+- @ndrpnt
+- @sanderginn
+- @tomrutsaert
+- @yspotts
 
 ## 1.16.0 (February 13, 2020)
 
@@ -328,6 +462,15 @@ BUG FIXES:
 
 * URL encode role names to allow for special characters ([#213](https://github.com/mrparkers/terraform-provider-keycloak/pull/213))
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @adresan
+- @bturbes
+- @cthiebault
+- @LoicAG
+- @SvenHamers
+- @waldemarschmalz
+
 ## 1.15.0 (January 20, 2020)
 
 FEATURES:
@@ -341,6 +484,13 @@ IMPROVEMENTS:
 * allow empty value for `pkce_code_challenge_method` attribute on `keycloak_openid_client` resource ([#198](https://github.com/mrparkers/terraform-provider-keycloak/pull/198))
 * support attributes for `keycloak_group` resource ([#199](https://github.com/mrparkers/terraform-provider-keycloak/pull/199))
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @aromeyer
+- @daviddesre
+- @dlechevalier
+- @madddi
+- @pths
 
 ## 1.14.0 (December 18, 2019)
 
@@ -356,11 +506,22 @@ IMPROVEMENTS:
 * allow you to prevent refresh token reuse with a new `revoke_refresh_token` attribute for the `keycloak_realm` resource ([#183](https://github.com/mrparkers/terraform-provider-keycloak/pull/183))
   * **note: please refer to the [docs](https://mrparkers.github.io/terraform-provider-keycloak/resources/keycloak_realm/#tokens) for the new configuration values if you currently use `refresh_token_max_reuse`**
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @madddi
+- @tomrutsaert
+- @Trois-Six
+
 ## 1.13.2 (November 27, 2019)
 
 BUG FIXES:
 
 * fix: update Keycloak API call to handle groups with more than 100 members ([#179](https://github.com/mrparkers/terraform-provider-keycloak/pull/179))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @Shubhammathur22
+- @vhiairrassary
 
 ## 1.13.1 (November 19, 2019)
 
@@ -368,11 +529,19 @@ BUG FIXES:
 
 * correctly handle Keycloak role names that contain a forward slash ([#175](https://github.com/mrparkers/terraform-provider-keycloak/pull/175))
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @Shubhammathur22
+
 ## 1.13.0 (November 8, 2019)
 
 IMPROVEMENTS:
 
 * use cookiejar for Keycloak API requests ([#173](https://github.com/mrparkers/terraform-provider-keycloak/pull/173))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @alexashley
 
 ## 1.12.0 (November 4, 2019)
 
@@ -385,12 +554,21 @@ BUG FIXES:
 * always use valid client secret for `keycloak_oidc_identity_provider` resource ([#171](https://github.com/mrparkers/terraform-provider-keycloak/pull/171))
 * fix state issues for `keycloak_openid_client_service_account_role` resource ([#171](https://github.com/mrparkers/terraform-provider-keycloak/pull/171))
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @AndrewChubatiuk
+- @PSanetra
+
 ## 1.11.1 (October 17, 2019)
 
 BUG FIXES:
 
 * fix required attribute for `keycloak_realm` data source ([#166](https://github.com/mrparkers/terraform-provider-keycloak/pull/166))
 * automatically retry role deletion if the first attempt fails ([#168](https://github.com/mrparkers/terraform-provider-keycloak/pull/168))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @aroemers
 
 ## 1.11.0 (October 14, 2019)
 
@@ -407,6 +585,15 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * fix default value for `reset_credentials_flow` attribute in `keycloak_realm` resource ([#158](https://github.com/mrparkers/terraform-provider-keycloak/pull/158))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @darin-sai
+- @drcrees
+- @LoicAG
+- @marcoreni
+- @Trois-Six
+- @xiaoyang-connyun
 
 ## 1.10.0 (September 6, 2019)
 
@@ -433,6 +620,16 @@ BUG FIXES:
 * fix user attributes to handle attributes longer than 255 characters ([#132](https://github.com/mrparkers/terraform-provider-keycloak/pull/132))
 * fix import for `keycloak_oidc_identity_provider` ([#142](https://github.com/mrparkers/terraform-provider-keycloak/pull/142))
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @AndrewChubatiuk
+- @BernhardBerbuir
+- @camelpunch
+- @fharding1
+- @ltscif
+- @nagytech
+- @tomrutsaert
+
 ## 1.9.0 (June 20, 2019)
 
 FEATURES:
@@ -447,6 +644,13 @@ IMPROVEMENTS:
 * update Terraform SDK to 0.12.1 ([#120](https://github.com/mrparkers/terraform-provider-keycloak/pull/120))
 * bump dependency versions for custom user federation example ([#121](https://github.com/mrparkers/terraform-provider-keycloak/pull/121))
 * add static binary to release for use within Alpine Docker iamges ([#129](https://github.com/mrparkers/terraform-provider-keycloak/pull/129))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @alexashley
+- @BernhardBerbuir
+- @Floby
+- @tomrutsaert
 
 ## 1.8.0 (May 14, 2019)
 
@@ -463,6 +667,11 @@ IMPROVEMENTS:
 * chore: support Keycloak v6.0.1 ([#106](https://github.com/mrparkers/terraform-provider-keycloak/pull/106))
 * chore: renames provider resource/data files ([#105](https://github.com/mrparkers/terraform-provider-keycloak/pull/105))
 
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @AndrewChubatiuk
+- @ctrox
+
 ## 1.7.0 (April 18, 2019)
 
 FEATURES:
@@ -473,6 +682,11 @@ FEATURES:
 IMPROVEMENTS:
 
 * new attributes added for `keycloak_saml_client` resource ([#103](https://github.com/mrparkers/terraform-provider-keycloak/pull/103))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @AndrewChubatiuk
+- @ctrox
 
 ## 1.6.0 (March 6, 2019)
 
@@ -494,6 +708,10 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * handle 404 errors when reading a group for group memberships ([#95](https://github.com/mrparkers/terraform-provider-keycloak/pull/95))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @AndrewChubatiuk
 
 ## 1.4.0 (January 28, 2019)
 
@@ -527,6 +745,10 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * ldap mappers: don't assume component fields are returned by Keycloak API ([#80](https://github.com/mrparkers/terraform-provider-keycloak/pull/80))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- @Floby
 
 ## 1.0.0 (December 16, 2018)
 
