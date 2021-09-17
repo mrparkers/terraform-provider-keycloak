@@ -30,12 +30,12 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @cw1o
-- @daviddelannoy
-- @f-stibane
-- @jjarman-infinity
-- @nolte
-- @olivierboudet
+- [@cw1o](https://github.com/cw1o)
+- [@daviddelannoy](https://github.com/daviddelannoy)
+- [@f-stibane](https://github.com/f-stibane)
+- [@jjarman-infinity](https://github.com/jjarman-infinity)
+- [@nolte](https://github.com/nolte)
+- [@olivierboudet](https://github.com/olivierboudet)
 
 ## v3.3.0 (August 9, 2021)
 
@@ -45,7 +45,7 @@ IMPROVEMENTS:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @whiskeysierra
+- [@whiskeysierra](https://github.com/whiskeysierra)
 
 ## v3.2.1 (July 23, 2021)
 
@@ -56,8 +56,8 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @DOboznyi
-- @Kent1
+- [@DOboznyi](https://github.com/DOboznyi)
+- [@Kent1](https://github.com/Kent1)
 
 ## v3.2.0 (July 14, 2021)
 
@@ -74,7 +74,7 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @meckhardt
+- [@meckhardt](https://github.com/meckhardt)
 
 ## v3.1.1 (June 8, 2021)
 
@@ -101,11 +101,11 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @bl00mber
-- @hamiltont
-- @Kyos
-- @pstanton237
-- @sl-benoitoyez
+- [@bl00mber](https://github.com/bl00mber)
+- [@hamiltont](https://github.com/hamiltont)
+- [@Kyos](https://github.com/Kyos)
+- [@pstanton237](https://github.com/pstanton237)
+- [@sl-benoitoyez](https://github.com/sl-benoitoyez)
 
 ## v3.0.1 (May 5, 2021)
 
@@ -147,16 +147,16 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @alex-hempel
-- @lathspell
-- @max-rocket-internet
-- @Photonios
-- @PSanetra
-- @sl-benoitoyez
-- @StatueFungus
-- @vlaurin
-- @yesteph
-- @Zeldhyr
+- [@alex-hempel](https://github.com/alex-hempel)
+- [@lathspell](https://github.com/lathspell)
+- [@max-rocket-internet](https://github.com/max-rocket-internet)
+- [@Photonios](https://github.com/Photonios)
+- [@PSanetra](https://github.com/PSanetra)
+- [@sl-benoitoyez](https://github.com/sl-benoitoyez)
+- [@StatueFungus](https://github.com/StatueFungus)
+- [@vlaurin](https://github.com/vlaurin)
+- [@yesteph](https://github.com/yesteph)
+- [@Zeldhyr](https://github.com/Zeldhyr)
 
 ## v2.3.0 (March 1, 2021)
 
@@ -174,9 +174,9 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @dbolack
-- @dullest
-- @lathspell
+- [@dbolack](https://github.com/dbolack)
+- [@dullest](https://github.com/dullest)
+- [@lathspell](https://github.com/lathspell)
 
 ## v2.2.0 (January 23, 2021)
 
@@ -197,8 +197,8 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @Filirom1
-- @thomasdarimont
+- [@Filirom1](https://github.com/Filirom1)
+- [@thomasdarimont](https://github.com/thomasdarimont)
 
 ## v2.1.0 (January 10, 2021)
 
@@ -226,15 +226,15 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @AdrienFromToulouse
-- @hcl31415
-- @jermarchand
-- @PaulGgithub
-- @pths
-- @randomswdev
-- @spirius
-- @toddkazakov
-- @xinau
+- [@AdrienFromToulouse](https://github.com/AdrienFromToulouse)
+- [@hcl31415](https://github.com/hcl31415)
+- [@jermarchand](https://github.com/jermarchand)
+- [@PaulGgithub](https://github.com/PaulGgithub)
+- [@pths](https://github.com/pths)
+- [@randomswdev](https://github.com/randomswdev)
+- [@spirius](https://github.com/spirius)
+- [@toddkazakov](https://github.com/toddkazakov)
+- [@xinau](https://github.com/xinau)
 
 ## v2.0.0 (September 20, 2020)
 
@@ -278,15 +278,15 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @cgroschupp
-- @gansb
-- @hcl31415
-- @jermarchand
-- @klausenbusk
-- @paulvollmer
-- @pmellati
-- @rjmasikome
-- @RomanNess
+- [@cgroschupp](https://github.com/cgroschupp)
+- [@gansb](https://github.com/gansb)
+- [@hcl31415](https://github.com/hcl31415)
+- [@jermarchand](https://github.com/jermarchand)
+- [@klausenbusk](https://github.com/klausenbusk)
+- [@paulvollmer](https://github.com/paulvollmer)
+- [@pmellati](https://github.com/pmellati)
+- [@rjmasikome](https://github.com/rjmasikome)
+- [@RomanNess](https://github.com/RomanNess)
 
 ## 1.20.0 (July 20, 2020)
 
@@ -315,17 +315,17 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @chanhht
-- @dmeyerholt
-- @elmarx
-- @hcl31415
-- @hnnsngl
-- @jgrgt
-- @lathspell
-- @m-v-k
-- @tomrutsaert
-- @Useurmind
-- @wadahiro
+- [@chanhht](https://github.com/chanhht)
+- [@dmeyerholt](https://github.com/dmeyerholt)
+- [@elmarx](https://github.com/elmarx)
+- [@hcl31415](https://github.com/hcl31415)
+- [@hnnsngl](https://github.com/hnnsngl)
+- [@jgrgt](https://github.com/jgrgt)
+- [@lathspell](https://github.com/lathspell)
+- [@m-v-k](https://github.com/m-v-k)
+- [@tomrutsaert](https://github.com/tomrutsaert)
+- [@Useurmind](https://github.com/Useurmind)
+- [@wadahiro](https://github.com/wadahiro)
 
 ## 1.19.0 (June 5, 2020)
 
@@ -353,19 +353,19 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @alevit33
-- @arminfelder
-- @awilliamsOM1
-- @dlechevalier
-- @dmeyerholt
-- @elmarx
-- @hawknewton
-- @javefang
-- @jgrgt
-- @pascal-hofmann
-- @tomrutsaert
-- @Useurmind
-- @wadahiro
+- [@alevit33](https://github.com/alevit33)
+- [@arminfelder](https://github.com/arminfelder)
+- [@awilliamsOM1](https://github.com/awilliamsOM1)
+- [@dlechevalier](https://github.com/dlechevalier)
+- [@dmeyerholt](https://github.com/dmeyerholt)
+- [@elmarx](https://github.com/elmarx)
+- [@hawknewton](https://github.com/hawknewton)
+- [@javefang](https://github.com/javefang)
+- [@jgrgt](https://github.com/jgrgt)
+- [@pascal-hofmann](https://github.com/pascal-hofmann)
+- [@tomrutsaert](https://github.com/tomrutsaert)
+- [@Useurmind](https://github.com/Useurmind)
+- [@wadahiro](https://github.com/wadahiro)
 
 ## 1.18.0 (April 17, 2020)
 
@@ -393,14 +393,14 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @dmeyerholt
-- @dwaynebailey
-- @Filirom1
-- @languitar
-- @lathspell
-- @tomrutsaert
-- @Trois-Six
-- @Xide
+- [@dmeyerholt](https://github.com/dmeyerholt)
+- [@dwaynebailey](https://github.com/dwaynebailey)
+- [@Filirom1](https://github.com/Filirom1)
+- [@languitar](https://github.com/languitar)
+- [@lathspell](https://github.com/lathspell)
+- [@tomrutsaert](https://github.com/tomrutsaert)
+- @[Trois-Six](https://github.com/Trois-Six)
+- [@Xide](https://github.com/Xide)
 
 ## 1.17.1 (March 12, 2020)
 
@@ -410,7 +410,7 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @tomrutsaert
+- [@tomrutsaert](https://github.com/tomrutsaert)
 
 ## 1.17.0 (March 10, 2020)
 
@@ -432,15 +432,15 @@ IMPROVEMENTS:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @Amad27
-- @BernhardBerbuir
-- @Guarionex
-- @moritz31
-- @mukuru-shaun
-- @ndrpnt
-- @sanderginn
-- @tomrutsaert
-- @yspotts
+- [@Amad27](https://github.com/Amad27)
+- [@BernhardBerbuir](https://github.com/BernhardBerbuir)
+- [@Guarionex](https://github.com/Guarionex)
+- [@moritz31](https://github.com/moritz31)
+- [@mukuru-shaun](https://github.com/mukuru-shaun)
+- [@ndrpnt](https://github.com/ndrpnt)
+- [@sanderginn](https://github.com/sanderginn)
+- [@tomrutsaert](https://github.com/tomrutsaert)
+- [@yspotts](https://github.com/yspotts)
 
 ## 1.16.0 (February 13, 2020)
 
@@ -464,12 +464,11 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @adresan
-- @bturbes
-- @cthiebault
-- @LoicAG
-- @SvenHamers
-- @waldemarschmalz
+- [@bturbes](https://github.com/bturbes)
+- [@cthiebault](https://github.com/cthiebault)
+- [@LoicAG](https://github.com/LoicAG)
+- [@SvenHamers](https://github.com/SvenHamers)
+- [@waldemarschmalz](https://github.com/waldemarschmalz)
 
 ## 1.15.0 (January 20, 2020)
 
@@ -486,11 +485,11 @@ IMPROVEMENTS:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @aromeyer
-- @daviddesre
-- @dlechevalier
-- @madddi
-- @pths
+- [@aromeyer](https://github.com/aromeyer)
+- [@daviddesre](https://github.com/daviddesre)
+- [@dlechevalier](https://github.com/dlechevalier)
+- [@madddi](https://github.com/madddi)
+- [@pths](https://github.com/pths)
 
 ## 1.14.0 (December 18, 2019)
 
@@ -508,9 +507,9 @@ IMPROVEMENTS:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @madddi
-- @tomrutsaert
-- @Trois-Six
+- [@madddi](https://github.com/madddi)
+- [@tomrutsaert](https://github.com/tomrutsaert)
+- [@Trois-Six](https://github.com/Trois-Six)
 
 ## 1.13.2 (November 27, 2019)
 
@@ -520,8 +519,8 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @Shubhammathur22
-- @vhiairrassary
+- [@Shubhammathur22](https://github.com/Shubhammathur22)
+- [@vhiairrassary](https://github.com/vhiairrassary)
 
 ## 1.13.1 (November 19, 2019)
 
@@ -531,7 +530,7 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @Shubhammathur22
+- [@Shubhammathur22](https://github.com/Shubhammathur22)
 
 ## 1.13.0 (November 8, 2019)
 
@@ -541,7 +540,7 @@ IMPROVEMENTS:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @alexashley
+- [@alexashley](https://github.com/alexashley)
 
 ## 1.12.0 (November 4, 2019)
 
@@ -556,8 +555,8 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @AndrewChubatiuk
-- @PSanetra
+- [@AndrewChubatiuk](https://github.com/AndrewChubatiuk)
+- [@PSanetra](https://github.com/PSanetra)
 
 ## 1.11.1 (October 17, 2019)
 
@@ -568,7 +567,7 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @aroemers
+- [@aroemers](https://github.com/aroemers)
 
 ## 1.11.0 (October 14, 2019)
 
@@ -588,12 +587,12 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @darin-sai
-- @drcrees
-- @LoicAG
-- @marcoreni
-- @Trois-Six
-- @xiaoyang-connyun
+- [@darin-sai](https://github.com/darin-sai)
+- [@drcrees](https://github.com/drcrees)
+- [@LoicAG](https://github.com/LoicAG)
+- [@marcoreni](https://github.com/marcoreni)
+- [@Trois-Six](https://github.com/Trois-Six)
+- [@xiaoyang-connyun](https://github.com/xiaoyang-connyun)
 
 ## 1.10.0 (September 6, 2019)
 
@@ -622,13 +621,13 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @AndrewChubatiuk
-- @BernhardBerbuir
-- @camelpunch
-- @fharding1
-- @ltscif
-- @nagytech
-- @tomrutsaert
+- [@AndrewChubatiuk](https://github.com/AndrewChubatiuk)
+- [@BernhardBerbuir](https://github.com/BernhardBerbuir)
+- [@camelpunch](https://github.com/camelpunch)
+- [@fharding1](https://github.com/fharding1)
+- [@ltscif](https://github.com/ltscif)
+- [@nagytech](https://github.com/nagytech)
+- [@tomrutsaert](https://github.com/tomrutsaert)
 
 ## 1.9.0 (June 20, 2019)
 
@@ -647,10 +646,10 @@ IMPROVEMENTS:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @alexashley
-- @BernhardBerbuir
-- @Floby
-- @tomrutsaert
+- [@alexashley](https://github.com/alexashley)
+- [@BernhardBerbuir](https://github.com/BernhardBerbuir)
+- [@Floby](https://github.com/Floby)
+- [@tomrutsaert](https://github.com/tomrutsaert)
 
 ## 1.8.0 (May 14, 2019)
 
@@ -669,8 +668,8 @@ IMPROVEMENTS:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @AndrewChubatiuk
-- @ctrox
+- [@AndrewChubatiuk](https://github.com/AndrewChubatiuk)
+- [@ctrox](https://github.com/ctrox)
 
 ## 1.7.0 (April 18, 2019)
 
@@ -685,8 +684,8 @@ IMPROVEMENTS:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @AndrewChubatiuk
-- @ctrox
+- [@AndrewChubatiuk](https://github.com/AndrewChubatiuk)
+- [@ctrox](https://github.com/ctrox)
 
 ## 1.6.0 (March 6, 2019)
 
@@ -711,7 +710,7 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @AndrewChubatiuk
+- [@AndrewChubatiuk](https://github.com/AndrewChubatiuk)
 
 ## 1.4.0 (January 28, 2019)
 
@@ -748,7 +747,7 @@ BUG FIXES:
 
 Huge thanks to all the individuals who have contributed towards this release:
 
-- @Floby
+- [@Floby](https://github.com/Floby)
 
 ## 1.0.0 (December 16, 2018)
 
