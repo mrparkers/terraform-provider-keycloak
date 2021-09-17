@@ -61,28 +61,28 @@ func resourceKeycloakRealmKeystoreJavaKeystore() *schema.Resource {
 			"keystore": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Intended algorithm for the key",
+				Description: "Path to keys file",
 			},
 			"keystore_password": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Size for the generated keys",
+				Description: "Password for the keys",
 			},
 			"key_alias": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Intended algorithm for the key",
+				Description: "Alias for the private key",
 			},
 			"key_password": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Size for the generated keys",
+				Description: "Password for the private key",
 			},
 			"disable_read": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-				Description: "Don't attempt to read the keys from Keycloak if true; drift won't be detected",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Don't attempt to read the passwords from Keycloak if true; drift won't be detected",
 			},
 		},
 	}

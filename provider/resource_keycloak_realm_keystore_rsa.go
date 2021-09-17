@@ -77,9 +77,9 @@ func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
 				Description: "X509 Certificate encoded in PEM format",
 			},
 			"disable_read": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
 				Description: "Don't attempt to read the keys from Keycloak if true; drift won't be detected",
 			},
 		},
