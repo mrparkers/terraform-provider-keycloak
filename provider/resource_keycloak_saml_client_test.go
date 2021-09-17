@@ -2,7 +2,7 @@ package provider
 
 import (
 	"fmt"
-	"strconv"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -30,6 +30,29 @@ func TestAccKeycloakSamlClient_basic(t *testing.T) {
 				ImportState:         true,
 				ImportStateVerify:   true,
 				ImportStateIdPrefix: testAccRealm.Realm + "/",
+			},
+		},
+	})
+}
+
+func TestAccKeycloakSamlClient_generatedCertificate(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlClient_basic(clientId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
+					resource.TestCheckResourceAttrSet("keycloak_saml_client.saml_client", "signing_certificate"),
+					resource.TestCheckResourceAttrSet("keycloak_saml_client.saml_client", "signing_private_key"),
+					resource.TestCheckResourceAttrSet("keycloak_saml_client.saml_client", "signing_certificate_sha1"),
+					resource.TestCheckResourceAttrSet("keycloak_saml_client.saml_client", "signing_private_key_sha1"),
+				),
 			},
 		},
 	})
@@ -95,37 +118,11 @@ func TestAccKeycloakSamlClient_updateRealm(t *testing.T) {
 	})
 }
 
-// Keycloak typically sets some values as default if they aren't provided
-// This test asserts that these default values are present if none are provided
-func TestAccKeycloakSamlClient_keycloakDefaults(t *testing.T) {
-	t.Parallel()
-	clientId := acctest.RandomWithPrefix("tf-acc")
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakSamlClient_basic(clientId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
-					testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes("keycloak_saml_client.saml_client"),
-					TestCheckResourceAttrNot("keycloak_saml_client.saml_client", "signing_certificate", ""),
-					TestCheckResourceAttrNot("keycloak_saml_client.saml_client", "signing_private_key", ""),
-					TestCheckResourceAttrNot("keycloak_saml_client.saml_client", "signature_key_name", "KEY_ID"),
-				),
-			},
-		},
-	})
-}
-
 func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	enabled := randomBool()
 	frontChannelLogout := randomBool()
-	clientSignatureRequired := "true"
 
 	encryptionCertificateBefore := acctest.RandomWithPrefix("tf-acc")
 	encryptionCertificateAfter := acctest.RandomWithPrefix("tf-acc")
@@ -154,19 +151,19 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 		MasterSamlProcessingUrl: acctest.RandString(20),
 
 		Attributes: &keycloak.SamlClientAttributes{
-			IncludeAuthnStatement:           randomBoolAsStringPointer(),
-			SignDocuments:                   randomBoolAsStringPointer(),
-			SignAssertions:                  randomBoolAsStringPointer(),
-			EncryptAssertions:               randomBoolAsStringPointer(),
-			ClientSignatureRequired:         &clientSignatureRequired,
-			ForcePostBinding:                randomBoolAsStringPointer(),
-			ForceNameIdFormat:               randomBoolAsStringPointer(),
+			IncludeAuthnStatement:           keycloak.KeycloakBoolQuoted(randomBool()),
+			SignDocuments:                   keycloak.KeycloakBoolQuoted(randomBool()),
+			SignAssertions:                  keycloak.KeycloakBoolQuoted(randomBool()),
+			EncryptAssertions:               keycloak.KeycloakBoolQuoted(randomBool()),
+			ClientSignatureRequired:         true,
+			ForcePostBinding:                keycloak.KeycloakBoolQuoted(randomBool()),
+			ForceNameIdFormat:               keycloak.KeycloakBoolQuoted(randomBool()),
 			SignatureAlgorithm:              randomStringInSlice(keycloakSamlClientSignatureAlgorithms),
-			SignatureKeyName:                randomStringInSlice(keycloakSamlClientSignatureKeyName),
+			SignatureKeyName:                randomStringInSlice(keycloakSamlClientSignatureKeyNames),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
-			EncryptionCertificate:           &encryptionCertificateBefore,
-			SigningCertificate:              &signingCertificateBefore,
-			SigningPrivateKey:               &signingPrivateKeyBefore,
+			EncryptionCertificate:           encryptionCertificateBefore,
+			SigningCertificate:              signingCertificateBefore,
+			SigningPrivateKey:               signingPrivateKeyBefore,
 			IDPInitiatedSSOURLName:          acctest.RandString(20),
 			IDPInitiatedSSORelayState:       acctest.RandString(20),
 			AssertionConsumerPostURL:        acctest.RandString(20),
@@ -195,19 +192,19 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 		MasterSamlProcessingUrl: acctest.RandString(20),
 
 		Attributes: &keycloak.SamlClientAttributes{
-			IncludeAuthnStatement:           randomBoolAsStringPointer(),
-			SignDocuments:                   randomBoolAsStringPointer(),
-			SignAssertions:                  randomBoolAsStringPointer(),
-			EncryptAssertions:               randomBoolAsStringPointer(),
-			ClientSignatureRequired:         &clientSignatureRequired,
-			ForcePostBinding:                randomBoolAsStringPointer(),
-			ForceNameIdFormat:               randomBoolAsStringPointer(),
+			IncludeAuthnStatement:           keycloak.KeycloakBoolQuoted(randomBool()),
+			SignDocuments:                   keycloak.KeycloakBoolQuoted(randomBool()),
+			SignAssertions:                  keycloak.KeycloakBoolQuoted(randomBool()),
+			EncryptAssertions:               keycloak.KeycloakBoolQuoted(randomBool()),
+			ClientSignatureRequired:         true,
+			ForcePostBinding:                keycloak.KeycloakBoolQuoted(randomBool()),
+			ForceNameIdFormat:               keycloak.KeycloakBoolQuoted(randomBool()),
 			SignatureAlgorithm:              randomStringInSlice(keycloakSamlClientSignatureAlgorithms),
-			SignatureKeyName:                randomStringInSlice(keycloakSamlClientSignatureKeyName),
+			SignatureKeyName:                randomStringInSlice(keycloakSamlClientSignatureKeyNames),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
-			EncryptionCertificate:           &encryptionCertificateAfter,
-			SigningCertificate:              &signingCertificateAfter,
-			SigningPrivateKey:               &signingPrivateKeyAfter,
+			EncryptionCertificate:           encryptionCertificateAfter,
+			SigningCertificate:              signingCertificateAfter,
+			SigningPrivateKey:               signingPrivateKeyAfter,
 			IDPInitiatedSSOURLName:          acctest.RandString(20),
 			IDPInitiatedSSORelayState:       acctest.RandString(20),
 			AssertionConsumerPostURL:        acctest.RandString(20),
@@ -250,14 +247,8 @@ func TestAccKeycloakSamlClient_certificateAndKey(t *testing.T) {
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 					testAccCheckKeycloakSamlClientHasSigningCertificate("keycloak_saml_client.saml_client"),
 					testAccCheckKeycloakSamlClientHasPrivateKey("keycloak_saml_client.saml_client"),
-				),
-			},
-			{
-				Config: testKeycloakSamlClient_signingCertificateNoKey(clientId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
-					testAccCheckKeycloakSamlClientHasSigningCertificate("keycloak_saml_client.saml_client"),
-					resource.TestCheckResourceAttr("keycloak_saml_client.saml_client", "signing_private_key", ""),
+					resource.TestCheckResourceAttrSet("keycloak_saml_client.saml_client", "signing_certificate_sha1"),
+					resource.TestCheckResourceAttrSet("keycloak_saml_client.saml_client", "signing_private_key_sha1"),
 				),
 			},
 		},
@@ -278,13 +269,7 @@ func TestAccKeycloakSamlClient_encryptionCertificate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
 					testAccCheckKeycloakSamlClientHasEncryptionCertificate("keycloak_saml_client.saml_client"),
-				),
-			},
-			{
-				Config: testKeycloakSamlClient_NoEncryptionCertificate(clientId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakSamlClientExistsWithCorrectProtocol("keycloak_saml_client.saml_client"),
-					resource.TestCheckResourceAttr("keycloak_saml_client.saml_client", "encryption_certificate", ""),
+					resource.TestCheckResourceAttrSet("keycloak_saml_client.saml_client", "encryption_certificate_sha1"),
 				),
 			},
 		},
@@ -313,6 +298,57 @@ func TestAccCheckKeycloakSamlClient_authenticationFlowBindingOverrides(t *testin
 	})
 }
 
+func TestAccKeycloakSamlClient_extraConfig(t *testing.T) {
+	t.Parallel()
+
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlClient_extraConfig(clientId, map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakSamlClientExtraConfig("keycloak_saml_client.saml_client", "key1", "value1"),
+					testAccCheckKeycloakSamlClientExtraConfig("keycloak_saml_client.saml_client", "key2", "value2"),
+				),
+			},
+			{
+				Config: testKeycloakSamlClient_extraConfig(clientId, map[string]string{
+					"key2": "value2",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakSamlClientExtraConfig("keycloak_saml_client.saml_client", "key2", "value2"),
+					testAccCheckKeycloakSamlClientExtraConfigMissing("keycloak_saml_client.saml_client", "key1"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakSamlClient_extraConfigInvalid(t *testing.T) {
+	t.Parallel()
+
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakSamlClient_extraConfig(clientId, map[string]string{"saml.signature.algorithm": "RSA_SHA1"}),
+				ExpectError: regexp.MustCompile(`extra_config key "saml.signature.algorithm" is not allowed`),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakSamlClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getSamlClientFromState(s, resourceName)
@@ -335,15 +371,15 @@ func testAccCheckKeycloakSamlClientHasEncryptionCertificate(resourceName string)
 			return err
 		}
 
-		if *client.Attributes.EncryptionCertificate == "" {
+		if client.Attributes.EncryptionCertificate == "" {
 			return fmt.Errorf("expected saml client to have a encryption certificate")
 		}
 
-		if strings.Contains(*client.Attributes.EncryptionCertificate, "-----BEGIN CERTIFICATE-----") || strings.Contains(*client.Attributes.EncryptionCertificate, "-----END CERTIFICATE-----") {
+		if strings.Contains(client.Attributes.EncryptionCertificate, "-----BEGIN CERTIFICATE-----") || strings.Contains(client.Attributes.EncryptionCertificate, "-----END CERTIFICATE-----") {
 			return fmt.Errorf("expected saml client encryption certificate to not contain headers")
 		}
 
-		if strings.ContainsAny(*client.Attributes.EncryptionCertificate, "\n\r ") {
+		if strings.ContainsAny(client.Attributes.EncryptionCertificate, "\n\r ") {
 			return fmt.Errorf("expected saml client encryption certificate to not contain whitespace")
 		}
 
@@ -358,15 +394,15 @@ func testAccCheckKeycloakSamlClientHasSigningCertificate(resourceName string) re
 			return err
 		}
 
-		if *client.Attributes.SigningCertificate == "" {
+		if client.Attributes.SigningCertificate == "" {
 			return fmt.Errorf("expected saml client to have a signing certificate")
 		}
 
-		if strings.Contains(*client.Attributes.SigningCertificate, "-----BEGIN CERTIFICATE-----") || strings.Contains(*client.Attributes.SigningCertificate, "-----END CERTIFICATE-----") {
+		if strings.Contains(client.Attributes.SigningCertificate, "-----BEGIN CERTIFICATE-----") || strings.Contains(client.Attributes.SigningCertificate, "-----END CERTIFICATE-----") {
 			return fmt.Errorf("expected saml client signing certificate to not contain headers")
 		}
 
-		if strings.ContainsAny(*client.Attributes.SigningCertificate, "\n\r ") {
+		if strings.ContainsAny(client.Attributes.SigningCertificate, "\n\r ") {
 			return fmt.Errorf("expected saml client signing certificate to not contain whitespace")
 		}
 
@@ -381,15 +417,15 @@ func testAccCheckKeycloakSamlClientHasPrivateKey(resourceName string) resource.T
 			return err
 		}
 
-		if *client.Attributes.SigningPrivateKey == "" {
+		if client.Attributes.SigningPrivateKey == "" {
 			return fmt.Errorf("expected saml client to have a signing private key")
 		}
 
-		if strings.Contains(*client.Attributes.SigningPrivateKey, "-----BEGIN PRIVATE KEY-----") || strings.Contains(*client.Attributes.SigningPrivateKey, "-----END PRIVATE KEY-----") {
+		if strings.Contains(client.Attributes.SigningPrivateKey, "-----BEGIN PRIVATE KEY-----") || strings.Contains(client.Attributes.SigningPrivateKey, "-----END PRIVATE KEY-----") {
 			return fmt.Errorf("expected saml client signing private key to not contain headers")
 		}
 
-		if strings.ContainsAny(*client.Attributes.SigningPrivateKey, "\n\r ") {
+		if strings.ContainsAny(client.Attributes.SigningPrivateKey, "\n\r ") {
 			return fmt.Errorf("expected saml client signing private key to not contain whitespace")
 		}
 
@@ -448,56 +484,6 @@ func getSamlClientFromState(s *terraform.State, resourceName string) (*keycloak.
 	return client, nil
 }
 
-func testAccCheckKeycloakSamlClientHasDefaultBooleanAttributes(resourceName string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("resource not found: %s", resourceName)
-		}
-
-		includeAuthnStatement, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["include_authn_statement"])
-		if err != nil {
-			return err
-		}
-
-		signDocuments, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["sign_documents"])
-		if err != nil {
-			return err
-		}
-
-		signAssertions, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["sign_assertions"])
-		if err != nil {
-			return err
-		}
-
-		encryptAssertions, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["encrypt_assertions"])
-		if err != nil {
-			return err
-		}
-
-		clientSignatureRequired, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["client_signature_required"])
-		if err != nil {
-			return err
-		}
-
-		forcePostBinding, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["force_post_binding"])
-		if err != nil {
-			return err
-		}
-
-		forceNameIdFormat, err := parseBoolAndTreatEmptyStringAsFalse(rs.Primary.Attributes["force_name_id_format"])
-		if err != nil {
-			return err
-		}
-
-		if !includeAuthnStatement && !signDocuments && !signAssertions && !encryptAssertions && !clientSignatureRequired && !forcePostBinding && !forceNameIdFormat {
-			return fmt.Errorf("expected saml client with id %s to have some defaults set by Keycloak", rs.Primary.ID)
-		}
-
-		return nil
-	}
-}
-
 func testAccCheckKeycloakSamlClientAuthenticationFlowBindingOverrides(resourceName, flowResourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getSamlClientFromState(s, resourceName)
@@ -533,18 +519,44 @@ func testAccCheckKeycloakSamlClientAuthenticationFlowBindingOverrides(resourceNa
 	}
 }
 
-func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
-	if b == "" {
-		return false, nil
-	}
+func testAccCheckKeycloakSamlClientExtraConfig(resourceName string, key string, value string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getSamlClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
 
-	return strconv.ParseBool(b)
+		if client.Attributes.ExtraConfig[key] != value {
+			return fmt.Errorf("expected saml client to have attribute %v set to %v, but got %v", key, value, client.Attributes.ExtraConfig[key])
+		}
+
+		return nil
+	}
 }
 
-func randomBoolAsStringPointer() *string {
-	s := strconv.FormatBool(randomBool())
+// check that a particular extra config key is missing
+func testAccCheckKeycloakSamlClientExtraConfigMissing(resourceName string, key string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getSamlClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
 
-	return &s
+		if val, ok := client.Attributes.ExtraConfig[key]; ok {
+			// keycloak 13+ will remove attributes if set to empty string. on older versions, we'll just check if this value is empty
+			if versionOk, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !versionOk {
+				if val != "" {
+					return fmt.Errorf("expected saml client to have empty attribute %v", key)
+				}
+
+				return nil
+			}
+
+			return fmt.Errorf("expected saml client to not have attribute %v", key)
+		}
+
+		return nil
+	}
 }
 
 func testKeycloakSamlClient_basic(clientId string) string {
@@ -556,6 +568,23 @@ data "keycloak_realm" "realm" {
 resource "keycloak_saml_client" "saml_client" {
 	client_id = "%s"
 	realm_id  = data.keycloak_realm.realm.id
+}
+	`, testAccRealm.Realm, clientId)
+}
+
+func testKeycloakSamlClient_generatedCertificate(clientId string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_saml_client" "saml_client" {
+	client_id = "%s"
+	realm_id  = data.keycloak_realm.realm.id
+
+	sign_documents          = false
+	sign_assertions         = true
+	include_authn_statement = true
 }
 	`, testAccRealm.Realm, clientId)
 }
@@ -608,13 +637,13 @@ resource "keycloak_saml_client" "saml_client" {
 	enabled     = %t
 
 	# below attributes are bools, but the model (and API) uses strings
-	include_authn_statement    = %s
-	sign_documents             = %s
-	sign_assertions            = %s
-	encrypt_assertions         = %s
-	client_signature_required  = %s
-	force_post_binding         = %s
-	force_name_id_format       = %s
+	include_authn_statement    = %t
+	sign_documents             = %t
+	sign_assertions            = %t
+	encrypt_assertions         = %t
+	client_signature_required  = %t
+	force_post_binding         = %t
+	force_name_id_format       = %t
 
 	front_channel_logout       = %t
 	signature_algorithm        = "%s"
@@ -642,13 +671,13 @@ resource "keycloak_saml_client" "saml_client" {
 		client.Name,
 		client.Description,
 		client.Enabled,
-		*client.Attributes.IncludeAuthnStatement,
-		*client.Attributes.SignDocuments,
-		*client.Attributes.SignAssertions,
-		*client.Attributes.EncryptAssertions,
-		*client.Attributes.ClientSignatureRequired,
-		*client.Attributes.ForcePostBinding,
-		*client.Attributes.ForceNameIdFormat,
+		client.Attributes.IncludeAuthnStatement,
+		client.Attributes.SignDocuments,
+		client.Attributes.SignAssertions,
+		client.Attributes.EncryptAssertions,
+		client.Attributes.ClientSignatureRequired,
+		client.Attributes.ForcePostBinding,
+		client.Attributes.ForceNameIdFormat,
 		client.FrontChannelLogout,
 		client.Attributes.SignatureAlgorithm,
 		client.Attributes.SignatureKeyName,
@@ -656,9 +685,9 @@ resource "keycloak_saml_client" "saml_client" {
 		client.RootUrl,
 		arrayOfStringsForTerraformResource(client.ValidRedirectUris),
 		client.BaseUrl, client.MasterSamlProcessingUrl,
-		*client.Attributes.EncryptionCertificate,
-		*client.Attributes.SigningCertificate,
-		*client.Attributes.SigningPrivateKey,
+		client.Attributes.EncryptionCertificate,
+		client.Attributes.SigningCertificate,
+		client.Attributes.SigningPrivateKey,
 		client.Attributes.IDPInitiatedSSOURLName,
 		client.Attributes.IDPInitiatedSSORelayState,
 		client.Attributes.AssertionConsumerPostURL,
@@ -790,4 +819,26 @@ resource "keycloak_saml_client" "client" {
 	name      = "test-saml-client"
 }
 	`, testAccRealm.Realm, clientId)
+}
+
+func testKeycloakSamlClient_extraConfig(clientId string, extraConfig map[string]string) string {
+	var sb strings.Builder
+	sb.WriteString("{\n")
+	for k, v := range extraConfig {
+		sb.WriteString(fmt.Sprintf("\t\t\"%s\" = \"%s\"\n", k, v))
+	}
+	sb.WriteString("}")
+
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_saml_client" "saml_client" {
+	client_id = "%s"
+	realm_id  = data.keycloak_realm.realm.id
+
+	extra_config = %s
+}
+	`, testAccRealm.Realm, clientId, sb.String())
 }
