@@ -197,6 +197,17 @@ The arguments below can be used to configure authentication flow bindings:
 - `client_authentication_flow` - (Optional) The desired flow for client authentication. Defaults to `clients`.
 - `docker_authentication_flow` - (Optional) The desired flow for Docker authentication. Defaults to `docker auth`.
 
+### OTP Policy
+
+The `otp_policy` block with following arguments can be found in the "OTP Policy" tab within the realm settings. 
+
+- `type` - (Optional) One Time Password Type, supported Values are `totp` for Time-Based One Time Password and `hotp` for Counter Based. Defaults to `totp`.
+- `algorithm` - (Optional) What hashing algorithm should be used to generate the OTP, Valid options are `HmacSHA1`,`HmacSHA256` and `HmacSHA512`. Defaults to `HmacSHA1`.
+- `digits` - (Optional) How many digits the OTP have. Defaults to `6`.
+- `initial_counter` - (Optional) What should the initial counter value be. Defaults to `2`.
+- `look_ahead_window` - (Optional) How far ahead should the server look just in case the token generator and server are out of time sync or counter sync. Defaults to `1`.
+- `period` - (Optional) How many seconds should an OTP token be valid. Defaults to `30`.
+
 ### WebAuthn
 
 The following settings can be used to modify the "WebAuthn Policy" and "WebAuthn Passwordless Policy" settings found within
