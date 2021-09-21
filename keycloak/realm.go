@@ -131,6 +131,9 @@ type Realm struct {
 	WebAuthnPolicyPasswordlessRpId                            string   `json:"webAuthnPolicyPasswordlessRpId"`
 	WebAuthnPolicyPasswordlessSignatureAlgorithms             []string `json:"webAuthnPolicyPasswordlessSignatureAlgorithms"`
 	WebAuthnPolicyPasswordlessUserVerificationRequirement     string   `json:"webAuthnPolicyPasswordlessUserVerificationRequirement"`
+
+	// Roles
+	DefaultRoles []string `json:"defaultRoles"`
 }
 
 type BrowserSecurityHeaders struct {

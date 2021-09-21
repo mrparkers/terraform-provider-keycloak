@@ -627,6 +627,13 @@ func resourceKeycloakRealm() *schema.Resource {
 					Schema: webAuthnSchema,
 				},
 			},
+			"default_roles": {
+				Type:        schema.TypeSet,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "Realm level roles assigned to new users.",
+				Optional:    true,
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -955,6 +962,14 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	}
 	realm.DefaultOptionalClientScopes = defaultOptionalClientScopes
 
+	defaultRoles := make([]string, 0)
+	if v, ok := data.GetOk("default_roles"); ok {
+		for _, defaultRole := range v.(*schema.Set).List() {
+			defaultRoles = append(defaultRoles, defaultRole.(string))
+		}
+	}
+	realm.DefaultRoles = defaultRoles
+
 	//OTPPolicy
 	if v, ok := data.GetOk("otp_policy"); ok {
 		otpPolicy := v.([]interface{})[0].(map[string]interface{})
@@ -1257,6 +1272,9 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	// default and optional client scope mappings
 	data.Set("default_default_client_scopes", realm.DefaultDefaultClientScopes)
 	data.Set("default_optional_client_scopes", realm.DefaultOptionalClientScopes)
+
+	//Roles
+	data.Set("default_roles", realm.DefaultRoles)
 }
 
 func getBruteForceDetectionSettings(realm *keycloak.Realm) map[string]interface{} {

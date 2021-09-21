@@ -73,6 +73,8 @@ resource "keycloak_realm" "realm" {
     relying_party_id          = "keycloak.example.com"
     signature_algorithms      = ["ES256", "RS256"]
   }
+
+  default_roles = [ "uma_authorization" ]
 }
 ```
 
@@ -199,7 +201,7 @@ The arguments below can be used to configure authentication flow bindings:
 
 ### OTP Policy
 
-The `otp_policy` block with following arguments can be found in the "OTP Policy" tab within the realm settings. 
+The `otp_policy` block with following arguments can be found in the "OTP Policy" tab within the realm settings.
 
 - `type` - (Optional) One Time Password Type, supported Values are `totp` for Time-Based One Time Password and `hotp` for Counter Based. Defaults to `totp`.
 - `algorithm` - (Optional) What hashing algorithm should be used to generate the OTP, Valid options are `HmacSHA1`,`HmacSHA256` and `HmacSHA512`. Defaults to `HmacSHA1`.
@@ -237,6 +239,9 @@ Each of these attributes are blocks with the following attributes:
 
 - `default_default_client_scopes` - (Optional) A list of default default client scopes to be used for client definitions. Defaults to `[]` or keycloak's built-in default default client-scopes.
 - `default_optional_client_scopes` - (Optional) A list of default optional client scopes to be used for client definitions. Defaults to `[]` or keycloak's built-in default optional client-scopes.
+
+## Roles
+- `default_roles` - (Optional) A realm level roles assigned to new users. Defaults to `[]` or keycloak's built-in default roles.
 
 ## Import
 
