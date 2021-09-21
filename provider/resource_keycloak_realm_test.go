@@ -783,6 +783,65 @@ func TestAccKeycloakRealm_default_client_scopes(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_default_roles(t *testing.T) {
+
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	defaultRolesTestList := []string{"uma_authorization"}
+
+	realm := &keycloak.Realm{
+		Realm: realmName,
+	}
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				ResourceName:  "keycloak_realm.realm",
+				ImportStateId: realmName,
+				ImportState:   true,
+				Config:        testKeycloakRealm_default_roles(realmName, defaultRolesTestList),
+				PreConfig: func() {
+					err := keycloakClient.NewRealm(realm)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Check: testAccCheckKeycloakRealm_default_roles(realmName, defaultRolesTestList),
+			},
+		},
+	})
+
+	// test empty default roles configuration
+	realmName2 := acctest.RandomWithPrefix("tf-acc")
+	defaultRolesTestList2 := []string{} // deliberately empty
+
+	realm2 := &keycloak.Realm{
+		Realm: realmName2,
+	}
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				ResourceName:  "keycloak_realm.realm",
+				ImportStateId: realmName2,
+				ImportState:   true,
+				Config:        testKeycloakRealm_default_roles(realmName2, defaultRolesTestList2),
+				PreConfig: func() {
+					err := keycloakClient.NewRealm(realm2)
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
+				Check: testAccCheckKeycloakRealm_default_roles(realmName2, defaultRolesTestList2),
+			},
+		},
+	})
+}
+
 func testKeycloakRealm_default_client_scopes(realm string, defaultDefaultClientScopes []string, defaultOptionalClientScopes []string) string {
 
 	defaultDefaultClientScopesString := fmt.Sprintf("%s", arrayOfStringsForTerraformResource(defaultDefaultClientScopes))
@@ -839,6 +898,39 @@ func testAccCheckKeycloakRealm_default_client_scopes(resourceName string, defaul
 				}
 				if !found {
 					return fmt.Errorf("expected realm %s to have default optional client scopes with value %s but was %s", realm.Realm, defaultOptionalClientScope, realm.DefaultOptionalClientScopes)
+				}
+			}
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRealm_default_roles(resourceName string, defaultRoles []string) resource.
+	TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if len(defaultRoles) == 0 {
+			if len(realm.DefaultRoles) != 0 {
+				return fmt.Errorf("expected realm %s to have empty default roles but was %s", realm.Realm,
+					realm.DefaultRoles)
+			}
+		} else {
+			for _, expectedScope := range defaultRoles {
+				found := false
+				for _, s := range realm.DefaultRoles {
+					if expectedScope == s {
+						found = true
+						break
+					}
+				}
+				if !found {
+					return fmt.Errorf("expected realm %s to have default roles with value %s but was %s", realm.Realm,
+						defaultRoles, realm.DefaultRoles)
 				}
 			}
 		}
@@ -1623,4 +1715,17 @@ resource "keycloak_realm" "realm" {
 	}
 }
 	`, realm, realmDisplayName, realmDisplayNameHtml, rpName, rpId, arrayOfStringsForTerraformResource(signatureAlgorithms), attestationConveyancePreference, authenticatorAttachment, avoidSameAuthenticatorRegister, requireResidentKey, userVerificationRequirement)
+}
+
+func testKeycloakRealm_default_roles(realm string, defaultRoles []string) string {
+
+	defaultRolesString := fmt.Sprintf("%s", arrayOfStringsForTerraformResource(defaultRoles))
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm                  = "%s"
+	enabled                = true
+	default_default_roles  = %s
+}
+	`, realm, defaultRolesString)
 }
