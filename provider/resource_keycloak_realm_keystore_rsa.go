@@ -59,13 +59,6 @@ func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
 				Default:      "RS256",
 				Description:  "Intended algorithm for the key",
 			},
-			"key_size": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ValidateFunc: validation.IntInSlice(keycloakRealmKeystoreRsaSize),
-				Default:      2048,
-				Description:  "Size for the generated keys",
-			},
 			"private_key": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -95,7 +88,6 @@ func getRealmKeystoreRsaFromData(keycloakClient *keycloak.KeycloakClient, data *
 		Active:      data.Get("active").(bool),
 		Enabled:     data.Get("enabled").(bool),
 		Priority:    data.Get("priority").(int),
-		KeySize:     data.Get("key_size").(int),
 		Algorithm:   data.Get("algorithm").(string),
 		PrivateKey:  data.Get("private_key").(string),
 		Certificate: data.Get("certificate").(string),
@@ -120,7 +112,6 @@ func setRealmKeystoreRsaData(keycloakClient *keycloak.KeycloakClient, data *sche
 	data.Set("active", realmKey.Active)
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
-	data.Set("key_size", realmKey.KeySize)
 	data.Set("algorithm", realmKey.Algorithm)
 	if disableRead != "true" {
 		data.Set("private_key", realmKey.PrivateKey)

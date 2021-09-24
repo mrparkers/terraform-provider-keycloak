@@ -298,13 +298,11 @@ resource "keycloak_realm_keystore_rsa" "realm_rsa" {
 
     priority  = %s
     algorithm = "%s"
-    key_size  = %s
 
     private_key = "%s"
     certificate = "%s"
 
     disable_read = true
 }
-	`, testAccRealmUserFederation.Realm, keystore.Name, strconv.Itoa(keystore.Priority), keystore.Algorithm,
-		strconv.Itoa(keystore.KeySize), keystore.PrivateKey, keystore.Certificate)
+	`, testAccRealmUserFederation.Realm, keystore.Name, strconv.Itoa(keystore.Priority), keystore.Algorithm, keystore.PrivateKey, keystore.Certificate)
 }
