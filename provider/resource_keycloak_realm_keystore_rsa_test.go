@@ -259,8 +259,6 @@ resource "keycloak_realm_keystore_rsa" "realm_rsa" {
     algorithm   = "RS384"
     private_key = "%s"
     certificate = "%s"
-
-    disable_read = true
 }
 	`, testAccRealmUserFederation.Realm, rsaName, privateKey, certificate)
 }
@@ -280,8 +278,6 @@ resource "keycloak_realm_keystore_rsa" "realm_rsa" {
 
     private_key = "%s"
     certificate = "%s"
-
-    disable_read = true
 }
 	`, testAccRealmUserFederation.Realm, rsaName, attr, val, privateKey, certificate)
 }
@@ -301,8 +297,6 @@ resource "keycloak_realm_keystore_rsa" "realm_rsa" {
 
     private_key = "%s"
     certificate = "%s"
-
-    disable_read = true
 }
 	`, testAccRealmUserFederation.Realm, keystore.Name, strconv.Itoa(keystore.Priority), keystore.Algorithm, keystore.PrivateKey, keystore.Certificate)
 }
