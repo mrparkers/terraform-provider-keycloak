@@ -5,13 +5,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"log"
 	"strings"
 )
 
 var (
 	keycloakRealmKeystoreRsaAlgorithm = []string{"RS256", "RS384", "RS512", "PS256", "PS384", "PS512"}
-	keycloakRealmKeystoreRsaSize      = []int{1024, 2048, 4096}
 )
 
 func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
@@ -69,12 +67,6 @@ func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
 				Required:    true,
 				Description: "X509 Certificate encoded in PEM format",
 			},
-			"disable_read": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: "Don't attempt to read the keys from Keycloak if true; drift won't be detected",
-			},
 		},
 	}
 }
@@ -91,7 +83,6 @@ func getRealmKeystoreRsaFromData(keycloakClient *keycloak.KeycloakClient, data *
 		Algorithm:   data.Get("algorithm").(string),
 		PrivateKey:  data.Get("private_key").(string),
 		Certificate: data.Get("certificate").(string),
-		DisableRead: data.Get("disable_read").(bool),
 	}
 	_, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11)
 	if err != nil {
@@ -103,7 +94,6 @@ func getRealmKeystoreRsaFromData(keycloakClient *keycloak.KeycloakClient, data *
 
 func setRealmKeystoreRsaData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData,
 	realmKey *keycloak.RealmKeystoreRsa, readFunc bool) error {
-	disableRead := fmt.Sprintf("%v", data.Get("disable_read"))
 	data.SetId(realmKey.Id)
 
 	data.Set("name", realmKey.Name)
@@ -113,11 +103,9 @@ func setRealmKeystoreRsaData(keycloakClient *keycloak.KeycloakClient, data *sche
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
 	data.Set("algorithm", realmKey.Algorithm)
-	if disableRead != "true" {
+	if realmKey.PrivateKey != "**********" || realmKey.Certificate != "**********" {
 		data.Set("private_key", realmKey.PrivateKey)
 		data.Set("certificate", realmKey.Certificate)
-	} else {
-		log.Printf("[WARN] keys does not refresh when disable_read is set to true")
 	}
 
 	_, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11)

@@ -270,7 +270,7 @@ resource "keycloak_realm_keystore_rsa_generated" "realm_rsa" {
 
     priority  = %s
     algorithm = "%s"
-    keystore_size  = %s
+    key_size  = %s
 }
 	`, testAccRealmUserFederation.Realm, keystore.Name, strconv.Itoa(keystore.Priority), keystore.Algorithm,
 		strconv.Itoa(keystore.KeySize))
