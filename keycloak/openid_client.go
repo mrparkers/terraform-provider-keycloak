@@ -232,7 +232,9 @@ func (keycloakClient *KeycloakClient) getOpenidClientScopes(realmId, clientId, t
 	var scopes []*OpenidClientScope
 
 	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes", realmId, clientId, t), &scopes, nil)
-	if err != nil {
+	if err != nil && ErrorIs404(err) {
+		return nil, fmt.Errorf("validation error: client with id %s does not exist", clientId)
+	} else if err != nil {
 		return nil, err
 	}
 
