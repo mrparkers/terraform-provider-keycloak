@@ -23,7 +23,7 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreRsaGenerated_basic(rsaName),
-				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_key_rsa_generated.realm_rsa"),
+				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_keystore_rsa_generated.realm_rsa"),
 			},
 		},
 	})
@@ -43,7 +43,7 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_createAfterManualDestroy(t *testin
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreRsaGenerated_basic(fullNameKeystoreName),
-				Check:  testAccCheckRealmKeystoreRsaGeneratedFetch("keycloak_realm_key_rsa_generated.realm_rsa", rsa),
+				Check:  testAccCheckRealmKeystoreRsaGeneratedFetch("keycloak_realm_keystore_rsa_generated.realm_rsa", rsa),
 			},
 			{
 				PreConfig: func() {
@@ -53,7 +53,7 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_createAfterManualDestroy(t *testin
 					}
 				},
 				Config: testKeycloakRealmKeystoreRsaGenerated_basic(fullNameKeystoreName),
-				Check:  testAccCheckRealmKeystoreRsaGeneratedFetch("keycloak_realm_key_rsa_generated.realm_rsa", rsa),
+				Check:  testAccCheckRealmKeystoreRsaGeneratedFetch("keycloak_realm_keystore_rsa_generated.realm_rsa", rsa),
 			},
 		},
 	})
@@ -70,13 +70,13 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_keySizeValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckRealmKeystoreRsaGeneratedDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmKeystoreRsaGenerated_basicWithAttrValidation(rsaName, "key_size",
+				Config: testKeycloakRealmKeystoreRsaGenerated_basicWithAttrValidation(rsaName, "keystore_size",
 					strconv.Itoa(acctest.RandIntRange(0, 1000)*2+1)),
-				ExpectError: regexp.MustCompile("expected key_size to be one of .+ got .+"),
+				ExpectError: regexp.MustCompile("expected keystore_size to be one of .+ got .+"),
 			},
 			{
-				Config: testKeycloakRealmKeystoreRsaGenerated_basicWithAttrValidation(rsaName, "key_size", "2048"),
-				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_key_rsa_generated.realm_rsa"),
+				Config: testKeycloakRealmKeystoreRsaGenerated_basicWithAttrValidation(rsaName, "keystore_size", "2048"),
+				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_keystore_rsa_generated.realm_rsa"),
 			},
 		},
 	})
@@ -99,7 +99,7 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_algorithmValidation(t *testing.T) 
 			},
 			{
 				Config: testKeycloakRealmKeystoreRsaGenerated_basicWithAttrValidation(algorithm, "algorithm", algorithm),
-				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_key_rsa_generated.realm_rsa"),
+				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_keystore_rsa_generated.realm_rsa"),
 			},
 		},
 	})
@@ -138,11 +138,11 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_updateRsaKeystoreGenerated(t *test
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreRsaGenerated_basicFromInterface(groupKeystoreOne),
-				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_key_rsa_generated.realm_rsa"),
+				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_keystore_rsa_generated.realm_rsa"),
 			},
 			{
 				Config: testKeycloakRealmKeystoreRsaGenerated_basicFromInterface(groupKeystoreTwo),
-				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_key_rsa_generated.realm_rsa"),
+				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_keystore_rsa_generated.realm_rsa"),
 			},
 		},
 	})
@@ -176,7 +176,7 @@ func testAccCheckRealmKeystoreRsaGeneratedFetch(resourceName string, keystore *k
 func testAccCheckRealmKeystoreRsaGeneratedDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_realm_key_rsa_generated" {
+			if rs.Type != "keycloak_realm_keystore_rsa_generated" {
 				continue
 			}
 
@@ -233,7 +233,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_rsa_generated" "realm_rsa" {
+resource "keycloak_realm_keystore_rsa_generated" "realm_rsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
@@ -249,7 +249,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_rsa_generated" "realm_rsa" {
+resource "keycloak_realm_keystore_rsa_generated" "realm_rsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
@@ -264,13 +264,13 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_rsa_generated" "realm_rsa" {
+resource "keycloak_realm_keystore_rsa_generated" "realm_rsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
     priority  = %s
     algorithm = "%s"
-    key_size  = %s
+    keystore_size  = %s
 }
 	`, testAccRealmUserFederation.Realm, keystore.Name, strconv.Itoa(keystore.Priority), keystore.Algorithm,
 		strconv.Itoa(keystore.KeySize))

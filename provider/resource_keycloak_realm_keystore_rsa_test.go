@@ -33,7 +33,7 @@ func TestAccKeycloakRealmKeystoreRsa_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreRsa_basic(rsaName, privateKey, certificate),
-				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
+				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_keystore_rsa.realm_rsa"),
 			},
 		},
 	})
@@ -54,7 +54,7 @@ func TestAccKeycloakRealmKeystoreRsa_createAfterManualDestroy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreRsa_basic(fullNameKeystoreName, privateKey, certificate),
-				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa.realm_rsa", keystoreRsa),
+				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_keystore_rsa.realm_rsa", keystoreRsa),
 			},
 			{
 				PreConfig: func() {
@@ -64,7 +64,7 @@ func TestAccKeycloakRealmKeystoreRsa_createAfterManualDestroy(t *testing.T) {
 					}
 				},
 				Config: testKeycloakRealmKeystoreRsa_basic(fullNameKeystoreName, privateKey, certificate),
-				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_key_rsa.realm_rsa", keystoreRsa),
+				Check:  testAccCheckRealmKeystoreRsaFetch("keycloak_realm_keystore_rsa.realm_rsa", keystoreRsa),
 			},
 		},
 	})
@@ -82,14 +82,14 @@ func TestAccKeycloakRealmKeystoreRsa_keySizeValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckRealmKeystoreRsaDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(rsaName, "key_size",
+				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(rsaName, "keystore_size",
 					strconv.Itoa(acctest.RandIntRange(0, 1000)*2+1), privateKey, certificate),
-				ExpectError: regexp.MustCompile("expected key_size to be one of .+ got .+"),
+				ExpectError: regexp.MustCompile("expected keystore_size to be one of .+ got .+"),
 			},
 			{
-				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(rsaName, "key_size", "2048", privateKey,
+				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(rsaName, "keystore_size", "2048", privateKey,
 					certificate),
-				Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
+				Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_keystore_rsa.realm_rsa"),
 			},
 		},
 	})
@@ -114,7 +114,7 @@ func TestAccKeycloakRealmKeystoreRsa_algorithmValidation(t *testing.T) {
 			{
 				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(algorithm, "algorithm", algorithm,
 					privateKey, certificate),
-				Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_key_rsa.realm_rsa"),
+				Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_keystore_rsa.realm_rsa"),
 			},
 		},
 	})
@@ -148,7 +148,7 @@ func testAccCheckRealmKeystoreRsaFetch(resourceName string, keystore *keycloak.R
 func testAccCheckRealmKeystoreRsaDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_realm_key_rsa" {
+			if rs.Type != "keycloak_realm_keystore_rsa" {
 				continue
 			}
 
@@ -250,7 +250,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_rsa" "realm_rsa" {
+resource "keycloak_realm_keystore_rsa" "realm_rsa" {
 
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
@@ -272,7 +272,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_rsa" "realm_rsa" {
+resource "keycloak_realm_keystore_rsa" "realm_rsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
@@ -292,7 +292,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_rsa" "realm_rsa" {
+resource "keycloak_realm_keystore_rsa" "realm_rsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 

@@ -65,7 +65,7 @@ func convertFromComponentToRealmKeystoreHmacGenerated(component *component, real
 		}
 	}
 
-	secretSize := 16 // Default key size for aes key
+	secretSize := 64 // Default key size for hmac key
 	if component.getConfig("secretSize") != "" {
 		secretSize, err = strconv.Atoi(component.getConfig("secretSize"))
 		if err != nil {

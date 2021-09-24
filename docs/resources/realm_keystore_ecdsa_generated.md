@@ -1,13 +1,12 @@
 ---
-page_title: "keycloak_realm_key_ecdsa_generated Resources"
+page_title: "keycloak_realm_keystore_ecdsa_generated Resources"
 ---
 
-# keycloak\_realm\_key\_ecdsa_generated Resources
+# keycloak\_realm\_keystore\_ecdsa_generated Resources
 
-Allows for creating and managing Realm keystores within Keycloak.
+Allows for creating and managing `acdsa_generated` Realm keystores within Keycloak.
 
-A realm manages a logical collection of users, credentials, roles, and groups. Users log in to realms and can be federated
-from multiple sources.
+A realm keystore manages generated key pairs that are used by Keycloak to perform cryptographic signatures and encryption.
 
 ## Example Usage
 
@@ -16,7 +15,7 @@ resource "keycloak_realm" "realm" {
 	realm = "my-realm"
 }
 
-resource "keycloak_realm_key_ecdsa_generated" "keystore_ecdsa_generated" {
+resource "keycloak_realm_keystore_ecdsa_generated" "keystore_ecdsa_generated" {
 	name      = "my-ecdsa-generated-key"
 	realm_id  = keycloak_realm.my_realm.realm
 
@@ -44,5 +43,5 @@ Realm keys can be imported using realm name and keystore id, you can find it in 
 Example:
 
 ```bash
-$ terraform import keycloak_realm_key_ecdsa_generated.keystore_ecdsa_generated my-realm/my-realm/618cfba7-49aa-4c09-9a19-2f699b576f0b
+$ terraform import keycloak_realm_keystore_ecdsa_generated.keystore_ecdsa_generated my-realm/my-realm/618cfba7-49aa-4c09-9a19-2f699b576f0b
 ```

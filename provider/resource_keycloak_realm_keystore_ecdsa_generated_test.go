@@ -23,7 +23,7 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreEcdsaGenerated_basic(ecdsaName),
-				Check:  testAccCheckRealmKeystoreEcdsaGeneratedExists("keycloak_realm_key_ecdsa_generated.realm_ecdsa"),
+				Check:  testAccCheckRealmKeystoreEcdsaGeneratedExists("keycloak_realm_keystore_ecdsa_generated.realm_ecdsa"),
 			},
 		},
 	})
@@ -43,7 +43,7 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_createAfterManualDestroy(t *test
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreEcdsaGenerated_basic(fullNameKeystoreName),
-				Check:  testAccCheckRealmKeystoreEcdsaGeneratedFetch("keycloak_realm_key_ecdsa_generated.realm_ecdsa", ecdsa),
+				Check:  testAccCheckRealmKeystoreEcdsaGeneratedFetch("keycloak_realm_keystore_ecdsa_generated.realm_ecdsa", ecdsa),
 			},
 			{
 				PreConfig: func() {
@@ -53,7 +53,7 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_createAfterManualDestroy(t *test
 					}
 				},
 				Config: testKeycloakRealmKeystoreEcdsaGenerated_basic(fullNameKeystoreName),
-				Check:  testAccCheckRealmKeystoreEcdsaGeneratedFetch("keycloak_realm_key_ecdsa_generated.realm_ecdsa", ecdsa),
+				Check:  testAccCheckRealmKeystoreEcdsaGeneratedFetch("keycloak_realm_keystore_ecdsa_generated.realm_ecdsa", ecdsa),
 			},
 		},
 	})
@@ -76,7 +76,7 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_ellipticCurveValidation(t *testi
 			},
 			{
 				Config: testKeycloakRealmKeystoreEcdsaGenerated_basicWithAttrValidation(ecdsaName, "elliptic_curve_key", ellipticCurve),
-				Check:  testAccCheckRealmKeystoreEcdsaGeneratedExists("keycloak_realm_key_ecdsa_generated.realm_ecdsa"),
+				Check:  testAccCheckRealmKeystoreEcdsaGeneratedExists("keycloak_realm_keystore_ecdsa_generated.realm_ecdsa"),
 			},
 		},
 	})
@@ -113,11 +113,11 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_updateRealmKeystoreEcdsaGenerate
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreEcdsaGenerated_basicFromInterface(groupKeystoreOne),
-				Check:  testAccCheckRealmKeystoreEcdsaGeneratedExists("keycloak_realm_key_ecdsa_generated.realm_ecdsa"),
+				Check:  testAccCheckRealmKeystoreEcdsaGeneratedExists("keycloak_realm_keystore_ecdsa_generated.realm_ecdsa"),
 			},
 			{
 				Config: testKeycloakRealmKeystoreEcdsaGenerated_basicFromInterface(groupKeystoreTwo),
-				Check:  testAccCheckRealmKeystoreEcdsaGeneratedExists("keycloak_realm_key_ecdsa_generated.realm_ecdsa"),
+				Check:  testAccCheckRealmKeystoreEcdsaGeneratedExists("keycloak_realm_keystore_ecdsa_generated.realm_ecdsa"),
 			},
 		},
 	})
@@ -151,7 +151,7 @@ func testAccCheckRealmKeystoreEcdsaGeneratedFetch(resourceName string, keystore 
 func testAccCheckRealmKeystoreEcdsaGeneratedDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_realm_key_ecdsa_generated" {
+			if rs.Type != "keycloak_realm_keystore_ecdsa_generated" {
 				continue
 			}
 
@@ -208,7 +208,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_ecdsa_generated" "realm_ecdsa" {
+resource "keycloak_realm_keystore_ecdsa_generated" "realm_ecdsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
@@ -224,7 +224,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_ecdsa_generated" "realm_ecdsa" {
+resource "keycloak_realm_keystore_ecdsa_generated" "realm_ecdsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
@@ -239,7 +239,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_ecdsa_generated" "realm_ecdsa" {
+resource "keycloak_realm_keystore_ecdsa_generated" "realm_ecdsa" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 

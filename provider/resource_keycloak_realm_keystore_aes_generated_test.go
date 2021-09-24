@@ -23,7 +23,7 @@ func TestAccKeycloakRealmKeystoreAesGenerated_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreAesGenerated_basic(aesName),
-				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_key_aes_generated.realm_aes"),
+				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_keystore_aes_generated.realm_aes"),
 			},
 		},
 	})
@@ -43,7 +43,7 @@ func TestAccKeycloakRealmKeystoreAesGenerated_createAfterManualDestroy(t *testin
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreAesGenerated_basic(fullNameKeystoreName),
-				Check:  testAccCheckRealmKeystoreAesGeneratedFetch("keycloak_realm_key_aes_generated.realm_aes", aes),
+				Check:  testAccCheckRealmKeystoreAesGeneratedFetch("keycloak_realm_keystore_aes_generated.realm_aes", aes),
 			},
 			{
 				PreConfig: func() {
@@ -53,7 +53,7 @@ func TestAccKeycloakRealmKeystoreAesGenerated_createAfterManualDestroy(t *testin
 					}
 				},
 				Config: testKeycloakRealmKeystoreAesGenerated_basic(fullNameKeystoreName),
-				Check:  testAccCheckRealmKeystoreAesGeneratedFetch("keycloak_realm_key_aes_generated.realm_aes", aes),
+				Check:  testAccCheckRealmKeystoreAesGeneratedFetch("keycloak_realm_keystore_aes_generated.realm_aes", aes),
 			},
 		},
 	})
@@ -76,7 +76,7 @@ func TestAccKeycloakRealmKeystoreAesGenerated_secretSizeValidation(t *testing.T)
 			},
 			{
 				Config: testKeycloakRealmKeystoreAesGenerated_basicWithAttrValidation(aesName, "secret_size", "16"),
-				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_key_aes_generated.realm_aes"),
+				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_keystore_aes_generated.realm_aes"),
 			},
 		},
 	})
@@ -113,11 +113,11 @@ func TestAccKeycloakRealmKeystoreAesGenerated_updateRealmKeystoreAesGenerated(t 
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreAesGenerated_basicFromInterface(groupKeystoreOne),
-				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_key_aes_generated.realm_aes"),
+				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_keystore_aes_generated.realm_aes"),
 			},
 			{
 				Config: testKeycloakRealmKeystoreAesGenerated_basicFromInterface(groupKeystoreTwo),
-				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_key_aes_generated.realm_aes"),
+				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_keystore_aes_generated.realm_aes"),
 			},
 		},
 	})
@@ -151,7 +151,7 @@ func testAccCheckRealmKeystoreAesGeneratedFetch(resourceName string, keystore *k
 func testAccCheckRealmKeystoreAesGeneratedDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_realm_key_aes_generated" {
+			if rs.Type != "keycloak_realm_keystore_aes_generated" {
 				continue
 			}
 
@@ -208,7 +208,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_aes_generated" "realm_aes" {
+resource "keycloak_realm_keystore_aes_generated" "realm_aes" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
@@ -223,7 +223,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_aes_generated" "realm_aes" {
+resource "keycloak_realm_keystore_aes_generated" "realm_aes" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
@@ -238,7 +238,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_aes_generated" "realm_aes" {
+resource "keycloak_realm_keystore_aes_generated" "realm_aes" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 

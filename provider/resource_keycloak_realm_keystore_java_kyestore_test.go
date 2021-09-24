@@ -25,7 +25,7 @@ func TestAccKeycloakRealmKeystoreJava_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreJava_basic(javaKeystoreName),
-				Check:  testAccCheckRealmKeystoreJavaExists("keycloak_realm_key_java_keystore.realm_java_keystore"),
+				Check:  testAccCheckRealmKeystoreJavaExists("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
 			},
 		},
 	})
@@ -47,7 +47,7 @@ func TestAccKeycloakRealmKeystoreJava_createAfterManualDestroy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreJava_basic(fullNameKeystoreName),
-				Check:  testAccCheckRealmKeystoreJavaFetch("keycloak_realm_key_java_keystore.realm_java_keystore", javaKeystore),
+				Check:  testAccCheckRealmKeystoreJavaFetch("keycloak_realm_keystore_java_keystore.realm_java_keystore", javaKeystore),
 			},
 			{
 				PreConfig: func() {
@@ -57,7 +57,7 @@ func TestAccKeycloakRealmKeystoreJava_createAfterManualDestroy(t *testing.T) {
 					}
 				},
 				Config: testKeycloakRealmKeystoreJava_basic(fullNameKeystoreName),
-				Check:  testAccCheckRealmKeystoreJavaFetch("keycloak_realm_key_java_keystore.realm_java_keystore", javaKeystore),
+				Check:  testAccCheckRealmKeystoreJavaFetch("keycloak_realm_keystore_java_keystore.realm_java_keystore", javaKeystore),
 			},
 		},
 	})
@@ -82,7 +82,7 @@ func TestAccKeycloakRealmKeystoreJava_algorithmValidation(t *testing.T) {
 			},
 			{
 				Config: testKeycloakRealmKeystoreJava_basicWithAttrValidation(algorithm, "algorithm", algorithm),
-				Check:  testAccCheckRealmKeystoreJavaExists("keycloak_realm_key_java_keystore.realm_java_keystore"),
+				Check:  testAccCheckRealmKeystoreJavaExists("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
 			},
 		},
 	})
@@ -121,11 +121,11 @@ func TestAccKeycloakRealmKeystoreJava_updateRsaKeystoreGenerated(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreJava_basicFromInterface(groupKeystoreOne),
-				Check:  testAccCheckRealmKeystoreJavaExists("keycloak_realm_key_java_keystore.realm_java_keystore"),
+				Check:  testAccCheckRealmKeystoreJavaExists("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
 			},
 			{
 				Config: testKeycloakRealmKeystoreJava_basicFromInterface(groupKeystoreTwo),
-				Check:  testAccCheckRealmKeystoreJavaExists("keycloak_realm_key_java_keystore.realm_java_keystore"),
+				Check:  testAccCheckRealmKeystoreJavaExists("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
 			},
 		},
 	})
@@ -160,7 +160,7 @@ func testAccCheckRealmKeystoreJavaFetch(resourceName string, keystore *keycloak.
 func testAccCheckRealmKeystoreJavaDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_realm_key_java_keystore" {
+			if rs.Type != "keycloak_realm_keystore_java_keystore" {
 				continue
 			}
 
@@ -217,14 +217,14 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_java_keystore" "realm_java_keystore" {
+resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
     keystore          = "misc/java-keystore.jks"
     keystore_password = "12345678"
-    key_alias         = "test"
-    key_password      = "12345678"
+    keystore_alias         = "test"
+    keystore_password      = "12345678"
 
     priority  = 100
     algorithm = "RS256"
@@ -238,14 +238,14 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_java_keystore" "realm_java_keystore" {
+resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
     keystore          = "misc/java-keystore.jks"
     keystore_password = "12345678"
-    key_alias         = "test"
-    key_password      = "12345678"
+    keystore_alias         = "test"
+    keystore_password      = "12345678"
 
 	%s        = "%s"
 }
@@ -258,14 +258,14 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_java_keystore" "realm_java_keystore" {
+resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
     keystore          = "misc/java-keystore.jks"
     keystore_password = "12345678"
-    key_alias         = "test"
-    key_password      = "12345678"
+    keystore_alias         = "test"
+    keystore_password      = "12345678"
 
     priority  = %s
     algorithm = "%s"

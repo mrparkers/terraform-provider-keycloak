@@ -23,7 +23,7 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreHmacGenerated_basic(hmacName),
-				Check:  testAccCheckRealmKeystoreHmacGeneratedExists("keycloak_realm_key_hmac_generated.realm_hmac"),
+				Check:  testAccCheckRealmKeystoreHmacGeneratedExists("keycloak_realm_keystore_hmac_generated.realm_hmac"),
 			},
 		},
 	})
@@ -43,7 +43,7 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_createAfterManualDestroy(t *testi
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreHmacGenerated_basic(fullNameKeystoreName),
-				Check:  testAccCheckRealmKeystoreHmacGeneratedFetch("keycloak_realm_key_hmac_generated.realm_hmac", hmac),
+				Check:  testAccCheckRealmKeystoreHmacGeneratedFetch("keycloak_realm_keystore_hmac_generated.realm_hmac", hmac),
 			},
 			{
 				PreConfig: func() {
@@ -53,7 +53,7 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_createAfterManualDestroy(t *testi
 					}
 				},
 				Config: testKeycloakRealmKeystoreHmacGenerated_basic(fullNameKeystoreName),
-				Check:  testAccCheckRealmKeystoreHmacGeneratedFetch("keycloak_realm_key_hmac_generated.realm_hmac", hmac),
+				Check:  testAccCheckRealmKeystoreHmacGeneratedFetch("keycloak_realm_keystore_hmac_generated.realm_hmac", hmac),
 			},
 		},
 	})
@@ -78,7 +78,7 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_algorithmValidation(t *testing.T)
 			{
 				Config: testKeycloakRealmKeystoreHmacGenerated_basicWithAttrValidation(hmacName, "algorithm",
 					algorithm),
-				Check: testAccCheckRealmKeystoreHmacGeneratedExists("keycloak_realm_key_hmac_generated.realm_hmac"),
+				Check: testAccCheckRealmKeystoreHmacGeneratedExists("keycloak_realm_keystore_hmac_generated.realm_hmac"),
 			},
 		},
 	})
@@ -117,11 +117,11 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_updateRealmKeystoreHmacGenerated(
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmKeystoreHmacGenerated_basicFromInterface(groupKeystoreOne),
-				Check:  testAccCheckRealmKeystoreHmacGeneratedExists("keycloak_realm_key_hmac_generated.realm_hmac"),
+				Check:  testAccCheckRealmKeystoreHmacGeneratedExists("keycloak_realm_keystore_hmac_generated.realm_hmac"),
 			},
 			{
 				Config: testKeycloakRealmKeystoreHmacGenerated_basicFromInterface(groupKeystoreTwo),
-				Check:  testAccCheckRealmKeystoreHmacGeneratedExists("keycloak_realm_key_hmac_generated.realm_hmac"),
+				Check:  testAccCheckRealmKeystoreHmacGeneratedExists("keycloak_realm_keystore_hmac_generated.realm_hmac"),
 			},
 		},
 	})
@@ -155,7 +155,7 @@ func testAccCheckRealmKeystoreHmacGeneratedFetch(resourceName string, keystore *
 func testAccCheckRealmKeystoreHmacGeneratedDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_realm_key_hmac_generated" {
+			if rs.Type != "keycloak_realm_keystore_hmac_generated" {
 				continue
 			}
 
@@ -212,7 +212,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_hmac_generated" "realm_hmac" {
+resource "keycloak_realm_keystore_hmac_generated" "realm_hmac" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
@@ -229,7 +229,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_hmac_generated" "realm_hmac" {
+resource "keycloak_realm_keystore_hmac_generated" "realm_hmac" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
@@ -244,7 +244,7 @@ data "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
-resource "keycloak_realm_key_hmac_generated" "realm_hmac" {
+resource "keycloak_realm_keystore_hmac_generated" "realm_hmac" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
