@@ -148,7 +148,7 @@ func resourceKeycloakRealmKeystoreAesGeneratedUpdate(data *schema.ResourceData, 
 		return err
 	}
 
-	return keycloakClient.UpdateRealmKeystoreAesGenerated(realmKey)
+	return nil
 }
 
 func resourceKeycloakRealmKeystoreAesGeneratedDelete(data *schema.ResourceData, meta interface{}) error {

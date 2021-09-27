@@ -174,7 +174,7 @@ func resourceKeycloakRealmKeystoreRsaUpdate(data *schema.ResourceData, meta inte
 		return err
 	}
 
-	return keycloakClient.UpdateRealmKeystoreRsa(realmKey)
+	return nil
 }
 
 func resourceKeycloakRealmKeystoreRsaDelete(data *schema.ResourceData, meta interface{}) error {
