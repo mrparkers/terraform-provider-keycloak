@@ -70,31 +70,6 @@ func TestAccKeycloakRealmKeystoreRsa_createAfterManualDestroy(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakRealmKeystoreRsa_keySizeValidation(t *testing.T) {
-	t.Parallel()
-
-	rsaName := acctest.RandomWithPrefix("tf-acc")
-	privateKey, certificate := generateKeyAndCert(2048)
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckRealmKeystoreRsaDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(rsaName, "keystore_size",
-					strconv.Itoa(acctest.RandIntRange(0, 1000)*2+1), privateKey, certificate),
-				ExpectError: regexp.MustCompile("expected keystore_size to be one of .+ got .+"),
-			},
-			{
-				Config: testKeycloakRealmKeystoreRsa_basicWithAttrValidation(rsaName, "keystore_size", "2048", privateKey,
-					certificate),
-				Check: testAccCheckRealmKeystoreRsaExists("keycloak_realm_keystore_rsa.realm_rsa"),
-			},
-		},
-	})
-}
-
 func TestAccKeycloakRealmKeystoreRsa_algorithmValidation(t *testing.T) {
 	t.Parallel()
 
