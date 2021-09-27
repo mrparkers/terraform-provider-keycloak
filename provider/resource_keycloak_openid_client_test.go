@@ -209,6 +209,30 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_backChannel(t *testing.T) {
+	t.Parallel()
+
+	clientId := acctest.RandomWithPrefix("tf-acc")
+	backchannelLogoutUrl := fmt.Sprintf("https://%s.com", acctest.RandString(10))
+	backchannelLogoutSessionRequired := randomBool()
+	backchannelLogoutRevokeOfflineSessions := !backchannelLogoutSessionRequired
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_backchannel(clientId, backchannelLogoutUrl, backchannelLogoutSessionRequired, backchannelLogoutRevokeOfflineSessions),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol("keycloak_openid_client.client"),
+					testAccCheckKeycloakOpenidClientHasBackchannelSettings("keycloak_openid_client.client", backchannelLogoutUrl, backchannelLogoutSessionRequired, backchannelLogoutRevokeOfflineSessions),
+				),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
 	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -581,6 +605,29 @@ func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName stri
 
 		if client.Protocol != "openid-connect" {
 			return fmt.Errorf("expected openid client to have openid-connect protocol, but got %s", client.Protocol)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientHasBackchannelSettings(resourceName, backchannelLogoutUrl string, backchannelLogoutSessionRequired, backchannelLogoutRevokeOfflineSessions bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.BackchannelLogoutUrl != backchannelLogoutUrl {
+			return fmt.Errorf("expected openid client to have backchannel logout url %s, got %s", backchannelLogoutUrl, client.Attributes.BackchannelLogoutUrl)
+		}
+
+		if bool(client.Attributes.BackchannelLogoutSessionRequired) != backchannelLogoutSessionRequired {
+			return fmt.Errorf("expected openid client to have backchannel session required bool %t, got %t", backchannelLogoutSessionRequired, bool(client.Attributes.BackchannelLogoutSessionRequired))
+		}
+
+		if bool(client.Attributes.BackchannelLogoutRevokeOfflineTokens) != backchannelLogoutRevokeOfflineSessions {
+			return fmt.Errorf("expected openid client to have backchannel revoke offline sessions bool %t, got %t", backchannelLogoutRevokeOfflineSessions, bool(client.Attributes.BackchannelLogoutRevokeOfflineTokens))
 		}
 
 		return nil
@@ -1076,6 +1123,24 @@ resource "keycloak_openid_client" "client" {
 	backchannel_logout_revoke_offline_sessions = %t
 }
 	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl, openidClient.Attributes.BackchannelLogoutUrl, openidClient.Attributes.BackchannelLogoutSessionRequired, openidClient.Attributes.BackchannelLogoutRevokeOfflineTokens)
+}
+
+func testKeycloakOpenidClient_backchannel(clientId, backchannelLogoutUrl string, backchannelLogoutSessionRequired, backchannelLogoutRevokeOfflineSessions bool) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = data.keycloak_realm.realm.id
+	access_type = "CONFIDENTIAL"
+
+	backchannel_logout_url                     = "%s"
+	backchannel_logout_session_required        = %t
+	backchannel_logout_revoke_offline_sessions = %t
+}
+	`, testAccRealm.Realm, clientId, backchannelLogoutUrl, backchannelLogoutSessionRequired, backchannelLogoutRevokeOfflineSessions)
 }
 
 func testKeycloakOpenidClient_secret(clientId, clientSecret string) string {
