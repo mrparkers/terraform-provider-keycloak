@@ -77,14 +77,12 @@ func getRealmKeystoreRsaFromData(keycloakClient *keycloak.KeycloakClient, data *
 		Name:    data.Get("name").(string),
 		RealmId: data.Get("realm_id").(string),
 
-		Active:    data.Get("active").(bool),
-		Enabled:   data.Get("enabled").(bool),
-		Priority:  data.Get("priority").(int),
-		Algorithm: data.Get("algorithm").(string),
-	}
-	if data.Get("private_key").(string) != "**********" || data.Get("certificate").(string) != "**********" {
-		mapper.PrivateKey = data.Get("private_key").(string)
-		mapper.Certificate = data.Get("certificate").(string)
+		Active:      data.Get("active").(bool),
+		Enabled:     data.Get("enabled").(bool),
+		Priority:    data.Get("priority").(int),
+		Algorithm:   data.Get("algorithm").(string),
+		PrivateKey:  data.Get("private_key").(string),
+		Certificate: data.Get("certificate").(string),
 	}
 	_, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11)
 	if err != nil {
@@ -105,7 +103,7 @@ func setRealmKeystoreRsaData(keycloakClient *keycloak.KeycloakClient, data *sche
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
 	data.Set("algorithm", realmKey.Algorithm)
-	if realmKey.PrivateKey != "**********" || realmKey.Certificate != "**********" {
+	if realmKey.PrivateKey != "**********" {
 		data.Set("private_key", realmKey.PrivateKey)
 		data.Set("certificate", realmKey.Certificate)
 	}

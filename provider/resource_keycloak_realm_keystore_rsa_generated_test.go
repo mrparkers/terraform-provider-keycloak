@@ -70,12 +70,12 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_keySizeValidation(t *testing.T) {
 		CheckDestroy:      testAccCheckRealmKeystoreRsaGeneratedDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmKeystoreRsaGenerated_basicWithAttrValidation(rsaName, "keystore_size",
+				Config: testKeycloakRealmKeystoreRsaGenerated_basicWithAttrValidation(rsaName, "key_size",
 					strconv.Itoa(acctest.RandIntRange(0, 1000)*2+1)),
-				ExpectError: regexp.MustCompile("expected keystore_size to be one of .+ got .+"),
+				ExpectError: regexp.MustCompile("expected key_size to be one of .+ got .+"),
 			},
 			{
-				Config: testKeycloakRealmKeystoreRsaGenerated_basicWithAttrValidation(rsaName, "keystore_size", "2048"),
+				Config: testKeycloakRealmKeystoreRsaGenerated_basicWithAttrValidation(rsaName, "key_size", "2048"),
 				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_keystore_rsa_generated.realm_rsa"),
 			},
 		},
