@@ -44,6 +44,7 @@ nav:
   - keycloak_ldap_user_federation: resources/keycloak_ldap_user_federation.md
   - keycloak_ldap_full_name_mapper: resources/keycloak_ldap_full_name_mapper.md
   - keycloak_ldap_group_mapper: resources/keycloak_ldap_group_mapper.md
+  - keycloak_ldap_hardcoded_attribute_mapper: resources/keycloak_ldap_hardcoded_attribute_mapper.md
   - keycloak_ldap_hardcoded_role_mapper: resources/keycloak_ldap_hardcoded_role_mapper.md
   - keycloak_ldap_msad_user_account_control_mapper: resources/keycloak_ldap_msad_user_account_control_mapper.md
   - keycloak_ldap_msad_lds_user_account_control_mapper: resources/keycloak_ldap_msad_lds_user_account_control_mapper.md
