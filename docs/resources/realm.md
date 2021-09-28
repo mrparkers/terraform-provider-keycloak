@@ -241,7 +241,7 @@ Each of these attributes are blocks with the following attributes:
 - `default_optional_client_scopes` - (Optional) A list of default optional client scopes to be used for client definitions. Defaults to `[]` or keycloak's built-in default optional client-scopes.
 
 ## Roles
-- `default_roles` - (Optional) A realm level roles assigned to new users. Defaults to `[]` or keycloak's built-in default roles.
+- `default_roles` - (Optional) Realm level roles assigned to new users by default. Defaults to `[]` or keycloak's built-in default roles.
 
 ## Import
 

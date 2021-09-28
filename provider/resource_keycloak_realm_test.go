@@ -1723,9 +1723,9 @@ func testKeycloakRealm_default_roles(realm string, defaultRoles []string) string
 
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
-	realm                  = "%s"
-	enabled                = true
-	default_default_roles  = %s
+	realm          = "%s"
+	enabled        = true
+	default_roles  = %s
 }
 	`, realm, defaultRolesString)
 }
