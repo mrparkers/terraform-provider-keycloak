@@ -8,10 +8,10 @@ import (
 
 func resourceKeycloakOpenidClientOptionalScopes() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenidClientOptionalScopesCreate,
+		Create: resourceKeycloakOpenidClientOptionalScopesReconcile,
 		Read:   resourceKeycloakOpenidClientOptionalScopesRead,
 		Delete: resourceKeycloakOpenidClientOptionalScopesDelete,
-		Update: resourceKeycloakOpenidClientOptionalScopesUpdate,
+		Update: resourceKeycloakOpenidClientOptionalScopesReconcile,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -31,22 +31,6 @@ func resourceKeycloakOpenidClientOptionalScopes() *schema.Resource {
 			},
 		},
 	}
-}
-
-func resourceKeycloakOpenidClientOptionalScopesCreate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realmId := data.Get("realm_id").(string)
-	clientId := data.Get("client_id").(string)
-	optionalScopes := data.Get("optional_scopes").(*schema.Set)
-
-	err := keycloakClient.AttachOpenidClientOptionalScopes(realmId, clientId, interfaceSliceToStringSlice(optionalScopes.List()))
-	if err != nil {
-		return err
-	}
-
-	data.SetId(openidClientOptionalScopesId(realmId, clientId))
-
-	return resourceKeycloakOpenidClientOptionalScopesRead(data, meta)
 }
 
 func openidClientOptionalScopesId(realmId string, clientId string) string {
@@ -75,7 +59,7 @@ func resourceKeycloakOpenidClientOptionalScopesRead(data *schema.ResourceData, m
 	return nil
 }
 
-func resourceKeycloakOpenidClientOptionalScopesUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientOptionalScopesReconcile(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)

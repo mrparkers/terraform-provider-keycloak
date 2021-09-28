@@ -296,8 +296,8 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			ClientSessionMaxLifespan:             data.Get("client_session_max_lifespan").(string),
 			UseRefreshTokens:                     keycloak.KeycloakBoolQuoted(data.Get("use_refresh_tokens").(bool)),
 			BackchannelLogoutUrl:                 data.Get("backchannel_logout_url").(string),
-			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_session_required").(bool)),
-			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_revoke_offline_sessions").(bool)),
+			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_revoke_offline_sessions").(bool)),
+			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_session_required").(bool)),
 			ExtraConfig:                          getExtraConfigFromData(data),
 		},
 		ValidRedirectUris: validRedirectUris,
@@ -392,8 +392,8 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("client_session_idle_timeout", client.Attributes.ClientSessionIdleTimeout)
 	data.Set("client_session_max_lifespan", client.Attributes.ClientSessionMaxLifespan)
 	data.Set("backchannel_logout_url", client.Attributes.BackchannelLogoutUrl)
-	data.Set("backchannel_logout_session_required", client.Attributes.BackchannelLogoutRevokeOfflineTokens)
-	data.Set("backchannel_logout_revoke_offline_sessions", client.Attributes.BackchannelLogoutSessionRequired)
+	data.Set("backchannel_logout_revoke_offline_sessions", client.Attributes.BackchannelLogoutRevokeOfflineTokens)
+	data.Set("backchannel_logout_session_required", client.Attributes.BackchannelLogoutSessionRequired)
 	setExtraConfigData(data, client.Attributes.ExtraConfig)
 
 	if client.AuthorizationServicesEnabled {

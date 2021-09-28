@@ -264,30 +264,6 @@ func TestAccKeycloakOpenidClientOptionalScopes_noImportNeeded(t *testing.T) {
 	})
 }
 
-// by optional, keycloak clients have the optional scopes "address", "phone" and
-// "offline_access" "microprofile-jwt" attached. if you create this resource with only one scope, it
-// won't remove these two scopes, because the creation of a new resource should
-// not result in anything destructive. thus, a following plan will not be empty,
-// as terraform will think it needs to remove these scopes, which is okay to do
-// during an update
-func TestAccKeycloakOpenidClientOptionalScopes_profileAndEmailOptionalScopes(t *testing.T) {
-	t.Parallel()
-	client := acctest.RandomWithPrefix("tf-acc")
-	clientScope := acctest.RandomWithPrefix("tf-acc")
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		Steps: []resource.TestStep{
-			{
-				Config:             testKeycloakOpenidClientOptionalScopes_listOfScopes(client, clientScope, []string{clientScope}),
-				Check:              testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client.client", append(getPreAssignedOptionalClientScopes(), clientScope)),
-				ExpectNonEmptyPlan: true,
-			},
-		},
-	})
-}
-
 // Keycloak throws a 500 if you attempt to attach an optional scope that is already attached as a default scope
 func TestAccKeycloakOpenidClientOptionalScopes_validateDuplicateScopeAssignment(t *testing.T) {
 	t.Parallel()
