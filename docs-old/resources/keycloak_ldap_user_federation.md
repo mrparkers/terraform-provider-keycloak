@@ -68,6 +68,8 @@ The following arguments are supported:
 - `search_scope` - (Optional) Can be one of `ONE_LEVEL` or `SUBTREE`:
     - `ONE_LEVEL`: Only search for users in the DN specified by `user_dn`.
     - `SUBTREE`: Search entire LDAP subtree.
+- `start_tls` - (Optional) When `true`, Keycloak will encrypt the connection to LDAP using STARTTLS, which will disable connection pooling.
+- `use_password_modify_extended_op` - (Optional) When `true`, use the LDAPv3 Password Modify Extended Operation (RFC-3062).
 - `validate_password_policy` - (Optional) When `true`, Keycloak will validate passwords using the realm policy before updating it.
 - `trust_email` - (Optional) If enabled, email provided by this provider is not verified even if verification is enabled for the realm.
 - `use_truststore_spi` - (Optional) Can be one of `ALWAYS`, `ONLY_FOR_LDAPS`, or `NEVER`:

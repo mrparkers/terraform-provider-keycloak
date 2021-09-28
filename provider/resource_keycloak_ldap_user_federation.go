@@ -138,6 +138,18 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Description:  "ONE_LEVEL: only search for users in the DN specified by user_dn. SUBTREE: search entire LDAP subtree.",
 			},
 
+			"start_tls": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When true, Keycloak will encrypt the connection to LDAP using STARTTLS, which will disable connection pooling.",
+			},
+			"use_password_modify_extended_op": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When `true`, use the LDAPv3 Password Modify Extended Operation (RFC-3062).",
+			},
 			"validate_password_policy": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -318,12 +330,14 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 		CustomUserSearchFilter: data.Get("custom_user_search_filter").(string),
 		SearchScope:            data.Get("search_scope").(string),
 
-		ValidatePasswordPolicy: data.Get("validate_password_policy").(bool),
-		TrustEmail:             data.Get("trust_email").(bool),
-		UseTruststoreSpi:       data.Get("use_truststore_spi").(string),
-		ConnectionTimeout:      data.Get("connection_timeout").(string),
-		ReadTimeout:            data.Get("read_timeout").(string),
-		Pagination:             data.Get("pagination").(bool),
+		StartTls:                    data.Get("start_tls").(bool),
+		UsePasswordModifyExtendedOp: data.Get("use_password_modify_extended_op").(bool),
+		ValidatePasswordPolicy:      data.Get("validate_password_policy").(bool),
+		TrustEmail:                  data.Get("trust_email").(bool),
+		UseTruststoreSpi:            data.Get("use_truststore_spi").(string),
+		ConnectionTimeout:           data.Get("connection_timeout").(string),
+		ReadTimeout:                 data.Get("read_timeout").(string),
+		Pagination:                  data.Get("pagination").(bool),
 
 		BatchSizeForSync:  data.Get("batch_size_for_sync").(int),
 		FullSyncPeriod:    data.Get("full_sync_period").(int),
@@ -387,6 +401,8 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 	data.Set("custom_user_search_filter", ldap.CustomUserSearchFilter)
 	data.Set("search_scope", ldap.SearchScope)
 
+	data.Set("start_tls", ldap.StartTls)
+	data.Set("use_password_modify_extended_op", ldap.UsePasswordModifyExtendedOp)
 	data.Set("validate_password_policy", ldap.ValidatePasswordPolicy)
 	data.Set("trust_email", ldap.TrustEmail)
 	data.Set("use_truststore_spi", ldap.UseTruststoreSpi)
