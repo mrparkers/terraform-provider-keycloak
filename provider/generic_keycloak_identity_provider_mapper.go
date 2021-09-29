@@ -36,6 +36,10 @@ func resourceKeycloakIdentityProviderMapper() *schema.Resource {
 				ForceNew:    true,
 				Description: "IDP Alias",
 			},
+			"config": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 			"extra_config": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -51,7 +55,18 @@ func getIdentityProviderMapperFromData(data *schema.ResourceData) (*keycloak.Ide
 		Name:                  data.Get("name").(string),
 		IdentityProviderAlias: data.Get("identity_provider_alias").(string),
 		Config: &keycloak.IdentityProviderMapperConfig{
-			ExtraConfig: getExtraConfigFromData(data),
+			UserAttribute:         data.Get("config.UserAttribute").(string),
+			UserAttributeName:     data.Get("config.UserAttributeName").(string),
+			Claim:                 data.Get("config.Claim").(string),
+			ClaimValue:            data.Get("config.ClaimValue").(string),
+			HardcodedAttribute:    data.Get("config.HardcodedAttribute").(string),
+			Attribute:             data.Get("config.Attribute").(string),
+			AttributeValue:        data.Get("config.AttributeValue").(string),
+			AttributeFriendlyName: data.Get("config.AttributeFriendlyName").(string),
+			Template:              data.Get("config.Template").(string),
+			Role:                  data.Get("config.Role").(string),
+			JsonField:             data.Get("config.JsonField").(string),
+			ExtraConfig:           getExtraConfigFromData(data),
 		},
 	}
 	return rec, nil
