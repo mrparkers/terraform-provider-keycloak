@@ -133,7 +133,7 @@ type Realm struct {
 	WebAuthnPolicyPasswordlessUserVerificationRequirement     string   `json:"webAuthnPolicyPasswordlessUserVerificationRequirement"`
 
 	// Roles
-	DefaultRoles []string `json:"defaultRoles"`
+	DefaultRole Role `json:"defaultRole"`
 }
 
 type BrowserSecurityHeaders struct {

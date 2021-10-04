@@ -504,14 +504,6 @@ func dataSourceKeycloakRealm() *schema.Resource {
 					Schema: webAuthnSchema,
 				},
 			},
-			//Roles
-			"default_roles": {
-				Type:        schema.TypeSet,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: "Realm level roles assigned to new users.",
-				Optional:    true,
-				Computed:    true,
-			},
 		},
 	}
 }
