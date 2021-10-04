@@ -783,7 +783,6 @@ func TestAccKeycloakRealm_default_client_scopes(t *testing.T) {
 	})
 }
 
-
 func testKeycloakRealm_default_client_scopes(realm string, defaultDefaultClientScopes []string, defaultOptionalClientScopes []string) string {
 
 	defaultDefaultClientScopesString := fmt.Sprintf("%s", arrayOfStringsForTerraformResource(defaultDefaultClientScopes))
