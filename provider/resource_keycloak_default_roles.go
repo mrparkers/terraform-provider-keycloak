@@ -105,7 +105,7 @@ func resourceKeycloakDefaultRolesUpdate(data *schema.ResourceData, meta interfac
 
 	var putList, deleteList []*keycloak.Role
 	for _, roleName := range defaultRoles.DefaultRoles {
-		if !contains(defaultRoleNamesList, roleName) {
+		if !roleListContains(defaultRoleNamesList, roleName) {
 			defaultRoles, err := getRoleByNameFromList(rolesList, roleName)
 			if err != nil {
 				return err
@@ -114,7 +114,7 @@ func resourceKeycloakDefaultRolesUpdate(data *schema.ResourceData, meta interfac
 		}
 	}
 	for _, roleName := range defaultRoleNamesList {
-		if !contains(defaultRoles.DefaultRoles, roleName) {
+		if !roleListContains(defaultRoles.DefaultRoles, roleName) {
 			defaultRoles, err := getRoleByNameFromList(rolesList, roleName)
 			if err != nil {
 				return err
@@ -206,7 +206,7 @@ func getRoleByNameFromList(defaultRoles []*keycloak.Role, name string) (*keycloa
 	return nil, fmt.Errorf("defaultRoles not found by name")
 }
 
-func contains(s []string, e string) bool {
+func roleListContains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
 			return true

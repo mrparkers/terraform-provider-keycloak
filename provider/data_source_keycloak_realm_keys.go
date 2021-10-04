@@ -170,7 +170,7 @@ func filterKeys(allValues []keycloak.Key, filterAttribute string, allowedValues 
 	return result
 }
 
-// Contains checks if the array contains the value
+// Contains checks if the array roleListContains the value
 func Contains(array []interface{}, value interface{}) bool {
 	for _, element := range array {
 		if element == value {

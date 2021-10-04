@@ -73,8 +73,6 @@ resource "keycloak_realm" "realm" {
     relying_party_id          = "keycloak.example.com"
     signature_algorithms      = ["ES256", "RS256"]
   }
-
-  default_roles = [ "uma_authorization" ]
 }
 ```
 
@@ -239,9 +237,6 @@ Each of these attributes are blocks with the following attributes:
 
 - `default_default_client_scopes` - (Optional) A list of default default client scopes to be used for client definitions. Defaults to `[]` or keycloak's built-in default default client-scopes.
 - `default_optional_client_scopes` - (Optional) A list of default optional client scopes to be used for client definitions. Defaults to `[]` or keycloak's built-in default optional client-scopes.
-
-## Roles
-- `default_roles` - (Optional) Realm level roles assigned to new users by default. Defaults to `[]` or keycloak's built-in default roles.
 
 ## Import
 
