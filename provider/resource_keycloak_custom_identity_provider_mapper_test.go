@@ -250,8 +250,8 @@ resource keycloak_custom_identity_provider_mapper oidc {
 	identity_provider_alias  = keycloak_oidc_identity_provider.oidc.alias
 	identity_provider_mapper = "%s"
 	extra_config 			= {
-		UserAttribute = "%s"
-		Claim         = "%s"
+		userAttribute = "%s"
+		claim         = "%s"
 	}
 }
 	`, testAccRealm.Realm, alias, name, mapperType, userAttribute, claimName)
@@ -279,8 +279,8 @@ resource keycloak_custom_identity_provider_mapper oidc {
 	identity_provider_mapper = "%s"
 	extra_config 			= {
 		syncMode      = "%s"
-		UserAttribute = "%s"
-		Claim         = "%s"
+		userAttribute = "%s"
+		claim         = "%s"
 	}
 }
 	`, testAccRealm.Realm, alias, name, mapperType, syncMode, userAttribute, claimName)
@@ -305,8 +305,8 @@ resource keycloak_custom_identity_provider_mapper saml {
 	identity_provider_alias  = keycloak_saml_identity_provider.saml.alias
 	identity_provider_mapper = "%s"
 	extra_config 			= {
-		Attribute     = "%s"
-		UserAttribute = "%s"
+		attribute     = "%s"
+		userAttribute = "%s"
 	}
 }
 	`, testAccRealm.Realm, mapper.IdentityProviderAlias, mapper.Name, mapper.IdentityProviderMapper, mapper.Config.Attribute, mapper.Config.UserAttribute)
