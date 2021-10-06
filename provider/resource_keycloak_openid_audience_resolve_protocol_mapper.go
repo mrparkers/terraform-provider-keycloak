@@ -100,24 +100,6 @@ func resourceKeycloakOpenIdAudienceResolveProtocolMapperRead(data *schema.Resour
 	return nil
 }
 
-//func resourceKeycloakOpenIdAudienceResolveProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
-//	keycloakClient := meta.(*keycloak.KeycloakClient)
-//
-//	openIdAudienceResolveMapper := mapFromDataToOpenIdAudienceResolveProtocolMapper(data)
-//
-//	err := keycloakClient.ValidateOpenIdAudienceResolveProtocolMapper(openIdAudienceResolveMapper)
-//	if err != nil {
-//		return err
-//	}
-//
-//	err = keycloakClient.UpdateOpenIdAudienceResolveProtocolMapper(openIdAudienceResolveMapper)
-//	if err != nil {
-//		return err
-//	}
-//
-//	return resourceKeycloakOpenIdAudienceResolveProtocolMapperRead(data, meta)
-//}
-
 func resourceKeycloakOpenIdAudienceResolveProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
