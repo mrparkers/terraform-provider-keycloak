@@ -28,8 +28,6 @@ resource "keycloak_realm_keystore_rsa" "keystore_rsa" {
 	priority  = 100
 	algorithm = "RS256"
 	keystore_size  = 2048
-
-	disable_read = true
 }
 ```
 
@@ -44,8 +42,6 @@ resource "keycloak_realm_keystore_rsa" "keystore_rsa" {
 - `priority` - (Optional) Priority for the provider. Defaults to `0`
 - `algorithm` - (Optional) Intended algorithm for the key. Defaults to `RS256`
 - `keystore_size` - (Optional) Size for the generated keys. Defaults to `2048`.
-- `disable_read` - (Optional) Don't attempt to read the keys from Keycloak if true. Drift won't be detected. Defaults to `false`.
-
 
 ## Import
 

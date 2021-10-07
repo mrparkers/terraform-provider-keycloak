@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"log"
 	"strings"
 )
 
@@ -78,12 +77,6 @@ func resourceKeycloakRealmKeystoreJavaKeystore() *schema.Resource {
 				Required:    true,
 				Description: "Password for the private key",
 			},
-			"disable_read": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: "Don't attempt to read the passwords from Keycloak if true; drift won't be detected",
-			},
 		},
 	}
 }
@@ -101,15 +94,12 @@ func getRealmKeystoreJavaKeystoreFromData(data *schema.ResourceData) (*keycloak.
 		KeystorePassword: data.Get("keystore_password").(string),
 		KeyAlias:         data.Get("key_alias").(string),
 		KeyPassword:      data.Get("key_password").(string),
-		DisableRead:      data.Get("disable_read").(bool),
 	}
 
 	return keystore, nil
 }
 
 func setRealmKeystoreJavaKeystoreData(data *schema.ResourceData, realmKey *keycloak.RealmKeystoreJavaKeystore) error {
-	disableRead := fmt.Sprintf("%v", data.Get("disable_read"))
-
 	data.SetId(realmKey.Id)
 
 	data.Set("name", realmKey.Name)
@@ -120,11 +110,11 @@ func setRealmKeystoreJavaKeystoreData(data *schema.ResourceData, realmKey *keycl
 	data.Set("priority", realmKey.Priority)
 	data.Set("keystore", realmKey.Keystore)
 	data.Set("key_alias", realmKey.KeyAlias)
-	if disableRead != "true" {
+	if realmKey.KeystorePassword != "**********" {
 		data.Set("keystore_password", realmKey.KeystorePassword)
+	}
+	if realmKey.KeyPassword != "**********" {
 		data.Set("key_password", realmKey.KeyPassword)
-	} else {
-		log.Printf("[WARN] keys does not refresh when disable_read is set to true")
 	}
 	return nil
 }

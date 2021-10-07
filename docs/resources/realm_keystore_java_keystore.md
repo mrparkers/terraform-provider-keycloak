@@ -29,8 +29,6 @@ resource "keycloak_realm_keystore_java_keystore" "java_keystore" {
 
 	priority  = 100
 	algorithm = "RS256"
-
-	disable_read = true
 }
 ```
 
@@ -46,8 +44,6 @@ resource "keycloak_realm_keystore_java_keystore" "java_keystore" {
 - `active` - (Optional) When `false`, key in not used for signing. Defaults to `true`.
 - `priority` - (Optional) Priority for the provider. Defaults to `0`
 - `algorithm` - (Optional) Intended algorithm for the key. Defaults to `RS256`
-- `disable_read` - (Optional) Don't attempt to read the keys from Keycloak if true. Drift won't be detected. Defaults to `false`.
-
 
 ## Import
 

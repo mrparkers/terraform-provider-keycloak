@@ -19,8 +19,6 @@ type RealmKeystoreJavaKeystore struct {
 	KeystorePassword string
 	KeyAlias         string
 	KeyPassword      string
-
-	DisableRead bool
 }
 
 func convertFromRealmKeystoreJavaKeystoreToComponent(realmKey *RealmKeystoreJavaKeystore) *component {
