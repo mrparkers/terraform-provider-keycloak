@@ -175,6 +175,7 @@ func testKeycloakOpenIdAudienceResolveProtocolMapperFetch(resourceName string, m
 		}
 
 		mapper.Id = fetchedMapper.Id
+		mapper.Name = fetchedMapper.Name
 		mapper.ClientId = fetchedMapper.ClientId
 		mapper.ClientScopeId = fetchedMapper.ClientScopeId
 		mapper.RealmId = fetchedMapper.RealmId
@@ -211,6 +212,7 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_openid_audience_resolve_protocol_mapper" "audience_resolve_mapper_client" {
+	name                     = "a-custom-name"
 	realm_id                 = data.keycloak_realm.realm.id
 	client_id                = "${keycloak_openid_client.openid_client.id}"
 }`, testAccRealm.Realm, clientId)

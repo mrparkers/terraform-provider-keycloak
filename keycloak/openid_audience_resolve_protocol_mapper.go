@@ -4,10 +4,9 @@ import (
 	"fmt"
 )
 
-const AudienceResolveMapperName = "audience resolve"
-
 type OpenIdAudienceResolveProtocolMapper struct {
 	Id            string
+	Name          string
 	RealmId       string
 	ClientId      string
 	ClientScopeId string
@@ -16,7 +15,7 @@ type OpenIdAudienceResolveProtocolMapper struct {
 func (mapper *OpenIdAudienceResolveProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
 	return &protocolMapper{
 		Id:             mapper.Id,
-		Name:           AudienceResolveMapperName,
+		Name:           mapper.Name,
 		Protocol:       "openid-connect",
 		ProtocolMapper: "oidc-audience-resolve-mapper",
 		Config:         map[string]string{},
@@ -26,6 +25,7 @@ func (mapper *OpenIdAudienceResolveProtocolMapper) convertToGenericProtocolMappe
 func (protocolMapper *protocolMapper) convertToOpenIdAudienceResolveProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdAudienceResolveProtocolMapper, error) {
 	return &OpenIdAudienceResolveProtocolMapper{
 		Id:            protocolMapper.Id,
+		Name:          protocolMapper.Name,
 		RealmId:       realmId,
 		ClientId:      clientId,
 		ClientScopeId: clientScopeId,
@@ -71,18 +71,14 @@ func (keycloakClient *KeycloakClient) ValidateOpenIdAudienceResolveProtocolMappe
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
 
-	if mapper.ClientId != "" && mapper.ClientScopeId != "" {
-		return fmt.Errorf("validation error: ClientId and ClientScopeId cannot both be set")
-	}
-
 	protocolMappers, err := keycloakClient.listGenericProtocolMappers(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 	if err != nil {
 		return err
 	}
 
 	for _, protocolMapper := range protocolMappers {
-		if protocolMapper.Name == AudienceResolveMapperName && protocolMapper.Id != mapper.Id {
-			return fmt.Errorf("validation error: a protocol mapper with name %s already exists for this client", AudienceResolveMapperName)
+		if protocolMapper.Name == mapper.Name && protocolMapper.Id != mapper.Id {
+			return fmt.Errorf("validation error: a protocol mapper with name %s already exists for this client", mapper.Name)
 		}
 	}
 

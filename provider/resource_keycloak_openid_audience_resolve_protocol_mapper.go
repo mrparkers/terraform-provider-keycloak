@@ -19,6 +19,13 @@ func resourceKeycloakOpenIdAudienceResolveProtocolMapper() *schema.Resource {
 			State: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "A human-friendly name that will appear in the Keycloak console.",
+				Default:     "audience resolve",
+			},
 			"realm_id": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -46,6 +53,7 @@ func resourceKeycloakOpenIdAudienceResolveProtocolMapper() *schema.Resource {
 func mapFromDataToOpenIdAudienceResolveProtocolMapper(data *schema.ResourceData) *keycloak.OpenIdAudienceResolveProtocolMapper {
 	return &keycloak.OpenIdAudienceResolveProtocolMapper{
 		Id:            data.Id(),
+		Name:          data.Get("name").(string),
 		RealmId:       data.Get("realm_id").(string),
 		ClientId:      data.Get("client_id").(string),
 		ClientScopeId: data.Get("client_scope_id").(string),
@@ -54,6 +62,7 @@ func mapFromDataToOpenIdAudienceResolveProtocolMapper(data *schema.ResourceData)
 
 func mapFromOpenIdAudienceResolveMapperToData(mapper *keycloak.OpenIdAudienceResolveProtocolMapper, data *schema.ResourceData) {
 	data.SetId(mapper.Id)
+	data.Set("name", mapper.Name)
 	data.Set("realm_id", mapper.RealmId)
 
 	if mapper.ClientId != "" {
