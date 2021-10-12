@@ -140,6 +140,8 @@ func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 		BindDn:                               acctest.RandString(10),
 		BindCredential:                       acctest.RandString(10),
 		SearchScope:                          randomStringInSlice([]string{"ONE_LEVEL", "SUBTREE"}),
+		StartTls:                             true,
+		UsePasswordModifyExtendedOp:          true,
 		ValidatePasswordPolicy:               true,
 		UseTruststoreSpi:                     randomStringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}),
 		ConnectionTimeout:                    connectionTimeout,
@@ -223,6 +225,8 @@ func TestAccKeycloakLdapUserFederation_basicUpdateKerberosSettings(t *testing.T)
 func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 	t.Parallel()
 	firstEnabled := randomBool()
+	firstStartTls := randomBool()
+	firstUsePasswordModifyExtendedOp := randomBool()
 	firstValidatePasswordPolicy := randomBool()
 	firstPagination := randomBool()
 
@@ -249,6 +253,8 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		BindDn:                               acctest.RandString(10),
 		BindCredential:                       acctest.RandString(10),
 		SearchScope:                          randomStringInSlice([]string{"ONE_LEVEL", "SUBTREE"}),
+		StartTls:                             firstStartTls,
+		UsePasswordModifyExtendedOp:          firstUsePasswordModifyExtendedOp,
 		ValidatePasswordPolicy:               firstValidatePasswordPolicy,
 		TrustEmail:                           firstTrustEmail,
 		UseTruststoreSpi:                     randomStringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}),
@@ -285,6 +291,8 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		BindDn:                               acctest.RandString(10),
 		BindCredential:                       acctest.RandString(10),
 		SearchScope:                          randomStringInSlice([]string{"ONE_LEVEL", "SUBTREE"}),
+		StartTls:                             !firstStartTls,
+		UsePasswordModifyExtendedOp:          !firstUsePasswordModifyExtendedOp,
 		ValidatePasswordPolicy:               !firstValidatePasswordPolicy,
 		TrustEmail:                           secondTrustEmail,
 		UseTruststoreSpi:                     randomStringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}),
@@ -641,12 +649,14 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_credential          = "%s"
 	search_scope             = "%s"
 
-	validate_password_policy = %t
-	trust_email              = %t
-	use_truststore_spi       = "%s"
-	connection_timeout       = "%s"
-	read_timeout             = "%s"
-	pagination               = %t
+	start_tls                       = %t
+	use_password_modify_extended_op = %t
+	validate_password_policy        = %t
+	trust_email                     = %t
+	use_truststore_spi              = "%s"
+	connection_timeout              = "%s"
+	read_timeout                    = "%s"
+	pagination                      = %t
 
 	batch_size_for_sync      = %d
 	full_sync_period         = %d
@@ -667,7 +677,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 		eviction_minute      = %d
 	}
 }
-	`, testAccRealmUserFederation.Realm, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, arrayOfStringsForTerraformResource(ldap.UserObjectClasses), ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.ValidatePasswordPolicy, ldap.TrustEmail, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.ServerPrincipal, ldap.UseKerberosForPasswordAuthentication, ldap.KeyTab, ldap.KerberosRealm, ldap.CachePolicy, ldap.MaxLifespan, *ldap.EvictionDay, *ldap.EvictionHour, *ldap.EvictionMinute)
+	`, testAccRealmUserFederation.Realm, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, arrayOfStringsForTerraformResource(ldap.UserObjectClasses), ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.StartTls, ldap.UsePasswordModifyExtendedOp, ldap.ValidatePasswordPolicy, ldap.TrustEmail, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.ServerPrincipal, ldap.UseKerberosForPasswordAuthentication, ldap.KeyTab, ldap.KerberosRealm, ldap.CachePolicy, ldap.MaxLifespan, *ldap.EvictionDay, *ldap.EvictionHour, *ldap.EvictionMinute)
 }
 
 func testKeycloakLdapUserFederation_basicWithAttrValidation(attr, ldap, val string) string {
