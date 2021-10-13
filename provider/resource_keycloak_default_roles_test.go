@@ -97,7 +97,7 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_default_roles" "default_roles" {
-	realm_id  = data.keycloak_realm.realm.id
+	realm_id  = keycloak_realm.realm.id
     default_roles = ["uma_authorization"]
 }
 	`, realmName)
@@ -111,7 +111,7 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_default_roles" "default_roles" {
-	realm_id  = data.keycloak_realm.realm.id
+	realm_id  = keycloak_realm.realm.id
     default_roles = %s
 }
 	`, realmName, defaultRoles.DefaultRoles)
