@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 	"testing"
 )
 
@@ -16,11 +15,14 @@ func TestAccKeycloakDefaultRoles_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakDefaultRolesDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakDefaultRoles_basic(realmName),
 				Check:  testAccCheckDefaultRolesExists("keycloak_default_roles.default_roles"),
+			},
+			{
+				Config: testKeycloakDefaultRoles_destroy(realmName),
+				Check:  testAccCheckKeycloakDefaultRolesDestroy(realmName),
 			},
 		},
 	})
@@ -42,7 +44,6 @@ func TestAccKeycloakDefaultRoles_updateDefaultRoles(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakDefaultRolesDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakDefaultRoles_basicFromInterface(realmName, groupDefaultRolesOne),
@@ -51,6 +52,10 @@ func TestAccKeycloakDefaultRoles_updateDefaultRoles(t *testing.T) {
 			{
 				Config: testKeycloakDefaultRoles_basicFromInterface(realmName, groupDefaultRolesTwo),
 				Check:  testAccCheckDefaultRolesExists("keycloak_default_roles.default_roles"),
+			},
+			{
+				Config: testKeycloakDefaultRoles_destroy(realmName),
+				Check:  testAccCheckKeycloakDefaultRolesDestroy(realmName),
 			},
 		},
 	})
@@ -67,37 +72,26 @@ func testAccCheckDefaultRolesExists(resourceName string) resource.TestCheckFunc 
 	}
 }
 
-func testAccCheckKeycloakDefaultRolesDestroy() resource.TestCheckFunc {
+func testAccCheckKeycloakDefaultRolesDestroy(realmId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_default_roles" || strings.HasPrefix(name, "data") {
-				continue
-			}
-
-			id := rs.Primary.ID
-			realmId := rs.Primary.Attributes["realm_id"]
-			realm, err := keycloakClient.GetRealm(realmId)
-			if err != nil {
-				return err
-			}
-			// Since we started using the realm as a resource, only this destroy check will be triggered.
-			if realm == nil {
-				return nil
-			}
-
-			composites, err := keycloakClient.GetDefaultRoles(realmId, id)
-			if err != nil {
-				return fmt.Errorf("error getting defaultRoles with id %s: %s", id, err)
-			}
-
-			defaultRoles := getDefaultRoleNames(composites)
-			if err != nil {
-				return err
-			}
-			if len(defaultRoles) != 0 {
-				return fmt.Errorf("%s with id %s still exists", name, id)
-			}
+		realm, err := keycloakClient.GetRealm(realmId)
+		if err != nil {
+			return err
 		}
+
+		composites, err := keycloakClient.GetDefaultRoles(realmId, realm.DefaultRole.Id)
+		if err != nil {
+			return fmt.Errorf("error getting defaultRoles with id %s: %s", realm.DefaultRole.Id, err)
+		}
+
+		defaultRoles := getDefaultRoleNames(composites)
+		if err != nil {
+			return err
+		}
+		if len(defaultRoles) != 0 {
+			return fmt.Errorf("realm %s still has %d default roles, expected zero", realmId, len(defaultRoles))
+		}
+
 		return nil
 	}
 }
@@ -137,6 +131,15 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_default_roles" "default_roles" {
 	realm_id      = keycloak_realm.realm.id
 	default_roles = ["uma_authorization"]
+}
+	`, realmName)
+}
+
+func testKeycloakDefaultRoles_destroy(realmName string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm   = "%s"
+	enabled = true
 }
 	`, realmName)
 }
