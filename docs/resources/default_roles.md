@@ -29,8 +29,9 @@ resource "keycloak_default_roles" "defalut_roles" {
 
 ## Import
 
-Default roles can be imported using the format `{{realm_id}}/{{default_role_id}}`, where `default_role_id` is the unique ID that Keycloak have to
-control default roles. The ID is not easy to find in the GUI, but it appears in the dev tools when editing the default roles.
+Default roles can be imported using the format `{{realm_id}}/{{default_role_id}}`, where `default_role_id` is the unique ID of the composite
+role that Keycloak uses to control default realm level roles. The ID is not easy to find in the GUI, but it appears in the dev tools when editing
+the default roles.
 
 Example:
 
