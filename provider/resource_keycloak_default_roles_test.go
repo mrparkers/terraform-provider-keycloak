@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -9,14 +10,14 @@ import (
 )
 
 func TestAccKeycloakDefaultRoles_basic(t *testing.T) {
-	t.Parallel()
+	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakDefaultRoles_basic(),
+				Config: testKeycloakDefaultRoles_basic(realmName),
 				Check:  testAccCheckDefaultRolesExists("keycloak_default_roles.default_roles"),
 			},
 		},
@@ -24,7 +25,7 @@ func TestAccKeycloakDefaultRoles_basic(t *testing.T) {
 }
 
 func TestAccKeycloakDefaultRoles_updateDefaultRoles(t *testing.T) {
-	t.Parallel()
+	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	groupDefaultRolesOne := &keycloak.DefaultRoles{
 		RealmId:      testAccRealmUserFederation.Realm,
@@ -41,11 +42,11 @@ func TestAccKeycloakDefaultRoles_updateDefaultRoles(t *testing.T) {
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakDefaultRoles_basicFromInterface(groupDefaultRolesOne),
+				Config: testKeycloakDefaultRoles_basicFromInterface(realmName, groupDefaultRolesOne),
 				Check:  testAccCheckDefaultRolesExists("keycloak_default_roles.default_roles"),
 			},
 			{
-				Config: testKeycloakDefaultRoles_basicFromInterface(groupDefaultRolesTwo),
+				Config: testKeycloakDefaultRoles_basicFromInterface(realmName, groupDefaultRolesTwo),
 				Check:  testAccCheckDefaultRolesExists("keycloak_default_roles.default_roles"),
 			},
 		},
@@ -88,26 +89,30 @@ func getKeycloakDefaultRolesFromState(s *terraform.State, resourceName string) (
 	return defaultRoles, nil
 }
 
-func testKeycloakDefaultRoles_basic() string {
+func testKeycloakDefaultRoles_basic(realmName string) string {
 	return fmt.Sprintf(`
-data "keycloak_realm" "realm" {
-	realm = "%s"
+resource "keycloak_realm" "realm" {
+	realm   = "%s"
+	enabled = true
 }
+
 resource "keycloak_default_roles" "default_roles" {
 	realm_id  = data.keycloak_realm.realm.id
     default_roles = ["uma_authorization"]
 }
-	`, testAccRealmUserFederation.Realm)
+	`, realmName)
 }
 
-func testKeycloakDefaultRoles_basicFromInterface(defaultRoles *keycloak.DefaultRoles) string {
+func testKeycloakDefaultRoles_basicFromInterface(realmName string, defaultRoles *keycloak.DefaultRoles) string {
 	return fmt.Sprintf(`
-data "keycloak_realm" "realm" {
-	realm = "%s"
+resource "keycloak_realm" "realm" {
+	realm   = "%s"
+	enabled = true
 }
+
 resource "keycloak_default_roles" "default_roles" {
 	realm_id  = data.keycloak_realm.realm.id
     default_roles = %s
 }
-	`, testAccRealmUserFederation.Realm, defaultRoles.DefaultRoles)
+	`, realmName, defaultRoles.DefaultRoles)
 }
