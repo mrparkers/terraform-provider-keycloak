@@ -199,7 +199,7 @@ The arguments below can be used to configure authentication flow bindings:
 
 ### OTP Policy
 
-The `otp_policy` block with following arguments can be found in the "OTP Policy" tab within the realm settings. 
+The `otp_policy` block with following arguments can be found in the "OTP Policy" tab within the realm settings.
 
 - `type` - (Optional) One Time Password Type, supported Values are `totp` for Time-Based One Time Password and `hotp` for Counter Based. Defaults to `totp`.
 - `algorithm` - (Optional) What hashing algorithm should be used to generate the OTP, Valid options are `HmacSHA1`,`HmacSHA256` and `HmacSHA512`. Defaults to `HmacSHA1`.
