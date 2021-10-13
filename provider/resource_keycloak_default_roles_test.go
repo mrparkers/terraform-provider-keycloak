@@ -76,7 +76,10 @@ func testAccCheckKeycloakDefaultRolesDestroy() resource.TestCheckFunc {
 
 			id := rs.Primary.ID
 			realmId := rs.Primary.Attributes["realm_id"]
-			realm, _ := keycloakClient.GetRealm(realmId)
+			realm, err := keycloakClient.GetRealm(realmId)
+			if err != nil {
+				return err
+			}
 			// Since we started using the realm as a resource, only this destroy check will be triggered.
 			if realm == nil {
 				return nil
@@ -87,7 +90,7 @@ func testAccCheckKeycloakDefaultRolesDestroy() resource.TestCheckFunc {
 				return fmt.Errorf("error getting defaultRoles with id %s: %s", id, err)
 			}
 
-			defaultRoles, err := getDefaultRoleNames(composites)
+			defaultRoles := getDefaultRoleNames(composites)
 			if err != nil {
 				return err
 			}
@@ -113,7 +116,7 @@ func getKeycloakDefaultRolesFromState(s *terraform.State, resourceName string) (
 		return nil, fmt.Errorf("error getting defaultRoles with id %s: %s", id, err)
 	}
 
-	defaultRoleNamesList, _ := getDefaultRoleNames(composites)
+	defaultRoleNamesList := getDefaultRoleNames(composites)
 
 	defaultRoles := &keycloak.DefaultRoles{
 		Id:           id,
@@ -132,8 +135,8 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_default_roles" "default_roles" {
-	realm_id  = keycloak_realm.realm.id
-    default_roles = ["uma_authorization"]
+	realm_id      = keycloak_realm.realm.id
+	default_roles = ["uma_authorization"]
 }
 	`, realmName)
 }
@@ -147,7 +150,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_default_roles" "default_roles" {
 	realm_id  = keycloak_realm.realm.id
-    default_roles = %s
+	default_roles = %s
 }
 	`, realmName, defaultRoles.DefaultRoles)
 }

@@ -63,8 +63,12 @@ func resourceKeycloakDefaultRolesRead(data *schema.ResourceData, meta interface{
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	composites, _ := keycloakClient.GetDefaultRoles(realmId, id)
-	defaultRoleNamesList, _ := getDefaultRoleNames(composites)
+	composites, err := keycloakClient.GetDefaultRoles(realmId, id)
+	if err != nil {
+		return handleNotFoundError(err, data)
+	}
+
+	defaultRoleNamesList := getDefaultRoleNames(composites)
 
 	defaultRoles := &keycloak.DefaultRoles{
 		Id:           id,
@@ -82,17 +86,19 @@ func resourceKeycloakDefaultRolesReconcile(data *schema.ResourceData, meta inter
 
 	defaultRoles := mapFromDataToDefaultRoles(data)
 
-	realm, _ := keycloakClient.GetRealm(defaultRoles.RealmId)
+	realm, err := keycloakClient.GetRealm(defaultRoles.RealmId)
+	if err != nil {
+		return err
+	}
+
 	data.SetId(realm.DefaultRole.Id)
 
 	composites, err := keycloakClient.GetDefaultRoles(defaultRoles.RealmId, realm.DefaultRole.Id)
 	if err != nil {
 		return err
 	}
-	defaultRoleNamesList, err := getDefaultRoleNames(composites)
-	if err != nil {
-		return err
-	}
+
+	defaultRoleNamesList := getDefaultRoleNames(composites)
 	rolesList, err := keycloakClient.GetRealmRoles(defaultRoles.RealmId)
 	if err != nil {
 		return err
@@ -154,7 +160,11 @@ func resourceKeycloakDefaultRolesDelete(data *schema.ResourceData, meta interfac
 
 	defaultRoles := mapFromDataToDefaultRoles(data)
 
-	realm, _ := keycloakClient.GetRealm(defaultRoles.RealmId)
+	realm, err := keycloakClient.GetRealm(defaultRoles.RealmId)
+	if err != nil {
+		return handleNotFoundError(err, data)
+	}
+
 	defaultRoles.Id = realm.DefaultRole.Id
 	data.SetId(defaultRoles.Id)
 
@@ -162,7 +172,7 @@ func resourceKeycloakDefaultRolesDelete(data *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
-	defaultRoleNamesList, err := getDefaultRoleNames(composites)
+	defaultRoleNamesList := getDefaultRoleNames(composites)
 	if err != nil {
 		return err
 	}
@@ -209,12 +219,12 @@ func resourceKeycloakDefaultRolesImport(d *schema.ResourceData, _ interface{}) (
 	return []*schema.ResourceData{d}, nil
 }
 
-func getDefaultRoleNames(roles []*keycloak.Role) ([]string, error) {
+func getDefaultRoleNames(roles []*keycloak.Role) []string {
 	var defaultRolesNames []string
 	for _, defaultRoles := range roles {
 		defaultRolesNames = append(defaultRolesNames, defaultRoles.Name)
 	}
-	return defaultRolesNames, nil
+	return defaultRolesNames
 }
 
 func getRoleByNameFromList(defaultRoles []*keycloak.Role, name string) (*keycloak.Role, error) {
