@@ -31,6 +31,12 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_realm":                                             resourceKeycloakRealm(),
 			"keycloak_realm_events":                                      resourceKeycloakRealmEvents(),
+			"keycloak_realm_keystore_aes_generated":                      resourceKeycloakRealmKeystoreAesGenerated(),
+			"keycloak_realm_keystore_ecdsa_generated":                    resourceKeycloakRealmKeystoreEcdsaGenerated(),
+			"keycloak_realm_keystore_hmac_generated":                     resourceKeycloakRealmKeystoreHmacGenerated(),
+			"keycloak_realm_keystore_java_keystore":                      resourceKeycloakRealmKeystoreJavaKeystore(),
+			"keycloak_realm_keystore_rsa":                                resourceKeycloakRealmKeystoreRsa(),
+			"keycloak_realm_keystore_rsa_generated":                      resourceKeycloakRealmKeystoreRsaGenerated(),
 			"keycloak_required_action":                                   resourceKeycloakRequiredAction(),
 			"keycloak_group":                                             resourceKeycloakGroup(),
 			"keycloak_group_memberships":                                 resourceKeycloakGroupMemberships(),
