@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"strings"
 	"testing"
 )
 
@@ -15,6 +16,7 @@ func TestAccKeycloakDefaultRoles_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakDefaultRolesDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakDefaultRoles_basic(realmName),
@@ -40,6 +42,7 @@ func TestAccKeycloakDefaultRoles_updateDefaultRoles(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakDefaultRolesDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakDefaultRoles_basicFromInterface(realmName, groupDefaultRolesOne),
@@ -60,6 +63,38 @@ func testAccCheckDefaultRolesExists(resourceName string) resource.TestCheckFunc 
 			return err
 		}
 
+		return nil
+	}
+}
+
+func testAccCheckKeycloakDefaultRolesDestroy() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "keycloak_default_roles" || strings.HasPrefix(name, "data") {
+				continue
+			}
+
+			id := rs.Primary.ID
+			realmId := rs.Primary.Attributes["realm_id"]
+			realm, _ := keycloakClient.GetRealm(realmId)
+			// Since we started using the realm as a resource, only this destroy check will be triggered.
+			if realm == nil {
+				return nil
+			}
+
+			composites, err := keycloakClient.GetDefaultRoles(realmId, id)
+			if err != nil {
+				return fmt.Errorf("error getting defaultRoles with id %s: %s", id, err)
+			}
+
+			defaultRoles, err := getDefaultRoleNames(composites)
+			if err != nil {
+				return err
+			}
+			if len(defaultRoles) != 0 {
+				return fmt.Errorf("%s with id %s still exists", name, id)
+			}
+		}
 		return nil
 	}
 }
