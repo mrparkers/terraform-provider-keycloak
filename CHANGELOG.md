@@ -1,3 +1,28 @@
+## v3.5.0 (October 13, 2021)
+
+FEATURES:
+
+- new resource: `keycloak_default_roles` ([#599](https://github.com/mrparkers/terraform-provider-keycloak/pull/599))
+- new resources: `keycloak_realm_keystore_aes_generated`, `keycloak_realm_keystore_ecdsa_generated`, `keycloak_realm_keystore_hmac_generated`, `keycloak_realm_keystore_java_keystore`, `keycloak_realm_keystore_rsa`, and `keycloak_realm_keystore_rsa_generated` ([#582](https://github.com/mrparkers/terraform-provider-keycloak/pull/582))
+- new resource: `keycloak_openid_audience_resolve_protocol_mapper` ([#606](https://github.com/mrparkers/terraform-provider-keycloak/pull/606))
+
+IMPROVEMENTS:
+
+- add `start_tls` and `use_password_modify_extended_op` attributes to `keycloak_ldap_user_federation` resource ([#601](https://github.com/mrparkers/terraform-provider-keycloak/pull/601))
+- `keycloak_openid_client_default_scopes` and `keycloak_openid_client_optional_scopes` resources will now completely reconcile assigned scopes on create ([#594](https://github.com/mrparkers/terraform-provider-keycloak/pull/594))
+  - this means that creating these resources will now remove default / optional scopes that are not specified within the resource configuration. see [#498](https://github.com/mrparkers/terraform-provider-keycloak/issues/498) for more context.
+
+BUG FIXES:
+
+- allow all `extra_config` attributes for `keycloak_custom_identity_provider_mapper` resource ([#607](https://github.com/mrparkers/terraform-provider-keycloak/pull/607))
+- `backchannel_logout_session_required` and `backchannel_logout_revoke_offline_sessions` attributes for `keycloak_openid_client` resource were swapped ([#600](https://github.com/mrparkers/terraform-provider-keycloak/pull/600))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@Vlad-Kirichenko](https://github.com/Vlad-Kirichenko)
+- [@thyming](https://github.com/thyming)
+- [@francois-travais](https://github.com/francois-travais)
+
 ## v3.4.0 (September 16, 2021)
 
 FEATURES:
