@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -86,12 +85,21 @@ func resourceKeycloakDefaultRolesReconcile(data *schema.ResourceData, meta inter
 	realm, _ := keycloakClient.GetRealm(defaultRoles.RealmId)
 	data.SetId(realm.DefaultRole.Id)
 
-	composites, _ := keycloakClient.GetDefaultRoles(defaultRoles.RealmId, realm.DefaultRole.Id)
-	defaultRoleNamesList, _ := getDefaultRoleNames(composites)
-	rolesList, _ := keycloakClient.GetRealmRoles(defaultRoles.RealmId)
+	composites, err := keycloakClient.GetDefaultRoles(defaultRoles.RealmId, realm.DefaultRole.Id)
+	if err != nil {
+		return err
+	}
+	defaultRoleNamesList, err := getDefaultRoleNames(composites)
+	if err != nil {
+		return err
+	}
+	rolesList, err := keycloakClient.GetRealmRoles(defaultRoles.RealmId)
+	if err != nil {
+		return err
+	}
 
 	// skip if actual default roles in keycloak same as we want
-	if reflect.DeepEqual(defaultRoleNamesList, defaultRoles.DefaultRoles) {
+	if roleListsEqual(defaultRoleNamesList, defaultRoles.DefaultRoles) {
 		return nil
 	}
 
@@ -117,13 +125,21 @@ func resourceKeycloakDefaultRolesReconcile(data *schema.ResourceData, meta inter
 
 	// apply if not empty
 	if len(putList) > 0 {
-		err := keycloakClient.AddDefaultRoles(defaultRoles.RealmId, realm.DefaultRole.Id, putList)
+		role := &keycloak.Role{
+			RealmId: defaultRoles.RealmId,
+			Id:      realm.DefaultRole.Id,
+		}
+		err := keycloakClient.AddCompositesToRole(role, putList)
 		if err != nil {
 			return err
 		}
 	}
 	if len(deleteList) > 0 {
-		err := keycloakClient.RemoveDefaultRoles(defaultRoles.RealmId, realm.DefaultRole.Id, deleteList)
+		role := &keycloak.Role{
+			RealmId: defaultRoles.RealmId,
+			Id:      realm.DefaultRole.Id,
+		}
+		err := keycloakClient.RemoveCompositesFromRole(role, deleteList)
 		if err != nil {
 			return err
 		}
@@ -142,11 +158,19 @@ func resourceKeycloakDefaultRolesDelete(data *schema.ResourceData, meta interfac
 	defaultRoles.Id = realm.DefaultRole.Id
 	data.SetId(defaultRoles.Id)
 
-	composites, _ := keycloakClient.GetDefaultRoles(defaultRoles.RealmId, defaultRoles.Id)
-	defaultRoleNamesList, _ := getDefaultRoleNames(composites)
-	rolesList, _ := keycloakClient.GetRealmRoles(defaultRoles.RealmId)
-
-	if reflect.DeepEqual(defaultRoleNamesList, defaultRoles.DefaultRoles) {
+	composites, err := keycloakClient.GetDefaultRoles(defaultRoles.RealmId, realm.DefaultRole.Id)
+	if err != nil {
+		return err
+	}
+	defaultRoleNamesList, err := getDefaultRoleNames(composites)
+	if err != nil {
+		return err
+	}
+	rolesList, err := keycloakClient.GetRealmRoles(defaultRoles.RealmId)
+	if err != nil {
+		return err
+	}
+	if roleListsEqual(defaultRoleNamesList, defaultRoles.DefaultRoles) {
 		return nil
 	}
 
@@ -159,7 +183,11 @@ func resourceKeycloakDefaultRolesDelete(data *schema.ResourceData, meta interfac
 		deleteList = append(deleteList, defaultRoles)
 	}
 	if len(deleteList) > 0 {
-		err := keycloakClient.RemoveDefaultRoles(defaultRoles.RealmId, defaultRoles.Id, deleteList)
+		role := &keycloak.Role{
+			RealmId: defaultRoles.RealmId,
+			Id:      realm.DefaultRole.Id,
+		}
+		err := keycloakClient.RemoveCompositesFromRole(role, deleteList)
 		if err != nil {
 			return err
 		}
@@ -205,4 +233,16 @@ func roleListContains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func roleListsEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
 }
