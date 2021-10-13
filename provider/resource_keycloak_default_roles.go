@@ -11,10 +11,10 @@ import (
 
 func resourceKeycloakDefaultRoles() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakDefaultRolesCreate,
+		Create: resourceKeycloakDefaultRolesReconcile,
 		Read:   resourceKeycloakDefaultRolesRead,
 		Delete: resourceKeycloakDefaultRolesDelete,
-		Update: resourceKeycloakDefaultRolesUpdate,
+		Update: resourceKeycloakDefaultRolesReconcile,
 		Importer: &schema.ResourceImporter{
 			State: resourceKeycloakDefaultRolesImport,
 		},
@@ -58,14 +58,6 @@ func mapFromDefaultRolesToData(data *schema.ResourceData, defaultRoles *keycloak
 	data.Set("default_roles", defaultRoles.DefaultRoles)
 }
 
-func resourceKeycloakDefaultRolesCreate(data *schema.ResourceData, meta interface{}) error {
-	err := resourceKeycloakDefaultRolesUpdate(data, meta)
-	if err != nil {
-		return err
-	}
-	return resourceKeycloakDefaultRolesRead(data, meta)
-}
-
 func resourceKeycloakDefaultRolesRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
@@ -86,7 +78,7 @@ func resourceKeycloakDefaultRolesRead(data *schema.ResourceData, meta interface{
 	return nil
 }
 
-func resourceKeycloakDefaultRolesUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakDefaultRolesReconcile(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	defaultRoles := mapFromDataToDefaultRoles(data)
