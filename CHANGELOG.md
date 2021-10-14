@@ -1,3 +1,9 @@
+## v3.5.1 (October 14, 2021)
+
+BUG FIXES:
+
+- remove `defaultRole` from realm JSON before sending requests to Keycloak to fix compatibility with Keycloak versions older than v13 ([#612](https://github.com/mrparkers/terraform-provider-keycloak/pull/612))
+
 ## v3.5.0 (October 13, 2021)
 
 FEATURES:
