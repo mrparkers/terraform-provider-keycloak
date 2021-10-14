@@ -17,7 +17,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_realm_keystore_rsa_generated" "keystore_rsa_generated" {
 	name      = "my-rsa-generated-key"
-	realm_id  = keycloak_realm.my_realm.realm
+	realm_id  = keycloak_realm.realm.realm
 
 	enabled = true
 	active  = true

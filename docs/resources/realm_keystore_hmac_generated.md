@@ -17,7 +17,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_realm_keystore_hmac_generated" "keystore_hmac_generated" {
 	name      = "my-hmac-generated-key"
-	realm_id  = keycloak_realm.my_realm.realm
+	realm_id  = keycloak_realm.realm.realm
 
 	enabled = true
 	active  = true
