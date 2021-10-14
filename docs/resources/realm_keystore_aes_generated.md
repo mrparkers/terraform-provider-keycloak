@@ -17,7 +17,7 @@ resource "keycloak_realm" "realm" {
 
 resource "keycloak_realm_keystore_aes_generated" "keystore_aes_generated" {
 	name      = "my-aes-generated-key"
-	realm_id  = keycloak_realm.my_realm.realm
+	realm_id  = keycloak_realm.realm.realm
 
 	enabled = true
 	active  = true
