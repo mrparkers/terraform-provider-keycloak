@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -83,6 +84,12 @@ func resourceKeycloakDefaultRolesRead(data *schema.ResourceData, meta interface{
 
 func resourceKeycloakDefaultRolesReconcile(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	if ok, err := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok && err != nil {
+		return errors.New("this resource requires Keycloak v13 or higher")
+	} else if err != nil {
+		return err
+	}
 
 	defaultRoles := mapFromDataToDefaultRoles(data)
 
