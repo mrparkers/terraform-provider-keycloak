@@ -196,21 +196,6 @@ func getKeycloakRealmKeystoreJavaFromState(s *terraform.State,
 	return realmKeystore, nil
 }
 
-func getRealmKeystoreJavaImportId(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return "", fmt.Errorf("resource not found: %s", resourceName)
-		}
-
-		id := rs.Primary.ID
-		realmId := rs.Primary.Attributes["realm_id"]
-		providerId := "rsa-generated"
-
-		return fmt.Sprintf("%s/%s/%s", realmId, providerId, id), nil
-	}
-}
-
 func testKeycloakRealmKeystoreJava_basic(javaKeystoreName string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
@@ -223,8 +208,7 @@ resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 
     keystore          = "misc/java-keystore.jks"
     keystore_password = "12345678"
-    keystore_alias         = "test"
-    keystore_password      = "12345678"
+    keystore_alias    = "test"
 
     priority  = 100
     algorithm = "RS256"
@@ -244,8 +228,7 @@ resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 
     keystore          = "misc/java-keystore.jks"
     keystore_password = "12345678"
-    keystore_alias         = "test"
-    keystore_password      = "12345678"
+    keystore_alias    = "test"
 
 	%s        = "%s"
 }
@@ -264,8 +247,7 @@ resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 
     keystore          = "misc/java-keystore.jks"
     keystore_password = "12345678"
-    keystore_alias         = "test"
-    keystore_password      = "12345678"
+    keystore_alias    = "test"
 
     priority  = %s
     algorithm = "%s"

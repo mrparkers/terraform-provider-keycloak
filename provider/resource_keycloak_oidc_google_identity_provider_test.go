@@ -12,6 +12,8 @@ import (
 )
 
 func TestAccKeycloakOidcGoogleIdentityProvider_basic(t *testing.T) {
+	t.Parallel()
+
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -26,6 +28,8 @@ func TestAccKeycloakOidcGoogleIdentityProvider_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOidcGoogleIdentityProvider_extraConfig(t *testing.T) {
+	t.Parallel()
+
 	customConfigValue := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -46,6 +50,8 @@ func TestAccKeycloakOidcGoogleIdentityProvider_extraConfig(t *testing.T) {
 
 // ensure that extra_config keys which are covered by top-level attributes are not allowed
 func TestAccKeycloakOidcGoogleIdentityProvider_extraConfigInvalid(t *testing.T) {
+	t.Parallel()
+
 	customConfigValue := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -62,6 +68,8 @@ func TestAccKeycloakOidcGoogleIdentityProvider_extraConfigInvalid(t *testing.T) 
 }
 
 func TestAccKeycloakOidcGoogleIdentityProvider_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
+
 	var idp = &keycloak.IdentityProvider{}
 
 	resource.Test(t, resource.TestCase{
@@ -88,6 +96,8 @@ func TestAccKeycloakOidcGoogleIdentityProvider_createAfterManualDestroy(t *testi
 }
 
 func TestAccKeycloakOidcGoogleIdentityProvider_basicUpdateAll(t *testing.T) {
+	t.Parallel()
+
 	firstEnabled := randomBool()
 
 	firstOidc := &keycloak.IdentityProvider{
