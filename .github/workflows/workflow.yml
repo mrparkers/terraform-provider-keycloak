@@ -58,17 +58,13 @@ jobs:
             provider
             scripts
 
-      - name: test output
-        run: |
-          echo ${{ steps.files.outputs.any_changed }}
-
     outputs:
       code-files-changed: steps.files.outputs.any_changed
       go-cache-build: steps.cache-paths.outputs.build
       go-cache-mod: steps.cache-paths.outputs.mod
 
   test:
-    if: startsWith(github.ref, 'refs/tags/v') || needs.verify.outputs.code-files-changed == 'true'
+    if: ${{ startsWith(github.ref, 'refs/tags/v') || needs.verify.outputs.code-files-changed == 'true' }}
     needs:
       - verify
     runs-on: ubuntu-latest
