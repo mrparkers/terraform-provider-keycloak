@@ -64,7 +64,13 @@ jobs:
       go-cache-mod: steps.cache-paths.outputs.mod
 
   test:
-    if: always() && needs.verify.outputs.code-files-changed == 'true'
+    # this conditional is more verbose than I'd like it to be
+    # https://github.com/actions/runner/issues/491
+    if: |
+      always() &&
+      !contains(needs.verify.result, 'failure') &&
+      !contains(needs.verify.result, 'cancelled') &&
+      needs.verify.outputs.code-files-changed
     needs:
       - verify
     runs-on: ubuntu-latest
