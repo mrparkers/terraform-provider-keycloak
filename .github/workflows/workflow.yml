@@ -81,6 +81,9 @@ jobs:
           - '14.0.0'
           - '13.0.1'
       fail-fast: false
+    concurrency:
+      group: ${{ github.head_ref }}
+      cancel-in-progress: true
     services:
       keycloak:
         image: jboss/keycloak:${{ matrix.keycloak-version }}
