@@ -58,6 +58,10 @@ jobs:
             provider
             scripts
 
+      - name: test output
+        run: |
+          echo ${{ steps.files.outputs.any_changed }}
+
     outputs:
       code-files-changed: steps.files.outputs.any_changed
       go-cache-build: steps.cache-paths.outputs.build
