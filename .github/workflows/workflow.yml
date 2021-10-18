@@ -64,7 +64,7 @@ jobs:
       go-cache-mod: steps.cache-paths.outputs.mod
 
   test:
-    if: ${{ startsWith(github.ref, 'refs/tags/v') || needs.verify.outputs.code-files-changed == 'true' }}
+    if: needs.verify.outputs.code-files-changed == 'true'
     needs:
       - verify
     runs-on: ubuntu-latest
