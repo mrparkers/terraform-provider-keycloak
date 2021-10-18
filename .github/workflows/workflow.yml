@@ -70,7 +70,7 @@ jobs:
       always() &&
       !contains(needs.verify.result, 'failure') &&
       !contains(needs.verify.result, 'cancelled') &&
-      needs.verify.outputs.code-files-changed
+      (needs.verify.outputs.code-files-changed || startsWith(github.ref, 'refs/tags/v'))
     needs:
       - verify
     runs-on: ubuntu-latest
