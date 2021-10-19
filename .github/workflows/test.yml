@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 2 # we want the HEAD commit and the previous commit to compare changed files
 
       - name: Set up Go
         uses: actions/setup-go@v2
