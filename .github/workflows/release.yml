@@ -1,0 +1,82 @@
+name: release
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  wait:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for acceptance tests
+        id: wait
+        uses: "WyriHaximus/github-action-wait-for-status@v1.1.2"
+        with:
+          ignoreActions: release
+          checkInterval: 30
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      status: steps.wait.outputs.status
+
+  release:
+    if: |
+      always() &&
+      !contains(needs.wait.result, 'failure') &&
+      !contains(needs.wait.result, 'cancelled') &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      needs.wait.outputs.status == 'success'
+    needs:
+      - wait
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Go Build Cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ needs.verify.outputs.go-cache-build }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+
+      - name: Go Mod Cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ needs.verify.outputs.go-cache-mod }}
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v2
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Get tag name
+        id: get_tag_name
+        run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+
+      - name: Build release notes link
+        id: build-release-notes
+        run: |
+          releaseDate=$(date '+%B-%-d-%Y' | tr '[:upper:]' '[:lower:]')
+          releaseVersion=$(echo ${{ steps.get_tag_name.outputs.TAG }} | tr -d '.')
+          tmp=$(mktemp -d)
+          echo "[Release Notes](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/CHANGELOG.md#${releaseVersion}-${releaseDate})" > ${tmp}/release-notes.md
+          cat ${tmp}/release-notes.md
+          echo ::set-output name=NOTES::${tmp}/release-notes.md
+
+      - name: GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: v0.179.0
+          args: release --rm-dist --release-notes=${{ steps.build-release-notes.outputs.NOTES }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
