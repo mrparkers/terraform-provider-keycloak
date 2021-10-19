@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 func resourceKeycloakGroupsPermissions() *schema.Resource {
@@ -125,7 +126,7 @@ func resourceKeycloakGroupsPermissionsRead(data *schema.ResourceData, meta inter
 		return handleNotFoundError(err, data)
 	}
 
-	data.SetId(groupPermissions.RealmId)
+	data.SetId(groupPermissionsId(groupPermissions.RealmId, groupPermissions.GroupId))
 	data.Set("realm_id", groupPermissions.RealmId)
 	data.Set("group_id", groupPermissions.GroupId)
 	data.Set("enabled", groupPermissions.Enabled)
@@ -144,19 +145,19 @@ func resourceKeycloakGroupsPermissionsRead(data *schema.ResourceData, meta inter
 	}
 
 	if viewMembersScope, err := getOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, groupPermissions.ScopePermissions["view-members"].(string)); err == nil && viewMembersScope != nil {
-		data.Set("map_roles_scope", []interface{}{viewMembersScope})
+		data.Set("view_members_scope", []interface{}{viewMembersScope})
 	} else if err != nil {
 		return err
 	}
 
 	if manageMembersScope, err := getOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, groupPermissions.ScopePermissions["manage-members"].(string)); err == nil && manageMembersScope != nil {
-		data.Set("manage_group_membership_scope", []interface{}{manageMembersScope})
+		data.Set("manage_members_scope", []interface{}{manageMembersScope})
 	} else if err != nil {
 		return err
 	}
 
 	if manageMembershipScope, err := getOpenidClientScopePermissionPolicy(keycloakClient, realmId, realmManagementClient.Id, groupPermissions.ScopePermissions["manage-membership"].(string)); err == nil && manageMembershipScope != nil {
-		data.Set("impersonate_scope", []interface{}{manageMembershipScope})
+		data.Set("manage_membership_scope", []interface{}{manageMembershipScope})
 	} else if err != nil {
 		return err
 	}

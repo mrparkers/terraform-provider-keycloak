@@ -25,15 +25,15 @@ func (keycloakClient *KeycloakClient) DisableGroupsPermissions(realmId, groupId 
 }
 
 func (keycloakClient *KeycloakClient) GetGroupsPermissions(realmId, groupId string) (*GroupsPermissions, error) {
-	var openidClientPermissions GroupsPermissions
+	var groupPermissions GroupsPermissions
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s/management/permissions", realmId, groupId), &openidClientPermissions, nil)
+	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s/management/permissions", realmId, groupId), &groupPermissions, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	openidClientPermissions.RealmId = realmId
-	openidClientPermissions.GroupId = groupId
+	groupPermissions.RealmId = realmId
+	groupPermissions.GroupId = groupId
 
-	return &openidClientPermissions, nil
+	return &groupPermissions, nil
 }
