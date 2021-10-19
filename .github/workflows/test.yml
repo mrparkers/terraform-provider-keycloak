@@ -82,7 +82,7 @@ jobs:
           - '13.0.1'
       fail-fast: false
     concurrency:
-      group: ${{ github.head_ref }}
+      group: ${{ github.head_ref }}-${{ matrix.keycloak-version }}
       cancel-in-progress: true
     services:
       keycloak:
