@@ -12,6 +12,8 @@ import (
 )
 
 func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
+	t.Parallel()
+
 	oidcName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -28,6 +30,8 @@ func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOidcIdentityProvider_extraConfig(t *testing.T) {
+	t.Parallel()
+
 	oidcName := acctest.RandomWithPrefix("tf-acc")
 	customConfigValue := acctest.RandomWithPrefix("tf-acc")
 
@@ -48,6 +52,8 @@ func TestAccKeycloakOidcIdentityProvider_extraConfig(t *testing.T) {
 
 // ensure that extra_config keys which are covered by top-level attributes are not allowed
 func TestAccKeycloakOidcIdentityProvider_extraConfigInvalid(t *testing.T) {
+	t.Parallel()
+
 	oidcName := acctest.RandomWithPrefix("tf-acc")
 	customConfigValue := acctest.RandomWithPrefix("tf-acc")
 
@@ -65,6 +71,8 @@ func TestAccKeycloakOidcIdentityProvider_extraConfigInvalid(t *testing.T) {
 }
 
 func TestAccKeycloakOidcIdentityProvider_keyDefaultScopes(t *testing.T) {
+	t.Parallel()
+
 	oidcName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -84,6 +92,8 @@ func TestAccKeycloakOidcIdentityProvider_keyDefaultScopes(t *testing.T) {
 }
 
 func TestAccKeycloakOidcIdentityProvider_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
+
 	var oidc = &keycloak.IdentityProvider{}
 
 	oidcName := acctest.RandomWithPrefix("tf-acc")
@@ -112,6 +122,8 @@ func TestAccKeycloakOidcIdentityProvider_createAfterManualDestroy(t *testing.T) 
 }
 
 func TestAccKeycloakOidcIdentityProvider_basicUpdateAll(t *testing.T) {
+	t.Parallel()
+
 	firstEnabled := randomBool()
 
 	firstOidc := &keycloak.IdentityProvider{
