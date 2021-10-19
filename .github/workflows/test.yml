@@ -1,0 +1,140 @@
+name: test
+on:
+  push:
+    tags:
+      - "v*"
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - id: cache-paths
+        run: |
+          echo "::set-output name=build::$(go env GOCACHE)"
+          echo "::set-output name=mod::$(go env GOMODCACHE)"
+
+      - name: Go Build Cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.cache-paths.outputs.build }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+
+      - name: Go Mod Cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.cache-paths.outputs.mod }}
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+
+      - name: Verify
+        run: |
+          go mod download
+          make vet
+          make fmtcheck
+
+      # we only want to run tests if any code changes (not for README or docs changes)
+      - name: Check Changed Files
+        id: files
+        uses: tj-actions/changed-files@v1.1.3
+        with:
+          files: |
+            .github
+            go.mod
+            go.sum
+            main.go
+            keycloak
+            provider
+            scripts
+
+    outputs:
+      code-files-changed: steps.files.outputs.any_changed
+      go-cache-build: steps.cache-paths.outputs.build
+      go-cache-mod: steps.cache-paths.outputs.mod
+
+  acceptance:
+    # this conditional is more verbose than I'd like it to be
+    # https://github.com/actions/runner/issues/491
+    if: |
+      always() &&
+      !contains(needs.verify.result, 'failure') &&
+      !contains(needs.verify.result, 'cancelled') &&
+      (needs.verify.outputs.code-files-changed || startsWith(github.ref, 'refs/tags/v'))
+    needs:
+      - verify
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        keycloak-version:
+          - '15.0.2'
+          - '14.0.0'
+          - '13.0.1'
+      fail-fast: false
+    concurrency:
+      group: ${{ github.head_ref }}-${{ matrix.keycloak-version }}
+      cancel-in-progress: true
+    services:
+      keycloak:
+        image: jboss/keycloak:${{ matrix.keycloak-version }}
+        ports:
+          - 8080:8080
+        env:
+          DB_VENDOR: H2
+          KEYCLOAK_LOGLEVEL: INFO
+          KEYCLOAK_USER: keycloak
+          KEYCLOAK_PASSWORD: password
+          JAVA_OPTS: "-Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.profile.feature.admin_fine_grained_authz=enabled -Dkeycloak.profile.feature.token_exchange=enabled"
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Go Build Cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ needs.verify.outputs.go-cache-build }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+
+      - name: Go Mod Cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ needs.verify.outputs.go-cache-mod }}
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+          terraform_version: 1.0.8
+
+      - name: Initialize Keycloak
+        run: ./scripts/wait-for-local-keycloak.sh && ./scripts/create-terraform-client.sh
+
+      - name: Test
+        run: |
+          go mod download
+          make testacc
+        env:
+          KEYCLOAK_CLIENT_ID: terraform
+          KEYCLOAK_CLIENT_SECRET: 884e0f95-0f42-4a63-9b1f-94274655669e
+          KEYCLOAK_CLIENT_TIMEOUT: 30
+          KEYCLOAK_REALM: master
+          KEYCLOAK_URL: "http://localhost:8080"
+          KEYCLOAK_TEST_PASSWORD_GRANT: "true"
+          KEYCLOAK_VERSION: ${{ matrix.keycloak-version }}
+        timeout-minutes: 60
