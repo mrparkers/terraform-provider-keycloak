@@ -35,12 +35,12 @@ func (mapper *OpenIdAudienceProtocolMapper) convertToGenericProtocolMapper() *pr
 }
 
 func (protocolMapper *protocolMapper) convertToOpenIdAudienceProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdAudienceProtocolMapper, error) {
-	addToIdToken, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
+	addToIdToken, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	addToAccessToken, err := strconv.ParseBool(protocolMapper.Config[addToAccessTokenField])
+	addToAccessToken, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToAccessTokenField])
 	if err != nil {
 		return nil, err
 	}
