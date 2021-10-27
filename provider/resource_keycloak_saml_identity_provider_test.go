@@ -13,6 +13,8 @@ import (
 )
 
 func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
+	t.Parallel()
+
 	samlName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -29,6 +31,8 @@ func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
 }
 
 func TestAccKeycloakSamlIdentityProvider_extraConfig(t *testing.T) {
+	t.Parallel()
+
 	samlName := acctest.RandomWithPrefix("tf-acc")
 	customConfigValue := acctest.RandomWithPrefix("tf-acc")
 
@@ -49,6 +53,8 @@ func TestAccKeycloakSamlIdentityProvider_extraConfig(t *testing.T) {
 
 // ensure that extra_config keys which are covered by top-level attributes are not allowed
 func TestAccKeycloakSamlIdentityProvider_extraConfigInvalid(t *testing.T) {
+	t.Parallel()
+
 	samlName := acctest.RandomWithPrefix("tf-acc")
 	customConfigValue := acctest.RandomWithPrefix("tf-acc")
 
@@ -66,6 +72,8 @@ func TestAccKeycloakSamlIdentityProvider_extraConfigInvalid(t *testing.T) {
 }
 
 func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) {
+	t.Parallel()
+
 	var saml = &keycloak.IdentityProvider{}
 
 	samlName := acctest.RandomWithPrefix("tf-acc")
@@ -94,7 +102,8 @@ func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) 
 }
 
 func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
-	realmName := acctest.RandomWithPrefix("tf-acc")
+	t.Parallel()
+
 	firstEnabled := randomBool()
 	firstBackchannel := randomBool()
 	firstValidateSignature := randomBool()
@@ -107,54 +116,52 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 	firstPostBindingRequest := randomBool()
 
 	firstSaml := &keycloak.IdentityProvider{
-		Realm:   realmName,
 		Alias:   acctest.RandString(10),
 		Enabled: firstEnabled,
 		Config: &keycloak.IdentityProviderConfig{
-			EntityId:                         "https://example.com/entity_id/1",
-			SingleSignOnServiceUrl:           "https://example.com/signon/1",
-			BackchannelSupported:             keycloak.KeycloakBoolQuoted(firstBackchannel),
-			ValidateSignature:                keycloak.KeycloakBoolQuoted(firstValidateSignature),
-			HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(firstHideOnLogin),
-			NameIDPolicyFormat:               "Email",
-			SingleLogoutServiceUrl:           "https://example.com/logout/1",
-			SigningCertificate:               acctest.RandString(10),
-			SignatureAlgorithm:               "RSA_SHA512",
-			XmlSignKeyInfoKeyNameTransformer: "KEY_ID",
-			PostBindingAuthnRequest:          keycloak.KeycloakBoolQuoted(firstPostBindingRequest),
-			PostBindingResponse:              keycloak.KeycloakBoolQuoted(firstPostBindingResponse),
-			PostBindingLogout:                keycloak.KeycloakBoolQuoted(firstPostBindingLogout),
-			ForceAuthn:                       keycloak.KeycloakBoolQuoted(firstForceAuthn),
-			WantAssertionsSigned:             keycloak.KeycloakBoolQuoted(firstAssertionsSigned),
-			WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(firstAssertionsEncrypted),
-			GuiOrder:                         strconv.Itoa(acctest.RandIntRange(1, 3)),
-			SyncMode:                         randomStringInSlice(syncModes),
+			EntityId:                        "https://example.com/entity_id/1",
+			SingleSignOnServiceUrl:          "https://example.com/signon/1",
+			BackchannelSupported:            keycloak.KeycloakBoolQuoted(firstBackchannel),
+			ValidateSignature:               keycloak.KeycloakBoolQuoted(firstValidateSignature),
+			HideOnLoginPage:                 keycloak.KeycloakBoolQuoted(firstHideOnLogin),
+			NameIDPolicyFormat:              "Email",
+			SingleLogoutServiceUrl:          "https://example.com/logout/1",
+			SigningCertificate:              acctest.RandString(10),
+			SignatureAlgorithm:              "RSA_SHA512",
+			XmlSigKeyInfoKeyNameTransformer: "KEY_ID",
+			PostBindingAuthnRequest:         keycloak.KeycloakBoolQuoted(firstPostBindingRequest),
+			PostBindingResponse:             keycloak.KeycloakBoolQuoted(firstPostBindingResponse),
+			PostBindingLogout:               keycloak.KeycloakBoolQuoted(firstPostBindingLogout),
+			ForceAuthn:                      keycloak.KeycloakBoolQuoted(firstForceAuthn),
+			WantAssertionsSigned:            keycloak.KeycloakBoolQuoted(firstAssertionsSigned),
+			WantAssertionsEncrypted:         keycloak.KeycloakBoolQuoted(firstAssertionsEncrypted),
+			GuiOrder:                        strconv.Itoa(acctest.RandIntRange(1, 3)),
+			SyncMode:                        randomStringInSlice(syncModes),
 		},
 	}
 
 	secondSaml := &keycloak.IdentityProvider{
-		Realm:   realmName,
 		Alias:   acctest.RandString(10),
 		Enabled: !firstEnabled,
 		Config: &keycloak.IdentityProviderConfig{
-			EntityId:                         "https://example.com/entity_id/2",
-			SingleSignOnServiceUrl:           "https://example.com/signon/2",
-			BackchannelSupported:             keycloak.KeycloakBoolQuoted(!firstBackchannel),
-			ValidateSignature:                keycloak.KeycloakBoolQuoted(!firstValidateSignature),
-			HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(!firstHideOnLogin),
-			NameIDPolicyFormat:               "Persistent",
-			SingleLogoutServiceUrl:           "https://example.com/logout/2",
-			SigningCertificate:               acctest.RandString(10),
-			SignatureAlgorithm:               "RSA_SHA256",
-			XmlSignKeyInfoKeyNameTransformer: "NONE",
-			PostBindingAuthnRequest:          keycloak.KeycloakBoolQuoted(!firstPostBindingRequest),
-			PostBindingResponse:              keycloak.KeycloakBoolQuoted(!firstPostBindingResponse),
-			PostBindingLogout:                keycloak.KeycloakBoolQuoted(!firstPostBindingLogout),
-			ForceAuthn:                       keycloak.KeycloakBoolQuoted(!firstForceAuthn),
-			WantAssertionsSigned:             keycloak.KeycloakBoolQuoted(!firstAssertionsSigned),
-			WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(!firstAssertionsEncrypted),
-			GuiOrder:                         strconv.Itoa(acctest.RandIntRange(1, 3)),
-			SyncMode:                         randomStringInSlice(syncModes),
+			EntityId:                        "https://example.com/entity_id/2",
+			SingleSignOnServiceUrl:          "https://example.com/signon/2",
+			BackchannelSupported:            keycloak.KeycloakBoolQuoted(!firstBackchannel),
+			ValidateSignature:               keycloak.KeycloakBoolQuoted(!firstValidateSignature),
+			HideOnLoginPage:                 keycloak.KeycloakBoolQuoted(!firstHideOnLogin),
+			NameIDPolicyFormat:              "Persistent",
+			SingleLogoutServiceUrl:          "https://example.com/logout/2",
+			SigningCertificate:              acctest.RandString(10),
+			SignatureAlgorithm:              "RSA_SHA256",
+			XmlSigKeyInfoKeyNameTransformer: "NONE",
+			PostBindingAuthnRequest:         keycloak.KeycloakBoolQuoted(!firstPostBindingRequest),
+			PostBindingResponse:             keycloak.KeycloakBoolQuoted(!firstPostBindingResponse),
+			PostBindingLogout:               keycloak.KeycloakBoolQuoted(!firstPostBindingLogout),
+			ForceAuthn:                      keycloak.KeycloakBoolQuoted(!firstForceAuthn),
+			WantAssertionsSigned:            keycloak.KeycloakBoolQuoted(!firstAssertionsSigned),
+			WantAssertionsEncrypted:         keycloak.KeycloakBoolQuoted(!firstAssertionsEncrypted),
+			GuiOrder:                        strconv.Itoa(acctest.RandIntRange(1, 3)),
+			SyncMode:                        randomStringInSlice(syncModes),
 		},
 	}
 
@@ -314,5 +321,5 @@ resource "keycloak_saml_identity_provider" "saml" {
 	gui_order                  = %s
 	sync_mode                  = "%s"
 }
-	`, testAccRealm.Realm, saml.Alias, saml.Enabled, saml.Config.EntityId, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSignKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted), saml.Config.GuiOrder, saml.Config.SyncMode)
+	`, testAccRealm.Realm, saml.Alias, saml.Enabled, saml.Config.EntityId, saml.Config.SingleSignOnServiceUrl, bool(saml.Config.BackchannelSupported), bool(saml.Config.ValidateSignature), bool(saml.Config.HideOnLoginPage), saml.Config.NameIDPolicyFormat, saml.Config.SingleLogoutServiceUrl, saml.Config.SigningCertificate, saml.Config.SignatureAlgorithm, saml.Config.XmlSigKeyInfoKeyNameTransformer, bool(saml.Config.PostBindingAuthnRequest), bool(saml.Config.PostBindingResponse), bool(saml.Config.PostBindingLogout), bool(saml.Config.ForceAuthn), bool(saml.Config.WantAssertionsSigned), bool(saml.Config.WantAssertionsEncrypted), saml.Config.GuiOrder, saml.Config.SyncMode)
 }

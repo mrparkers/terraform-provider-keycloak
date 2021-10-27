@@ -37,12 +37,12 @@ func (mapper *OpenIdUserSessionNoteProtocolMapper) convertToGenericProtocolMappe
 }
 
 func (protocolMapper *protocolMapper) convertToOpenIdUserSessionNoteProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdUserSessionNoteProtocolMapper, error) {
-	addToIdToken, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
+	addToIdToken, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	addToAccessToken, err := strconv.ParseBool(protocolMapper.Config[addToAccessTokenField])
+	addToAccessToken, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToAccessTokenField])
 	if err != nil {
 		return nil, err
 	}

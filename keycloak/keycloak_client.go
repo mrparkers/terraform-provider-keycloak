@@ -18,6 +18,8 @@ import (
 	"github.com/hashicorp/go-version"
 
 	"golang.org/x/net/publicsuffix"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 type KeycloakClient struct {
@@ -49,33 +51,6 @@ const (
 )
 
 func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string, additionalHeaders map[string]string) (*KeycloakClient, error) {
-	cookieJar, err := cookiejar.New(&cookiejar.Options{
-		PublicSuffixList: publicsuffix.List,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: tlsInsecureSkipVerify},
-		Proxy:           http.ProxyFromEnvironment,
-	}
-
-	httpClient := &http.Client{
-		Timeout:   time.Second * time.Duration(clientTimeout),
-		Transport: transport,
-		Jar:       cookieJar,
-	}
-
-	if caCert != "" {
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM([]byte(caCert))
-		httpClient.Transport = &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs: caCertPool,
-			},
-		}
-	}
 	clientCredentials := &ClientCredentials{
 		ClientId:     clientId,
 		ClientSecret: clientSecret,
@@ -94,6 +69,11 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 		}
 	}
 
+	httpClient, err := newHttpClient(tlsInsecureSkipVerify, clientTimeout, caCert)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create http client: %v", err)
+	}
+
 	keycloakClient := KeycloakClient{
 		baseUrl:           url + basePath,
 		clientCredentials: clientCredentials,
@@ -107,7 +87,7 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 	if keycloakClient.initialLogin {
 		err = keycloakClient.login()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to perform initial login to Keycloak: %v", err)
 		}
 	}
 
@@ -463,4 +443,36 @@ func (keycloakClient *KeycloakClient) marshal(requestBody interface{}) ([]byte, 
 	}
 
 	return json.Marshal(requestBody)
+}
+
+func newHttpClient(tlsInsecureSkipVerify bool, clientTimeout int, caCert string) (*http.Client, error) {
+	cookieJar, err := cookiejar.New(&cookiejar.Options{
+		PublicSuffixList: publicsuffix.List,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: tlsInsecureSkipVerify},
+		Proxy:           http.ProxyFromEnvironment,
+	}
+
+	if caCert != "" {
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM([]byte(caCert))
+		transport.TLSClientConfig.RootCAs = caCertPool
+	}
+
+	retryClient := retryablehttp.NewClient()
+	retryClient.RetryMax = 1
+	retryClient.RetryWaitMin = time.Second * 1
+	retryClient.RetryWaitMax = time.Second * 3
+
+	httpClient := retryClient.StandardClient()
+	httpClient.Timeout = time.Second * time.Duration(clientTimeout)
+	httpClient.Transport = transport
+	httpClient.Jar = cookieJar
+
+	return httpClient, nil
 }

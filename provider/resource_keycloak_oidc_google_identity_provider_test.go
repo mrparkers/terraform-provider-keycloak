@@ -11,6 +11,11 @@ import (
 	"testing"
 )
 
+/*
+	note: we cannot use parallel tests for this resource as only one instance of a google identity provider can be created
+	for a realm.
+*/
+
 func TestAccKeycloakOidcGoogleIdentityProvider_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

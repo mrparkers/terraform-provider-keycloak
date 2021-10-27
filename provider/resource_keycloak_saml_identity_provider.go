@@ -153,24 +153,24 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 	rec.ProviderId = "saml"
 
 	samlIdentityProviderConfig := &keycloak.IdentityProviderConfig{
-		ValidateSignature:                keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
-		HideOnLoginPage:                  keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
-		BackchannelSupported:             keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
-		NameIDPolicyFormat:               nameIdPolicyFormats[data.Get("name_id_policy_format").(string)],
-		EntityId:                         data.Get("entity_id").(string),
-		SingleLogoutServiceUrl:           data.Get("single_logout_service_url").(string),
-		SingleSignOnServiceUrl:           data.Get("single_sign_on_service_url").(string),
-		SigningCertificate:               data.Get("signing_certificate").(string),
-		SignatureAlgorithm:               data.Get("signature_algorithm").(string),
-		XmlSignKeyInfoKeyNameTransformer: data.Get("xml_sign_key_info_key_name_transformer").(string),
-		PostBindingAuthnRequest:          keycloak.KeycloakBoolQuoted(data.Get("post_binding_authn_request").(bool)),
-		PostBindingResponse:              keycloak.KeycloakBoolQuoted(data.Get("post_binding_response").(bool)),
-		PostBindingLogout:                keycloak.KeycloakBoolQuoted(data.Get("post_binding_logout").(bool)),
-		ForceAuthn:                       keycloak.KeycloakBoolQuoted(data.Get("force_authn").(bool)),
-		WantAssertionsSigned:             keycloak.KeycloakBoolQuoted(data.Get("want_assertions_signed").(bool)),
-		WantAssertionsEncrypted:          keycloak.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
-		PrincipalType:                    data.Get("principal_type").(string),
-		PrincipalAttribute:               data.Get("principal_attribute").(string),
+		ValidateSignature:               keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
+		HideOnLoginPage:                 keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
+		BackchannelSupported:            keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
+		NameIDPolicyFormat:              nameIdPolicyFormats[data.Get("name_id_policy_format").(string)],
+		EntityId:                        data.Get("entity_id").(string),
+		SingleLogoutServiceUrl:          data.Get("single_logout_service_url").(string),
+		SingleSignOnServiceUrl:          data.Get("single_sign_on_service_url").(string),
+		SigningCertificate:              data.Get("signing_certificate").(string),
+		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
+		XmlSigKeyInfoKeyNameTransformer: data.Get("xml_sign_key_info_key_name_transformer").(string),
+		PostBindingAuthnRequest:         keycloak.KeycloakBoolQuoted(data.Get("post_binding_authn_request").(bool)),
+		PostBindingResponse:             keycloak.KeycloakBoolQuoted(data.Get("post_binding_response").(bool)),
+		PostBindingLogout:               keycloak.KeycloakBoolQuoted(data.Get("post_binding_logout").(bool)),
+		ForceAuthn:                      keycloak.KeycloakBoolQuoted(data.Get("force_authn").(bool)),
+		WantAssertionsSigned:            keycloak.KeycloakBoolQuoted(data.Get("want_assertions_signed").(bool)),
+		WantAssertionsEncrypted:         keycloak.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
+		PrincipalType:                   data.Get("principal_type").(string),
+		PrincipalAttribute:              data.Get("principal_attribute").(string),
 	}
 
 	if _, ok := data.GetOk("signature_algorithm"); ok {
@@ -198,7 +198,7 @@ func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("single_sign_on_service_url", identityProvider.Config.SingleSignOnServiceUrl)
 	data.Set("signing_certificate", identityProvider.Config.SigningCertificate)
 	data.Set("signature_algorithm", identityProvider.Config.SignatureAlgorithm)
-	data.Set("xml_sign_key_info_key_name_transformer", identityProvider.Config.XmlSignKeyInfoKeyNameTransformer)
+	data.Set("xml_sign_key_info_key_name_transformer", identityProvider.Config.XmlSigKeyInfoKeyNameTransformer)
 	data.Set("post_binding_authn_request", identityProvider.Config.PostBindingAuthnRequest)
 	data.Set("post_binding_response", identityProvider.Config.PostBindingResponse)
 	data.Set("post_binding_logout", identityProvider.Config.PostBindingLogout)

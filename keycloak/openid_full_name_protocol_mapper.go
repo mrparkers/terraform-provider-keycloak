@@ -32,17 +32,17 @@ func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *pr
 }
 
 func (protocolMapper *protocolMapper) convertToOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdFullNameProtocolMapper, error) {
-	idTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
+	idTokenClaim, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	accessTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToAccessTokenField])
+	accessTokenClaim, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToAccessTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	userinfoTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToUserInfoField])
+	userinfoTokenClaim, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToUserInfoField])
 	if err != nil {
 		return nil, err
 	}
