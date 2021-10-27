@@ -1,8 +1,8 @@
 ---
-page_title: "keycloak_groups_permissions Resource"
+page_title: "keycloak_group_permissions Resource"
 ---
 
-# keycloak_groups_permissions
+# keycloak_group_permissions
 
 Allows you to manage all group Scope Based Permissions https://www.keycloak.org/docs/latest/server_admin/#group.
 
@@ -55,7 +55,7 @@ resource "keycloak_openid_client_group_policy" "test" {
 	]
 }
 
-resource "keycloak_groups_permissions" "test" {
+resource "keycloak_group_permissions" "test" {
 	realm_id                               = keycloak_realm.realm.id
 	group_id                               = keycloak_group.group.id
 	manage_members_scope {

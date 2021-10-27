@@ -19,10 +19,10 @@ func TestAccKeycloakGroupPermission_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakGroupPermission_basic(groupName),
-				Check:  testAccCheckKeycloakGroupPermissionExists("keycloak_groups_permissions.test"),
+				Check:  testAccCheckKeycloakGroupPermissionExists("keycloak_group_permissions.test"),
 			},
 			{
-				ResourceName:      "keycloak_groups_permissions.test",
+				ResourceName:      "keycloak_group_permissions.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -88,7 +88,7 @@ func testAccCheckKeycloakGroupPermissionExists(resourceName string) resource.Tes
 	}
 }
 
-func getGroupPermissionsFromState(s *terraform.State, resourceName string) (*keycloak.GroupsPermissions, error) {
+func getGroupPermissionsFromState(s *terraform.State, resourceName string) (*keycloak.GroupPermissions, error) {
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
 	rs, ok := s.RootModule().Resources[resourceName]
@@ -99,7 +99,7 @@ func getGroupPermissionsFromState(s *terraform.State, resourceName string) (*key
 	realmId := rs.Primary.Attributes["realm_id"]
 	groupId := rs.Primary.Attributes["group_id"]
 
-	permissions, err := keycloakClient.GetGroupsPermissions(realmId, groupId)
+	permissions, err := keycloakClient.GetGroupPermissions(realmId, groupId)
 	if err != nil {
 		return nil, fmt.Errorf("error getting group permissions with realm id %s and group id %s : %s", realmId, groupId, err)
 	}
@@ -144,7 +144,7 @@ resource "keycloak_openid_client_group_policy" "test" {
 	]
 }
 
-resource "keycloak_groups_permissions" "test" {
+resource "keycloak_group_permissions" "test" {
 	realm_id                               = data.keycloak_realm.realm.id
 	group_id                               = keycloak_group.group.id
 	manage_members_scope {

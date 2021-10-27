@@ -8,14 +8,14 @@ import (
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-func resourceKeycloakGroupsPermissions() *schema.Resource {
+func resourceKeycloakGroupPermissions() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakGroupsPermissionsCreate,
-		Read:   resourceKeycloakGroupsPermissionsRead,
-		Delete: resourceKeycloakGroupsPermissionsDelete,
-		Update: resourceKeycloakGroupsPermissionsUpdate,
+		Create: resourceKeycloakGroupPermissionsCreate,
+		Read:   resourceKeycloakGroupPermissionsRead,
+		Delete: resourceKeycloakGroupPermissionsDelete,
+		Update: resourceKeycloakGroupPermissionsUpdate,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakGroupsPermissionsImport,
+			State: resourceKeycloakGroupPermissionsImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -50,24 +50,24 @@ func groupPermissionsId(realmId, groupId string) string {
 	return fmt.Sprintf("%s/%s", realmId, groupId)
 }
 
-func resourceKeycloakGroupsPermissionsCreate(data *schema.ResourceData, meta interface{}) error {
-	return resourceKeycloakGroupsPermissionsUpdate(data, meta)
+func resourceKeycloakGroupPermissionsCreate(data *schema.ResourceData, meta interface{}) error {
+	return resourceKeycloakGroupPermissionsUpdate(data, meta)
 }
 
-func resourceKeycloakGroupsPermissionsUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupPermissionsUpdate(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
 
 	// the existence of this resource implies that it is enabled.
-	err := keycloakClient.EnableGroupsPermissions(realmId, groupId)
+	err := keycloakClient.EnableGroupPermissions(realmId, groupId)
 	if err != nil {
 		return err
 	}
 
 	// setting scope permissions requires us to fetch the users permissions details, as well as the realm management client
-	groupPermissions, err := keycloakClient.GetGroupsPermissions(realmId, groupId)
+	groupPermissions, err := keycloakClient.GetGroupPermissions(realmId, groupId)
 	if err != nil {
 		return err
 	}
@@ -108,10 +108,10 @@ func resourceKeycloakGroupsPermissionsUpdate(data *schema.ResourceData, meta int
 		}
 	}
 
-	return resourceKeycloakGroupsPermissionsRead(data, meta)
+	return resourceKeycloakGroupPermissionsRead(data, meta)
 }
 
-func resourceKeycloakGroupsPermissionsRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupPermissionsRead(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
@@ -121,7 +121,7 @@ func resourceKeycloakGroupsPermissionsRead(data *schema.ResourceData, meta inter
 		return err
 	}
 
-	groupPermissions, err := keycloakClient.GetGroupsPermissions(realmId, groupId)
+	groupPermissions, err := keycloakClient.GetGroupPermissions(realmId, groupId)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -165,16 +165,16 @@ func resourceKeycloakGroupsPermissionsRead(data *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceKeycloakGroupsPermissionsDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupPermissionsDelete(data *schema.ResourceData, meta interface{}) error {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
 
-	return keycloakClient.DisableGroupsPermissions(realmId, groupId)
+	return keycloakClient.DisableGroupPermissions(realmId, groupId)
 }
 
-func resourceKeycloakGroupsPermissionsImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakGroupPermissionsImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{groupId}}")
