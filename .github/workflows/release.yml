@@ -34,16 +34,21 @@ jobs:
         with:
           go-version: 1.16
 
+      - id: cache-paths
+        run: |
+          echo "::set-output name=build::$(go env GOCACHE)"
+          echo "::set-output name=mod::$(go env GOMODCACHE)"
+
       - name: Go Build Cache
         uses: actions/cache@v2
         with:
-          path: ${{ needs.verify.outputs.go-cache-build }}
+          path: ${{ steps.cache-paths.outputs.build }}
           key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
 
       - name: Go Mod Cache
         uses: actions/cache@v2
         with:
-          path: ${{ needs.verify.outputs.go-cache-mod }}
+          path: ${{ steps.cache-paths.outputs.mod }}
           key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
 
       - name: Import GPG key
