@@ -64,6 +64,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Computed:  true,
 				Sensitive: true,
 			},
+			"client_authenticator_type": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Computed:  true,
+			},
 			"standard_flow_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -280,6 +285,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		Enabled:                   data.Get("enabled").(bool),
 		Description:               data.Get("description").(string),
 		ClientSecret:              data.Get("client_secret").(string),
+		ClientAuthenticatorType:   data.Get("client_authenticator_type").(string),
 		StandardFlowEnabled:       data.Get("standard_flow_enabled").(bool),
 		ImplicitFlowEnabled:       data.Get("implicit_flow_enabled").(bool),
 		DirectAccessGrantsEnabled: data.Get("direct_access_grants_enabled").(bool),
@@ -372,6 +378,7 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("enabled", client.Enabled)
 	data.Set("description", client.Description)
 	data.Set("client_secret", client.ClientSecret)
+	data.Set("client_authenticator_type", client.ClientAuthenticatorType)
 	data.Set("standard_flow_enabled", client.StandardFlowEnabled)
 	data.Set("implicit_flow_enabled", client.ImplicitFlowEnabled)
 	data.Set("direct_access_grants_enabled", client.DirectAccessGrantsEnabled)
