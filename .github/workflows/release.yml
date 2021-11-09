@@ -22,12 +22,6 @@ jobs:
       status: steps.wait.outputs.status
 
   release:
-    if: |
-      always() &&
-      !contains(needs.wait.result, 'failure') &&
-      !contains(needs.wait.result, 'cancelled') &&
-      startsWith(github.ref, 'refs/tags/v') &&
-      needs.wait.outputs.status == 'success'
     needs:
       - wait
     runs-on: ubuntu-latest
