@@ -407,6 +407,17 @@ func resourceKeycloakRealm() *schema.Resource {
 				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
+			"oauth2_device_code_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"oauth2_device_polling_interval": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
 
 			// internationalization
 			"internationalization": {
@@ -862,6 +873,18 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		realm.ActionTokenGeneratedByAdminLifespan = actionTokenGeneratedByAdminLifespanDurationString
 	}
 
+	if oauth2DeviceCodeLifespan := data.Get("oauth2_device_code_lifespan").(string); oauth2DeviceCodeLifespan != "" {
+		oauth2DeviceCodeLifespanDurationString, err := getSecondsFromDurationString(oauth2DeviceCodeLifespan)
+		if err != nil {
+			return nil, err
+		}
+		realm.Oauth2DeviceCodeLifespan = oauth2DeviceCodeLifespanDurationString
+	}
+
+	if oauth2DevicePollingInterval, ok := data.GetOk("oauth2_device_polling_interval"); ok {
+		realm.Oauth2DevicePollingInterval = oauth2DevicePollingInterval.(int)
+	}
+
 	//security defenses
 	if v, ok := data.GetOk("security_defenses"); ok {
 		securityDefensesSettings := v.([]interface{})[0].(map[string]interface{})
@@ -1166,6 +1189,8 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("access_code_lifespan_user_action", getDurationStringFromSeconds(realm.AccessCodeLifespanUserAction))
 	data.Set("action_token_generated_by_user_lifespan", getDurationStringFromSeconds(realm.ActionTokenGeneratedByUserLifespan))
 	data.Set("action_token_generated_by_admin_lifespan", getDurationStringFromSeconds(realm.ActionTokenGeneratedByAdminLifespan))
+	data.Set("oauth2_device_code_lifespan", getDurationStringFromSeconds(realm.Oauth2DeviceCodeLifespan))
+	data.Set("oauth2_device_polling_interval", realm.Oauth2DevicePollingInterval)
 
 	//internationalization
 	if realm.InternationalizationEnabled {
