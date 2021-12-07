@@ -8,12 +8,13 @@ jobs:
   wait:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    name: Wait for acceptance tests
     steps:
       - name: Wait for acceptance tests
         id: wait
-        uses: "WyriHaximus/github-action-wait-for-status@v1.1.2"
+        uses: "WyriHaximus/github-action-wait-for-status@v1.4.0"
         with:
-          ignoreActions: release
+          ignoreActions: Wait for acceptance tests
           checkInterval: 30
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -21,12 +22,6 @@ jobs:
       status: steps.wait.outputs.status
 
   release:
-    if: |
-      always() &&
-      !contains(needs.wait.result, 'failure') &&
-      !contains(needs.wait.result, 'cancelled') &&
-      startsWith(github.ref, 'refs/tags/v') &&
-      needs.wait.outputs.status == 'success'
     needs:
       - wait
     runs-on: ubuntu-latest
@@ -39,16 +34,21 @@ jobs:
         with:
           go-version: 1.16
 
+      - id: cache-paths
+        run: |
+          echo "::set-output name=build::$(go env GOCACHE)"
+          echo "::set-output name=mod::$(go env GOMODCACHE)"
+
       - name: Go Build Cache
         uses: actions/cache@v2
         with:
-          path: ${{ needs.verify.outputs.go-cache-build }}
+          path: ${{ steps.cache-paths.outputs.build }}
           key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
 
       - name: Go Mod Cache
         uses: actions/cache@v2
         with:
-          path: ${{ needs.verify.outputs.go-cache-mod }}
+          path: ${{ steps.cache-paths.outputs.mod }}
           key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
 
       - name: Import GPG key

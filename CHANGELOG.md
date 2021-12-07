@@ -1,3 +1,19 @@
+## v3.6.0 (November 9, 2021)
+
+FEATURES:
+
+- new resource: `keycloak_group_permissions` ([#617](https://github.com/mrparkers/terraform-provider-keycloak/pull/617))
+
+BUG FIXES:
+
+- `xml_sign_key_info_key_name_transformer` attribute for `keycloak_saml_identity_provider` resource used incorrect spelling, causing it to not be set correctly ([#614](https://github.com/mrparkers/terraform-provider-keycloak/pull/614))
+- when querying protocol mappers from the Keycloak API, treat quoted boolean attributes as `false` when receiving an empty string. this should fix issues when importing protocol mappers that were created by Keycloak ([#622](https://github.com/mrparkers/terraform-provider-keycloak/pull/622))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@jkemming](https://github.com/jkemming)
+- [@hoeggi](https://github.com/hoeggi)
+
 ## v3.5.1 (October 14, 2021)
 
 BUG FIXES:
