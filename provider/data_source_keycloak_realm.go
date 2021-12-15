@@ -309,6 +309,14 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"oauth2_device_code_lifespan": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"oauth2_device_polling_interval": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 
 			//internationalization
 			"internationalization": {

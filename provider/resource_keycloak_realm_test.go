@@ -392,6 +392,31 @@ func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_tokenSettingsOauth2Device(t *testing.T) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+		t.Skip()
+	}
+
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmName, realmDisplayNameHtml),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+			{
+				Config: testKeycloakRealm_tokenSettingsOauth2Device(realmName),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
 	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
@@ -439,6 +464,36 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 
 					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "action_token_generated_by_admin_lifespan"),
 					TestCheckResourceAttrNot("keycloak_realm.realm", "action_token_generated_by_admin_lifespan", "0s"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_oauth2DeviceSettings(t *testing.T) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+		t.Skip()
+	}
+
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "oauth2_device_code_lifespan"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "oauth2_device_code_lifespan", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "oauth2_device_polling_interval"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "oauth2_device_polling_interval", "0"),
 				),
 			},
 		},
@@ -1471,6 +1526,22 @@ resource "keycloak_realm" "realm" {
 	action_token_generated_by_admin_lifespan = "%s"
 }
 	`, realm, realm, defaultSignatureAlgorithm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, ssoSessionIdleTimeoutRememberMe, ssoSessionMaxLifespanRememberMe, offlineSessionIdleTimeout, offlineSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
+}
+
+func testKeycloakRealm_tokenSettingsOauth2Device(realm string) string {
+	oauth2DeviceCodeLifespan := randomDurationString()
+	oauth2DevicePollingInterval := "10"
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm                                    = "%s"
+	enabled                                  = true
+	display_name                             = "%s"
+
+	oauth2_device_code_lifespan              = "%s"
+	oauth2_device_polling_interval           = "%s"
+}
+	`, realm, realm, oauth2DeviceCodeLifespan, oauth2DevicePollingInterval)
 }
 
 func testKeycloakRealm_securityDefensesHeaders(realm, realmDisplayName, xFrameOptions string) string {

@@ -91,7 +91,8 @@ masterRealmExtendAccessToken=$(jq -n "{
     accessCodeLifespanUserAction: 86400,
     accessCodeLifespanLogin: 86400,
     actionTokenGeneratedByAdminLifespan: 86400,
-    actionTokenGeneratedByUserLifespan: 86400
+    actionTokenGeneratedByUserLifespan: 86400,
+    oauth2DeviceCodeLifespan: 86400
 }")
 
 put "/realms/master" "${masterRealmExtendAccessToken}"
