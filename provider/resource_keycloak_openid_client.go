@@ -230,6 +230,19 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional:         true,
 				ValidateDiagFunc: validateExtraConfig(reflect.ValueOf(&keycloak.OpenidClientAttributes{}).Elem()),
 			},
+			"oauth2_device_authorization_grant_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"oauth2_device_code_lifespan": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"oauth2_device_polling_interval": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		CustomizeDiff: customdiff.ComputedIf("service_account_user_id", func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 			return d.HasChange("service_accounts_enabled")
@@ -286,19 +299,22 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		ServiceAccountsEnabled:    data.Get("service_accounts_enabled").(bool),
 		FullScopeAllowed:          data.Get("full_scope_allowed").(bool),
 		Attributes: keycloak.OpenidClientAttributes{
-			PkceCodeChallengeMethod:              data.Get("pkce_code_challenge_method").(string),
-			ExcludeSessionStateFromAuthResponse:  keycloak.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
-			AccessTokenLifespan:                  data.Get("access_token_lifespan").(string),
-			LoginTheme:                           data.Get("login_theme").(string),
-			ClientOfflineSessionIdleTimeout:      data.Get("client_offline_session_idle_timeout").(string),
-			ClientOfflineSessionMaxLifespan:      data.Get("client_offline_session_max_lifespan").(string),
-			ClientSessionIdleTimeout:             data.Get("client_session_idle_timeout").(string),
-			ClientSessionMaxLifespan:             data.Get("client_session_max_lifespan").(string),
-			UseRefreshTokens:                     keycloak.KeycloakBoolQuoted(data.Get("use_refresh_tokens").(bool)),
-			BackchannelLogoutUrl:                 data.Get("backchannel_logout_url").(string),
-			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_revoke_offline_sessions").(bool)),
-			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_session_required").(bool)),
-			ExtraConfig:                          getExtraConfigFromData(data),
+			PkceCodeChallengeMethod:               data.Get("pkce_code_challenge_method").(string),
+			ExcludeSessionStateFromAuthResponse:   keycloak.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
+			AccessTokenLifespan:                   data.Get("access_token_lifespan").(string),
+			LoginTheme:                            data.Get("login_theme").(string),
+			ClientOfflineSessionIdleTimeout:       data.Get("client_offline_session_idle_timeout").(string),
+			ClientOfflineSessionMaxLifespan:       data.Get("client_offline_session_max_lifespan").(string),
+			ClientSessionIdleTimeout:              data.Get("client_session_idle_timeout").(string),
+			ClientSessionMaxLifespan:              data.Get("client_session_max_lifespan").(string),
+			UseRefreshTokens:                      keycloak.KeycloakBoolQuoted(data.Get("use_refresh_tokens").(bool)),
+			BackchannelLogoutUrl:                  data.Get("backchannel_logout_url").(string),
+			BackchannelLogoutRevokeOfflineTokens:  keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_revoke_offline_sessions").(bool)),
+			BackchannelLogoutSessionRequired:      keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_session_required").(bool)),
+			ExtraConfig:                           getExtraConfigFromData(data),
+			Oauth2DeviceAuthorizationGrantEnabled: keycloak.KeycloakBoolQuoted(data.Get("oauth2_device_authorization_grant_enabled").(bool)),
+			Oauth2DeviceCodeLifespan:              data.Get("oauth2_device_code_lifespan").(string),
+			Oauth2DevicePollingInterval:           data.Get("oauth2_device_polling_interval").(string),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
@@ -387,6 +403,9 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("access_token_lifespan", client.Attributes.AccessTokenLifespan)
 	data.Set("login_theme", client.Attributes.LoginTheme)
 	data.Set("use_refresh_tokens", client.Attributes.UseRefreshTokens)
+	data.Set("oauth2_device_authorization_grant_enabled", client.Attributes.Oauth2DeviceAuthorizationGrantEnabled)
+	data.Set("oauth2_device_code_lifespan", client.Attributes.Oauth2DeviceCodeLifespan)
+	data.Set("oauth2_device_polling_interval", client.Attributes.Oauth2DevicePollingInterval)
 	data.Set("client_offline_session_idle_timeout", client.Attributes.ClientOfflineSessionIdleTimeout)
 	data.Set("client_offline_session_max_lifespan", client.Attributes.ClientOfflineSessionMaxLifespan)
 	data.Set("client_session_idle_timeout", client.Attributes.ClientSessionIdleTimeout)

@@ -66,6 +66,8 @@ type Realm struct {
 	AccessCodeLifespanUserAction        int    `json:"accessCodeLifespanUserAction,omitempty"`
 	ActionTokenGeneratedByUserLifespan  int    `json:"actionTokenGeneratedByUserLifespan,omitempty"`
 	ActionTokenGeneratedByAdminLifespan int    `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
+	Oauth2DeviceCodeLifespan            int    `json:"oauth2DeviceCodeLifespan,omitempty"`
+	Oauth2DevicePollingInterval         int    `json:"oauth2DevicePollingInterval,omitempty"`
 
 	//internationalization
 	InternationalizationEnabled bool     `json:"internationalizationEnabled"`

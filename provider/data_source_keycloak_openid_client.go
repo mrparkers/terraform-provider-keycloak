@@ -188,6 +188,19 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"oauth2_device_authorization_grant_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"oauth2_device_code_lifespan": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"oauth2_device_polling_interval": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
