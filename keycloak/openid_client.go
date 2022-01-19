@@ -31,7 +31,7 @@ type OpenidClient struct {
 	ClientId                           string                                   `json:"clientId"`
 	RealmId                            string                                   `json:"-"`
 	Name                               string                                   `json:"name"`
-	Protocol                           string                                   `json:"protocol"`                // always openid-connect for this resource
+	Protocol                           string                                   `json:"protocol"` // always openid-connect for this resource
 	ClientAuthenticatorType            string                                   `json:"clientAuthenticatorType"`
 	ClientSecret                       string                                   `json:"secret,omitempty"`
 	Enabled                            bool                                     `json:"enabled"`

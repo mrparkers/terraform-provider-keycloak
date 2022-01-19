@@ -40,8 +40,8 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Sensitive: true,
 			},
 			"client_authenticator_type": {
-				Type:      schema.TypeString,
-				Computed:  true,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"standard_flow_enabled": {
 				Type:     schema.TypeBool,
