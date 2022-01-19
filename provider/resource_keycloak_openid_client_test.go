@@ -132,9 +132,6 @@ func TestAccKeycloakOpenidClient_clientAuthenticatorType(t *testing.T) {
 			{
 				Config: testKeycloakOpenidClient_clientAuthenticatorType(clientId, "client-secret"),
 				Check:  testAccCheckKeycloakOpenidClientAuthenticatorType("keycloak_openid_client.client", "client-secret"),
-			}, {
-				Config: testKeycloakOpenidClient_clientAuthenticatorType(clientId, ""),
-				Check:  testAccCheckKeycloakOpenidClientAuthenticatorType("keycloak_openid_client.client", "client-secret"),
 			},
 			{
 				Config: testKeycloakOpenidClient_clientAuthenticatorType(clientId, "client-jwt"),
@@ -1145,10 +1142,10 @@ data "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "client" {
-	client_id   = "%s"
-	realm_id    = data.keycloak_realm.realm.id
-    access_type = "CONFIDENTIAL"
-    client_authenticator_type="%s"
+	realm_id                  = data.keycloak_realm.realm.id
+	client_id                 = "%s"
+	access_type               = "CONFIDENTIAL"
+	client_authenticator_type = "%s"
 }
 	`, testAccRealm.Realm, clientId, authType)
 }
