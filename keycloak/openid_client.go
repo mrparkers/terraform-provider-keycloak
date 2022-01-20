@@ -31,8 +31,8 @@ type OpenidClient struct {
 	ClientId                           string                                   `json:"clientId"`
 	RealmId                            string                                   `json:"-"`
 	Name                               string                                   `json:"name"`
-	Protocol                           string                                   `json:"protocol"`                // always openid-connect for this resource
-	ClientAuthenticatorType            string                                   `json:"clientAuthenticatorType"` // always client-secret for now, don't have a need for JWT here
+	Protocol                           string                                   `json:"protocol"` // always openid-connect for this resource
+	ClientAuthenticatorType            string                                   `json:"clientAuthenticatorType"`
 	ClientSecret                       string                                   `json:"secret,omitempty"`
 	Enabled                            bool                                     `json:"enabled"`
 	Description                        string                                   `json:"description"`
@@ -119,7 +119,6 @@ func (keycloakClient *KeycloakClient) ValidateOpenidClient(client *OpenidClient)
 
 func (keycloakClient *KeycloakClient) NewOpenidClient(client *OpenidClient) error {
 	client.Protocol = "openid-connect"
-	client.ClientAuthenticatorType = "client-secret"
 
 	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients", client.RealmId), client)
 	if err != nil {
@@ -222,7 +221,6 @@ func (keycloakClient *KeycloakClient) GetOpenidClientByClientId(realmId, clientI
 
 func (keycloakClient *KeycloakClient) UpdateOpenidClient(client *OpenidClient) error {
 	client.Protocol = "openid-connect"
-	client.ClientAuthenticatorType = "client-secret"
 
 	return keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s", client.RealmId, client.Id), client)
 }
