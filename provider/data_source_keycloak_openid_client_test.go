@@ -34,6 +34,9 @@ func TestAccKeycloakDataSourceOpenidClient_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceName, "service_accounts_enabled", resourceName, "service_accounts_enabled"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "resource_server_id", resourceName, "resource_server_id"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "full_scope_allowed", resourceName, "full_scope_allowed"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "consent_required", resourceName, "consent_required"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "consent_screen_text", resourceName, "consent_screen_text"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "display_on_consent_screen", resourceName, "display_on_consent_screen"),
 				),
 			},
 		},
@@ -67,24 +70,27 @@ data "keycloak_realm" "realm" {
 }
 
 resource "keycloak_openid_client" "test" {
-	name                     = "%s"
-	client_id                = "%s"
-	realm_id                 = data.keycloak_realm.realm.id
-	description              = "a test openid client"
-	standard_flow_enabled    = true
-	access_type              = "CONFIDENTIAL"
-	service_accounts_enabled = true
-	client_secret            = "secret"
-	valid_redirect_uris      = [
+	name                     	= "%s"
+	client_id                	= "%s"
+	realm_id                 	= data.keycloak_realm.realm.id
+	description              	= "a test openid client"
+	standard_flow_enabled    	= true
+	access_type              	= "CONFIDENTIAL"
+	service_accounts_enabled 	= true
+	client_secret            	= "secret"
+	valid_redirect_uris      	= [
 		"http://localhost:5555/callback",
 	]
 	authorization {
 		policy_enforcement_mode = "ENFORCING"
 	}
-	web_origins              = [
+	web_origins              	= [
 		"http://localhost"
 	]
-	full_scope_allowed       = false
+	full_scope_allowed       	= false
+	consent_required         	= true
+	display_on_consent_screen	= true
+	consent_screen_text      	= "some consent screen text"
 }
 
 data "keycloak_openid_client" "test" {

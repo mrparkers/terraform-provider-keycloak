@@ -36,6 +36,30 @@ func TestAccKeycloakOpenidClient_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_basic_with_consent(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_basic_with_consent(clientId),
+				Check:  testAccCheckKeycloakOpenidClientExistsWithCorrectConsentSettings("keycloak_openid_client.client"),
+			},
+			{
+				ResourceName:            "keycloak_openid_client.client",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     testAccRealm.Realm + "/",
+				ImportStateVerifyIgnore: []string{"exclude_session_state_from_auth_response"},
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var client = &keycloak.OpenidClient{}
@@ -700,6 +724,29 @@ func testAccCheckKeycloakOpenidClientExistsWithCorrectProtocol(resourceName stri
 	}
 }
 
+func testAccCheckKeycloakOpenidClientExistsWithCorrectConsentSettings(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.ConsentRequired != true {
+			return fmt.Errorf("expected openid client to have ConsentRequired %v, but got %v", true, client.ConsentRequired)
+		}
+
+		if client.Attributes.DisplayOnConsentScreen != true {
+			return fmt.Errorf("expected openid client to have DisplayClientOnConsentScreen %v, but got %v", true, client.Attributes.DisplayOnConsentScreen)
+		}
+
+		if client.Attributes.ConsentScreenText != "some consent screen text" {
+			return fmt.Errorf("expected openid client to have ConsentScreenText %v, but got %v", "some consent screen text", client.Attributes.ConsentScreenText)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakOpenidClientHasBackchannelSettings(resourceName, backchannelLogoutUrl string, backchannelLogoutSessionRequired, backchannelLogoutRevokeOfflineSessions bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -1081,6 +1128,23 @@ resource "keycloak_openid_client" "client" {
 	client_id   = "%s"
 	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
+}
+	`, testAccRealm.Realm, clientId)
+}
+
+func testKeycloakOpenidClient_basic_with_consent(clientId string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   				= "%s"
+	realm_id    				= data.keycloak_realm.realm.id
+	access_type 				= "CONFIDENTIAL"
+	consent_required            = true
+	display_on_consent_screen	= true
+	consent_screen_text         = "some consent screen text"
 }
 	`, testAccRealm.Realm, clientId)
 }

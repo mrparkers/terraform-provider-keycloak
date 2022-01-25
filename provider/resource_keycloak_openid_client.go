@@ -193,6 +193,14 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"display_on_consent_screen": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"consent_screen_text": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"authentication_flow_binding_overrides": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -323,6 +331,8 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			Oauth2DeviceAuthorizationGrantEnabled: keycloak.KeycloakBoolQuoted(data.Get("oauth2_device_authorization_grant_enabled").(bool)),
 			Oauth2DeviceCodeLifespan:              data.Get("oauth2_device_code_lifespan").(string),
 			Oauth2DevicePollingInterval:           data.Get("oauth2_device_polling_interval").(string),
+			ConsentScreenText:                     data.Get("consent_screen_text").(string),
+			DisplayOnConsentScreen:                keycloak.KeycloakBoolQuoted(data.Get("display_on_consent_screen").(bool)),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
@@ -419,6 +429,8 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("client_offline_session_max_lifespan", client.Attributes.ClientOfflineSessionMaxLifespan)
 	data.Set("client_session_idle_timeout", client.Attributes.ClientSessionIdleTimeout)
 	data.Set("client_session_max_lifespan", client.Attributes.ClientSessionMaxLifespan)
+	data.Set("display_on_consent_screen", client.Attributes.DisplayOnConsentScreen)
+	data.Set("consent_screen_text", client.Attributes.ConsentScreenText)
 	data.Set("backchannel_logout_url", client.Attributes.BackchannelLogoutUrl)
 	data.Set("backchannel_logout_revoke_offline_sessions", client.Attributes.BackchannelLogoutRevokeOfflineTokens)
 	data.Set("backchannel_logout_session_required", client.Attributes.BackchannelLogoutSessionRequired)
