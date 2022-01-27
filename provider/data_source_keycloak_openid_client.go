@@ -151,6 +151,14 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"display_on_consent_screen": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"consent_screen_text": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"authentication_flow_binding_overrides": {
 				Type:     schema.TypeSet,
 				Computed: true,

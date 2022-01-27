@@ -61,6 +61,8 @@ type OpenidClientAttributes struct {
 	AccessTokenLifespan                   string                 `json:"access.token.lifespan"`
 	LoginTheme                            string                 `json:"login_theme"`
 	ClientOfflineSessionIdleTimeout       string                 `json:"client.offline.session.idle.timeout,omitempty"`
+	DisplayOnConsentScreen                KeycloakBoolQuoted     `json:"display.on.consent.screen"`
+	ConsentScreenText                     string                 `json:"consent.screen.text"`
 	ClientOfflineSessionMaxLifespan       string                 `json:"client.offline.session.max.lifespan,omitempty"`
 	ClientSessionIdleTimeout              string                 `json:"client.session.idle.timeout,omitempty"`
 	ClientSessionMaxLifespan              string                 `json:"client.session.max.lifespan,omitempty"`
