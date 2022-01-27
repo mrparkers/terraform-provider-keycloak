@@ -196,6 +196,7 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 			"display_on_consent_screen": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  false,
 			},
 			"consent_screen_text": {
 				Type:     schema.TypeString,

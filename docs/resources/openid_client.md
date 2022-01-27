@@ -76,7 +76,9 @@ is set to `true`.
 - `client_offline_session_max_lifespan` - (Optional) Max time before a client session is expired. Tokens are invalidated when a client session is expired. If not set, it uses the standard SSO Session Max value.
 - `client_session_idle_timeout` - (Optional) Time a client offline session is allowed to be idle before it expires. Offline tokens are invalidated when a client offline session is expired. If not set it uses the Offline Session Idle value.
 - `client_session_max_lifespan` - (Optional) Max time before a client offline session is expired. Offline tokens are invalidated when a client offline session is expired. If not set, it uses the Offline Session Max value.
-- `consent_required` - (Optional) When `true`, users have to consent to client access.
+- `consent_required` - (Optional) When `true`, users have to consent to client access. Defaults to `false`.
+- `display_on_consent_screen` - (Optional) When `true`, the consent screen will display information about the client itself. Defaults to `false`. This is applicable only when `consent_required` is `true`.
+- `consent_screen_text` - (Optional) The text to display on the consent screen about permissions specific to this client. This is applicable only when `display_on_consent_screen` is `true`.
 - `authentication_flow_binding_overrides` - (Optional) Override realm authentication flow bindings
     - `browser_id` - (Optional) Browser flow id, (flow needs to exist)
     - `direct_grant_id` - (Optional) Direct grant flow id (flow needs to exist)
