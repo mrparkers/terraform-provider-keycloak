@@ -59,6 +59,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"frontchannel_logout_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"valid_redirect_uris": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -184,6 +188,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Computed: true,
 			},
 			"backchannel_logout_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"frontchannel_logout_url": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
