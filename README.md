@@ -7,24 +7,24 @@ All documentation for this provider can now be found on the Terraform Registry: 
 
 ## Installation
 
-v2.0.0 and above can be installed automatically using Terraform >=0.13 by using the `terraform` configuration block:
+This provider can be installed automatically using Terraform >=0.13 by using the `terraform` configuration block:
 
 ```hcl
 terraform {
   required_providers {
     keycloak = {
       source = "mrparkers/keycloak"
-      version = ">= 2.0.0"
+      version = ">= 3.0.0"
     }
   }
 }
 ```
 
-If you are using v2.0.0 and above with Terraform 0.12, you can use this provider by downloading it and placing it within
+If you are using Terraform 0.12, you can use this provider by downloading it and placing it within
 one of the [implied local mirror directories](https://www.terraform.io/docs/commands/cli-config.html#implied-local-mirror-directories).
 Or, follow the [old instructions for installing third-party plugins](https://www.terraform.io/docs/configuration-0-11/providers.html#third-party-plugins).
 
-If you are using any version below v2.0.0, you can also follow the [old instructions for installing third-party plugins](https://www.terraform.io/docs/configuration-0-11/providers.html#third-party-plugins).
+If you are using any provider version below v2.0.0, you can also follow the [old instructions for installing third-party plugins](https://www.terraform.io/docs/configuration-0-11/providers.html#third-party-plugins).
 
 ## Supported Versions
 
@@ -48,7 +48,7 @@ created by a PGP key with the fingerprint `C508 6791 5E11 6CD2`. This key can be
 You can find the list of releases [here](https://github.com/mrparkers/terraform-provider-keycloak/releases).
 You can find the changelog for each version [here](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/CHANGELOG.md).
 
-Note: Prior to 2.0.0, a statically linked build for use within Alpine linux was included with each release. This is no longer
+Note: Prior to v2.0.0, a statically linked build for use within Alpine linux was included with each release. This is no longer
 done due to [GoReleaser not supporting CGO](https://goreleaser.com/limitations/cgo/). Instead of using a statically linked,
 build you can use the `linux_amd64` build as long as `libc6-compat` is installed.
 
