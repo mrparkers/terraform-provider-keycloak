@@ -1,8 +1,6 @@
 # terraform-provider-keycloak
 Terraform provider for [Keycloak](https://www.keycloak.org/).
 
-[![CircleCI](https://circleci.com/gh/mrparkers/terraform-provider-keycloak.svg?style=shield)](https://circleci.com/gh/mrparkers/terraform-provider-keycloak)
-
 ## Docs
 
 All documentation for this provider can now be found on the Terraform Registry: https://registry.terraform.io/providers/mrparkers/keycloak/latest/docs
