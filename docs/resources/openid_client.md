@@ -62,6 +62,8 @@ resource "keycloak_openid_client" "openid_client" {
 - `implicit_flow_enabled` - (Optional) When `true`, the OAuth2 Implicit Grant will be enabled for this client. Defaults to `false`.
 - `direct_access_grants_enabled` - (Optional) When `true`, the OAuth2 Resource Owner Password Grant will be enabled for this client. Defaults to `false`.
 - `service_accounts_enabled` - (Optional) When `true`, the OAuth2 Client Credentials grant will be enabled for this client. Defaults to `false`.
+- `frontchannel_logout_enabled` - (Optional) When `true`, Frontchannel logout will be enabled for this client. Specify the url with `frontchannel_logout_url`. Defaults to `false`.
+- `frontchannel_logout_url` - (Optional) Frontchannel logout url. `frontchannel_logout_enabled` must be `true`.
 - `valid_redirect_uris` - (Optional) A list of valid URIs a browser is permitted to redirect to after a successful login or logout. Simple
 wildcards in the form of an asterisk can be used here. This attribute must be set if either `standard_flow_enabled` or `implicit_flow_enabled`
 is set to `true`.
@@ -76,7 +78,9 @@ is set to `true`.
 - `client_offline_session_max_lifespan` - (Optional) Max time before a client session is expired. Tokens are invalidated when a client session is expired. If not set, it uses the standard SSO Session Max value.
 - `client_session_idle_timeout` - (Optional) Time a client offline session is allowed to be idle before it expires. Offline tokens are invalidated when a client offline session is expired. If not set it uses the Offline Session Idle value.
 - `client_session_max_lifespan` - (Optional) Max time before a client offline session is expired. Offline tokens are invalidated when a client offline session is expired. If not set, it uses the Offline Session Max value.
-- `consent_required` - (Optional) When `true`, users have to consent to client access.
+- `consent_required` - (Optional) When `true`, users have to consent to client access. Defaults to `false`.
+- `display_on_consent_screen` - (Optional) When `true`, the consent screen will display information about the client itself. Defaults to `false`. This is applicable only when `consent_required` is `true`.
+- `consent_screen_text` - (Optional) The text to display on the consent screen about permissions specific to this client. This is applicable only when `display_on_consent_screen` is `true`.
 - `authentication_flow_binding_overrides` - (Optional) Override realm authentication flow bindings
     - `browser_id` - (Optional) Browser flow id, (flow needs to exist)
     - `direct_grant_id` - (Optional) Direct grant flow id (flow needs to exist)
