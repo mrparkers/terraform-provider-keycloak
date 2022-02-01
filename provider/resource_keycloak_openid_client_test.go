@@ -1417,8 +1417,8 @@ resource "keycloak_openid_client" "client" {
 	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
 
-	frontchannel_logout_url                     = "%s"
-	frontchannel_logout_enabled        = %t
+	frontchannel_logout_url     = "%s"
+	frontchannel_logout_enabled = %t
 }
 	`, testAccRealm.Realm, clientId, frontchannelLogoutUrl, frontchannelLogoutEnabled)
 }
