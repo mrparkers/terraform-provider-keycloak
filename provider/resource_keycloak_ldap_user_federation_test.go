@@ -160,6 +160,7 @@ func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 		EvictionDay:                          &evictionDay,
 		EvictionHour:                         &evictionHour,
 		EvictionMinute:                       &evictionMinute,
+		EditMode:                             "WRITABLE",
 	}
 }
 
@@ -274,6 +275,7 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		EvictionDay:                          &evictionDay,
 		EvictionHour:                         &evictionHour,
 		EvictionMinute:                       &evictionMinute,
+		EditMode:                             "WRITABLE",
 	}
 
 	evictionDay = acctest.RandIntRange(0, 6)
@@ -312,6 +314,7 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		EvictionDay:                          &evictionDay,
 		EvictionHour:                         &evictionHour,
 		EvictionMinute:                       &evictionMinute,
+		EditMode:                             "WRITABLE",
 	}
 
 	resource.Test(t, resource.TestCase{
