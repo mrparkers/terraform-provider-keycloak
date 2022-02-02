@@ -77,9 +77,9 @@ jobs:
     strategy:
       matrix:
         keycloak-version:
-          - '15.0.2'
+          - '16.1.1'
+          - '15.1.1'
           - '14.0.0'
-          - '13.0.1'
       fail-fast: false
     concurrency:
       group: ${{ github.head_ref }}-${{ matrix.keycloak-version }}
