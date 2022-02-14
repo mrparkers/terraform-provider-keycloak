@@ -1,9 +1,10 @@
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
+DIST=terraform-provider-keycloak
 
 MAKEFLAGS += --silent
 
 build:
-	go build -o terraform-provider-keycloak
+	go build -o $(DIST)
 
 build-example: build
 	mkdir -p example/.terraform/plugins/terraform.local/mrparkers/keycloak/3.0.0/darwin_amd64
@@ -37,3 +38,6 @@ vet:
 
 user-federation-example:
 	cd custom-user-federation-example && ./gradlew shadowJar
+
+install-macos: build
+	mv $(DIST) ~/.terraform.d/plugins/foo.com/keycloak/keycloak/1.0/darwin_amd64

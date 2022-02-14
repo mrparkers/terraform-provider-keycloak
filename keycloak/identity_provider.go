@@ -7,46 +7,49 @@ import (
 )
 
 type IdentityProviderConfig struct {
-	Key                             string                 `json:"key,omitempty"`
-	HostIp                          string                 `json:"hostIp,omitempty"`
-	UseJwksUrl                      KeycloakBoolQuoted     `json:"useJwksUrl,omitempty"`
-	JwksUrl                         string                 `json:"jwksUrl,omitempty"`
-	ClientId                        string                 `json:"clientId,omitempty"`
-	ClientSecret                    string                 `json:"clientSecret,omitempty"`
-	DisableUserInfo                 KeycloakBoolQuoted     `json:"disableUserInfo"`
-	UserInfoUrl                     string                 `json:"userInfoUrl,omitempty"`
-	HideOnLoginPage                 KeycloakBoolQuoted     `json:"hideOnLoginPage"`
-	NameIDPolicyFormat              string                 `json:"nameIDPolicyFormat,omitempty"`
-	EntityId                        string                 `json:"entityId,omitempty"`
-	SingleLogoutServiceUrl          string                 `json:"singleLogoutServiceUrl,omitempty"`
-	SingleSignOnServiceUrl          string                 `json:"singleSignOnServiceUrl,omitempty"`
-	SigningCertificate              string                 `json:"signingCertificate,omitempty"`
-	SignatureAlgorithm              string                 `json:"signatureAlgorithm,omitempty"`
-	XmlSigKeyInfoKeyNameTransformer string                 `json:"xmlSigKeyInfoKeyNameTransformer,omitempty"`
-	PostBindingAuthnRequest         KeycloakBoolQuoted     `json:"postBindingAuthnRequest,omitempty"`
-	PostBindingResponse             KeycloakBoolQuoted     `json:"postBindingResponse,omitempty"`
-	PostBindingLogout               KeycloakBoolQuoted     `json:"postBindingLogout,omitempty"`
-	ForceAuthn                      KeycloakBoolQuoted     `json:"forceAuthn,omitempty"`
-	WantAuthnRequestsSigned         KeycloakBoolQuoted     `json:"wantAuthnRequestsSigned,omitempty"`
-	WantAssertionsSigned            KeycloakBoolQuoted     `json:"wantAssertionsSigned,omitempty"`
-	WantAssertionsEncrypted         KeycloakBoolQuoted     `json:"wantAssertionsEncrypted,omitempty"`
-	BackchannelSupported            KeycloakBoolQuoted     `json:"backchannelSupported,omitempty"`
-	ValidateSignature               KeycloakBoolQuoted     `json:"validateSignature,omitempty"`
-	AuthorizationUrl                string                 `json:"authorizationUrl,omitempty"`
-	TokenUrl                        string                 `json:"tokenUrl,omitempty"`
-	LoginHint                       string                 `json:"loginHint,omitempty"`
-	UILocales                       KeycloakBoolQuoted     `json:"uiLocales,omitempty"`
-	LogoutUrl                       string                 `json:"logoutUrl,omitempty"`
-	DefaultScope                    string                 `json:"defaultScope,omitempty"`
-	AcceptsPromptNoneForwFrmClt     KeycloakBoolQuoted     `json:"acceptsPromptNoneForwardFromClient,omitempty"`
-	HostedDomain                    string                 `json:"hostedDomain,omitempty"`
-	UserIp                          KeycloakBoolQuoted     `json:"userIp,omitempty"`
-	OfflineAccess                   KeycloakBoolQuoted     `json:"offlineAccess,omitempty"`
-	PrincipalType                   string                 `json:"principalType,omitempty"`
-	PrincipalAttribute              string                 `json:"principalAttribute,omitempty"`
-	GuiOrder                        string                 `json:"guiOrder,omitempty"`
-	SyncMode                        string                 `json:"syncMode,omitempty"`
-	ExtraConfig                     map[string]interface{} `json:"-"`
+	Key                              string                 `json:"key,omitempty"`
+	HostIp                           string                 `json:"hostIp,omitempty"`
+	UseJwksUrl                       KeycloakBoolQuoted     `json:"useJwksUrl,omitempty"`
+	JwksUrl                          string                 `json:"jwksUrl,omitempty"`
+	ClientId                         string                 `json:"clientId,omitempty"`
+	ClientSecret                     string                 `json:"clientSecret,omitempty"`
+	DisableUserInfo                  KeycloakBoolQuoted     `json:"disableUserInfo"`
+	UserInfoUrl                      string                 `json:"userInfoUrl,omitempty"`
+	HideOnLoginPage                  KeycloakBoolQuoted     `json:"hideOnLoginPage"`
+	NameIDPolicyFormat               string                 `json:"nameIDPolicyFormat,omitempty"`
+	EntityId                         string                 `json:"entityId,omitempty"`
+	SingleLogoutServiceUrl           string                 `json:"singleLogoutServiceUrl,omitempty"`
+	SingleSignOnServiceUrl           string                 `json:"singleSignOnServiceUrl,omitempty"`
+	SigningCertificate               string                 `json:"signingCertificate,omitempty"`
+	SignatureAlgorithm               string                 `json:"signatureAlgorithm,omitempty"`
+	XmlSignKeyInfoKeyNameTransformer string                 `json:"xmlSignKeyInfoKeyNameTransformer,omitempty"`
+	PostBindingAuthnRequest          KeycloakBoolQuoted     `json:"postBindingAuthnRequest,omitempty"`
+	PostBindingResponse              KeycloakBoolQuoted     `json:"postBindingResponse,omitempty"`
+	PostBindingLogout                KeycloakBoolQuoted     `json:"postBindingLogout,omitempty"`
+	ForceAuthn                       KeycloakBoolQuoted     `json:"forceAuthn,omitempty"`
+	WantAuthnRequestsSigned          KeycloakBoolQuoted     `json:"wantAuthnRequestsSigned,omitempty"`
+	WantAssertionsSigned             KeycloakBoolQuoted     `json:"wantAssertionsSigned,omitempty"`
+	WantAssertionsEncrypted          KeycloakBoolQuoted     `json:"wantAssertionsEncrypted,omitempty"`
+	BackchannelSupported             KeycloakBoolQuoted     `json:"backchannelSupported,omitempty"`
+	ValidateSignature                KeycloakBoolQuoted     `json:"validateSignature,omitempty"`
+	AuthorizationUrl                 string                 `json:"authorizationUrl,omitempty"`
+	TokenUrl                         string                 `json:"tokenUrl,omitempty"`
+	LoginHint                        string                 `json:"loginHint,omitempty"`
+	UILocales                        KeycloakBoolQuoted     `json:"uiLocales,omitempty"`
+	LogoutUrl                        string                 `json:"logoutUrl,omitempty"`
+	DefaultScope                     string                 `json:"defaultScope,omitempty"`
+	AcceptsPromptNoneForwFrmClt      KeycloakBoolQuoted     `json:"acceptsPromptNoneForwardFromClient,omitempty"`
+	HostedDomain                     string                 `json:"hostedDomain,omitempty"`
+	UserIp                           KeycloakBoolQuoted     `json:"userIp,omitempty"`
+	OfflineAccess                    KeycloakBoolQuoted     `json:"offlineAccess,omitempty"`
+	PrincipalType                    string                 `json:"principalType,omitempty"`
+	PrincipalAttribute               string                 `json:"principalAttribute,omitempty"`
+	GuiOrder                         string                 `json:"guiOrder,omitempty"`
+	SyncMode                         string                 `json:"syncMode,omitempty"`
+	ExtraConfig                      map[string]interface{} `json:"-"`
+	AuthnContextClassRefs            []interface{}          `json:"authnContextClassRefs,omitempty"`
+	AuthnContextComparisonType       string                 `json:"authnContextComparisonType,omitempty"`
+	AuthnContextDeclRefs             []interface{}          `json:"authnContextDeclRefs,omitempty"`
 }
 
 type IdentityProvider struct {
@@ -66,8 +69,69 @@ type IdentityProvider struct {
 	Config                    *IdentityProviderConfig `json:"config"`
 }
 
+func (f *IdentityProviderConfig) UnmarshalJSON(data []byte) error {
+	f.ExtraConfig = map[string]interface{}{}
+	err := json.Unmarshal(data, &f.ExtraConfig)
+	if err != nil {
+		return err
+	}
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		structField := v.Type().Field(i)
+		jsonKey := strings.Split(structField.Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			value, ok := f.ExtraConfig[jsonKey]
+			if ok {
+				field := v.FieldByName(structField.Name)
+				if field.IsValid() && field.CanSet() {
+					if field.Kind() == reflect.String {
+						field.SetString(value.(string))
+					} else if field.Kind() == reflect.Bool {
+						boolVal, err := strconv.ParseBool(value.(string))
+						if err == nil {
+							field.Set(reflect.ValueOf(KeycloakBoolQuoted(boolVal)))
+						}
+					} else if field.Kind() == reflect.Slice {
+						var unmarshaledSlice []interface{}
+						json.Unmarshal([]byte(value.(string)), &unmarshaledSlice)
+						field.Set(reflect.ValueOf(unmarshaledSlice))
+					}
+					delete(f.ExtraConfig, jsonKey)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (f *IdentityProviderConfig) MarshalJSON() ([]byte, error) {
+	out := map[string]interface{}{}
+
+	for k, v := range f.ExtraConfig {
+		out[k] = v
+	}
+	v := reflect.ValueOf(f).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		jsonKey := strings.Split(v.Type().Field(i).Tag.Get("json"), ",")[0]
+		if jsonKey != "-" {
+			field := v.Field(i)
+			if field.IsValid() && field.CanSet() {
+				if field.Kind() == reflect.String {
+					out[jsonKey] = field.String()
+				} else if field.Kind() == reflect.Bool {
+					out[jsonKey] = KeycloakBoolQuoted(field.Bool())
+				} else if field.Kind() == reflect.Slice {
+					out[jsonKey] = KeycloakSliceQuoted(field.Interface().([]interface{}))
+				}
+			}
+		}
+	}
+	return json.Marshal(out)
+}
+
 func (keycloakClient *KeycloakClient) NewIdentityProvider(identityProvider *IdentityProvider) error {
 	log.Printf("[WARN] Realm: %s", identityProvider.Realm)
+
 	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/identity-provider/instances", identityProvider.Realm), identityProvider)
 	if err != nil {
 		return err
