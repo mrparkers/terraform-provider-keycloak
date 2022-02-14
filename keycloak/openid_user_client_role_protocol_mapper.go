@@ -44,22 +44,22 @@ func (mapper *OpenIdUserClientRoleProtocolMapper) convertToGenericProtocolMapper
 }
 
 func (protocolMapper *protocolMapper) convertToOpenIdUserClientRoleProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdUserClientRoleProtocolMapper, error) {
-	addToIdToken, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
+	addToIdToken, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	addToAccessToken, err := strconv.ParseBool(protocolMapper.Config[addToAccessTokenField])
+	addToAccessToken, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToAccessTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	addToUserInfo, err := strconv.ParseBool(protocolMapper.Config[addToUserInfoField])
+	addToUserInfo, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToUserInfoField])
 	if err != nil {
 		return nil, err
 	}
 
-	multivalued, err := strconv.ParseBool(protocolMapper.Config[multivaluedField])
+	multivalued, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[multivaluedField])
 	if err != nil {
 		return nil, err
 	}

@@ -21,13 +21,13 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_saml_client" "saml_client" {
-  realm_id  = keycloak_realm.test.id
+  realm_id  = keycloak_realm.realm.id
   client_id = "saml-client"
   name      = "saml-client"
 }
 
 resource "keycloak_saml_user_attribute_protocol_mapper" "saml_user_attribute_mapper" {
-  realm_id  = keycloak_realm.test.id
+  realm_id  = keycloak_realm.realm.id
   client_id = keycloak_saml_client.saml_client.id
   name      = "displayname-user-attribute-mapper"
 

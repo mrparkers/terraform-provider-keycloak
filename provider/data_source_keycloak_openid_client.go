@@ -39,6 +39,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Computed:  true,
 				Sensitive: true,
 			},
+			"client_authenticator_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"standard_flow_enabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -52,6 +56,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Computed: true,
 			},
 			"service_accounts_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"frontchannel_logout_enabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
@@ -93,19 +101,19 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 			},
 			"client_offline_session_idle_timeout": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"client_offline_session_max_lifespan": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"client_session_idle_timeout": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"client_session_max_lifespan": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"exclude_session_state_from_auth_response": {
 				Type:     schema.TypeBool,
@@ -147,6 +155,14 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"display_on_consent_screen": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"consent_screen_text": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"authentication_flow_binding_overrides": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -169,8 +185,41 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 			},
 			"use_refresh_tokens": {
 				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"backchannel_logout_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"frontchannel_logout_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"backchannel_logout_session_required": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"backchannel_logout_revoke_offline_sessions": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"extra_config": {
+				Type:     schema.TypeMap,
 				Optional: true,
-				Default:  true,
+				Computed: true,
+			},
+			"oauth2_device_authorization_grant_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"oauth2_device_code_lifespan": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"oauth2_device_polling_interval": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 	}

@@ -6,7 +6,62 @@ import (
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
+var (
+	keycloakRealmValidOTPTypes      = []string{"totp", "hotp"}
+	keycloakRealmValidOTPAlgorithms = []string{"HmacSHA1", "HmacSHA256", "HmacSHA512"}
+)
+
 func resourceKeycloakRealm() *schema.Resource {
+
+	otpPolicySchema := map[string]*schema.Schema{
+		"type": {
+			Type:         schema.TypeString,
+			Description:  "OTP Type, totp for Time-Based One Time Password or hotp for counter base one time password",
+			Optional:     true,
+			Default:      "totp",
+			ValidateFunc: validation.StringInSlice(keycloakRealmValidOTPTypes, false),
+		},
+		"algorithm": {
+			Type:         schema.TypeString,
+			Description:  "What hashing algorithm should be used to generate the OTP.",
+			Optional:     true,
+			Default:      "HmacSHA1",
+			ValidateFunc: validation.StringInSlice(keycloakRealmValidOTPAlgorithms, false),
+		},
+		"digits": {
+			Type: schema.TypeInt,
+			Elem: &schema.Schema{
+				Type: schema.TypeInt,
+			},
+			Default:  6,
+			Optional: true,
+		},
+		"initial_counter": {
+			Type: schema.TypeInt,
+			Elem: &schema.Schema{
+				Type: schema.TypeInt,
+			},
+			Default:  2,
+			Optional: true,
+		},
+		"look_ahead_window": {
+			Type: schema.TypeInt,
+			Elem: &schema.Schema{
+				Type: schema.TypeInt,
+			},
+			Default:  1,
+			Optional: true,
+		},
+		"period": {
+			Type: schema.TypeInt,
+			Elem: &schema.Schema{
+				Type: schema.TypeInt,
+			},
+			Default:  30,
+			Optional: true,
+		},
+	}
+
 	webAuthnSchema := map[string]*schema.Schema{
 		"acceptable_aaguids": {
 			Type: schema.TypeSet,
@@ -352,6 +407,17 @@ func resourceKeycloakRealm() *schema.Resource {
 				Computed:         true,
 				DiffSuppressFunc: suppressDurationStringDiff,
 			},
+			"oauth2_device_code_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"oauth2_device_polling_interval": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
 
 			// internationalization
 			"internationalization": {
@@ -538,6 +604,17 @@ func resourceKeycloakRealm() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 				ForceNew: false,
+			},
+
+			// OTPPolicy
+			"otp_policy": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: otpPolicySchema,
+				},
 			},
 
 			// WebAuthn
@@ -796,6 +873,18 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		realm.ActionTokenGeneratedByAdminLifespan = actionTokenGeneratedByAdminLifespanDurationString
 	}
 
+	if oauth2DeviceCodeLifespan := data.Get("oauth2_device_code_lifespan").(string); oauth2DeviceCodeLifespan != "" {
+		oauth2DeviceCodeLifespanDurationString, err := getSecondsFromDurationString(oauth2DeviceCodeLifespan)
+		if err != nil {
+			return nil, err
+		}
+		realm.Oauth2DeviceCodeLifespan = oauth2DeviceCodeLifespanDurationString
+	}
+
+	if oauth2DevicePollingInterval, ok := data.GetOk("oauth2_device_polling_interval"); ok {
+		realm.Oauth2DevicePollingInterval = oauth2DevicePollingInterval.(int)
+	}
+
 	//security defenses
 	if v, ok := data.GetOk("security_defenses"); ok {
 		securityDefensesSettings := v.([]interface{})[0].(map[string]interface{})
@@ -888,6 +977,35 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		}
 	}
 	realm.DefaultOptionalClientScopes = defaultOptionalClientScopes
+
+	//OTPPolicy
+	if v, ok := data.GetOk("otp_policy"); ok {
+		otpPolicy := v.([]interface{})[0].(map[string]interface{})
+
+		if otpPolicyAlgorithm, ok := otpPolicy["algorithm"]; ok {
+			realm.OTPPolicyAlgorithm = otpPolicyAlgorithm.(string)
+		}
+
+		if otpPolicyDigits, ok := otpPolicy["digits"]; ok {
+			realm.OTPPolicyDigits = otpPolicyDigits.(int)
+		}
+
+		if otpPolicyInitialCounter, ok := otpPolicy["initial_counter"]; ok {
+			realm.OTPPolicyInitialCounter = otpPolicyInitialCounter.(int)
+		}
+
+		if otpPolicyLookAheadWindow, ok := otpPolicy["look_ahead_window"]; ok {
+			realm.OTPPolicyLookAheadWindow = otpPolicyLookAheadWindow.(int)
+		}
+
+		if otpPolicyPeriod, ok := otpPolicy["period"]; ok {
+			realm.OTPPolicyPeriod = otpPolicyPeriod.(int)
+		}
+
+		if otpPolicyType, ok := otpPolicy["type"]; ok {
+			realm.OTPPolicyType = otpPolicyType.(string)
+		}
+	}
 
 	//WebAuthn
 	if v, ok := data.GetOk("web_authn_policy"); ok {
@@ -1071,6 +1189,8 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("access_code_lifespan_user_action", getDurationStringFromSeconds(realm.AccessCodeLifespanUserAction))
 	data.Set("action_token_generated_by_user_lifespan", getDurationStringFromSeconds(realm.ActionTokenGeneratedByUserLifespan))
 	data.Set("action_token_generated_by_admin_lifespan", getDurationStringFromSeconds(realm.ActionTokenGeneratedByAdminLifespan))
+	data.Set("oauth2_device_code_lifespan", getDurationStringFromSeconds(realm.Oauth2DeviceCodeLifespan))
+	data.Set("oauth2_device_polling_interval", realm.Oauth2DevicePollingInterval)
 
 	//internationalization
 	if realm.InternationalizationEnabled {
@@ -1125,6 +1245,16 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	webAuthnPolicy["signature_algorithms"] = realm.WebAuthnPolicySignatureAlgorithms
 	webAuthnPolicy["user_verification_requirement"] = realm.WebAuthnPolicyUserVerificationRequirement
 	data.Set("web_authn_policy", []interface{}{webAuthnPolicy})
+
+	//OTP Policy
+	otpPolicy := make(map[string]interface{})
+	otpPolicy["type"] = realm.OTPPolicyType
+	otpPolicy["algorithm"] = realm.OTPPolicyAlgorithm
+	otpPolicy["digits"] = realm.OTPPolicyDigits
+	otpPolicy["initial_counter"] = realm.OTPPolicyInitialCounter
+	otpPolicy["look_ahead_window"] = realm.OTPPolicyLookAheadWindow
+	otpPolicy["period"] = realm.OTPPolicyPeriod
+	data.Set("otp_policy", []interface{}{otpPolicy})
 
 	//WebAuthn Passwordless
 	webAuthnPasswordlessPolicy := make(map[string]interface{})

@@ -165,7 +165,11 @@ func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
 						}
 
 						//keycloak versions < 7.0.0 have 63 events, versions >=7.0.0 have 67 events, versions >=12.0.0 have 69 events
-						if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); ok {
+						if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_14); ok {
+							if len(realmEventsConfig.EnabledEventTypes) != 79 {
+								return fmt.Errorf("exptected to enabled_event_types to contain all(79) event types, but it contains %d", len(realmEventsConfig.EnabledEventTypes))
+							}
+						} else if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); ok {
 							if len(realmEventsConfig.EnabledEventTypes) != 77 {
 								return fmt.Errorf("exptected to enabled_event_types to contain all(77) event types, but it contains %d", len(realmEventsConfig.EnabledEventTypes))
 							}

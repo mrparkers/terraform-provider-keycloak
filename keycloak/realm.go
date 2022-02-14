@@ -66,6 +66,8 @@ type Realm struct {
 	AccessCodeLifespanUserAction        int    `json:"accessCodeLifespanUserAction,omitempty"`
 	ActionTokenGeneratedByUserLifespan  int    `json:"actionTokenGeneratedByUserLifespan,omitempty"`
 	ActionTokenGeneratedByAdminLifespan int    `json:"actionTokenGeneratedByAdminLifespan,omitempty"`
+	Oauth2DeviceCodeLifespan            int    `json:"oauth2DeviceCodeLifespan,omitempty"`
+	Oauth2DevicePollingInterval         int    `json:"oauth2DevicePollingInterval,omitempty"`
 
 	//internationalization
 	InternationalizationEnabled bool     `json:"internationalizationEnabled"`
@@ -100,6 +102,14 @@ type Realm struct {
 	ClientAuthenticationFlow string `json:"clientAuthenticationFlow,omitempty"`
 	DockerAuthenticationFlow string `json:"dockerAuthenticationFlow,omitempty"`
 
+	// OTP Policy
+	OTPPolicyAlgorithm       string `json:"otpPolicyAlgorithm,omitempty"`
+	OTPPolicyDigits          int    `json:"otpPolicyDigits,omitempty"`
+	OTPPolicyInitialCounter  int    `json:"otpPolicyInitialCounter,omitempty"`
+	OTPPolicyLookAheadWindow int    `json:"otpPolicyLookAheadWindow,omitempty"`
+	OTPPolicyPeriod          int    `json:"otpPolicyPeriod,omitempty"`
+	OTPPolicyType            string `json:"otpPolicyType,omitempty"`
+
 	// WebAuthn
 	WebAuthnPolicyAcceptableAaguids               []string `json:"webAuthnPolicyAcceptableAaguids"`
 	WebAuthnPolicyAttestationConveyancePreference string   `json:"webAuthnPolicyAttestationConveyancePreference"`
@@ -123,6 +133,9 @@ type Realm struct {
 	WebAuthnPolicyPasswordlessRpId                            string   `json:"webAuthnPolicyPasswordlessRpId"`
 	WebAuthnPolicyPasswordlessSignatureAlgorithms             []string `json:"webAuthnPolicyPasswordlessSignatureAlgorithms"`
 	WebAuthnPolicyPasswordlessUserVerificationRequirement     string   `json:"webAuthnPolicyPasswordlessUserVerificationRequirement"`
+
+	// Roles
+	DefaultRole *Role `json:"defaultRole,omitempty"`
 }
 
 type BrowserSecurityHeaders struct {

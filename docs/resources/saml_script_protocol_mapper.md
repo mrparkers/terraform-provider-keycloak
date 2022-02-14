@@ -20,13 +20,13 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_saml_client" "saml_client" {
-  realm_id  = keycloak_realm.test.id
+  realm_id  = keycloak_realm.realm.id
   client_id = "saml-client"
   name      = "saml-client"
 }
 
 resource "keycloak_saml_script_protocol_mapper" "saml_script_mapper" {
-  realm_id  = keycloak_realm.test.id
+  realm_id  = keycloak_realm.realm.id
   client_id = keycloak_saml_client.saml_client.id
   name      = "script-mapper"
 

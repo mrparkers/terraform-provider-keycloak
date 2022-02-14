@@ -1,12 +1,9 @@
 package keycloak
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"reflect"
-	"strconv"
-	"strings"
 )
 
 type IdentityProviderConfig struct {
@@ -161,4 +158,12 @@ func (keycloakClient *KeycloakClient) UpdateIdentityProvider(identityProvider *I
 
 func (keycloakClient *KeycloakClient) DeleteIdentityProvider(realm, alias string) error {
 	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), nil)
+}
+
+func (f *IdentityProviderConfig) UnmarshalJSON(data []byte) error {
+	return unmarshalExtraConfig(data, reflect.ValueOf(f).Elem(), &f.ExtraConfig)
+}
+
+func (f *IdentityProviderConfig) MarshalJSON() ([]byte, error) {
+	return marshalExtraConfig(reflect.ValueOf(f).Elem(), f.ExtraConfig)
 }

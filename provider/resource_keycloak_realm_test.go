@@ -91,6 +91,26 @@ func TestAccKeycloakRealm_import(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_OTP(t *testing.T) {
+	realm := acctest.RandomWithPrefix("tf-acc")
+
+	otpType := randomStringInSlice(keycloakRealmValidOTPTypes)
+	otpAlgorithm := randomStringInSlice(keycloakRealmValidOTPAlgorithms)
+	otpPeriod := acctest.RandIntRange(15, 45)
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_WithOTP(realm, otpType, otpAlgorithm, otpPeriod),
+				Check:  testAccCheckKeycloakRealmOTP("keycloak_realm.realm", otpType, otpAlgorithm, otpPeriod),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_SmtpServer(t *testing.T) {
 	realm := acctest.RandomWithPrefix("tf-acc")
 	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
@@ -372,6 +392,31 @@ func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_tokenSettingsOauth2Device(t *testing.T) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+		t.Skip()
+	}
+
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmName, realmDisplayNameHtml),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+			{
+				Config: testKeycloakRealm_tokenSettingsOauth2Device(realmName),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
 	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
@@ -419,6 +464,36 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 
 					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "action_token_generated_by_admin_lifespan"),
 					TestCheckResourceAttrNot("keycloak_realm.realm", "action_token_generated_by_admin_lifespan", "0s"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_oauth2DeviceSettings(t *testing.T) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+		t.Skip()
+	}
+
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "oauth2_device_code_lifespan"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "oauth2_device_code_lifespan", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "oauth2_device_polling_interval"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "oauth2_device_polling_interval", "0"),
 				),
 			},
 		},
@@ -991,6 +1066,29 @@ func testAccCheckKeycloakRealmSmtp(resourceName, host, from, user string) resour
 	}
 }
 
+func testAccCheckKeycloakRealmOTP(resourceName, otpType, algorithm string, period int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		realm, err := getRealmFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if realm.OTPPolicyType != otpType {
+			return fmt.Errorf("expected realm %s to have OTP type set to %s, but was %s", realm.Realm, otpType, realm.OTPPolicyType)
+		}
+
+		if realm.OTPPolicyAlgorithm != algorithm {
+			return fmt.Errorf("expected realm %s to have OTP algorithm set to %s, but was %s", realm.Realm, algorithm, realm.OTPPolicyAlgorithm)
+		}
+
+		if realm.OTPPolicyPeriod != period {
+			return fmt.Errorf("expected realm %s to have OTP period set to %d, but was %d", realm.Realm, period, realm.OTPPolicyPeriod)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakRealmInternationalizationIsEnabled(resourceName string, defaultLocale string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		realm, err := getRealmFromState(s, resourceName)
@@ -1211,6 +1309,21 @@ resource "keycloak_realm" "realm" {
 	`, realm, realm, host, from, user)
 }
 
+func testKeycloakRealm_WithOTP(realm, otpType, algorithm string, period int) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm   = "%s"
+	enabled = true
+
+	otp_policy {
+		type      = "%s"
+		algorithm = "%s"
+		period    = %d
+	}
+}
+	`, realm, otpType, algorithm, period)
+}
+
 func testKeycloakRealm_WithSmtpServerWithoutHost(realm, from string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
@@ -1413,6 +1526,22 @@ resource "keycloak_realm" "realm" {
 	action_token_generated_by_admin_lifespan = "%s"
 }
 	`, realm, realm, defaultSignatureAlgorithm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, ssoSessionIdleTimeoutRememberMe, ssoSessionMaxLifespanRememberMe, offlineSessionIdleTimeout, offlineSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
+}
+
+func testKeycloakRealm_tokenSettingsOauth2Device(realm string) string {
+	oauth2DeviceCodeLifespan := randomDurationString()
+	oauth2DevicePollingInterval := "10"
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm                                    = "%s"
+	enabled                                  = true
+	display_name                             = "%s"
+
+	oauth2_device_code_lifespan              = "%s"
+	oauth2_device_polling_interval           = "%s"
+}
+	`, realm, realm, oauth2DeviceCodeLifespan, oauth2DevicePollingInterval)
 }
 
 func testKeycloakRealm_securityDefensesHeaders(realm, realmDisplayName, xFrameOptions string) string {

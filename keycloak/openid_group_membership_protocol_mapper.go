@@ -37,22 +37,22 @@ func (mapper *OpenIdGroupMembershipProtocolMapper) convertToGenericProtocolMappe
 }
 
 func (protocolMapper *protocolMapper) convertToOpenIdGroupMembershipProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdGroupMembershipProtocolMapper, error) {
-	fullPath, err := strconv.ParseBool(protocolMapper.Config[fullPathField])
+	fullPath, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[fullPathField])
 	if err != nil {
 		return nil, err
 	}
 
-	idTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
+	idTokenClaim, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	accessTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToAccessTokenField])
+	accessTokenClaim, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToAccessTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	userinfoTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToUserInfoField])
+	userinfoTokenClaim, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToUserInfoField])
 	if err != nil {
 		return nil, err
 	}
