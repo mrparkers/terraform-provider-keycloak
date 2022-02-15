@@ -226,7 +226,7 @@ func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("single_sign_on_service_url", identityProvider.Config.SingleSignOnServiceUrl)
 	data.Set("signing_certificate", identityProvider.Config.SigningCertificate)
 	data.Set("signature_algorithm", identityProvider.Config.SignatureAlgorithm)
-	data.Set("xml_sign_key_info_key_name_transformer", identityProvider.Config.XmlSigKeyInfoKeyNameTransformer)
+	data.Set("xml_sign_key_info_key_name_transformer", identityProvider.Config.XmlSignKeyInfoKeyNameTransformer)
 	data.Set("post_binding_authn_request", identityProvider.Config.PostBindingAuthnRequest)
 	data.Set("post_binding_response", identityProvider.Config.PostBindingResponse)
 	data.Set("post_binding_logout", identityProvider.Config.PostBindingLogout)
