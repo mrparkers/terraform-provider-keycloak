@@ -365,7 +365,13 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
   read_only                = true
 }
 
+resource "keycloak_custom_user_federation" "custom" {
+  name        = "custom1"
+  realm_id    = "master"
+  provider_id = "custom"
 
+  enabled = true
+}
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_client" {
   name           = "tf-test-open-id-user-attribute-protocol-mapper-client"
