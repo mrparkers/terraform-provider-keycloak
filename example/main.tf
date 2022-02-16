@@ -216,7 +216,7 @@ resource "keycloak_openid_client" "test_client" {
   backchannel_logout_revoke_offline_sessions = true
 
   extra_config = {
-    customAttribute = "a test custom value"    
+    customAttribute = "a test custom value"
   }
 }
 
@@ -365,13 +365,7 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
   read_only                = true
 }
 
-resource "keycloak_custom_user_federation" "custom" {
-  name        = "custom1"
-  realm_id    = "master"
-  provider_id = "custom"
 
-  enabled = true
-}
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "map_user_attributes_client" {
   name           = "tf-test-open-id-user-attribute-protocol-mapper-client"
@@ -784,6 +778,19 @@ resource keycloak_hardcoded_attribute_identity_provider_mapper saml {
   #KC10 support
   extra_config = {
     syncMode = "INHERIT"
+  }
+}
+
+resource keycloak_saml_identity_provider saml_custom {
+  realm                      = keycloak_realm.test.id
+  alias                      = "custom_saml"
+  provider_id                = "saml"
+  entity_id                  = "https://example.com/entity_id"
+  single_sign_on_service_url = "https://example.com/auth"
+  sync_mode                  = "FORCE"
+  gui_order                  = 4
+  extra_config = {
+    mycustomAttribute = "aValue"
   }
 }
 
