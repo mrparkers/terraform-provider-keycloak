@@ -41,7 +41,7 @@ func TestAccKeycloakSamlIdentityProvider_customProviderId(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlIdentityProvider_customProviderId(samlName, "saml"),//actually needs to be something that exists
+				Config: testKeycloakSamlIdentityProvider_customProviderId(samlName, "saml"), //actually needs to be something that exists
 				Check:  testAccCheckKeycloakSamlIdentityProviderExists("keycloak_saml_identity_provider.saml"),
 			},
 		},
