@@ -37,6 +37,12 @@ var principalTypes = []string{
 
 func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	samlSchema := map[string]*schema.Schema{
+		"provider_id": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "saml",
+			Description: "provider id, is always saml, unless you have a custom implementation",
+		},
 		"backchannel_supported": {
 			Type:        schema.TypeBool,
 			Optional:    true,
@@ -150,7 +156,7 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 
 func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.IdentityProvider, error) {
 	rec, defaultConfig := getIdentityProviderFromData(data)
-	rec.ProviderId = "saml"
+	rec.ProviderId = data.Get("provider_id").(string)
 
 	samlIdentityProviderConfig := &keycloak.IdentityProviderConfig{
 		ValidateSignature:               keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
