@@ -820,6 +820,41 @@ resource "keycloak_openid_client" "test_client_auth" {
   client_secret = "secret"
 }
 
+resource keycloak_openid_client test_open_id_client_with_consent_text {
+  client_id   = "test_open_id_client_with_consent_text"
+  name        = "test_open_id_client_with_consent_text"
+  realm_id    = keycloak_realm.test.id
+  description = "a test openid client that has consent text"
+
+  standard_flow_enabled    = true
+  service_accounts_enabled = true
+
+  access_type = "CONFIDENTIAL"
+
+  valid_redirect_uris = [
+    "http://localhost:5555/callback",
+  ]
+
+  client_secret = "secret"
+
+  pkce_code_challenge_method = "plain"
+
+  login_theme = "keycloak"
+
+  backchannel_logout_url                     = "http://localhost:3333/backchannel"
+  backchannel_logout_session_required        = true
+  backchannel_logout_revoke_offline_sessions = true
+
+  extra_config = {
+    customAttribute = "a test custom value"
+  }
+
+  consent_required          = true
+  display_on_consent_screen = true
+  consent_screen_text       = "some consent screen text"
+}
+
+
 resource "keycloak_openid_client_authorization_permission" "resource" {
   resource_server_id = keycloak_openid_client.test_client_auth.resource_server_id
   realm_id           = keycloak_realm.test.id

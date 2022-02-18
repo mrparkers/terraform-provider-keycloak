@@ -31,8 +31,8 @@ type OpenidClient struct {
 	ClientId                           string                                   `json:"clientId"`
 	RealmId                            string                                   `json:"-"`
 	Name                               string                                   `json:"name"`
-	Protocol                           string                                   `json:"protocol"`                // always openid-connect for this resource
-	ClientAuthenticatorType            string                                   `json:"clientAuthenticatorType"` // always client-secret for now, don't have a need for JWT here
+	Protocol                           string                                   `json:"protocol"` // always openid-connect for this resource
+	ClientAuthenticatorType            string                                   `json:"clientAuthenticatorType"`
 	ClientSecret                       string                                   `json:"secret,omitempty"`
 	Enabled                            bool                                     `json:"enabled"`
 	Description                        string                                   `json:"description"`
@@ -42,6 +42,7 @@ type OpenidClient struct {
 	ImplicitFlowEnabled                bool                                     `json:"implicitFlowEnabled"`
 	DirectAccessGrantsEnabled          bool                                     `json:"directAccessGrantsEnabled"`
 	ServiceAccountsEnabled             bool                                     `json:"serviceAccountsEnabled"`
+	FrontChannelLogoutEnabled          bool                                     `json:"frontchannelLogout"`
 	AuthorizationServicesEnabled       bool                                     `json:"authorizationServicesEnabled"`
 	ValidRedirectUris                  []string                                 `json:"redirectUris"`
 	WebOrigins                         []string                                 `json:"webOrigins"`
@@ -61,11 +62,14 @@ type OpenidClientAttributes struct {
 	AccessTokenLifespan                   string                 `json:"access.token.lifespan"`
 	LoginTheme                            string                 `json:"login_theme"`
 	ClientOfflineSessionIdleTimeout       string                 `json:"client.offline.session.idle.timeout,omitempty"`
+	DisplayOnConsentScreen                KeycloakBoolQuoted     `json:"display.on.consent.screen"`
+	ConsentScreenText                     string                 `json:"consent.screen.text"`
 	ClientOfflineSessionMaxLifespan       string                 `json:"client.offline.session.max.lifespan,omitempty"`
 	ClientSessionIdleTimeout              string                 `json:"client.session.idle.timeout,omitempty"`
 	ClientSessionMaxLifespan              string                 `json:"client.session.max.lifespan,omitempty"`
 	UseRefreshTokens                      KeycloakBoolQuoted     `json:"use.refresh.tokens"`
 	BackchannelLogoutUrl                  string                 `json:"backchannel.logout.url"`
+	FrontchannelLogoutUrl                 string                 `json:"frontchannel.logout.url"`
 	BackchannelLogoutRevokeOfflineTokens  KeycloakBoolQuoted     `json:"backchannel.logout.revoke.offline.tokens"`
 	BackchannelLogoutSessionRequired      KeycloakBoolQuoted     `json:"backchannel.logout.session.required"`
 	ExtraConfig                           map[string]interface{} `json:"-"`
@@ -119,7 +123,6 @@ func (keycloakClient *KeycloakClient) ValidateOpenidClient(client *OpenidClient)
 
 func (keycloakClient *KeycloakClient) NewOpenidClient(client *OpenidClient) error {
 	client.Protocol = "openid-connect"
-	client.ClientAuthenticatorType = "client-secret"
 
 	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients", client.RealmId), client)
 	if err != nil {
@@ -222,7 +225,6 @@ func (keycloakClient *KeycloakClient) GetOpenidClientByClientId(realmId, clientI
 
 func (keycloakClient *KeycloakClient) UpdateOpenidClient(client *OpenidClient) error {
 	client.Protocol = "openid-connect"
-	client.ClientAuthenticatorType = "client-secret"
 
 	return keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s", client.RealmId, client.Id), client)
 }

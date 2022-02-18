@@ -18,6 +18,7 @@ var (
 	keycloakOpenidClientAuthorizationPolicyEnforcementMode   = []string{"ENFORCING", "PERMISSIVE", "DISABLED"}
 	keycloakOpenidClientResourcePermissionDecisionStrategies = []string{"UNANIMOUS", "AFFIRMATIVE", "CONSENSUS"}
 	keycloakOpenidClientPkceCodeChallengeMethod              = []string{"", "plain", "S256"}
+	keycloakOpenidClientAuthenticatorTypes                   = []string{"client-secret", "client-jwt", "client-x509", "client-secret-jwt"}
 )
 
 func resourceKeycloakOpenidClient() *schema.Resource {
@@ -64,6 +65,12 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Computed:  true,
 				Sensitive: true,
 			},
+			"client_authenticator_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice(keycloakOpenidClientAuthenticatorTypes, false),
+				Default:      "client-secret",
+			},
 			"standard_flow_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -80,6 +87,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Default:  false,
 			},
 			"service_accounts_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"frontchannel_logout_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -186,6 +198,15 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"display_on_consent_screen": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"consent_screen_text": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"authentication_flow_binding_overrides": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -211,6 +232,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
+			},
+			"frontchannel_logout_url": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"backchannel_logout_url": {
 				Type:     schema.TypeString,
@@ -293,10 +318,12 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		Enabled:                   data.Get("enabled").(bool),
 		Description:               data.Get("description").(string),
 		ClientSecret:              data.Get("client_secret").(string),
+		ClientAuthenticatorType:   data.Get("client_authenticator_type").(string),
 		StandardFlowEnabled:       data.Get("standard_flow_enabled").(bool),
 		ImplicitFlowEnabled:       data.Get("implicit_flow_enabled").(bool),
 		DirectAccessGrantsEnabled: data.Get("direct_access_grants_enabled").(bool),
 		ServiceAccountsEnabled:    data.Get("service_accounts_enabled").(bool),
+		FrontChannelLogoutEnabled: data.Get("frontchannel_logout_enabled").(bool),
 		FullScopeAllowed:          data.Get("full_scope_allowed").(bool),
 		Attributes: keycloak.OpenidClientAttributes{
 			PkceCodeChallengeMethod:               data.Get("pkce_code_challenge_method").(string),
@@ -308,6 +335,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			ClientSessionIdleTimeout:              data.Get("client_session_idle_timeout").(string),
 			ClientSessionMaxLifespan:              data.Get("client_session_max_lifespan").(string),
 			UseRefreshTokens:                      keycloak.KeycloakBoolQuoted(data.Get("use_refresh_tokens").(bool)),
+			FrontchannelLogoutUrl:                 data.Get("frontchannel_logout_url").(string),
 			BackchannelLogoutUrl:                  data.Get("backchannel_logout_url").(string),
 			BackchannelLogoutRevokeOfflineTokens:  keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_revoke_offline_sessions").(bool)),
 			BackchannelLogoutSessionRequired:      keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_session_required").(bool)),
@@ -315,6 +343,8 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			Oauth2DeviceAuthorizationGrantEnabled: keycloak.KeycloakBoolQuoted(data.Get("oauth2_device_authorization_grant_enabled").(bool)),
 			Oauth2DeviceCodeLifespan:              data.Get("oauth2_device_code_lifespan").(string),
 			Oauth2DevicePollingInterval:           data.Get("oauth2_device_polling_interval").(string),
+			ConsentScreenText:                     data.Get("consent_screen_text").(string),
+			DisplayOnConsentScreen:                keycloak.KeycloakBoolQuoted(data.Get("display_on_consent_screen").(bool)),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
@@ -388,10 +418,12 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("enabled", client.Enabled)
 	data.Set("description", client.Description)
 	data.Set("client_secret", client.ClientSecret)
+	data.Set("client_authenticator_type", client.ClientAuthenticatorType)
 	data.Set("standard_flow_enabled", client.StandardFlowEnabled)
 	data.Set("implicit_flow_enabled", client.ImplicitFlowEnabled)
 	data.Set("direct_access_grants_enabled", client.DirectAccessGrantsEnabled)
 	data.Set("service_accounts_enabled", client.ServiceAccountsEnabled)
+	data.Set("frontchannel_logout_enabled", client.FrontChannelLogoutEnabled)
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
 	data.Set("web_origins", client.WebOrigins)
 	data.Set("admin_url", client.AdminUrl)
@@ -410,6 +442,9 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	data.Set("client_offline_session_max_lifespan", client.Attributes.ClientOfflineSessionMaxLifespan)
 	data.Set("client_session_idle_timeout", client.Attributes.ClientSessionIdleTimeout)
 	data.Set("client_session_max_lifespan", client.Attributes.ClientSessionMaxLifespan)
+	data.Set("display_on_consent_screen", client.Attributes.DisplayOnConsentScreen)
+	data.Set("consent_screen_text", client.Attributes.ConsentScreenText)
+	data.Set("frontchannel_logout_url", client.Attributes.FrontchannelLogoutUrl)
 	data.Set("backchannel_logout_url", client.Attributes.BackchannelLogoutUrl)
 	data.Set("backchannel_logout_revoke_offline_sessions", client.Attributes.BackchannelLogoutRevokeOfflineTokens)
 	data.Set("backchannel_logout_session_required", client.Attributes.BackchannelLogoutSessionRequired)

@@ -39,6 +39,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Computed:  true,
 				Sensitive: true,
 			},
+			"client_authenticator_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"standard_flow_enabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -52,6 +56,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Computed: true,
 			},
 			"service_accounts_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"frontchannel_logout_enabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
@@ -147,6 +155,14 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"display_on_consent_screen": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"consent_screen_text": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"authentication_flow_binding_overrides": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -172,6 +188,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Computed: true,
 			},
 			"backchannel_logout_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"frontchannel_logout_url": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
