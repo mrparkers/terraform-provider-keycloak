@@ -114,6 +114,10 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"user_profile_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 
 			// Login Config
 

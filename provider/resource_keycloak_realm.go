@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -170,6 +172,11 @@ func resourceKeycloakRealm() *schema.Resource {
 				Optional: true,
 			},
 			"user_managed_access": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"user_profile_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -960,6 +967,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 			attributes[key] = value
 		}
 	}
+	attributes["userProfileEnabled"] = strconv.FormatBool(data.Get("user_profile_enabled").(bool))
 	realm.Attributes = attributes
 
 	defaultDefaultClientScopes := make([]string, 0)
@@ -1124,6 +1132,11 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("display_name", realm.DisplayName)
 	data.Set("display_name_html", realm.DisplayNameHtml)
 	data.Set("user_managed_access", realm.UserManagedAccess)
+
+	if v, ok := realm.Attributes["userProfileEnabled"]; ok {
+		userProfileEnabled, _ := strconv.ParseBool(v.(string))
+		data.Set("user_profile_enabled", userProfileEnabled)
+	}
 
 	// Login Config
 	data.Set("registration_allowed", realm.RegistrationAllowed)
