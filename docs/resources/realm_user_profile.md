@@ -9,8 +9,8 @@ Allows for managing Realm User Profiles within Keycloak.
 A user profile defines a schema for representing user attributes and how they are managed within a realm.
 This is a preview feature, hence not fully supported and disabled by default.
 To enable it, start the server with one of the following flags:
-- `-Dkeycloak.profile.feature.declarative_user_profile=enabled` (WildFly distribution)
-- `--features=preview` or `--features=declarative-user-profile` (Quarkus distribution)
+- WildFly distribution: `-Dkeycloak.profile.feature.declarative_user_profile=enabled`
+- Quarkus distribution: `--features=preview` or `--features=declarative-user-profile`
 
 The realm linked to the `keycloak_realm_user_profile` resource must have the user profile feature enabled.
 It can be done via the administration UI, or using the `user_profile_enabled` argument of the `keycloak_realm` resource.
