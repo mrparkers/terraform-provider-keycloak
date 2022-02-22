@@ -96,40 +96,21 @@ func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakRealmUserProfile_update(t *testing.T) {
+func TestAccKeycloakRealmUserProfile_group(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
-	before := &keycloak.RealmUserProfile{
+	withoutGroup := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{Name: "attribute1"},
-			{
-				Name:        "attribute2",
-				DisplayName: "attribute 2",
-				Group:       "group",
-				Selector:    &keycloak.RealmUserProfileSelector{Scopes: []string{"roles"}},
-				Required: &keycloak.RealmUserProfileRequired{
-					Roles:  []string{"user"},
-					Scopes: []string{"offline_access"},
-				},
-				Permissions: &keycloak.RealmUserProfilePermissions{
-					Edit: []string{"admin", "user"},
-					View: []string{"admin", "user"},
-				},
-				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
-					"person-name-prohibited-characters": map[string]interface{}{},
-					"pattern":                           map[string]interface{}{"pattern": "^[a-z]+$", "error_message": "Error!"},
-				},
-				Annotations: map[string]string{"foo": "bar"},
-			},
-		},
-		Groups: []*keycloak.RealmUserProfileGroup{
-			{Name: "group", DisplayDescription: "Description", DisplayHeader: "Header", Annotations: map[string]string{"foo": "bar"}},
+			{Name: "attribute"},
 		},
 	}
 
-	after := &keycloak.RealmUserProfile{
+	withGroup := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{Name: "attribute1"},
+			{Name: "attribute"},
+		},
+		Groups: []*keycloak.RealmUserProfileGroup{
+			{Name: "group"},
 		},
 	}
 
@@ -139,14 +120,204 @@ func TestAccKeycloakRealmUserProfile_update(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakRealmUserProfileDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmUserProfile_template(realmName, before),
+				Config: testKeycloakRealmUserProfile_template(realmName, withoutGroup),
 				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
-					"keycloak_realm_user_profile.realm_user_profile", before,
-				)},
+					"keycloak_realm_user_profile.realm_user_profile", withoutGroup,
+				),
+			},
 			{
-				Config: testKeycloakRealmUserProfile_template(realmName, after),
+				Config: testKeycloakRealmUserProfile_template(realmName, withGroup),
 				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
-					"keycloak_realm_user_profile.realm_user_profile", after,
+					"keycloak_realm_user_profile.realm_user_profile", withGroup,
+				),
+			},
+			{
+				Config: testKeycloakRealmUserProfile_template(realmName, withoutGroup),
+				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
+					"keycloak_realm_user_profile.realm_user_profile", withoutGroup,
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
+	realmName := acctest.RandomWithPrefix("tf-acc")
+
+	withoutValidator := &keycloak.RealmUserProfile{
+		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{
+				Name: "attribute",
+			},
+		},
+	}
+
+	withInitialConfig := &keycloak.RealmUserProfile{
+		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{
+				Name: "attribute",
+				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+					"length": map[string]interface{}{"min": "5", "max": "10"},
+				},
+			},
+		},
+	}
+
+	withNewConfig := &keycloak.RealmUserProfile{
+		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{
+				Name: "attribute",
+				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+					"length": map[string]interface{}{"min": "6", "max": "10"},
+				},
+			},
+		},
+	}
+
+	withNewValidator := &keycloak.RealmUserProfile{
+		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{
+				Name: "attribute",
+				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+					"person-name-prohibited-characters": map[string]interface{}{},
+					"length":                            map[string]interface{}{"min": "6", "max": "10"},
+				},
+			},
+		},
+	}
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmUserProfileDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealmUserProfile_template(realmName, withoutValidator),
+				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
+					"keycloak_realm_user_profile.realm_user_profile", withoutValidator,
+				),
+			},
+			{
+				Config: testKeycloakRealmUserProfile_template(realmName, withInitialConfig),
+				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
+					"keycloak_realm_user_profile.realm_user_profile", withInitialConfig,
+				),
+			},
+			{
+				Config: testKeycloakRealmUserProfile_template(realmName, withNewConfig),
+				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
+					"keycloak_realm_user_profile.realm_user_profile", withNewConfig,
+				),
+			},
+			{
+				Config: testKeycloakRealmUserProfile_template(realmName, withNewValidator),
+				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
+					"keycloak_realm_user_profile.realm_user_profile", withNewValidator,
+				),
+			},
+			{
+				Config: testKeycloakRealmUserProfile_template(realmName, withNewConfig),
+				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
+					"keycloak_realm_user_profile.realm_user_profile", withNewConfig,
+				),
+			},
+			{
+				Config: testKeycloakRealmUserProfile_template(realmName, withoutValidator),
+				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
+					"keycloak_realm_user_profile.realm_user_profile", withoutValidator,
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealmUserProfile_attributePermissions(t *testing.T) {
+	realmName := acctest.RandomWithPrefix("tf-acc")
+
+	withoutPermissions := &keycloak.RealmUserProfile{
+		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{
+				Name: "attribute",
+			},
+		},
+	}
+
+	viewAttributeMissing := &keycloak.RealmUserProfile{
+		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{
+				Name: "attribute",
+				Permissions: &keycloak.RealmUserProfilePermissions{
+					Edit: []string{"admin", "user"},
+				},
+			},
+		},
+	}
+
+	editAttributeMissing := &keycloak.RealmUserProfile{
+		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{
+				Name: "attribute",
+				Permissions: &keycloak.RealmUserProfilePermissions{
+					View: []string{"admin", "user"},
+				},
+			},
+		},
+	}
+
+	bothAttributesMissing := &keycloak.RealmUserProfile{
+		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{
+				Name:        "attribute",
+				Permissions: &keycloak.RealmUserProfilePermissions{},
+			},
+		},
+	}
+
+	withRightPermissions := &keycloak.RealmUserProfile{
+		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{
+				Name: "attribute",
+				Permissions: &keycloak.RealmUserProfilePermissions{
+					Edit: []string{"admin", "user"},
+					View: []string{"admin", "user"},
+				},
+			},
+		},
+	}
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmUserProfileDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealmUserProfile_template(realmName, withoutPermissions),
+				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
+					"keycloak_realm_user_profile.realm_user_profile", withoutPermissions,
+				),
+			},
+			{
+				Config:      testKeycloakRealmUserProfile_template(realmName, viewAttributeMissing),
+				ExpectError: regexp.MustCompile("Missing required argument"),
+			},
+			{
+				Config:      testKeycloakRealmUserProfile_template(realmName, editAttributeMissing),
+				ExpectError: regexp.MustCompile("Missing required argument"),
+			},
+			{
+				Config:      testKeycloakRealmUserProfile_template(realmName, bothAttributesMissing),
+				ExpectError: regexp.MustCompile("Missing required argument"),
+			},
+			{
+				Config: testKeycloakRealmUserProfile_template(realmName, withRightPermissions),
+				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
+					"keycloak_realm_user_profile.realm_user_profile", withRightPermissions,
+				),
+			},
+			{
+				Config: testKeycloakRealmUserProfile_template(realmName, withoutPermissions),
+				Check: testAccCheckKeycloakRealmUserProfileStateEqual(
+					"keycloak_realm_user_profile.realm_user_profile", withoutPermissions,
 				),
 			},
 		},
