@@ -1,43 +1,30 @@
 # terraform-provider-keycloak
 Terraform provider for [Keycloak](https://www.keycloak.org/).
 
-[![CircleCI](https://circleci.com/gh/mrparkers/terraform-provider-keycloak.svg?style=shield)](https://circleci.com/gh/mrparkers/terraform-provider-keycloak)
-
 ## Docs
 
 All documentation for this provider can now be found on the Terraform Registry: https://registry.terraform.io/providers/mrparkers/keycloak/latest/docs
 
 ## Installation
 
-v2.0.0 and above can be installed automatically using Terraform >=0.13 by using the `terraform` configuration block:
+This provider can be installed automatically using Terraform >=0.13 by using the `terraform` configuration block:
 
 ```hcl
 terraform {
   required_providers {
     keycloak = {
       source = "mrparkers/keycloak"
-      version = ">= 2.0.0"
+      version = ">= 3.0.0"
     }
   }
 }
 ```
 
-If you are using v2.0.0 and above with Terraform 0.12, you can use this provider by downloading it and placing it within
+If you are using Terraform 0.12, you can use this provider by downloading it and placing it within
 one of the [implied local mirror directories](https://www.terraform.io/docs/commands/cli-config.html#implied-local-mirror-directories).
 Or, follow the [old instructions for installing third-party plugins](https://www.terraform.io/docs/configuration-0-11/providers.html#third-party-plugins).
 
-If you are using any version below v2.0.0, you can also follow the [old instructions for installing third-party plugins](https://www.terraform.io/docs/configuration-0-11/providers.html#third-party-plugins).
-
-## Upgrade from terraform 0.12 and keycloak provider 1.x
-
-Please read https://www.terraform.io/upgrade-guides/0-13.html first. For a keycloak project follow the following steps in order:
-
-1. `terraform -v` should print 0.13 and list no keycloak provider
-1. `terraform state replace-provider registry.terraform.io/-/keycloak mrparkers/keycloak`
-1. find all `provider keycloak {...}` blocks in `*.tf` (also in all modules you are including) and delete the `version` line
-1. add the `terraform { required_provides { keycloak = { ...` block mentioned in "Installation" to `terraform.tf` (also in all module directories you are including). Be sure to also always add "source" or else the Terraform looks for "hashicorp/keycloak"!
-1. `terraform 0.13upgrade`
-1. `terraform init`
+If you are using any provider version below v2.0.0, you can also follow the [old instructions for installing third-party plugins](https://www.terraform.io/docs/configuration-0-11/providers.html#third-party-plugins).
 
 ## Supported Versions
 
@@ -45,9 +32,9 @@ This provider will officially support the latest three major versions of Keycloa
 
 The following versions are used when running acceptance tests in CI:
 
-- 15.0.2 (latest)
+- 16.1.1 (latest)
+- 15.1.1
 - 14.0.0
-- 13.0.1
 
 ## Releases
 
@@ -61,7 +48,7 @@ created by a PGP key with the fingerprint `C508 6791 5E11 6CD2`. This key can be
 You can find the list of releases [here](https://github.com/mrparkers/terraform-provider-keycloak/releases).
 You can find the changelog for each version [here](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/CHANGELOG.md).
 
-Note: Prior to 2.0.0, a statically linked build for use within Alpine linux was included with each release. This is no longer
+Note: Prior to v2.0.0, a statically linked build for use within Alpine linux was included with each release. This is no longer
 done due to [GoReleaser not supporting CGO](https://goreleaser.com/limitations/cgo/). Instead of using a statically linked,
 build you can use the `linux_amd64` build as long as `libc6-compat` is installed.
 

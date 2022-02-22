@@ -1,3 +1,26 @@
+## v3.7.0 (February 2, 2022)
+
+IMPROVEMENTS:
+
+- add support for the oauth2 device authorization grant ([#578](https://github.com/mrparkers/terraform-provider-keycloak/pull/578))
+- add `client_authenticator_type` attribute to `keycloak_openid_client` resource ([#627](https://github.com/mrparkers/terraform-provider-keycloak/pull/627))
+- add missing documentation for `keycloak_user_template_importer_identity_provider_mapper` resource ([#635](https://github.com/mrparkers/terraform-provider-keycloak/pull/635))
+- add attributes for customizing consent screen for `keycloak_openid_client` resource ([#646](https://github.com/mrparkers/terraform-provider-keycloak/pull/646))
+- upgrade to the latest version of the `terraform-plugin-sdk` ([#644](https://github.com/mrparkers/terraform-provider-keycloak/pull/644))
+- add attributes for configuring frontchannel logout on `keycloak_openid_client` resource ([#644](https://github.com/mrparkers/terraform-provider-keycloak/pull/644))
+- bump supported keycloak versions ([#650](https://github.com/mrparkers/terraform-provider-keycloak/pull/650))
+
+BUG FIXES:
+
+- fix keycloak version check for `keycloak_default_roles` resource ([#637](https://github.com/mrparkers/terraform-provider-keycloak/pull/637))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@shellrausch](https://github.com/shellrausch)
+- [@m-v-k](https://github.com/m-v-k)
+- [@oysteinhauan](https://github.com/oysteinhauan)
+- [@Kidsan](https://github.com/Kidsan)
+
 ## v3.6.0 (November 9, 2021)
 
 FEATURES:

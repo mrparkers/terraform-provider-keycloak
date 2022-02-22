@@ -42,6 +42,7 @@ type OpenidClient struct {
 	ImplicitFlowEnabled                bool                                     `json:"implicitFlowEnabled"`
 	DirectAccessGrantsEnabled          bool                                     `json:"directAccessGrantsEnabled"`
 	ServiceAccountsEnabled             bool                                     `json:"serviceAccountsEnabled"`
+	FrontChannelLogoutEnabled          bool                                     `json:"frontchannelLogout"`
 	AuthorizationServicesEnabled       bool                                     `json:"authorizationServicesEnabled"`
 	ValidRedirectUris                  []string                                 `json:"redirectUris"`
 	WebOrigins                         []string                                 `json:"webOrigins"`
@@ -68,6 +69,7 @@ type OpenidClientAttributes struct {
 	ClientSessionMaxLifespan              string                 `json:"client.session.max.lifespan,omitempty"`
 	UseRefreshTokens                      KeycloakBoolQuoted     `json:"use.refresh.tokens"`
 	BackchannelLogoutUrl                  string                 `json:"backchannel.logout.url"`
+	FrontchannelLogoutUrl                 string                 `json:"frontchannel.logout.url"`
 	BackchannelLogoutRevokeOfflineTokens  KeycloakBoolQuoted     `json:"backchannel.logout.revoke.offline.tokens"`
 	BackchannelLogoutSessionRequired      KeycloakBoolQuoted     `json:"backchannel.logout.session.required"`
 	ExtraConfig                           map[string]interface{} `json:"-"`

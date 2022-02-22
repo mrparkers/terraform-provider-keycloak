@@ -52,6 +52,7 @@ resource "keycloak_saml_identity_provider" "realm_saml_identity_provider" {
 - `single_sign_on_service_url` - (Required) The Url that must be used to send authentication requests (SAML AuthnRequest).
 - `single_logout_service_url` - (Optional) The Url that must be used to send logout requests.
 - `backchannel_supported` - (Optional) Does the external IDP support back-channel logout ?.
+- `provider_id` - (Optional) The ID of the identity provider to use. Defaults to `saml`, which should be used unless you have extended Keycloak and provided your own implementation.
 - `name_id_policy_format` - (Optional) Specifies the URI reference corresponding to a name identifier format. Defaults to empty.
 - `post_binding_response` - (Optional) Indicates whether to respond to requests using HTTP-POST binding. If false, HTTP-REDIRECT binding will be used..
 - `post_binding_authn_request` - (Optional) Indicates whether the AuthnRequest must be sent using HTTP-POST binding. If false, HTTP-REDIRECT binding will be used.

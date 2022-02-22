@@ -30,6 +30,24 @@ func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakSamlIdentityProvider_customProviderId(t *testing.T) {
+	t.Parallel()
+
+	samlName := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlIdentityProvider_customProviderId(samlName, "saml"), //actually needs to be something that exists
+				Check:  testAccCheckKeycloakSamlIdentityProviderExists("keycloak_saml_identity_provider.saml"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakSamlIdentityProvider_extraConfig(t *testing.T) {
 	t.Parallel()
 
@@ -272,6 +290,22 @@ resource "keycloak_saml_identity_provider" "saml" {
 	single_sign_on_service_url  = "https://example.com/auth"
 }
 	`, testAccRealm.Realm, saml)
+}
+
+func testKeycloakSamlIdentityProvider_customProviderId(saml, providerId string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_saml_identity_provider" "saml" {
+	realm             			= data.keycloak_realm.realm.id
+	alias             			= "%s"
+	provider_id       			= "%s"
+	entity_id					= "https://example.com/entity_id"
+	single_sign_on_service_url  = "https://example.com/auth"
+}
+	`, testAccRealm.Realm, saml, providerId)
 }
 
 func testKeycloakSamlIdentityProvider_extra_config(alias, configKey, configValue string) string {
