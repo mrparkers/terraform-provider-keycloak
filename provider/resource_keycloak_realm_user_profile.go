@@ -172,6 +172,10 @@ func getRealmUserProfileAttributeFromData(m map[string]interface{}) *keycloak.Re
 
 			name := validationConfig["name"].(string)
 
+			if name == "" {
+				continue
+			}
+
 			config := make(map[string]interface{})
 			if v, ok := validationConfig["config"]; ok {
 				for key, value := range v.(map[string]interface{}) {
