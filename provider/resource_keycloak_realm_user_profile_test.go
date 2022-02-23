@@ -33,6 +33,8 @@ func TestAccKeycloakRealmUserProfile_featureDisabled(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_basicEmpty(t *testing.T) {
+	skipForMajorServerVersion(t, keycloakClient, "14")
+
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	realmUserProfile := &keycloak.RealmUserProfile{}
@@ -51,6 +53,8 @@ func TestAccKeycloakRealmUserProfile_basicEmpty(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
+	skipForMajorServerVersion(t, keycloakClient, "14")
+
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	realmUserProfile := &keycloak.RealmUserProfile{
@@ -97,6 +101,8 @@ func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_group(t *testing.T) {
+	skipForMajorServerVersion(t, keycloakClient, "14")
+
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	withoutGroup := &keycloak.RealmUserProfile{
@@ -142,6 +148,8 @@ func TestAccKeycloakRealmUserProfile_group(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
+	skipForMajorServerVersion(t, keycloakClient, "14")
+
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	withoutValidator := &keycloak.RealmUserProfile{
@@ -232,6 +240,8 @@ func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_attributePermissions(t *testing.T) {
+	skipForMajorServerVersion(t, keycloakClient, "14")
+
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	withoutPermissions := &keycloak.RealmUserProfile{
@@ -338,8 +348,11 @@ resource "keycloak_realm_user_profile" "realm_user_profile" {
 func testKeycloakRealmUserProfile_template(realm string, realmUserProfile *keycloak.RealmUserProfile) string {
 	tmpl, err := template.New("").Funcs(template.FuncMap{"StringsJoin": strings.Join}).Parse(`
 resource "keycloak_realm" "realm" {
-	realm = "{{ .realm }}"
-	user_profile_enabled = true
+	realm 	   = "{{ .realm }}"
+
+	attributes = {
+		userProfileEnabled  = true
+	}
 }
 
 resource "keycloak_realm_user_profile" "realm_user_profile" {
