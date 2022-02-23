@@ -83,7 +83,6 @@ resource "keycloak_realm" "realm" {
 - `display_name` - (Optional) The display name for the realm that is shown when logging in to the admin console.
 - `display_name_html` - (Optional) The display name for the realm that is rendered as HTML on the screen when logging in to the admin console.
 - `user_managed_access` - (Optional) When `true`, users are allowed to manage their own resources. Defaults to `false`. 
-- `user_profile_enabled` - (Optional) When `true`, the User Profile is enabled. Defaults to `false`.
 - `attributes` - (Optional) A map of custom attributes to add to the realm.
 
 ### Login Settings

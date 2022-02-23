@@ -13,7 +13,7 @@ To enable it, start the server with one of the following flags:
 - Quarkus distribution: `--features=preview` or `--features=declarative-user-profile`
 
 The realm linked to the `keycloak_realm_user_profile` resource must have the user profile feature enabled.
-It can be done via the administration UI, or using the `user_profile_enabled` argument of the `keycloak_realm` resource.
+It can be done via the administration UI, or by setting the `userProfileEnabled` realm attribute to `true`.
 
 ## Example Usage
 
@@ -21,7 +21,9 @@ It can be done via the administration UI, or using the `user_profile_enabled` ar
 resource "keycloak_realm" "my_realm" {
 	realm = "my-realm"
 
-  user_profile_enabled = true
+  attributes = {
+		userProfileEnabled = true
+	}
 }
 
 resource keycloak_realm_user_profile userprofile {
