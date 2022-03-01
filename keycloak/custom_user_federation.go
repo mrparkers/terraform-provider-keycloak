@@ -17,6 +17,9 @@ type CustomUserFederation struct {
 
 	CachePolicy string
 
+	FullSyncPeriod    int
+	ChangedSyncPeriod int
+
 	Config map[string][]string
 }
 
@@ -35,6 +38,8 @@ func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *c
 	componentConfig["cachePolicy"] = append(componentConfig["cachePolicy"], custom.CachePolicy)
 	componentConfig["enabled"] = append(componentConfig["enabled"], strconv.FormatBool(custom.Enabled))
 	componentConfig["priority"] = append(componentConfig["priority"], strconv.Itoa(custom.Priority))
+	componentConfig["fullSyncPeriod"] = append(componentConfig["fullSyncPeriod"], strconv.Itoa(custom.FullSyncPeriod))
+	componentConfig["changedSyncPeriod"] = append(componentConfig["changedSyncPeriod"], strconv.Itoa(custom.ChangedSyncPeriod))
 	parentId := custom.RealmId
 	if custom.ParentId != "" {
 		parentId = custom.ParentId
@@ -60,9 +65,25 @@ func convertFromComponentToCustomUserFederation(component *component, realmName 
 		return nil, err
 	}
 
+	fullSyncPeriod, err := strconv.Atoi(component.getConfig("fullSyncPeriod"))
+	if err != nil {
+		return nil, err
+	}
+	changedSyncPeriod, err := strconv.Atoi(component.getConfig("changedSyncPeriod"))
+	if err != nil {
+		return nil, err
+	}
+
+	configsToIgnore := map[string]bool{
+		"enabled":           true,
+		"priority":          true,
+		"cachePolicy":       true,
+		"fullSyncPeriod":    true,
+		"changedSyncPeriod": true,
+	}
 	config := make(map[string][]string)
 	for k := range component.Config {
-		if k != "enabled" && k != "priority" && k != "cachePolicy" {
+		if found := configsToIgnore[k]; !found {
 			config[k] = append(config[k], component.getConfig(k))
 		}
 	}
@@ -78,6 +99,9 @@ func convertFromComponentToCustomUserFederation(component *component, realmName 
 		Priority: priority,
 
 		CachePolicy: component.getConfig("cachePolicy"),
+
+		FullSyncPeriod:    fullSyncPeriod,
+		ChangedSyncPeriod: changedSyncPeriod,
 
 		Config: config,
 	}
