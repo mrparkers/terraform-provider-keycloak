@@ -2,10 +2,11 @@ package provider
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 func resourceKeycloakCustomUserFederation() *schema.Resource {
@@ -70,6 +71,21 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(keycloakUserFederationCachePolicies, false),
 			},
 
+			"full_sync_period": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      -1,
+				ValidateFunc: validateSyncPeriod,
+				Description:  "How frequently Keycloak should sync all users, in seconds. Omit this property to disable periodic full sync.",
+			},
+			"changed_sync_period": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      -1,
+				ValidateFunc: validateSyncPeriod,
+				Description:  "How frequently Keycloak should sync changed users, in seconds. Omit this property to disable periodic changed users sync.",
+			},
+
 			"config": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -105,6 +121,9 @@ func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.Custom
 
 		CachePolicy: data.Get("cache_policy").(string),
 
+		FullSyncPeriod:    data.Get("full_sync_period").(int),
+		ChangedSyncPeriod: data.Get("changed_sync_period").(int),
+
 		Config: config,
 	}
 }
@@ -120,6 +139,9 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 
 	data.Set("enabled", custom.Enabled)
 	data.Set("priority", custom.Priority)
+
+	data.Set("full_sync_period", custom.FullSyncPeriod)
+	data.Set("changed_sync_period", custom.ChangedSyncPeriod)
 
 	data.Set("cache_policy", custom.CachePolicy)
 

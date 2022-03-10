@@ -2,12 +2,13 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"regexp"
-	"testing"
 )
 
 func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
@@ -230,6 +231,10 @@ func getCustomUserFederationFromState(s *terraform.State, resourceName string) (
 	custom, err := keycloakClient.GetCustomUserFederation(realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting custom user federation with id %s: %s", id, err)
+	} else if custom.FullSyncPeriod != 30 {
+		return nil, fmt.Errorf("expected fullSyncPeriod to equal %d, actual value = %d", 30, custom.FullSyncPeriod)
+	} else if custom.ChangedSyncPeriod != 60 {
+		return nil, fmt.Errorf("expected changedSyncPeriod to equal %d, actual value = %d", 60, custom.ChangedSyncPeriod)
 	}
 
 	return custom, nil
@@ -246,6 +251,9 @@ resource "keycloak_custom_user_federation" "custom" {
 	realm_id    = data.keycloak_realm.realm.id
 	provider_id = "%s"
 
+	full_sync_period    = 30
+	changed_sync_period = 60
+
 	enabled     = true
 }
 	`, testAccRealm.Realm, name, providerId)
@@ -261,6 +269,9 @@ resource "keycloak_custom_user_federation" "custom" {
 	name        = "%s"
 	realm_id    = data.keycloak_realm.realm.id
 	provider_id = "%s"
+
+	full_sync_period    = 30
+	changed_sync_period = 60
 
 	enabled     = true
 
@@ -282,6 +293,9 @@ resource "keycloak_custom_user_federation" "custom" {
 	realm_id    = keycloak_realm.realm.id
 	provider_id = "%s"
     parent_id   = "%s"
+
+	full_sync_period    = 30
+	changed_sync_period = 60
 
 	enabled     = true
 }
