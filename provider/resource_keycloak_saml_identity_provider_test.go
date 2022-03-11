@@ -48,6 +48,24 @@ func TestAccKeycloakSamlIdentityProvider_customProviderId(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakSamlIdentityProvider_nameIdPolicyFormatTransient(t *testing.T) {
+	t.Parallel()
+
+	samlName := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlIdentityProviderDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlIdentityProvider_withNameIdPolicyFormat(samlName, "Transient"),
+				Check:  testAccCheckKeycloakSamlIdentityProviderHasNameIdPolicyFormatValue("keycloak_saml_identity_provider.saml", "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakSamlIdentityProvider_extraConfig(t *testing.T) {
 	t.Parallel()
 
@@ -240,6 +258,21 @@ func testAccCheckKeycloakSamlIdentityProviderHasCustomConfigValue(resourceName, 
 	}
 }
 
+func testAccCheckKeycloakSamlIdentityProviderHasNameIdPolicyFormatValue(resourceName, nameIdPolicyFormatValue string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		fetchedSaml, err := getKeycloakSamlIdentityProviderFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if fetchedSaml.Config.NameIDPolicyFormat != nameIdPolicyFormatValue {
+			return fmt.Errorf("expected saml provider to have config with nameIdPolicyFormat with a value %s, but value was %s", nameIdPolicyFormatValue, fetchedSaml.Config.NameIDPolicyFormat)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakSamlIdentityProviderDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -306,6 +339,23 @@ resource "keycloak_saml_identity_provider" "saml" {
 	single_sign_on_service_url  = "https://example.com/auth"
 }
 	`, testAccRealm.Realm, saml, providerId)
+}
+
+func testKeycloakSamlIdentityProvider_withNameIdPolicyFormat(saml, nameIdPolicyFormat string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_saml_identity_provider" "saml" {
+	realm             			= data.keycloak_realm.realm.id
+	alias             			= "%s"
+	name_id_policy_format		= "%s"
+	principal_type				= "ATTRIBUTE"
+	entity_id					= "https://example.com/entity_id"
+	single_sign_on_service_url  = "https://example.com/auth"
+}
+	`, testAccRealm.Realm, saml, nameIdPolicyFormat)
 }
 
 func testKeycloakSamlIdentityProvider_extra_config(alias, configKey, configValue string) string {
