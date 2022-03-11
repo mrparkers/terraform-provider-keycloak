@@ -12,16 +12,23 @@ import (
 
 func TestAccKeycloakOpenidClientAuthorizationGroupPolicy(t *testing.T) {
 	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	var policyId string
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testResourceKeycloakOpenidClientAuthorizationGroupPolicyDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testResourceKeycloakOpenidClientAuthorizationGroupPolicy_basic(clientId),
-				Check:  testResourceKeycloakOpenidClientAuthorizationGroupPolicyExists("keycloak_openid_client_group_policy.test"),
+				Check:  testResourceKeycloakOpenidClientAuthorizationGroupPolicyExists("keycloak_openid_client_group_policy.test", &policyId),
+			},
+			// we need a separate test step to verify destroy, since destroying the client will always lead to destroying the group policy
+			{
+				Config: testResourceKeycloakOpenidClientAuthorizationGroupPolicy_basicDestroy(clientId),
+				Check:  testResourceKeycloakOpenidClientHasNoAuthorizationGroupPolicy("keycloak_openid_client.test", policyId),
 			},
 		},
 	})
@@ -45,34 +52,34 @@ func getResourceKeycloakOpenidClientAuthorizationGroupPolicyFromState(s *terrafo
 	return policy, nil
 }
 
-func testResourceKeycloakOpenidClientAuthorizationGroupPolicyDestroy() resource.TestCheckFunc {
+func testResourceKeycloakOpenidClientHasNoAuthorizationGroupPolicy(resourceName string, policyId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_openid_client_group_policy" {
-				continue
-			}
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
 
-			realm := rs.Primary.Attributes["realm_id"]
-			resourceServerId := rs.Primary.Attributes["resource_server_id"]
-			policyId := rs.Primary.ID
+		realm := rs.Primary.Attributes["realm_id"]
+		resourceServerId := rs.Primary.Attributes["resource_server_id"]
 
-			policy, _ := keycloakClient.GetOpenidClientAuthorizationGroupPolicy(realm, resourceServerId, policyId)
-			if policy != nil {
-				return fmt.Errorf("policy config with id %s still exists", policyId)
-			}
+		_, err := keycloakClient.GetOpenidClientAuthorizationGroupPolicy(realm, resourceServerId, policyId)
+		if err == nil {
+			return fmt.Errorf("policy with id %s still exists", policyId)
 		}
 
 		return nil
 	}
 }
 
-func testResourceKeycloakOpenidClientAuthorizationGroupPolicyExists(resourceName string) resource.TestCheckFunc {
+func testResourceKeycloakOpenidClientAuthorizationGroupPolicyExists(resourceName string, policyId *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		_, err := getResourceKeycloakOpenidClientAuthorizationGroupPolicyFromState(s, resourceName)
+		policy, err := getResourceKeycloakOpenidClientAuthorizationGroupPolicyFromState(s, resourceName)
 
 		if err != nil {
 			return err
 		}
+
+		policyId = &policy.Id
 
 		return nil
 	}
@@ -110,6 +117,24 @@ resource keycloak_openid_client_group_policy test {
 	}
 	logic = "POSITIVE"
 	decision_strategy = "UNANIMOUS"
+}
+	`, testAccRealm.Realm, clientId)
+}
+
+func testResourceKeycloakOpenidClientAuthorizationGroupPolicy_basicDestroy(clientId string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource keycloak_openid_client test {
+	client_id                = "%s"
+	realm_id                 = data.keycloak_realm.realm.id
+	access_type              = "CONFIDENTIAL"
+	service_accounts_enabled = true
+	authorization {
+		policy_enforcement_mode = "ENFORCING"
+	}
 }
 	`, testAccRealm.Realm, clientId)
 }
