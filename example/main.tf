@@ -1004,6 +1004,11 @@ resource "keycloak_authentication_execution_config" "config" {
   }
 }
 
+resource "keycloak_authentication_bindings" "test_bindings" {
+  realm_id     = keycloak_realm.test.id
+  browser_flow = keycloak_authentication_flow.browser-copy-flow.alias
+}
+
 resource "keycloak_openid_client" "client" {
   client_id   = "my-override-flow-binding-client"
   realm_id    = keycloak_realm.test.id
