@@ -94,7 +94,7 @@ jobs:
           KEYCLOAK_LOGLEVEL: INFO
           KEYCLOAK_USER: keycloak
           KEYCLOAK_PASSWORD: password
-          JAVA_OPTS: "-Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.profile.feature.admin_fine_grained_authz=enabled -Dkeycloak.profile.feature.token_exchange=enabled"
+          JAVA_OPTS: "-Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.profile.feature.admin_fine_grained_authz=enabled -Dkeycloak.profile.feature.token_exchange=enabled -Dkeycloak.profile.feature.declarative_user_profile=enabled"
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
