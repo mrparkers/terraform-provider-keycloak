@@ -32,3 +32,19 @@ func (keycloakClient *KeycloakClient) VersionIsGreaterThanOrEqualTo(versionStrin
 
 	return keycloakClient.version.GreaterThanOrEqual(v), nil
 }
+
+func (keycloakClient *KeycloakClient) VersionIsLessThanOrEqualTo(versionString Version) (bool, error) {
+	if keycloakClient.version == nil {
+		err := keycloakClient.login()
+		if err != nil {
+			return false, err
+		}
+	}
+
+	v, err := version.NewVersion(string(versionString))
+	if err != nil {
+		return false, nil
+	}
+
+	return keycloakClient.version.LessThanOrEqual(v), nil
+}

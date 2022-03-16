@@ -19,24 +19,24 @@ It can be done via the administration UI, or by setting the `userProfileEnabled`
 
 ```hcl
 resource "keycloak_realm" "my_realm" {
-	realm = "my-realm"
+  realm = "my-realm"
 
   attributes = {
-		userProfileEnabled = true
-	}
+    userProfileEnabled = true
+  }
 }
 
-resource keycloak_realm_user_profile userprofile {
-	realm_id  = keycloak_realm.my_realm.realm
+resource "keycloak_realm_user_profile" "userprofile" {
+  realm_id = keycloak_realm.my_realm.id
 
   attribute {
-    name = "field1"
+    name         = "field1"
     display_name = "Field 1"
-    group = "group1"
+    group        = "group1"
 
     enabled_when_scope = ["offline_access"]
 
-    required_for_roles = ["user"]
+    required_for_roles  = ["user"]
     required_for_scopes = ["offline_access"]
 
     permissions {
@@ -46,12 +46,12 @@ resource keycloak_realm_user_profile userprofile {
 
     validator {
       name = "person-name-prohibited-characters"
-    } 
+    }
 
     validator {
-      name = "pattern"
+      name   = "pattern"
       config = {
-        pattern = "^[a-z]+$"
+        pattern       = "^[a-z]+$"
         error_message = "Nope"
       }
     }
@@ -66,8 +66,8 @@ resource keycloak_realm_user_profile userprofile {
   }
 
   group {
-    name = "group1"
-    display_header = "Group 1"
+    name                = "group1"
+    display_header      = "Group 1"
     display_description = "A first group"
 
     annotations = {
@@ -83,7 +83,7 @@ resource keycloak_realm_user_profile userprofile {
 
 ## Argument Reference
 
-- `realm_id` - (Required) The name of the realm the user profile apply to.
+- `realm_id` - (Required) The ID of the realm the user profile applies to.
 - `attribute` - (Optional) An ordered list of [attributes](#attribute-arguments).
 - `group` - (Optional) A list of [groups](#group-arguments).
 
