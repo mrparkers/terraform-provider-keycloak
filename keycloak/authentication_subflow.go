@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"errors"
 	"fmt"
 )
@@ -28,7 +29,7 @@ type authenticationSubFlowCreate struct {
 	Description string `json:"description"`
 }
 
-func (keycloakClient *KeycloakClient) NewAuthenticationSubFlow(authenticationSubFlow *AuthenticationSubFlow) error {
+func (keycloakClient *KeycloakClient) NewAuthenticationSubFlow(ctx context.Context, authenticationSubFlow *AuthenticationSubFlow) error {
 	authenticationSubFlow.TopLevel = false
 	authenticationSubFlow.BuiltIn = false
 	authenticationSubFlowCreate := &authenticationSubFlowCreate{
@@ -38,33 +39,33 @@ func (keycloakClient *KeycloakClient) NewAuthenticationSubFlow(authenticationSub
 		Description: authenticationSubFlow.Description,
 	}
 
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions/flow", authenticationSubFlow.RealmId, authenticationSubFlow.ParentFlowAlias), authenticationSubFlowCreate)
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s/executions/flow", authenticationSubFlow.RealmId, authenticationSubFlow.ParentFlowAlias), authenticationSubFlowCreate)
 	if err != nil {
 		return err
 	}
 	authenticationSubFlow.Id = getIdFromLocationHeader(location)
 
 	if authenticationSubFlow.Requirement != "DISABLED" {
-		return keycloakClient.UpdateAuthenticationSubFlow(authenticationSubFlow)
+		return keycloakClient.UpdateAuthenticationSubFlow(ctx, authenticationSubFlow)
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetAuthenticationSubFlow(realmId, parentFlowAlias, id string) (*AuthenticationSubFlow, error) {
+func (keycloakClient *KeycloakClient) GetAuthenticationSubFlow(ctx context.Context, realmId, parentFlowAlias, id string) (*AuthenticationSubFlow, error) {
 	var authenticationSubFlow AuthenticationSubFlow
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows/%s", realmId, id), &authenticationSubFlow, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s", realmId, id), &authenticationSubFlow, nil)
 	if err != nil {
 		return nil, err
 	}
 	authenticationSubFlow.RealmId = realmId
 	authenticationSubFlow.ParentFlowAlias = parentFlowAlias
 
-	executionId, err := keycloakClient.getExecutionId(&authenticationSubFlow)
+	executionId, err := keycloakClient.getExecutionId(ctx, &authenticationSubFlow)
 	if err != nil {
 		return nil, err
 	}
 
-	subFlowExecution, err := keycloakClient.GetAuthenticationExecution(realmId, parentFlowAlias, executionId)
+	subFlowExecution, err := keycloakClient.GetAuthenticationExecution(ctx, realmId, parentFlowAlias, executionId)
 	if err != nil {
 		return nil, err
 	}
@@ -74,8 +75,8 @@ func (keycloakClient *KeycloakClient) GetAuthenticationSubFlow(realmId, parentFl
 	return &authenticationSubFlow, nil
 }
 
-func (keycloakClient *KeycloakClient) getExecutionId(authenticationSubFlow *AuthenticationSubFlow) (string, error) {
-	list, err := keycloakClient.ListAuthenticationExecutions(authenticationSubFlow.RealmId, authenticationSubFlow.ParentFlowAlias)
+func (keycloakClient *KeycloakClient) getExecutionId(ctx context.Context, authenticationSubFlow *AuthenticationSubFlow) (string, error) {
+	list, err := keycloakClient.ListAuthenticationExecutions(ctx, authenticationSubFlow.RealmId, authenticationSubFlow.ParentFlowAlias)
 	if err != nil {
 		return "", err
 	}
@@ -88,17 +89,17 @@ func (keycloakClient *KeycloakClient) getExecutionId(authenticationSubFlow *Auth
 	return "", errors.New("no execution id found for subflow")
 }
 
-func (keycloakClient *KeycloakClient) UpdateAuthenticationSubFlow(authenticationSubFlow *AuthenticationSubFlow) error {
+func (keycloakClient *KeycloakClient) UpdateAuthenticationSubFlow(ctx context.Context, authenticationSubFlow *AuthenticationSubFlow) error {
 	authenticationSubFlow.TopLevel = false
 	authenticationSubFlow.BuiltIn = false
 
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/authentication/flows/%s", authenticationSubFlow.RealmId, authenticationSubFlow.Id), authenticationSubFlow)
+	err := keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s", authenticationSubFlow.RealmId, authenticationSubFlow.Id), authenticationSubFlow)
 
 	if err != nil {
 		return err
 	}
 
-	executionId, err := keycloakClient.getExecutionId(authenticationSubFlow)
+	executionId, err := keycloakClient.getExecutionId(ctx, authenticationSubFlow)
 	if err != nil {
 		return err
 	}
@@ -110,48 +111,48 @@ func (keycloakClient *KeycloakClient) UpdateAuthenticationSubFlow(authentication
 		Id:              executionId,
 		Requirement:     authenticationSubFlow.Requirement,
 	}
-	return keycloakClient.UpdateAuthenticationExecutionRequirement(authenticationExecutionUpdateRequirement)
+	return keycloakClient.UpdateAuthenticationExecutionRequirement(ctx, authenticationExecutionUpdateRequirement)
 
 }
 
-func (keycloakClient *KeycloakClient) DeleteAuthenticationSubFlow(realmId, parentFlowAlias, id string) error {
+func (keycloakClient *KeycloakClient) DeleteAuthenticationSubFlow(ctx context.Context, realmId, parentFlowAlias, id string) error {
 	authenticationSubFlow := AuthenticationSubFlow{
 		Id:              id,
 		ParentFlowAlias: parentFlowAlias,
 		RealmId:         realmId,
 	}
-	executionId, err := keycloakClient.getExecutionId(&authenticationSubFlow)
+	executionId, err := keycloakClient.getExecutionId(ctx, &authenticationSubFlow)
 	if err != nil {
 		return err
 	}
 
-	return keycloakClient.DeleteAuthenticationExecution(authenticationSubFlow.RealmId, executionId)
+	return keycloakClient.DeleteAuthenticationExecution(ctx, authenticationSubFlow.RealmId, executionId)
 }
 
-func (keycloakClient *KeycloakClient) RaiseAuthenticationSubFlowPriority(realmId, parentFlowAlias, id string) error {
+func (keycloakClient *KeycloakClient) RaiseAuthenticationSubFlowPriority(ctx context.Context, realmId, parentFlowAlias, id string) error {
 	authenticationSubFlow := AuthenticationSubFlow{
 		Id:              id,
 		ParentFlowAlias: parentFlowAlias,
 		RealmId:         realmId,
 	}
-	executionId, err := keycloakClient.getExecutionId(&authenticationSubFlow)
+	executionId, err := keycloakClient.getExecutionId(ctx, &authenticationSubFlow)
 	if err != nil {
 		return err
 	}
 
-	return keycloakClient.RaiseAuthenticationExecutionPriority(authenticationSubFlow.RealmId, executionId)
+	return keycloakClient.RaiseAuthenticationExecutionPriority(ctx, authenticationSubFlow.RealmId, executionId)
 }
 
-func (keycloakClient *KeycloakClient) LowerAuthenticationSubFlowPriority(realmId, parentFlowAlias, id string) error {
+func (keycloakClient *KeycloakClient) LowerAuthenticationSubFlowPriority(ctx context.Context, realmId, parentFlowAlias, id string) error {
 	authenticationSubFlow := AuthenticationSubFlow{
 		Id:              id,
 		ParentFlowAlias: parentFlowAlias,
 		RealmId:         realmId,
 	}
-	executionId, err := keycloakClient.getExecutionId(&authenticationSubFlow)
+	executionId, err := keycloakClient.getExecutionId(ctx, &authenticationSubFlow)
 	if err != nil {
 		return err
 	}
 
-	return keycloakClient.LowerAuthenticationExecutionPriority(authenticationSubFlow.RealmId, executionId)
+	return keycloakClient.LowerAuthenticationExecutionPriority(ctx, authenticationSubFlow.RealmId, executionId)
 }

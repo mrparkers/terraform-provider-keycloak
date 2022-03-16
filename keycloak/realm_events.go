@@ -1,6 +1,9 @@
 package keycloak
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 type RealmEventsConfig struct {
 	AdminEventsDetailsEnabled bool     `json:"adminEventsDetailsEnabled"`
@@ -11,10 +14,10 @@ type RealmEventsConfig struct {
 	EventsListeners           []string `json:"eventsListeners,omitempty"`
 }
 
-func (keycloakClient *KeycloakClient) GetRealmEventsConfig(realmId string) (*RealmEventsConfig, error) {
+func (keycloakClient *KeycloakClient) GetRealmEventsConfig(ctx context.Context, realmId string) (*RealmEventsConfig, error) {
 	var realmEventsConfig RealmEventsConfig
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/events/config", realmId), &realmEventsConfig, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/events/config", realmId), &realmEventsConfig, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -22,6 +25,6 @@ func (keycloakClient *KeycloakClient) GetRealmEventsConfig(realmId string) (*Rea
 	return &realmEventsConfig, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateRealmEventsConfig(realmId string, realmEventsConfig *RealmEventsConfig) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/events/config", realmId), realmEventsConfig)
+func (keycloakClient *KeycloakClient) UpdateRealmEventsConfig(ctx context.Context, realmId string, realmEventsConfig *RealmEventsConfig) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/events/config", realmId), realmEventsConfig)
 }

@@ -1,6 +1,9 @@
 package keycloak
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 type GenericClient struct {
 	Id       string `json:"id,omitempty"`
@@ -13,10 +16,10 @@ type GenericClient struct {
 	Description string `json:"description"`
 }
 
-func (keycloakClient *KeycloakClient) listGenericClients(realmId string) ([]*GenericClient, error) {
+func (keycloakClient *KeycloakClient) listGenericClients(ctx context.Context, realmId string) ([]*GenericClient, error) {
 	var clients []*GenericClient
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients", realmId), &clients, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients", realmId), &clients, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -28,10 +31,10 @@ func (keycloakClient *KeycloakClient) listGenericClients(realmId string) ([]*Gen
 	return clients, nil
 }
 
-func (keycloakClient *KeycloakClient) GetGenericClient(realmId, id string) (*GenericClient, error) {
+func (keycloakClient *KeycloakClient) GetGenericClient(ctx context.Context, realmId, id string) (*GenericClient, error) {
 	var client GenericClient
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s", realmId, id), &client, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients/%s", realmId, id), &client, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -41,14 +44,14 @@ func (keycloakClient *KeycloakClient) GetGenericClient(realmId, id string) (*Gen
 	return &client, nil
 }
 
-func (keycloakClient *KeycloakClient) GetGenericClientByClientId(realmId, clientId string) (*GenericClient, error) {
+func (keycloakClient *KeycloakClient) GetGenericClientByClientId(ctx context.Context, realmId, clientId string) (*GenericClient, error) {
 	var clients []GenericClient
 
 	params := map[string]string{
 		"clientId": clientId,
 	}
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients", realmId), &clients, params)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients", realmId), &clients, params)
 	if err != nil {
 		return nil, err
 	}

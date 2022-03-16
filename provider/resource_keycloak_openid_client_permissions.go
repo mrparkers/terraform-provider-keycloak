@@ -54,32 +54,6 @@ func clientPermissionsId(realmId, clientId string) string {
 	return fmt.Sprintf("%s/%s", realmId, clientId)
 }
 
-// TODO: is this needed?
-//func unsetOpenidClientScopePermissionPolicy(keycloakClient *keycloak.KeycloakClient, realmId, clientId, scopeName string) error {
-//	openidClientPermissions, err := keycloakClient.GetOpenidClientPermissions(realmId, clientId)
-//	if err != nil {
-//		return err
-//	}
-//
-//	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
-//	if err != nil {
-//		return err
-//	}
-//
-//	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions[scopeName].(string))
-//	if err != nil {
-//		return err
-//	}
-//
-//	permission.Policies = []string{}
-//	err = keycloakClient.UpdateOpenidClientAuthorizationPermission(permission)
-//	if err != nil {
-//		return err
-//	}
-//
-//	return nil
-//}
-
 func resourceKeycloakOpenidClientPermissionsCreate(data *schema.ResourceData, meta interface{}) error {
 	return resourceKeycloakOpenidClientPermissionsUpdate(data, meta)
 }

@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -20,10 +21,10 @@ func roleScopeMappingUrl(realmId, clientId string, clientScopeId string, role *R
 	}
 }
 
-func (keycloakClient *KeycloakClient) CreateRoleScopeMapping(realmId string, clientId string, clientScopeId string, role *Role) error {
+func (keycloakClient *KeycloakClient) CreateRoleScopeMapping(ctx context.Context, realmId string, clientId string, clientScopeId string, role *Role) error {
 	roleUrl := roleScopeMappingUrl(realmId, clientId, clientScopeId, role)
 
-	_, _, err := keycloakClient.post(roleUrl, []Role{*role})
+	_, _, err := keycloakClient.post(ctx, roleUrl, []Role{*role})
 	if err != nil {
 		return err
 	}
@@ -31,11 +32,11 @@ func (keycloakClient *KeycloakClient) CreateRoleScopeMapping(realmId string, cli
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetRoleScopeMapping(realmId string, clientId string, clientScopeId string, role *Role) (*Role, error) {
+func (keycloakClient *KeycloakClient) GetRoleScopeMapping(ctx context.Context, realmId string, clientId string, clientScopeId string, role *Role) (*Role, error) {
 	roleUrl := roleScopeMappingUrl(realmId, clientId, clientScopeId, role)
 	var roles []Role
 
-	err := keycloakClient.get(roleUrl, &roles, nil)
+	err := keycloakClient.get(ctx, roleUrl, &roles, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,7 @@ func (keycloakClient *KeycloakClient) GetRoleScopeMapping(realmId string, client
 	return nil, nil
 }
 
-func (keycloakClient *KeycloakClient) DeleteRoleScopeMapping(realmId string, clientId string, clientScopeId string, role *Role) error {
+func (keycloakClient *KeycloakClient) DeleteRoleScopeMapping(ctx context.Context, realmId string, clientId string, clientScopeId string, role *Role) error {
 	roleUrl := roleScopeMappingUrl(realmId, clientId, clientScopeId, role)
-	return keycloakClient.delete(roleUrl, nil)
+	return keycloakClient.delete(ctx, roleUrl, nil)
 }

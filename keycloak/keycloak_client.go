@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -50,7 +51,7 @@ const (
 	tokenUrl = "%s/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string, additionalHeaders map[string]string) (*KeycloakClient, error) {
+func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string, additionalHeaders map[string]string) (*KeycloakClient, error) {
 	clientCredentials := &ClientCredentials{
 		ClientId:     clientId,
 		ClientSecret: clientSecret,
@@ -85,7 +86,7 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 	}
 
 	if keycloakClient.initialLogin {
-		err = keycloakClient.login()
+		err = keycloakClient.login(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to perform initial login to Keycloak: %v", err)
 		}
@@ -100,13 +101,13 @@ func NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, p
 	return &keycloakClient, nil
 }
 
-func (keycloakClient *KeycloakClient) login() error {
+func (keycloakClient *KeycloakClient) login(ctx context.Context) error {
 	accessTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	accessTokenData := keycloakClient.getAuthenticationFormData()
 
 	log.Printf("[DEBUG] Login request: %s", accessTokenData.Encode())
 
-	accessTokenRequest, err := http.NewRequest(http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
+	accessTokenRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
 	if err != nil {
 		return err
 	}
@@ -145,7 +146,7 @@ func (keycloakClient *KeycloakClient) login() error {
 	keycloakClient.clientCredentials.RefreshToken = clientCredentials.RefreshToken
 	keycloakClient.clientCredentials.TokenType = clientCredentials.TokenType
 
-	info, err := keycloakClient.GetServerInfo()
+	info, err := keycloakClient.GetServerInfo(ctx)
 	if err != nil {
 		return err
 	}
@@ -165,13 +166,13 @@ func (keycloakClient *KeycloakClient) login() error {
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) refresh() error {
+func (keycloakClient *KeycloakClient) refresh(ctx context.Context) error {
 	refreshTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	refreshTokenData := keycloakClient.getAuthenticationFormData()
 
 	log.Printf("[DEBUG] Refresh request: %s", refreshTokenData.Encode())
 
-	refreshTokenRequest, err := http.NewRequest(http.MethodPost, refreshTokenUrl, strings.NewReader(refreshTokenData.Encode()))
+	refreshTokenRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, refreshTokenUrl, strings.NewReader(refreshTokenData.Encode()))
 	if err != nil {
 		return err
 	}
@@ -201,7 +202,7 @@ func (keycloakClient *KeycloakClient) refresh() error {
 	if refreshTokenResponse.StatusCode == http.StatusBadRequest {
 		log.Printf("[DEBUG] Unexpected 400, attemting to log in again")
 
-		return keycloakClient.login()
+		return keycloakClient.login(ctx)
 	}
 
 	var clientCredentials ClientCredentials
@@ -260,10 +261,10 @@ func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 /**
 Sends an HTTP request and refreshes credentials on 403 or 401 errors
 */
-func (keycloakClient *KeycloakClient) sendRequest(request *http.Request, body []byte) ([]byte, string, error) {
+func (keycloakClient *KeycloakClient) sendRequest(ctx context.Context, request *http.Request, body []byte) ([]byte, string, error) {
 	if !keycloakClient.initialLogin {
 		keycloakClient.initialLogin = true
-		err := keycloakClient.login()
+		err := keycloakClient.login(ctx)
 		if err != nil {
 			return nil, "", fmt.Errorf("error logging in: %s", err)
 		}
@@ -290,7 +291,7 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request, body []
 	if response.StatusCode == http.StatusUnauthorized || response.StatusCode == http.StatusForbidden {
 		log.Printf("[DEBUG] Response: %s.  Attempting refresh", response.Status)
 
-		err := keycloakClient.refresh()
+		err := keycloakClient.refresh(nil)
 		if err != nil {
 			return nil, "", fmt.Errorf("error refreshing credentials: %s", err)
 		}
@@ -335,18 +336,18 @@ func (keycloakClient *KeycloakClient) sendRequest(request *http.Request, body []
 	return responseBody, response.Header.Get("Location"), nil
 }
 
-func (keycloakClient *KeycloakClient) get(path string, resource interface{}, params map[string]string) error {
-	body, err := keycloakClient.getRaw(path, params)
+func (keycloakClient *KeycloakClient) get(ctx context.Context, path string, resource interface{}, params map[string]string) error {
+	body, err := keycloakClient.getRaw(ctx, path, params)
 	if err != nil {
 		return err
 	}
 	return json.Unmarshal(body, resource)
 }
 
-func (keycloakClient *KeycloakClient) getRaw(path string, params map[string]string) ([]byte, error) {
+func (keycloakClient *KeycloakClient) getRaw(ctx context.Context, path string, params map[string]string) ([]byte, error) {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
-	request, err := http.NewRequest(http.MethodGet, resourceUrl, nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, resourceUrl, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -359,24 +360,24 @@ func (keycloakClient *KeycloakClient) getRaw(path string, params map[string]stri
 		request.URL.RawQuery = query.Encode()
 	}
 
-	body, _, err := keycloakClient.sendRequest(request, nil)
+	body, _, err := keycloakClient.sendRequest(ctx, request, nil)
 	return body, err
 }
 
-func (keycloakClient *KeycloakClient) sendRaw(path string, requestBody []byte) ([]byte, error) {
+func (keycloakClient *KeycloakClient) sendRaw(ctx context.Context, path string, requestBody []byte) ([]byte, error) {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
-	request, err := http.NewRequest(http.MethodPost, resourceUrl, nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, resourceUrl, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	body, _, err := keycloakClient.sendRequest(request, requestBody)
+	body, _, err := keycloakClient.sendRequest(ctx, request, requestBody)
 
 	return body, err
 }
 
-func (keycloakClient *KeycloakClient) post(path string, requestBody interface{}) ([]byte, string, error) {
+func (keycloakClient *KeycloakClient) post(ctx context.Context, path string, requestBody interface{}) ([]byte, string, error) {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
 	payload, err := keycloakClient.marshal(requestBody)
@@ -384,17 +385,17 @@ func (keycloakClient *KeycloakClient) post(path string, requestBody interface{})
 		return nil, "", err
 	}
 
-	request, err := http.NewRequest(http.MethodPost, resourceUrl, nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, resourceUrl, nil)
 	if err != nil {
 		return nil, "", err
 	}
 
-	body, location, err := keycloakClient.sendRequest(request, payload)
+	body, location, err := keycloakClient.sendRequest(ctx, request, payload)
 
 	return body, location, err
 }
 
-func (keycloakClient *KeycloakClient) put(path string, requestBody interface{}) error {
+func (keycloakClient *KeycloakClient) put(ctx context.Context, path string, requestBody interface{}) error {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
 	payload, err := keycloakClient.marshal(requestBody)
@@ -402,17 +403,17 @@ func (keycloakClient *KeycloakClient) put(path string, requestBody interface{}) 
 		return err
 	}
 
-	request, err := http.NewRequest(http.MethodPut, resourceUrl, nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodPut, resourceUrl, nil)
 	if err != nil {
 		return err
 	}
 
-	_, _, err = keycloakClient.sendRequest(request, payload)
+	_, _, err = keycloakClient.sendRequest(ctx, request, payload)
 
 	return err
 }
 
-func (keycloakClient *KeycloakClient) delete(path string, requestBody interface{}) error {
+func (keycloakClient *KeycloakClient) delete(ctx context.Context, path string, requestBody interface{}) error {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
 	var (
@@ -427,12 +428,12 @@ func (keycloakClient *KeycloakClient) delete(path string, requestBody interface{
 		}
 	}
 
-	request, err := http.NewRequest(http.MethodDelete, resourceUrl, nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodDelete, resourceUrl, nil)
 	if err != nil {
 		return err
 	}
 
-	_, _, err = keycloakClient.sendRequest(request, payload)
+	_, _, err = keycloakClient.sendRequest(ctx, request, payload)
 
 	return err
 }

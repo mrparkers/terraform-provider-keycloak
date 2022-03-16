@@ -158,11 +158,6 @@ func resourceKeycloakLdapRoleMapperCreate(data *schema.ResourceData, meta interf
 
 	ldapRoleMapper := getLdapRoleMapperFromData(data)
 
-	err := keycloakClient.ValidateLdapRoleMapper(ldapRoleMapper)
-	if err != nil {
-		return err
-	}
-
 	err = keycloakClient.NewLdapRoleMapper(ldapRoleMapper)
 	if err != nil {
 		return err
@@ -193,11 +188,6 @@ func resourceKeycloakLdapRoleMapperUpdate(data *schema.ResourceData, meta interf
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapRoleMapper := getLdapRoleMapperFromData(data)
-
-	err := keycloakClient.ValidateLdapRoleMapper(ldapRoleMapper)
-	if err != nil {
-		return err
-	}
 
 	err = keycloakClient.UpdateLdapRoleMapper(ldapRoleMapper)
 	if err != nil {

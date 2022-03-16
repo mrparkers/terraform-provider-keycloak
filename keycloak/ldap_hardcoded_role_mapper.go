@@ -1,6 +1,9 @@
 package keycloak
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 type LdapHardcodedRoleMapper struct {
 	Id                   string
@@ -37,15 +40,15 @@ func convertFromComponentToLdapHardcodedRoleMapper(component *component, realmId
 	}
 }
 
-func (keycloakClient *KeycloakClient) ValidateLdapHardcodedRoleMapper(ldapMapper *LdapHardcodedRoleMapper) error {
+func (keycloakClient *KeycloakClient) ValidateLdapHardcodedRoleMapper(ctx context.Context, ldapMapper *LdapHardcodedRoleMapper) error {
 	if len(ldapMapper.Role) == 0 {
 		return fmt.Errorf("validation error: hardcoded role name must not be empty")
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) NewLdapHardcodedRoleMapper(ldapMapper *LdapHardcodedRoleMapper) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapMapper.RealmId), convertFromLdapHardcodedRoleMapperToComponent(ldapMapper))
+func (keycloakClient *KeycloakClient) NewLdapHardcodedRoleMapper(ctx context.Context, ldapMapper *LdapHardcodedRoleMapper) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", ldapMapper.RealmId), convertFromLdapHardcodedRoleMapperToComponent(ldapMapper))
 	if err != nil {
 		return err
 	}
@@ -55,10 +58,10 @@ func (keycloakClient *KeycloakClient) NewLdapHardcodedRoleMapper(ldapMapper *Lda
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetLdapHardcodedRoleMapper(realmId, id string) (*LdapHardcodedRoleMapper, error) {
+func (keycloakClient *KeycloakClient) GetLdapHardcodedRoleMapper(ctx context.Context, realmId, id string) (*LdapHardcodedRoleMapper, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -66,10 +69,10 @@ func (keycloakClient *KeycloakClient) GetLdapHardcodedRoleMapper(realmId, id str
 	return convertFromComponentToLdapHardcodedRoleMapper(component, realmId), nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateLdapHardcodedRoleMapper(ldapMapper *LdapHardcodedRoleMapper) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapMapper.RealmId, ldapMapper.Id), convertFromLdapHardcodedRoleMapperToComponent(ldapMapper))
+func (keycloakClient *KeycloakClient) UpdateLdapHardcodedRoleMapper(ctx context.Context, ldapMapper *LdapHardcodedRoleMapper) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", ldapMapper.RealmId, ldapMapper.Id), convertFromLdapHardcodedRoleMapperToComponent(ldapMapper))
 }
 
-func (keycloakClient *KeycloakClient) DeleteLdapHardcodedRoleMapper(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteLdapHardcodedRoleMapper(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

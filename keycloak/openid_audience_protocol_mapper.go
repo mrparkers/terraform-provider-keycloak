@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
@@ -60,10 +61,10 @@ func (protocolMapper *protocolMapper) convertToOpenIdAudienceProtocolMapper(real
 	}, nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenIdAudienceProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdAudienceProtocolMapper, error) {
+func (keycloakClient *KeycloakClient) GetOpenIdAudienceProtocolMapper(ctx context.Context, realmId, clientId, clientScopeId, mapperId string) (*OpenIdAudienceProtocolMapper, error) {
 	var protocolMapper *protocolMapper
 
-	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
+	err := keycloakClient.get(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -71,14 +72,14 @@ func (keycloakClient *KeycloakClient) GetOpenIdAudienceProtocolMapper(realmId, c
 	return protocolMapper.convertToOpenIdAudienceProtocolMapper(realmId, clientId, clientScopeId)
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenIdAudienceProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
-	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
+func (keycloakClient *KeycloakClient) DeleteOpenIdAudienceProtocolMapper(ctx context.Context, realmId, clientId, clientScopeId, mapperId string) error {
+	return keycloakClient.delete(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
 }
 
-func (keycloakClient *KeycloakClient) NewOpenIdAudienceProtocolMapper(mapper *OpenIdAudienceProtocolMapper) error {
+func (keycloakClient *KeycloakClient) NewOpenIdAudienceProtocolMapper(ctx context.Context, mapper *OpenIdAudienceProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(ctx, path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}
@@ -88,13 +89,13 @@ func (keycloakClient *KeycloakClient) NewOpenIdAudienceProtocolMapper(mapper *Op
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateOpenIdAudienceProtocolMapper(mapper *OpenIdAudienceProtocolMapper) error {
+func (keycloakClient *KeycloakClient) UpdateOpenIdAudienceProtocolMapper(ctx context.Context, mapper *OpenIdAudienceProtocolMapper) error {
 	path := individualProtocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 
-	return keycloakClient.put(path, mapper.convertToGenericProtocolMapper())
+	return keycloakClient.put(ctx, path, mapper.convertToGenericProtocolMapper())
 }
 
-func (keycloakClient *KeycloakClient) ValidateOpenIdAudienceProtocolMapper(mapper *OpenIdAudienceProtocolMapper) error {
+func (keycloakClient *KeycloakClient) ValidateOpenIdAudienceProtocolMapper(ctx context.Context, mapper *OpenIdAudienceProtocolMapper) error {
 	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
@@ -111,7 +112,7 @@ func (keycloakClient *KeycloakClient) ValidateOpenIdAudienceProtocolMapper(mappe
 		return fmt.Errorf("validation error: IncludedClientAudience and IncludedCustomAudience cannot both be set")
 	}
 
-	protocolMappers, err := keycloakClient.listGenericProtocolMappers(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
+	protocolMappers, err := keycloakClient.listGenericProtocolMappers(ctx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 	if err != nil {
 		return err
 	}
@@ -123,7 +124,7 @@ func (keycloakClient *KeycloakClient) ValidateOpenIdAudienceProtocolMapper(mappe
 	}
 
 	if mapper.IncludedClientAudience != "" {
-		clients, err := keycloakClient.listGenericClients(mapper.RealmId)
+		clients, err := keycloakClient.listGenericClients(ctx, mapper.RealmId)
 		if err != nil {
 			return err
 		}
