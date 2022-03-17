@@ -119,7 +119,7 @@ func resourceKeycloakRealmKeystoreEcdsaGeneratedRead(ctx context.Context, data *
 
 	realmKey, err := keycloakClient.GetRealmKeystoreEcdsaGenerated(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	err = setRealmKeystoreEcdsaGeneratedData(data, realmKey)

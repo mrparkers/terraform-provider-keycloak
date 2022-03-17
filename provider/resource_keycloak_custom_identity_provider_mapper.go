@@ -96,7 +96,7 @@ func resourceKeycloakCustomIdentityProviderMapperRead(ctx context.Context, data 
 
 	customIdentityProvider, err := keycloakClient.GetCustomIdentityProviderMapper(ctx, realm, alias, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setCustomIdentityProviderMapperData(data, customIdentityProvider)

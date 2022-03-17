@@ -363,7 +363,7 @@ func resourceKeycloakRealmUserProfileRead(ctx context.Context, data *schema.Reso
 
 	realmUserProfile, err := keycloakClient.GetRealmUserProfile(ctx, realmId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setRealmUserProfileData(data, realmUserProfile)

@@ -56,7 +56,7 @@ func resourceKeycloakUserGroupsRead(ctx context.Context, data *schema.ResourceDa
 
 	userGroups, err := keycloakClient.GetUserGroups(ctx, realmId, userId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	var groups []string

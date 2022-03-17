@@ -144,7 +144,7 @@ func resourceKeycloakOpenidClientAuthorizationRolePolicyRead(ctx context.Context
 
 	resource, err := keycloakClient.GetOpenidClientAuthorizationRolePolicy(ctx, realmId, resourceServerId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setOpenidClientAuthorizationRolePolicyResourceData(data, resource)

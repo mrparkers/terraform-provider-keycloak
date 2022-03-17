@@ -133,7 +133,7 @@ func resourceKeycloakGenericClientProtocolMapperRead(ctx context.Context, data *
 
 	resource, err := keycloakClient.GetGenericClientProtocolMapper(ctx, realmId, clientId, clientScopeId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromGenericClientProtocolMapperToData(data, resource)

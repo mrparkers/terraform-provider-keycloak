@@ -92,7 +92,7 @@ func resourceKeycloakAuthenticationFlowRead(ctx context.Context, data *schema.Re
 
 	authenticationFlow, err := keycloakClient.GetAuthenticationFlow(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromAuthenticationFlowToData(data, authenticationFlow)

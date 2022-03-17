@@ -114,7 +114,7 @@ func resourceKeycloakRealmEventsRead(ctx context.Context, data *schema.ResourceD
 
 	realmEventsConfig, err := keycloakClient.GetRealmEventsConfig(ctx, realmId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setRealmEventsConfigData(data, realmEventsConfig)

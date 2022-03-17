@@ -90,7 +90,7 @@ func resourceKeycloakOpenidClientAuthorizationScopeRead(ctx context.Context, dat
 
 	scope, err := keycloakClient.GetOpenidClientAuthorizationScope(ctx, realmId, resourceServerId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setOpenidClientAuthorizationScopeData(data, scope)

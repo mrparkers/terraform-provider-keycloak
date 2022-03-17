@@ -219,7 +219,7 @@ func resourceKeycloakIdentityProviderTokenExchangeScopePermissionRead(ctx contex
 
 	identityProviderPermissions, err := keycloakClient.GetIdentityProviderPermissions(ctx, realmId, providerAlias)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 	if !identityProviderPermissions.Enabled {
 		tflog.Warn(ctx, "Removing resource from state as it is no longer enabled", map[string]interface{}{

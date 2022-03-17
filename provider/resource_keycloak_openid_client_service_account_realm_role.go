@@ -91,7 +91,7 @@ func resourceKeycloakOpenidClientServiceAccountRealmRoleRead(ctx context.Context
 
 	serviceAccountRole, err = keycloakClient.GetOpenidClientServiceAccountRealmRole(ctx, serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.Id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setOpenidClientServiceAccountRealmRoleData(data, serviceAccountRole)
@@ -109,7 +109,7 @@ func resourceKeycloakOpenidClientServiceAccountRealmRoleDelete(ctx context.Conte
 
 	err = keycloakClient.DeleteOpenidClientServiceAccountRealmRole(ctx, serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.Id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 	return nil
 }

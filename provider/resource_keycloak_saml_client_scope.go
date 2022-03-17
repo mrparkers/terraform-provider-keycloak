@@ -109,7 +109,7 @@ func resourceKeycloakSamlClientScopeRead(ctx context.Context, data *schema.Resou
 
 	clientScope, err := keycloakClient.GetSamlClientScope(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setSamlClientScopeData(data, clientScope)

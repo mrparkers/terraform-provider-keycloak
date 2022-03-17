@@ -64,7 +64,7 @@ func resourceKeycloakSamlClientDefaultScopesRead(ctx context.Context, data *sche
 
 	clientScopes, err := keycloakClient.GetSamlClientDefaultScopes(ctx, realmId, clientId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	var defaultScopes []string

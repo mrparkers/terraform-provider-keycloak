@@ -104,7 +104,7 @@ func resourceKeycloakGroupRead(ctx context.Context, data *schema.ResourceData, m
 
 	group, err := keycloakClient.GetGroup(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromGroupToData(data, group)

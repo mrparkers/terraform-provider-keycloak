@@ -67,7 +67,7 @@ func resourceKeycloakDefaultRolesRead(ctx context.Context, data *schema.Resource
 
 	composites, err := keycloakClient.GetDefaultRoles(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	defaultRoleNamesList := getDefaultRoleNames(composites)
@@ -172,7 +172,7 @@ func resourceKeycloakDefaultRolesDelete(ctx context.Context, data *schema.Resour
 	realmId := data.Get("realm_id").(string)
 	realm, err := keycloakClient.GetRealm(ctx, realmId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	defaultRoles, err := keycloakClient.GetDefaultRoles(ctx, realmId, realm.DefaultRole.Id)

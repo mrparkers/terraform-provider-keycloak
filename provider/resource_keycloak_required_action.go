@@ -111,7 +111,7 @@ func resourceKeycloakRequiredActionsRead(ctx context.Context, data *schema.Resou
 
 	action, err := keycloakClient.GetRequiredAction(ctx, data.Get("realm_id").(string), data.Get("alias").(string))
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setRequiredActionData(data, action)

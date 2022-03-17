@@ -190,7 +190,7 @@ func dataSourceKeycloakSamlClientRead(ctx context.Context, data *schema.Resource
 
 	client, err := keycloakClient.GetSamlClientByClientId(ctx, realmId, clientId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	err = mapToDataFromSamlClient(ctx, data, client)

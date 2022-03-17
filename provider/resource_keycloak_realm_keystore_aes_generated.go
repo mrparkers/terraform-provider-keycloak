@@ -119,7 +119,7 @@ func resourceKeycloakRealmKeystoreAesGeneratedRead(ctx context.Context, data *sc
 
 	realmKey, err := keycloakClient.GetRealmKeystoreAesGenerated(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	err = setRealmKeystoreAesGeneratedData(data, realmKey)

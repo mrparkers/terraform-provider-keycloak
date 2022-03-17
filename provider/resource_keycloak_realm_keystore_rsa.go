@@ -130,7 +130,7 @@ func resourceKeycloakRealmKeystoreRsaRead(ctx context.Context, data *schema.Reso
 
 	realmKey, err := keycloakClient.GetRealmKeystoreRsa(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setRealmKeystoreRsaData(data, realmKey)

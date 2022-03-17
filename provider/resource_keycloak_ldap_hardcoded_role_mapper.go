@@ -91,7 +91,7 @@ func resourceKeycloakLdapHardcodedRoleMapperRead(ctx context.Context, data *sche
 
 	ldapMapper, err := keycloakClient.GetLdapHardcodedRoleMapper(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setLdapHardcodedRoleMapperData(data, ldapMapper)

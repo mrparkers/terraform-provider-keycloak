@@ -516,7 +516,7 @@ func resourceKeycloakOpenidClientRead(ctx context.Context, data *schema.Resource
 
 	client, err := keycloakClient.GetOpenidClient(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	err = setOpenidClientData(ctx, keycloakClient, data, client)

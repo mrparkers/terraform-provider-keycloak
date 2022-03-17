@@ -103,7 +103,7 @@ func resourceKeycloakOpenIdAudienceResolveProtocolMapperRead(ctx context.Context
 
 	openIdAudienceResolveMapper, err := keycloakClient.GetOpenIdAudienceResolveProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromOpenIdAudienceResolveMapperToData(openIdAudienceResolveMapper, data)

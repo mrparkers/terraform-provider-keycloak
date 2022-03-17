@@ -141,7 +141,7 @@ func resourceKeycloakOpenIdUserSessionNoteProtocolMapperRead(ctx context.Context
 
 	openIdUserSessionNoteMapper, err := keycloakClient.GetOpenIdUserSessionNoteProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromOpenIdUserSessionNoteMapperToData(openIdUserSessionNoteMapper, data)

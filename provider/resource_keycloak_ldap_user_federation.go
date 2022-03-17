@@ -480,7 +480,7 @@ func resourceKeycloakLdapUserFederationRead(ctx context.Context, data *schema.Re
 
 	ldap, err := keycloakClient.GetLdapUserFederation(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	ldap.BindCredential = data.Get("bind_credential").(string) // we can't trust the API to set this field correctly since it just responds with "**********"

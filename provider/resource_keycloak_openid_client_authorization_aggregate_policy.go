@@ -110,7 +110,7 @@ func resourceKeycloakOpenidClientAuthorizationAggregatePolicyRead(ctx context.Co
 
 	resource, err := keycloakClient.GetOpenidClientAuthorizationAggregatePolicy(ctx, realmId, resourceServerId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setOpenidClientAuthorizationAggregatePolicyResourceData(data, resource)

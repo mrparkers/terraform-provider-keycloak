@@ -127,7 +127,7 @@ func resourceKeycloakSamlUserAttributeProtocolMapperRead(ctx context.Context, da
 
 	samlUserAttributeMapper, err := keycloakClient.GetSamlUserAttributeProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromSamlUserAttributeMapperToData(samlUserAttributeMapper, data)

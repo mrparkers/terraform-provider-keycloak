@@ -1,8 +1,9 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -65,9 +66,11 @@ func suppressDurationStringDiff(_, old, new string, _ *schema.ResourceData) bool
 	return oldDuration.Seconds() == newDuration.Seconds()
 }
 
-func handleNotFoundError(err error, data *schema.ResourceData) diag.Diagnostics {
+func handleNotFoundError(ctx context.Context, err error, data *schema.ResourceData) diag.Diagnostics {
 	if keycloak.ErrorIs404(err) {
-		log.Printf("[WARN] Removing resource with id %s from state as it no longer exists", data.Id())
+		tflog.Warn(ctx, "Removing resource from state as it no longer exists", map[string]interface{}{
+			"id": data.Id(),
+		})
 		data.SetId("")
 
 		return nil

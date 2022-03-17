@@ -138,7 +138,7 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapperRead(ctx context.Context
 
 	openIdGroupMembershipMapper, err := keycloakClient.GetOpenIdGroupMembershipProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromOpenIdGroupMembershipMapperToData(openIdGroupMembershipMapper, data)

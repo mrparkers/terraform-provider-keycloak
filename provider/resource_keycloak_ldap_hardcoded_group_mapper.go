@@ -91,7 +91,7 @@ func resourceKeycloakLdapHardcodedGroupMapperRead(ctx context.Context, data *sch
 
 	ldapMapper, err := keycloakClient.GetLdapHardcodedGroupMapper(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setLdapHardcodedGroupMapperData(data, ldapMapper)

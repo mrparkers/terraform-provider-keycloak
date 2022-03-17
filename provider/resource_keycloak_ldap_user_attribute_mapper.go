@@ -121,7 +121,7 @@ func resourceKeycloakLdapUserAttributeMapperRead(ctx context.Context, data *sche
 
 	ldapUserAttributeMapper, err := keycloakClient.GetLdapUserAttributeMapper(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setLdapUserAttributeMapperData(data, ldapUserAttributeMapper)

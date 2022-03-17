@@ -108,7 +108,7 @@ func resourceKeycloakLdapFullNameMapperRead(ctx context.Context, data *schema.Re
 
 	ldapFullNameMapper, err := keycloakClient.GetLdapFullNameMapper(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setLdapFullNameMapperData(data, ldapFullNameMapper)

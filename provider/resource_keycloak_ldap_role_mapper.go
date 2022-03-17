@@ -178,7 +178,7 @@ func resourceKeycloakLdapRoleMapperRead(ctx context.Context, data *schema.Resour
 
 	ldapRoleMapper, err := keycloakClient.GetLdapRoleMapper(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setLdapRoleMapperData(data, ldapRoleMapper)

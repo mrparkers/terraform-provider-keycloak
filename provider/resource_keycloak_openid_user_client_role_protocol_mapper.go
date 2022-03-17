@@ -164,7 +164,7 @@ func resourceKeycloakOpenIdUserClientRoleProtocolMapperRead(ctx context.Context,
 
 	openIdUserClientRoleMapper, err := keycloakClient.GetOpenIdUserClientRoleProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromOpenIdUserClientRoleMapperToData(openIdUserClientRoleMapper, data)

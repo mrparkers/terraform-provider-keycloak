@@ -125,7 +125,7 @@ func resourceKeycloakGroupPermissionsRead(ctx context.Context, data *schema.Reso
 
 	groupPermissions, err := keycloakClient.GetGroupPermissions(ctx, realmId, groupId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	data.SetId(groupPermissionsId(groupPermissions.RealmId, groupPermissions.GroupId))

@@ -216,7 +216,7 @@ func resourceKeycloakIdentityProviderRead(setDataFromIdentityProvider identityPr
 		alias := data.Get("alias").(string)
 		identityProvider, err := keycloakClient.GetIdentityProvider(ctx, realm, alias)
 		if err != nil {
-			return handleNotFoundError(err, data)
+			return handleNotFoundError(ctx, err, data)
 		}
 
 		return diag.FromErr(setDataFromIdentityProvider(data, identityProvider))

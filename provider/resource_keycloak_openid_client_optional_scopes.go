@@ -47,7 +47,7 @@ func resourceKeycloakOpenidClientOptionalScopesRead(ctx context.Context, data *s
 
 	clientScopes, err := keycloakClient.GetOpenidClientOptionalScopes(ctx, realmId, clientId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	var optionalScopes []string

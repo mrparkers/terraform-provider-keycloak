@@ -217,7 +217,7 @@ func resourceKeycloakUserRead(ctx context.Context, data *schema.ResourceData, me
 
 	user, err := keycloakClient.GetUser(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromUserToData(data, user)

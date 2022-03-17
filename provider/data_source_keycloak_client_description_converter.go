@@ -242,7 +242,7 @@ func dataSourceKeycloakClientDescriptionConverterRead(ctx context.Context, data 
 	description, err := keycloakClient.NewGenericClientDescription(ctx, realmId, body)
 
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setClientDescriptionConverterData(data, description)

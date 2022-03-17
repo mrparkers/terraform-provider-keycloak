@@ -129,7 +129,7 @@ func resourceKeycloakRealmKeystoreHmacGeneratedRead(ctx context.Context, data *s
 
 	realmKey, err := keycloakClient.GetRealmKeystoreHmacGenerated(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	err = setRealmKeystoreHmacGeneratedData(data, realmKey)

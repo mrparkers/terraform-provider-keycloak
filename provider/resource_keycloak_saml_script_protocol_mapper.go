@@ -133,7 +133,7 @@ func resourceKeycloakSamlScriptProtocolMapperRead(ctx context.Context, data *sch
 
 	samlScriptMapper, err := keycloakClient.GetSamlScriptProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromSamlScriptMapperToData(samlScriptMapper, data)

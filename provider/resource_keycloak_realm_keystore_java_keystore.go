@@ -148,7 +148,7 @@ func resourceKeycloakRealmKeystoreJavaKeystoreRead(ctx context.Context, data *sc
 
 	realmKey, err := keycloakClient.GetRealmKeystoreJavaKeystore(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	err = setRealmKeystoreJavaKeystoreData(data, realmKey)

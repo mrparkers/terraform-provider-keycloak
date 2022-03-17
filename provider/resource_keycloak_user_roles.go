@@ -159,7 +159,7 @@ func resourceKeycloakUserRolesRead(ctx context.Context, data *schema.ResourceDat
 
 	// check if user exists, remove from state if not found
 	if _, err := keycloakClient.GetUser(ctx, realmId, userId); err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	roles, err := keycloakClient.GetUserRoleMappings(ctx, realmId, userId)

@@ -148,7 +148,7 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapperRead(ctx context.Context,
 
 	openIdHardcodedClaimMapper, err := keycloakClient.GetOpenIdHardcodedClaimProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromOpenIdHardcodedClaimMapperToData(openIdHardcodedClaimMapper, data)

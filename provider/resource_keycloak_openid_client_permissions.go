@@ -131,7 +131,7 @@ func resourceKeycloakOpenidClientPermissionsRead(ctx context.Context, data *sche
 
 	openidClientPermissions, err := keycloakClient.GetOpenidClientPermissions(ctx, realmId, clientId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	if !openidClientPermissions.Enabled {

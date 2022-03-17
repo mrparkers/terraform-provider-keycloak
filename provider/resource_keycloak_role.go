@@ -137,7 +137,7 @@ func resourceKeycloakRoleRead(ctx context.Context, data *schema.ResourceData, me
 
 	role, err := keycloakClient.GetRole(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromRoleToData(data, role)

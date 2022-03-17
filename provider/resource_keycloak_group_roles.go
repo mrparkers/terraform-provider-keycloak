@@ -159,7 +159,7 @@ func resourceKeycloakGroupRolesRead(ctx context.Context, data *schema.ResourceDa
 
 	// check if group exists, remove from state if not found
 	if _, err := keycloakClient.GetGroup(ctx, realmId, groupId); err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	roles, err := keycloakClient.GetGroupRoleMappings(ctx, realmId, groupId)

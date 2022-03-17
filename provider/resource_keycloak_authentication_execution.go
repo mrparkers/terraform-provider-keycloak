@@ -98,7 +98,7 @@ func resourceKeycloakAuthenticationExecutionRead(ctx context.Context, data *sche
 
 	authenticationExecution, err := keycloakClient.GetAuthenticationExecution(ctx, realmId, parentFlowAlias, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromAuthenticationExecutionToData(data, authenticationExecution)

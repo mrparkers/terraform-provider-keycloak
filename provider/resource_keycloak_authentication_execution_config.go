@@ -92,7 +92,7 @@ func resourceKeycloakAuthenticationExecutionConfigRead(ctx context.Context, data
 
 	err := keycloakClient.GetAuthenticationExecutionConfig(ctx, config)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setAuthenticationExecutionConfigData(data, config)

@@ -99,7 +99,7 @@ func resourceKeycloakIdentityProviderMapperCreate(getIdentityProviderMapperFromD
 
 		identityProvider, err := getIdentityProviderMapperFromData(ctx, data, meta)
 		if err != nil {
-			return handleNotFoundError(err, data)
+			return handleNotFoundError(ctx, err, data)
 		}
 
 		if identityProvider == nil {
@@ -128,7 +128,7 @@ func resourceKeycloakIdentityProviderMapperRead(setDataFromIdentityProviderMappe
 
 		identityProvider, err := keycloakClient.GetIdentityProviderMapper(ctx, realm, alias, id)
 		if err != nil {
-			return handleNotFoundError(err, data)
+			return handleNotFoundError(ctx, err, data)
 		}
 
 		if err = setDataFromIdentityProviderMapper(data, identityProvider); err != nil {
@@ -145,7 +145,7 @@ func resourceKeycloakIdentityProviderMapperUpdate(getIdentityProviderMapperFromD
 
 		identityProvider, err := getIdentityProviderMapperFromData(ctx, data, meta)
 		if err != nil {
-			return handleNotFoundError(err, data)
+			return handleNotFoundError(ctx, err, data)
 		}
 
 		if err = keycloakClient.UpdateIdentityProviderMapper(ctx, identityProvider); err != nil {

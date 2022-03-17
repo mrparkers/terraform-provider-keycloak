@@ -115,7 +115,7 @@ func resourceKeycloakUsersPermissionsRead(ctx context.Context, data *schema.Reso
 
 	usersPermissions, err := keycloakClient.GetUsersPermissions(ctx, realmId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	if !usersPermissions.Enabled {
