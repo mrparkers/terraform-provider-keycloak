@@ -90,7 +90,7 @@ func (keycloakClient *KeycloakClient) GetSamlClient(ctx context.Context, realmId
 }
 
 func (keycloakClient *KeycloakClient) GetSamlClientInstallationProvider(ctx context.Context, realmId, id string, providerId string) ([]byte, error) {
-	value, err := keycloakClient.getRaw(nil, fmt.Sprintf("/realms/%s/clients/%s/installation/providers/%s", realmId, id, providerId), nil)
+	value, err := keycloakClient.getRaw(ctx, fmt.Sprintf("/realms/%s/clients/%s/installation/providers/%s", realmId, id, providerId), nil)
 	return value, err
 }
 
