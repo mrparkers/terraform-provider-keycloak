@@ -191,7 +191,7 @@ func getRealmUserProfileAttributeFromData(m map[string]interface{}) *keycloak.Re
 		attribute.Validations = validations
 	}
 
-	required := keycloak.RealmUserProfileRequired{}
+	required := &keycloak.RealmUserProfileRequired{}
 
 	if v, ok := m["required_for_roles"]; ok {
 		required.Roles = interfaceSliceToStringSlice(v.(*schema.Set).List())
@@ -201,7 +201,7 @@ func getRealmUserProfileAttributeFromData(m map[string]interface{}) *keycloak.Re
 	}
 
 	if len(required.Roles) != 0 || len(required.Scopes) != 0 {
-		attribute.Required = &required
+		attribute.Required = required
 	}
 
 	if v, ok := m["annotations"]; ok {
@@ -376,7 +376,10 @@ func resourceKeycloakRealmUserProfileDelete(ctx context.Context, data *schema.Re
 	realmId := data.Get("realm_id").(string)
 
 	// The realm user profile cannot be deleted, so instead we set it back to its "zero" values.
-	realmUserProfile := &keycloak.RealmUserProfile{Attributes: []*keycloak.RealmUserProfileAttribute{}, Groups: []*keycloak.RealmUserProfileGroup{}}
+	realmUserProfile := &keycloak.RealmUserProfile{
+		Attributes: []*keycloak.RealmUserProfileAttribute{},
+		Groups:     []*keycloak.RealmUserProfileGroup{},
+	}
 
 	err := keycloakClient.UpdateRealmUserProfile(ctx, realmId, realmUserProfile)
 	if err != nil {

@@ -76,8 +76,10 @@ resource "keycloak_realm" "test" {
 
   ssl_required    = "external"
   password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
-  attributes      = {
-    mycustomAttribute = "myCustomValue"
+
+  attributes = {
+    mycustomAttribute  = "myCustomValue"
+    userProfileEnabled = true
   }
 
   web_authn_policy {
@@ -85,7 +87,8 @@ resource "keycloak_realm" "test" {
     relying_party_id          = "keycloak.example.com"
     signature_algorithms      = [
       "ES256",
-      "RS256"]
+      "RS256"
+    ]
   }
 
   web_authn_passwordless_policy {
@@ -93,7 +96,8 @@ resource "keycloak_realm" "test" {
     relying_party_id          = "keycloak.example.com"
     signature_algorithms      = [
       "ES256",
-      "RS256"]
+      "RS256"
+    ]
   }
 }
 
@@ -187,7 +191,8 @@ resource "keycloak_group" "baz" {
 resource "keycloak_default_groups" "default" {
   realm_id  = keycloak_realm.test.id
   group_ids = [
-    keycloak_group.baz.id]
+    keycloak_group.baz.id
+  ]
 }
 
 resource "keycloak_openid_client" "test_client" {
@@ -303,9 +308,9 @@ resource "keycloak_ldap_role_mapper" "ldap_role_mapper" {
   ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
   name                    = "role-mapper"
 
-  ldap_roles_dn                 = "dc=example,dc=org"
-  role_name_ldap_attribute      = "cn"
-  role_object_classes           = [
+  ldap_roles_dn            = "dc=example,dc=org"
+  role_name_ldap_attribute = "cn"
+  role_object_classes      = [
     "groupOfNames"
   ]
   membership_attribute_type      = "DN"
@@ -795,7 +800,7 @@ resource keycloak_saml_identity_provider saml_custom {
   single_sign_on_service_url = "https://example.com/auth"
   sync_mode                  = "FORCE"
   gui_order                  = 4
-  extra_config = {
+  extra_config               = {
     mycustomAttribute = "aValue"
   }
 }
@@ -1010,5 +1015,59 @@ resource "keycloak_openid_client" "client" {
   access_type = "PUBLIC"
   authentication_flow_binding_overrides {
     browser_id = keycloak_authentication_flow.browser-copy-flow.id
+  }
+}
+
+resource "keycloak_realm_user_profile" "userprofile" {
+  realm_id = keycloak_realm.test.id
+
+  attribute {
+    name         = "field1"
+    display_name = "Field 1"
+    group        = "group1"
+
+    enabled_when_scope = ["offline_access"]
+
+    required_for_roles  = ["user"]
+    required_for_scopes = ["offline_access"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+
+    validator {
+      name   = "pattern"
+      config = {
+        pattern       = "^[a-z]+$"
+        error_message = "Nope"
+      }
+    }
+
+    annotations = {
+      foo = "bar"
+    }
+  }
+
+  attribute {
+    name = "field2"
+  }
+
+  group {
+    name                = "group1"
+    display_header      = "Group 1"
+    display_description = "A first group"
+
+    annotations = {
+      foo = "bar"
+    }
+  }
+
+  group {
+    name = "group2"
   }
 }
