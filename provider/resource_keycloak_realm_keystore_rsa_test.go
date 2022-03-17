@@ -34,10 +34,10 @@ func TestAccKeycloakRealmKeystoreRsa_basic(t *testing.T) {
 				Config: testKeycloakRealmKeystoreRsa_basic(rsaName, privateKey, certificate),
 				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_keystore_rsa.realm_rsa"),
 			},
+			// we can't verify this import test because there's no way to get the private key / cert from the Keycloak API
 			{
 				ResourceName:      "keycloak_realm_keystore_rsa.realm_rsa",
 				ImportState:       true,
-				ImportStateVerify: true,
 				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_rsa.realm_rsa"),
 			},
 		},
