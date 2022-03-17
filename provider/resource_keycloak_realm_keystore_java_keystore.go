@@ -2,12 +2,10 @@ package provider
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 var (
@@ -21,7 +19,7 @@ func resourceKeycloakRealmKeystoreJavaKeystore() *schema.Resource {
 		UpdateContext: resourceKeycloakRealmKeystoreJavaKeystoreUpdate,
 		DeleteContext: resourceKeycloakRealmKeystoreJavaKeystoreDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceKeycloakRealmKeystoreJavaKeystoreImport,
+			StateContext: resourceKeycloakRealmKeystoreGenericImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -189,17 +187,4 @@ func resourceKeycloakRealmKeystoreJavaKeystoreDelete(ctx context.Context, data *
 	id := data.Id()
 
 	return diag.FromErr(keycloakClient.DeleteRealmKeystoreJavaKeystore(ctx, realmId, id))
-}
-
-func resourceKeycloakRealmKeystoreJavaKeystoreImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{keystoreId}}")
-	}
-
-	d.Set("realm_id", parts[0])
-	d.SetId(parts[1])
-
-	return []*schema.ResourceData{d}, nil
 }

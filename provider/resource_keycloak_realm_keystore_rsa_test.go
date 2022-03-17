@@ -34,6 +34,12 @@ func TestAccKeycloakRealmKeystoreRsa_basic(t *testing.T) {
 				Config: testKeycloakRealmKeystoreRsa_basic(rsaName, privateKey, certificate),
 				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_keystore_rsa.realm_rsa"),
 			},
+			{
+				ResourceName:      "keycloak_realm_keystore_rsa.realm_rsa",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_rsa.realm_rsa"),
+			},
 		},
 	})
 }

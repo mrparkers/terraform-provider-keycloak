@@ -29,7 +29,7 @@ func TestAccKeycloakRealmKeystoreAesGenerated_basic(t *testing.T) {
 				ResourceName:      "keycloak_realm_keystore_aes_generated.realm_aes",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateIdFunc: getRealmKeystoreAesGeneratedImportId("keycloak_realm_keystore_aes_generated.realm_aes"),
+				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_aes_generated.realm_aes"),
 			},
 		},
 	})
@@ -191,20 +191,6 @@ func getKeycloakRealmKeystoreAesGeneratedFromState(s *terraform.State,
 	}
 
 	return realmKeystore, nil
-}
-
-func getRealmKeystoreAesGeneratedImportId(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return "", fmt.Errorf("resource not found: %s", resourceName)
-		}
-
-		id := rs.Primary.ID
-		realmId := rs.Primary.Attributes["realm_id"]
-
-		return fmt.Sprintf("%s/%s", realmId, id), nil
-	}
 }
 
 func testKeycloakRealmKeystoreAesGenerated_basic(aesName string) string {

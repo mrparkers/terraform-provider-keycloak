@@ -25,6 +25,12 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_basic(t *testing.T) {
 				Config: testKeycloakRealmKeystoreRsaGenerated_basic(rsaName),
 				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_keystore_rsa_generated.realm_rsa"),
 			},
+			{
+				ResourceName:      "keycloak_realm_keystore_rsa_generated.realm_rsa",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_rsa_generated.realm_rsa"),
+			},
 		},
 	})
 }
@@ -210,21 +216,6 @@ func getKeycloakRealmKeystoreRsaGeneratedFromState(s *terraform.State,
 	}
 
 	return realmKeystore, nil
-}
-
-func getRealmKeystoreRsaGeneratedImportId(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return "", fmt.Errorf("resource not found: %s", resourceName)
-		}
-
-		id := rs.Primary.ID
-		realmId := rs.Primary.Attributes["realm_id"]
-		providerId := "rsa-generated"
-
-		return fmt.Sprintf("%s/%s/%s", realmId, providerId, id), nil
-	}
 }
 
 func testKeycloakRealmKeystoreRsaGenerated_basic(rsaName string) string {

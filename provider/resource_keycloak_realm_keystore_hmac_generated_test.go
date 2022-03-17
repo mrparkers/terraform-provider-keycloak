@@ -29,7 +29,7 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_basic(t *testing.T) {
 				ResourceName:      "keycloak_realm_keystore_hmac_generated.realm_hmac",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateIdFunc: getRealmKeystoreHmacGeneratedImportId("keycloak_realm_keystore_hmac_generated.realm_hmac"),
+				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_hmac_generated.realm_hmac"),
 			},
 		},
 	})
@@ -195,20 +195,6 @@ func getKeycloakRealmKeystoreHmacGeneratedFromState(s *terraform.State,
 	}
 
 	return realmKeystore, nil
-}
-
-func getRealmKeystoreHmacGeneratedImportId(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return "", fmt.Errorf("resource not found: %s", resourceName)
-		}
-
-		id := rs.Primary.ID
-		realmId := rs.Primary.Attributes["realm_id"]
-
-		return fmt.Sprintf("%s/%s", realmId, id), nil
-	}
 }
 
 func testKeycloakRealmKeystoreHmacGenerated_basic(hmacName string) string {

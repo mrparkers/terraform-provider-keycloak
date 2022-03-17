@@ -2,12 +2,10 @@ package provider
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 var (
@@ -21,7 +19,7 @@ func resourceKeycloakRealmKeystoreAesGenerated() *schema.Resource {
 		UpdateContext: resourceKeycloakRealmKeystoreAesGeneratedUpdate,
 		DeleteContext: resourceKeycloakRealmKeystoreAesGeneratedDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceKeycloakRealmKeystoreAesGeneratedImport,
+			StateContext: resourceKeycloakRealmKeystoreGenericImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -160,17 +158,4 @@ func resourceKeycloakRealmKeystoreAesGeneratedDelete(ctx context.Context, data *
 	id := data.Id()
 
 	return diag.FromErr(keycloakClient.DeleteRealmKeystoreAesGenerated(ctx, realmId, id))
-}
-
-func resourceKeycloakRealmKeystoreAesGeneratedImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{keystoreId}}")
-	}
-
-	d.Set("realm_id", parts[0])
-	d.SetId(parts[1])
-
-	return []*schema.ResourceData{d}, nil
 }

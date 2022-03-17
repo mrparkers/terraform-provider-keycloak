@@ -27,6 +27,12 @@ func TestAccKeycloakRealmKeystoreJava_basic(t *testing.T) {
 				Config: testKeycloakRealmKeystoreJava_basic(javaKeystoreName),
 				Check:  testAccCheckRealmKeystoreJavaExists("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
 			},
+			{
+				ResourceName:      "keycloak_realm_keystore_java_keystore.realm_java_keystore",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
+			},
 		},
 	})
 }
