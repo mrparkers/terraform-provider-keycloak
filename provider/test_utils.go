@@ -66,14 +66,14 @@ func skipIfEnvNotSet(t *testing.T, envs ...string) {
 	}
 }
 
-// Skips the test if the keycloak server matches a specific major version
-func skipForMajorServerVersion(t *testing.T, keycloakClient *keycloak.KeycloakClient, majorVersion string) {
-	serverInfo, err := keycloakClient.GetServerInfo()
+func skipIfVersionIsLessThanOrEqualTo(t *testing.T, keycloakClient *keycloak.KeycloakClient, version keycloak.Version) {
+	ok, err := keycloakClient.VersionIsLessThanOrEqualTo(version)
 	if err != nil {
-		t.Errorf("Cannot get server info: %v", err)
+		t.Errorf("error checking keycloak version: %v", err)
 	}
-	if majorVersion == serverInfo.SystemInfo.ServerVersion[0:2] {
-		t.Skipf("Server major version is %s, skipping...", majorVersion)
+
+	if ok {
+		t.Skipf("keycloak server version is less than or equal to %s, skipping...", version)
 	}
 }
 

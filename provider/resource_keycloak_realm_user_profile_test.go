@@ -33,7 +33,7 @@ func TestAccKeycloakRealmUserProfile_featureDisabled(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_basicEmpty(t *testing.T) {
-	skipForMajorServerVersion(t, keycloakClient, "14")
+	skipIfVersionIsLessThanOrEqualTo(t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
@@ -53,7 +53,7 @@ func TestAccKeycloakRealmUserProfile_basicEmpty(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
-	skipForMajorServerVersion(t, keycloakClient, "14")
+	skipIfVersionIsLessThanOrEqualTo(t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
@@ -101,7 +101,7 @@ func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_group(t *testing.T) {
-	skipForMajorServerVersion(t, keycloakClient, "14")
+	skipIfVersionIsLessThanOrEqualTo(t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
@@ -148,7 +148,7 @@ func TestAccKeycloakRealmUserProfile_group(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
-	skipForMajorServerVersion(t, keycloakClient, "14")
+	skipIfVersionIsLessThanOrEqualTo(t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
@@ -240,7 +240,7 @@ func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_attributePermissions(t *testing.T) {
-	skipForMajorServerVersion(t, keycloakClient, "14")
+	skipIfVersionIsLessThanOrEqualTo(t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
@@ -409,7 +409,7 @@ resource "keycloak_realm_user_profile" "realm_user_profile" {
                 {{- end }}
             }
             {{- end }}
-        } 
+        }
 		{{- end }}
 		{{- end }}
 
