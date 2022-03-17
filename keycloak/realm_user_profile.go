@@ -46,17 +46,12 @@ type RealmUserProfile struct {
 }
 
 func (keycloakClient *KeycloakClient) UpdateRealmUserProfile(ctx context.Context, realmId string, realmUserProfile *RealmUserProfile) error {
-	err := keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/users/profile", realmId), realmUserProfile)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/users/profile", realmId), realmUserProfile)
 }
 
 func (keycloakClient *KeycloakClient) GetRealmUserProfile(ctx context.Context, realmId string) (*RealmUserProfile, error) {
 	var realmUserProfile RealmUserProfile
-	body, err := keycloakClient.getRaw(nil, fmt.Sprintf("/realms/%s/users/profile", realmId), nil)
+	body, err := keycloakClient.getRaw(ctx, fmt.Sprintf("/realms/%s/users/profile", realmId), nil)
 	if err != nil {
 		return nil, err
 	}
