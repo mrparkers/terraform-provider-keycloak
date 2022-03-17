@@ -3,7 +3,7 @@ package keycloak
 import (
 	"context"
 	"fmt"
-	"log"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"net/url"
 )
 
@@ -164,7 +164,9 @@ func (keycloakClient *KeycloakClient) UpdateRole(ctx context.Context, role *Role
 func (keycloakClient *KeycloakClient) DeleteRole(ctx context.Context, realmId, id string) error {
 	err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), nil)
 	if err != nil {
-		log.Printf("[DEBUG] Failed to delete role with id %s. Trying again...", id)
+		tflog.Debug(ctx, "Failed to delete role, trying again", map[string]interface{}{
+			"roleId": id,
+		})
 
 		return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), nil)
 	}

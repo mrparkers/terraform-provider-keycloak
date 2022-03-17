@@ -7,8 +7,8 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -66,7 +66,7 @@ func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecre
 		if initialLogin {
 			return nil, fmt.Errorf("must specify client id, username and password for password grant, or client id and secret for client credentials grant")
 		} else {
-			log.Printf("[WARN] missing required keycloak credentials, but proceeding anyways as initial_login is false")
+			tflog.Warn(ctx, "missing required keycloak credentials, but proceeding anyways as initial_login is false")
 		}
 	}
 
@@ -105,7 +105,9 @@ func (keycloakClient *KeycloakClient) login(ctx context.Context) error {
 	accessTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	accessTokenData := keycloakClient.getAuthenticationFormData()
 
-	log.Printf("[DEBUG] Login request: %s", accessTokenData.Encode())
+	tflog.Debug(ctx, "Login request", map[string]interface{}{
+		"request": accessTokenData.Encode(),
+	})
 
 	accessTokenRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, accessTokenUrl, strings.NewReader(accessTokenData.Encode()))
 	if err != nil {
@@ -134,7 +136,9 @@ func (keycloakClient *KeycloakClient) login(ctx context.Context) error {
 
 	body, _ := ioutil.ReadAll(accessTokenResponse.Body)
 
-	log.Printf("[DEBUG] Login response: %s", body)
+	tflog.Debug(ctx, "Login response", map[string]interface{}{
+		"response": string(body),
+	})
 
 	var clientCredentials ClientCredentials
 	err = json.Unmarshal(body, &clientCredentials)
@@ -151,12 +155,12 @@ func (keycloakClient *KeycloakClient) login(ctx context.Context) error {
 		return err
 	}
 
-	server_version := info.SystemInfo.ServerVersion
-	if strings.Contains(server_version, ".GA") {
-		server_version = strings.ReplaceAll(info.SystemInfo.ServerVersion, ".GA", "")
+	serverVersion := info.SystemInfo.ServerVersion
+	if strings.Contains(serverVersion, ".GA") {
+		serverVersion = strings.ReplaceAll(info.SystemInfo.ServerVersion, ".GA", "")
 	}
 
-	v, err := version.NewVersion(server_version)
+	v, err := version.NewVersion(serverVersion)
 	if err != nil {
 		return err
 	}
@@ -170,7 +174,9 @@ func (keycloakClient *KeycloakClient) refresh(ctx context.Context) error {
 	refreshTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	refreshTokenData := keycloakClient.getAuthenticationFormData()
 
-	log.Printf("[DEBUG] Refresh request: %s", refreshTokenData.Encode())
+	tflog.Debug(ctx, "Refresh request", map[string]interface{}{
+		"request": refreshTokenData.Encode(),
+	})
 
 	refreshTokenRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, refreshTokenUrl, strings.NewReader(refreshTokenData.Encode()))
 	if err != nil {
@@ -196,11 +202,13 @@ func (keycloakClient *KeycloakClient) refresh(ctx context.Context) error {
 
 	body, _ := ioutil.ReadAll(refreshTokenResponse.Body)
 
-	log.Printf("[DEBUG] Refresh response: %s", body)
+	tflog.Debug(ctx, "Refresh response", map[string]interface{}{
+		"response": string(body),
+	})
 
 	// Handle 401 "User or client no longer has role permissions for client key" until I better understand why that happens in the first place
 	if refreshTokenResponse.StatusCode == http.StatusBadRequest {
-		log.Printf("[DEBUG] Unexpected 400, attemting to log in again")
+		tflog.Debug(ctx, "Unexpected 400, attempting to log in again")
 
 		return keycloakClient.login(ctx)
 	}
@@ -273,11 +281,17 @@ func (keycloakClient *KeycloakClient) sendRequest(ctx context.Context, request *
 	requestMethod := request.Method
 	requestPath := request.URL.Path
 
-	log.Printf("[DEBUG] Sending %s to %s", requestMethod, requestPath)
+	requestLogArgs := map[string]interface{}{
+		"method": requestMethod,
+		"path":   requestPath,
+	}
+
 	if body != nil {
 		request.Body = ioutil.NopCloser(bytes.NewReader(body))
-		log.Printf("[DEBUG] Request body: %s", string(body))
+		requestLogArgs["body"] = string(body)
 	}
+
+	tflog.Debug(ctx, "Sending request", requestLogArgs)
 
 	keycloakClient.addRequestHeaders(request)
 
@@ -289,7 +303,9 @@ func (keycloakClient *KeycloakClient) sendRequest(ctx context.Context, request *
 	// Unauthorized: Token could have expired
 	// Forbidden: After creating a realm, following GETs for the realm return 403 until you refresh
 	if response.StatusCode == http.StatusUnauthorized || response.StatusCode == http.StatusForbidden {
-		log.Printf("[DEBUG] Response: %s.  Attempting refresh", response.Status)
+		tflog.Debug(ctx, "Got unexpected response, attempting refresh", map[string]interface{}{
+			"status": response.Status,
+		})
 
 		err := keycloakClient.refresh(ctx)
 		if err != nil {
@@ -307,8 +323,6 @@ func (keycloakClient *KeycloakClient) sendRequest(ctx context.Context, request *
 		}
 	}
 
-	log.Printf("[DEBUG] Response: %s", response.Status)
-
 	defer response.Body.Close()
 
 	responseBody, err := ioutil.ReadAll(response.Body)
@@ -316,9 +330,15 @@ func (keycloakClient *KeycloakClient) sendRequest(ctx context.Context, request *
 		return nil, "", err
 	}
 
-	if len(responseBody) != 0 && request.URL.Path != "/auth/admin/serverinfo" {
-		log.Printf("[DEBUG] Response body: %s", responseBody)
+	responseLogArgs := map[string]interface{}{
+		"status": response.Status,
 	}
+
+	if len(responseBody) != 0 && request.URL.Path != "/auth/admin/serverinfo" {
+		responseLogArgs["body"] = string(responseBody)
+	}
+
+	tflog.Debug(ctx, "Received response", responseLogArgs)
 
 	if response.StatusCode >= 400 {
 		errorMessage := fmt.Sprintf("error sending %s request to %s: %s.", request.Method, request.URL.Path, response.Status)
@@ -438,12 +458,12 @@ func (keycloakClient *KeycloakClient) delete(ctx context.Context, path string, r
 	return err
 }
 
-func (keycloakClient *KeycloakClient) marshal(requestBody interface{}) ([]byte, error) {
+func (keycloakClient *KeycloakClient) marshal(body interface{}) ([]byte, error) {
 	if keycloakClient.debug {
-		return json.MarshalIndent(requestBody, "", "    ")
+		return json.MarshalIndent(body, "", "    ")
 	}
 
-	return json.Marshal(requestBody)
+	return json.Marshal(body)
 }
 
 func newHttpClient(tlsInsecureSkipVerify bool, clientTimeout int, caCert string) (*http.Client, error) {

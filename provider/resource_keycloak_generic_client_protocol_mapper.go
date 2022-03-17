@@ -3,8 +3,6 @@ package provider
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"log"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -144,7 +142,6 @@ func resourceKeycloakGenericClientProtocolMapperRead(ctx context.Context, data *
 }
 
 func resourceKeycloakGenericClientProtocolMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Printf("[DEBUG] updating\n")
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	resource := mapFromDataToGenericClientProtocolMapper(data)

@@ -3,7 +3,6 @@ package keycloak
 import (
 	"context"
 	"fmt"
-	"log"
 	"reflect"
 )
 
@@ -68,7 +67,6 @@ type IdentityProvider struct {
 }
 
 func (keycloakClient *KeycloakClient) NewIdentityProvider(ctx context.Context, identityProvider *IdentityProvider) error {
-	log.Printf("[WARN] Realm: %s", identityProvider.Realm)
 	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances", identityProvider.Realm), identityProvider)
 	if err != nil {
 		return err

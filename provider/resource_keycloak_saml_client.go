@@ -6,8 +6,8 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"log"
 	"reflect"
 	"strings"
 
@@ -328,7 +328,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	return samlClient
 }
 
-func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlClient) error {
+func mapToDataFromSamlClient(ctx context.Context, data *schema.ResourceData, client *keycloak.SamlClient) error {
 	data.SetId(client.Id)
 
 	data.Set("include_authn_statement", client.Attributes.IncludeAuthnStatement)
@@ -379,18 +379,21 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("encryption_certificate", client.Attributes.EncryptionCertificate)
 	data.Set("signing_certificate", client.Attributes.SigningCertificate)
 	data.Set("signing_private_key", client.Attributes.SigningPrivateKey)
-	resourceKeycloakSamlClientSetSha1(data, "encryption_certificate_sha1", client.Attributes.EncryptionCertificate)
-	resourceKeycloakSamlClientSetSha1(data, "signing_certificate_sha1", client.Attributes.SigningCertificate)
-	resourceKeycloakSamlClientSetSha1(data, "signing_private_key_sha1", client.Attributes.SigningPrivateKey)
+	resourceKeycloakSamlClientSetSha1(ctx, data, "encryption_certificate_sha1", client.Attributes.EncryptionCertificate)
+	resourceKeycloakSamlClientSetSha1(ctx, data, "signing_certificate_sha1", client.Attributes.SigningCertificate)
+	resourceKeycloakSamlClientSetSha1(ctx, data, "signing_private_key_sha1", client.Attributes.SigningPrivateKey)
 
 	return nil
 }
 
-func resourceKeycloakSamlClientSetSha1(data *schema.ResourceData, attribute, value string) {
+func resourceKeycloakSamlClientSetSha1(ctx context.Context, data *schema.ResourceData, attribute, value string) {
 	if value != "" {
 		bytes, err := base64.StdEncoding.DecodeString(value)
 		if err != nil {
-			log.Printf("[WARN] Cannot compute sha1sum for attribute %s: %v", attribute, err)
+			tflog.Warn(ctx, "Cannot compute sha1sum", map[string]interface{}{
+				"error":     err.Error(),
+				"attribute": attribute,
+			})
 			data.Set(attribute, "")
 
 			return
@@ -431,7 +434,7 @@ func resourceKeycloakSamlClientRead(ctx context.Context, data *schema.ResourceDa
 		return handleNotFoundError(err, data)
 	}
 
-	err = mapToDataFromSamlClient(data, client)
+	err = mapToDataFromSamlClient(ctx, data, client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -449,7 +452,7 @@ func resourceKeycloakSamlClientUpdate(ctx context.Context, data *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	err = mapToDataFromSamlClient(data, client)
+	err = mapToDataFromSamlClient(ctx, data, client)
 	if err != nil {
 		return diag.FromErr(err)
 	}

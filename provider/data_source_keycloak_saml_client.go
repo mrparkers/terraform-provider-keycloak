@@ -193,7 +193,7 @@ func dataSourceKeycloakSamlClientRead(ctx context.Context, data *schema.Resource
 		return handleNotFoundError(err, data)
 	}
 
-	err = mapToDataFromSamlClient(data, client)
+	err = mapToDataFromSamlClient(ctx, data, client)
 	if err != nil {
 		return diag.FromErr(err)
 	}

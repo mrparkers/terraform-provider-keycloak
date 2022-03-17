@@ -3,8 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -135,7 +135,9 @@ func resourceKeycloakOpenidClientPermissionsRead(ctx context.Context, data *sche
 	}
 
 	if !openidClientPermissions.Enabled {
-		log.Printf("[WARN] Removing resource with id %s from state as it no longer enabled", data.Id())
+		tflog.Warn(ctx, "Removing resource from state as it is no longer enabled", map[string]interface{}{
+			"id": data.Id(),
+		})
 		data.SetId("")
 		return nil
 	}

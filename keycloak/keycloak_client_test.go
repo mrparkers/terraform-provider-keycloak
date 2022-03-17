@@ -3,8 +3,6 @@ package keycloak
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"io/ioutil"
-	"log"
 	"os"
 	"strconv"
 	"testing"
@@ -42,12 +40,6 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		if v := os.Getenv("KEYCLOAK_PASSWORD"); v == "" {
 			t.Fatal("KEYCLOAK_PASSWORD must be set for acceptance tests")
 		}
-	}
-
-	// Disable [DEBUG] logs which terraform typically handles for you. Re-enable when finished
-	if tfLogLevel := os.Getenv("TF_LOG"); tfLogLevel == "" {
-		log.SetOutput(ioutil.Discard)
-		defer log.SetOutput(os.Stdout)
 	}
 
 	// Convert KEYCLOAK_CLIENT_TIMEOUT to int
