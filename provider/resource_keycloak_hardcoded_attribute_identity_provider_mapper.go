@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -28,13 +30,13 @@ func resourceKeycloakHardcodedAttributeIdentityProviderMapper() *schema.Resource
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate(getHardcodedAttributeIdentityProviderMapperFromData, setHardcodedAttributeIdentityProviderMapperData)
-	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead(setHardcodedAttributeIdentityProviderMapperData)
-	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate(getHardcodedAttributeIdentityProviderMapperFromData, setHardcodedAttributeIdentityProviderMapperData)
+	genericMapperResource.CreateContext = resourceKeycloakIdentityProviderMapperCreate(getHardcodedAttributeIdentityProviderMapperFromData, setHardcodedAttributeIdentityProviderMapperData)
+	genericMapperResource.ReadContext = resourceKeycloakIdentityProviderMapperRead(setHardcodedAttributeIdentityProviderMapperData)
+	genericMapperResource.UpdateContext = resourceKeycloakIdentityProviderMapperUpdate(getHardcodedAttributeIdentityProviderMapperFromData, setHardcodedAttributeIdentityProviderMapperData)
 	return genericMapperResource
 }
 
-func getHardcodedAttributeIdentityProviderMapperFromData(data *schema.ResourceData, _ interface{}) (*keycloak.IdentityProviderMapper, error) {
+func getHardcodedAttributeIdentityProviderMapperFromData(_ context.Context, data *schema.ResourceData, _ interface{}) (*keycloak.IdentityProviderMapper, error) {
 	rec, _ := getIdentityProviderMapperFromData(data)
 
 	rec.IdentityProviderMapper = getHardcodedAttributeIdentityProviderMapperType(data.Get("user_session").(bool))
@@ -51,7 +53,7 @@ func setHardcodedAttributeIdentityProviderMapperData(data *schema.ResourceData, 
 
 	mapperType, err := getUserSessionFromHardcodedAttributeIdentityProviderMapperType(identityProviderMapper.IdentityProviderMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	data.Set("user_session", mapperType)

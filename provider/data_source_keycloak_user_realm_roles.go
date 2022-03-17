@@ -1,13 +1,15 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakUserRealmRoles() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakUserRealmRolesRead,
+		ReadContext: dataSourceKeycloakUserRealmRolesRead,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -27,15 +29,15 @@ func dataSourceKeycloakUserRealmRoles() *schema.Resource {
 	}
 }
 
-func dataSourceKeycloakUserRealmRolesRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakUserRealmRolesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	userId := data.Get("user_id").(string)
 
-	roles, err := keycloakClient.GetUserRoleMappings(realmId, userId)
+	roles, err := keycloakClient.GetUserRoleMappings(ctx, realmId, userId)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	var roleNames []string

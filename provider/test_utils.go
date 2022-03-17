@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"os"
@@ -67,8 +68,8 @@ func skipIfEnvNotSet(t *testing.T, envs ...string) {
 }
 
 // Skips the test if the keycloak server matches a specific major version
-func skipForMajorServerVersion(t *testing.T, keycloakClient *keycloak.KeycloakClient, majorVersion string) {
-	serverInfo, err := keycloakClient.GetServerInfo()
+func skipForMajorServerVersion(ctx context.Context, t *testing.T, keycloakClient *keycloak.KeycloakClient, majorVersion string) {
+	serverInfo, err := keycloakClient.GetServerInfo(ctx)
 	if err != nil {
 		t.Errorf("Cannot get server info: %v", err)
 	}

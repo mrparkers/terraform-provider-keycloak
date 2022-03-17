@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -8,12 +10,12 @@ import (
 
 func resourceKeycloakOpenidClientAuthorizationGroupPolicy() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenidClientAuthorizationGroupPolicyCreate,
-		Read:   resourceKeycloakOpenidClientAuthorizationGroupPolicyRead,
-		Delete: resourceKeycloakOpenidClientAuthorizationGroupPolicyDelete,
-		Update: resourceKeycloakOpenidClientAuthorizationGroupPolicyUpdate,
+		CreateContext: resourceKeycloakOpenidClientAuthorizationGroupPolicyCreate,
+		ReadContext:   resourceKeycloakOpenidClientAuthorizationGroupPolicyRead,
+		DeleteContext: resourceKeycloakOpenidClientAuthorizationGroupPolicyDelete,
+		UpdateContext: resourceKeycloakOpenidClientAuthorizationGroupPolicyUpdate,
 		Importer: &schema.ResourceImporter{
-			State: genericResourcePolicyImport,
+			StateContext: genericResourcePolicyImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"resource_server_id": {
@@ -100,7 +102,7 @@ func getOpenidClientAuthorizationGroupPolicyResourceFromData(data *schema.Resour
 	return &resource
 }
 
-func setOpenidClientAuthorizationGroupPolicyResourceData(keycloakClient *keycloak.KeycloakClient, policy *keycloak.OpenidClientAuthorizationGroupPolicy, data *schema.ResourceData) error {
+func setOpenidClientAuthorizationGroupPolicyResourceData(ctx context.Context, keycloakClient *keycloak.KeycloakClient, policy *keycloak.OpenidClientAuthorizationGroupPolicy, data *schema.ResourceData) error {
 	data.SetId(policy.Id)
 
 	data.Set("resource_server_id", policy.ResourceServerId)
@@ -114,7 +116,7 @@ func setOpenidClientAuthorizationGroupPolicyResourceData(keycloakClient *keycloa
 	var groups []interface{}
 	for _, g := range policy.Groups {
 		// the "path" attribute is omitted by Keycloak, so we have to look this group up ourselves to get the path
-		group, err := keycloakClient.GetGroup(policy.RealmId, g.Id)
+		group, err := keycloakClient.GetGroup(ctx, policy.RealmId, g.Id)
 		if err != nil {
 			return err
 		}
@@ -131,68 +133,68 @@ func setOpenidClientAuthorizationGroupPolicyResourceData(keycloakClient *keycloa
 	return nil
 }
 
-func resourceKeycloakOpenidClientAuthorizationGroupPolicyCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationGroupPolicyCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	resource := getOpenidClientAuthorizationGroupPolicyResourceFromData(data)
 
-	err := keycloakClient.NewOpenidClientAuthorizationGroupPolicy(resource)
+	err := keycloakClient.NewOpenidClientAuthorizationGroupPolicy(ctx, resource)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = setOpenidClientAuthorizationGroupPolicyResourceData(keycloakClient, resource, data)
+	err = setOpenidClientAuthorizationGroupPolicyResourceData(ctx, keycloakClient, resource, data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakOpenidClientAuthorizationGroupPolicyRead(data, meta)
+	return resourceKeycloakOpenidClientAuthorizationGroupPolicyRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenidClientAuthorizationGroupPolicyRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationGroupPolicyRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	resourceServerId := data.Get("resource_server_id").(string)
 	id := data.Id()
 
-	resource, err := keycloakClient.GetOpenidClientAuthorizationGroupPolicy(realmId, resourceServerId, id)
+	resource, err := keycloakClient.GetOpenidClientAuthorizationGroupPolicy(ctx, realmId, resourceServerId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
-	err = setOpenidClientAuthorizationGroupPolicyResourceData(keycloakClient, resource, data)
+	err = setOpenidClientAuthorizationGroupPolicyResourceData(ctx, keycloakClient, resource, data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakOpenidClientAuthorizationGroupPolicyUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationGroupPolicyUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	resource := getOpenidClientAuthorizationGroupPolicyResourceFromData(data)
 
-	err := keycloakClient.UpdateOpenidClientAuthorizationGroupPolicy(resource)
+	err := keycloakClient.UpdateOpenidClientAuthorizationGroupPolicy(ctx, resource)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = setOpenidClientAuthorizationGroupPolicyResourceData(keycloakClient, resource, data)
+	err = setOpenidClientAuthorizationGroupPolicyResourceData(ctx, keycloakClient, resource, data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakOpenidClientAuthorizationGroupPolicyDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationGroupPolicyDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	resourceServerId := data.Get("resource_server_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteOpenidClientAuthorizationGroupPolicy(realmId, resourceServerId, id)
+	return diag.FromErr(keycloakClient.DeleteOpenidClientAuthorizationGroupPolicy(ctx, realmId, resourceServerId, id))
 }

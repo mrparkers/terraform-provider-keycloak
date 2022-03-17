@@ -49,7 +49,7 @@ type GenericClientRepresentation struct {
 func (keycloakClient *KeycloakClient) NewGenericClientDescription(ctx context.Context, realmId string, body string) (*GenericClientRepresentation, error) {
 	var genericClientRepresentation GenericClientRepresentation
 
-	result, err := keycloakClient.sendRaw(ctx context.Context, fmt.Sprintf("/realms/%s/client-description-converter", realmId), []byte(body))
+	result, err := keycloakClient.sendRaw(ctx, fmt.Sprintf("/realms/%s/client-description-converter", realmId), []byte(body))
 
 	if err != nil {
 		return nil, err

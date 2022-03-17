@@ -25,6 +25,12 @@ func TestAccKeycloakRealmKeystoreAesGenerated_basic(t *testing.T) {
 				Config: testKeycloakRealmKeystoreAesGenerated_basic(aesName),
 				Check:  testAccCheckRealmKeystoreAesGeneratedExists("keycloak_realm_keystore_aes_generated.realm_aes"),
 			},
+			{
+				ResourceName:      "keycloak_realm_keystore_aes_generated.realm_aes",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getRealmKeystoreAesGeneratedImportId("keycloak_realm_keystore_aes_generated.realm_aes"),
+			},
 		},
 	})
 }
@@ -47,7 +53,7 @@ func TestAccKeycloakRealmKeystoreAesGenerated_createAfterManualDestroy(t *testin
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRealmKeystoreAesGenerated(aes.RealmId, aes.Id)
+					err := keycloakClient.DeleteRealmKeystoreAesGenerated(testCtx, aes.RealmId, aes.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -158,7 +164,7 @@ func testAccCheckRealmKeystoreAesGeneratedDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreAesGenerated(realm, id)
+			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreAesGenerated(testCtx, realm, id)
 			if ldapGroupKeystore != nil {
 				return fmt.Errorf("aes keystore with id %s still exists", id)
 			}
@@ -179,7 +185,7 @@ func getKeycloakRealmKeystoreAesGeneratedFromState(s *terraform.State,
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	realmKeystore, err := keycloakClient.GetRealmKeystoreAesGenerated(realm, id)
+	realmKeystore, err := keycloakClient.GetRealmKeystoreAesGenerated(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting aes keystore with id %s: %s", id, err)
 	}
@@ -196,9 +202,8 @@ func getRealmKeystoreAesGeneratedImportId(resourceName string) resource.ImportSt
 
 		id := rs.Primary.ID
 		realmId := rs.Primary.Attributes["realm_id"]
-		providerId := "aes-generated"
 
-		return fmt.Sprintf("%s/%s/%s", realmId, providerId, id), nil
+		return fmt.Sprintf("%s/%s", realmId, id), nil
 	}
 }
 

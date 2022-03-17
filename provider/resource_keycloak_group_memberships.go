@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -9,10 +11,10 @@ import (
 
 func resourceKeycloakGroupMemberships() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakGroupMembershipsCreate,
-		Read:   resourceKeycloakGroupMembershipsRead,
-		Delete: resourceKeycloakGroupMembershipsDelete,
-		Update: resourceKeycloakGroupMembershipsUpdate,
+		CreateContext: resourceKeycloakGroupMembershipsCreate,
+		ReadContext:   resourceKeycloakGroupMembershipsRead,
+		DeleteContext: resourceKeycloakGroupMembershipsDelete,
+		UpdateContext: resourceKeycloakGroupMembershipsUpdate,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -34,7 +36,7 @@ func resourceKeycloakGroupMemberships() *schema.Resource {
 	}
 }
 
-func resourceKeycloakGroupMembershipsCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupMembershipsCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	groupId := data.Get("group_id").(string)
@@ -43,26 +45,26 @@ func resourceKeycloakGroupMembershipsCreate(data *schema.ResourceData, meta inte
 
 	err := keycloakClient.ValidateGroupMembers(members)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.AddUsersToGroup(realmId, groupId, members)
+	err = keycloakClient.AddUsersToGroup(ctx, realmId, groupId, members)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	data.SetId(groupMembershipsId(realmId, groupId))
 
-	return resourceKeycloakGroupMembershipsRead(data, meta)
+	return resourceKeycloakGroupMembershipsRead(ctx, data, meta)
 }
 
-func resourceKeycloakGroupMembershipsRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupMembershipsRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
 
-	usersInGroup, err := keycloakClient.GetGroupMembers(realmId, groupId)
+	usersInGroup, err := keycloakClient.GetGroupMembers(ctx, realmId, groupId)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -78,7 +80,7 @@ func resourceKeycloakGroupMembershipsRead(data *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceKeycloakGroupMembershipsUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupMembershipsUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -87,12 +89,12 @@ func resourceKeycloakGroupMembershipsUpdate(data *schema.ResourceData, meta inte
 
 	err := keycloakClient.ValidateGroupMembers(tfMembers.List())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	keycloakMembers, err := keycloakClient.GetGroupMembers(realmId, groupId)
+	keycloakMembers, err := keycloakClient.GetGroupMembers(ctx, realmId, groupId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	for _, keycloakMember := range keycloakMembers {
@@ -102,31 +104,31 @@ func resourceKeycloakGroupMembershipsUpdate(data *schema.ResourceData, meta inte
 			tfMembers.Remove(keycloakMember.Username)
 		} else {
 			// if the user exists in keycloak and not in tf state, they need to be removed from the group
-			err = keycloakClient.RemoveUserFromGroup(keycloakMember, groupId)
+			err = keycloakClient.RemoveUserFromGroup(ctx, keycloakMember, groupId)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
 
 	// at this point, `tfMembers` should only contain users that exist in tf state but not keycloak. these users need to be added
-	err = keycloakClient.AddUsersToGroup(realmId, groupId, tfMembers.List())
+	err = keycloakClient.AddUsersToGroup(ctx, realmId, groupId, tfMembers.List())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	data.SetId(groupMembershipsId(realmId, groupId))
 
-	return resourceKeycloakGroupMembershipsRead(data, meta)
+	return resourceKeycloakGroupMembershipsRead(ctx, data, meta)
 }
 
-func resourceKeycloakGroupMembershipsDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupMembershipsDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
 
-	return keycloakClient.RemoveUsersFromGroup(realmId, groupId, data.Get("members").(*schema.Set).List())
+	return diag.FromErr(keycloakClient.RemoveUsersFromGroup(ctx, realmId, groupId, data.Get("members").(*schema.Set).List()))
 }
 
 func groupMembershipsId(realmId, groupId string) string {

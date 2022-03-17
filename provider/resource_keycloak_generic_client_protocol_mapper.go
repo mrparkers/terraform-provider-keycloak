@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -11,16 +13,16 @@ import (
 
 func resourceKeycloakGenericClientProtocolMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakGenericClientProtocolMapperCreate,
-		Read:   resourceKeycloakGenericClientProtocolMapperRead,
-		Delete: resourceKeycloakGenericClientProtocolMapperDelete,
-		Update: resourceKeycloakGenericClientProtocolMapperUpdate,
+		CreateContext: resourceKeycloakGenericClientProtocolMapperCreate,
+		ReadContext:   resourceKeycloakGenericClientProtocolMapperRead,
+		DeleteContext: resourceKeycloakGenericClientProtocolMapperDelete,
+		UpdateContext: resourceKeycloakGenericClientProtocolMapperUpdate,
 		//  import a mapper tied to a client:
 		// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 		// or a client scope:
 		// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
 		Importer: &schema.ResourceImporter{
-			State: genericProtocolMapperImport,
+			StateContext: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -104,26 +106,26 @@ func mapFromGenericClientProtocolMapperToData(data *schema.ResourceData, mapper 
 	data.Set("realm_id", mapper.RealmId)
 }
 
-func resourceKeycloakGenericClientProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGenericClientProtocolMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	genericClientProtocolMapper := mapFromDataToGenericClientProtocolMapper(data)
 
-	err := genericClientProtocolMapper.Validate(keycloakClient)
+	err := genericClientProtocolMapper.Validate(ctx, keycloakClient)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewGenericClientProtocolMapper(genericClientProtocolMapper)
+	err = keycloakClient.NewGenericClientProtocolMapper(ctx, genericClientProtocolMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	mapFromGenericClientProtocolMapperToData(data, genericClientProtocolMapper)
 
-	return resourceKeycloakGenericClientProtocolMapperRead(data, meta)
+	return resourceKeycloakGenericClientProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakGenericClientProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGenericClientProtocolMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -131,7 +133,7 @@ func resourceKeycloakGenericClientProtocolMapperRead(data *schema.ResourceData, 
 	clientScopeId := data.Get("client_scope_id").(string)
 	id := data.Id()
 
-	resource, err := keycloakClient.GetGenericClientProtocolMapper(realmId, clientId, clientScopeId, id)
+	resource, err := keycloakClient.GetGenericClientProtocolMapper(ctx, realmId, clientId, clientScopeId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -141,15 +143,15 @@ func resourceKeycloakGenericClientProtocolMapperRead(data *schema.ResourceData, 
 	return nil
 }
 
-func resourceKeycloakGenericClientProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGenericClientProtocolMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] updating\n")
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	resource := mapFromDataToGenericClientProtocolMapper(data)
 
-	err := keycloakClient.UpdateGenericClientProtocolMapper(resource)
+	err := keycloakClient.UpdateGenericClientProtocolMapper(ctx, resource)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromGenericClientProtocolMapperToData(data, resource)
@@ -157,7 +159,7 @@ func resourceKeycloakGenericClientProtocolMapperUpdate(data *schema.ResourceData
 	return nil
 }
 
-func resourceKeycloakGenericClientProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGenericClientProtocolMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -165,5 +167,5 @@ func resourceKeycloakGenericClientProtocolMapperDelete(data *schema.ResourceData
 	clientScopeId := data.Get("client_scope_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteGenericClientProtocolMapper(realmId, clientId, clientScopeId, id)
+	return diag.FromErr(keycloakClient.DeleteGenericClientProtocolMapper(ctx, realmId, clientId, clientScopeId, id))
 }

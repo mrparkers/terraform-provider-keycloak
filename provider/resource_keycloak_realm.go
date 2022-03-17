@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -139,12 +141,12 @@ func resourceKeycloakRealm() *schema.Resource {
 		},
 	}
 	return &schema.Resource{
-		Create: resourceKeycloakRealmCreate,
-		Read:   resourceKeycloakRealmRead,
-		Delete: resourceKeycloakRealmDelete,
-		Update: resourceKeycloakRealmUpdate,
+		CreateContext: resourceKeycloakRealmCreate,
+		ReadContext:   resourceKeycloakRealmRead,
+		DeleteContext: resourceKeycloakRealmDelete,
+		UpdateContext: resourceKeycloakRealmUpdate,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm": {
@@ -1308,33 +1310,33 @@ func getHeaderSettings(realm *keycloak.Realm) map[string]interface{} {
 	return headersSettings
 }
 
-func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realm, err := getRealmFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.ValidateRealm(realm)
+	err = keycloakClient.ValidateRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewRealm(realm)
+	err = keycloakClient.NewRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setRealmData(data, realm)
 
-	return resourceKeycloakRealmRead(data, meta)
+	return resourceKeycloakRealmRead(ctx, data, meta)
 }
 
-func resourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm, err := keycloakClient.GetRealm(data.Id())
+	realm, err := keycloakClient.GetRealm(ctx, data.Id())
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -1349,22 +1351,22 @@ func resourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceKeycloakRealmUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realm, err := getRealmFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.ValidateRealm(realm)
+	err = keycloakClient.ValidateRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateRealm(realm)
+	err = keycloakClient.UpdateRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setRealmData(data, realm)
@@ -1372,8 +1374,8 @@ func resourceKeycloakRealmUpdate(data *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourceKeycloakRealmDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	return keycloakClient.DeleteRealm(data.Id())
+	return diag.FromErr(keycloakClient.DeleteRealm(ctx, data.Id()))
 }

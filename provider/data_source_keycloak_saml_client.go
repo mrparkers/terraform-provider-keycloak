@@ -1,13 +1,15 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakSamlClient() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakSamlClientRead,
+		ReadContext: dataSourceKeycloakSamlClientRead,
 
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -180,20 +182,20 @@ func dataSourceKeycloakSamlClient() *schema.Resource {
 	}
 }
 
-func dataSourceKeycloakSamlClientRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakSamlClientRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
-	client, err := keycloakClient.GetSamlClientByClientId(realmId, clientId)
+	client, err := keycloakClient.GetSamlClientByClientId(ctx, realmId, clientId)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
 	err = mapToDataFromSamlClient(data, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

@@ -1,16 +1,18 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakRealmUserProfile() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakRealmUserProfileCreate,
-		Read:   resourceKeycloakRealmUserProfileRead,
-		Delete: resourceKeycloakRealmUserProfileDelete,
-		Update: resourceKeycloakRealmUserProfileUpdate,
+		CreateContext: resourceKeycloakRealmUserProfileCreate,
+		ReadContext:   resourceKeycloakRealmUserProfileRead,
+		DeleteContext: resourceKeycloakRealmUserProfileDelete,
+		UpdateContext: resourceKeycloakRealmUserProfileUpdate,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -183,7 +185,7 @@ func getRealmUserProfileAttributeFromData(m map[string]interface{}) *keycloak.Re
 				}
 			}
 
-			validations[name] = keycloak.RealmUserProfileValidationConfig(keycloak.RealmUserProfileValidationConfig(config))
+			validations[name] = config
 		}
 
 		attribute.Validations = validations
@@ -297,7 +299,7 @@ func getRealmUserProfileAttributeData(attr *keycloak.RealmUserProfileAttribute) 
 	if attr.Validations != nil {
 		validations := make([]interface{}, 0)
 		for name, config := range attr.Validations {
-			validator := (make(map[string]interface{}))
+			validator := make(map[string]interface{})
 
 			validator["name"] = name
 			validator["config"] = config
@@ -339,27 +341,27 @@ func setRealmUserProfileData(data *schema.ResourceData, realmUserProfile *keyclo
 	data.Set("group", groups)
 }
 
-func resourceKeycloakRealmUserProfileCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmUserProfileCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	realmId := data.Get("realm_id").(string)
 	data.SetId(realmId)
 
 	realmUserProfile := getRealmUserProfileFromData(data)
 
-	err := keycloakClient.UpdateRealmUserProfile(realmId, realmUserProfile)
+	err := keycloakClient.UpdateRealmUserProfile(ctx, realmId, realmUserProfile)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakRealmUserProfileRead(data, meta)
+	return resourceKeycloakRealmUserProfileRead(ctx, data, meta)
 }
 
-func resourceKeycloakRealmUserProfileRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmUserProfileRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 
-	realmUserProfile, err := keycloakClient.GetRealmUserProfile(realmId)
+	realmUserProfile, err := keycloakClient.GetRealmUserProfile(ctx, realmId)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -369,30 +371,30 @@ func resourceKeycloakRealmUserProfileRead(data *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceKeycloakRealmUserProfileDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmUserProfileDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	realmId := data.Get("realm_id").(string)
 
 	// The realm user profile cannot be deleted, so instead we set it back to its "zero" values.
 	realmUserProfile := &keycloak.RealmUserProfile{Attributes: []*keycloak.RealmUserProfileAttribute{}, Groups: []*keycloak.RealmUserProfileGroup{}}
 
-	err := keycloakClient.UpdateRealmUserProfile(realmId, realmUserProfile)
+	err := keycloakClient.UpdateRealmUserProfile(ctx, realmId, realmUserProfile)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakRealmUserProfileUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmUserProfileUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	realmUserProfile := getRealmUserProfileFromData(data)
 
-	err := keycloakClient.UpdateRealmUserProfile(realmId, realmUserProfile)
+	err := keycloakClient.UpdateRealmUserProfile(ctx, realmId, realmUserProfile)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setRealmUserProfileData(data, realmUserProfile)

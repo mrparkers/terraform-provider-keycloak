@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -8,16 +10,16 @@ import (
 
 func resourceKeycloakOpenIdScriptProtocolMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenIdScriptProtocolMapperCreate,
-		Read:   resourceKeycloakOpenIdScriptProtocolMapperRead,
-		Update: resourceKeycloakOpenIdScriptProtocolMapperUpdate,
-		Delete: resourceKeycloakOpenIdScriptProtocolMapperDelete,
+		CreateContext: resourceKeycloakOpenIdScriptProtocolMapperCreate,
+		ReadContext:   resourceKeycloakOpenIdScriptProtocolMapperRead,
+		UpdateContext: resourceKeycloakOpenIdScriptProtocolMapperUpdate,
+		DeleteContext: resourceKeycloakOpenIdScriptProtocolMapperDelete,
 		Importer: &schema.ResourceImporter{
 			// import a mapper tied to a client:
 			// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 			// or a client scope:
 			// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
-			State: genericProtocolMapperImport,
+			StateContext: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -127,34 +129,34 @@ func mapFromOpenIdScriptMapperToData(mapper *keycloak.OpenIdScriptProtocolMapper
 	data.Set("multivalued", mapper.Multivalued)
 }
 
-func resourceKeycloakOpenIdScriptProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdScriptProtocolMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdScriptMapper := mapFromDataToOpenIdScriptProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdScriptProtocolMapper(openIdScriptMapper)
+	err := keycloakClient.ValidateOpenIdScriptProtocolMapper(ctx, openIdScriptMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewOpenIdScriptProtocolMapper(openIdScriptMapper)
+	err = keycloakClient.NewOpenIdScriptProtocolMapper(ctx, openIdScriptMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromOpenIdScriptMapperToData(openIdScriptMapper, data)
 
-	return resourceKeycloakOpenIdScriptProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdScriptProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdScriptProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdScriptProtocolMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	openIdScriptMapper, err := keycloakClient.GetOpenIdScriptProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	openIdScriptMapper, err := keycloakClient.GetOpenIdScriptProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -164,30 +166,30 @@ func resourceKeycloakOpenIdScriptProtocolMapperRead(data *schema.ResourceData, m
 	return nil
 }
 
-func resourceKeycloakOpenIdScriptProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdScriptProtocolMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdScriptMapper := mapFromDataToOpenIdScriptProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdScriptProtocolMapper(openIdScriptMapper)
+	err := keycloakClient.ValidateOpenIdScriptProtocolMapper(ctx, openIdScriptMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateOpenIdScriptProtocolMapper(openIdScriptMapper)
+	err = keycloakClient.UpdateOpenIdScriptProtocolMapper(ctx, openIdScriptMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakOpenIdScriptProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdScriptProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdScriptProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdScriptProtocolMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	return keycloakClient.DeleteOpenIdScriptProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	return diag.FromErr(keycloakClient.DeleteOpenIdScriptProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id()))
 }

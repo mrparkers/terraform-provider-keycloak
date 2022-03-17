@@ -53,7 +53,7 @@ func TestAccKeycloakIdpTokenExchangeScopePermission_createAfterManualDestroy(t *
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DisableIdentityProviderPermissions(idpPermissions.RealmId, idpPermissions.ProviderAlias)
+					err := keycloakClient.DisableIdentityProviderPermissions(testCtx, idpPermissions.RealmId, idpPermissions.ProviderAlias)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -157,22 +157,22 @@ func testAccCheckKeycloakIdpTokenExchangeScopePermissionDestroy() resource.TestC
 			authorizationIdpResourceId := rs.Primary.Attributes["authorization_idp_resource_id"]
 			authorizationTokenExchangeScopePermissionId := rs.Primary.Attributes["authorization_token_exchange_scope_permission_id"]
 
-			permissions, _ := keycloakClient.GetIdentityProviderPermissions(realmId, providerAlias)
+			permissions, _ := keycloakClient.GetIdentityProviderPermissions(testCtx, realmId, providerAlias)
 			if permissions != nil {
 				return fmt.Errorf("idp permissions for realm id %s and provider alias %s still exists", realmId, providerAlias)
 			}
 
-			tokenExchangePermission, _ := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, authorizationResourceServerId, authorizationTokenExchangeScopePermissionId)
+			tokenExchangePermission, _ := keycloakClient.GetOpenidClientAuthorizationPermission(testCtx, realmId, authorizationResourceServerId, authorizationTokenExchangeScopePermissionId)
 			if tokenExchangePermission != nil {
 				return fmt.Errorf("tokenExchangePermission for realm id %s, resource server id %s and permission id %s still exists", realmId, authorizationResourceServerId, authorizationTokenExchangeScopePermissionId)
 			}
 
-			idpResource, _ := keycloakClient.GetOpenidClientAuthorizationResource(realmId, authorizationResourceServerId, authorizationIdpResourceId)
+			idpResource, _ := keycloakClient.GetOpenidClientAuthorizationResource(testCtx, realmId, authorizationResourceServerId, authorizationIdpResourceId)
 			if idpResource != nil {
 				return fmt.Errorf("idp resource for realm id%s, resource server id %s and resource id %s still exists", realmId, authorizationResourceServerId, authorizationIdpResourceId)
 			}
 
-			policy, _ := keycloakClient.GetOpenidClientAuthorizationClientPolicy(realmId, authorizationResourceServerId, policyId)
+			policy, _ := keycloakClient.GetOpenidClientAuthorizationClientPolicy(testCtx, realmId, authorizationResourceServerId, policyId)
 			if policy != nil {
 				return fmt.Errorf("client policy for realm id %s, resource server id %s and policy id %s still exists", realmId, authorizationResourceServerId, policyId)
 			}
@@ -199,7 +199,7 @@ func testAccCheckKeycloakIdpTokenExchangeScopePermissionExists(resourceName stri
 		authorizationTokenExchangeScopePermissionId := rs.Primary.Attributes["authorization_token_exchange_scope_permission_id"]
 
 		var realmManagementId string
-		clients, _ := keycloakClient.GetOpenidClients(permissions.RealmId, false)
+		clients, _ := keycloakClient.GetOpenidClients(testCtx, permissions.RealmId, false)
 		for _, client := range clients {
 			if client.ClientId == "realm-management" {
 				realmManagementId = client.Id
@@ -220,7 +220,7 @@ func testAccCheckKeycloakIdpTokenExchangeScopePermissionExists(resourceName stri
 			return fmt.Errorf("computed authorizationTokenExchangeScopePermissionId %s was not equal to %s scope permission id set on the idp permission", authorizationTokenExchangeScopePermissionId, tokenExchangeScopedPermissionId)
 		}
 
-		tokenExchangeScopedPermission, err := keycloakClient.GetOpenidClientAuthorizationPermission(permissions.RealmId, realmManagementId, tokenExchangeScopedPermissionId)
+		tokenExchangeScopedPermission, err := keycloakClient.GetOpenidClientAuthorizationPermission(testCtx, permissions.RealmId, realmManagementId, tokenExchangeScopedPermissionId)
 		if err != nil {
 			return err
 		}
@@ -233,7 +233,7 @@ func testAccCheckKeycloakIdpTokenExchangeScopePermissionExists(resourceName stri
 			return fmt.Errorf("token exchange scope permission has not exact 1 policy, it has %d", len(tokenExchangeScopedPermission.Policies))
 		}
 
-		policy, err := keycloakClient.GetOpenidClientAuthorizationClientPolicy(permissions.RealmId, realmManagementId, tokenExchangeScopedPermission.Policies[0])
+		policy, err := keycloakClient.GetOpenidClientAuthorizationClientPolicy(testCtx, permissions.RealmId, realmManagementId, tokenExchangeScopedPermission.Policies[0])
 		if err != nil {
 			return err
 		}
@@ -242,7 +242,7 @@ func testAccCheckKeycloakIdpTokenExchangeScopePermissionExists(resourceName stri
 			return fmt.Errorf("computed policyId %s was not equal to %s policyId found on the token exchange scope based permission", policyId, policy.Id)
 		}
 
-		idpResource, err := keycloakClient.GetOpenidClientAuthorizationResource(permissions.RealmId, realmManagementId, permissions.Resource)
+		idpResource, err := keycloakClient.GetOpenidClientAuthorizationResource(testCtx, permissions.RealmId, realmManagementId, permissions.Resource)
 		if err != nil {
 			return err
 		}
@@ -269,12 +269,12 @@ func testAccCheckKeycloakIdpTokenExchangeScopePermissionClientPolicyHasClient(re
 		authorizationResourceServerId := rs.Primary.Attributes["authorization_resource_server_id"]
 		policyId := rs.Primary.Attributes["policy_id"]
 
-		policy, err := keycloakClient.GetOpenidClientAuthorizationClientPolicy(realmId, authorizationResourceServerId, policyId)
+		policy, err := keycloakClient.GetOpenidClientAuthorizationClientPolicy(testCtx, realmId, authorizationResourceServerId, policyId)
 		if err != nil {
 			return err
 		}
 
-		client, err := keycloakClient.GetOpenidClientByClientId(realmId, clientId)
+		client, err := keycloakClient.GetOpenidClientByClientId(testCtx, realmId, clientId)
 		if err != nil {
 			return err
 		}
@@ -320,7 +320,7 @@ func getIdpPermissionsFromState(s *terraform.State, resourceName string) (*keycl
 	realmId := rs.Primary.Attributes["realm_id"]
 	providerAlias := rs.Primary.Attributes["provider_alias"]
 
-	permissions, err := keycloakClient.GetIdentityProviderPermissions(realmId, providerAlias)
+	permissions, err := keycloakClient.GetIdentityProviderPermissions(testCtx, realmId, providerAlias)
 	if err != nil {
 		return nil, fmt.Errorf("error getting idp permissions with realm id %s and provider alias %s: %s", realmId, providerAlias, err)
 

@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -9,10 +11,10 @@ import (
 
 func resourceKeycloakSamlClientDefaultScopes() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakSamlClientDefaultScopesCreate,
-		Read:   resourceKeycloakSamlClientDefaultScopesRead,
-		Delete: resourceKeycloakSamlClientDefaultScopesDelete,
-		Update: resourceKeycloakSamlClientDefaultScopesUpdate,
+		CreateContext: resourceKeycloakSamlClientDefaultScopesCreate,
+		ReadContext:   resourceKeycloakSamlClientDefaultScopesRead,
+		DeleteContext: resourceKeycloakSamlClientDefaultScopesDelete,
+		UpdateContext: resourceKeycloakSamlClientDefaultScopesUpdate,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -34,33 +36,33 @@ func resourceKeycloakSamlClientDefaultScopes() *schema.Resource {
 	}
 }
 
-func resourceKeycloakSamlClientDefaultScopesCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientDefaultScopesCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	defaultScopes := data.Get("default_scopes").(*schema.Set)
 
-	err := keycloakClient.AttachSamlClientDefaultScopes(realmId, clientId, interfaceSliceToStringSlice(defaultScopes.List()))
+	err := keycloakClient.AttachSamlClientDefaultScopes(ctx, realmId, clientId, interfaceSliceToStringSlice(defaultScopes.List()))
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	data.SetId(samlClientDefaultScopesId(realmId, clientId))
 
-	return resourceKeycloakSamlClientDefaultScopesRead(data, meta)
+	return resourceKeycloakSamlClientDefaultScopesRead(ctx, data, meta)
 }
 
 func samlClientDefaultScopesId(realmId string, clientId string) string {
 	return fmt.Sprintf("%s/%s", realmId, clientId)
 }
 
-func resourceKeycloakSamlClientDefaultScopesRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientDefaultScopesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
-	clientScopes, err := keycloakClient.GetSamlClientDefaultScopes(realmId, clientId)
+	clientScopes, err := keycloakClient.GetSamlClientDefaultScopes(ctx, realmId, clientId)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -76,16 +78,16 @@ func resourceKeycloakSamlClientDefaultScopesRead(data *schema.ResourceData, meta
 	return nil
 }
 
-func resourceKeycloakSamlClientDefaultScopesUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientDefaultScopesUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	tfSamlClientDefaultScopes := data.Get("default_scopes").(*schema.Set)
 
-	keycloakSamlClientDefaultScopes, err := keycloakClient.GetSamlClientDefaultScopes(realmId, clientId)
+	keycloakSamlClientDefaultScopes, err := keycloakClient.GetSamlClientDefaultScopes(ctx, realmId, clientId)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	var samlClientDefaultScopesToDetach []string
@@ -101,28 +103,28 @@ func resourceKeycloakSamlClientDefaultScopesUpdate(data *schema.ResourceData, me
 	}
 
 	// detach scopes that aren't in tf state
-	err = keycloakClient.DetachSamlClientDefaultScopes(realmId, clientId, samlClientDefaultScopesToDetach)
+	err = keycloakClient.DetachSamlClientDefaultScopes(ctx, realmId, clientId, samlClientDefaultScopesToDetach)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	// attach scopes that exist in tf state but not in keycloak
-	err = keycloakClient.AttachSamlClientDefaultScopes(realmId, clientId, interfaceSliceToStringSlice(tfSamlClientDefaultScopes.List()))
+	err = keycloakClient.AttachSamlClientDefaultScopes(ctx, realmId, clientId, interfaceSliceToStringSlice(tfSamlClientDefaultScopes.List()))
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	data.SetId(samlClientDefaultScopesId(realmId, clientId))
 
-	return resourceKeycloakSamlClientDefaultScopesRead(data, meta)
+	return resourceKeycloakSamlClientDefaultScopesRead(ctx, data, meta)
 }
 
-func resourceKeycloakSamlClientDefaultScopesDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientDefaultScopesDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	defaultScopes := data.Get("default_scopes").(*schema.Set)
 
-	return keycloakClient.DetachSamlClientDefaultScopes(realmId, clientId, interfaceSliceToStringSlice(defaultScopes.List()))
+	return diag.FromErr(keycloakClient.DetachSamlClientDefaultScopes(ctx, realmId, clientId, interfaceSliceToStringSlice(defaultScopes.List())))
 }

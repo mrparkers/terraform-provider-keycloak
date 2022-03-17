@@ -1,7 +1,10 @@
 package provider
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -9,13 +12,13 @@ import (
 
 func resourceKeycloakGroupRoles() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakGroupRolesReconcile,
-		Read:   resourceKeycloakGroupRolesRead,
-		Update: resourceKeycloakGroupRolesReconcile,
-		Delete: resourceKeycloakGroupRolesDelete,
+		CreateContext: resourceKeycloakGroupRolesReconcile,
+		ReadContext:   resourceKeycloakGroupRolesRead,
+		UpdateContext: resourceKeycloakGroupRolesReconcile,
+		DeleteContext: resourceKeycloakGroupRolesDelete,
 		// This resource can be imported using {{realm}}/{{groupId}}.
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakGroupRolesImport,
+			StateContext: resourceKeycloakGroupRolesImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -47,9 +50,9 @@ func groupRolesId(realmId, groupId string) string {
 	return fmt.Sprintf("%s/%s", realmId, groupId)
 }
 
-func addRolesToGroup(keycloakClient *keycloak.KeycloakClient, clientRolesToAdd map[string][]*keycloak.Role, realmRolesToAdd []*keycloak.Role, group *keycloak.Group) error {
+func addRolesToGroup(ctx context.Context, keycloakClient *keycloak.KeycloakClient, clientRolesToAdd map[string][]*keycloak.Role, realmRolesToAdd []*keycloak.Role, group *keycloak.Group) error {
 	if len(realmRolesToAdd) != 0 {
-		err := keycloakClient.AddRealmRolesToGroup(group.RealmId, group.Id, realmRolesToAdd)
+		err := keycloakClient.AddRealmRolesToGroup(ctx, group.RealmId, group.Id, realmRolesToAdd)
 		if err != nil {
 			return err
 		}
@@ -57,7 +60,7 @@ func addRolesToGroup(keycloakClient *keycloak.KeycloakClient, clientRolesToAdd m
 
 	for k, roles := range clientRolesToAdd {
 		if len(roles) != 0 {
-			err := keycloakClient.AddClientRolesToGroup(group.RealmId, group.Id, k, roles)
+			err := keycloakClient.AddClientRolesToGroup(ctx, group.RealmId, group.Id, k, roles)
 			if err != nil {
 				return err
 			}
@@ -67,9 +70,9 @@ func addRolesToGroup(keycloakClient *keycloak.KeycloakClient, clientRolesToAdd m
 	return nil
 }
 
-func removeRolesFromGroup(keycloakClient *keycloak.KeycloakClient, clientRolesToRemove map[string][]*keycloak.Role, realmRolesToRemove []*keycloak.Role, group *keycloak.Group) error {
+func removeRolesFromGroup(ctx context.Context, keycloakClient *keycloak.KeycloakClient, clientRolesToRemove map[string][]*keycloak.Role, realmRolesToRemove []*keycloak.Role, group *keycloak.Group) error {
 	if len(realmRolesToRemove) != 0 {
-		err := keycloakClient.RemoveRealmRolesFromGroup(group.RealmId, group.Id, realmRolesToRemove)
+		err := keycloakClient.RemoveRealmRolesFromGroup(ctx, group.RealmId, group.Id, realmRolesToRemove)
 		if err != nil {
 			return err
 		}
@@ -77,7 +80,7 @@ func removeRolesFromGroup(keycloakClient *keycloak.KeycloakClient, clientRolesTo
 
 	for k, roles := range clientRolesToRemove {
 		if len(roles) != 0 {
-			err := keycloakClient.RemoveClientRolesFromGroup(group.RealmId, group.Id, k, roles)
+			err := keycloakClient.RemoveClientRolesFromGroup(ctx, group.RealmId, group.Id, k, roles)
 			if err != nil {
 				return err
 			}
@@ -87,7 +90,7 @@ func removeRolesFromGroup(keycloakClient *keycloak.KeycloakClient, clientRolesTo
 	return nil
 }
 
-func resourceKeycloakGroupRolesReconcile(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupRolesReconcile(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -95,9 +98,9 @@ func resourceKeycloakGroupRolesReconcile(data *schema.ResourceData, meta interfa
 	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
 	exhaustive := data.Get("exhaustive").(bool)
 
-	group, err := keycloakClient.GetGroup(realmId, groupId)
+	group, err := keycloakClient.GetGroup(ctx, realmId, groupId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if data.HasChange("role_ids") {
@@ -106,46 +109,47 @@ func resourceKeycloakGroupRolesReconcile(data *schema.ResourceData, meta interfa
 		ns := n.(*schema.Set)
 		remove := interfaceSliceToStringSlice(os.Difference(ns).List())
 
-		tfRolesToRemove, err := getExtendedRoleMapping(keycloakClient, realmId, remove)
+		tfRolesToRemove, err := getExtendedRoleMapping(ctx, keycloakClient, realmId, remove)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
-		if err = removeRolesFromGroup(keycloakClient, tfRolesToRemove.clientRoles, tfRolesToRemove.realmRoles, group); err != nil {
-			return err
+		if err = removeRolesFromGroup(ctx, keycloakClient, tfRolesToRemove.clientRoles, tfRolesToRemove.realmRoles, group); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
-	tfRoles, err := getExtendedRoleMapping(keycloakClient, realmId, roleIds)
+	tfRoles, err := getExtendedRoleMapping(ctx, keycloakClient, realmId, roleIds)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// get the list of currently assigned roles. Due to default realm and client roles
-	roleMappings, err := keycloakClient.GetGroupRoleMappings(realmId, groupId)
+	roleMappings, err := keycloakClient.GetGroupRoleMappings(ctx, realmId, groupId)
 
 	// sort into roles we need to add and roles we need to remove
 	updates := calculateRoleMappingUpdates(tfRoles, intoRoleMapping(roleMappings))
 
 	// add roles
-	err = addRolesToGroup(keycloakClient, updates.clientRolesToAdd, updates.realmRolesToAdd, group)
+	err = addRolesToGroup(ctx, keycloakClient, updates.clientRolesToAdd, updates.realmRolesToAdd, group)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// remove roles if exhaustive (authoritative)
 	if exhaustive {
-		err = removeRolesFromGroup(keycloakClient, updates.clientRolesToRemove, updates.realmRolesToRemove, group)
+		err = removeRolesFromGroup(ctx, keycloakClient, updates.clientRolesToRemove, updates.realmRolesToRemove, group)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	data.SetId(groupRolesId(realmId, groupId))
-	return resourceKeycloakGroupRolesRead(data, meta)
+
+	return resourceKeycloakGroupRolesRead(ctx, data, meta)
 }
 
-func resourceKeycloakGroupRolesRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupRolesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -154,13 +158,13 @@ func resourceKeycloakGroupRolesRead(data *schema.ResourceData, meta interface{})
 	exhaustive := data.Get("exhaustive").(bool)
 
 	// check if group exists, remove from state if not found
-	if _, err := keycloakClient.GetGroup(realmId, groupId); err != nil {
+	if _, err := keycloakClient.GetGroup(ctx, realmId, groupId); err != nil {
 		return handleNotFoundError(err, data)
 	}
 
-	roles, err := keycloakClient.GetGroupRoleMappings(realmId, groupId)
+	roles, err := keycloakClient.GetGroupRoleMappings(ctx, realmId, groupId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var roleIds []string
@@ -185,29 +189,29 @@ func resourceKeycloakGroupRolesRead(data *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func resourceKeycloakGroupRolesDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupRolesDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	groupId := data.Get("group_id").(string)
 
-	group, err := keycloakClient.GetGroup(realmId, groupId)
+	group, err := keycloakClient.GetGroup(ctx, realmId, groupId)
 
 	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
-	rolesToRemove, err := getExtendedRoleMapping(keycloakClient, realmId, roleIds)
+	rolesToRemove, err := getExtendedRoleMapping(ctx, keycloakClient, realmId, roleIds)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = removeRolesFromGroup(keycloakClient, rolesToRemove.clientRoles, rolesToRemove.realmRoles, group)
+	err = removeRolesFromGroup(ctx, keycloakClient, rolesToRemove.clientRoles, rolesToRemove.realmRoles, group)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakGroupRolesImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakGroupRolesImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {
@@ -221,5 +225,10 @@ func resourceKeycloakGroupRolesImport(d *schema.ResourceData, meta interface{}) 
 	d.Set("group_id", groupId)
 	d.Set("exhaustive", true)
 
-	return []*schema.ResourceData{d}, resourceKeycloakGroupRolesRead(d, meta)
+	diagnostics := resourceKeycloakGroupRolesRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

@@ -1,12 +1,13 @@
 package provider
 
 import (
+	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-func setOpenidClientScopePermissionPolicy(keycloakClient *keycloak.KeycloakClient, realmId, realmManagementClientId, authorizationPermissionId string, scopeDataSet *schema.Set) error {
+func setOpenidClientScopePermissionPolicy(ctx context.Context, keycloakClient *keycloak.KeycloakClient, realmId string, realmManagementClientId string, authorizationPermissionId string, scopeDataSet *schema.Set) error {
 	var policies []string
 
 	scopePermission := scopeDataSet.List()[0].(map[string]interface{})
@@ -17,7 +18,7 @@ func setOpenidClientScopePermissionPolicy(keycloakClient *keycloak.KeycloakClien
 		}
 	}
 
-	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClientId, authorizationPermissionId)
+	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(ctx, realmId, realmManagementClientId, authorizationPermissionId)
 	if err != nil {
 		return err
 	}
@@ -32,11 +33,11 @@ func setOpenidClientScopePermissionPolicy(keycloakClient *keycloak.KeycloakClien
 
 	permission.Policies = policies
 
-	return keycloakClient.UpdateOpenidClientAuthorizationPermission(permission)
+	return keycloakClient.UpdateOpenidClientAuthorizationPermission(ctx, permission)
 }
 
-func getOpenidClientScopePermissionPolicy(keycloakClient *keycloak.KeycloakClient, realmId string, realmManagementClientId, permissionId string) (map[string]interface{}, error) {
-	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClientId, permissionId)
+func getOpenidClientScopePermissionPolicy(ctx context.Context, keycloakClient *keycloak.KeycloakClient, realmId, realmManagementClientId, permissionId string) (map[string]interface{}, error) {
+	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(ctx, realmId, realmManagementClientId, permissionId)
 	if err != nil {
 		return nil, err
 	}

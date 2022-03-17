@@ -291,7 +291,7 @@ func (keycloakClient *KeycloakClient) sendRequest(ctx context.Context, request *
 	if response.StatusCode == http.StatusUnauthorized || response.StatusCode == http.StatusForbidden {
 		log.Printf("[DEBUG] Response: %s.  Attempting refresh", response.Status)
 
-		err := keycloakClient.refresh(nil)
+		err := keycloakClient.refresh(ctx)
 		if err != nil {
 			return nil, "", fmt.Errorf("error refreshing credentials: %s", err)
 		}

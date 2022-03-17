@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -8,16 +10,16 @@ import (
 
 func resourceKeycloakOpenIdUserClientRoleProtocolMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenIdUserClientRoleProtocolMapperCreate,
-		Read:   resourceKeycloakOpenIdUserClientRoleProtocolMapperRead,
-		Update: resourceKeycloakOpenIdUserClientRoleProtocolMapperUpdate,
-		Delete: resourceKeycloakOpenIdUserClientRoleProtocolMapperDelete,
+		CreateContext: resourceKeycloakOpenIdUserClientRoleProtocolMapperCreate,
+		ReadContext:   resourceKeycloakOpenIdUserClientRoleProtocolMapperRead,
+		UpdateContext: resourceKeycloakOpenIdUserClientRoleProtocolMapperUpdate,
+		DeleteContext: resourceKeycloakOpenIdUserClientRoleProtocolMapperDelete,
 		Importer: &schema.ResourceImporter{
 			// import a mapper tied to a client:
 			// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 			// or a client scope:
 			// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
-			State: genericProtocolMapperImport,
+			StateContext: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -134,33 +136,33 @@ func mapFromOpenIdUserClientRoleMapperToData(mapper *keycloak.OpenIdUserClientRo
 	data.Set("client_role_prefix", mapper.ClientRolePrefix)
 }
 
-func resourceKeycloakOpenIdUserClientRoleProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdUserClientRoleProtocolMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdUserClientRoleMapper := mapFromDataToOpenIdUserClientRoleProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdUserClientRoleProtocolMapper(openIdUserClientRoleMapper)
+	err := keycloakClient.ValidateOpenIdUserClientRoleProtocolMapper(ctx, openIdUserClientRoleMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewOpenIdUserClientRoleProtocolMapper(openIdUserClientRoleMapper)
+	err = keycloakClient.NewOpenIdUserClientRoleProtocolMapper(ctx, openIdUserClientRoleMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromOpenIdUserClientRoleMapperToData(openIdUserClientRoleMapper, data)
 
-	return resourceKeycloakOpenIdUserClientRoleProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdUserClientRoleProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdUserClientRoleProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdUserClientRoleProtocolMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	openIdUserClientRoleMapper, err := keycloakClient.GetOpenIdUserClientRoleProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	openIdUserClientRoleMapper, err := keycloakClient.GetOpenIdUserClientRoleProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -170,30 +172,30 @@ func resourceKeycloakOpenIdUserClientRoleProtocolMapperRead(data *schema.Resourc
 	return nil
 }
 
-func resourceKeycloakOpenIdUserClientRoleProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdUserClientRoleProtocolMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdUserClientRoleMapper := mapFromDataToOpenIdUserClientRoleProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdUserClientRoleProtocolMapper(openIdUserClientRoleMapper)
+	err := keycloakClient.ValidateOpenIdUserClientRoleProtocolMapper(ctx, openIdUserClientRoleMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateOpenIdUserClientRoleProtocolMapper(openIdUserClientRoleMapper)
+	err = keycloakClient.UpdateOpenIdUserClientRoleProtocolMapper(ctx, openIdUserClientRoleMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakOpenIdUserClientRoleProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdUserClientRoleProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdUserClientRoleProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdUserClientRoleProtocolMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	return keycloakClient.DeleteOpenIdUserClientRoleProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	return diag.FromErr(keycloakClient.DeleteOpenIdUserClientRoleProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id()))
 }

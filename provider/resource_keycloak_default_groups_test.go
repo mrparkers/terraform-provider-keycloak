@@ -26,7 +26,7 @@ func TestAccKeycloakDefaultGroups_basic(t *testing.T) {
 				// we need a separate test for destroy instead of using CheckDestroy because this resource is implicitly
 				// destroyed at the end of each test via destroying users or groups they're tied to
 				Config: testKeycloakDefaultGroups_noDefaultGroups(realmName, groupName),
-				Check:  testAccNoDefaultGroups("keycloak_group.group", []string{groupName}),
+				Check:  testAccNoDefaultGroups("keycloak_group.group"),
 			},
 		},
 	})
@@ -142,7 +142,7 @@ func testAccCheckGroupsArentDefault(resourceName string, groupNames []string) re
 	}
 }
 
-func testAccNoDefaultGroups(resourceName string, groupNames []string) resource.TestCheckFunc {
+func testAccNoDefaultGroups(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		stateGroups, err := testAccGetGroupsFromDefaultGroup(resourceName, s)
 		if err != nil {
@@ -165,7 +165,7 @@ func testAccGetGroupsFromDefaultGroup(resourceName string, s *terraform.State) (
 
 	realmId := rs.Primary.Attributes["realm_id"]
 
-	return keycloakClient.GetDefaultGroups(realmId)
+	return keycloakClient.GetDefaultGroups(testCtx, realmId)
 }
 
 func testKeycloakDefaultGroups_basic(realmName, groupName string) string {

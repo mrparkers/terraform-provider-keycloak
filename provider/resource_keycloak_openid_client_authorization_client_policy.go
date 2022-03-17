@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -8,12 +10,12 @@ import (
 
 func resourceKeycloakOpenidClientAuthorizationClientPolicy() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenidClientAuthorizationClientPolicyCreate,
-		Read:   resourceKeycloakOpenidClientAuthorizationClientPolicyRead,
-		Delete: resourceKeycloakOpenidClientAuthorizationClientPolicyDelete,
-		Update: resourceKeycloakOpenidClientAuthorizationClientPolicyUpdate,
+		CreateContext: resourceKeycloakOpenidClientAuthorizationClientPolicyCreate,
+		ReadContext:   resourceKeycloakOpenidClientAuthorizationClientPolicyRead,
+		DeleteContext: resourceKeycloakOpenidClientAuthorizationClientPolicyDelete,
+		UpdateContext: resourceKeycloakOpenidClientAuthorizationClientPolicyUpdate,
 		Importer: &schema.ResourceImporter{
-			State: genericResourcePolicyImport,
+			StateContext: genericResourcePolicyImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"resource_server_id": {
@@ -85,29 +87,29 @@ func setOpenidClientAuthorizationClientAuthorizationClientPolicyResourceData(dat
 	data.Set("clients", policy.Clients)
 }
 
-func resourceKeycloakOpenidClientAuthorizationClientPolicyCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationClientPolicyCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	resource := getOpenidClientAuthorizationClientAuthorizationClientPolicyResourceFromData(data)
 
-	err := keycloakClient.NewOpenidClientAuthorizationClientPolicy(resource)
+	err := keycloakClient.NewOpenidClientAuthorizationClientPolicy(ctx, resource)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setOpenidClientAuthorizationClientAuthorizationClientPolicyResourceData(data, resource)
 
-	return resourceKeycloakOpenidClientAuthorizationClientPolicyRead(data, meta)
+	return resourceKeycloakOpenidClientAuthorizationClientPolicyRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenidClientAuthorizationClientPolicyRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationClientPolicyRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	resourceServerId := data.Get("resource_server_id").(string)
 	id := data.Id()
 
-	resource, err := keycloakClient.GetOpenidClientAuthorizationClientPolicy(realmId, resourceServerId, id)
+	resource, err := keycloakClient.GetOpenidClientAuthorizationClientPolicy(ctx, realmId, resourceServerId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -117,14 +119,14 @@ func resourceKeycloakOpenidClientAuthorizationClientPolicyRead(data *schema.Reso
 	return nil
 }
 
-func resourceKeycloakOpenidClientAuthorizationClientPolicyUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationClientPolicyUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	resource := getOpenidClientAuthorizationClientAuthorizationClientPolicyResourceFromData(data)
 
-	err := keycloakClient.UpdateOpenidClientAuthorizationClientPolicy(resource)
+	err := keycloakClient.UpdateOpenidClientAuthorizationClientPolicy(ctx, resource)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setOpenidClientAuthorizationClientAuthorizationClientPolicyResourceData(data, resource)
@@ -132,12 +134,12 @@ func resourceKeycloakOpenidClientAuthorizationClientPolicyUpdate(data *schema.Re
 	return nil
 }
 
-func resourceKeycloakOpenidClientAuthorizationClientPolicyDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationClientPolicyDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	resourceServerId := data.Get("resource_server_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteOpenidClientAuthorizationClientPolicy(realmId, resourceServerId, id)
+	return diag.FromErr(keycloakClient.DeleteOpenidClientAuthorizationClientPolicy(ctx, realmId, resourceServerId, id))
 }

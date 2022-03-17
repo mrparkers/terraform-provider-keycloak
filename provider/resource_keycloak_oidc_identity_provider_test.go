@@ -109,7 +109,7 @@ func TestAccKeycloakOidcIdentityProvider_createAfterManualDestroy(t *testing.T) 
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteIdentityProvider(oidc.Realm, oidc.Alias)
+					err := keycloakClient.DeleteIdentityProvider(testCtx, oidc.Realm, oidc.Alias)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -236,7 +236,7 @@ func testAccCheckKeycloakOidcIdentityProviderDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm"]
 
-			oidc, _ := keycloakClient.GetIdentityProvider(realm, id)
+			oidc, _ := keycloakClient.GetIdentityProvider(testCtx, realm, id)
 			if oidc != nil {
 				return fmt.Errorf("oidc config with id %s still exists", id)
 			}
@@ -255,7 +255,7 @@ func getKeycloakOidcIdentityProviderFromState(s *terraform.State, resourceName s
 	realm := rs.Primary.Attributes["realm"]
 	alias := rs.Primary.Attributes["alias"]
 
-	oidc, err := keycloakClient.GetIdentityProvider(realm, alias)
+	oidc, err := keycloakClient.GetIdentityProvider(testCtx, realm, alias)
 	if err != nil {
 		return nil, fmt.Errorf("error getting oidc identity provider config with alias %s: %s", alias, err)
 	}

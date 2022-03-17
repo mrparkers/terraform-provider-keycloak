@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -14,12 +16,12 @@ var (
 
 func resourceKeycloakRealmKeystoreJavaKeystore() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakRealmKeystoreJavaKeystoreCreate,
-		Read:   resourceKeycloakRealmKeystoreJavaKeystoreRead,
-		Update: resourceKeycloakRealmKeystoreJavaKeystoreUpdate,
-		Delete: resourceKeycloakRealmKeystoreJavaKeystoreDelete,
+		CreateContext: resourceKeycloakRealmKeystoreJavaKeystoreCreate,
+		ReadContext:   resourceKeycloakRealmKeystoreJavaKeystoreRead,
+		UpdateContext: resourceKeycloakRealmKeystoreJavaKeystoreUpdate,
+		DeleteContext: resourceKeycloakRealmKeystoreJavaKeystoreDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakRealmKeystoreJavaKeystoreImport,
+			StateContext: resourceKeycloakRealmKeystoreJavaKeystoreImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -119,77 +121,77 @@ func setRealmKeystoreJavaKeystoreData(data *schema.ResourceData, realmKey *keycl
 	return nil
 }
 
-func resourceKeycloakRealmKeystoreJavaKeystoreCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreJavaKeystoreCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmKey, err := getRealmKeystoreJavaKeystoreFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewRealmKeystoreJavaKeystore(realmKey)
+	err = keycloakClient.NewRealmKeystoreJavaKeystore(ctx, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = setRealmKeystoreJavaKeystoreData(data, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakRealmKeystoreJavaKeystoreRead(data, meta)
+	return resourceKeycloakRealmKeystoreJavaKeystoreRead(ctx, data, meta)
 }
 
-func resourceKeycloakRealmKeystoreJavaKeystoreRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreJavaKeystoreRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	realmKey, err := keycloakClient.GetRealmKeystoreJavaKeystore(realmId, id)
+	realmKey, err := keycloakClient.GetRealmKeystoreJavaKeystore(ctx, realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
 	err = setRealmKeystoreJavaKeystoreData(data, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakRealmKeystoreJavaKeystoreUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreJavaKeystoreUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmKey, err := getRealmKeystoreJavaKeystoreFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateRealmKeystoreJavaKeystore(realmKey)
+	err = keycloakClient.UpdateRealmKeystoreJavaKeystore(ctx, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = setRealmKeystoreJavaKeystoreData(data, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakRealmKeystoreJavaKeystoreDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreJavaKeystoreDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteRealmKeystoreJavaKeystore(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteRealmKeystoreJavaKeystore(ctx, realmId, id))
 }
 
-func resourceKeycloakRealmKeystoreJavaKeystoreImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakRealmKeystoreJavaKeystoreImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {

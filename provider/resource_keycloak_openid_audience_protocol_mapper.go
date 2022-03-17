@@ -1,22 +1,24 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakOpenIdAudienceProtocolMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenIdAudienceProtocolMapperCreate,
-		Read:   resourceKeycloakOpenIdAudienceProtocolMapperRead,
-		Update: resourceKeycloakOpenIdAudienceProtocolMapperUpdate,
-		Delete: resourceKeycloakOpenIdAudienceProtocolMapperDelete,
+		CreateContext: resourceKeycloakOpenIdAudienceProtocolMapperCreate,
+		ReadContext:   resourceKeycloakOpenIdAudienceProtocolMapperRead,
+		UpdateContext: resourceKeycloakOpenIdAudienceProtocolMapperUpdate,
+		DeleteContext: resourceKeycloakOpenIdAudienceProtocolMapperDelete,
 		Importer: &schema.ResourceImporter{
 			// import a mapper tied to a client:
 			// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 			// or a client scope:
 			// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
-			State: genericProtocolMapperImport,
+			StateContext: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -109,34 +111,34 @@ func mapFromOpenIdAudienceMapperToData(mapper *keycloak.OpenIdAudienceProtocolMa
 	data.Set("add_to_access_token", mapper.AddToAccessToken)
 }
 
-func resourceKeycloakOpenIdAudienceProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdAudienceProtocolMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdAudienceMapper := mapFromDataToOpenIdAudienceProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdAudienceProtocolMapper(openIdAudienceMapper)
+	err := keycloakClient.ValidateOpenIdAudienceProtocolMapper(ctx, openIdAudienceMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewOpenIdAudienceProtocolMapper(openIdAudienceMapper)
+	err = keycloakClient.NewOpenIdAudienceProtocolMapper(ctx, openIdAudienceMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromOpenIdAudienceMapperToData(openIdAudienceMapper, data)
 
-	return resourceKeycloakOpenIdAudienceProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdAudienceProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdAudienceProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdAudienceProtocolMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	openIdAudienceMapper, err := keycloakClient.GetOpenIdAudienceProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	openIdAudienceMapper, err := keycloakClient.GetOpenIdAudienceProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -146,30 +148,30 @@ func resourceKeycloakOpenIdAudienceProtocolMapperRead(data *schema.ResourceData,
 	return nil
 }
 
-func resourceKeycloakOpenIdAudienceProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdAudienceProtocolMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdAudienceMapper := mapFromDataToOpenIdAudienceProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdAudienceProtocolMapper(openIdAudienceMapper)
+	err := keycloakClient.ValidateOpenIdAudienceProtocolMapper(ctx, openIdAudienceMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateOpenIdAudienceProtocolMapper(openIdAudienceMapper)
+	err = keycloakClient.UpdateOpenIdAudienceProtocolMapper(ctx, openIdAudienceMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakOpenIdAudienceProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdAudienceProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdAudienceProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdAudienceProtocolMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	return keycloakClient.DeleteOpenIdAudienceProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	return diag.FromErr(keycloakClient.DeleteOpenIdAudienceProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id()))
 }

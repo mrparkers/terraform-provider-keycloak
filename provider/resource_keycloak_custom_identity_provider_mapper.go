@@ -1,19 +1,21 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakCustomIdentityProviderMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakCustomIdentityProviderMapperCreate,
-		Read:   resourceKeycloakCustomIdentityProviderMapperRead,
-		Update: resourceKeycloakCustomIdentityProviderMapperUpdate,
-		Delete: resourceKeycloakCustomIdentityProviderMapperDelete,
+		CreateContext: resourceKeycloakCustomIdentityProviderMapperCreate,
+		ReadContext:   resourceKeycloakCustomIdentityProviderMapperRead,
+		UpdateContext: resourceKeycloakCustomIdentityProviderMapperUpdate,
+		DeleteContext: resourceKeycloakCustomIdentityProviderMapperDelete,
 		Importer: &schema.ResourceImporter{
 			// we can use the generic identity provider import func here
-			State: resourceKeycloakIdentityProviderMapperImport,
+			StateContext: resourceKeycloakIdentityProviderMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm": {
@@ -70,29 +72,29 @@ func setCustomIdentityProviderMapperData(data *schema.ResourceData, identityProv
 	setExtraConfigData(data, identityProviderMapper.Config.ExtraConfig)
 }
 
-func resourceKeycloakCustomIdentityProviderMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakCustomIdentityProviderMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	customIdentityProvider := getCustomIdentityProviderMapperFromData(data)
 
-	err := keycloakClient.NewCustomIdentityProviderMapper(customIdentityProvider)
+	err := keycloakClient.NewCustomIdentityProviderMapper(ctx, customIdentityProvider)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setCustomIdentityProviderMapperData(data, customIdentityProvider)
 
-	return resourceKeycloakCustomIdentityProviderMapperRead(data, meta)
+	return resourceKeycloakCustomIdentityProviderMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakCustomIdentityProviderMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakCustomIdentityProviderMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realm := data.Get("realm").(string)
 	alias := data.Get("identity_provider_alias").(string)
 	id := data.Id()
 
-	customIdentityProvider, err := keycloakClient.GetCustomIdentityProviderMapper(realm, alias, id)
+	customIdentityProvider, err := keycloakClient.GetCustomIdentityProviderMapper(ctx, realm, alias, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -102,14 +104,14 @@ func resourceKeycloakCustomIdentityProviderMapperRead(data *schema.ResourceData,
 	return nil
 }
 
-func resourceKeycloakCustomIdentityProviderMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakCustomIdentityProviderMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	customIdentityProvider := getCustomIdentityProviderMapperFromData(data)
 
-	err := keycloakClient.UpdateCustomIdentityProviderMapper(customIdentityProvider)
+	err := keycloakClient.UpdateCustomIdentityProviderMapper(ctx, customIdentityProvider)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setCustomIdentityProviderMapperData(data, customIdentityProvider)
@@ -117,12 +119,12 @@ func resourceKeycloakCustomIdentityProviderMapperUpdate(data *schema.ResourceDat
 	return nil
 }
 
-func resourceKeycloakCustomIdentityProviderMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakCustomIdentityProviderMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realm := data.Get("realm").(string)
 	alias := data.Get("identity_provider_alias").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteCustomIdentityProviderMapper(realm, alias, id)
+	return diag.FromErr(keycloakClient.DeleteCustomIdentityProviderMapper(ctx, realm, alias, id))
 }

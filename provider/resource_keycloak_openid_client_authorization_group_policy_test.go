@@ -44,7 +44,7 @@ func getResourceKeycloakOpenidClientAuthorizationGroupPolicyFromState(s *terrafo
 	resourceServerId := rs.Primary.Attributes["resource_server_id"]
 	policyId := rs.Primary.ID
 
-	policy, err := keycloakClient.GetOpenidClientAuthorizationGroupPolicy(realm, resourceServerId, policyId)
+	policy, err := keycloakClient.GetOpenidClientAuthorizationGroupPolicy(testCtx, realm, resourceServerId, policyId)
 	if err != nil {
 		return nil, fmt.Errorf("error getting openid client auth role policy config with alias %s: %s", resourceServerId, err)
 	}
@@ -62,7 +62,7 @@ func testResourceKeycloakOpenidClientHasNoAuthorizationGroupPolicy(resourceName 
 		realm := rs.Primary.Attributes["realm_id"]
 		resourceServerId := rs.Primary.Attributes["resource_server_id"]
 
-		_, err := keycloakClient.GetOpenidClientAuthorizationGroupPolicy(realm, resourceServerId, policyId)
+		_, err := keycloakClient.GetOpenidClientAuthorizationGroupPolicy(testCtx, realm, resourceServerId, policyId)
 		if err == nil {
 			return fmt.Errorf("policy with id %s still exists", policyId)
 		}

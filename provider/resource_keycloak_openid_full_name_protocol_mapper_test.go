@@ -143,7 +143,7 @@ func TestAccKeycloakOpenIdFullNameProtocolMapper_createAfterManualDestroy(t *tes
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenIdUserAttributeProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					err := keycloakClient.DeleteOpenIdUserAttributeProtocolMapper(testCtx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
@@ -285,7 +285,7 @@ func getFullNameMapperUsingState(state *terraform.State, resourceName string) (*
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	return keycloakClient.GetOpenIdFullNameProtocolMapper(realm, clientId, clientScopeId, id)
+	return keycloakClient.GetOpenIdFullNameProtocolMapper(testCtx, realm, clientId, clientScopeId, id)
 }
 
 func getGenericProtocolMapperIdForClient(resourceName string) resource.ImportStateIdFunc {

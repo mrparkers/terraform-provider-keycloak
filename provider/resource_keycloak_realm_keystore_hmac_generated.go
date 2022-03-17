@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -15,12 +17,12 @@ var (
 
 func resourceKeycloakRealmKeystoreHmacGenerated() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakRealmKeystoreHmacGeneratedCreate,
-		Read:   resourceKeycloakRealmKeystoreHmacGeneratedRead,
-		Update: resourceKeycloakRealmKeystoreHmacGeneratedUpdate,
-		Delete: resourceKeycloakRealmKeystoreHmacGeneratedDelete,
+		CreateContext: resourceKeycloakRealmKeystoreHmacGeneratedCreate,
+		ReadContext:   resourceKeycloakRealmKeystoreHmacGeneratedRead,
+		UpdateContext: resourceKeycloakRealmKeystoreHmacGeneratedUpdate,
+		DeleteContext: resourceKeycloakRealmKeystoreHmacGeneratedDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakRealmKeystoreHmacGeneratedImport,
+			StateContext: resourceKeycloakRealmKeystoreHmacGeneratedImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -100,77 +102,77 @@ func setRealmKeystoreHmacGeneratedData(data *schema.ResourceData, realmKey *keyc
 	return nil
 }
 
-func resourceKeycloakRealmKeystoreHmacGeneratedCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreHmacGeneratedCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmKey, err := getRealmKeystoreHmacGeneratedFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewRealmKeystoreHmacGenerated(realmKey)
+	err = keycloakClient.NewRealmKeystoreHmacGenerated(ctx, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = setRealmKeystoreHmacGeneratedData(data, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakRealmKeystoreHmacGeneratedRead(data, meta)
+	return resourceKeycloakRealmKeystoreHmacGeneratedRead(ctx, data, meta)
 }
 
-func resourceKeycloakRealmKeystoreHmacGeneratedRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreHmacGeneratedRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	realmKey, err := keycloakClient.GetRealmKeystoreHmacGenerated(realmId, id)
+	realmKey, err := keycloakClient.GetRealmKeystoreHmacGenerated(ctx, realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
 	err = setRealmKeystoreHmacGeneratedData(data, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakRealmKeystoreHmacGeneratedUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreHmacGeneratedUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmKey, err := getRealmKeystoreHmacGeneratedFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateRealmKeystoreHmacGenerated(realmKey)
+	err = keycloakClient.UpdateRealmKeystoreHmacGenerated(ctx, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = setRealmKeystoreHmacGeneratedData(data, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakRealmKeystoreHmacGeneratedDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreHmacGeneratedDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteRealmKeystoreHmacGenerated(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteRealmKeystoreHmacGenerated(ctx, realmId, id))
 }
 
-func resourceKeycloakRealmKeystoreHmacGeneratedImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakRealmKeystoreHmacGeneratedImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {

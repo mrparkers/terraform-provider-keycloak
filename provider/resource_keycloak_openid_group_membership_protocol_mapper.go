@@ -1,22 +1,24 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakOpenIdGroupMembershipProtocolMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenIdGroupMembershipProtocolMapperCreate,
-		Read:   resourceKeycloakOpenIdGroupMembershipProtocolMapperRead,
-		Update: resourceKeycloakOpenIdGroupMembershipProtocolMapperUpdate,
-		Delete: resourceKeycloakOpenIdGroupMembershipProtocolMapperDelete,
+		CreateContext: resourceKeycloakOpenIdGroupMembershipProtocolMapperCreate,
+		ReadContext:   resourceKeycloakOpenIdGroupMembershipProtocolMapperRead,
+		UpdateContext: resourceKeycloakOpenIdGroupMembershipProtocolMapperUpdate,
+		DeleteContext: resourceKeycloakOpenIdGroupMembershipProtocolMapperDelete,
 		Importer: &schema.ResourceImporter{
 			// import a mapper tied to a client:
 			// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 			// or a client scope:
 			// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
-			State: genericProtocolMapperImport,
+			StateContext: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -107,34 +109,34 @@ func mapFromOpenIdGroupMembershipMapperToData(mapper *keycloak.OpenIdGroupMember
 	data.Set("add_to_userinfo", mapper.AddToUserinfo)
 }
 
-func resourceKeycloakOpenIdGroupMembershipProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdGroupMembershipProtocolMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdGroupMembershipMapper := mapFromDataToOpenIdGroupMembershipProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdGroupMembershipProtocolMapper(openIdGroupMembershipMapper)
+	err := keycloakClient.ValidateOpenIdGroupMembershipProtocolMapper(ctx, openIdGroupMembershipMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewOpenIdGroupMembershipProtocolMapper(openIdGroupMembershipMapper)
+	err = keycloakClient.NewOpenIdGroupMembershipProtocolMapper(ctx, openIdGroupMembershipMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	mapFromOpenIdGroupMembershipMapperToData(openIdGroupMembershipMapper, data)
 
-	return resourceKeycloakOpenIdGroupMembershipProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdGroupMembershipProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdGroupMembershipProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdGroupMembershipProtocolMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	openIdGroupMembershipMapper, err := keycloakClient.GetOpenIdGroupMembershipProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	openIdGroupMembershipMapper, err := keycloakClient.GetOpenIdGroupMembershipProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -144,30 +146,30 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapperRead(data *schema.Resour
 	return nil
 }
 
-func resourceKeycloakOpenIdGroupMembershipProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdGroupMembershipProtocolMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdGroupMembershipMapper := mapFromDataToOpenIdGroupMembershipProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdGroupMembershipProtocolMapper(openIdGroupMembershipMapper)
+	err := keycloakClient.ValidateOpenIdGroupMembershipProtocolMapper(ctx, openIdGroupMembershipMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateOpenIdGroupMembershipProtocolMapper(openIdGroupMembershipMapper)
+	err = keycloakClient.UpdateOpenIdGroupMembershipProtocolMapper(ctx, openIdGroupMembershipMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
-	return resourceKeycloakOpenIdGroupMembershipProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdGroupMembershipProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdGroupMembershipProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdGroupMembershipProtocolMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	return keycloakClient.DeleteOpenIdGroupMembershipProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	return diag.FromErr(keycloakClient.DeleteOpenIdGroupMembershipProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id()))
 }

@@ -47,7 +47,7 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_createAfterManualDestroy(t *test
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRealmKeystoreEcdsaGenerated(ecdsa.RealmId, ecdsa.Id)
+					err := keycloakClient.DeleteRealmKeystoreEcdsaGenerated(testCtx, ecdsa.RealmId, ecdsa.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -158,7 +158,7 @@ func testAccCheckRealmKeystoreEcdsaGeneratedDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ecdsa, _ := keycloakClient.GetRealmKeystoreEcdsaGenerated(realm, id)
+			ecdsa, _ := keycloakClient.GetRealmKeystoreEcdsaGenerated(testCtx, realm, id)
 			if ecdsa != nil {
 				return fmt.Errorf("ecdsa keystore with id %s still exists", id)
 			}
@@ -179,7 +179,7 @@ func getKeycloakRealmKeystoreEcdsaGeneratedFromState(s *terraform.State,
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	realmKeystore, err := keycloakClient.GetRealmKeystoreEcdsaGenerated(realm, id)
+	realmKeystore, err := keycloakClient.GetRealmKeystoreEcdsaGenerated(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting ecdsa keystore with id %s: %s", id, err)
 	}

@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func keys(data map[string]string) []string {
-	var result = []string{}
+	var result []string
 	for k := range data {
 		result = append(result, k)
 	}
@@ -64,7 +65,7 @@ func suppressDurationStringDiff(_, old, new string, _ *schema.ResourceData) bool
 	return oldDuration.Seconds() == newDuration.Seconds()
 }
 
-func handleNotFoundError(err error, data *schema.ResourceData) error {
+func handleNotFoundError(err error, data *schema.ResourceData) diag.Diagnostics {
 	if keycloak.ErrorIs404(err) {
 		log.Printf("[WARN] Removing resource with id %s from state as it no longer exists", data.Id())
 		data.SetId("")
@@ -72,7 +73,7 @@ func handleNotFoundError(err error, data *schema.ResourceData) error {
 		return nil
 	}
 
-	return err
+	return diag.FromErr(err)
 }
 
 func interfaceSliceToStringSlice(iv []interface{}) []string {

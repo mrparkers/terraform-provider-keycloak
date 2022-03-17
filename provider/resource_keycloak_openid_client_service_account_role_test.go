@@ -51,7 +51,7 @@ func TestAccKeycloakOpenidClientServiceAccountRole_createAfterManualDestroy(t *t
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenidClientServiceAccountRole(serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId, serviceAccountRole.Id)
+					err := keycloakClient.DeleteOpenidClientServiceAccountRole(testCtx, serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId, serviceAccountRole.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -125,7 +125,7 @@ func testAccCheckKeycloakOpenidClientServiceAccountRoleDestroy() resource.TestCh
 			clientId := rs.Primary.Attributes["client_id"]
 			id := strings.Split(rs.Primary.ID, "/")[1]
 
-			serviceAccountRole, _ := keycloakClient.GetOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, id)
+			serviceAccountRole, _ := keycloakClient.GetOpenidClientServiceAccountRole(testCtx, realm, serviceAccountUserId, clientId, id)
 			if serviceAccountRole != nil {
 				return fmt.Errorf("service account role exists")
 			}
@@ -146,7 +146,7 @@ func getKeycloakOpenidClientServiceAccountRoleFromState(s *terraform.State, reso
 	clientId := rs.Primary.Attributes["client_id"]
 	id := strings.Split(rs.Primary.ID, "/")[1]
 
-	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, id)
+	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRole(testCtx, realm, serviceAccountUserId, clientId, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting service account role mapping: %s", err)
 	}

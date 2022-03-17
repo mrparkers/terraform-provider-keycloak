@@ -140,7 +140,7 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_createAfterManualDestroy(t *testi
 				PreConfig: func() {
 					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-					err := keycloakClient.DeleteOpenIdScriptProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					err := keycloakClient.DeleteOpenIdScriptProtocolMapper(testCtx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
@@ -281,7 +281,7 @@ func getScriptMapperUsingState(state *terraform.State, resourceName string) (*ke
 
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-	return keycloakClient.GetOpenIdScriptProtocolMapper(realm, clientId, clientScopeId, id)
+	return keycloakClient.GetOpenIdScriptProtocolMapper(testCtx, realm, clientId, clientScopeId, id)
 }
 
 func testKeycloakOpenIdScriptProtocolMapper_basic_client(clientId, mapperName string) string {

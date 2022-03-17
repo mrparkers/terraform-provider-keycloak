@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -9,11 +11,11 @@ import (
 
 func resourceKeycloakOpenidClientServiceAccountRealmRole() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenidClientServiceAccountRealmRoleCreate,
-		Read:   resourceKeycloakOpenidClientServiceAccountRealmRoleRead,
-		Delete: resourceKeycloakOpenidClientServiceAccountRealmRoleDelete,
+		CreateContext: resourceKeycloakOpenidClientServiceAccountRealmRoleCreate,
+		ReadContext:   resourceKeycloakOpenidClientServiceAccountRealmRoleRead,
+		DeleteContext: resourceKeycloakOpenidClientServiceAccountRealmRoleDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakOpenidClientServiceAccountRealmRoleImport,
+			StateContext: resourceKeycloakOpenidClientServiceAccountRealmRoleImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"service_account_user_id": {
@@ -35,12 +37,12 @@ func resourceKeycloakOpenidClientServiceAccountRealmRole() *schema.Resource {
 	}
 }
 
-func getOpenidClientServiceAccountRealmRoleFromData(data *schema.ResourceData, keycloakClient *keycloak.KeycloakClient) (*keycloak.OpenidClientServiceAccountRealmRole, error) {
+func getOpenidClientServiceAccountRealmRoleFromData(ctx context.Context, data *schema.ResourceData, keycloakClient *keycloak.KeycloakClient) (*keycloak.OpenidClientServiceAccountRealmRole, error) {
 	roleName := data.Get("role").(string)
 	realmId := data.Get("realm_id").(string)
 	serviceAccountRoleId := data.Get("service_account_user_id").(string)
 
-	role, err := keycloakClient.GetRoleByName(realmId, "", roleName)
+	role, err := keycloakClient.GetRoleByName(ctx, realmId, "", roleName)
 	if err != nil {
 		if keycloak.ErrorIs404(err) {
 			role = &keycloak.Role{Id: ""}
@@ -64,30 +66,30 @@ func setOpenidClientServiceAccountRealmRoleData(data *schema.ResourceData, servi
 	data.Set("role", serviceAccountRole.Name)
 }
 
-func resourceKeycloakOpenidClientServiceAccountRealmRoleCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientServiceAccountRealmRoleCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
-	serviceAccountRole, err := getOpenidClientServiceAccountRealmRoleFromData(data, keycloakClient)
+	serviceAccountRole, err := getOpenidClientServiceAccountRealmRoleFromData(ctx, data, keycloakClient)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewOpenidClientServiceAccountRealmRole(serviceAccountRole)
+	err = keycloakClient.NewOpenidClientServiceAccountRealmRole(ctx, serviceAccountRole)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	setOpenidClientServiceAccountRealmRoleData(data, serviceAccountRole)
-	return resourceKeycloakOpenidClientServiceAccountRealmRoleRead(data, meta)
+	return resourceKeycloakOpenidClientServiceAccountRealmRoleRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenidClientServiceAccountRealmRoleRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientServiceAccountRealmRoleRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	serviceAccountRole, err := getOpenidClientServiceAccountRealmRoleFromData(data, keycloakClient)
+	serviceAccountRole, err := getOpenidClientServiceAccountRealmRoleFromData(ctx, data, keycloakClient)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	serviceAccountRole, err = keycloakClient.GetOpenidClientServiceAccountRealmRole(serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.Id)
+	serviceAccountRole, err = keycloakClient.GetOpenidClientServiceAccountRealmRole(ctx, serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.Id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -97,22 +99,22 @@ func resourceKeycloakOpenidClientServiceAccountRealmRoleRead(data *schema.Resour
 	return nil
 }
 
-func resourceKeycloakOpenidClientServiceAccountRealmRoleDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientServiceAccountRealmRoleDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	serviceAccountRole, err := getOpenidClientServiceAccountRealmRoleFromData(data, keycloakClient)
+	serviceAccountRole, err := getOpenidClientServiceAccountRealmRoleFromData(ctx, data, keycloakClient)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.DeleteOpenidClientServiceAccountRealmRole(serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.Id)
+	err = keycloakClient.DeleteOpenidClientServiceAccountRealmRole(ctx, serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.Id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 	return nil
 }
 
-func resourceKeycloakOpenidClientServiceAccountRealmRoleImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakOpenidClientServiceAccountRealmRoleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	parts := strings.Split(d.Id(), "/")
@@ -124,7 +126,7 @@ func resourceKeycloakOpenidClientServiceAccountRealmRoleImport(d *schema.Resourc
 	serviceAccountUserId := parts[1]
 	roleId := parts[2]
 
-	role, err := keycloakClient.GetRole(realmId, roleId)
+	role, err := keycloakClient.GetRole(ctx, realmId, roleId)
 	if err != nil {
 		return nil, err
 	}

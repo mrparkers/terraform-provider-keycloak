@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -16,6 +17,7 @@ var keycloakClient *keycloak.KeycloakClient
 var testAccRealm *keycloak.Realm
 var testAccRealmTwo *keycloak.Realm
 var testAccRealmUserFederation *keycloak.Realm
+var testCtx context.Context
 
 var requiredEnvironmentVariables = []string{
 	"KEYCLOAK_CLIENT_ID",
@@ -25,8 +27,9 @@ var requiredEnvironmentVariables = []string{
 }
 
 func init() {
+	testCtx = context.Background()
 	userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", schema.Provider{}.TerraformVersion, meta.SDKVersionString())
-	keycloakClient, _ = keycloak.NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), "/auth", os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), "", "", true, 5, "", false, userAgent, map[string]string{
+	keycloakClient, _ = keycloak.NewKeycloakClient(testCtx, os.Getenv("KEYCLOAK_URL"), "/auth", os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), "", "", true, 5, "", false, userAgent, map[string]string{
 		"foo": "bar",
 	})
 	testAccProvider = KeycloakProvider(keycloakClient)
@@ -38,23 +41,23 @@ func init() {
 }
 
 func TestMain(m *testing.M) {
-	testAccRealm = createTestRealm()
-	testAccRealmTwo = createTestRealm()
-	testAccRealmUserFederation = createTestRealm()
+	testAccRealm = createTestRealm(testCtx)
+	testAccRealmTwo = createTestRealm(testCtx)
+	testAccRealmUserFederation = createTestRealm(testCtx)
 
 	code := m.Run()
 
-	err := keycloakClient.DeleteRealm(testAccRealm.Realm)
+	err := keycloakClient.DeleteRealm(testCtx, testAccRealm.Realm)
 	if err != nil {
 		os.Exit(1)
 	}
 
-	err = keycloakClient.DeleteRealm(testAccRealmTwo.Realm)
+	err = keycloakClient.DeleteRealm(testCtx, testAccRealmTwo.Realm)
 	if err != nil {
 		os.Exit(1)
 	}
 
-	err = keycloakClient.DeleteRealm(testAccRealmUserFederation.Realm)
+	err = keycloakClient.DeleteRealm(testCtx, testAccRealmUserFederation.Realm)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -62,7 +65,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func createTestRealm() *keycloak.Realm {
+func createTestRealm(testCtx context.Context) *keycloak.Realm {
 	name := acctest.RandomWithPrefix("tf-acc")
 	r := &keycloak.Realm{
 		Id:      name,
@@ -70,7 +73,7 @@ func createTestRealm() *keycloak.Realm {
 		Enabled: true,
 	}
 
-	err := keycloakClient.NewRealm(r)
+	err := keycloakClient.NewRealm(testCtx, r)
 	if err != nil {
 		os.Exit(1)
 	}

@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -9,13 +11,13 @@ import (
 
 func resourceKeycloakLdapFullNameMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakLdapFullNameMapperCreate,
-		Read:   resourceKeycloakLdapFullNameMapperRead,
-		Update: resourceKeycloakLdapFullNameMapperUpdate,
-		Delete: resourceKeycloakLdapFullNameMapperDelete,
+		CreateContext: resourceKeycloakLdapFullNameMapperCreate,
+		ReadContext:   resourceKeycloakLdapFullNameMapperRead,
+		UpdateContext: resourceKeycloakLdapFullNameMapperUpdate,
+		DeleteContext: resourceKeycloakLdapFullNameMapperDelete,
 		// This resource can be imported using {{realm}}/{{provider_id}}/{{mapper_id}}. The Provider and Mapper IDs are displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakLdapGenericMapperImport,
+			StateContext: resourceKeycloakLdapGenericMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -78,33 +80,33 @@ func setLdapFullNameMapperData(data *schema.ResourceData, ldapFullNameMapper *ke
 	data.Set("write_only", ldapFullNameMapper.WriteOnly)
 }
 
-func resourceKeycloakLdapFullNameMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapFullNameMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
 
-	err := keycloakClient.ValidateLdapFullNameMapper(ldapFullNameMapper)
+	err := keycloakClient.ValidateLdapFullNameMapper(ctx, ldapFullNameMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewLdapFullNameMapper(ldapFullNameMapper)
+	err = keycloakClient.NewLdapFullNameMapper(ctx, ldapFullNameMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	setLdapFullNameMapperData(data, ldapFullNameMapper)
 
-	return resourceKeycloakLdapFullNameMapperRead(data, meta)
+	return resourceKeycloakLdapFullNameMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakLdapFullNameMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapFullNameMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	ldapFullNameMapper, err := keycloakClient.GetLdapFullNameMapper(realmId, id)
+	ldapFullNameMapper, err := keycloakClient.GetLdapFullNameMapper(ctx, realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -114,19 +116,19 @@ func resourceKeycloakLdapFullNameMapperRead(data *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceKeycloakLdapFullNameMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapFullNameMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapFullNameMapper := getLdapFullNameMapperFromData(data)
 
-	err := keycloakClient.ValidateLdapFullNameMapper(ldapFullNameMapper)
+	err := keycloakClient.ValidateLdapFullNameMapper(ctx, ldapFullNameMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateLdapFullNameMapper(ldapFullNameMapper)
+	err = keycloakClient.UpdateLdapFullNameMapper(ctx, ldapFullNameMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	setLdapFullNameMapperData(data, ldapFullNameMapper)
@@ -134,16 +136,16 @@ func resourceKeycloakLdapFullNameMapperUpdate(data *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceKeycloakLdapFullNameMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapFullNameMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteLdapFullNameMapper(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteLdapFullNameMapper(ctx, realmId, id))
 }
 
-func resourceKeycloakLdapGenericMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakLdapGenericMapperImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 3 {

@@ -103,7 +103,7 @@ func TestAccKeycloakOpenIdAudienceResolveProtocolMapper_createAfterManualDestroy
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenIdAudienceResolveProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					err := keycloakClient.DeleteOpenIdAudienceResolveProtocolMapper(testCtx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
@@ -195,7 +195,7 @@ func getAudienceResolveMapperUsingState(state *terraform.State, resourceName str
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	return keycloakClient.GetOpenIdAudienceResolveProtocolMapper(realm, clientId, clientScopeId, id)
+	return keycloakClient.GetOpenIdAudienceResolveProtocolMapper(testCtx, realm, clientId, clientScopeId, id)
 }
 
 func testKeycloakOpenIdAudienceResolveProtocolMapper_basic_client(clientId string) string {

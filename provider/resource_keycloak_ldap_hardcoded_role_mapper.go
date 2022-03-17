@@ -1,19 +1,21 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakLdapHardcodedRoleMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakLdapHardcodedRoleMapperCreate,
-		Read:   resourceKeycloakLdapHardcodedRoleMapperRead,
-		Update: resourceKeycloakLdapHardcodedRoleMapperUpdate,
-		Delete: resourceKeycloakLdapHardcodedRoleMapperDelete,
+		CreateContext: resourceKeycloakLdapHardcodedRoleMapperCreate,
+		ReadContext:   resourceKeycloakLdapHardcodedRoleMapperRead,
+		UpdateContext: resourceKeycloakLdapHardcodedRoleMapperUpdate,
+		DeleteContext: resourceKeycloakLdapHardcodedRoleMapperDelete,
 		// This resource can be imported using {{realm}}/{{provider_id}}/{{mapper_id}}. The Provider and Mapper IDs are displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakLdapGenericMapperImport,
+			StateContext: resourceKeycloakLdapGenericMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -61,33 +63,33 @@ func setLdapHardcodedRoleMapperData(data *schema.ResourceData, ldapMapper *keycl
 	data.Set("role", ldapMapper.Role)
 }
 
-func resourceKeycloakLdapHardcodedRoleMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapHardcodedRoleMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapMapper := getLdapHardcodedRoleMapperFromData(data)
 
-	err := keycloakClient.ValidateLdapHardcodedRoleMapper(ldapMapper)
+	err := keycloakClient.ValidateLdapHardcodedRoleMapper(ctx, ldapMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewLdapHardcodedRoleMapper(ldapMapper)
+	err = keycloakClient.NewLdapHardcodedRoleMapper(ctx, ldapMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	setLdapHardcodedRoleMapperData(data, ldapMapper)
 
-	return resourceKeycloakLdapHardcodedRoleMapperRead(data, meta)
+	return resourceKeycloakLdapHardcodedRoleMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakLdapHardcodedRoleMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapHardcodedRoleMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	ldapMapper, err := keycloakClient.GetLdapHardcodedRoleMapper(realmId, id)
+	ldapMapper, err := keycloakClient.GetLdapHardcodedRoleMapper(ctx, realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -97,19 +99,19 @@ func resourceKeycloakLdapHardcodedRoleMapperRead(data *schema.ResourceData, meta
 	return nil
 }
 
-func resourceKeycloakLdapHardcodedRoleMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapHardcodedRoleMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapMapper := getLdapHardcodedRoleMapperFromData(data)
 
-	err := keycloakClient.ValidateLdapHardcodedRoleMapper(ldapMapper)
+	err := keycloakClient.ValidateLdapHardcodedRoleMapper(ctx, ldapMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateLdapHardcodedRoleMapper(ldapMapper)
+	err = keycloakClient.UpdateLdapHardcodedRoleMapper(ctx, ldapMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	setLdapHardcodedRoleMapperData(data, ldapMapper)
@@ -117,11 +119,11 @@ func resourceKeycloakLdapHardcodedRoleMapperUpdate(data *schema.ResourceData, me
 	return nil
 }
 
-func resourceKeycloakLdapHardcodedRoleMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapHardcodedRoleMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteLdapHardcodedRoleMapper(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteLdapHardcodedRoleMapper(ctx, realmId, id))
 }

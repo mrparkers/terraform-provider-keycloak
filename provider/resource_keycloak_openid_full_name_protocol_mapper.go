@@ -1,22 +1,24 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakOpenIdFullNameProtocolMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenIdFullNameProtocolMapperCreate,
-		Read:   resourceKeycloakOpenIdFullNameProtocolMapperRead,
-		Update: resourceKeycloakOpenIdFullNameProtocolMapperUpdate,
-		Delete: resourceKeycloakOpenIdFullNameProtocolMapperDelete,
+		CreateContext: resourceKeycloakOpenIdFullNameProtocolMapperCreate,
+		ReadContext:   resourceKeycloakOpenIdFullNameProtocolMapperRead,
+		UpdateContext: resourceKeycloakOpenIdFullNameProtocolMapperUpdate,
+		DeleteContext: resourceKeycloakOpenIdFullNameProtocolMapperDelete,
 		Importer: &schema.ResourceImporter{
 			// import a mapper tied to a client:
 			// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 			// or a client scope:
 			// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
-			State: genericProtocolMapperImport,
+			StateContext: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -94,34 +96,34 @@ func mapFromOpenIdFullNameMapperToData(mapper *keycloak.OpenIdFullNameProtocolMa
 	data.Set("add_to_userinfo", mapper.AddToUserInfo)
 }
 
-func resourceKeycloakOpenIdFullNameProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdFullNameProtocolMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(openIdFullNameMapper)
+	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(ctx, openIdFullNameMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewOpenIdFullNameProtocolMapper(openIdFullNameMapper)
+	err = keycloakClient.NewOpenIdFullNameProtocolMapper(ctx, openIdFullNameMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	mapFromOpenIdFullNameMapperToData(openIdFullNameMapper, data)
 
-	return resourceKeycloakOpenIdFullNameProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdFullNameProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdFullNameProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdFullNameProtocolMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	openIdFullNameMapper, err := keycloakClient.GetOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	openIdFullNameMapper, err := keycloakClient.GetOpenIdFullNameProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -131,30 +133,30 @@ func resourceKeycloakOpenIdFullNameProtocolMapperRead(data *schema.ResourceData,
 	return nil
 }
 
-func resourceKeycloakOpenIdFullNameProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdFullNameProtocolMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdFullNameMapper := mapFromDataToOpenIdFullNameProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(openIdFullNameMapper)
+	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(ctx, openIdFullNameMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateOpenIdFullNameProtocolMapper(openIdFullNameMapper)
+	err = keycloakClient.UpdateOpenIdFullNameProtocolMapper(ctx, openIdFullNameMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
-	return resourceKeycloakOpenIdFullNameProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdFullNameProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdFullNameProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdFullNameProtocolMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	return keycloakClient.DeleteOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	return diag.FromErr(keycloakClient.DeleteOpenIdFullNameProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id()))
 }

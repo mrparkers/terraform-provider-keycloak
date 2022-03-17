@@ -1,10 +1,12 @@
 package provider
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
 	"reflect"
 	"strings"
@@ -28,13 +30,13 @@ var (
 
 func resourceKeycloakSamlClient() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakSamlClientCreate,
-		Read:   resourceKeycloakSamlClientRead,
-		Delete: resourceKeycloakSamlClientDelete,
-		Update: resourceKeycloakSamlClientUpdate,
+		CreateContext: resourceKeycloakSamlClientCreate,
+		ReadContext:   resourceKeycloakSamlClientRead,
+		DeleteContext: resourceKeycloakSamlClientDelete,
+		UpdateContext: resourceKeycloakSamlClientUpdate,
 		// This resource can be imported using {{realm}}/{{client_id}}. The Client ID is displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakSamlClientImport,
+			StateContext: resourceKeycloakSamlClientImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -403,68 +405,68 @@ func resourceKeycloakSamlClientSetSha1(data *schema.ResourceData, attribute, val
 	}
 }
 
-func resourceKeycloakSamlClientCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	client := mapToSamlClientFromData(data)
 
-	err := keycloakClient.NewSamlClient(client)
+	err := keycloakClient.NewSamlClient(ctx, client)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	data.SetId(client.Id)
 
-	return resourceKeycloakSamlClientRead(data, meta)
+	return resourceKeycloakSamlClientRead(ctx, data, meta)
 }
 
-func resourceKeycloakSamlClientRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	client, err := keycloakClient.GetSamlClient(realmId, id)
+	client, err := keycloakClient.GetSamlClient(ctx, realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
 	err = mapToDataFromSamlClient(data, client)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakSamlClientUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	client := mapToSamlClientFromData(data)
 
-	err := keycloakClient.UpdateSamlClient(client)
+	err := keycloakClient.UpdateSamlClient(ctx, client)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	err = mapToDataFromSamlClient(data, client)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakSamlClientDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteSamlClient(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteSamlClient(ctx, realmId, id))
 }
 
-func resourceKeycloakSamlClientImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakSamlClientImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {

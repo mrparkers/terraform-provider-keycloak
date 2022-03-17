@@ -1,19 +1,21 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakLdapMsadLdsUserAccountControlMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakLdapMsadLdsUserAccountControlMapperCreate,
-		Read:   resourceKeycloakLdapMsadLdsUserAccountControlMapperRead,
-		Update: resourceKeycloakLdapMsadLdsUserAccountControlMapperUpdate,
-		Delete: resourceKeycloakLdapMsadLdsUserAccountControlMapperDelete,
+		CreateContext: resourceKeycloakLdapMsadLdsUserAccountControlMapperCreate,
+		ReadContext:   resourceKeycloakLdapMsadLdsUserAccountControlMapperRead,
+		UpdateContext: resourceKeycloakLdapMsadLdsUserAccountControlMapperUpdate,
+		DeleteContext: resourceKeycloakLdapMsadLdsUserAccountControlMapperDelete,
 		// This resource can be imported using {{realm}}/{{provider_id}}/{{mapper_id}}. The Provider and Mapper IDs are displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakLdapGenericMapperImport,
+			StateContext: resourceKeycloakLdapGenericMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -54,28 +56,28 @@ func setLdapMsadLdsUserAccountControlMapperData(data *schema.ResourceData, ldapM
 	data.Set("ldap_user_federation_id", ldapMsadLdsUserAccountControlMapper.LdapUserFederationId)
 }
 
-func resourceKeycloakLdapMsadLdsUserAccountControlMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapMsadLdsUserAccountControlMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapMsadLdsUserAccountControlMapper := getLdapMsadLdsUserAccountControlMapperFromData(data)
 
-	err := keycloakClient.NewLdapMsadLdsUserAccountControlMapper(ldapMsadLdsUserAccountControlMapper)
+	err := keycloakClient.NewLdapMsadLdsUserAccountControlMapper(ctx, ldapMsadLdsUserAccountControlMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	setLdapMsadLdsUserAccountControlMapperData(data, ldapMsadLdsUserAccountControlMapper)
 
-	return resourceKeycloakLdapMsadLdsUserAccountControlMapperRead(data, meta)
+	return resourceKeycloakLdapMsadLdsUserAccountControlMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakLdapMsadLdsUserAccountControlMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapMsadLdsUserAccountControlMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	ldapMsadLdsUserAccountControlMapper, err := keycloakClient.GetLdapMsadLdsUserAccountControlMapper(realmId, id)
+	ldapMsadLdsUserAccountControlMapper, err := keycloakClient.GetLdapMsadLdsUserAccountControlMapper(ctx, realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -85,14 +87,14 @@ func resourceKeycloakLdapMsadLdsUserAccountControlMapperRead(data *schema.Resour
 	return nil
 }
 
-func resourceKeycloakLdapMsadLdsUserAccountControlMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapMsadLdsUserAccountControlMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapMsadLdsUserAccountControlMapper := getLdapMsadLdsUserAccountControlMapperFromData(data)
 
-	err := keycloakClient.UpdateLdapMsadLdsUserAccountControlMapper(ldapMsadLdsUserAccountControlMapper)
+	err := keycloakClient.UpdateLdapMsadLdsUserAccountControlMapper(ctx, ldapMsadLdsUserAccountControlMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	setLdapMsadLdsUserAccountControlMapperData(data, ldapMsadLdsUserAccountControlMapper)
@@ -100,11 +102,11 @@ func resourceKeycloakLdapMsadLdsUserAccountControlMapperUpdate(data *schema.Reso
 	return nil
 }
 
-func resourceKeycloakLdapMsadLdsUserAccountControlMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapMsadLdsUserAccountControlMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteLdapMsadLdsUserAccountControlMapper(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteLdapMsadLdsUserAccountControlMapper(ctx, realmId, id))
 }

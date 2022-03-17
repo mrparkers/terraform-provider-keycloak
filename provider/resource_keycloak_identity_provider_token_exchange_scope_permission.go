@@ -1,8 +1,10 @@
 package provider
 
 import (
+	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -17,13 +19,13 @@ var (
 
 func resourceKeycloakIdentityProviderTokenExchangeScopePermission() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakIdentityProviderTokenExchangeScopePermissionCreate,
-		Read:   resourceKeycloakIdentityProviderTokenExchangeScopePermissionRead,
-		Delete: resourceKeycloakIdentityProviderTokenExchangeScopePermissionDelete,
-		Update: resourceKeycloakIdentityProviderTokenExchangeScopePermissionUpdate,
+		CreateContext: resourceKeycloakIdentityProviderTokenExchangeScopePermissionCreate,
+		ReadContext:   resourceKeycloakIdentityProviderTokenExchangeScopePermissionRead,
+		DeleteContext: resourceKeycloakIdentityProviderTokenExchangeScopePermissionDelete,
+		UpdateContext: resourceKeycloakIdentityProviderTokenExchangeScopePermissionUpdate,
 		// This resource can be imported using {{realmId}}/{{providerAlias}}. The provider alias is displayed in the URL when editing it from the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakIdentityProviderTokenExchangeScopePermissionImport,
+			StateContext: resourceKeycloakIdentityProviderTokenExchangeScopePermissionImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -73,13 +75,13 @@ func resourceKeycloakIdentityProviderTokenExchangeScopePermission() *schema.Reso
 	}
 }
 
-func setIdentityProviderTokenExchangeScopePermissionClientPolicy(keycloakClient *keycloak.KeycloakClient, realmId, providerAlias string, clients []string) error {
-	identityProviderPermissions, err := keycloakClient.GetIdentityProviderPermissions(realmId, providerAlias)
+func setIdentityProviderTokenExchangeScopePermissionClientPolicy(ctx context.Context, keycloakClient *keycloak.KeycloakClient, realmId, providerAlias string, clients []string) error {
+	identityProviderPermissions, err := keycloakClient.GetIdentityProviderPermissions(ctx, realmId, providerAlias)
 	if err != nil {
 		return err
 	}
 
-	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
+	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(ctx, realmId, "realm-management")
 	if err != nil {
 		return err
 	}
@@ -89,33 +91,33 @@ func setIdentityProviderTokenExchangeScopePermissionClientPolicy(keycloakClient 
 		return err
 	}
 
-	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, tokenExchangeScopedPermissionId)
+	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(ctx, realmId, realmManagementClient.Id, tokenExchangeScopedPermissionId)
 	if err != nil {
 		return err
 	}
 
 	if len(permission.Policies) == 0 {
-		policyId, err := createClientPolicy(keycloakClient, realmId, realmManagementClient.Id, providerAlias, clients)
+		policyId, err := createClientPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, providerAlias, clients)
 		if err != nil {
 			return err
 		}
 		permission.Policies = []string{policyId}
-		return keycloakClient.UpdateOpenidClientAuthorizationPermission(permission)
+		return keycloakClient.UpdateOpenidClientAuthorizationPermission(ctx, permission)
 
 	} else if len(permission.Policies) == 1 {
-		openidClientAuthorizationClientPolicy, err := keycloakClient.GetOpenidClientAuthorizationClientPolicy(realmId, realmManagementClient.Id, permission.Policies[0])
+		openidClientAuthorizationClientPolicy, err := keycloakClient.GetOpenidClientAuthorizationClientPolicy(ctx, realmId, realmManagementClient.Id, permission.Policies[0])
 		if err != nil {
 			return err
 		}
 		openidClientAuthorizationClientPolicy.Clients = clients
-		return keycloakClient.UpdateOpenidClientAuthorizationClientPolicy(openidClientAuthorizationClientPolicy)
+		return keycloakClient.UpdateOpenidClientAuthorizationClientPolicy(ctx, openidClientAuthorizationClientPolicy)
 
 	} else {
 		return fmt.Errorf("only one client policy is supported, but %d were found", len(permission.Policies))
 	}
 }
 
-func createClientPolicy(keycloakClient *keycloak.KeycloakClient, realmId, realmManagementClientId, providerAlias string, clients []string) (string, error) {
+func createClientPolicy(ctx context.Context, keycloakClient *keycloak.KeycloakClient, realmId, realmManagementClientId, providerAlias string, clients []string) (string, error) {
 	openidClientAuthorizationClientPolicy := &keycloak.OpenidClientAuthorizationClientPolicy{
 		RealmId:          realmId,
 		ResourceServerId: realmManagementClientId,
@@ -125,14 +127,14 @@ func createClientPolicy(keycloakClient *keycloak.KeycloakClient, realmId, realmM
 		Type:             "client",
 		Clients:          clients,
 	}
-	err := keycloakClient.NewOpenidClientAuthorizationClientPolicy(openidClientAuthorizationClientPolicy)
+	err := keycloakClient.NewOpenidClientAuthorizationClientPolicy(ctx, openidClientAuthorizationClientPolicy)
 	if err != nil {
 		if keycloak.ErrorIs409(err) {
 			b := make([]byte, 4)
 			rand.Read(b)
 			suffix := hex.EncodeToString(b)
 			openidClientAuthorizationClientPolicy.Name = providerAlias + "_" + suffix + "_idp_client_policy"
-			err = keycloakClient.NewOpenidClientAuthorizationClientPolicy(openidClientAuthorizationClientPolicy)
+			err = keycloakClient.NewOpenidClientAuthorizationClientPolicy(ctx, openidClientAuthorizationClientPolicy)
 		}
 	}
 	if err != nil {
@@ -141,13 +143,13 @@ func createClientPolicy(keycloakClient *keycloak.KeycloakClient, realmId, realmM
 	return openidClientAuthorizationClientPolicy.Id, nil
 }
 
-func unsetIdentityProviderTokenExchangeScopePermissionPolicy(keycloakClient *keycloak.KeycloakClient, realmId, providerAlias, policyId string) error {
-	identityProviderPermissions, err := keycloakClient.GetIdentityProviderPermissions(realmId, providerAlias)
+func unsetIdentityProviderTokenExchangeScopePermissionPolicy(ctx context.Context, keycloakClient *keycloak.KeycloakClient, realmId, providerAlias, policyId string) error {
+	identityProviderPermissions, err := keycloakClient.GetIdentityProviderPermissions(ctx, realmId, providerAlias)
 	if err != nil {
 		return err
 	}
 
-	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
+	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(ctx, realmId, "realm-management")
 	if err != nil {
 		return err
 	}
@@ -157,32 +159,32 @@ func unsetIdentityProviderTokenExchangeScopePermissionPolicy(keycloakClient *key
 		return err
 	}
 
-	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, tokenExchangeScopedPermissionId)
+	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(ctx, realmId, realmManagementClient.Id, tokenExchangeScopedPermissionId)
 	if err != nil {
 		return err
 	}
 
 	permission.Policies = []string{}
-	err = keycloakClient.UpdateOpenidClientAuthorizationPermission(permission)
+	err = keycloakClient.UpdateOpenidClientAuthorizationPermission(ctx, permission)
 	if err != nil {
 		return err
 	}
 
-	err = keycloakClient.DisableIdentityProviderPermissions(realmId, providerAlias)
+	err = keycloakClient.DisableIdentityProviderPermissions(ctx, realmId, providerAlias)
 	if err != nil {
 		return err
 	}
 
-	_ = keycloakClient.DeleteOpenidClientAuthorizationClientPolicy(realmId, realmManagementClient.Id, policyId)
+	_ = keycloakClient.DeleteOpenidClientAuthorizationClientPolicy(ctx, realmId, realmManagementClient.Id, policyId)
 
 	return nil
 }
 
-func resourceKeycloakIdentityProviderTokenExchangeScopePermissionCreate(data *schema.ResourceData, meta interface{}) error {
-	return resourceKeycloakIdentityProviderTokenExchangeScopePermissionUpdate(data, meta)
+func resourceKeycloakIdentityProviderTokenExchangeScopePermissionCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceKeycloakIdentityProviderTokenExchangeScopePermissionUpdate(ctx, data, meta)
 }
 
-func resourceKeycloakIdentityProviderTokenExchangeScopePermissionUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakIdentityProviderTokenExchangeScopePermissionUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	realmId := data.Get("realm_id").(string)
 	providerAlias := data.Get("provider_alias").(string)
@@ -195,27 +197,27 @@ func resourceKeycloakIdentityProviderTokenExchangeScopePermissionUpdate(data *sc
 		}
 	}
 
-	err := keycloakClient.EnableIdentityProviderPermissions(realmId, providerAlias)
+	err := keycloakClient.EnableIdentityProviderPermissions(ctx, realmId, providerAlias)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if policyType == "client" {
-		err = setIdentityProviderTokenExchangeScopePermissionClientPolicy(keycloakClient, realmId, providerAlias, clients)
+		err = setIdentityProviderTokenExchangeScopePermissionClientPolicy(ctx, keycloakClient, realmId, providerAlias, clients)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	} else {
-		return fmt.Errorf("invalid policy type, supported types are ['client']")
+		return diag.Errorf("invalid policy type, supported types are ['client']")
 	}
-	return resourceKeycloakIdentityProviderTokenExchangeScopePermissionRead(data, meta)
+	return resourceKeycloakIdentityProviderTokenExchangeScopePermissionRead(ctx, data, meta)
 }
 
-func resourceKeycloakIdentityProviderTokenExchangeScopePermissionRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakIdentityProviderTokenExchangeScopePermissionRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	realmId := data.Get("realm_id").(string)
 	providerAlias := data.Get("provider_alias").(string)
 
-	identityProviderPermissions, err := keycloakClient.GetIdentityProviderPermissions(realmId, providerAlias)
+	identityProviderPermissions, err := keycloakClient.GetIdentityProviderPermissions(ctx, realmId, providerAlias)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -229,33 +231,33 @@ func resourceKeycloakIdentityProviderTokenExchangeScopePermissionRead(data *sche
 	data.Set("realm_id", identityProviderPermissions.RealmId)
 	data.Set("provider_alias", identityProviderPermissions.ProviderAlias)
 
-	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(realmId, "realm-management")
+	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(ctx, realmId, "realm-management")
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	tokenExchangeScopedPermissionId, err := identityProviderPermissions.GetTokenExchangeScopedPermissionId()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(realmId, realmManagementClient.Id, tokenExchangeScopedPermissionId)
+	permission, err := keycloakClient.GetOpenidClientAuthorizationPermission(ctx, realmId, realmManagementClient.Id, tokenExchangeScopedPermissionId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var openidClientAuthorizationClientPolicyId string
 	if len(permission.Policies) >= 1 {
 		openidClientAuthorizationClientPolicyId = permission.Policies[0]
 	} else {
-		openidClientAuthorizationClientPolicyId, err = createClientPolicy(keycloakClient, realmId, realmManagementClient.Id, providerAlias, data.Get("clients").([]string))
+		openidClientAuthorizationClientPolicyId, err = createClientPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, providerAlias, data.Get("clients").([]string))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
-	openidClientAuthorizationClientPolicy, err := keycloakClient.GetOpenidClientAuthorizationClientPolicy(realmId, realmManagementClient.Id, openidClientAuthorizationClientPolicyId)
+	openidClientAuthorizationClientPolicy, err := keycloakClient.GetOpenidClientAuthorizationClientPolicy(ctx, realmId, realmManagementClient.Id, openidClientAuthorizationClientPolicyId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	data.Set("policy_id", openidClientAuthorizationClientPolicy.Id)
@@ -270,21 +272,21 @@ func resourceKeycloakIdentityProviderTokenExchangeScopePermissionRead(data *sche
 	return nil
 }
 
-func resourceKeycloakIdentityProviderTokenExchangeScopePermissionDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakIdentityProviderTokenExchangeScopePermissionDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	providerAlias := data.Get("provider_alias").(string)
 	policyId := data.Get("policy_id").(string)
 
-	identityProviderPermissions, err := keycloakClient.GetIdentityProviderPermissions(realmId, providerAlias)
+	identityProviderPermissions, err := keycloakClient.GetIdentityProviderPermissions(ctx, realmId, providerAlias)
 	if err == nil && identityProviderPermissions.Enabled {
-		_ = unsetIdentityProviderTokenExchangeScopePermissionPolicy(keycloakClient, realmId, providerAlias, policyId)
+		_ = unsetIdentityProviderTokenExchangeScopePermissionPolicy(ctx, keycloakClient, realmId, providerAlias, policyId)
 	}
-	return keycloakClient.DisableIdentityProviderPermissions(realmId, providerAlias)
+	return diag.FromErr(keycloakClient.DisableIdentityProviderPermissions(ctx, realmId, providerAlias))
 }
 
-func resourceKeycloakIdentityProviderTokenExchangeScopePermissionImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakIdentityProviderTokenExchangeScopePermissionImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {

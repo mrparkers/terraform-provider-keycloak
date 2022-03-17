@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -15,13 +17,13 @@ var (
 
 func resourceKeycloakLdapRoleMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakLdapRoleMapperCreate,
-		Read:   resourceKeycloakLdapRoleMapperRead,
-		Update: resourceKeycloakLdapRoleMapperUpdate,
-		Delete: resourceKeycloakLdapRoleMapperDelete,
+		CreateContext: resourceKeycloakLdapRoleMapperCreate,
+		ReadContext:   resourceKeycloakLdapRoleMapperRead,
+		UpdateContext: resourceKeycloakLdapRoleMapperUpdate,
+		DeleteContext: resourceKeycloakLdapRoleMapperDelete,
 		// This resource can be imported using {{realm}}/{{provider_id}}/{{mapper_id}}. The Provider and Mapper IDs are displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakLdapGenericMapperImport,
+			StateContext: resourceKeycloakLdapGenericMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -153,28 +155,28 @@ func setLdapRoleMapperData(data *schema.ResourceData, ldapRoleMapper *keycloak.L
 	data.Set("client_id", ldapRoleMapper.ClientId)
 }
 
-func resourceKeycloakLdapRoleMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapRoleMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapRoleMapper := getLdapRoleMapperFromData(data)
 
-	err = keycloakClient.NewLdapRoleMapper(ldapRoleMapper)
+	err := keycloakClient.NewLdapRoleMapper(ctx, ldapRoleMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	setLdapRoleMapperData(data, ldapRoleMapper)
 
-	return resourceKeycloakLdapRoleMapperRead(data, meta)
+	return resourceKeycloakLdapRoleMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakLdapRoleMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapRoleMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	ldapRoleMapper, err := keycloakClient.GetLdapRoleMapper(realmId, id)
+	ldapRoleMapper, err := keycloakClient.GetLdapRoleMapper(ctx, realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -184,14 +186,14 @@ func resourceKeycloakLdapRoleMapperRead(data *schema.ResourceData, meta interfac
 	return nil
 }
 
-func resourceKeycloakLdapRoleMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapRoleMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapRoleMapper := getLdapRoleMapperFromData(data)
 
-	err = keycloakClient.UpdateLdapRoleMapper(ldapRoleMapper)
+	err := keycloakClient.UpdateLdapRoleMapper(ctx, ldapRoleMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	setLdapRoleMapperData(data, ldapRoleMapper)
@@ -199,11 +201,11 @@ func resourceKeycloakLdapRoleMapperUpdate(data *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceKeycloakLdapRoleMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapRoleMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteLdapRoleMapper(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteLdapRoleMapper(ctx, realmId, id))
 }

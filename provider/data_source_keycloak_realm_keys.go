@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -9,7 +11,7 @@ import (
 
 func dataSourceKeycloakRealmKeys() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakRealmKeysRead,
+		ReadContext: dataSourceKeycloakRealmKeysRead,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -123,35 +125,36 @@ func setRealmKeysData(data *schema.ResourceData, keys *keycloak.Keys) error {
 	return nil
 }
 
-func dataSourceKeycloakRealmKeysRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakRealmKeysRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 
-	keys, err := keycloakClient.GetRealmKeys(realmId)
+	keys, err := keycloakClient.GetRealmKeys(ctx, realmId)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
 
-	if filterStatus, ok := data.GetOkExists("status"); ok {
+	if filterStatus, ok := data.GetOk("status"); ok {
 		keys.Keys = filterKeys(keys.Keys, "status", filterStatus.(*schema.Set))
 	}
 
-	if filterAlgorithm, ok := data.GetOkExists("algorithms"); ok {
+	if filterAlgorithm, ok := data.GetOk("algorithms"); ok {
 		keys.Keys = filterKeys(keys.Keys, "algorithms", filterAlgorithm.(*schema.Set))
 	}
 
 	if len(keys.Keys) == 0 {
-		return fmt.Errorf("Your query returned no results. Please change your search criteria and try again.")
+		return diag.Diagnostics{{
+			Summary:  "Your query returned no results. Please change your search criteria and try again.",
+			Severity: diag.Error,
+		}}
 	}
 
-	err = setRealmKeysData(data, keys)
-
-	return err
+	return diag.FromErr(setRealmKeysData(data, keys))
 }
 
 func filterKeys(allValues []keycloak.Key, filterAttribute string, allowedValues *schema.Set) []keycloak.Key {
-	result := []keycloak.Key{}
+	var result []keycloak.Key
 	var keyValue string
 
 	for _, key := range allValues {

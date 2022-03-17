@@ -1,19 +1,21 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakLdapHardcodedGroupMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakLdapHardcodedGroupMapperCreate,
-		Read:   resourceKeycloakLdapHardcodedGroupMapperRead,
-		Update: resourceKeycloakLdapHardcodedGroupMapperUpdate,
-		Delete: resourceKeycloakLdapHardcodedGroupMapperDelete,
+		CreateContext: resourceKeycloakLdapHardcodedGroupMapperCreate,
+		ReadContext:   resourceKeycloakLdapHardcodedGroupMapperRead,
+		UpdateContext: resourceKeycloakLdapHardcodedGroupMapperUpdate,
+		DeleteContext: resourceKeycloakLdapHardcodedGroupMapperDelete,
 		// This resource can be imported using {{realm}}/{{provider_id}}/{{mapper_id}}. The Provider and Mapper IDs are displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakLdapGenericMapperImport,
+			StateContext: resourceKeycloakLdapGenericMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -61,33 +63,33 @@ func setLdapHardcodedGroupMapperData(data *schema.ResourceData, ldapMapper *keyc
 	data.Set("group", ldapMapper.Group)
 }
 
-func resourceKeycloakLdapHardcodedGroupMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapHardcodedGroupMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapMapper := getLdapHardcodedGroupMapperFromData(data)
 
-	err := keycloakClient.ValidateLdapHardcodedGroupMapper(ldapMapper)
+	err := keycloakClient.ValidateLdapHardcodedGroupMapper(ctx, ldapMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewLdapHardcodedGroupMapper(ldapMapper)
+	err = keycloakClient.NewLdapHardcodedGroupMapper(ctx, ldapMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setLdapHardcodedGroupMapperData(data, ldapMapper)
 
-	return resourceKeycloakLdapHardcodedGroupMapperRead(data, meta)
+	return resourceKeycloakLdapHardcodedGroupMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakLdapHardcodedGroupMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapHardcodedGroupMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	ldapMapper, err := keycloakClient.GetLdapHardcodedGroupMapper(realmId, id)
+	ldapMapper, err := keycloakClient.GetLdapHardcodedGroupMapper(ctx, realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -97,19 +99,19 @@ func resourceKeycloakLdapHardcodedGroupMapperRead(data *schema.ResourceData, met
 	return nil
 }
 
-func resourceKeycloakLdapHardcodedGroupMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapHardcodedGroupMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapMapper := getLdapHardcodedGroupMapperFromData(data)
 
-	err := keycloakClient.ValidateLdapHardcodedGroupMapper(ldapMapper)
+	err := keycloakClient.ValidateLdapHardcodedGroupMapper(ctx, ldapMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateLdapHardcodedGroupMapper(ldapMapper)
+	err = keycloakClient.UpdateLdapHardcodedGroupMapper(ctx, ldapMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setLdapHardcodedGroupMapperData(data, ldapMapper)
@@ -117,11 +119,11 @@ func resourceKeycloakLdapHardcodedGroupMapperUpdate(data *schema.ResourceData, m
 	return nil
 }
 
-func resourceKeycloakLdapHardcodedGroupMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapHardcodedGroupMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteLdapHardcodedGroupMapper(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteLdapHardcodedGroupMapper(ctx, realmId, id))
 }

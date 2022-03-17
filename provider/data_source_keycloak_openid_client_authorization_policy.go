@@ -1,13 +1,15 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakOpenidClientAuthorizationPolicy() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakOpenidClientAuthorizationPolicyRead,
+		ReadContext: dataSourceKeycloakOpenidClientAuthorizationPolicyRead,
 
 		Schema: map[string]*schema.Schema{
 			"resource_server_id": {
@@ -72,14 +74,14 @@ func setOpenidClientAuthorizationPolicyData(data *schema.ResourceData, policy *k
 	data.Set("type", policy.Type)
 }
 
-func dataSourceKeycloakOpenidClientAuthorizationPolicyRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakOpenidClientAuthorizationPolicyRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	resourceServerId := data.Get("resource_server_id").(string)
 	name := data.Get("name").(string)
 
-	client, err := keycloakClient.GetClientAuthorizationPolicyByName(realmId, resourceServerId, name)
+	client, err := keycloakClient.GetClientAuthorizationPolicyByName(ctx, realmId, resourceServerId, name)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}

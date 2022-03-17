@@ -1,19 +1,21 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakLdapUserAttributeMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakLdapUserAttributeMapperCreate,
-		Read:   resourceKeycloakLdapUserAttributeMapperRead,
-		Update: resourceKeycloakLdapUserAttributeMapperUpdate,
-		Delete: resourceKeycloakLdapUserAttributeMapperDelete,
+		CreateContext: resourceKeycloakLdapUserAttributeMapperCreate,
+		ReadContext:   resourceKeycloakLdapUserAttributeMapperRead,
+		UpdateContext: resourceKeycloakLdapUserAttributeMapperUpdate,
+		DeleteContext: resourceKeycloakLdapUserAttributeMapperDelete,
 		// This resource can be imported using {{realm}}/{{provider_id}}/{{mapper_id}}. The Provider and Mapper IDs are displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakLdapGenericMapperImport,
+			StateContext: resourceKeycloakLdapGenericMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -96,28 +98,28 @@ func setLdapUserAttributeMapperData(data *schema.ResourceData, ldapUserAttribute
 	data.Set("is_mandatory_in_ldap", ldapUserAttributeMapper.IsMandatoryInLdap)
 }
 
-func resourceKeycloakLdapUserAttributeMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserAttributeMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapUserAttributeMapper := getLdapUserAttributeMapperFromData(data)
 
-	err := keycloakClient.NewLdapUserAttributeMapper(ldapUserAttributeMapper)
+	err := keycloakClient.NewLdapUserAttributeMapper(ctx, ldapUserAttributeMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	setLdapUserAttributeMapperData(data, ldapUserAttributeMapper)
 
-	return resourceKeycloakLdapUserAttributeMapperRead(data, meta)
+	return resourceKeycloakLdapUserAttributeMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakLdapUserAttributeMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserAttributeMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	ldapUserAttributeMapper, err := keycloakClient.GetLdapUserAttributeMapper(realmId, id)
+	ldapUserAttributeMapper, err := keycloakClient.GetLdapUserAttributeMapper(ctx, realmId, id)
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -127,14 +129,14 @@ func resourceKeycloakLdapUserAttributeMapperRead(data *schema.ResourceData, meta
 	return nil
 }
 
-func resourceKeycloakLdapUserAttributeMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserAttributeMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldapUserAttributeMapper := getLdapUserAttributeMapperFromData(data)
 
-	err := keycloakClient.UpdateLdapUserAttributeMapper(ldapUserAttributeMapper)
+	err := keycloakClient.UpdateLdapUserAttributeMapper(ctx, ldapUserAttributeMapper)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	setLdapUserAttributeMapperData(data, ldapUserAttributeMapper)
@@ -142,11 +144,11 @@ func resourceKeycloakLdapUserAttributeMapperUpdate(data *schema.ResourceData, me
 	return nil
 }
 
-func resourceKeycloakLdapUserAttributeMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserAttributeMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteLdapUserAttributeMapper(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteLdapUserAttributeMapper(ctx, realmId, id))
 }

@@ -1,13 +1,15 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakOpenidClientServiceAccountUser() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakOpenidClientServiceAccountUserRead,
+		ReadContext: dataSourceKeycloakOpenidClientServiceAccountUserRead,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -69,15 +71,15 @@ func dataSourceKeycloakOpenidClientServiceAccountUser() *schema.Resource {
 	}
 }
 
-func dataSourceKeycloakOpenidClientServiceAccountUserRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakOpenidClientServiceAccountUserRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
-	user, err := keycloakClient.GetOpenidClientServiceAccountUserId(realmId, clientId)
+	user, err := keycloakClient.GetOpenidClientServiceAccountUserId(ctx, realmId, clientId)
 	if err != nil {
-		return err
+		diag.FromErr(err)
 	}
 
 	mapFromUserToData(data, user)

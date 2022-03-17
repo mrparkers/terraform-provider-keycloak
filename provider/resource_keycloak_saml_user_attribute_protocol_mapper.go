@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -10,16 +12,16 @@ var keycloakSamlUserAttributeProtocolMapperNameFormats = []string{"Basic", "URI 
 
 func resourceKeycloakSamlUserAttributeProtocolMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakSamlUserAttributeProtocolMapperCreate,
-		Read:   resourceKeycloakSamlUserAttributeProtocolMapperRead,
-		Update: resourceKeycloakSamlUserAttributeProtocolMapperUpdate,
-		Delete: resourceKeycloakSamlUserAttributeProtocolMapperDelete,
+		CreateContext: resourceKeycloakSamlUserAttributeProtocolMapperCreate,
+		ReadContext:   resourceKeycloakSamlUserAttributeProtocolMapperRead,
+		UpdateContext: resourceKeycloakSamlUserAttributeProtocolMapperUpdate,
+		DeleteContext: resourceKeycloakSamlUserAttributeProtocolMapperDelete,
 		Importer: &schema.ResourceImporter{
 			// import a mapper tied to a client:
 			// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 			// or a client scope:
 			// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
-			State: genericProtocolMapperImport,
+			StateContext: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -96,34 +98,34 @@ func mapFromSamlUserAttributeMapperToData(mapper *keycloak.SamlUserAttributeProt
 	data.Set("saml_attribute_name_format", mapper.SamlAttributeNameFormat)
 }
 
-func resourceKeycloakSamlUserAttributeProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlUserAttributeProtocolMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	samlUserAttributeMapper := mapFromDataToSamlUserAttributeProtocolMapper(data)
 
-	err := keycloakClient.ValidateSamlUserAttributeProtocolMapper(samlUserAttributeMapper)
+	err := keycloakClient.ValidateSamlUserAttributeProtocolMapper(ctx, samlUserAttributeMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewSamlUserAttributeProtocolMapper(samlUserAttributeMapper)
+	err = keycloakClient.NewSamlUserAttributeProtocolMapper(ctx, samlUserAttributeMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromSamlUserAttributeMapperToData(samlUserAttributeMapper, data)
 
-	return resourceKeycloakSamlUserAttributeProtocolMapperRead(data, meta)
+	return resourceKeycloakSamlUserAttributeProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakSamlUserAttributeProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlUserAttributeProtocolMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	samlUserAttributeMapper, err := keycloakClient.GetSamlUserAttributeProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	samlUserAttributeMapper, err := keycloakClient.GetSamlUserAttributeProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
 		return handleNotFoundError(err, data)
 	}
@@ -133,30 +135,30 @@ func resourceKeycloakSamlUserAttributeProtocolMapperRead(data *schema.ResourceDa
 	return nil
 }
 
-func resourceKeycloakSamlUserAttributeProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlUserAttributeProtocolMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	samlUserAttributeMapper := mapFromDataToSamlUserAttributeProtocolMapper(data)
 
-	err := keycloakClient.ValidateSamlUserAttributeProtocolMapper(samlUserAttributeMapper)
+	err := keycloakClient.ValidateSamlUserAttributeProtocolMapper(ctx, samlUserAttributeMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateSamlUserAttributeProtocolMapper(samlUserAttributeMapper)
+	err = keycloakClient.UpdateSamlUserAttributeProtocolMapper(ctx, samlUserAttributeMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakSamlUserAttributeProtocolMapperRead(data, meta)
+	return resourceKeycloakSamlUserAttributeProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakSamlUserAttributeProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlUserAttributeProtocolMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	return keycloakClient.DeleteSamlUserAttributeProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	return diag.FromErr(keycloakClient.DeleteSamlUserAttributeProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id()))
 }
