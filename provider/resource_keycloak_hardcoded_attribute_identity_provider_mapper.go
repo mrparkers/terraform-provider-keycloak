@@ -3,8 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -53,7 +51,7 @@ func setHardcodedAttributeIdentityProviderMapperData(data *schema.ResourceData, 
 
 	mapperType, err := getUserSessionFromHardcodedAttributeIdentityProviderMapperType(identityProviderMapper.IdentityProviderMapper)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	data.Set("user_session", mapperType)

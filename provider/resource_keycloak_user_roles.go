@@ -54,7 +54,7 @@ func addRolesToUser(ctx context.Context, keycloakClient *keycloak.KeycloakClient
 	if len(realmRolesToAdd) != 0 {
 		err := keycloakClient.AddRealmRolesToUser(ctx, user.RealmId, user.Id, realmRolesToAdd)
 		if err != nil {
-			return diag.FromErr(err)
+			return err
 		}
 	}
 
@@ -62,7 +62,7 @@ func addRolesToUser(ctx context.Context, keycloakClient *keycloak.KeycloakClient
 		if len(roles) != 0 {
 			err := keycloakClient.AddClientRolesToUser(ctx, user.RealmId, user.Id, k, roles)
 			if err != nil {
-				return diag.FromErr(err)
+				return err
 			}
 		}
 	}
@@ -74,7 +74,7 @@ func removeRolesFromUser(ctx context.Context, keycloakClient *keycloak.KeycloakC
 	if len(realmRolesToRemove) != 0 {
 		err := keycloakClient.RemoveRealmRolesFromUser(ctx, user.RealmId, user.Id, realmRolesToRemove)
 		if err != nil {
-			return diag.FromErr(err)
+			return err
 		}
 	}
 
@@ -82,7 +82,7 @@ func removeRolesFromUser(ctx context.Context, keycloakClient *keycloak.KeycloakC
 		if len(roles) != 0 {
 			err := keycloakClient.RemoveClientRolesFromUser(ctx, user.RealmId, user.Id, k, roles)
 			if err != nil {
-				return diag.FromErr(err)
+				return err
 			}
 		}
 	}
