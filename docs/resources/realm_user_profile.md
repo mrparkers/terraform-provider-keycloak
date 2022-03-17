@@ -18,16 +18,16 @@ It can be done via the administration UI, or by setting the `userProfileEnabled`
 ## Example Usage
 
 ```hcl
-resource "keycloak_realm" "my_realm" {
-	realm = "my-realm"
+resource "keycloak_realm" "realm" {
+  realm = "my-realm"
 
   attributes = {
-		userProfileEnabled = true
-	}
+    userProfileEnabled = true
+  }
 }
 
-resource keycloak_realm_user_profile userprofile {
-	realm_id  = keycloak_realm.my_realm.realm
+resource "keycloak_realm_user_profile" "userprofile" {
+	realm_id  = keycloak_realm.realm.id
 
   attribute {
     name = "field1"
@@ -46,7 +46,7 @@ resource keycloak_realm_user_profile userprofile {
 
     validator {
       name = "person-name-prohibited-characters"
-    } 
+    }
 
     validator {
       name = "pattern"
