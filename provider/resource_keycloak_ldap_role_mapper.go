@@ -162,7 +162,7 @@ func resourceKeycloakLdapRoleMapperCreate(ctx context.Context, data *schema.Reso
 
 	err := keycloakClient.NewLdapRoleMapper(ctx, ldapRoleMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setLdapRoleMapperData(data, ldapRoleMapper)
@@ -193,7 +193,7 @@ func resourceKeycloakLdapRoleMapperUpdate(ctx context.Context, data *schema.Reso
 
 	err := keycloakClient.UpdateLdapRoleMapper(ctx, ldapRoleMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setLdapRoleMapperData(data, ldapRoleMapper)

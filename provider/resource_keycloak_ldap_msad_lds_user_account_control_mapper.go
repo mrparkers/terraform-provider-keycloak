@@ -63,7 +63,7 @@ func resourceKeycloakLdapMsadLdsUserAccountControlMapperCreate(ctx context.Conte
 
 	err := keycloakClient.NewLdapMsadLdsUserAccountControlMapper(ctx, ldapMsadLdsUserAccountControlMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setLdapMsadLdsUserAccountControlMapperData(data, ldapMsadLdsUserAccountControlMapper)
@@ -94,7 +94,7 @@ func resourceKeycloakLdapMsadLdsUserAccountControlMapperUpdate(ctx context.Conte
 
 	err := keycloakClient.UpdateLdapMsadLdsUserAccountControlMapper(ctx, ldapMsadLdsUserAccountControlMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setLdapMsadLdsUserAccountControlMapperData(data, ldapMsadLdsUserAccountControlMapper)

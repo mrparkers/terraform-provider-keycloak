@@ -70,12 +70,12 @@ func resourceKeycloakLdapHardcodedRoleMapperCreate(ctx context.Context, data *sc
 
 	err := keycloakClient.ValidateLdapHardcodedRoleMapper(ctx, ldapMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.NewLdapHardcodedRoleMapper(ctx, ldapMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setLdapHardcodedRoleMapperData(data, ldapMapper)
@@ -106,12 +106,12 @@ func resourceKeycloakLdapHardcodedRoleMapperUpdate(ctx context.Context, data *sc
 
 	err := keycloakClient.ValidateLdapHardcodedRoleMapper(ctx, ldapMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.UpdateLdapHardcodedRoleMapper(ctx, ldapMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setLdapHardcodedRoleMapperData(data, ldapMapper)

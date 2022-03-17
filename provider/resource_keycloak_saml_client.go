@@ -412,7 +412,7 @@ func resourceKeycloakSamlClientCreate(ctx context.Context, data *schema.Resource
 
 	err := keycloakClient.NewSamlClient(ctx, client)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	data.SetId(client.Id)
@@ -433,7 +433,7 @@ func resourceKeycloakSamlClientRead(ctx context.Context, data *schema.ResourceDa
 
 	err = mapToDataFromSamlClient(data, client)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -446,12 +446,12 @@ func resourceKeycloakSamlClientUpdate(ctx context.Context, data *schema.Resource
 
 	err := keycloakClient.UpdateSamlClient(ctx, client)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = mapToDataFromSamlClient(data, client)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	return nil

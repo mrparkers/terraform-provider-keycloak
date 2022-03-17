@@ -93,7 +93,7 @@ func resourceKeycloakOpenidClientAuthorizationUserPolicyCreate(ctx context.Conte
 
 	err := keycloakClient.NewOpenidClientAuthorizationUserPolicy(ctx, resource)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setOpenidClientAuthorizationUserPolicyResourceData(data, resource)
@@ -125,7 +125,7 @@ func resourceKeycloakOpenidClientAuthorizationUserPolicyUpdate(ctx context.Conte
 
 	err := keycloakClient.UpdateOpenidClientAuthorizationUserPolicy(ctx, resource)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setOpenidClientAuthorizationUserPolicyResourceData(data, resource)

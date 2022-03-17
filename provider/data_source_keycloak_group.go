@@ -43,7 +43,7 @@ func dataSourceKeycloakGroupRead(ctx context.Context, data *schema.ResourceData,
 
 	group, err := keycloakClient.GetGroupByName(ctx, realmId, groupName)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	mapFromGroupToData(data, group)

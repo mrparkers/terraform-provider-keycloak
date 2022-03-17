@@ -105,7 +105,7 @@ func resourceKeycloakLdapUserAttributeMapperCreate(ctx context.Context, data *sc
 
 	err := keycloakClient.NewLdapUserAttributeMapper(ctx, ldapUserAttributeMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setLdapUserAttributeMapperData(data, ldapUserAttributeMapper)
@@ -136,7 +136,7 @@ func resourceKeycloakLdapUserAttributeMapperUpdate(ctx context.Context, data *sc
 
 	err := keycloakClient.UpdateLdapUserAttributeMapper(ctx, ldapUserAttributeMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setLdapUserAttributeMapperData(data, ldapUserAttributeMapper)

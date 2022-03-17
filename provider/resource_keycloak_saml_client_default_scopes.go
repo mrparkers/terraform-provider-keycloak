@@ -44,7 +44,7 @@ func resourceKeycloakSamlClientDefaultScopesCreate(ctx context.Context, data *sc
 
 	err := keycloakClient.AttachSamlClientDefaultScopes(ctx, realmId, clientId, interfaceSliceToStringSlice(defaultScopes.List()))
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	data.SetId(samlClientDefaultScopesId(realmId, clientId))
@@ -87,7 +87,7 @@ func resourceKeycloakSamlClientDefaultScopesUpdate(ctx context.Context, data *sc
 
 	keycloakSamlClientDefaultScopes, err := keycloakClient.GetSamlClientDefaultScopes(ctx, realmId, clientId)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	var samlClientDefaultScopesToDetach []string
@@ -105,13 +105,13 @@ func resourceKeycloakSamlClientDefaultScopesUpdate(ctx context.Context, data *sc
 	// detach scopes that aren't in tf state
 	err = keycloakClient.DetachSamlClientDefaultScopes(ctx, realmId, clientId, samlClientDefaultScopesToDetach)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	// attach scopes that exist in tf state but not in keycloak
 	err = keycloakClient.AttachSamlClientDefaultScopes(ctx, realmId, clientId, interfaceSliceToStringSlice(tfSamlClientDefaultScopes.List()))
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	data.SetId(samlClientDefaultScopesId(realmId, clientId))

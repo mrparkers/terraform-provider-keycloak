@@ -70,7 +70,7 @@ func resourceKeycloakOpenidClientOptionalScopesReconcile(ctx context.Context, da
 
 	keycloakOpenidClientOptionalScopes, err := keycloakClient.GetOpenidClientOptionalScopes(ctx, realmId, clientId)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	var openidClientOptionalScopesToDetach []string
@@ -88,13 +88,13 @@ func resourceKeycloakOpenidClientOptionalScopesReconcile(ctx context.Context, da
 	// detach scopes that aren't in tf state
 	err = keycloakClient.DetachOpenidClientOptionalScopes(ctx, realmId, clientId, openidClientOptionalScopesToDetach)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	// attach scopes that exist in tf state but not in keycloak
 	err = keycloakClient.AttachOpenidClientOptionalScopes(ctx, realmId, clientId, interfaceSliceToStringSlice(tfOpenidClientOptionalScopes.List()))
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	data.SetId(openidClientOptionalScopesId(realmId, clientId))

@@ -116,12 +116,12 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapperCreate(ctx context.Conte
 
 	err := keycloakClient.ValidateOpenIdGroupMembershipProtocolMapper(ctx, openIdGroupMembershipMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.NewOpenIdGroupMembershipProtocolMapper(ctx, openIdGroupMembershipMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	mapFromOpenIdGroupMembershipMapperToData(openIdGroupMembershipMapper, data)
@@ -153,12 +153,12 @@ func resourceKeycloakOpenIdGroupMembershipProtocolMapperUpdate(ctx context.Conte
 
 	err := keycloakClient.ValidateOpenIdGroupMembershipProtocolMapper(ctx, openIdGroupMembershipMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.UpdateOpenIdGroupMembershipProtocolMapper(ctx, openIdGroupMembershipMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	return resourceKeycloakOpenIdGroupMembershipProtocolMapperRead(ctx, data, meta)

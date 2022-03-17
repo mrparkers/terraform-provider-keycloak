@@ -53,7 +53,7 @@ func setHardcodedAttributeIdentityProviderMapperData(data *schema.ResourceData, 
 
 	mapperType, err := getUserSessionFromHardcodedAttributeIdentityProviderMapperType(identityProviderMapper.IdentityProviderMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	data.Set("user_session", mapperType)

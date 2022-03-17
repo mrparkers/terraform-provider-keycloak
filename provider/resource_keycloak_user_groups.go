@@ -88,13 +88,13 @@ func resourceKeycloakUserGroupsReconcile(ctx context.Context, data *schema.Resou
 		remove := interfaceSliceToStringSlice(os.Difference(ns).List())
 
 		if err := keycloakClient.RemoveUserFromGroups(ctx, remove, userId, realmId); err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 
 	userGroups, err := keycloakClient.GetUserGroups(ctx, realmId, userId)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	var userGroupsIds []string
@@ -106,12 +106,12 @@ func resourceKeycloakUserGroupsReconcile(ctx context.Context, data *schema.Resou
 	add := stringArrayDifference(groupIds, userGroupsIds)
 
 	if err := keycloakClient.AddUserToGroups(ctx, add, userId, realmId); err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if exhaustive {
 		if err := keycloakClient.RemoveUserFromGroups(ctx, remove, userId, realmId); err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 

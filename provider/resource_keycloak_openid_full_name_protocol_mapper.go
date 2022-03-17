@@ -103,12 +103,12 @@ func resourceKeycloakOpenIdFullNameProtocolMapperCreate(ctx context.Context, dat
 
 	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(ctx, openIdFullNameMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.NewOpenIdFullNameProtocolMapper(ctx, openIdFullNameMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	mapFromOpenIdFullNameMapperToData(openIdFullNameMapper, data)
@@ -140,12 +140,12 @@ func resourceKeycloakOpenIdFullNameProtocolMapperUpdate(ctx context.Context, dat
 
 	err := keycloakClient.ValidateOpenIdFullNameProtocolMapper(ctx, openIdFullNameMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.UpdateOpenIdFullNameProtocolMapper(ctx, openIdFullNameMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	return resourceKeycloakOpenIdFullNameProtocolMapperRead(ctx, data, meta)

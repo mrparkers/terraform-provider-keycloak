@@ -127,12 +127,12 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapperCreate(ctx context.Contex
 
 	err := keycloakClient.ValidateOpenIdHardcodedClaimProtocolMapper(ctx, openIdHardcodedClaimMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.NewOpenIdHardcodedClaimProtocolMapper(ctx, openIdHardcodedClaimMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	mapFromOpenIdHardcodedClaimMapperToData(openIdHardcodedClaimMapper, data)
@@ -163,12 +163,12 @@ func resourceKeycloakOpenIdHardcodedClaimProtocolMapperUpdate(ctx context.Contex
 
 	err := keycloakClient.ValidateOpenIdHardcodedClaimProtocolMapper(ctx, openIdHardcodedClaimMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.UpdateOpenIdHardcodedClaimProtocolMapper(ctx, openIdHardcodedClaimMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	return resourceKeycloakOpenIdHardcodedClaimProtocolMapperRead(ctx, data, meta)

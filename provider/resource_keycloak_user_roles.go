@@ -54,7 +54,7 @@ func addRolesToUser(ctx context.Context, keycloakClient *keycloak.KeycloakClient
 	if len(realmRolesToAdd) != 0 {
 		err := keycloakClient.AddRealmRolesToUser(ctx, user.RealmId, user.Id, realmRolesToAdd)
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 
@@ -62,7 +62,7 @@ func addRolesToUser(ctx context.Context, keycloakClient *keycloak.KeycloakClient
 		if len(roles) != 0 {
 			err := keycloakClient.AddClientRolesToUser(ctx, user.RealmId, user.Id, k, roles)
 			if err != nil {
-				diag.FromErr(err)
+				return diag.FromErr(err)
 			}
 		}
 	}
@@ -74,7 +74,7 @@ func removeRolesFromUser(ctx context.Context, keycloakClient *keycloak.KeycloakC
 	if len(realmRolesToRemove) != 0 {
 		err := keycloakClient.RemoveRealmRolesFromUser(ctx, user.RealmId, user.Id, realmRolesToRemove)
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 
@@ -82,7 +82,7 @@ func removeRolesFromUser(ctx context.Context, keycloakClient *keycloak.KeycloakC
 		if len(roles) != 0 {
 			err := keycloakClient.RemoveClientRolesFromUser(ctx, user.RealmId, user.Id, k, roles)
 			if err != nil {
-				diag.FromErr(err)
+				return diag.FromErr(err)
 			}
 		}
 	}
@@ -100,7 +100,7 @@ func resourceKeycloakUserRolesReconcile(ctx context.Context, data *schema.Resour
 
 	user, err := keycloakClient.GetUser(ctx, realmId, userId)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if data.HasChange("role_ids") && !data.IsNewResource() {
@@ -111,17 +111,17 @@ func resourceKeycloakUserRolesReconcile(ctx context.Context, data *schema.Resour
 
 		tfRolesToRemove, err := getExtendedRoleMapping(ctx, keycloakClient, realmId, remove)
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 
 		if err = removeRolesFromUser(ctx, keycloakClient, tfRolesToRemove.clientRoles, tfRolesToRemove.realmRoles, user); err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 
 	tfRoles, err := getExtendedRoleMapping(ctx, keycloakClient, realmId, roleIds)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	// get the list of currently assigned roles. Due to default realm and client roles
@@ -134,14 +134,14 @@ func resourceKeycloakUserRolesReconcile(ctx context.Context, data *schema.Resour
 	// add roles
 	err = addRolesToUser(ctx, keycloakClient, updates.clientRolesToAdd, updates.realmRolesToAdd, user)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	// remove roles if exhaustive (authoritative)
 	if exhaustive {
 		err = removeRolesFromUser(ctx, keycloakClient, updates.clientRolesToRemove, updates.realmRolesToRemove, user)
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 
@@ -164,7 +164,7 @@ func resourceKeycloakUserRolesRead(ctx context.Context, data *schema.ResourceDat
 
 	roles, err := keycloakClient.GetUserRoleMappings(ctx, realmId, userId)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	var roleIds []string
@@ -200,12 +200,12 @@ func resourceKeycloakUserRolesDelete(ctx context.Context, data *schema.ResourceD
 	roleIds := interfaceSliceToStringSlice(data.Get("role_ids").(*schema.Set).List())
 	rolesToRemove, err := getExtendedRoleMapping(ctx, keycloakClient, realmId, roleIds)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = removeRolesFromUser(ctx, keycloakClient, rolesToRemove.clientRoles, rolesToRemove.realmRoles, user)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	return nil

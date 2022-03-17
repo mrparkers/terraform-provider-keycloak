@@ -79,7 +79,7 @@ func dataSourceKeycloakOpenidClientServiceAccountUserRead(ctx context.Context, d
 
 	user, err := keycloakClient.GetOpenidClientServiceAccountUserId(ctx, realmId, clientId)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	mapFromUserToData(data, user)

@@ -101,7 +101,7 @@ func resourceKeycloakRoleCreate(ctx context.Context, data *schema.ResourceData, 
 		for _, compositeRoleId := range compositeRolesTf {
 			compositeRoleToAdd, err := keycloakClient.GetRole(ctx, role.RealmId, compositeRoleId.(string))
 			if err != nil {
-				diag.FromErr(err)
+				return diag.FromErr(err)
 			}
 
 			compositeRoles = append(compositeRoles, compositeRoleToAdd)
@@ -114,13 +114,13 @@ func resourceKeycloakRoleCreate(ctx context.Context, data *schema.ResourceData, 
 
 	err := keycloakClient.CreateRole(ctx, role)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if role.Composite {
 		err = keycloakClient.AddCompositesToRole(ctx, role, compositeRoles)
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 
@@ -145,7 +145,7 @@ func resourceKeycloakRoleRead(ctx context.Context, data *schema.ResourceData, me
 	if role.Composite {
 		composites, err := keycloakClient.GetRoleComposites(ctx, role)
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 
 		var compositeRoleIds []string
@@ -167,12 +167,12 @@ func resourceKeycloakRoleUpdate(ctx context.Context, data *schema.ResourceData, 
 
 	err := keycloakClient.UpdateRole(ctx, role)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	keycloakComposites, err := keycloakClient.GetRoleComposites(ctx, role)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if v, ok := data.GetOk("composite_roles"); ok {
@@ -197,7 +197,7 @@ func resourceKeycloakRoleUpdate(ctx context.Context, data *schema.ResourceData, 
 		if len(keycloakCompositesToRemove) != 0 {
 			err = keycloakClient.RemoveCompositesFromRole(ctx, role, keycloakCompositesToRemove)
 			if err != nil {
-				diag.FromErr(err)
+				return diag.FromErr(err)
 			}
 		}
 
@@ -206,7 +206,7 @@ func resourceKeycloakRoleUpdate(ctx context.Context, data *schema.ResourceData, 
 			for _, tfCompositeId := range tfCompositeIds.List() {
 				compositeToAdd, err := keycloakClient.GetRole(ctx, role.RealmId, tfCompositeId.(string))
 				if err != nil {
-					diag.FromErr(err)
+					return diag.FromErr(err)
 				}
 
 				compositesToAdd = append(compositesToAdd, compositeToAdd)
@@ -214,7 +214,7 @@ func resourceKeycloakRoleUpdate(ctx context.Context, data *schema.ResourceData, 
 
 			err = keycloakClient.AddCompositesToRole(ctx, role, compositesToAdd)
 			if err != nil {
-				diag.FromErr(err)
+				return diag.FromErr(err)
 			}
 		}
 	} else {
@@ -222,7 +222,7 @@ func resourceKeycloakRoleUpdate(ctx context.Context, data *schema.ResourceData, 
 		if len(keycloakComposites) != 0 {
 			err = keycloakClient.RemoveCompositesFromRole(ctx, role, keycloakComposites)
 			if err != nil {
-				diag.FromErr(err)
+				return diag.FromErr(err)
 			}
 		}
 	}

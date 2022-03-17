@@ -37,7 +37,7 @@ func dataSourceKeycloakUserRealmRolesRead(ctx context.Context, data *schema.Reso
 
 	roles, err := keycloakClient.GetUserRoleMappings(ctx, realmId, userId)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	var roleNames []string

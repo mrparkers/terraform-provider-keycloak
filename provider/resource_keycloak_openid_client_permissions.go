@@ -65,59 +65,59 @@ func resourceKeycloakOpenidClientPermissionsReconcile(ctx context.Context, data 
 	// the existence of this resource implies that permissions are enabled for this client.
 	err := keycloakClient.EnableOpenidClientPermissions(ctx, realmId, clientId)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	openidClientPermissions, err := keycloakClient.GetOpenidClientPermissions(ctx, realmId, clientId)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(ctx, realmId, "realm-management")
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if viewScope, ok := data.GetOk("view_scope"); ok {
 		err := setOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["view"], viewScope.(*schema.Set))
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 	if manageScope, ok := data.GetOk("manage_scope"); ok {
 		err := setOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["manage"], manageScope.(*schema.Set))
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 	if configureScope, ok := data.GetOk("configure_scope"); ok {
 		err := setOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["configure"], configureScope.(*schema.Set))
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 	if mapRolesScope, ok := data.GetOk("map_roles_scope"); ok {
 		err := setOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles"], mapRolesScope.(*schema.Set))
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 	if mapRolesClientsScope, ok := data.GetOk("map_roles_client_scope_scope"); ok {
 		err := setOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles-client-scope"], mapRolesClientsScope.(*schema.Set))
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 	if mapRolesCompositeScope, ok := data.GetOk("map_roles_composite_scope"); ok {
 		err := setOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles-composite"], mapRolesCompositeScope.(*schema.Set))
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 	if tokenExchangeScope, ok := data.GetOk("token_exchange_scope"); ok {
 		err := setOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["token-exchange"], tokenExchangeScope.(*schema.Set))
 		if err != nil {
-			diag.FromErr(err)
+			return diag.FromErr(err)
 		}
 	}
 
@@ -142,7 +142,7 @@ func resourceKeycloakOpenidClientPermissionsRead(ctx context.Context, data *sche
 
 	realmManagementClient, err := keycloakClient.GetOpenidClientByClientId(ctx, realmId, "realm-management")
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	data.SetId(clientPermissionsId(openidClientPermissions.RealmId, openidClientPermissions.ClientId))
@@ -154,43 +154,43 @@ func resourceKeycloakOpenidClientPermissionsRead(ctx context.Context, data *sche
 	if viewScope, err := getOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["view"]); err == nil && viewScope != nil {
 		data.Set("view_scope", []interface{}{viewScope})
 	} else if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if manageScope, err := getOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["manage"]); err == nil && manageScope != nil {
 		data.Set("manage_scope", []interface{}{manageScope})
 	} else if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if mapRolesScope, err := getOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["configure"]); err == nil && mapRolesScope != nil {
 		data.Set("configure_scope", []interface{}{mapRolesScope})
 	} else if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if manageGroupMembershipScope, err := getOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles"]); err == nil && manageGroupMembershipScope != nil {
 		data.Set("map_roles_scope", []interface{}{manageGroupMembershipScope})
 	} else if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if impersonateScope, err := getOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles-client-scope"]); err == nil && impersonateScope != nil {
 		data.Set("map_roles_client_scope_scope", []interface{}{impersonateScope})
 	} else if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if userImpersonatedScope, err := getOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["map-roles-composite"]); err == nil && userImpersonatedScope != nil {
 		data.Set("map_roles_composite_scope", []interface{}{userImpersonatedScope})
 	} else if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if tokenExchangeScope, err := getOpenidClientScopePermissionPolicy(ctx, keycloakClient, realmId, realmManagementClient.Id, openidClientPermissions.ScopePermissions["token-exchange"]); err == nil && tokenExchangeScope != nil {
 		data.Set("token_exchange_scope", []interface{}{tokenExchangeScope})
 	} else if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	return nil

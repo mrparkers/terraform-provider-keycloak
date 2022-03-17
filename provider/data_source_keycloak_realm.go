@@ -525,7 +525,7 @@ func dataSourceKeycloakRealmRead(ctx context.Context, data *schema.ResourceData,
 
 	realm, err := keycloakClient.GetRealm(ctx, realmName)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setRealmData(data, realm)

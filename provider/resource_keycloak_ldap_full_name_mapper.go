@@ -87,12 +87,12 @@ func resourceKeycloakLdapFullNameMapperCreate(ctx context.Context, data *schema.
 
 	err := keycloakClient.ValidateLdapFullNameMapper(ctx, ldapFullNameMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.NewLdapFullNameMapper(ctx, ldapFullNameMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setLdapFullNameMapperData(data, ldapFullNameMapper)
@@ -123,12 +123,12 @@ func resourceKeycloakLdapFullNameMapperUpdate(ctx context.Context, data *schema.
 
 	err := keycloakClient.ValidateLdapFullNameMapper(ctx, ldapFullNameMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.UpdateLdapFullNameMapper(ctx, ldapFullNameMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	setLdapFullNameMapperData(data, ldapFullNameMapper)

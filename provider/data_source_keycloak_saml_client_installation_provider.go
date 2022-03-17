@@ -42,7 +42,7 @@ func dataSourceKeycloakSamlClientInstallationProviderRead(ctx context.Context, d
 
 	value, err := keycloakClient.GetSamlClientInstallationProvider(ctx, realmId, clientId, providerId)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	h := sha1.New()

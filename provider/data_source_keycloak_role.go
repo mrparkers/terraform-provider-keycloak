@@ -50,7 +50,7 @@ func dataSourceKeycloakRoleRead(ctx context.Context, data *schema.ResourceData, 
 
 	role, err := keycloakClient.GetRoleByName(ctx, realmId, clientId, roleName)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	mapFromRoleToData(data, role)

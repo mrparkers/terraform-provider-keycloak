@@ -95,7 +95,7 @@ func resourceKeycloakAuthenticationSubFlowCreate(ctx context.Context, data *sche
 
 	err := keycloakClient.NewAuthenticationSubFlow(ctx, authenticationFlow)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 	mapFromAuthenticationSubFlowToData(data, authenticationFlow)
 	return resourceKeycloakAuthenticationSubFlowRead(ctx, data, meta)
@@ -123,7 +123,7 @@ func resourceKeycloakAuthenticationSubFlowUpdate(ctx context.Context, data *sche
 
 	err := keycloakClient.UpdateAuthenticationSubFlow(ctx, authenticationFlow)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 	mapFromAuthenticationSubFlowToData(data, authenticationFlow)
 	return nil

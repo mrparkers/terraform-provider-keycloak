@@ -97,17 +97,17 @@ func resourceKeycloakRealmKeystoreAesGeneratedCreate(ctx context.Context, data *
 
 	realmKey, err := getRealmKeystoreAesGeneratedFromData(data)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.NewRealmKeystoreAesGenerated(ctx, realmKey)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = setRealmKeystoreAesGeneratedData(data, realmKey)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	return resourceKeycloakRealmKeystoreAesGeneratedRead(ctx, data, meta)
@@ -126,7 +126,7 @@ func resourceKeycloakRealmKeystoreAesGeneratedRead(ctx context.Context, data *sc
 
 	err = setRealmKeystoreAesGeneratedData(data, realmKey)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -137,17 +137,17 @@ func resourceKeycloakRealmKeystoreAesGeneratedUpdate(ctx context.Context, data *
 
 	realmKey, err := getRealmKeystoreAesGeneratedFromData(data)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.UpdateRealmKeystoreAesGenerated(ctx, realmKey)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = setRealmKeystoreAesGeneratedData(data, realmKey)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	return nil

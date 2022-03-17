@@ -143,12 +143,12 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperCreate(ctx context.Context
 
 	err := keycloakClient.ValidateOpenIdUserAttributeProtocolMapper(ctx, openIdUserAttributeMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.NewOpenIdUserAttributeProtocolMapper(ctx, openIdUserAttributeMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	mapFromOpenIdUserAttributeMapperToData(openIdUserAttributeMapper, data)
@@ -180,12 +180,12 @@ func resourceKeycloakOpenIdUserAttributeProtocolMapperUpdate(ctx context.Context
 
 	err := keycloakClient.ValidateOpenIdUserAttributeProtocolMapper(ctx, openIdUserAttributeMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	err = keycloakClient.UpdateOpenIdUserAttributeProtocolMapper(ctx, openIdUserAttributeMapper)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	return resourceKeycloakOpenIdUserAttributeProtocolMapperRead(ctx, data, meta)

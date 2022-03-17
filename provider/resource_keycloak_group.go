@@ -88,7 +88,7 @@ func resourceKeycloakGroupCreate(ctx context.Context, data *schema.ResourceData,
 
 	err := keycloakClient.NewGroup(ctx, group)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	mapFromGroupToData(data, group)
@@ -119,7 +119,7 @@ func resourceKeycloakGroupUpdate(ctx context.Context, data *schema.ResourceData,
 
 	err := keycloakClient.UpdateGroup(ctx, group)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	mapFromGroupToData(data, group)
