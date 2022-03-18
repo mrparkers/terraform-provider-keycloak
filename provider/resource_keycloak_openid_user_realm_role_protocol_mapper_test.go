@@ -135,7 +135,7 @@ func TestAccKeycloakOpenIdUserRealmRoleProtocolMapper_createAfterManualDestroy(t
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenIdUserRealmRoleProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					err := keycloakClient.DeleteOpenIdUserRealmRoleProtocolMapper(testCtx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
@@ -296,7 +296,7 @@ func getUserRealmRoleMapperUsingState(state *terraform.State, resourceName strin
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	return keycloakClient.GetOpenIdUserRealmRoleProtocolMapper(realm, clientId, clientScopeId, id)
+	return keycloakClient.GetOpenIdUserRealmRoleProtocolMapper(testCtx, realm, clientId, clientScopeId, id)
 }
 
 func testKeycloakOpenIdUserRealmRoleProtocolMapper_basic_client(clientId, mapperName string) string {

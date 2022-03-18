@@ -52,7 +52,7 @@ func testAccCheckKeycloakUsersPermissionExists(resourceName string) resource.Tes
 		authorizationResourceServerId := rs.Primary.Attributes["authorization_resource_server_id"]
 
 		var realmManagementId string
-		clients, _ := keycloakClient.GetOpenidClients(permissions.RealmId, false)
+		clients, _ := keycloakClient.GetOpenidClients(testCtx, permissions.RealmId, false)
 		for _, client := range clients {
 			if client.ClientId == "realm-management" {
 				realmManagementId = client.Id
@@ -68,7 +68,7 @@ func testAccCheckKeycloakUsersPermissionExists(resourceName string) resource.Tes
 		viewScopeDescription := rs.Primary.Attributes["view_scope.0.description"]
 		viewScopeDecisionStrategy := rs.Primary.Attributes["view_scope.0.decision_strategy"]
 
-		authzClientView, err := keycloakClient.GetOpenidClientAuthorizationPermission(permissions.RealmId, realmManagementId, permissions.ScopePermissions["view"])
+		authzClientView, err := keycloakClient.GetOpenidClientAuthorizationPermission(testCtx, permissions.RealmId, realmManagementId, permissions.ScopePermissions["view"])
 		if err != nil {
 			return err
 		}
@@ -86,7 +86,7 @@ func testAccCheckKeycloakUsersPermissionExists(resourceName string) resource.Tes
 			return fmt.Errorf("decision strategy %s was not equal to %s", authzClientView.DecisionStrategy, viewScopeDecisionStrategy)
 		}
 
-		authzClientManage, err := keycloakClient.GetOpenidClientAuthorizationPermission(permissions.RealmId, realmManagementId, permissions.ScopePermissions["manage"])
+		authzClientManage, err := keycloakClient.GetOpenidClientAuthorizationPermission(testCtx, permissions.RealmId, realmManagementId, permissions.ScopePermissions["manage"])
 		if err != nil {
 			return err
 		}
@@ -116,7 +116,7 @@ func testAccCheckKeycloakUsersPermissionExists(resourceName string) resource.Tes
 
 func testAccCheckKeycloakUsersPermissionsAreDisabled(realmId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		permissions, err := keycloakClient.GetUsersPermissions(realmId)
+		permissions, err := keycloakClient.GetUsersPermissions(testCtx, realmId)
 		if err != nil {
 			return fmt.Errorf("error getting users permissions with realm id %s: %s", realmId, err)
 		}
@@ -137,7 +137,7 @@ func getUsersPermissionsFromState(s *terraform.State, resourceName string) (*key
 
 	realmId := rs.Primary.Attributes["realm_id"]
 
-	permissions, err := keycloakClient.GetUsersPermissions(realmId)
+	permissions, err := keycloakClient.GetUsersPermissions(testCtx, realmId)
 	if err != nil {
 		return nil, fmt.Errorf("error getting users permissions with realm id %s: %s", realmId, err)
 

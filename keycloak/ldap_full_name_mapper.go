@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
@@ -61,14 +62,14 @@ func convertFromComponentToLdapFullNameMapper(component *component, realmId stri
 }
 
 // the keycloak api client is passed in order to fetch the ldap provider for writable validation
-func (keycloakClient *KeycloakClient) ValidateLdapFullNameMapper(mapper *LdapFullNameMapper) error {
+func (keycloakClient *KeycloakClient) ValidateLdapFullNameMapper(ctx context.Context, mapper *LdapFullNameMapper) error {
 	if mapper.ReadOnly && mapper.WriteOnly {
 		return fmt.Errorf("validation error: ldap full name mapper cannot be both read only and write only")
 	}
 
 	// the mapper can't be write only if the ldap provider is not writable
 	if mapper.WriteOnly {
-		ldapUserFederation, err := keycloakClient.GetLdapUserFederation(mapper.RealmId, mapper.LdapUserFederationId)
+		ldapUserFederation, err := keycloakClient.GetLdapUserFederation(ctx, mapper.RealmId, mapper.LdapUserFederationId)
 		if err != nil {
 			return err
 		}
@@ -81,8 +82,8 @@ func (keycloakClient *KeycloakClient) ValidateLdapFullNameMapper(mapper *LdapFul
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) NewLdapFullNameMapper(ldapFullNameMapper *LdapFullNameMapper) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapFullNameMapper.RealmId), convertFromLdapFullNameMapperToComponent(ldapFullNameMapper))
+func (keycloakClient *KeycloakClient) NewLdapFullNameMapper(ctx context.Context, ldapFullNameMapper *LdapFullNameMapper) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", ldapFullNameMapper.RealmId), convertFromLdapFullNameMapperToComponent(ldapFullNameMapper))
 	if err != nil {
 		return err
 	}
@@ -92,10 +93,10 @@ func (keycloakClient *KeycloakClient) NewLdapFullNameMapper(ldapFullNameMapper *
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetLdapFullNameMapper(realmId, id string) (*LdapFullNameMapper, error) {
+func (keycloakClient *KeycloakClient) GetLdapFullNameMapper(ctx context.Context, realmId, id string) (*LdapFullNameMapper, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -103,10 +104,10 @@ func (keycloakClient *KeycloakClient) GetLdapFullNameMapper(realmId, id string) 
 	return convertFromComponentToLdapFullNameMapper(component, realmId)
 }
 
-func (keycloakClient *KeycloakClient) UpdateLdapFullNameMapper(ldapFullNameMapper *LdapFullNameMapper) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapFullNameMapper.RealmId, ldapFullNameMapper.Id), convertFromLdapFullNameMapperToComponent(ldapFullNameMapper))
+func (keycloakClient *KeycloakClient) UpdateLdapFullNameMapper(ctx context.Context, ldapFullNameMapper *LdapFullNameMapper) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", ldapFullNameMapper.RealmId, ldapFullNameMapper.Id), convertFromLdapFullNameMapperToComponent(ldapFullNameMapper))
 }
 
-func (keycloakClient *KeycloakClient) DeleteLdapFullNameMapper(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteLdapFullNameMapper(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

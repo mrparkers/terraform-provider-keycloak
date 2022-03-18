@@ -49,7 +49,7 @@ func testAccCheckKeycloakOpenidClientPermissionExists(resourceName string) resou
 		viewScopeDecisionStrategy := rs.Primary.Attributes["view_scope.0.decision_strategy"]
 
 		var realmManagementId string
-		clients, _ := keycloakClient.GetOpenidClients(permissions.RealmId, false)
+		clients, _ := keycloakClient.GetOpenidClients(testCtx, permissions.RealmId, false)
 		for _, client := range clients {
 			if client.ClientId == "realm-management" {
 				realmManagementId = client.Id
@@ -61,7 +61,7 @@ func testAccCheckKeycloakOpenidClientPermissionExists(resourceName string) resou
 			return fmt.Errorf("computed authorizationResourceServerId %s was not equal to %s (the id of the realm-management client)", authorizationResourceServerId, realmManagementId)
 		}
 
-		authzClientView, err := keycloakClient.GetOpenidClientAuthorizationPermission(permissions.RealmId, realmManagementId, permissions.ScopePermissions["view"])
+		authzClientView, err := keycloakClient.GetOpenidClientAuthorizationPermission(testCtx, permissions.RealmId, realmManagementId, permissions.ScopePermissions["view"])
 		if err != nil {
 			return err
 		}
@@ -82,12 +82,12 @@ func testAccCheckKeycloakOpenidClientPermissionExists(resourceName string) resou
 
 func testAccCheckKeycloakOpenidClientPermissionsAreDisabled(clientId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client, err := keycloakClient.GetOpenidClientByClientId(testAccRealm.Realm, clientId)
+		client, err := keycloakClient.GetOpenidClientByClientId(testCtx, testAccRealm.Realm, clientId)
 		if err != nil {
 			return err
 		}
 
-		permissions, err := keycloakClient.GetOpenidClientPermissions(testAccRealm.Realm, client.Id)
+		permissions, err := keycloakClient.GetOpenidClientPermissions(testCtx, testAccRealm.Realm, client.Id)
 		if err != nil {
 			return fmt.Errorf("error getting openid_client permissions with realm id %s and client id %s: %s", testAccRealm.Realm, clientId, err)
 		}
@@ -109,7 +109,7 @@ func getOpenidClientPermissionsFromState(s *terraform.State, resourceName string
 	realmId := rs.Primary.Attributes["realm_id"]
 	clientId := rs.Primary.Attributes["client_id"]
 
-	permissions, err := keycloakClient.GetOpenidClientPermissions(testAccRealm.Realm, clientId)
+	permissions, err := keycloakClient.GetOpenidClientPermissions(testCtx, testAccRealm.Realm, clientId)
 	if err != nil {
 		return nil, fmt.Errorf("error getting openid_client permissions with realm id %s and client id %s: %s", realmId, clientId, err)
 	}

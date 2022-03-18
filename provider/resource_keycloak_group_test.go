@@ -74,7 +74,7 @@ func TestAccKeycloakGroup_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteGroup(group.RealmId, group.Id)
+					err := keycloakClient.DeleteGroup(testCtx, group.RealmId, group.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -326,7 +326,7 @@ func testAccCheckKeycloakGroupDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			group, _ := keycloakClient.GetGroup(realm, id)
+			group, _ := keycloakClient.GetGroup(testCtx, realm, id)
 			if group != nil {
 				return fmt.Errorf("group with id %s still exists", id)
 			}
@@ -345,7 +345,7 @@ func getGroupFromState(s *terraform.State, resourceName string) (*keycloak.Group
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	group, err := keycloakClient.GetGroup(realm, id)
+	group, err := keycloakClient.GetGroup(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting group with id %s: %s", id, err)
 	}

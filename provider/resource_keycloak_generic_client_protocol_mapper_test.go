@@ -142,7 +142,7 @@ func getGenericClientProtocolMapperUsingState(state *terraform.State, resourceNa
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	return keycloakClient.GetGenericClientProtocolMapper(realmId, clientId, clientScopeId, mapperId)
+	return keycloakClient.GetGenericClientProtocolMapper(testCtx, realmId, clientId, clientScopeId, mapperId)
 }
 
 func testKeycloakGenericClientProtocolMapper_basic_client(clientId string, mapperName string) string {

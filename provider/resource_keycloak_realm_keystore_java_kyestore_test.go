@@ -27,6 +27,12 @@ func TestAccKeycloakRealmKeystoreJava_basic(t *testing.T) {
 				Config: testKeycloakRealmKeystoreJava_basic(javaKeystoreName),
 				Check:  testAccCheckRealmKeystoreJavaExists("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
 			},
+			{
+				ResourceName:      "keycloak_realm_keystore_java_keystore.realm_java_keystore",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
+			},
 		},
 	})
 }
@@ -51,7 +57,7 @@ func TestAccKeycloakRealmKeystoreJava_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRealmKeystoreJavaKeystore(javaKeystore.RealmId, javaKeystore.Id)
+					err := keycloakClient.DeleteRealmKeystoreJavaKeystore(testCtx, javaKeystore.RealmId, javaKeystore.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -167,7 +173,7 @@ func testAccCheckRealmKeystoreJavaDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreJavaKeystore(realm, id)
+			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreJavaKeystore(testCtx, realm, id)
 			if ldapGroupKeystore != nil {
 				return fmt.Errorf("rsa keystore with id %s still exists", id)
 			}
@@ -188,7 +194,7 @@ func getKeycloakRealmKeystoreJavaFromState(s *terraform.State,
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	realmKeystore, err := keycloakClient.GetRealmKeystoreJavaKeystore(realm, id)
+	realmKeystore, err := keycloakClient.GetRealmKeystoreJavaKeystore(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting rsa keystore with id %s: %s", id, err)
 	}

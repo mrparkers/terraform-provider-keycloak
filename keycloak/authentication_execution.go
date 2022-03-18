@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
@@ -63,10 +64,10 @@ func (list AuthenticationExecutionList) Swap(i, j int) {
 	list[i], list[j] = list[j], list[i]
 }
 
-func (keycloakClient *KeycloakClient) ListAuthenticationExecutions(realmId, parentFlowAlias string) (AuthenticationExecutionList, error) {
+func (keycloakClient *KeycloakClient) ListAuthenticationExecutions(ctx context.Context, realmId, parentFlowAlias string) (AuthenticationExecutionList, error) {
 	var authenticationExecutions []*AuthenticationExecutionInfo
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -74,11 +75,11 @@ func (keycloakClient *KeycloakClient) ListAuthenticationExecutions(realmId, pare
 	return authenticationExecutions, err
 }
 
-func (keycloakClient *KeycloakClient) GetAuthenticationExecutionInfoFromProviderId(realmId, parentFlowAlias, providerId string) (*AuthenticationExecutionInfo, error) {
+func (keycloakClient *KeycloakClient) GetAuthenticationExecutionInfoFromProviderId(ctx context.Context, realmId, parentFlowAlias, providerId string) (*AuthenticationExecutionInfo, error) {
 	var authenticationExecutions []*AuthenticationExecutionInfo
 	var authenticationExecution AuthenticationExecutionInfo
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +87,7 @@ func (keycloakClient *KeycloakClient) GetAuthenticationExecutionInfoFromProvider
 	// Retry 3 more times if not found, sometimes it took split milliseconds the Authentication Executions to populate
 	if len(authenticationExecutions) == 0 {
 		for i := 0; i < 3; i++ {
-			err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
+			err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
 
 			if len(authenticationExecutions) > 0 {
 				break
@@ -117,15 +118,15 @@ func (keycloakClient *KeycloakClient) GetAuthenticationExecutionInfoFromProvider
 	return nil, fmt.Errorf("no authentication execution under parent flow alias %s with provider id %s found", parentFlowAlias, providerId)
 }
 
-func (keycloakClient *KeycloakClient) NewAuthenticationExecution(execution *AuthenticationExecution) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions/execution", execution.RealmId, execution.ParentFlowAlias), &authenticationExecutionCreate{Provider: execution.Authenticator})
+func (keycloakClient *KeycloakClient) NewAuthenticationExecution(ctx context.Context, execution *AuthenticationExecution) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s/executions/execution", execution.RealmId, execution.ParentFlowAlias), &authenticationExecutionCreate{Provider: execution.Authenticator})
 	if err != nil {
 		return err
 	}
 
 	execution.Id = getIdFromLocationHeader(location)
 
-	err = keycloakClient.UpdateAuthenticationExecution(execution)
+	err = keycloakClient.UpdateAuthenticationExecution(ctx, execution)
 	if err != nil {
 		return err
 	}
@@ -133,10 +134,10 @@ func (keycloakClient *KeycloakClient) NewAuthenticationExecution(execution *Auth
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetAuthenticationExecution(realmId, parentFlowAlias, id string) (*AuthenticationExecution, error) {
+func (keycloakClient *KeycloakClient) GetAuthenticationExecution(ctx context.Context, realmId, parentFlowAlias, id string) (*AuthenticationExecution, error) {
 	var authenticationExecution AuthenticationExecution
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/executions/%s", realmId, id), &authenticationExecution, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/executions/%s", realmId, id), &authenticationExecution, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -147,40 +148,40 @@ func (keycloakClient *KeycloakClient) GetAuthenticationExecution(realmId, parent
 	return &authenticationExecution, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateAuthenticationExecution(execution *AuthenticationExecution) error {
+func (keycloakClient *KeycloakClient) UpdateAuthenticationExecution(ctx context.Context, execution *AuthenticationExecution) error {
 	authenticationExecutionUpdateRequirement := &authenticationExecutionRequirementUpdate{
 		RealmId:         execution.RealmId,
 		ParentFlowAlias: execution.ParentFlowAlias,
 		Id:              execution.Id,
 		Requirement:     execution.Requirement,
 	}
-	return keycloakClient.UpdateAuthenticationExecutionRequirement(authenticationExecutionUpdateRequirement)
+	return keycloakClient.UpdateAuthenticationExecutionRequirement(ctx, authenticationExecutionUpdateRequirement)
 }
 
-func (keycloakClient *KeycloakClient) UpdateAuthenticationExecutionRequirement(executionRequirementUpdate *authenticationExecutionRequirementUpdate) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", executionRequirementUpdate.RealmId, executionRequirementUpdate.ParentFlowAlias), executionRequirementUpdate)
+func (keycloakClient *KeycloakClient) UpdateAuthenticationExecutionRequirement(ctx context.Context, executionRequirementUpdate *authenticationExecutionRequirementUpdate) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", executionRequirementUpdate.RealmId, executionRequirementUpdate.ParentFlowAlias), executionRequirementUpdate)
 }
 
-func (keycloakClient *KeycloakClient) DeleteAuthenticationExecution(realmId, id string) error {
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/authentication/executions/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteAuthenticationExecution(ctx context.Context, realmId, id string) error {
+	err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/authentication/executions/%s", realmId, id), nil)
 	if err != nil {
 		// For whatever reason, this fails sometimes with a 500 during acceptance tests. try again
-		return keycloakClient.delete(fmt.Sprintf("/realms/%s/authentication/executions/%s", realmId, id), nil)
+		return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/authentication/executions/%s", realmId, id), nil)
 	}
 
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) RaiseAuthenticationExecutionPriority(realmId, id string) error {
-	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/authentication/executions/%s/raise-priority", realmId, id), nil)
+func (keycloakClient *KeycloakClient) RaiseAuthenticationExecutionPriority(ctx context.Context, realmId, id string) error {
+	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/authentication/executions/%s/raise-priority", realmId, id), nil)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) LowerAuthenticationExecutionPriority(realmId, id string) error {
-	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/authentication/executions/%s/lower-priority", realmId, id), nil)
+func (keycloakClient *KeycloakClient) LowerAuthenticationExecutionPriority(ctx context.Context, realmId, id string) error {
+	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/authentication/executions/%s/lower-priority", realmId, id), nil)
 	if err != nil {
 		return err
 	}

@@ -56,7 +56,7 @@ func TestAccKeycloakAuthenticationSubFlow_createAfterManualDestroy(t *testing.T)
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteAuthenticationSubFlow(authenticationSubFlow.RealmId, authenticationSubFlow.ParentFlowAlias, authenticationSubFlow.Id)
+					err := keycloakClient.DeleteAuthenticationSubFlow(testCtx, authenticationSubFlow.RealmId, authenticationSubFlow.ParentFlowAlias, authenticationSubFlow.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -172,7 +172,7 @@ func testAccCheckKeycloakAuthenticationSubFlowDestroy() resource.TestCheckFunc {
 			realm := rs.Primary.Attributes["realm_id"]
 			parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
 
-			authenticationSubFlow, _ := keycloakClient.GetAuthenticationSubFlow(realm, parentFlowAlias, id)
+			authenticationSubFlow, _ := keycloakClient.GetAuthenticationSubFlow(testCtx, realm, parentFlowAlias, id)
 			if authenticationSubFlow != nil {
 				return fmt.Errorf("authentication flow with id %s still exists", id)
 			}
@@ -192,7 +192,7 @@ func getAuthenticationSubFlowFromState(s *terraform.State, resourceName string) 
 	realm := rs.Primary.Attributes["realm_id"]
 	parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
 
-	authenticationSubFlow, err := keycloakClient.GetAuthenticationSubFlow(realm, parentFlowAlias, id)
+	authenticationSubFlow, err := keycloakClient.GetAuthenticationSubFlow(testCtx, realm, parentFlowAlias, id)
 
 	if err != nil {
 		return nil, fmt.Errorf("error getting authentication subflow with id %s: %s", id, err)

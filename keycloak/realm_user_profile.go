@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -44,18 +45,13 @@ type RealmUserProfile struct {
 	Groups     []*RealmUserProfileGroup     `json:"groups,omitempty"`
 }
 
-func (keycloakClient *KeycloakClient) UpdateRealmUserProfile(realmId string, realmUserProfile *RealmUserProfile) error {
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/users/profile", realmId), realmUserProfile)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (keycloakClient *KeycloakClient) UpdateRealmUserProfile(ctx context.Context, realmId string, realmUserProfile *RealmUserProfile) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/users/profile", realmId), realmUserProfile)
 }
 
-func (keycloakClient *KeycloakClient) GetRealmUserProfile(realmId string) (*RealmUserProfile, error) {
+func (keycloakClient *KeycloakClient) GetRealmUserProfile(ctx context.Context, realmId string) (*RealmUserProfile, error) {
 	var realmUserProfile RealmUserProfile
-	body, err := keycloakClient.getRaw(fmt.Sprintf("/realms/%s/users/profile", realmId), nil)
+	body, err := keycloakClient.getRaw(ctx, fmt.Sprintf("/realms/%s/users/profile", realmId), nil)
 	if err != nil {
 		return nil, err
 	}

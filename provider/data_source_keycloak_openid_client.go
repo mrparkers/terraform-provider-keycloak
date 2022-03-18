@@ -1,13 +1,15 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakOpenidClient() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakOpenidClientRead,
+		ReadContext: dataSourceKeycloakOpenidClientRead,
 
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -225,20 +227,20 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 	}
 }
 
-func dataSourceKeycloakOpenidClientRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakOpenidClientRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
-	client, err := keycloakClient.GetOpenidClientByClientId(realmId, clientId)
+	client, err := keycloakClient.GetOpenidClientByClientId(ctx, realmId, clientId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
-	err = setOpenidClientData(keycloakClient, data, client)
+	err = setOpenidClientData(ctx, keycloakClient, data, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

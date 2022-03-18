@@ -179,7 +179,7 @@ func TestAccKeycloakRole_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRole(role.RealmId, role.Id)
+					err := keycloakClient.DeleteRole(testCtx, role.RealmId, role.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -313,7 +313,7 @@ func testAccCheckKeycloakRoleDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			role, _ := keycloakClient.GetRole(realm, id)
+			role, _ := keycloakClient.GetRole(testCtx, realm, id)
 			if role != nil {
 				return fmt.Errorf("%s with id %s still exists", name, id)
 			}
@@ -369,7 +369,7 @@ func testAccCheckKeycloakRoleHasComposites(resourceName string, compositeRoleNam
 			return fmt.Errorf("expected role %s to have no composites, but has some", role.Name)
 		}
 
-		composites, err := keycloakClient.GetRoleComposites(role)
+		composites, err := keycloakClient.GetRoleComposites(testCtx, role)
 		if err != nil {
 			return err
 		}
@@ -415,7 +415,7 @@ func getRoleFromState(s *terraform.State, resourceName string) (*keycloak.Role, 
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	role, err := keycloakClient.GetRole(realm, id)
+	role, err := keycloakClient.GetRole(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting role with id %s: %s", id, err)
 	}

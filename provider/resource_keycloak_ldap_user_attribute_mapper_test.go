@@ -51,7 +51,7 @@ func TestAccKeycloakLdapUserAttributeMapper_createAfterManualDestroy(t *testing.
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteLdapUserAttributeMapper(mapper.RealmId, mapper.Id)
+					err := keycloakClient.DeleteLdapUserAttributeMapper(testCtx, mapper.RealmId, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -157,7 +157,7 @@ func testAccCheckKeycloakLdapUserAttributeMapperDestroy() resource.TestCheckFunc
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapUserAttributeMapper, _ := keycloakClient.GetLdapUserAttributeMapper(realm, id)
+			ldapUserAttributeMapper, _ := keycloakClient.GetLdapUserAttributeMapper(testCtx, realm, id)
 			if ldapUserAttributeMapper != nil {
 				return fmt.Errorf("ldap user attribute mapper with id %s still exists", id)
 			}
@@ -176,7 +176,7 @@ func getLdapUserAttributeMapperFromState(s *terraform.State, resourceName string
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	ldapUserAttributeMapper, err := keycloakClient.GetLdapUserAttributeMapper(realm, id)
+	ldapUserAttributeMapper, err := keycloakClient.GetLdapUserAttributeMapper(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting ldap user attribute mapper with id %s: %s", id, err)
 	}

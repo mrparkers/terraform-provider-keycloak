@@ -89,7 +89,7 @@ func TestAccKeycloakUser_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteUser(user.RealmId, user.Id)
+					err := keycloakClient.DeleteUser(testCtx, user.RealmId, user.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -294,7 +294,7 @@ func testAccCheckKeycloakUserHasFederationLinkWithSourceUserName(resourceName, s
 			return err
 		}
 
-		var found bool = false
+		var found = false
 		for _, federatedIdentity := range fetchedUser.FederatedIdentities {
 			if federatedIdentity.UserName == sourceUserName {
 				found = true
@@ -380,7 +380,7 @@ func testAccCheckKeycloakUserDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			user, _ := keycloakClient.GetUser(realm, id)
+			user, _ := keycloakClient.GetUser(testCtx, realm, id)
 			if user != nil {
 				return fmt.Errorf("user with id %s still exists", id)
 			}
@@ -399,7 +399,7 @@ func getUserFromState(s *terraform.State, resourceName string) (*keycloak.User, 
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	user, err := keycloakClient.GetUser(realm, id)
+	user, err := keycloakClient.GetUser(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting user with id %s: %s", id, err)
 	}

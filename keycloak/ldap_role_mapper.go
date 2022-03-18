@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -118,12 +119,8 @@ func convertFromComponentToLdapRoleMapper(component *component, realmId string) 
 	return ldapRoleMapper, nil
 }
 
-func (keycloakClient *KeycloakClient) ValidateLdapRoleMapper(ldapRoleMapper *LdapRoleMapper) error {
-	return nil
-}
-
-func (keycloakClient *KeycloakClient) NewLdapRoleMapper(ldapRoleMapper *LdapRoleMapper) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapRoleMapper.RealmId), convertFromLdapRoleMapperToComponent(ldapRoleMapper))
+func (keycloakClient *KeycloakClient) NewLdapRoleMapper(ctx context.Context, ldapRoleMapper *LdapRoleMapper) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", ldapRoleMapper.RealmId), convertFromLdapRoleMapperToComponent(ldapRoleMapper))
 	if err != nil {
 		return err
 	}
@@ -133,10 +130,10 @@ func (keycloakClient *KeycloakClient) NewLdapRoleMapper(ldapRoleMapper *LdapRole
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetLdapRoleMapper(realmId, id string) (*LdapRoleMapper, error) {
+func (keycloakClient *KeycloakClient) GetLdapRoleMapper(ctx context.Context, realmId, id string) (*LdapRoleMapper, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -144,10 +141,10 @@ func (keycloakClient *KeycloakClient) GetLdapRoleMapper(realmId, id string) (*Ld
 	return convertFromComponentToLdapRoleMapper(component, realmId)
 }
 
-func (keycloakClient *KeycloakClient) UpdateLdapRoleMapper(ldapRoleMapper *LdapRoleMapper) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapRoleMapper.RealmId, ldapRoleMapper.Id), convertFromLdapRoleMapperToComponent(ldapRoleMapper))
+func (keycloakClient *KeycloakClient) UpdateLdapRoleMapper(ctx context.Context, ldapRoleMapper *LdapRoleMapper) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", ldapRoleMapper.RealmId, ldapRoleMapper.Id), convertFromLdapRoleMapperToComponent(ldapRoleMapper))
 }
 
-func (keycloakClient *KeycloakClient) DeleteLdapRoleMapper(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteLdapRoleMapper(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

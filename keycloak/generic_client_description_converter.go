@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -45,10 +46,10 @@ type GenericClientRepresentation struct {
 	WebOrigins                         []string                       `json:"webOrigins"`
 }
 
-func (keycloakClient *KeycloakClient) NewGenericClientDescription(realmId string, body string) (*GenericClientRepresentation, error) {
+func (keycloakClient *KeycloakClient) NewGenericClientDescription(ctx context.Context, realmId string, body string) (*GenericClientRepresentation, error) {
 	var genericClientRepresentation GenericClientRepresentation
 
-	result, err := keycloakClient.sendRaw(fmt.Sprintf("/realms/%s/client-description-converter", realmId), []byte(body))
+	result, err := keycloakClient.sendRaw(ctx, fmt.Sprintf("/realms/%s/client-description-converter", realmId), []byte(body))
 
 	if err != nil {
 		return nil, err

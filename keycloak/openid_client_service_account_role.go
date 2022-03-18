@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -15,29 +16,29 @@ type OpenidClientServiceAccountRole struct {
 	Description          string `json:"description"`
 }
 
-func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(serviceAccountRole *OpenidClientServiceAccountRole) error {
+func (keycloakClient *KeycloakClient) NewOpenidClientServiceAccountRole(ctx context.Context, serviceAccountRole *OpenidClientServiceAccountRole) error {
 	serviceAccountRoles := []OpenidClientServiceAccountRole{*serviceAccountRole}
-	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId), serviceAccountRoles)
+	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.ContainerId), serviceAccountRoles)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId string) error {
-	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId)
+func (keycloakClient *KeycloakClient) DeleteOpenidClientServiceAccountRole(ctx context.Context, realm, serviceAccountUserId, clientId, roleId string) error {
+	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRole(ctx, realm, serviceAccountUserId, clientId, roleId)
 	if err != nil {
 		return err
 	}
 	serviceAccountRoles := []OpenidClientServiceAccountRole{*serviceAccountRole}
-	err = keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles)
+	err = keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(realm, serviceAccountUserId, clientId, roleId string) (*OpenidClientServiceAccountRole, error) {
+func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(ctx context.Context, realm, serviceAccountUserId, clientId, roleId string) (*OpenidClientServiceAccountRole, error) {
 	serviceAccountRoles := []OpenidClientServiceAccountRole{
 		{
 			Id:                   roleId,
@@ -46,7 +47,7 @@ func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(realm, s
 			ServiceAccountUserId: serviceAccountUserId,
 		},
 	}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -60,10 +61,10 @@ func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRole(realm, s
 	return &OpenidClientServiceAccountRole{}, nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRealmRoles(realm, serviceAccountUserId string) ([]*OpenidClientServiceAccountRole, error) {
+func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRealmRoles(ctx context.Context, realm, serviceAccountUserId string) ([]*OpenidClientServiceAccountRole, error) {
 	var serviceAccountRoles []*OpenidClientServiceAccountRole
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm/composite", realm, serviceAccountUserId), &serviceAccountRoles, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm/composite", realm, serviceAccountUserId), &serviceAccountRoles, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -76,10 +77,10 @@ func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountRealmRoles(re
 	return serviceAccountRoles, nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountClientRoles(realm, serviceAccountUserId, clientId string) ([]*OpenidClientServiceAccountRole, error) {
+func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountClientRoles(ctx context.Context, realm, serviceAccountUserId, clientId string) ([]*OpenidClientServiceAccountRole, error) {
 	var serviceAccountRoles []*OpenidClientServiceAccountRole
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realm, serviceAccountUserId, clientId), &serviceAccountRoles, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"strings"
 
@@ -11,13 +13,13 @@ import (
 
 func resourceKeycloakSamlClientScope() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakSamlClientScopeCreate,
-		Read:   resourceKeycloakSamlClientScopeRead,
-		Delete: resourceKeycloakSamlClientScopeDelete,
-		Update: resourceKeycloakSamlClientScopeUpdate,
+		CreateContext: resourceKeycloakSamlClientScopeCreate,
+		ReadContext:   resourceKeycloakSamlClientScopeRead,
+		DeleteContext: resourceKeycloakSamlClientScopeDelete,
+		UpdateContext: resourceKeycloakSamlClientScopeUpdate,
 		// This resource can be imported using {{realm}}/{{client_scope_id}}. The Client Scope ID is displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakSamlClientScopeImport,
+			StateContext: resourceKeycloakSamlClientScopeImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -84,30 +86,30 @@ func setSamlClientScopeData(data *schema.ResourceData, clientScope *keycloak.Sam
 	}
 }
 
-func resourceKeycloakSamlClientScopeCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientScopeCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	clientScope := getSamlClientScopeFromData(data)
 
-	err := keycloakClient.NewSamlClientScope(clientScope)
+	err := keycloakClient.NewSamlClientScope(ctx, clientScope)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setSamlClientScopeData(data, clientScope)
 
-	return resourceKeycloakSamlClientScopeRead(data, meta)
+	return resourceKeycloakSamlClientScopeRead(ctx, data, meta)
 }
 
-func resourceKeycloakSamlClientScopeRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientScopeRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	clientScope, err := keycloakClient.GetSamlClientScope(realmId, id)
+	clientScope, err := keycloakClient.GetSamlClientScope(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setSamlClientScopeData(data, clientScope)
@@ -115,14 +117,14 @@ func resourceKeycloakSamlClientScopeRead(data *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceKeycloakSamlClientScopeUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientScopeUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	clientScope := getSamlClientScopeFromData(data)
 
-	err := keycloakClient.UpdateSamlClientScope(clientScope)
+	err := keycloakClient.UpdateSamlClientScope(ctx, clientScope)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setSamlClientScopeData(data, clientScope)
@@ -130,16 +132,16 @@ func resourceKeycloakSamlClientScopeUpdate(data *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceKeycloakSamlClientScopeDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientScopeDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteSamlClientScope(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteSamlClientScope(ctx, realmId, id))
 }
 
-func resourceKeycloakSamlClientScopeImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakSamlClientScopeImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{samlClientScopeId}}")

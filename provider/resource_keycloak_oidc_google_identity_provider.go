@@ -79,9 +79,9 @@ func resourceKeycloakOidcGoogleIdentityProvider() *schema.Resource {
 	}
 	oidcResource := resourceKeycloakIdentityProvider()
 	oidcResource.Schema = mergeSchemas(oidcResource.Schema, oidcGoogleSchema)
-	oidcResource.Create = resourceKeycloakIdentityProviderCreate(getOidcGoogleIdentityProviderFromData, setOidcGoogleIdentityProviderData)
-	oidcResource.Read = resourceKeycloakIdentityProviderRead(setOidcGoogleIdentityProviderData)
-	oidcResource.Update = resourceKeycloakIdentityProviderUpdate(getOidcGoogleIdentityProviderFromData, setOidcGoogleIdentityProviderData)
+	oidcResource.CreateContext = resourceKeycloakIdentityProviderCreate(getOidcGoogleIdentityProviderFromData, setOidcGoogleIdentityProviderData)
+	oidcResource.ReadContext = resourceKeycloakIdentityProviderRead(setOidcGoogleIdentityProviderData)
+	oidcResource.UpdateContext = resourceKeycloakIdentityProviderUpdate(getOidcGoogleIdentityProviderFromData, setOidcGoogleIdentityProviderData)
 	return oidcResource
 }
 

@@ -54,7 +54,7 @@ func TestAccKeycloakSamlClientScope_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteSamlClientScope(clientScope.RealmId, clientScope.Id)
+					err := keycloakClient.DeleteSamlClientScope(testCtx, clientScope.RealmId, clientScope.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -216,7 +216,7 @@ func testAccCheckKeycloakSamlClientScopeDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			clientScope, _ := keycloakClient.GetSamlClientScope(realm, id)
+			clientScope, _ := keycloakClient.GetSamlClientScope(testCtx, realm, id)
 			if clientScope != nil {
 				return fmt.Errorf("saml client scope %s still exists", id)
 			}
@@ -237,7 +237,7 @@ func getSamlClientScopeFromState(s *terraform.State, resourceName string) (*keyc
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	clientScope, err := keycloakClientScope.GetSamlClientScope(realm, id)
+	clientScope, err := keycloakClientScope.GetSamlClientScope(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting saml client scope %s: %s", id, err)
 	}

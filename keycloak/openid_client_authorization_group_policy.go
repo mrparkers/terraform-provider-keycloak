@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -24,8 +25,8 @@ type OpenidClientAuthorizationGroup struct {
 	ExtendChildren bool   `json:"extendChildren,omitempty"`
 }
 
-func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationGroupPolicy(policy *OpenidClientAuthorizationGroupPolicy) error {
-	body, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/group", policy.RealmId, policy.ResourceServerId), policy)
+func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationGroupPolicy(ctx context.Context, policy *OpenidClientAuthorizationGroupPolicy) error {
+	body, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/group", policy.RealmId, policy.ResourceServerId), policy)
 	if err != nil {
 		return err
 	}
@@ -36,26 +37,26 @@ func (keycloakClient *KeycloakClient) NewOpenidClientAuthorizationGroupPolicy(po
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationGroupPolicy(policy *OpenidClientAuthorizationGroupPolicy) error {
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/group/%s", policy.RealmId, policy.ResourceServerId, policy.Id), policy)
+func (keycloakClient *KeycloakClient) UpdateOpenidClientAuthorizationGroupPolicy(ctx context.Context, policy *OpenidClientAuthorizationGroupPolicy) error {
+	err := keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/group/%s", policy.RealmId, policy.ResourceServerId, policy.Id), policy)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationGroupPolicy(realmId, resourceServerId, policyId string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/group/%s", realmId, resourceServerId, policyId), nil)
+func (keycloakClient *KeycloakClient) DeleteOpenidClientAuthorizationGroupPolicy(ctx context.Context, realmId, resourceServerId, policyId string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/group/%s", realmId, resourceServerId, policyId), nil)
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationGroupPolicy(realmId, resourceServerId, policyId string) (*OpenidClientAuthorizationGroupPolicy, error) {
+func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationGroupPolicy(ctx context.Context, realmId, resourceServerId, policyId string) (*OpenidClientAuthorizationGroupPolicy, error) {
 
 	policy := OpenidClientAuthorizationGroupPolicy{
 		Id:               policyId,
 		ResourceServerId: resourceServerId,
 		RealmId:          realmId,
 	}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/group/%s", realmId, resourceServerId, policyId), &policy, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy/group/%s", realmId, resourceServerId, policyId), &policy, nil)
 	if err != nil {
 		return nil, err
 	}

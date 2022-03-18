@@ -51,7 +51,7 @@ func TestAccKeycloakLdapMsadUserAccountControlMapper_createAfterManualDestroy(t 
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteLdapMsadUserAccountControlMapper(mapper.RealmId, mapper.Id)
+					err := keycloakClient.DeleteLdapMsadUserAccountControlMapper(testCtx, mapper.RealmId, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -142,7 +142,7 @@ func testAccCheckKeycloakLdapMsadUserAccountControlMapperDestroy() resource.Test
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapMsadUserAccountControlMapper, _ := keycloakClient.GetLdapMsadUserAccountControlMapper(realm, id)
+			ldapMsadUserAccountControlMapper, _ := keycloakClient.GetLdapMsadUserAccountControlMapper(testCtx, realm, id)
 			if ldapMsadUserAccountControlMapper != nil {
 				return fmt.Errorf("ldap msad uac mapper with id %s still exists", id)
 			}
@@ -161,7 +161,7 @@ func getLdapMsadUserAccountControlMapperFromState(s *terraform.State, resourceNa
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	ldapMsadUserAccountControlMapper, err := keycloakClient.GetLdapMsadUserAccountControlMapper(realm, id)
+	ldapMsadUserAccountControlMapper, err := keycloakClient.GetLdapMsadUserAccountControlMapper(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting ldap msad uac mapper with id %s: %s", id, err)
 	}

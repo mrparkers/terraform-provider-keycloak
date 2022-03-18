@@ -25,6 +25,12 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_basic(t *testing.T) {
 				Config: testKeycloakRealmKeystoreHmacGenerated_basic(hmacName),
 				Check:  testAccCheckRealmKeystoreHmacGeneratedExists("keycloak_realm_keystore_hmac_generated.realm_hmac"),
 			},
+			{
+				ResourceName:      "keycloak_realm_keystore_hmac_generated.realm_hmac",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_hmac_generated.realm_hmac"),
+			},
 		},
 	})
 }
@@ -47,7 +53,7 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_createAfterManualDestroy(t *testi
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRealmKeystoreHmacGenerated(hmac.RealmId, hmac.Id)
+					err := keycloakClient.DeleteRealmKeystoreHmacGenerated(testCtx, hmac.RealmId, hmac.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -162,7 +168,7 @@ func testAccCheckRealmKeystoreHmacGeneratedDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreHmacGenerated(realm, id)
+			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreHmacGenerated(testCtx, realm, id)
 			if ldapGroupKeystore != nil {
 				return fmt.Errorf("hmac keystore with id %s still exists", id)
 			}
@@ -183,27 +189,12 @@ func getKeycloakRealmKeystoreHmacGeneratedFromState(s *terraform.State,
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	realmKeystore, err := keycloakClient.GetRealmKeystoreHmacGenerated(realm, id)
+	realmKeystore, err := keycloakClient.GetRealmKeystoreHmacGenerated(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting hmac keystore with id %s: %s", id, err)
 	}
 
 	return realmKeystore, nil
-}
-
-func getRealmKeystoreHmacGeneratedImportId(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return "", fmt.Errorf("resource not found: %s", resourceName)
-		}
-
-		id := rs.Primary.ID
-		realmId := rs.Primary.Attributes["realm_id"]
-		providerId := "hmac-generated"
-
-		return fmt.Sprintf("%s/%s/%s", realmId, providerId, id), nil
-	}
 }
 
 func testKeycloakRealmKeystoreHmacGenerated_basic(hmacName string) string {
