@@ -45,7 +45,7 @@ func TestAccKeycloakOpenidClientAuthorizationScope_createAfterManualDestroy(t *t
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenidClientAuthorizationScope(authorizationScope.RealmId, authorizationScope.ResourceServerId, authorizationScope.Id)
+					err := keycloakClient.DeleteOpenidClientAuthorizationScope(testCtx, authorizationScope.RealmId, authorizationScope.ResourceServerId, authorizationScope.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -61,14 +61,14 @@ func TestAccKeycloakOpenidClientAuthorizationScope_basicUpdateAll(t *testing.T) 
 	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
-	firstAuthrorizationScope := &keycloak.OpenidClientAuthorizationScope{
+	firstAuthorizationScope := &keycloak.OpenidClientAuthorizationScope{
 		RealmId:     testAccRealm.Realm,
 		Name:        acctest.RandString(10),
 		DisplayName: acctest.RandString(10),
 		IconUri:     acctest.RandString(10),
 	}
 
-	secondAuthrorizationScope := &keycloak.OpenidClientAuthorizationScope{
+	secondAuthorizationScope := &keycloak.OpenidClientAuthorizationScope{
 		RealmId:     testAccRealm.Realm,
 		Name:        acctest.RandString(10),
 		DisplayName: acctest.RandString(10),
@@ -81,11 +81,11 @@ func TestAccKeycloakOpenidClientAuthorizationScope_basicUpdateAll(t *testing.T) 
 		CheckDestroy:      testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenidClientAuthorizationScope_basicFromInterface(clientId, firstAuthrorizationScope),
+				Config: testKeycloakOpenidClientAuthorizationScope_basicFromInterface(clientId, firstAuthorizationScope),
 				Check:  testAccCheckKeycloakOpenidClientAuthorizationScopeExists("keycloak_openid_client_authorization_scope.test"),
 			},
 			{
-				Config: testKeycloakOpenidClientAuthorizationScope_basicFromInterface(clientId, secondAuthrorizationScope),
+				Config: testKeycloakOpenidClientAuthorizationScope_basicFromInterface(clientId, secondAuthorizationScope),
 				Check:  testAccCheckKeycloakOpenidClientAuthorizationScopeExists("keycloak_openid_client_authorization_scope.test"),
 			},
 		},
@@ -129,7 +129,7 @@ func testAccCheckKeycloakOpenidClientAuthorizationScopeDestroy() resource.TestCh
 			resourceServerId := rs.Primary.Attributes["resource_server_id"]
 			id := rs.Primary.ID
 
-			authorizationScope, _ := keycloakClient.GetOpenidClientAuthorizationScope(realm, resourceServerId, id)
+			authorizationScope, _ := keycloakClient.GetOpenidClientAuthorizationScope(testCtx, realm, resourceServerId, id)
 			if authorizationScope != nil {
 				return fmt.Errorf("test config with id %s still exists", id)
 			}
@@ -149,7 +149,7 @@ func getKeycloakOpenidClientAuthorizationScopeFromState(s *terraform.State, scop
 	resourceServerId := rs.Primary.Attributes["resource_server_id"]
 	id := rs.Primary.ID
 
-	authorizationScope, err := keycloakClient.GetOpenidClientAuthorizationScope(realm, resourceServerId, id)
+	authorizationScope, err := keycloakClient.GetOpenidClientAuthorizationScope(testCtx, realm, resourceServerId, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting authorization scope config with id %s: %s", id, err)
 	}

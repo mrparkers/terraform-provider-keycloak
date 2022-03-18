@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -88,7 +90,7 @@ func dataSourceKeycloakRealm() *schema.Resource {
 		},
 	}
 	return &schema.Resource{
-		Read: dataSourceKeycloakRealmRead,
+		ReadContext: dataSourceKeycloakRealmRead,
 		Schema: map[string]*schema.Schema{
 			"realm": {
 				Type:     schema.TypeString,
@@ -516,14 +518,14 @@ func dataSourceKeycloakRealm() *schema.Resource {
 	}
 }
 
-func dataSourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakRealmRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmName := data.Get("realm").(string)
 
-	realm, err := keycloakClient.GetRealm(realmName)
+	realm, err := keycloakClient.GetRealm(ctx, realmName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setRealmData(data, realm)

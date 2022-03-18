@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -32,7 +33,7 @@ type PasswordCredentials struct {
 	Temporary bool   `json:"temporary"`
 }
 
-func (keycloakClient *KeycloakClient) NewUser(user *User) error {
+func (keycloakClient *KeycloakClient) NewUser(ctx context.Context, user *User) error {
 	newUser := User{
 		Id:            user.Id,
 		RealmId:       user.RealmId,
@@ -44,7 +45,7 @@ func (keycloakClient *KeycloakClient) NewUser(user *User) error {
 		Enabled:       user.Enabled,
 		Attributes:    user.Attributes,
 	}
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users", user.RealmId), newUser)
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/users", user.RealmId), newUser)
 	if err != nil {
 		return err
 	}
@@ -52,7 +53,7 @@ func (keycloakClient *KeycloakClient) NewUser(user *User) error {
 	user.Id = getIdFromLocationHeader(location)
 
 	for _, federatedIdentity := range user.FederatedIdentities {
-		_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/federated-identity/%s", user.RealmId, user.Id, federatedIdentity.IdentityProvider), federatedIdentity)
+		_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/users/%s/federated-identity/%s", user.RealmId, user.Id, federatedIdentity.IdentityProvider), federatedIdentity)
 		if err != nil {
 			return err
 		}
@@ -61,24 +62,24 @@ func (keycloakClient *KeycloakClient) NewUser(user *User) error {
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) ResetUserPassword(realmId, userId string, newPassword string, isTemporary bool) error {
+func (keycloakClient *KeycloakClient) ResetUserPassword(ctx context.Context, realmId, userId string, newPassword string, isTemporary bool) error {
 	resetCredentials := &PasswordCredentials{
 		Value:     newPassword,
 		Type:      "password",
 		Temporary: isTemporary,
 	}
 
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/users/%s/reset-password", realmId, userId), resetCredentials)
+	err := keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/users/%s/reset-password", realmId, userId), resetCredentials)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetUsers(realmId string) ([]*User, error) {
+func (keycloakClient *KeycloakClient) GetUsers(ctx context.Context, realmId string) ([]*User, error) {
 	var users []*User
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users", realmId), &users, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/users", realmId), &users, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -90,10 +91,10 @@ func (keycloakClient *KeycloakClient) GetUsers(realmId string) ([]*User, error) 
 	return users, nil
 }
 
-func (keycloakClient *KeycloakClient) GetUser(realmId, id string) (*User, error) {
+func (keycloakClient *KeycloakClient) GetUser(ctx context.Context, realmId, id string) (*User, error) {
 	var user User
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s", realmId, id), &user, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/users/%s", realmId, id), &user, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -103,24 +104,24 @@ func (keycloakClient *KeycloakClient) GetUser(realmId, id string) (*User, error)
 	return &user, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateUser(user *User) error {
-	err := keycloakClient.put(fmt.Sprintf("/realms/%s/users/%s", user.RealmId, user.Id), user)
+func (keycloakClient *KeycloakClient) UpdateUser(ctx context.Context, user *User) error {
+	err := keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/users/%s", user.RealmId, user.Id), user)
 	if err != nil {
 		return err
 	}
 
 	var federatedIdentities []*FederatedIdentity
-	err = keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/federated-identity", user.RealmId, user.Id), &federatedIdentities, nil)
+	err = keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/users/%s/federated-identity", user.RealmId, user.Id), &federatedIdentities, nil)
 	if err != nil {
 		return err
 	}
 
 	for _, federatedIdentity := range federatedIdentities {
-		keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/federated-identity/%s", user.RealmId, user.Id, federatedIdentity.IdentityProvider), nil)
+		keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/users/%s/federated-identity/%s", user.RealmId, user.Id, federatedIdentity.IdentityProvider), nil)
 	}
 
 	for _, federatedIdentity := range user.FederatedIdentities {
-		_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/federated-identity/%s", user.RealmId, user.Id, federatedIdentity.IdentityProvider), federatedIdentity)
+		_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/users/%s/federated-identity/%s", user.RealmId, user.Id, federatedIdentity.IdentityProvider), federatedIdentity)
 		if err != nil {
 			return err
 		}
@@ -129,18 +130,18 @@ func (keycloakClient *KeycloakClient) UpdateUser(user *User) error {
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) DeleteUser(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteUser(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/users/%s", realmId, id), nil)
 }
 
-func (keycloakClient *KeycloakClient) GetUserByUsername(realmId, username string) (*User, error) {
+func (keycloakClient *KeycloakClient) GetUserByUsername(ctx context.Context, realmId, username string) (*User, error) {
 	var users []*User
 
 	params := map[string]string{
 		"username": username,
 	}
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users", realmId), &users, params)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/users", realmId), &users, params)
 	if err != nil {
 		return nil, err
 	}
@@ -160,9 +161,9 @@ func (keycloakClient *KeycloakClient) GetUserByUsername(realmId, username string
 	return nil, nil
 }
 
-func (keycloakClient *KeycloakClient) GetUserGroups(realmId, userId string) ([]*Group, error) {
+func (keycloakClient *KeycloakClient) GetUserGroups(ctx context.Context, realmId, userId string) ([]*Group, error) {
 	var groups []*Group
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/groups/", realmId, userId), &groups, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/users/%s/groups/", realmId, userId), &groups, nil)
 
 	if err != nil {
 		return nil, err
@@ -171,13 +172,13 @@ func (keycloakClient *KeycloakClient) GetUserGroups(realmId, userId string) ([]*
 	return groups, nil
 }
 
-func (keycloakClient *KeycloakClient) addUserToGroup(user *User, groupId string) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/users/%s/groups/%s", user.RealmId, user.Id, groupId), nil)
+func (keycloakClient *KeycloakClient) addUserToGroup(ctx context.Context, user *User, groupId string) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/users/%s/groups/%s", user.RealmId, user.Id, groupId), nil)
 }
 
-func (keycloakClient *KeycloakClient) AddUsersToGroup(realmId, groupId string, users []interface{}) error {
+func (keycloakClient *KeycloakClient) AddUsersToGroup(ctx context.Context, realmId, groupId string, users []interface{}) error {
 	for _, username := range users {
-		user, err := keycloakClient.GetUserByUsername(realmId, username.(string)) // we need the user's id in order to add them to a group
+		user, err := keycloakClient.GetUserByUsername(ctx, realmId, username.(string)) // we need the user's id in order to add them to a group
 		if err != nil {
 			return err
 		}
@@ -185,7 +186,7 @@ func (keycloakClient *KeycloakClient) AddUsersToGroup(realmId, groupId string, u
 			return fmt.Errorf("user with username %s does not exist", username.(string))
 		}
 
-		err = keycloakClient.addUserToGroup(user, groupId)
+		err = keycloakClient.addUserToGroup(ctx, user, groupId)
 		if err != nil {
 			return err
 		}
@@ -194,13 +195,13 @@ func (keycloakClient *KeycloakClient) AddUsersToGroup(realmId, groupId string, u
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) RemoveUserFromGroup(user *User, groupId string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/groups/%s", user.RealmId, user.Id, groupId), nil)
+func (keycloakClient *KeycloakClient) RemoveUserFromGroup(ctx context.Context, user *User, groupId string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/users/%s/groups/%s", user.RealmId, user.Id, groupId), nil)
 }
 
-func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId string, usernames []interface{}) error {
+func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(ctx context.Context, realmId, groupId string, usernames []interface{}) error {
 	for _, username := range usernames {
-		user, err := keycloakClient.GetUserByUsername(realmId, username.(string)) // we need the user's id in order to remove them from a group
+		user, err := keycloakClient.GetUserByUsername(ctx, realmId, username.(string)) // we need the user's id in order to remove them from a group
 		if err != nil {
 			return err
 		}
@@ -208,7 +209,7 @@ func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId stri
 			return fmt.Errorf("user with username %s does not exist", username.(string))
 		}
 
-		err = keycloakClient.RemoveUserFromGroup(user, groupId)
+		err = keycloakClient.RemoveUserFromGroup(ctx, user, groupId)
 		if err != nil {
 			return err
 		}
@@ -217,12 +218,12 @@ func (keycloakClient *KeycloakClient) RemoveUsersFromGroup(realmId, groupId stri
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) AddUserToGroups(groupIds []string, userId string, realmId string) error {
+func (keycloakClient *KeycloakClient) AddUserToGroups(ctx context.Context, groupIds []string, userId string, realmId string) error {
 	for _, groupId := range groupIds {
 		var user User
 		user.Id = userId
 		user.RealmId = realmId
-		err := keycloakClient.addUserToGroup(&user, groupId)
+		err := keycloakClient.addUserToGroup(ctx, &user, groupId)
 
 		if err != nil {
 			return err
@@ -231,12 +232,12 @@ func (keycloakClient *KeycloakClient) AddUserToGroups(groupIds []string, userId 
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) RemoveUserFromGroups(groupIds []string, userId string, realmId string) error {
+func (keycloakClient *KeycloakClient) RemoveUserFromGroups(ctx context.Context, groupIds []string, userId string, realmId string) error {
 	for _, groupId := range groupIds {
 		var user User
 		user.Id = userId
 		user.RealmId = realmId
-		err := keycloakClient.RemoveUserFromGroup(&user, groupId)
+		err := keycloakClient.RemoveUserFromGroup(ctx, &user, groupId)
 
 		if err != nil {
 			return err

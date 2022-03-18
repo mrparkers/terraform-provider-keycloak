@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
@@ -96,8 +97,8 @@ func convertFromComponentToRealmKeystoreJavaKeystore(component *component, realm
 	return realmKey, nil
 }
 
-func (keycloakClient *KeycloakClient) NewRealmKeystoreJavaKeystore(realmKey *RealmKeystoreJavaKeystore) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", realmKey.RealmId), convertFromRealmKeystoreJavaKeystoreToComponent(realmKey))
+func (keycloakClient *KeycloakClient) NewRealmKeystoreJavaKeystore(ctx context.Context, realmKey *RealmKeystoreJavaKeystore) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", realmKey.RealmId), convertFromRealmKeystoreJavaKeystoreToComponent(realmKey))
 	if err != nil {
 		return err
 	}
@@ -107,10 +108,10 @@ func (keycloakClient *KeycloakClient) NewRealmKeystoreJavaKeystore(realmKey *Rea
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetRealmKeystoreJavaKeystore(realmId, id string) (*RealmKeystoreJavaKeystore, error) {
+func (keycloakClient *KeycloakClient) GetRealmKeystoreJavaKeystore(ctx context.Context, realmId, id string) (*RealmKeystoreJavaKeystore, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -118,10 +119,10 @@ func (keycloakClient *KeycloakClient) GetRealmKeystoreJavaKeystore(realmId, id s
 	return convertFromComponentToRealmKeystoreJavaKeystore(component, realmId)
 }
 
-func (keycloakClient *KeycloakClient) UpdateRealmKeystoreJavaKeystore(realmKey *RealmKeystoreJavaKeystore) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", realmKey.RealmId, realmKey.Id), convertFromRealmKeystoreJavaKeystoreToComponent(realmKey))
+func (keycloakClient *KeycloakClient) UpdateRealmKeystoreJavaKeystore(ctx context.Context, realmKey *RealmKeystoreJavaKeystore) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", realmKey.RealmId, realmKey.Id), convertFromRealmKeystoreJavaKeystoreToComponent(realmKey))
 }
 
-func (keycloakClient *KeycloakClient) DeleteRealmKeystoreJavaKeystore(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteRealmKeystoreJavaKeystore(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

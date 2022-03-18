@@ -1,13 +1,14 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func genericResourcePolicyImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func genericResourcePolicyImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{resourceServerId}}/{{authorizationResourceId}}")

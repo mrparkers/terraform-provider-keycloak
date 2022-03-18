@@ -1,10 +1,13 @@
 package keycloak
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
-func (keycloakClient *KeycloakClient) GetUserRoleMappings(realmId string, userId string) (*RoleMapping, error) {
+func (keycloakClient *KeycloakClient) GetUserRoleMappings(ctx context.Context, realmId string, userId string) (*RoleMapping, error) {
 	var roleMapping *RoleMapping
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/users/%s/role-mappings", realmId, userId), &roleMapping, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/users/%s/role-mappings", realmId, userId), &roleMapping, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -12,26 +15,26 @@ func (keycloakClient *KeycloakClient) GetUserRoleMappings(realmId string, userId
 	return roleMapping, nil
 }
 
-func (keycloakClient *KeycloakClient) AddRealmRolesToUser(realmId, userId string, roles []*Role) error {
-	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", realmId, userId), roles)
+func (keycloakClient *KeycloakClient) AddRealmRolesToUser(ctx context.Context, realmId, userId string, roles []*Role) error {
+	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", realmId, userId), roles)
 
 	return err
 }
 
-func (keycloakClient *KeycloakClient) AddClientRolesToUser(realmId, userId, clientId string, roles []*Role) error {
-	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realmId, userId, clientId), roles)
+func (keycloakClient *KeycloakClient) AddClientRolesToUser(ctx context.Context, realmId, userId, clientId string, roles []*Role) error {
+	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realmId, userId, clientId), roles)
 
 	return err
 }
 
-func (keycloakClient *KeycloakClient) RemoveRealmRolesFromUser(realmId, userId string, roles []*Role) error {
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", realmId, userId), roles)
+func (keycloakClient *KeycloakClient) RemoveRealmRolesFromUser(ctx context.Context, realmId, userId string, roles []*Role) error {
+	err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/users/%s/role-mappings/realm", realmId, userId), roles)
 
 	return err
 }
 
-func (keycloakClient *KeycloakClient) RemoveClientRolesFromUser(realmId, userId, clientId string, roles []*Role) error {
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realmId, userId, clientId), roles)
+func (keycloakClient *KeycloakClient) RemoveClientRolesFromUser(ctx context.Context, realmId, userId, clientId string, roles []*Role) error {
+	err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/users/%s/role-mappings/clients/%s", realmId, userId, clientId), roles)
 
 	return err
 }

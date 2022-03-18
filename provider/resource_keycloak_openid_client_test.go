@@ -80,7 +80,7 @@ func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenidClient(client.RealmId, client.Id)
+					err := keycloakClient.DeleteOpenidClient(testCtx, client.RealmId, client.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -367,7 +367,7 @@ func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_Device_basic(t *testing.T) {
-	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_13); !ok {
 		t.Skip()
 	}
 
@@ -708,7 +708,7 @@ func TestAccKeycloakOpenidClient_extraConfigInvalid(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_oauth2DeviceAuthorizationGrantEnabled(t *testing.T) {
-	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_13); !ok {
 		t.Skip()
 	}
 
@@ -803,8 +803,8 @@ func testAccCheckKeycloakOpenidClientHasFrontchannelSettings(resourceName, front
 			return fmt.Errorf("expected openid client to have frontchannel logout url %s, got %s", frontChannelLogoutUrl, client.Attributes.FrontchannelLogoutUrl)
 		}
 
-		if bool(client.FrontChannelLogoutEnabled) != frontChannelLogoutEnabled {
-			return fmt.Errorf("expected openid client to have frontchannel enabled bool %t, got %t", frontChannelLogoutEnabled, bool(client.FrontChannelLogoutEnabled))
+		if client.FrontChannelLogoutEnabled != frontChannelLogoutEnabled {
+			return fmt.Errorf("expected openid client to have frontchannel enabled bool %t, got %t", frontChannelLogoutEnabled, client.FrontChannelLogoutEnabled)
 		}
 
 		return nil
@@ -982,7 +982,7 @@ func testAccCheckKeycloakOpenidClientDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			client, _ := keycloakClient.GetOpenidClient(realm, id)
+			client, _ := keycloakClient.GetOpenidClient(testCtx, realm, id)
 			if client != nil {
 				return fmt.Errorf("openid client %s still exists", id)
 			}
@@ -1127,7 +1127,7 @@ func testAccCheckKeycloakOpenidClientExtraConfigMissing(resourceName string, key
 
 		if val, ok := client.Attributes.ExtraConfig[key]; ok {
 			// keycloak 13+ will remove attributes if set to empty string. on older versions, we'll just check if this value is empty
-			if versionOk, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !versionOk {
+			if versionOk, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_13); !versionOk {
 				if val != "" {
 					return fmt.Errorf("expected openid client to have empty attribute %v", key)
 				}
@@ -1151,7 +1151,7 @@ func getOpenidClientFromState(s *terraform.State, resourceName string) (*keycloa
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	client, err := keycloakClient.GetOpenidClient(realm, id)
+	client, err := keycloakClient.GetOpenidClient(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting openid client %s: %s", id, err)
 	}

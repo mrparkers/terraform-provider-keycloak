@@ -246,7 +246,7 @@ func testAccCheckKeycloakUserHasRoles(resourceName string, exhaustive bool) reso
 				continue
 			}
 
-			role, err := keycloakClient.GetRole(realm, v)
+			role, err := keycloakClient.GetRole(testCtx, realm, v)
 			if err != nil {
 				return err
 			}
@@ -254,12 +254,12 @@ func testAccCheckKeycloakUserHasRoles(resourceName string, exhaustive bool) reso
 			roles = append(roles, role)
 		}
 
-		user, err := keycloakClient.GetUser(realm, userId)
+		user, err := keycloakClient.GetUser(testCtx, realm, userId)
 		if err != nil {
 			return err
 		}
 
-		userRoleMappings, err := keycloakClient.GetUserRoleMappings(realm, userId)
+		userRoleMappings, err := keycloakClient.GetUserRoleMappings(testCtx, realm, userId)
 		if err != nil {
 			return err
 		}
@@ -315,12 +315,12 @@ func testAccCheckKeycloakUserHasNoRoles(resourceName string) resource.TestCheckF
 		realm := rs.Primary.Attributes["realm_id"]
 		id := rs.Primary.ID
 
-		user, err := keycloakClient.GetUser(realm, id)
+		user, err := keycloakClient.GetUser(testCtx, realm, id)
 		if err != nil {
 			return err
 		}
 
-		userRoleMapping, err := keycloakClient.GetUserRoleMappings(realm, id)
+		userRoleMapping, err := keycloakClient.GetUserRoleMappings(testCtx, realm, id)
 		if err != nil {
 			return err
 		}

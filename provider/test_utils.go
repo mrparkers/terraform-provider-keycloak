@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"os"
@@ -66,8 +67,9 @@ func skipIfEnvNotSet(t *testing.T, envs ...string) {
 	}
 }
 
-func skipIfVersionIsLessThanOrEqualTo(t *testing.T, keycloakClient *keycloak.KeycloakClient, version keycloak.Version) {
-	ok, err := keycloakClient.VersionIsLessThanOrEqualTo(version)
+// Skips the test if the keycloak server matches a specific major version
+func skipIfVersionIsLessThanOrEqualTo(ctx context.Context, t *testing.T, keycloakClient *keycloak.KeycloakClient, version keycloak.Version) {
+	ok, err := keycloakClient.VersionIsLessThanOrEqualTo(ctx, version)
 	if err != nil {
 		t.Errorf("error checking keycloak version: %v", err)
 	}

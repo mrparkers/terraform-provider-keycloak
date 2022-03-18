@@ -11,13 +11,13 @@ A realm keystore manages generated key pairs that are used by Keycloak to perfor
 ## Example Usage
 
 ```hcl
-resource "keycloak_realm" "my_realm" {
+resource "keycloak_realm" "realm" {
 	realm = "my-realm"
 }
 
 resource "keycloak_realm_keystore_java_keystore" "java_keystore" {
 	name      = "my-java-keystore"
-	realm_id  = keycloak_realm.my_realm.realm
+	realm_id  = keycloak_realm.realm.id
 
 	enabled = true
 	active  = true
@@ -52,5 +52,5 @@ Realm keys can be imported using realm name and keystore id, you can find it in 
 Example:
 
 ```bash
-$ terraform import keycloak_realm_keystore_java_keystore.java_keystore my-realm/my-realm/618cfba7-49aa-4c09-9a19-2f699b576f0b
+$ terraform import keycloak_realm_keystore_java_keystore.java_keystore my-realm/618cfba7-49aa-4c09-9a19-2f699b576f0b
 ```

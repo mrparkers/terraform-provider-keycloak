@@ -18,7 +18,7 @@ It can be done via the administration UI, or by setting the `userProfileEnabled`
 ## Example Usage
 
 ```hcl
-resource "keycloak_realm" "my_realm" {
+resource "keycloak_realm" "realm" {
   realm = "my-realm"
 
   attributes = {

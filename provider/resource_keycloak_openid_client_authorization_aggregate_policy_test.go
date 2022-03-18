@@ -37,7 +37,7 @@ func getResourceKeycloakOpenidClientAuthorizationAggregatePolicyFromState(s *ter
 	resourceServerId := rs.Primary.Attributes["resource_server_id"]
 	policyId := rs.Primary.ID
 
-	policy, err := keycloakClient.GetOpenidClientAuthorizationAggregatePolicy(realm, resourceServerId, policyId)
+	policy, err := keycloakClient.GetOpenidClientAuthorizationAggregatePolicy(testCtx, realm, resourceServerId, policyId)
 	if err != nil {
 		return nil, fmt.Errorf("error getting openid client auth aggregate policy config with alias %s: %s", resourceServerId, err)
 	}
@@ -56,7 +56,7 @@ func testResourceKeycloakOpenidClientAuthorizationAggregatePolicyDestroy() resou
 			resourceServerId := rs.Primary.Attributes["resource_server_id"]
 			policyId := rs.Primary.ID
 
-			policy, _ := keycloakClient.GetOpenidClientAuthorizationAggregatePolicy(realm, resourceServerId, policyId)
+			policy, _ := keycloakClient.GetOpenidClientAuthorizationAggregatePolicy(testCtx, realm, resourceServerId, policyId)
 			if policy != nil {
 				return fmt.Errorf("policy config with id %s still exists", policyId)
 			}

@@ -11,6 +11,7 @@ import (
 
 func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
 	t.Parallel()
+
 	group := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -35,6 +36,7 @@ func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
 
 func TestAccKeycloakDataSourceGroup_nested(t *testing.T) {
 	t.Parallel()
+
 	group := acctest.RandomWithPrefix("tf-acc")
 	groupNested := acctest.RandomWithPrefix("tf-acc")
 
@@ -74,7 +76,7 @@ func testAccCheckDataKeycloakGroup(resourceName string) resource.TestCheckFunc {
 		realmId := rs.Primary.Attributes["realm_id"]
 		name := rs.Primary.Attributes["name"]
 
-		group, err := keycloakClient.GetGroup(realmId, id)
+		group, err := keycloakClient.GetGroup(testCtx, realmId, id)
 		if err != nil {
 			return err
 		}

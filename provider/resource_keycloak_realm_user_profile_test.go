@@ -33,7 +33,7 @@ func TestAccKeycloakRealmUserProfile_featureDisabled(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_basicEmpty(t *testing.T) {
-	skipIfVersionIsLessThanOrEqualTo(t, keycloakClient, keycloak.Version_14)
+	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
@@ -53,7 +53,7 @@ func TestAccKeycloakRealmUserProfile_basicEmpty(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
-	skipIfVersionIsLessThanOrEqualTo(t, keycloakClient, keycloak.Version_14)
+	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
@@ -101,7 +101,7 @@ func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_group(t *testing.T) {
-	skipIfVersionIsLessThanOrEqualTo(t, keycloakClient, keycloak.Version_14)
+	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
@@ -148,7 +148,7 @@ func TestAccKeycloakRealmUserProfile_group(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
-	skipIfVersionIsLessThanOrEqualTo(t, keycloakClient, keycloak.Version_14)
+	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
@@ -240,7 +240,7 @@ func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_attributePermissions(t *testing.T) {
-	skipIfVersionIsLessThanOrEqualTo(t, keycloakClient, keycloak.Version_14)
+	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
@@ -498,7 +498,7 @@ func testAccCheckKeycloakRealmUserProfileDestroy() resource.TestCheckFunc {
 
 			realm := rs.Primary.Attributes["realm_id"]
 
-			realmUserProfile, _ := keycloakClient.GetRealmUserProfile(realm)
+			realmUserProfile, _ := keycloakClient.GetRealmUserProfile(testCtx, realm)
 			if realmUserProfile != nil {
 				return fmt.Errorf("user profile for realm %s", realm)
 			}
@@ -516,7 +516,7 @@ func getRealmUserProfileFromState(s *terraform.State, resourceName string) (*key
 
 	realm := rs.Primary.Attributes["realm_id"]
 
-	realmUserProfile, err := keycloakClient.GetRealmUserProfile(realm)
+	realmUserProfile, err := keycloakClient.GetRealmUserProfile(testCtx, realm)
 	if err != nil {
 		return nil, fmt.Errorf("error getting realm user profile: %s", err)
 	}

@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 )
@@ -61,11 +62,11 @@ type SamlClient struct {
 	AuthenticationFlowBindingOverrides SamlAuthenticationFlowBindingOverrides `json:"authenticationFlowBindingOverrides,omitempty"`
 }
 
-func (keycloakClient *KeycloakClient) NewSamlClient(client *SamlClient) error {
+func (keycloakClient *KeycloakClient) NewSamlClient(ctx context.Context, client *SamlClient) error {
 	client.Protocol = "saml"
 	client.ClientAuthenticatorType = "client-secret"
 
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/clients", client.RealmId), client)
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/clients", client.RealmId), client)
 	if err != nil {
 		return err
 	}
@@ -75,10 +76,10 @@ func (keycloakClient *KeycloakClient) NewSamlClient(client *SamlClient) error {
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetSamlClient(realmId, id string) (*SamlClient, error) {
+func (keycloakClient *KeycloakClient) GetSamlClient(ctx context.Context, realmId, id string) (*SamlClient, error) {
 	var client SamlClient
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s", realmId, id), &client, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients/%s", realmId, id), &client, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -88,19 +89,19 @@ func (keycloakClient *KeycloakClient) GetSamlClient(realmId, id string) (*SamlCl
 	return &client, nil
 }
 
-func (keycloakClient *KeycloakClient) GetSamlClientInstallationProvider(realmId, id string, providerId string) ([]byte, error) {
-	value, err := keycloakClient.getRaw(fmt.Sprintf("/realms/%s/clients/%s/installation/providers/%s", realmId, id, providerId), nil)
+func (keycloakClient *KeycloakClient) GetSamlClientInstallationProvider(ctx context.Context, realmId, id string, providerId string) ([]byte, error) {
+	value, err := keycloakClient.getRaw(ctx, fmt.Sprintf("/realms/%s/clients/%s/installation/providers/%s", realmId, id, providerId), nil)
 	return value, err
 }
 
-func (keycloakClient *KeycloakClient) GetSamlClientByClientId(realmId, clientId string) (*SamlClient, error) {
+func (keycloakClient *KeycloakClient) GetSamlClientByClientId(ctx context.Context, realmId, clientId string) (*SamlClient, error) {
 	var clients []SamlClient
 
 	params := map[string]string{
 		"clientId": clientId,
 	}
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients", realmId), &clients, params)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients", realmId), &clients, params)
 	if err != nil {
 		return nil, err
 	}
@@ -116,21 +117,21 @@ func (keycloakClient *KeycloakClient) GetSamlClientByClientId(realmId, clientId 
 	return &client, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateSamlClient(client *SamlClient) error {
+func (keycloakClient *KeycloakClient) UpdateSamlClient(ctx context.Context, client *SamlClient) error {
 	client.Protocol = "saml"
 	client.ClientAuthenticatorType = "client-secret"
 
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s", client.RealmId, client.Id), client)
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/clients/%s", client.RealmId, client.Id), client)
 }
 
-func (keycloakClient *KeycloakClient) DeleteSamlClient(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteSamlClient(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/clients/%s", realmId, id), nil)
 }
 
-func (keycloakClient *KeycloakClient) getSamlClientScopes(realmId, clientId, t string) ([]*SamlClientScope, error) {
+func (keycloakClient *KeycloakClient) getSamlClientScopes(ctx context.Context, realmId, clientId, t string) ([]*SamlClientScope, error) {
 	var scopes []*SamlClientScope
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes", realmId, clientId, t), &scopes, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes", realmId, clientId, t), &scopes, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -138,25 +139,25 @@ func (keycloakClient *KeycloakClient) getSamlClientScopes(realmId, clientId, t s
 	return scopes, nil
 }
 
-func (keycloakClient *KeycloakClient) GetSamlClientDefaultScopes(realmId, clientId string) ([]*SamlClientScope, error) {
-	return keycloakClient.getSamlClientScopes(realmId, clientId, "default")
+func (keycloakClient *KeycloakClient) GetSamlClientDefaultScopes(ctx context.Context, realmId, clientId string) ([]*SamlClientScope, error) {
+	return keycloakClient.getSamlClientScopes(ctx, realmId, clientId, "default")
 }
 
-func (keycloakClient *KeycloakClient) attachSamlClientScopes(realmId, clientId, t string, scopeNames []string) error {
-	_, err := keycloakClient.GetSamlClient(realmId, clientId)
+func (keycloakClient *KeycloakClient) attachSamlClientScopes(ctx context.Context, realmId, clientId, t string, scopeNames []string) error {
+	_, err := keycloakClient.GetSamlClient(ctx, realmId, clientId)
 	if err != nil && ErrorIs404(err) {
 		return fmt.Errorf("validation error: client with id %s does not exist", clientId)
 	} else if err != nil {
 		return err
 	}
 
-	allSamlClientScopes, err := keycloakClient.ListSamlClientScopesWithFilter(realmId, includeSamlClientScopesMatchingNames(scopeNames))
+	allSamlClientScopes, err := keycloakClient.ListSamlClientScopesWithFilter(ctx, realmId, includeSamlClientScopesMatchingNames(scopeNames))
 	if err != nil {
 		return err
 	}
 
 	for _, samlClientScope := range allSamlClientScopes {
-		err := keycloakClient.put(fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, samlClientScope.Id), nil)
+		err := keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, samlClientScope.Id), nil)
 		if err != nil {
 			return err
 		}
@@ -165,18 +166,18 @@ func (keycloakClient *KeycloakClient) attachSamlClientScopes(realmId, clientId, 
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) AttachSamlClientDefaultScopes(realmId, clientId string, scopeNames []string) error {
-	return keycloakClient.attachSamlClientScopes(realmId, clientId, "default", scopeNames)
+func (keycloakClient *KeycloakClient) AttachSamlClientDefaultScopes(ctx context.Context, realmId, clientId string, scopeNames []string) error {
+	return keycloakClient.attachSamlClientScopes(ctx, realmId, clientId, "default", scopeNames)
 }
 
-func (keycloakClient *KeycloakClient) detachSamlClientScopes(realmId, clientId, t string, scopeNames []string) error {
-	allSamlClientScopes, err := keycloakClient.ListSamlClientScopesWithFilter(realmId, includeSamlClientScopesMatchingNames(scopeNames))
+func (keycloakClient *KeycloakClient) detachSamlClientScopes(ctx context.Context, realmId, clientId, t string, scopeNames []string) error {
+	allSamlClientScopes, err := keycloakClient.ListSamlClientScopesWithFilter(ctx, realmId, includeSamlClientScopesMatchingNames(scopeNames))
 	if err != nil {
 		return err
 	}
 
 	for _, samlClientScope := range allSamlClientScopes {
-		err := keycloakClient.delete(fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, samlClientScope.Id), nil)
+		err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, samlClientScope.Id), nil)
 		if err != nil {
 			return err
 		}
@@ -185,8 +186,8 @@ func (keycloakClient *KeycloakClient) detachSamlClientScopes(realmId, clientId, 
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) DetachSamlClientDefaultScopes(realmId, clientId string, scopeNames []string) error {
-	return keycloakClient.detachSamlClientScopes(realmId, clientId, "default", scopeNames)
+func (keycloakClient *KeycloakClient) DetachSamlClientDefaultScopes(ctx context.Context, realmId, clientId string, scopeNames []string) error {
+	return keycloakClient.detachSamlClientScopes(ctx, realmId, clientId, "default", scopeNames)
 }
 
 func (f *SamlClientAttributes) UnmarshalJSON(data []byte) error {

@@ -1,6 +1,9 @@
 package keycloak
 
-import "github.com/hashicorp/go-version"
+import (
+	"context"
+	"github.com/hashicorp/go-version"
+)
 
 type Version string
 
@@ -17,9 +20,9 @@ const (
 	Version_15 Version = "15.0.0"
 )
 
-func (keycloakClient *KeycloakClient) VersionIsGreaterThanOrEqualTo(versionString Version) (bool, error) {
+func (keycloakClient *KeycloakClient) VersionIsGreaterThanOrEqualTo(ctx context.Context, versionString Version) (bool, error) {
 	if keycloakClient.version == nil {
-		err := keycloakClient.login()
+		err := keycloakClient.login(ctx)
 		if err != nil {
 			return false, err
 		}
@@ -33,9 +36,9 @@ func (keycloakClient *KeycloakClient) VersionIsGreaterThanOrEqualTo(versionStrin
 	return keycloakClient.version.GreaterThanOrEqual(v), nil
 }
 
-func (keycloakClient *KeycloakClient) VersionIsLessThanOrEqualTo(versionString Version) (bool, error) {
+func (keycloakClient *KeycloakClient) VersionIsLessThanOrEqualTo(ctx context.Context, versionString Version) (bool, error) {
 	if keycloakClient.version == nil {
-		err := keycloakClient.login()
+		err := keycloakClient.login(ctx)
 		if err != nil {
 			return false, err
 		}

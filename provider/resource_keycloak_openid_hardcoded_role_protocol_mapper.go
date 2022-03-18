@@ -1,22 +1,24 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakOpenIdHardcodedRoleProtocolMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenIdHardcodedRoleProtocolMapperCreate,
-		Read:   resourceKeycloakOpenIdHardcodedRoleProtocolMapperRead,
-		Update: resourceKeycloakOpenIdHardcodedRoleProtocolMapperUpdate,
-		Delete: resourceKeycloakOpenIdHardcodedRoleProtocolMapperDelete,
+		CreateContext: resourceKeycloakOpenIdHardcodedRoleProtocolMapperCreate,
+		ReadContext:   resourceKeycloakOpenIdHardcodedRoleProtocolMapperRead,
+		UpdateContext: resourceKeycloakOpenIdHardcodedRoleProtocolMapperUpdate,
+		DeleteContext: resourceKeycloakOpenIdHardcodedRoleProtocolMapperDelete,
 		Importer: &schema.ResourceImporter{
 			// import a mapper tied to a client:
 			// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 			// or a client scope:
 			// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
-			State: genericProtocolMapperImport,
+			StateContext: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -79,36 +81,36 @@ func mapFromOpenIdHardcodedRoleMapperToData(mapper *keycloak.OpenIdHardcodedRole
 	data.Set("role_id", mapper.RoleId)
 }
 
-func resourceKeycloakOpenIdHardcodedRoleProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdHardcodedRoleProtocolMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdHardcodedRoleMapper := mapFromDataToOpenIdHardcodedRoleProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdHardcodedRoleProtocolMapper(openIdHardcodedRoleMapper)
+	err := keycloakClient.ValidateOpenIdHardcodedRoleProtocolMapper(ctx, openIdHardcodedRoleMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewOpenIdHardcodedRoleProtocolMapper(openIdHardcodedRoleMapper)
+	err = keycloakClient.NewOpenIdHardcodedRoleProtocolMapper(ctx, openIdHardcodedRoleMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromOpenIdHardcodedRoleMapperToData(openIdHardcodedRoleMapper, data)
 
-	return resourceKeycloakOpenIdHardcodedRoleProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdHardcodedRoleProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdHardcodedRoleProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdHardcodedRoleProtocolMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	openIdHardcodedRoleMapper, err := keycloakClient.GetOpenIdHardcodedRoleProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	openIdHardcodedRoleMapper, err := keycloakClient.GetOpenIdHardcodedRoleProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromOpenIdHardcodedRoleMapperToData(openIdHardcodedRoleMapper, data)
@@ -116,30 +118,30 @@ func resourceKeycloakOpenIdHardcodedRoleProtocolMapperRead(data *schema.Resource
 	return nil
 }
 
-func resourceKeycloakOpenIdHardcodedRoleProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdHardcodedRoleProtocolMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdHardcodedRoleMapper := mapFromDataToOpenIdHardcodedRoleProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdHardcodedRoleProtocolMapper(openIdHardcodedRoleMapper)
+	err := keycloakClient.ValidateOpenIdHardcodedRoleProtocolMapper(ctx, openIdHardcodedRoleMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateOpenIdHardcodedRoleProtocolMapper(openIdHardcodedRoleMapper)
+	err = keycloakClient.UpdateOpenIdHardcodedRoleProtocolMapper(ctx, openIdHardcodedRoleMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakOpenIdHardcodedRoleProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdHardcodedRoleProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdHardcodedRoleProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdHardcodedRoleProtocolMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	return keycloakClient.DeleteOpenIdHardcodedRoleProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	return diag.FromErr(keycloakClient.DeleteOpenIdHardcodedRoleProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id()))
 }

@@ -12,6 +12,7 @@ import (
 
 func TestAccKeycloakDataSourceUser(t *testing.T) {
 	t.Parallel()
+
 	username := acctest.RandomWithPrefix("tf-acc")
 	email := acctest.RandomWithPrefix("tf-acc") + "@fakedomain.com"
 
@@ -62,7 +63,7 @@ func testAccCheckDataKeycloakUser(resourceName string) resource.TestCheckFunc {
 		realmID := rs.Primary.Attributes["realm_id"]
 		username := rs.Primary.Attributes["username"]
 
-		user, err := keycloakClient.GetUser(realmID, id)
+		user, err := keycloakClient.GetUser(testCtx, realmID, id)
 		if err != nil {
 			return err
 		}

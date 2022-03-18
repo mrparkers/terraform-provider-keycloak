@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -11,13 +13,13 @@ const MULTIVALUE_ATTRIBUTE_SEPARATOR = "##"
 
 func resourceKeycloakUser() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakUserCreate,
-		Read:   resourceKeycloakUserRead,
-		Delete: resourceKeycloakUserDelete,
-		Update: resourceKeycloakUserUpdate,
+		CreateContext: resourceKeycloakUserCreate,
+		ReadContext:   resourceKeycloakUserRead,
+		DeleteContext: resourceKeycloakUserDelete,
+		UpdateContext: resourceKeycloakUserUpdate,
 		// This resource can be imported using {{realm}}/{{user_id}}. The User's ID is displayed in the GUI when editing
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakUserImport,
+			StateContext: resourceKeycloakUserImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -156,7 +158,7 @@ func getUserFederatedIdentitiesFromData(data []interface{}) *keycloak.FederatedI
 }
 
 func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
-	federatedIdentities := []interface{}{}
+	var federatedIdentities []interface{}
 	for _, federatedIdentity := range user.FederatedIdentities {
 		identity := map[string]interface{}{
 			"identity_provider": federatedIdentity.IdentityProvider,
@@ -181,14 +183,14 @@ func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
 	data.Set("federated_identity", federatedIdentities)
 }
 
-func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakUserCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	user := mapFromDataToUser(data)
 
-	err := keycloakClient.NewUser(user)
+	err := keycloakClient.NewUser(ctx, user)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	v, isInitialPasswordSet := data.GetOk("initial_password")
@@ -196,26 +198,26 @@ func resourceKeycloakUserCreate(data *schema.ResourceData, meta interface{}) err
 		passwordBlock := v.([]interface{})[0].(map[string]interface{})
 		passwordValue := passwordBlock["value"].(string)
 		isPasswordTemporary := passwordBlock["temporary"].(bool)
-		err := keycloakClient.ResetUserPassword(user.RealmId, user.Id, passwordValue, isPasswordTemporary)
+		err := keycloakClient.ResetUserPassword(ctx, user.RealmId, user.Id, passwordValue, isPasswordTemporary)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	mapFromUserToData(data, user)
 
-	return resourceKeycloakUserRead(data, meta)
+	return resourceKeycloakUserRead(ctx, data, meta)
 }
 
-func resourceKeycloakUserRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakUserRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	user, err := keycloakClient.GetUser(realmId, id)
+	user, err := keycloakClient.GetUser(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromUserToData(data, user)
@@ -223,14 +225,14 @@ func resourceKeycloakUserRead(data *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func resourceKeycloakUserUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakUserUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	user := mapFromDataToUser(data)
 
-	err := keycloakClient.UpdateUser(user)
+	err := keycloakClient.UpdateUser(ctx, user)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromUserToData(data, user)
@@ -238,16 +240,16 @@ func resourceKeycloakUserUpdate(data *schema.ResourceData, meta interface{}) err
 	return nil
 }
 
-func resourceKeycloakUserDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakUserDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteUser(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteUser(ctx, realmId, id))
 }
 
-func resourceKeycloakUserImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakUserImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userId}}")

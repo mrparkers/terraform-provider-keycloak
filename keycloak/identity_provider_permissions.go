@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -16,20 +17,20 @@ type IdentityProviderPermissions struct {
 	ScopePermissions map[string]interface{} `json:"scopePermissions"`
 }
 
-func (keycloakClient *KeycloakClient) EnableIdentityProviderPermissions(realmId, providerAlias string) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/management/permissions", realmId, providerAlias), IdentityProviderPermissionsInput{Enabled: true})
+func (keycloakClient *KeycloakClient) EnableIdentityProviderPermissions(ctx context.Context, realmId, providerAlias string) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances/%s/management/permissions", realmId, providerAlias), IdentityProviderPermissionsInput{Enabled: true})
 }
 
-func (keycloakClient *KeycloakClient) DisableIdentityProviderPermissions(realmId, providerAlias string) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/management/permissions", realmId, providerAlias), IdentityProviderPermissionsInput{Enabled: false})
+func (keycloakClient *KeycloakClient) DisableIdentityProviderPermissions(ctx context.Context, realmId, providerAlias string) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances/%s/management/permissions", realmId, providerAlias), IdentityProviderPermissionsInput{Enabled: false})
 }
 
-func (keycloakClient *KeycloakClient) GetIdentityProviderPermissions(realmId, providerAlias string) (*IdentityProviderPermissions, error) {
+func (keycloakClient *KeycloakClient) GetIdentityProviderPermissions(ctx context.Context, realmId, providerAlias string) (*IdentityProviderPermissions, error) {
 	var identityProviderPermissions IdentityProviderPermissions
 	identityProviderPermissions.RealmId = realmId
 	identityProviderPermissions.ProviderAlias = providerAlias
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/management/permissions", realmId, providerAlias), &identityProviderPermissions, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances/%s/management/permissions", realmId, providerAlias), &identityProviderPermissions, nil)
 	if err != nil {
 		return nil, err
 	}

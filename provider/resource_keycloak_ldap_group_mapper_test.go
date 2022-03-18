@@ -53,7 +53,7 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 			{
 				PreConfig: func() {
 
-					err := keycloakClient.DeleteLdapGroupMapper(mapper.RealmId, mapper.Id)
+					err := keycloakClient.DeleteLdapGroupMapper(testCtx, mapper.RealmId, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -262,7 +262,7 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 func TestAccKeycloakLdapGroupMapper_groupsPath(t *testing.T) {
 	t.Parallel()
 
-	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11); !ok {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_11); !ok {
 		t.Skip()
 	}
 
@@ -317,7 +317,7 @@ func testAccCheckKeycloakLdapGroupMapperDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapGroupMapper, _ := keycloakClient.GetLdapGroupMapper(realm, id)
+			ldapGroupMapper, _ := keycloakClient.GetLdapGroupMapper(testCtx, realm, id)
 			if ldapGroupMapper != nil {
 				return fmt.Errorf("ldap group mapper with id %s still exists", id)
 			}
@@ -336,7 +336,7 @@ func getLdapGroupMapperFromState(s *terraform.State, resourceName string) (*keyc
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	ldapGroupMapper, err := keycloakClient.GetLdapGroupMapper(realm, id)
+	ldapGroupMapper, err := keycloakClient.GetLdapGroupMapper(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting ldap group mapper with id %s: %s", id, err)
 	}
