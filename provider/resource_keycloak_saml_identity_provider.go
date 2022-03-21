@@ -14,6 +14,7 @@ var nameIdPolicyFormats = map[string]string{
 	"Kerberos":                      "urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos",
 	"X.509 Subject Name":            "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName",
 	"Unspecified":                   "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+	"Transient":                     "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
 }
 
 var signatureAlgorithms = []string{
@@ -148,9 +149,9 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 	}
 	samlResource := resourceKeycloakIdentityProvider()
 	samlResource.Schema = mergeSchemas(samlResource.Schema, samlSchema)
-	samlResource.Create = resourceKeycloakIdentityProviderCreate(getSamlIdentityProviderFromData, setSamlIdentityProviderData)
-	samlResource.Read = resourceKeycloakIdentityProviderRead(setSamlIdentityProviderData)
-	samlResource.Update = resourceKeycloakIdentityProviderUpdate(getSamlIdentityProviderFromData, setSamlIdentityProviderData)
+	samlResource.CreateContext = resourceKeycloakIdentityProviderCreate(getSamlIdentityProviderFromData, setSamlIdentityProviderData)
+	samlResource.ReadContext = resourceKeycloakIdentityProviderRead(setSamlIdentityProviderData)
+	samlResource.UpdateContext = resourceKeycloakIdentityProviderUpdate(getSamlIdentityProviderFromData, setSamlIdentityProviderData)
 	return samlResource
 }
 

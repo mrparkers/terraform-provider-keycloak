@@ -139,7 +139,7 @@ func TestAccKeycloakSamlScriptProtocolMapper_createAfterManualDestroy(t *testing
 				PreConfig: func() {
 					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-					err := keycloakClient.DeleteSamlScriptProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					err := keycloakClient.DeleteSamlScriptProtocolMapper(testCtx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
@@ -261,7 +261,7 @@ func getSamlScriptMapperUsingState(state *terraform.State, resourceName string) 
 
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-	return keycloakClient.GetSamlScriptProtocolMapper(realm, clientId, clientScopeId, id)
+	return keycloakClient.GetSamlScriptProtocolMapper(testCtx, realm, clientId, clientScopeId, id)
 }
 
 func testKeycloakSamlScriptProtocolMapper_basic_client(clientId, mapperName string) string {

@@ -155,13 +155,13 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeAdd(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					client, err := keycloakClient.GetOpenidClientByClientId(testAccRealm.Realm, client)
+					client, err := keycloakClient.GetOpenidClientByClientId(testCtx, testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
 					clientToManuallyDetach := clientScopes[acctest.RandIntRange(0, len(clientScopes)-1)]
-					err = keycloakClient.DetachOpenidClientDefaultScopes(testAccRealm.Realm, client.Id, []string{clientToManuallyDetach})
+					err = keycloakClient.DetachOpenidClientDefaultScopes(testCtx, testAccRealm.Realm, client.Id, []string{clientToManuallyDetach})
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -203,12 +203,12 @@ func TestAccKeycloakOpenidClientDefaultScopes_authoritativeRemove(t *testing.T) 
 			},
 			{
 				PreConfig: func() {
-					client, err := keycloakClient.GetOpenidClientByClientId(testAccRealm.Realm, client)
+					client, err := keycloakClient.GetOpenidClientByClientId(testCtx, testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachOpenidClientDefaultScopes(testAccRealm.Realm, client.Id, []string{clientToManuallyAttach})
+					err = keycloakClient.AttachOpenidClientDefaultScopes(testCtx, testAccRealm.Realm, client.Id, []string{clientToManuallyAttach})
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -241,12 +241,12 @@ func TestAccKeycloakOpenidClientDefaultScopes_noImportNeeded(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					openidClient, err := keycloakClient.GetOpenidClientByClientId(testAccRealm.Realm, client)
+					openidClient, err := keycloakClient.GetOpenidClientByClientId(testCtx, testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachOpenidClientDefaultScopes(testAccRealm.Realm, openidClient.Id, clientScopes)
+					err = keycloakClient.AttachOpenidClientDefaultScopes(testCtx, testAccRealm.Realm, openidClient.Id, clientScopes)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -299,7 +299,7 @@ func getDefaultClientScopesFromState(resourceName string, s *terraform.State) ([
 		client = rs.Primary.ID
 	}
 
-	keycloakDefaultClientScopes, err := keycloakClient.GetOpenidClientDefaultScopes(realm, client)
+	keycloakDefaultClientScopes, err := keycloakClient.GetOpenidClientDefaultScopes(testCtx, realm, client)
 	if err != nil {
 		return nil, err
 	}

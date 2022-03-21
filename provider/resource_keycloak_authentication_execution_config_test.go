@@ -141,7 +141,7 @@ func testAccCheckKeycloakAuthenticationExecutionConfigExists(resourceName string
 		config.ExecutionId = rs.Primary.Attributes["execution_id"]
 		config.Id = rs.Primary.ID
 
-		if err := keycloakClient.GetAuthenticationExecutionConfig(config); err != nil {
+		if err := keycloakClient.GetAuthenticationExecutionConfig(testCtx, config); err != nil {
 			return fmt.Errorf("error fetching authentication execution config: %v", err)
 		}
 
@@ -159,7 +159,7 @@ func testAccCheckKeycloakAuthenticationExecutionConfigDestroy(s *terraform.State
 			RealmId: rs.Primary.Attributes["realm_id"],
 			Id:      rs.Primary.ID,
 		}
-		if err := keycloakClient.GetAuthenticationExecutionConfig(config); err == nil {
+		if err := keycloakClient.GetAuthenticationExecutionConfig(testCtx, config); err == nil {
 			return fmt.Errorf("authentication execution config still exists")
 		} else if !keycloak.ErrorIs404(err) {
 			return fmt.Errorf("could not fetch authentication execution config: %v", err)

@@ -1,5 +1,7 @@
 package keycloak
 
+import "context"
+
 type SystemInfo struct {
 	ServerVersion string `json:"version"`
 }
@@ -71,10 +73,10 @@ func (serverInfo *ServerInfo) providerInstalled(providerType, providerName strin
 	return false
 }
 
-func (keycloakClient *KeycloakClient) GetServerInfo() (*ServerInfo, error) {
+func (keycloakClient *KeycloakClient) GetServerInfo(ctx context.Context) (*ServerInfo, error) {
 	var serverInfo ServerInfo
 
-	err := keycloakClient.get("/serverinfo", &serverInfo, nil)
+	err := keycloakClient.get(ctx, "/serverinfo", &serverInfo, nil)
 	if err != nil {
 		return nil, err
 	}

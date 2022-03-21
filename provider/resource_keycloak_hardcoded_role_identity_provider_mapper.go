@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -15,13 +16,13 @@ func resourceKeycloakHardcodedRoleIdentityProviderMapper() *schema.Resource {
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate(getHardcodedRoleIdentityProviderMapperFromData, setHardcodedRoleIdentityProviderMapperData)
-	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead(setHardcodedRoleIdentityProviderMapperData)
-	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate(getHardcodedRoleIdentityProviderMapperFromData, setHardcodedRoleIdentityProviderMapperData)
+	genericMapperResource.CreateContext = resourceKeycloakIdentityProviderMapperCreate(getHardcodedRoleIdentityProviderMapperFromData, setHardcodedRoleIdentityProviderMapperData)
+	genericMapperResource.ReadContext = resourceKeycloakIdentityProviderMapperRead(setHardcodedRoleIdentityProviderMapperData)
+	genericMapperResource.UpdateContext = resourceKeycloakIdentityProviderMapperUpdate(getHardcodedRoleIdentityProviderMapperFromData, setHardcodedRoleIdentityProviderMapperData)
 	return genericMapperResource
 }
 
-func getHardcodedRoleIdentityProviderMapperFromData(data *schema.ResourceData, _ interface{}) (*keycloak.IdentityProviderMapper, error) {
+func getHardcodedRoleIdentityProviderMapperFromData(_ context.Context, data *schema.ResourceData, _ interface{}) (*keycloak.IdentityProviderMapper, error) {
 	rec, _ := getIdentityProviderMapperFromData(data)
 
 	rec.IdentityProviderMapper = "oidc-hardcoded-role-idp-mapper"

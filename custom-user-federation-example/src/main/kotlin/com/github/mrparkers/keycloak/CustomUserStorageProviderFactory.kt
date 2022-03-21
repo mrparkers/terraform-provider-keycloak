@@ -2,10 +2,15 @@ package com.github.mrparkers.keycloak
 
 import org.keycloak.component.ComponentModel
 import org.keycloak.models.KeycloakSession
+import org.keycloak.models.KeycloakSessionFactory
 import org.keycloak.provider.ProviderConfigProperty
 import org.keycloak.storage.UserStorageProviderFactory
+import org.keycloak.storage.UserStorageProviderModel
+import org.keycloak.storage.user.ImportSynchronization
+import org.keycloak.storage.user.SynchronizationResult
+import java.util.Date
 
-class CustomUserStorageProviderFactory : UserStorageProviderFactory<CustomUserStorageProvider> {
+class CustomUserStorageProviderFactory : UserStorageProviderFactory<CustomUserStorageProvider>, ImportSynchronization {
 	override fun getId(): String = "custom"
 
 	override fun init(config: org.keycloak.Config.Scope) {
@@ -30,4 +35,14 @@ class CustomUserStorageProviderFactory : UserStorageProviderFactory<CustomUserSt
 			configPropertyList.add(property)
 		}
 	}
+
+	override fun sync(sessionFactory: KeycloakSessionFactory?, realmId: String?, model: UserStorageProviderModel?):
+		SynchronizationResult = SynchronizationResult()
+
+	override fun syncSince(
+		lastSync: Date?,
+		sessionFactory: KeycloakSessionFactory?,
+		realmId: String?,
+		model: UserStorageProviderModel?
+	): SynchronizationResult = SynchronizationResult()
 }

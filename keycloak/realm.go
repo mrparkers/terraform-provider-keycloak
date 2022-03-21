@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strings"
 )
@@ -163,26 +164,26 @@ type SmtpServer struct {
 	Password           string             `json:"password,omitempty"`
 }
 
-func (keycloakClient *KeycloakClient) NewRealm(realm *Realm) error {
-	_, _, err := keycloakClient.post("/realms", realm)
+func (keycloakClient *KeycloakClient) NewRealm(ctx context.Context, realm *Realm) error {
+	_, _, err := keycloakClient.post(ctx, "/realms", realm)
 
 	return err
 }
 
-func (keycloakClient *KeycloakClient) GetRealm(name string) (*Realm, error) {
+func (keycloakClient *KeycloakClient) GetRealm(ctx context.Context, name string) (*Realm, error) {
 	var realm Realm
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s", name), &realm, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s", name), &realm, nil)
 	if err != nil {
 		return nil, err
 	}
 	return &realm, nil
 }
 
-func (keycloakClient *KeycloakClient) GetRealms() ([]*Realm, error) {
+func (keycloakClient *KeycloakClient) GetRealms(ctx context.Context) ([]*Realm, error) {
 	var realms []*Realm
 
-	err := keycloakClient.get("/realms", &realms, nil)
+	err := keycloakClient.get(ctx, "/realms", &realms, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -190,10 +191,10 @@ func (keycloakClient *KeycloakClient) GetRealms() ([]*Realm, error) {
 	return realms, nil
 }
 
-func (keycloakClient *KeycloakClient) GetRealmKeys(name string) (*Keys, error) {
+func (keycloakClient *KeycloakClient) GetRealmKeys(ctx context.Context, name string) (*Keys, error) {
 	var keys Keys
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/keys", name), &keys, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/keys", name), &keys, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -201,21 +202,21 @@ func (keycloakClient *KeycloakClient) GetRealmKeys(name string) (*Keys, error) {
 	return &keys, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateRealm(realm *Realm) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s", realm.Realm), realm)
+func (keycloakClient *KeycloakClient) UpdateRealm(ctx context.Context, realm *Realm) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s", realm.Realm), realm)
 }
 
-func (keycloakClient *KeycloakClient) DeleteRealm(name string) error {
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s", name), nil)
+func (keycloakClient *KeycloakClient) DeleteRealm(ctx context.Context, name string) error {
+	err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s", name), nil)
 	if err != nil {
 		// For whatever reason, this fails sometimes with a 500 during acceptance tests. try again
-		return keycloakClient.delete(fmt.Sprintf("/realms/%s", name), nil)
+		return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s", name), nil)
 	}
 
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
+func (keycloakClient *KeycloakClient) ValidateRealm(ctx context.Context, realm *Realm) error {
 	if realm.DuplicateEmailsAllowed == true && realm.RegistrationEmailAsUsername == true {
 		return fmt.Errorf("validation error: DuplicateEmailsAllowed cannot be true if RegistrationEmailAsUsername is true")
 	}
@@ -229,7 +230,7 @@ func (keycloakClient *KeycloakClient) ValidateRealm(realm *Realm) error {
 	}
 
 	// validate if the given theme exists on the server. the keycloak API allows you to use any random string for a theme
-	serverInfo, err := keycloakClient.GetServerInfo()
+	serverInfo, err := keycloakClient.GetServerInfo(ctx)
 	if err != nil {
 		return err
 	}

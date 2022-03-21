@@ -1,8 +1,8 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"reflect"
 )
 
@@ -66,9 +66,8 @@ type IdentityProvider struct {
 	Config                    *IdentityProviderConfig `json:"config"`
 }
 
-func (keycloakClient *KeycloakClient) NewIdentityProvider(identityProvider *IdentityProvider) error {
-	log.Printf("[WARN] Realm: %s", identityProvider.Realm)
-	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/identity-provider/instances", identityProvider.Realm), identityProvider)
+func (keycloakClient *KeycloakClient) NewIdentityProvider(ctx context.Context, identityProvider *IdentityProvider) error {
+	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances", identityProvider.Realm), identityProvider)
 	if err != nil {
 		return err
 	}
@@ -76,11 +75,11 @@ func (keycloakClient *KeycloakClient) NewIdentityProvider(identityProvider *Iden
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetIdentityProvider(realm, alias string) (*IdentityProvider, error) {
+func (keycloakClient *KeycloakClient) GetIdentityProvider(ctx context.Context, realm, alias string) (*IdentityProvider, error) {
 	var identityProvider IdentityProvider
 	identityProvider.Realm = realm
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), &identityProvider, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), &identityProvider, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -88,12 +87,12 @@ func (keycloakClient *KeycloakClient) GetIdentityProvider(realm, alias string) (
 	return &identityProvider, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateIdentityProvider(identityProvider *IdentityProvider) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", identityProvider.Realm, identityProvider.Alias), identityProvider)
+func (keycloakClient *KeycloakClient) UpdateIdentityProvider(ctx context.Context, identityProvider *IdentityProvider) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances/%s", identityProvider.Realm, identityProvider.Alias), identityProvider)
 }
 
-func (keycloakClient *KeycloakClient) DeleteIdentityProvider(realm, alias string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), nil)
+func (keycloakClient *KeycloakClient) DeleteIdentityProvider(ctx context.Context, realm, alias string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances/%s", realm, alias), nil)
 }
 
 func (f *IdentityProviderConfig) UnmarshalJSON(data []byte) error {

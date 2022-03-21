@@ -44,7 +44,7 @@ func testAccCheckKeycloakGroupPermissionExists(resourceName string) resource.Tes
 		authorizationResourceServerId := rs.Primary.Attributes["authorization_resource_server_id"]
 
 		var realmManagementId string
-		clients, _ := keycloakClient.GetOpenidClients(permissions.RealmId, false)
+		clients, _ := keycloakClient.GetOpenidClients(testCtx, permissions.RealmId, false)
 		for _, client := range clients {
 			if client.ClientId == "realm-management" {
 				realmManagementId = client.Id
@@ -60,7 +60,7 @@ func testAccCheckKeycloakGroupPermissionExists(resourceName string) resource.Tes
 		manageMembersScopeDescription := rs.Primary.Attributes["manage_members_scope.0.description"]
 		manageMembersScopeDecisionStrategy := rs.Primary.Attributes["manage_members_scope.0.decision_strategy"]
 
-		authzClientManageMembersScope, err := keycloakClient.GetOpenidClientAuthorizationPermission(permissions.RealmId, realmManagementId, permissions.ScopePermissions["manage-members"].(string))
+		authzClientManageMembersScope, err := keycloakClient.GetOpenidClientAuthorizationPermission(testCtx, permissions.RealmId, realmManagementId, permissions.ScopePermissions["manage-members"].(string))
 		if err != nil {
 			return err
 		}
@@ -99,7 +99,7 @@ func getGroupPermissionsFromState(s *terraform.State, resourceName string) (*key
 	realmId := rs.Primary.Attributes["realm_id"]
 	groupId := rs.Primary.Attributes["group_id"]
 
-	permissions, err := keycloakClient.GetGroupPermissions(realmId, groupId)
+	permissions, err := keycloakClient.GetGroupPermissions(testCtx, realmId, groupId)
 	if err != nil {
 		return nil, fmt.Errorf("error getting group permissions with realm id %s and group id %s : %s", realmId, groupId, err)
 	}

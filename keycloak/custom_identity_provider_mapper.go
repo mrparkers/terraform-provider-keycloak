@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 )
@@ -19,8 +20,8 @@ type CustomIdentityProviderMapper struct {
 	Config                 *CustomIdentityProviderMapperConfig `json:"config,omitempty"`
 }
 
-func (keycloakClient *KeycloakClient) NewCustomIdentityProviderMapper(customIdentityProviderMapper *CustomIdentityProviderMapper) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers", customIdentityProviderMapper.Realm, customIdentityProviderMapper.IdentityProviderAlias), customIdentityProviderMapper)
+func (keycloakClient *KeycloakClient) NewCustomIdentityProviderMapper(ctx context.Context, customIdentityProviderMapper *CustomIdentityProviderMapper) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers", customIdentityProviderMapper.Realm, customIdentityProviderMapper.IdentityProviderAlias), customIdentityProviderMapper)
 	if err != nil {
 		return err
 	}
@@ -30,12 +31,12 @@ func (keycloakClient *KeycloakClient) NewCustomIdentityProviderMapper(customIden
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetCustomIdentityProviderMapper(realm, alias, id string) (*CustomIdentityProviderMapper, error) {
+func (keycloakClient *KeycloakClient) GetCustomIdentityProviderMapper(ctx context.Context, realm, alias, id string) (*CustomIdentityProviderMapper, error) {
 	var customIdentityProviderMapper CustomIdentityProviderMapper
 	customIdentityProviderMapper.Realm = realm
 	customIdentityProviderMapper.IdentityProviderAlias = alias
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers/%s", realm, alias, id), &customIdentityProviderMapper, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers/%s", realm, alias, id), &customIdentityProviderMapper, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -43,12 +44,12 @@ func (keycloakClient *KeycloakClient) GetCustomIdentityProviderMapper(realm, ali
 	return &customIdentityProviderMapper, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateCustomIdentityProviderMapper(customIdentityProviderMapper *CustomIdentityProviderMapper) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers/%s", customIdentityProviderMapper.Realm, customIdentityProviderMapper.IdentityProviderAlias, customIdentityProviderMapper.Id), customIdentityProviderMapper)
+func (keycloakClient *KeycloakClient) UpdateCustomIdentityProviderMapper(ctx context.Context, customIdentityProviderMapper *CustomIdentityProviderMapper) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers/%s", customIdentityProviderMapper.Realm, customIdentityProviderMapper.IdentityProviderAlias, customIdentityProviderMapper.Id), customIdentityProviderMapper)
 }
 
-func (keycloakClient *KeycloakClient) DeleteCustomIdentityProviderMapper(realm, alias, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers/%s", realm, alias, id), nil)
+func (keycloakClient *KeycloakClient) DeleteCustomIdentityProviderMapper(ctx context.Context, realm, alias, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers/%s", realm, alias, id), nil)
 }
 
 func (f *CustomIdentityProviderMapperConfig) UnmarshalJSON(data []byte) error {

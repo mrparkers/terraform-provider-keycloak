@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -10,12 +12,12 @@ import (
 
 func resourceKeycloakAuthenticationFlow() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakAuthenticationFlowCreate,
-		Read:   resourceKeycloakAuthenticationFlowRead,
-		Delete: resourceKeycloakAuthenticationFlowDelete,
-		Update: resourceKeycloakAuthenticationFlowUpdate,
+		CreateContext: resourceKeycloakAuthenticationFlowCreate,
+		ReadContext:   resourceKeycloakAuthenticationFlowRead,
+		DeleteContext: resourceKeycloakAuthenticationFlowDelete,
+		UpdateContext: resourceKeycloakAuthenticationFlowUpdate,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakAuthenticationFlowImport,
+			StateContext: resourceKeycloakAuthenticationFlowImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -67,59 +69,60 @@ func mapFromAuthenticationFlowInfoToData(data *schema.ResourceData, authenticati
 	data.Set("alias", authenticationFlow.Alias)
 }
 
-func resourceKeycloakAuthenticationFlowCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationFlowCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	authenticationFlow := mapFromDataToAuthenticationFlow(data)
 
-	err := keycloakClient.NewAuthenticationFlow(authenticationFlow)
+	err := keycloakClient.NewAuthenticationFlow(ctx, authenticationFlow)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromAuthenticationFlowToData(data, authenticationFlow)
-	return resourceKeycloakAuthenticationFlowRead(data, meta)
+
+	return resourceKeycloakAuthenticationFlowRead(ctx, data, meta)
 }
 
-func resourceKeycloakAuthenticationFlowRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationFlowRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	authenticationFlow, err := keycloakClient.GetAuthenticationFlow(realmId, id)
+	authenticationFlow, err := keycloakClient.GetAuthenticationFlow(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromAuthenticationFlowToData(data, authenticationFlow)
 	return nil
 }
 
-func resourceKeycloakAuthenticationFlowUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationFlowUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	authenticationFlow := mapFromDataToAuthenticationFlow(data)
 
-	err := keycloakClient.UpdateAuthenticationFlow(authenticationFlow)
+	err := keycloakClient.UpdateAuthenticationFlow(ctx, authenticationFlow)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromAuthenticationFlowToData(data, authenticationFlow)
 	return nil
 }
 
-func resourceKeycloakAuthenticationFlowDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationFlowDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteAuthenticationFlow(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteAuthenticationFlow(ctx, realmId, id))
 }
 
-func resourceKeycloakAuthenticationFlowImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakAuthenticationFlowImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {

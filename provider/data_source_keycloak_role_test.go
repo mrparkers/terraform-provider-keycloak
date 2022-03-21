@@ -10,6 +10,7 @@ import (
 
 func TestAccKeycloakDataSourceRole_basic(t *testing.T) {
 	t.Parallel()
+
 	client := acctest.RandomWithPrefix("tf-acc")
 	realmRole := acctest.RandomWithPrefix("tf-acc")
 	clientRole := acctest.RandomWithPrefix("tf-acc")
@@ -58,7 +59,7 @@ func testAccCheckDataKeycloakRole(resourceName string) resource.TestCheckFunc {
 		realmId := rs.Primary.Attributes["realm_id"]
 		name := rs.Primary.Attributes["name"]
 
-		role, err := keycloakClient.GetRole(realmId, id)
+		role, err := keycloakClient.GetRole(testCtx, realmId, id)
 		if err != nil {
 			return err
 		}

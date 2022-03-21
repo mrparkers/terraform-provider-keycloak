@@ -68,7 +68,7 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_createAfterManualDestroy(
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteIdentityProviderMapper(mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
+					err := keycloakClient.DeleteIdentityProviderMapper(testCtx, mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -100,7 +100,7 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_withExtraConfig_createAft
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteIdentityProviderMapper(mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
+					err := keycloakClient.DeleteIdentityProviderMapper(testCtx, mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -188,7 +188,7 @@ func testAccCheckKeycloakUserTemplateIdentityProviderMapperDestroy() resource.Te
 			alias := rs.Primary.Attributes["identity_provider_alias"]
 			id := rs.Primary.ID
 
-			mapper, _ := keycloakClient.GetIdentityProviderMapper(realm, alias, id)
+			mapper, _ := keycloakClient.GetIdentityProviderMapper(testCtx, realm, alias, id)
 			if mapper != nil {
 				return fmt.Errorf("oidc config with id %s still exists", id)
 			}
@@ -208,7 +208,7 @@ func getKeycloakUserTemplateIdentityProviderMapperFromState(s *terraform.State, 
 	alias := rs.Primary.Attributes["identity_provider_alias"]
 	id := rs.Primary.ID
 
-	mapper, err := keycloakClient.GetIdentityProviderMapper(realm, alias, id)
+	mapper, err := keycloakClient.GetIdentityProviderMapper(testCtx, realm, alias, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting identity provider mapper config with id %s: %s", id, err)
 	}

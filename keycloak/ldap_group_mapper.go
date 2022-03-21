@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -150,7 +151,7 @@ func convertFromComponentToLdapGroupMapper(component *component, realmId string)
 	return ldapGroupMapper, nil
 }
 
-func (keycloakClient *KeycloakClient) ValidateLdapGroupMapper(ldapGroupMapper *LdapGroupMapper) error {
+func (keycloakClient *KeycloakClient) ValidateLdapGroupMapper(ctx context.Context, ldapGroupMapper *LdapGroupMapper) error {
 	if ldapGroupMapper.MembershipAttributeType == "UID" && ldapGroupMapper.PreserveGroupInheritance == true {
 		return fmt.Errorf("validation error: group inheritance cannot be preserved while membership attribute type is UID")
 	}
@@ -158,8 +159,8 @@ func (keycloakClient *KeycloakClient) ValidateLdapGroupMapper(ldapGroupMapper *L
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) NewLdapGroupMapper(ldapGroupMapper *LdapGroupMapper) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapGroupMapper.RealmId), convertFromLdapGroupMapperToComponent(ldapGroupMapper))
+func (keycloakClient *KeycloakClient) NewLdapGroupMapper(ctx context.Context, ldapGroupMapper *LdapGroupMapper) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", ldapGroupMapper.RealmId), convertFromLdapGroupMapperToComponent(ldapGroupMapper))
 	if err != nil {
 		return err
 	}
@@ -169,10 +170,10 @@ func (keycloakClient *KeycloakClient) NewLdapGroupMapper(ldapGroupMapper *LdapGr
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetLdapGroupMapper(realmId, id string) (*LdapGroupMapper, error) {
+func (keycloakClient *KeycloakClient) GetLdapGroupMapper(ctx context.Context, realmId, id string) (*LdapGroupMapper, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -180,10 +181,10 @@ func (keycloakClient *KeycloakClient) GetLdapGroupMapper(realmId, id string) (*L
 	return convertFromComponentToLdapGroupMapper(component, realmId)
 }
 
-func (keycloakClient *KeycloakClient) UpdateLdapGroupMapper(ldapGroupMapper *LdapGroupMapper) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapGroupMapper.RealmId, ldapGroupMapper.Id), convertFromLdapGroupMapperToComponent(ldapGroupMapper))
+func (keycloakClient *KeycloakClient) UpdateLdapGroupMapper(ctx context.Context, ldapGroupMapper *LdapGroupMapper) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", ldapGroupMapper.RealmId, ldapGroupMapper.Id), convertFromLdapGroupMapperToComponent(ldapGroupMapper))
 }
 
-func (keycloakClient *KeycloakClient) DeleteLdapGroupMapper(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteLdapGroupMapper(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

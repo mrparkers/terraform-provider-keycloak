@@ -25,6 +25,12 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_basic(t *testing.T) {
 				Config: testKeycloakRealmKeystoreRsaGenerated_basic(rsaName),
 				Check:  testAccCheckRealmKeystoreRsaGeneratedExists("keycloak_realm_keystore_rsa_generated.realm_rsa"),
 			},
+			{
+				ResourceName:      "keycloak_realm_keystore_rsa_generated.realm_rsa",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_rsa_generated.realm_rsa"),
+			},
 		},
 	})
 }
@@ -47,7 +53,7 @@ func TestAccKeycloakRealmKeystoreRsaGenerated_createAfterManualDestroy(t *testin
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRealmKeystoreRsaGenerated(rsa.RealmId, rsa.Id)
+					err := keycloakClient.DeleteRealmKeystoreRsaGenerated(testCtx, rsa.RealmId, rsa.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -183,7 +189,7 @@ func testAccCheckRealmKeystoreRsaGeneratedDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreRsaGenerated(realm, id)
+			ldapGroupKeystore, _ := keycloakClient.GetRealmKeystoreRsaGenerated(testCtx, realm, id)
 			if ldapGroupKeystore != nil {
 				return fmt.Errorf("rsa keystore with id %s still exists", id)
 			}
@@ -204,27 +210,12 @@ func getKeycloakRealmKeystoreRsaGeneratedFromState(s *terraform.State,
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	realmKeystore, err := keycloakClient.GetRealmKeystoreRsaGenerated(realm, id)
+	realmKeystore, err := keycloakClient.GetRealmKeystoreRsaGenerated(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting rsa keystore with id %s: %s", id, err)
 	}
 
 	return realmKeystore, nil
-}
-
-func getRealmKeystoreRsaGeneratedImportId(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return "", fmt.Errorf("resource not found: %s", resourceName)
-		}
-
-		id := rs.Primary.ID
-		realmId := rs.Primary.Attributes["realm_id"]
-		providerId := "rsa-generated"
-
-		return fmt.Sprintf("%s/%s/%s", realmId, providerId, id), nil
-	}
 }
 
 func testKeycloakRealmKeystoreRsaGenerated_basic(rsaName string) string {

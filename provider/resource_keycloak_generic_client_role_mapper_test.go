@@ -53,7 +53,7 @@ func TestAccKeycloakGenericRoleMapper_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRoleScopeMapping(childClient.RealmId, childClient.Id, "", role)
+					err := keycloakClient.DeleteRoleScopeMapping(testCtx, childClient.RealmId, childClient.Id, "", role)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -179,7 +179,7 @@ func TestAccKeycloakGenericRealmLevelRoleMapperClientScope_createAfterManualDest
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRoleScopeMapping(clientScope.RealmId, "", clientScope.Id, role)
+					err := keycloakClient.DeleteRoleScopeMapping(testCtx, clientScope.RealmId, "", clientScope.Id, role)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -215,7 +215,7 @@ func TestAccKeycloakGenericRoleMapperClientScope_createAfterManualDestroy(t *tes
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRoleScopeMapping(clientScope.RealmId, "", clientScope.Id, role)
+					err := keycloakClient.DeleteRoleScopeMapping(testCtx, clientScope.RealmId, "", clientScope.Id, role)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -276,7 +276,7 @@ func getGenericClientFromState(s *terraform.State, resourceName string) (*keyclo
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	client, err := keycloakClient.GetGenericClient(realm, id)
+	client, err := keycloakClient.GetGenericClient(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting generic client %s: %s", id, err)
 	}
@@ -293,7 +293,7 @@ func getOpenidClientScopeFromState(s *terraform.State, resourceName string) (*ke
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	client, err := keycloakClient.GetOpenidClientScope(realm, id)
+	client, err := keycloakClient.GetOpenidClientScope(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting client scope %s: %s", id, err)
 	}

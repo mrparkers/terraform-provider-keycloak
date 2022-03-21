@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -11,12 +13,12 @@ import (
 
 func resourceKeycloakAuthenticationExecution() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakAuthenticationExecutionCreate,
-		Read:   resourceKeycloakAuthenticationExecutionRead,
-		Delete: resourceKeycloakAuthenticationExecutionDelete,
-		Update: resourceKeycloakAuthenticationExecutionUpdate,
+		CreateContext: resourceKeycloakAuthenticationExecutionCreate,
+		ReadContext:   resourceKeycloakAuthenticationExecutionRead,
+		DeleteContext: resourceKeycloakAuthenticationExecutionDelete,
+		UpdateContext: resourceKeycloakAuthenticationExecutionUpdate,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakAuthenticationExecutionImport,
+			StateContext: resourceKeycloakAuthenticationExecutionImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -72,31 +74,31 @@ func mapFromAuthenticationExecutionInfoToData(data *schema.ResourceData, authent
 	data.Set("parent_flow_alias", authenticationExecutionInfo.ParentFlowAlias)
 }
 
-func resourceKeycloakAuthenticationExecutionCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationExecutionCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	authenticationExecution := mapFromDataToAuthenticationExecution(data)
 
-	err := keycloakClient.NewAuthenticationExecution(authenticationExecution)
+	err := keycloakClient.NewAuthenticationExecution(ctx, authenticationExecution)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromAuthenticationExecutionToData(data, authenticationExecution)
 
-	return resourceKeycloakAuthenticationExecutionRead(data, meta)
+	return resourceKeycloakAuthenticationExecutionRead(ctx, data, meta)
 }
 
-func resourceKeycloakAuthenticationExecutionRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationExecutionRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	parentFlowAlias := data.Get("parent_flow_alias").(string)
 	id := data.Id()
 
-	authenticationExecution, err := keycloakClient.GetAuthenticationExecution(realmId, parentFlowAlias, id)
+	authenticationExecution, err := keycloakClient.GetAuthenticationExecution(ctx, realmId, parentFlowAlias, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromAuthenticationExecutionToData(data, authenticationExecution)
@@ -104,14 +106,14 @@ func resourceKeycloakAuthenticationExecutionRead(data *schema.ResourceData, meta
 	return nil
 }
 
-func resourceKeycloakAuthenticationExecutionUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationExecutionUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	authenticationExecution := mapFromDataToAuthenticationExecution(data)
 
-	err := keycloakClient.UpdateAuthenticationExecution(authenticationExecution)
+	err := keycloakClient.UpdateAuthenticationExecution(ctx, authenticationExecution)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromAuthenticationExecutionToData(data, authenticationExecution)
@@ -119,16 +121,16 @@ func resourceKeycloakAuthenticationExecutionUpdate(data *schema.ResourceData, me
 	return nil
 }
 
-func resourceKeycloakAuthenticationExecutionDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationExecutionDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteAuthenticationExecution(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteAuthenticationExecution(ctx, realmId, id))
 }
 
-func resourceKeycloakAuthenticationExecutionImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakAuthenticationExecutionImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 3 {

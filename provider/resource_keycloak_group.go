@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -10,13 +12,13 @@ import (
 
 func resourceKeycloakGroup() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakGroupCreate,
-		Read:   resourceKeycloakGroupRead,
-		Delete: resourceKeycloakGroupDelete,
-		Update: resourceKeycloakGroupUpdate,
+		CreateContext: resourceKeycloakGroupCreate,
+		ReadContext:   resourceKeycloakGroupRead,
+		DeleteContext: resourceKeycloakGroupDelete,
+		UpdateContext: resourceKeycloakGroupUpdate,
 		// This resource can be imported using {{realm}}/{{group_id}}. The Group ID is displayed in the URL when editing it from the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakGroupImport,
+			StateContext: resourceKeycloakGroupImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -79,30 +81,30 @@ func mapFromGroupToData(data *schema.ResourceData, group *keycloak.Group) {
 	}
 }
 
-func resourceKeycloakGroupCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	group := mapFromDataToGroup(data)
 
-	err := keycloakClient.NewGroup(group)
+	err := keycloakClient.NewGroup(ctx, group)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromGroupToData(data, group)
 
-	return resourceKeycloakGroupRead(data, meta)
+	return resourceKeycloakGroupRead(ctx, data, meta)
 }
 
-func resourceKeycloakGroupRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	group, err := keycloakClient.GetGroup(realmId, id)
+	group, err := keycloakClient.GetGroup(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromGroupToData(data, group)
@@ -110,14 +112,14 @@ func resourceKeycloakGroupRead(data *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceKeycloakGroupUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	group := mapFromDataToGroup(data)
 
-	err := keycloakClient.UpdateGroup(group)
+	err := keycloakClient.UpdateGroup(ctx, group)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromGroupToData(data, group)
@@ -125,16 +127,16 @@ func resourceKeycloakGroupUpdate(data *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourceKeycloakGroupDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGroupDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteGroup(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteGroup(ctx, realmId, id))
 }
 
-func resourceKeycloakGroupImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakGroupImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {

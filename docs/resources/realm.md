@@ -82,7 +82,7 @@ resource "keycloak_realm" "realm" {
 - `enabled` - (Optional) When `false`, users and clients will not be able to access this realm. Defaults to `true`.
 - `display_name` - (Optional) The display name for the realm that is shown when logging in to the admin console.
 - `display_name_html` - (Optional) The display name for the realm that is rendered as HTML on the screen when logging in to the admin console.
-- `user_managed_access` - (Optional) When `true`, users are allowed to manage their own resources. Defaults to `false`.
+- `user_managed_access` - (Optional) When `true`, users are allowed to manage their own resources. Defaults to `false`. 
 - `attributes` - (Optional) A map of custom attributes to add to the realm.
 
 ### Login Settings

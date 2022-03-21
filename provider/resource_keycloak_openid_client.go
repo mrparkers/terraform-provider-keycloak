@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"reflect"
 	"strings"
 
@@ -23,13 +24,13 @@ var (
 
 func resourceKeycloakOpenidClient() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenidClientCreate,
-		Read:   resourceKeycloakOpenidClientRead,
-		Delete: resourceKeycloakOpenidClientDelete,
-		Update: resourceKeycloakOpenidClientUpdate,
+		CreateContext: resourceKeycloakOpenidClientCreate,
+		ReadContext:   resourceKeycloakOpenidClientRead,
+		DeleteContext: resourceKeycloakOpenidClientDelete,
+		UpdateContext: resourceKeycloakOpenidClientUpdate,
 		// This resource can be imported using {{realm}}/{{client_id}}. The Client ID is displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakOpenidClientImport,
+			StateContext: resourceKeycloakOpenidClientImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -402,10 +403,10 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	return openidClient, nil
 }
 
-func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData, client *keycloak.OpenidClient) error {
+func setOpenidClientData(ctx context.Context, keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData, client *keycloak.OpenidClient) error {
 	var serviceAccountUserId string
 	if client.ServiceAccountsEnabled {
-		serviceAccountUser, err := keycloakClient.GetOpenidClientServiceAccountUserId(client.RealmId, client.Id)
+		serviceAccountUser, err := keycloakClient.GetOpenidClientServiceAccountUserId(ctx, client.RealmId, client.Id)
 		if err != nil {
 			return err
 		}
@@ -481,87 +482,87 @@ func setOpenidClientData(keycloakClient *keycloak.KeycloakClient, data *schema.R
 	return nil
 }
 
-func resourceKeycloakOpenidClientCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	client, err := getOpenidClientFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.ValidateOpenidClient(client)
+	err = keycloakClient.ValidateOpenidClient(ctx, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewOpenidClient(client)
+	err = keycloakClient.NewOpenidClient(ctx, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = setOpenidClientData(keycloakClient, data, client)
+	err = setOpenidClientData(ctx, keycloakClient, data, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakOpenidClientRead(data, meta)
+	return resourceKeycloakOpenidClientRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenidClientRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	client, err := keycloakClient.GetOpenidClient(realmId, id)
+	client, err := keycloakClient.GetOpenidClient(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
-	err = setOpenidClientData(keycloakClient, data, client)
+	err = setOpenidClientData(ctx, keycloakClient, data, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakOpenidClientUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	client, err := getOpenidClientFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.ValidateOpenidClient(client)
+	err = keycloakClient.ValidateOpenidClient(ctx, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateOpenidClient(client)
+	err = keycloakClient.UpdateOpenidClient(ctx, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = setOpenidClientData(keycloakClient, data, client)
+	err = setOpenidClientData(ctx, keycloakClient, data, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakOpenidClientDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteOpenidClient(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteOpenidClient(ctx, realmId, id))
 }
 
-func resourceKeycloakOpenidClientImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakOpenidClientImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{openidClientId}}")
@@ -569,5 +570,10 @@ func resourceKeycloakOpenidClientImport(d *schema.ResourceData, meta interface{}
 	d.Set("realm_id", parts[0])
 	d.SetId(parts[1])
 
-	return []*schema.ResourceData{d}, resourceKeycloakOpenidClientRead(d, meta)
+	diagnostics := resourceKeycloakOpenidClientRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

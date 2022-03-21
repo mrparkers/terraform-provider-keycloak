@@ -1,6 +1,9 @@
 package provider
 
-import "github.com/mrparkers/terraform-provider-keycloak/keycloak"
+import (
+	"context"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+)
 
 // a struct that represents the "desired" state configured via terraform
 // the key for 'clientRoles' is keycloak's client-id (the uuid, not to be confused with the OAuth Client Id)
@@ -27,12 +30,12 @@ func intoRoleMapping(keycloakRoleMapping *keycloak.RoleMapping) *roleMapping {
 
 // given a list of roleIds, query keycloak for role details to find out if a role is a client role or a
 // realm role (which is required to POST the role assignment to the correct API endpoint)
-func getExtendedRoleMapping(keycloakClient *keycloak.KeycloakClient, realmId string, roleIds []string) (*roleMapping, error) {
+func getExtendedRoleMapping(ctx context.Context, keycloakClient *keycloak.KeycloakClient, realmId string, roleIds []string) (*roleMapping, error) {
 	clientRoles := make(map[string][]*keycloak.Role)
 	var realmRoles []*keycloak.Role
 
 	for _, roleId := range roleIds {
-		role, err := keycloakClient.GetRole(realmId, roleId)
+		role, err := keycloakClient.GetRole(ctx, realmId, roleId)
 		if err != nil {
 			// if the role doesn't exist anymore, skip it
 			if keycloak.ErrorIs404(err) {
