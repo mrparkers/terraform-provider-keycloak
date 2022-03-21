@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
@@ -88,8 +89,8 @@ func convertFromComponentToRealmKeystoreHmacGenerated(component *component, real
 	return realmKey, nil
 }
 
-func (keycloakClient *KeycloakClient) NewRealmKeystoreHmacGenerated(realmKey *RealmKeystoreHmacGenerated) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", realmKey.RealmId), convertFromRealmKeystoreHmacGeneratedToComponent(realmKey))
+func (keycloakClient *KeycloakClient) NewRealmKeystoreHmacGenerated(ctx context.Context, realmKey *RealmKeystoreHmacGenerated) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", realmKey.RealmId), convertFromRealmKeystoreHmacGeneratedToComponent(realmKey))
 	if err != nil {
 		return err
 	}
@@ -99,10 +100,10 @@ func (keycloakClient *KeycloakClient) NewRealmKeystoreHmacGenerated(realmKey *Re
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetRealmKeystoreHmacGenerated(realmId, id string) (*RealmKeystoreHmacGenerated, error) {
+func (keycloakClient *KeycloakClient) GetRealmKeystoreHmacGenerated(ctx context.Context, realmId, id string) (*RealmKeystoreHmacGenerated, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -110,10 +111,10 @@ func (keycloakClient *KeycloakClient) GetRealmKeystoreHmacGenerated(realmId, id 
 	return convertFromComponentToRealmKeystoreHmacGenerated(component, realmId)
 }
 
-func (keycloakClient *KeycloakClient) UpdateRealmKeystoreHmacGenerated(realmKey *RealmKeystoreHmacGenerated) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", realmKey.RealmId, realmKey.Id), convertFromRealmKeystoreHmacGeneratedToComponent(realmKey))
+func (keycloakClient *KeycloakClient) UpdateRealmKeystoreHmacGenerated(ctx context.Context, realmKey *RealmKeystoreHmacGenerated) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", realmKey.RealmId, realmKey.Id), convertFromRealmKeystoreHmacGeneratedToComponent(realmKey))
 }
 
-func (keycloakClient *KeycloakClient) DeleteRealmKeystoreHmacGenerated(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteRealmKeystoreHmacGenerated(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

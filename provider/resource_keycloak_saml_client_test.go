@@ -78,7 +78,7 @@ func TestAccKeycloakSamlClient_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteSamlClient(client.RealmId, client.Id)
+					err := keycloakClient.DeleteSamlClient(testCtx, client.RealmId, client.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -457,7 +457,7 @@ func testAccCheckKeycloakSamlClientDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			client, _ := keycloakClient.GetSamlClient(realm, id)
+			client, _ := keycloakClient.GetSamlClient(testCtx, realm, id)
 			if client != nil {
 				return fmt.Errorf("saml client %s still exists", id)
 			}
@@ -476,7 +476,7 @@ func getSamlClientFromState(s *terraform.State, resourceName string) (*keycloak.
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	client, err := keycloakClient.GetSamlClient(realm, id)
+	client, err := keycloakClient.GetSamlClient(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting saml client %s: %s", id, err)
 	}
@@ -544,7 +544,7 @@ func testAccCheckKeycloakSamlClientExtraConfigMissing(resourceName string, key s
 
 		if val, ok := client.Attributes.ExtraConfig[key]; ok {
 			// keycloak 13+ will remove attributes if set to empty string. on older versions, we'll just check if this value is empty
-			if versionOk, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !versionOk {
+			if versionOk, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_13); !versionOk {
 				if val != "" {
 					return fmt.Errorf("expected saml client to have empty attribute %v", key)
 				}

@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -16,18 +17,18 @@ type GroupPermissions struct {
 	ScopePermissions map[string]interface{} `json:"scopePermissions"`
 }
 
-func (keycloakClient *KeycloakClient) EnableGroupPermissions(realmId, groupId string) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/groups/%s/management/permissions", realmId, groupId), GroupPermissionsInput{Enabled: true})
+func (keycloakClient *KeycloakClient) EnableGroupPermissions(ctx context.Context, realmId, groupId string) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/groups/%s/management/permissions", realmId, groupId), GroupPermissionsInput{Enabled: true})
 }
 
-func (keycloakClient *KeycloakClient) DisableGroupPermissions(realmId, groupId string) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/groups/%s/management/permissions", realmId, groupId), GroupPermissionsInput{Enabled: false})
+func (keycloakClient *KeycloakClient) DisableGroupPermissions(ctx context.Context, realmId, groupId string) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/groups/%s/management/permissions", realmId, groupId), GroupPermissionsInput{Enabled: false})
 }
 
-func (keycloakClient *KeycloakClient) GetGroupPermissions(realmId, groupId string) (*GroupPermissions, error) {
+func (keycloakClient *KeycloakClient) GetGroupPermissions(ctx context.Context, realmId, groupId string) (*GroupPermissions, error) {
 	var groupPermissions GroupPermissions
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/groups/%s/management/permissions", realmId, groupId), &groupPermissions, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/groups/%s/management/permissions", realmId, groupId), &groupPermissions, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -25,6 +25,12 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_basic(t *testing.T) {
 				Config: testKeycloakRealmKeystoreEcdsaGenerated_basic(ecdsaName),
 				Check:  testAccCheckRealmKeystoreEcdsaGeneratedExists("keycloak_realm_keystore_ecdsa_generated.realm_ecdsa"),
 			},
+			{
+				ResourceName:      "keycloak_realm_keystore_ecdsa_generated.realm_ecdsa",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_ecdsa_generated.realm_ecdsa"),
+			},
 		},
 	})
 }
@@ -47,7 +53,7 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_createAfterManualDestroy(t *test
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRealmKeystoreEcdsaGenerated(ecdsa.RealmId, ecdsa.Id)
+					err := keycloakClient.DeleteRealmKeystoreEcdsaGenerated(testCtx, ecdsa.RealmId, ecdsa.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -158,7 +164,7 @@ func testAccCheckRealmKeystoreEcdsaGeneratedDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ecdsa, _ := keycloakClient.GetRealmKeystoreEcdsaGenerated(realm, id)
+			ecdsa, _ := keycloakClient.GetRealmKeystoreEcdsaGenerated(testCtx, realm, id)
 			if ecdsa != nil {
 				return fmt.Errorf("ecdsa keystore with id %s still exists", id)
 			}
@@ -179,27 +185,12 @@ func getKeycloakRealmKeystoreEcdsaGeneratedFromState(s *terraform.State,
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	realmKeystore, err := keycloakClient.GetRealmKeystoreEcdsaGenerated(realm, id)
+	realmKeystore, err := keycloakClient.GetRealmKeystoreEcdsaGenerated(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting ecdsa keystore with id %s: %s", id, err)
 	}
 
 	return realmKeystore, nil
-}
-
-func getRealmKeystoreEcdsaGeneratedImportId(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return "", fmt.Errorf("resource not found: %s", resourceName)
-		}
-
-		id := rs.Primary.ID
-		realmId := rs.Primary.Attributes["realm_id"]
-		providerId := "ecdsa-generated"
-
-		return fmt.Sprintf("%s/%s/%s", realmId, providerId, id), nil
-	}
 }
 
 func testKeycloakRealmKeystoreEcdsaGenerated_basic(ecdsaName string) string {

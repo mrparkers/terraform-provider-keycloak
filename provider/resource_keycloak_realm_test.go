@@ -56,7 +56,7 @@ func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRealm(realmName)
+					err := keycloakClient.DeleteRealm(testCtx, realmName)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -393,7 +393,7 @@ func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_tokenSettingsOauth2Device(t *testing.T) {
-	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_13); !ok {
 		t.Skip()
 	}
 
@@ -471,7 +471,7 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 }
 
 func TestAccKeycloakRealm_oauth2DeviceSettings(t *testing.T) {
-	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_13); !ok {
 		t.Skip()
 	}
 
@@ -766,7 +766,7 @@ func TestAccKeycloakRealm_internalId(t *testing.T) {
 				ImportState:   true,
 				Config:        testKeycloakRealm_basic(realmName, "foo", "<b>foo</b>"),
 				PreConfig: func() {
-					err := keycloakClient.NewRealm(realm)
+					err := keycloakClient.NewRealm(testCtx, realm)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -798,7 +798,7 @@ func TestAccKeycloakRealm_default_client_scopes(t *testing.T) {
 				ImportState:   true,
 				Config:        testKeycloakRealm_default_client_scopes(realmName, defaultDefaultClientScope, defaultOptionalClientScope),
 				PreConfig: func() {
-					err := keycloakClient.NewRealm(realm)
+					err := keycloakClient.NewRealm(testCtx, realm)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -810,8 +810,8 @@ func TestAccKeycloakRealm_default_client_scopes(t *testing.T) {
 
 	// test empty default client scope configuration
 	realmName2 := acctest.RandomWithPrefix("tf-acc")
-	defaultDefaultClientScope2 := []string{}  // deliberately empty
-	defaultOptionalClientScope2 := []string{} // deliberately empty
+	var defaultDefaultClientScope2 []string  // deliberately empty
+	var defaultOptionalClientScope2 []string // deliberately empty
 
 	realm2 := &keycloak.Realm{
 		Realm: realmName2,
@@ -827,7 +827,7 @@ func TestAccKeycloakRealm_default_client_scopes(t *testing.T) {
 				ImportState:   true,
 				Config:        testKeycloakRealm_default_client_scopes(realmName2, defaultDefaultClientScope2, defaultOptionalClientScope2),
 				PreConfig: func() {
-					err := keycloakClient.NewRealm(realm2)
+					err := keycloakClient.NewRealm(testCtx, realm2)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -1142,7 +1142,7 @@ func testAccCheckKeycloakRealmDestroy() resource.TestCheckFunc {
 			}
 
 			realmName := rs.Primary.ID
-			realm, _ := keycloakClient.GetRealm(realmName)
+			realm, _ := keycloakClient.GetRealm(testCtx, realmName)
 			if realm != nil {
 				return fmt.Errorf("realm %s still exists", realmName)
 			}
@@ -1160,7 +1160,7 @@ func getRealmFromState(s *terraform.State, resourceName string) (*keycloak.Realm
 
 	realmName := rs.Primary.Attributes["realm"]
 
-	realm, err := keycloakClient.GetRealm(realmName)
+	realm, err := keycloakClient.GetRealm(testCtx, realmName)
 	if err != nil {
 		return nil, fmt.Errorf("error getting realm %s: %s", realmName, err)
 	}

@@ -1,18 +1,20 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakDefaultGroups() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakDefaultGroupsCreate,
-		Read:   resourceKeycloakDefaultGroupsRead,
-		Update: resourceKeycloakDefaultGroupsUpdate,
-		Delete: resourceKeycloakDefaultGroupsDelete,
+		CreateContext: resourceKeycloakDefaultGroupsCreate,
+		ReadContext:   resourceKeycloakDefaultGroupsRead,
+		UpdateContext: resourceKeycloakDefaultGroupsUpdate,
+		DeleteContext: resourceKeycloakDefaultGroupsDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakDefaultGroupsImport,
+			StateContext: resourceKeycloakDefaultGroupsImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -34,16 +36,16 @@ func defaultGroupId(realmId string) string {
 	return realmId + "/default-groups"
 }
 
-func resourceKeycloakDefaultGroupsCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakDefaultGroupsCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	groupIds := interfaceSliceToStringSlice(data.Get("group_ids").(*schema.Set).List())
 
 	for _, groupId := range groupIds {
-		err := keycloakClient.PutDefaultGroup(realmId, groupId)
+		err := keycloakClient.PutDefaultGroup(ctx, realmId, groupId)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -52,14 +54,14 @@ func resourceKeycloakDefaultGroupsCreate(data *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceKeycloakDefaultGroupsRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakDefaultGroupsRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 
-	groups, err := keycloakClient.GetDefaultGroups(realmId)
+	groups, err := keycloakClient.GetDefaultGroups(ctx, realmId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var groupIds []string
@@ -73,58 +75,58 @@ func resourceKeycloakDefaultGroupsRead(data *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceKeycloakDefaultGroupsUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakDefaultGroupsUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	newGroupIds := data.Get("group_ids").(*schema.Set)
 
-	originalGroups, err := keycloakClient.GetDefaultGroups(realmId)
+	originalGroups, err := keycloakClient.GetDefaultGroups(ctx, realmId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	for _, originalGroup := range originalGroups {
 		if newGroupIds.Contains(originalGroup.Id) {
 			newGroupIds.Remove(originalGroup.Id)
 		} else {
-			err := keycloakClient.DeleteDefaultGroup(realmId, originalGroup.Id)
+			err := keycloakClient.DeleteDefaultGroup(ctx, realmId, originalGroup.Id)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
 
 	// at this point newGroupIds should contain only users that need to be created
 	for _, group := range interfaceSliceToStringSlice(newGroupIds.List()) {
-		err := keycloakClient.PutDefaultGroup(realmId, group)
+		err := keycloakClient.PutDefaultGroup(ctx, realmId, group)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	data.SetId(defaultGroupId(realmId))
 
-	return resourceKeycloakDefaultGroupsRead(data, meta)
+	return resourceKeycloakDefaultGroupsRead(ctx, data, meta)
 }
 
-func resourceKeycloakDefaultGroupsDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakDefaultGroupsDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	groupIds := interfaceSliceToStringSlice(data.Get("group_ids").(*schema.Set).List())
 
 	for _, groupId := range groupIds {
-		err := keycloakClient.DeleteDefaultGroup(realmId, groupId)
+		err := keycloakClient.DeleteDefaultGroup(ctx, realmId, groupId)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	return nil
 }
 
-func resourceKeycloakDefaultGroupsImport(data *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakDefaultGroupsImport(_ context.Context, data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	data.Set("realm_id", data.Id())
 	data.SetId(data.Id())
 	return []*schema.ResourceData{data}, nil

@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -8,16 +10,16 @@ import (
 
 func resourceKeycloakOpenIdUserSessionNoteProtocolMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenIdUserSessionNoteProtocolMapperCreate,
-		Read:   resourceKeycloakOpenIdUserSessionNoteProtocolMapperRead,
-		Update: resourceKeycloakOpenIdUserSessionNoteProtocolMapperUpdate,
-		Delete: resourceKeycloakOpenIdUserSessionNoteProtocolMapperDelete,
+		CreateContext: resourceKeycloakOpenIdUserSessionNoteProtocolMapperCreate,
+		ReadContext:   resourceKeycloakOpenIdUserSessionNoteProtocolMapperRead,
+		UpdateContext: resourceKeycloakOpenIdUserSessionNoteProtocolMapperUpdate,
+		DeleteContext: resourceKeycloakOpenIdUserSessionNoteProtocolMapperDelete,
 		Importer: &schema.ResourceImporter{
 			// import a mapper tied to a client:
 			// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 			// or a client scope:
 			// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
-			State: genericProtocolMapperImport,
+			StateContext: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -111,35 +113,35 @@ func mapFromOpenIdUserSessionNoteMapperToData(mapper *keycloak.OpenIdUserSession
 	data.Set("session_note", mapper.UserSessionNote)
 }
 
-func resourceKeycloakOpenIdUserSessionNoteProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdUserSessionNoteProtocolMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdUserSessionNoteMapper := mapFromDataToOpenIdUserSessionNoteProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdUserSessionNoteProtocolMapper(openIdUserSessionNoteMapper)
+	err := keycloakClient.ValidateOpenIdUserSessionNoteProtocolMapper(ctx, openIdUserSessionNoteMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewOpenIdUserSessionNoteProtocolMapper(openIdUserSessionNoteMapper)
+	err = keycloakClient.NewOpenIdUserSessionNoteProtocolMapper(ctx, openIdUserSessionNoteMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromOpenIdUserSessionNoteMapperToData(openIdUserSessionNoteMapper, data)
 
-	return resourceKeycloakOpenIdUserSessionNoteProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdUserSessionNoteProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdUserSessionNoteProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdUserSessionNoteProtocolMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	openIdUserSessionNoteMapper, err := keycloakClient.GetOpenIdUserSessionNoteProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	openIdUserSessionNoteMapper, err := keycloakClient.GetOpenIdUserSessionNoteProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromOpenIdUserSessionNoteMapperToData(openIdUserSessionNoteMapper, data)
@@ -147,30 +149,30 @@ func resourceKeycloakOpenIdUserSessionNoteProtocolMapperRead(data *schema.Resour
 	return nil
 }
 
-func resourceKeycloakOpenIdUserSessionNoteProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdUserSessionNoteProtocolMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	openIdUserSessionNoteMapper := mapFromDataToOpenIdUserSessionNoteProtocolMapper(data)
 
-	err := keycloakClient.ValidateOpenIdUserSessionNoteProtocolMapper(openIdUserSessionNoteMapper)
+	err := keycloakClient.ValidateOpenIdUserSessionNoteProtocolMapper(ctx, openIdUserSessionNoteMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateOpenIdUserSessionNoteProtocolMapper(openIdUserSessionNoteMapper)
+	err = keycloakClient.UpdateOpenIdUserSessionNoteProtocolMapper(ctx, openIdUserSessionNoteMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakOpenIdUserSessionNoteProtocolMapperRead(data, meta)
+	return resourceKeycloakOpenIdUserSessionNoteProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenIdUserSessionNoteProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenIdUserSessionNoteProtocolMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	return keycloakClient.DeleteOpenIdUserSessionNoteProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	return diag.FromErr(keycloakClient.DeleteOpenIdUserSessionNoteProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id()))
 }

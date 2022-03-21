@@ -1,13 +1,15 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakAuthenticationExecution() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakAuthenticationExecutionRead,
+		ReadContext: dataSourceKeycloakAuthenticationExecutionRead,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -25,16 +27,16 @@ func dataSourceKeycloakAuthenticationExecution() *schema.Resource {
 	}
 }
 
-func dataSourceKeycloakAuthenticationExecutionRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakAuthenticationExecutionRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmID := data.Get("realm_id").(string)
 	parentFlowAlias := data.Get("parent_flow_alias").(string)
 	providerID := data.Get("provider_id").(string)
 
-	authenticationExecutionInfo, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(realmID, parentFlowAlias, providerID)
+	authenticationExecutionInfo, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(ctx, realmID, parentFlowAlias, providerID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromAuthenticationExecutionInfoToData(data, authenticationExecutionInfo)

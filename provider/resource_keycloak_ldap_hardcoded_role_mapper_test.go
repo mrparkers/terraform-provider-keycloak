@@ -52,7 +52,7 @@ func TestAccKeycloakLdapHardcodedRoleMapper_createAfterManualDestroy(t *testing.
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteLdapHardcodedRoleMapper(mapper.RealmId, mapper.Id)
+					err := keycloakClient.DeleteLdapHardcodedRoleMapper(testCtx, mapper.RealmId, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -99,7 +99,7 @@ func testAccCheckKeycloakLdapHardcodedRoleMapperDestroy() resource.TestCheckFunc
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapMapper, _ := keycloakClient.GetLdapHardcodedRoleMapper(realm, id)
+			ldapMapper, _ := keycloakClient.GetLdapHardcodedRoleMapper(testCtx, realm, id)
 			if ldapMapper != nil {
 				return fmt.Errorf("ldap hardcoded role mapper with id %s still exists", id)
 			}
@@ -118,7 +118,7 @@ func getLdapHardcodedRoleMapperFromState(s *terraform.State, resourceName string
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	ldapMapper, err := keycloakClient.GetLdapHardcodedRoleMapper(realm, id)
+	ldapMapper, err := keycloakClient.GetLdapHardcodedRoleMapper(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting ldap group mapper with id %s: %s", id, err)
 	}

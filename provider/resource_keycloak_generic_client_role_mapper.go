@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -10,11 +12,11 @@ import (
 
 func resourceKeycloakGenericClientRoleMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakGenericClientRoleMapperCreate,
-		Read:   resourceKeycloakGenericClientRoleMapperRead,
-		Delete: resourceKeycloakGenericClientRoleMapperDelete,
+		CreateContext: resourceKeycloakGenericClientRoleMapperCreate,
+		ReadContext:   resourceKeycloakGenericClientRoleMapperRead,
+		DeleteContext: resourceKeycloakGenericClientRoleMapperDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakGenericClientRoleMapperImport,
+			StateContext: resourceKeycloakGenericClientRoleMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -47,7 +49,7 @@ func resourceKeycloakGenericClientRoleMapper() *schema.Resource {
 	}
 }
 
-func resourceKeycloakGenericClientRoleMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGenericClientRoleMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -55,14 +57,14 @@ func resourceKeycloakGenericClientRoleMapperCreate(data *schema.ResourceData, me
 	clientScopeId := data.Get("client_scope_id").(string)
 	roleId := data.Get("role_id").(string)
 
-	role, err := keycloakClient.GetRole(realmId, roleId)
+	role, err := keycloakClient.GetRole(ctx, realmId, roleId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.CreateRoleScopeMapping(realmId, clientId, clientScopeId, role)
+	err = keycloakClient.CreateRoleScopeMapping(ctx, realmId, clientId, clientScopeId, role)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if clientId != "" {
@@ -71,10 +73,10 @@ func resourceKeycloakGenericClientRoleMapperCreate(data *schema.ResourceData, me
 		data.SetId(fmt.Sprintf("%s/client-scope/%s/scope-mappings/%s/%s", realmId, clientScopeId, role.ClientId, role.Id))
 	}
 
-	return resourceKeycloakGenericClientRoleMapperRead(data, meta)
+	return resourceKeycloakGenericClientRoleMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakGenericClientRoleMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGenericClientRoleMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -82,12 +84,12 @@ func resourceKeycloakGenericClientRoleMapperRead(data *schema.ResourceData, meta
 	clientScopeId := data.Get("client_scope_id").(string)
 	roleId := data.Get("role_id").(string)
 
-	role, err := keycloakClient.GetRole(realmId, roleId)
+	role, err := keycloakClient.GetRole(ctx, realmId, roleId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	mappedRole, err := keycloakClient.GetRoleScopeMapping(realmId, clientId, clientScopeId, role)
+	mappedRole, err := keycloakClient.GetRoleScopeMapping(ctx, realmId, clientId, clientScopeId, role)
 
 	if mappedRole == nil {
 		data.SetId("")
@@ -96,7 +98,7 @@ func resourceKeycloakGenericClientRoleMapperRead(data *schema.ResourceData, meta
 	return nil
 }
 
-func resourceKeycloakGenericClientRoleMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakGenericClientRoleMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -104,15 +106,15 @@ func resourceKeycloakGenericClientRoleMapperDelete(data *schema.ResourceData, me
 	clientScopeId := data.Get("client_scope_id").(string)
 	roleId := data.Get("role_id").(string)
 
-	role, err := keycloakClient.GetRole(realmId, roleId)
+	role, err := keycloakClient.GetRole(ctx, realmId, roleId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return keycloakClient.DeleteRoleScopeMapping(realmId, clientId, clientScopeId, role)
+	return diag.FromErr(keycloakClient.DeleteRoleScopeMapping(ctx, realmId, clientId, clientScopeId, role))
 }
 
-func resourceKeycloakGenericClientRoleMapperImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakGenericClientRoleMapperImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 6 {

@@ -1,8 +1,9 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
-	"log"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"net/url"
 )
 
@@ -37,7 +38,7 @@ func roleByNameUrl(realmId, clientId string) string {
 	return fmt.Sprintf("/realms/%s/clients/%s/roles", realmId, clientId)
 }
 
-func (keycloakClient *KeycloakClient) CreateRole(role *Role) error {
+func (keycloakClient *KeycloakClient) CreateRole(ctx context.Context, role *Role) error {
 	roleUrl := roleByNameUrl(role.RealmId, role.ClientId)
 
 	if role.ClientId != "" {
@@ -45,7 +46,7 @@ func (keycloakClient *KeycloakClient) CreateRole(role *Role) error {
 		role.ClientRole = true
 	}
 
-	_, _, err := keycloakClient.post(roleUrl, role)
+	_, _, err := keycloakClient.post(ctx, roleUrl, role)
 	if err != nil {
 		return err
 	}
@@ -53,7 +54,7 @@ func (keycloakClient *KeycloakClient) CreateRole(role *Role) error {
 	var createdRole Role
 	var roleName = url.PathEscape(role.Name)
 
-	err = keycloakClient.get(fmt.Sprintf("%s/%s", roleUrl, roleName), &createdRole, nil)
+	err = keycloakClient.get(ctx, fmt.Sprintf("%s/%s", roleUrl, roleName), &createdRole, nil)
 	if err != nil {
 		return err
 	}
@@ -61,13 +62,13 @@ func (keycloakClient *KeycloakClient) CreateRole(role *Role) error {
 	role.Id = createdRole.Id
 
 	// seems like role attributes aren't respected on create, so a following update is needed
-	return keycloakClient.UpdateRole(role)
+	return keycloakClient.UpdateRole(ctx, role)
 }
 
-func (keycloakClient *KeycloakClient) GetRealmRoles(realmId string) ([]*Role, error) {
+func (keycloakClient *KeycloakClient) GetRealmRoles(ctx context.Context, realmId string) ([]*Role, error) {
 	var roles []*Role
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/roles", realmId), &roles, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/roles", realmId), &roles, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -79,13 +80,13 @@ func (keycloakClient *KeycloakClient) GetRealmRoles(realmId string) ([]*Role, er
 	return roles, nil
 }
 
-func (keycloakClient *KeycloakClient) GetClientRoles(realmId string, clients []*OpenidClient) ([]*Role, error) {
+func (keycloakClient *KeycloakClient) GetClientRoles(ctx context.Context, realmId string, clients []*OpenidClient) ([]*Role, error) {
 	var roles []*Role
 
 	for _, client := range clients {
 		var rolesClient []*Role
 
-		err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/roles", realmId, client.Id), &rolesClient, nil)
+		err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients/%s/roles", realmId, client.Id), &rolesClient, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -101,14 +102,14 @@ func (keycloakClient *KeycloakClient) GetClientRoles(realmId string, clients []*
 	return roles, nil
 }
 
-func (keycloakClient *KeycloakClient) GetClientRoleUsers(realmId string, roles []*Role) (*[]UsersInRole, error) {
+func (keycloakClient *KeycloakClient) GetClientRoleUsers(ctx context.Context, realmId string, roles []*Role) (*[]UsersInRole, error) {
 	var usersInRoles []UsersInRole
 
 	for _, role := range roles {
 		var usersInRole UsersInRole
 
 		usersInRole.Role = role
-		err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/roles/%s/users", realmId, role.ClientId, role.Name), &usersInRole.Users, nil)
+		err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients/%s/roles/%s/users", realmId, role.ClientId, role.Name), &usersInRole.Users, nil)
 		if usersInRole.Users == nil {
 			continue
 		}
@@ -122,9 +123,9 @@ func (keycloakClient *KeycloakClient) GetClientRoleUsers(realmId string, roles [
 	return &usersInRoles, nil
 }
 
-func (keycloakClient *KeycloakClient) GetRole(realmId, id string) (*Role, error) {
+func (keycloakClient *KeycloakClient) GetRole(ctx context.Context, realmId, id string) (*Role, error) {
 	var role Role
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), &role, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), &role, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -138,11 +139,11 @@ func (keycloakClient *KeycloakClient) GetRole(realmId, id string) (*Role, error)
 	return &role, nil
 }
 
-func (keycloakClient *KeycloakClient) GetRoleByName(realmId, clientId, name string) (*Role, error) {
+func (keycloakClient *KeycloakClient) GetRoleByName(ctx context.Context, realmId, clientId, name string) (*Role, error) {
 	var role Role
 	var roleName = url.PathEscape(name)
 
-	err := keycloakClient.get(fmt.Sprintf("%s/%s", roleByNameUrl(realmId, clientId), roleName), &role, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("%s/%s", roleByNameUrl(realmId, clientId), roleName), &role, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -156,32 +157,25 @@ func (keycloakClient *KeycloakClient) GetRoleByName(realmId, clientId, name stri
 	return &role, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateRole(role *Role) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/roles-by-id/%s", role.RealmId, role.Id), role)
+func (keycloakClient *KeycloakClient) UpdateRole(ctx context.Context, role *Role) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s", role.RealmId, role.Id), role)
 }
 
-func (keycloakClient *KeycloakClient) DeleteRole(realmId, id string) error {
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteRole(ctx context.Context, realmId, id string) error {
+	err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), nil)
 	if err != nil {
-		log.Printf("[DEBUG] Failed to delete role with id %s. Trying again...", id)
+		tflog.Debug(ctx, "Failed to delete role, trying again", map[string]interface{}{
+			"roleId": id,
+		})
 
-		return keycloakClient.delete(fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), nil)
+		return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s", realmId, id), nil)
 	}
 
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) AddCompositesToRole(role *Role, compositeRoles []*Role) error {
-	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/roles-by-id/%s/composites", role.RealmId, role.Id), compositeRoles)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (keycloakClient *KeycloakClient) RemoveCompositesFromRole(role *Role, compositeRoles []*Role) error {
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/roles-by-id/%s/composites", role.RealmId, role.Id), compositeRoles)
+func (keycloakClient *KeycloakClient) AddCompositesToRole(ctx context.Context, role *Role, compositeRoles []*Role) error {
+	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s/composites", role.RealmId, role.Id), compositeRoles)
 	if err != nil {
 		return err
 	}
@@ -189,10 +183,19 @@ func (keycloakClient *KeycloakClient) RemoveCompositesFromRole(role *Role, compo
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetRoleComposites(role *Role) ([]*Role, error) {
+func (keycloakClient *KeycloakClient) RemoveCompositesFromRole(ctx context.Context, role *Role, compositeRoles []*Role) error {
+	err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s/composites", role.RealmId, role.Id), compositeRoles)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (keycloakClient *KeycloakClient) GetRoleComposites(ctx context.Context, role *Role) ([]*Role, error) {
 	var composites []*Role
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/roles-by-id/%s/composites", role.RealmId, role.Id), &composites, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s/composites", role.RealmId, role.Id), &composites, nil)
 	if err != nil {
 		return nil, err
 	}

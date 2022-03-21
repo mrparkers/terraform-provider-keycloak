@@ -1,9 +1,8 @@
 package keycloak
 
 import (
+	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"io/ioutil"
-	"log"
 	"os"
 	"strconv"
 	"testing"
@@ -26,6 +25,8 @@ var requiredEnvironmentVariables = []string{
 //
 // This appears to have been fixed as of Keycloak 12.x
 func TestAccKeycloakApiClientRefresh(t *testing.T) {
+	ctx := context.Background()
+
 	for _, requiredEnvironmentVariable := range requiredEnvironmentVariables {
 		if value := os.Getenv(requiredEnvironmentVariable); value == "" {
 			t.Fatalf("%s must be set before running acceptance tests.", requiredEnvironmentVariable)
@@ -41,19 +42,13 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		}
 	}
 
-	// Disable [DEBUG] logs which terraform typically handles for you. Re-enable when finished
-	if tfLogLevel := os.Getenv("TF_LOG"); tfLogLevel == "" {
-		log.SetOutput(ioutil.Discard)
-		defer log.SetOutput(os.Stdout)
-	}
-
 	// Convert KEYCLOAK_CLIENT_TIMEOUT to int
 	clientTimeout, err := strconv.Atoi(os.Getenv("KEYCLOAK_CLIENT_TIMEOUT"))
 	if err != nil {
 		t.Fatal("KEYCLOAK_CLIENT_TIMEOUT must be an integer")
 	}
 
-	keycloakClient, err := NewKeycloakClient(os.Getenv("KEYCLOAK_URL"), "/auth", os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), os.Getenv("KEYCLOAK_USER"), os.Getenv("KEYCLOAK_PASSWORD"), true, clientTimeout, "", false, "", map[string]string{
+	keycloakClient, err := NewKeycloakClient(ctx, os.Getenv("KEYCLOAK_URL"), "/auth", os.Getenv("KEYCLOAK_CLIENT_ID"), os.Getenv("KEYCLOAK_CLIENT_SECRET"), os.Getenv("KEYCLOAK_REALM"), os.Getenv("KEYCLOAK_USER"), os.Getenv("KEYCLOAK_PASSWORD"), true, clientTimeout, "", false, "", map[string]string{
 		"foo": "bar",
 	})
 	if err != nil {
@@ -61,7 +56,7 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 	}
 
 	// skip test if running 12.x or greater
-	if v, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(Version_12); v {
+	if v, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(ctx, Version_12); v {
 		t.Skip()
 	}
 
@@ -71,7 +66,7 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		Id:    realmName,
 	}
 
-	err = keycloakClient.NewRealm(realm)
+	err = keycloakClient.NewRealm(ctx, realm)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
@@ -85,13 +80,13 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 		oldTokenType = keycloakClient.clientCredentials.TokenType
 	}
 
-	_, err = keycloakClient.GetRealm(realmName) // This should not fail since it will automatically refresh and try again
+	_, err = keycloakClient.GetRealm(ctx, realmName) // This should not fail since it will automatically refresh and try again
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
 
 	// Clean up - the realm doesn't need to exist in order for us to assert against the refreshed tokens
-	err = keycloakClient.DeleteRealm(realmName)
+	err = keycloakClient.DeleteRealm(ctx, realmName)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}

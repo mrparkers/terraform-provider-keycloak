@@ -74,12 +74,12 @@ func testAccCheckDefaultRolesExists(resourceName string) resource.TestCheckFunc 
 
 func testAccCheckKeycloakDefaultRolesDestroy(realmId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		realm, err := keycloakClient.GetRealm(realmId)
+		realm, err := keycloakClient.GetRealm(testCtx, realmId)
 		if err != nil {
 			return err
 		}
 
-		composites, err := keycloakClient.GetDefaultRoles(realmId, realm.DefaultRole.Id)
+		composites, err := keycloakClient.GetDefaultRoles(testCtx, realmId, realm.DefaultRole.Id)
 		if err != nil {
 			return fmt.Errorf("error getting defaultRoles with id %s: %s", realm.DefaultRole.Id, err)
 		}
@@ -105,7 +105,7 @@ func getKeycloakDefaultRolesFromState(s *terraform.State, resourceName string) (
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	composites, err := keycloakClient.GetDefaultRoles(realm, id)
+	composites, err := keycloakClient.GetDefaultRoles(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting defaultRoles with id %s: %s", id, err)
 	}
