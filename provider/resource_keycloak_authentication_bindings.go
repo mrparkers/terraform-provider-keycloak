@@ -1,16 +1,18 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakAuthenticationBindings() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakAuthenticationBindingsCreate,
-		Read:   resourceKeycloakAuthenticationBindingsRead,
-		Delete: resourceKeycloakAuthenticationBindingsDelete,
-		Update: resourceKeycloakAuthenticationBindingsUpdate,
+		CreateContext: resourceKeycloakAuthenticationBindingsCreate,
+		ReadContext:   resourceKeycloakAuthenticationBindingsRead,
+		DeleteContext: resourceKeycloakAuthenticationBindingsDelete,
+		UpdateContext: resourceKeycloakAuthenticationBindingsUpdate,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -57,8 +59,8 @@ func resourceKeycloakAuthenticationBindings() *schema.Resource {
 	}
 }
 
-func getAuthenticationBindingsFromData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData) (*keycloak.Realm, error) {
-	realm, err := keycloakClient.GetRealm(data.Get("realm_id").(string))
+func getAuthenticationBindingsFromData(ctx context.Context, keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData) (*keycloak.Realm, error) {
+	realm, err := keycloakClient.GetRealm(ctx, data.Get("realm_id").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -92,32 +94,32 @@ func resetAuthenticationBindingsForRealm(realm *keycloak.Realm) {
 	realm.DockerAuthenticationFlow = "docker auth"
 }
 
-func resourceKeycloakAuthenticationBindingsCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationBindingsCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm, err := keycloakClient.GetRealm(data.Get("realm_id").(string))
+	realm, err := keycloakClient.GetRealm(ctx, data.Get("realm_id").(string))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	realm, err = getAuthenticationBindingsFromData(keycloakClient, data)
+	realm, err = getAuthenticationBindingsFromData(ctx, keycloakClient, data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.ValidateRealm(realm)
+	err = keycloakClient.ValidateRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateRealm(realm)
+	err = keycloakClient.UpdateRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	realm, err = keycloakClient.GetRealm(realm.Id)
+	realm, err = keycloakClient.GetRealm(ctx, realm.Id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setAuthenticationBindingsData(data, realm)
@@ -125,12 +127,12 @@ func resourceKeycloakAuthenticationBindingsCreate(data *schema.ResourceData, met
 	return nil
 }
 
-func resourceKeycloakAuthenticationBindingsRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationBindingsRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm, err := keycloakClient.GetRealm(data.Id())
+	realm, err := keycloakClient.GetRealm(ctx, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setAuthenticationBindingsData(data, realm)
@@ -138,40 +140,40 @@ func resourceKeycloakAuthenticationBindingsRead(data *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceKeycloakAuthenticationBindingsDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationBindingsDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm, err := keycloakClient.GetRealm(data.Id())
+	realm, err := keycloakClient.GetRealm(ctx, data.Id())
 	if err != nil {
 		return nil
 	}
 
 	resetAuthenticationBindingsForRealm(realm)
 
-	err = keycloakClient.UpdateRealm(realm)
+	err = keycloakClient.UpdateRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakAuthenticationBindingsUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakAuthenticationBindingsUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm, err := getAuthenticationBindingsFromData(keycloakClient, data)
+	realm, err := getAuthenticationBindingsFromData(ctx, keycloakClient, data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.ValidateRealm(realm)
+	err = keycloakClient.ValidateRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateRealm(realm)
+	err = keycloakClient.UpdateRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setAuthenticationBindingsData(data, realm)

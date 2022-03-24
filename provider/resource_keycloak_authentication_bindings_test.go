@@ -154,7 +154,7 @@ resource "keycloak_authentication_bindings" "authentication_binding" {
 
 func testAccCheckKeycloakAuthenticationBindingBrowserSet(realmName, binding, flowAlias string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		realm, err := keycloakClient.GetRealm(realmName)
+		realm, err := keycloakClient.GetRealm(testCtx, realmName)
 		if err != nil {
 			return fmt.Errorf("error getting realm %s: %s", realmName, err)
 		}
