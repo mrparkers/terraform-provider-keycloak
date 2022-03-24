@@ -133,7 +133,7 @@ func TestAccKeycloakOpenIdUserPropertyProtocolMapper_createAfterManualDestroy(t 
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenIdUserPropertyProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					err := keycloakClient.DeleteOpenIdUserPropertyProtocolMapper(testCtx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
@@ -294,7 +294,7 @@ func getUserPropertyMapperUsingState(state *terraform.State, resourceName string
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	return keycloakClient.GetOpenIdUserPropertyProtocolMapper(realm, clientId, clientScopeId, id)
+	return keycloakClient.GetOpenIdUserPropertyProtocolMapper(testCtx, realm, clientId, clientScopeId, id)
 }
 
 func testKeycloakOpenIdUserPropertyProtocolMapper_basic_client(clientId, mapperName string) string {

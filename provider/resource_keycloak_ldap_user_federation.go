@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,15 +21,15 @@ var (
 
 func resourceKeycloakLdapUserFederation() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakLdapUserFederationCreate,
-		Read:   resourceKeycloakLdapUserFederationRead,
-		Update: resourceKeycloakLdapUserFederationUpdate,
-		Delete: resourceKeycloakLdapUserFederationDelete,
+		CreateContext: resourceKeycloakLdapUserFederationCreate,
+		ReadContext:   resourceKeycloakLdapUserFederationRead,
+		UpdateContext: resourceKeycloakLdapUserFederationUpdate,
+		DeleteContext: resourceKeycloakLdapUserFederationDelete,
 		// If this resource uses authentication, then this resource must be imported using the syntax {{realm_id}}/{{provider_id}}/{{bind_credential}}
 		// Otherwise, this resource can be imported using {{realm}}/{{provider_id}}.
 		// The Provider ID is displayed in the GUI when editing this provider
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakLdapUserFederationImport,
+			StateContext: resourceKeycloakLdapUserFederationImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -450,35 +452,35 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 	}
 }
 
-func resourceKeycloakLdapUserFederationCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserFederationCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldap := getLdapUserFederationFromData(data)
 
-	err := keycloakClient.ValidateLdapUserFederation(ldap)
+	err := keycloakClient.ValidateLdapUserFederation(ctx, ldap)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewLdapUserFederation(ldap)
+	err = keycloakClient.NewLdapUserFederation(ctx, ldap)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setLdapUserFederationData(data, ldap)
 
-	return resourceKeycloakLdapUserFederationRead(data, meta)
+	return resourceKeycloakLdapUserFederationRead(ctx, data, meta)
 }
 
-func resourceKeycloakLdapUserFederationRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserFederationRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	ldap, err := keycloakClient.GetLdapUserFederation(realmId, id)
+	ldap, err := keycloakClient.GetLdapUserFederation(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	ldap.BindCredential = data.Get("bind_credential").(string) // we can't trust the API to set this field correctly since it just responds with "**********"
@@ -487,19 +489,19 @@ func resourceKeycloakLdapUserFederationRead(data *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceKeycloakLdapUserFederationUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserFederationUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	ldap := getLdapUserFederationFromData(data)
 
-	err := keycloakClient.ValidateLdapUserFederation(ldap)
+	err := keycloakClient.ValidateLdapUserFederation(ctx, ldap)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateLdapUserFederation(ldap)
+	err = keycloakClient.UpdateLdapUserFederation(ctx, ldap)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setLdapUserFederationData(data, ldap)
@@ -507,16 +509,16 @@ func resourceKeycloakLdapUserFederationUpdate(data *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceKeycloakLdapUserFederationDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserFederationDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteLdapUserFederation(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteLdapUserFederation(ctx, realmId, id))
 }
 
-func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakLdapUserFederationImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	var realmId, id string

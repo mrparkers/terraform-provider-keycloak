@@ -1,6 +1,9 @@
 package keycloak
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 type RequiredAction struct {
 	Id            string              `json:"-"`
@@ -28,10 +31,10 @@ func (requiredActions *RequiredAction) getConfigOk(val string) (string, bool) {
 	return "", false
 }
 
-func (keycloakClient *KeycloakClient) GetRequiredActions(realmId string) ([]*RequiredAction, error) {
+func (keycloakClient *KeycloakClient) GetRequiredActions(ctx context.Context, realmId string) ([]*RequiredAction, error) {
 	var requiredActions []*RequiredAction
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/required-actions", realmId), &requiredActions, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/required-actions", realmId), &requiredActions, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +46,10 @@ func (keycloakClient *KeycloakClient) GetRequiredActions(realmId string) ([]*Req
 	return requiredActions, nil
 }
 
-func (keycloakClient *KeycloakClient) GetUnregisteredRequiredActions(realmId string) ([]*RequiredAction, error) {
+func (keycloakClient *KeycloakClient) GetUnregisteredRequiredActions(ctx context.Context, realmId string) ([]*RequiredAction, error) {
 	var unregisteredRequiredActions []*RequiredAction
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/unregistered-required-actions", realmId), &unregisteredRequiredActions, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/unregistered-required-actions", realmId), &unregisteredRequiredActions, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -58,10 +61,10 @@ func (keycloakClient *KeycloakClient) GetUnregisteredRequiredActions(realmId str
 	return unregisteredRequiredActions, nil
 }
 
-func (keycloakClient *KeycloakClient) GetRequiredAction(realmId string, alias string) (*RequiredAction, error) {
+func (keycloakClient *KeycloakClient) GetRequiredAction(ctx context.Context, realmId string, alias string) (*RequiredAction, error) {
 	var requiredAction RequiredAction
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/authentication/required-actions/%s", realmId, alias), &requiredAction, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/required-actions/%s", realmId, alias), &requiredAction, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -69,38 +72,38 @@ func (keycloakClient *KeycloakClient) GetRequiredAction(realmId string, alias st
 	return &requiredAction, nil
 }
 
-func (keycloakClient *KeycloakClient) RegisterRequiredAction(requiredAction *RequiredAction) error {
-	_, _, err := keycloakClient.post(fmt.Sprintf("/realms/%s/authentication/register-required-action", requiredAction.RealmId), requiredAction)
+func (keycloakClient *KeycloakClient) RegisterRequiredAction(ctx context.Context, requiredAction *RequiredAction) error {
+	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/authentication/register-required-action", requiredAction.RealmId), requiredAction)
 	return err
 }
 
-func (keycloakClient *KeycloakClient) CreateRequiredAction(requiredAction *RequiredAction) error {
+func (keycloakClient *KeycloakClient) CreateRequiredAction(ctx context.Context, requiredAction *RequiredAction) error {
 	requiredAction.Id = fmt.Sprintf("%s/%s", requiredAction.RealmId, requiredAction.Alias)
-	return keycloakClient.UpdateRequiredAction(requiredAction)
+	return keycloakClient.UpdateRequiredAction(ctx, requiredAction)
 }
 
-func (keycloakClient *KeycloakClient) UpdateRequiredAction(requiredAction *RequiredAction) error {
+func (keycloakClient *KeycloakClient) UpdateRequiredAction(ctx context.Context, requiredAction *RequiredAction) error {
 
-	err := keycloakClient.ValidateRequiredAction(requiredAction)
+	err := keycloakClient.ValidateRequiredAction(ctx, requiredAction)
 	if err != nil {
 		return err
 	}
 
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/authentication/required-actions/%s", requiredAction.RealmId, requiredAction.Alias), requiredAction)
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/authentication/required-actions/%s", requiredAction.RealmId, requiredAction.Alias), requiredAction)
 }
 
-func (keycloakClient *KeycloakClient) DeleteRequiredAction(realmName string, alias string) error {
-	err := keycloakClient.delete(fmt.Sprintf("/realms/%s/authentication/required-actions/%s", realmName, alias), nil)
+func (keycloakClient *KeycloakClient) DeleteRequiredAction(ctx context.Context, realmName string, alias string) error {
+	err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/authentication/required-actions/%s", realmName, alias), nil)
 	if err != nil {
 		// For whatever reason, this fails sometimes with a 500 during acceptance tests. try again
-		return keycloakClient.delete(fmt.Sprintf("/realms/%s/authentication/required-actions/%s", realmName, alias), nil)
+		return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/authentication/required-actions/%s", realmName, alias), nil)
 	}
 
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) ValidateRequiredAction(requiredAction *RequiredAction) error {
-	serverInfo, err := keycloakClient.GetServerInfo()
+func (keycloakClient *KeycloakClient) ValidateRequiredAction(ctx context.Context, requiredAction *RequiredAction) error {
+	serverInfo, err := keycloakClient.GetServerInfo(ctx)
 	if err != nil {
 		return err
 	}

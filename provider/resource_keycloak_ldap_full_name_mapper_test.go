@@ -52,7 +52,7 @@ func TestAccKeycloakLdapFullNameMapper_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteLdapFullNameMapper(mapper.RealmId, mapper.Id)
+					err := keycloakClient.DeleteLdapFullNameMapper(testCtx, mapper.RealmId, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -166,7 +166,7 @@ func testAccCheckKeycloakLdapFullNameMapperDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapFullNameMapper, _ := keycloakClient.GetLdapFullNameMapper(realm, id)
+			ldapFullNameMapper, _ := keycloakClient.GetLdapFullNameMapper(testCtx, realm, id)
 			if ldapFullNameMapper != nil {
 				return fmt.Errorf("ldap full name mapper with id %s still exists", id)
 			}
@@ -185,7 +185,7 @@ func getLdapFullNameMapperFromState(s *terraform.State, resourceName string) (*k
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	ldapFullNameMapper, err := keycloakClient.GetLdapFullNameMapper(realm, id)
+	ldapFullNameMapper, err := keycloakClient.GetLdapFullNameMapper(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting ldap full name mapper with id %s: %s", id, err)
 	}

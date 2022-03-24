@@ -100,9 +100,9 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 	}
 	oidcResource := resourceKeycloakIdentityProvider()
 	oidcResource.Schema = mergeSchemas(oidcResource.Schema, oidcSchema)
-	oidcResource.Create = resourceKeycloakIdentityProviderCreate(getOidcIdentityProviderFromData, setOidcIdentityProviderData)
-	oidcResource.Read = resourceKeycloakIdentityProviderRead(setOidcIdentityProviderData)
-	oidcResource.Update = resourceKeycloakIdentityProviderUpdate(getOidcIdentityProviderFromData, setOidcIdentityProviderData)
+	oidcResource.CreateContext = resourceKeycloakIdentityProviderCreate(getOidcIdentityProviderFromData, setOidcIdentityProviderData)
+	oidcResource.ReadContext = resourceKeycloakIdentityProviderRead(setOidcIdentityProviderData)
+	oidcResource.UpdateContext = resourceKeycloakIdentityProviderUpdate(getOidcIdentityProviderFromData, setOidcIdentityProviderData)
 	return oidcResource
 }
 

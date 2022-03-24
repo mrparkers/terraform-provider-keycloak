@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
@@ -83,10 +84,10 @@ func (protocolMapper *protocolMapper) convertToOpenIdUserClientRoleProtocolMappe
 	}, nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenIdUserClientRoleProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdUserClientRoleProtocolMapper, error) {
+func (keycloakClient *KeycloakClient) GetOpenIdUserClientRoleProtocolMapper(ctx context.Context, realmId, clientId, clientScopeId, mapperId string) (*OpenIdUserClientRoleProtocolMapper, error) {
 	var protocolMapper *protocolMapper
 
-	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
+	err := keycloakClient.get(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -94,14 +95,14 @@ func (keycloakClient *KeycloakClient) GetOpenIdUserClientRoleProtocolMapper(real
 	return protocolMapper.convertToOpenIdUserClientRoleProtocolMapper(realmId, clientId, clientScopeId)
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenIdUserClientRoleProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
-	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
+func (keycloakClient *KeycloakClient) DeleteOpenIdUserClientRoleProtocolMapper(ctx context.Context, realmId, clientId, clientScopeId, mapperId string) error {
+	return keycloakClient.delete(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
 }
 
-func (keycloakClient *KeycloakClient) NewOpenIdUserClientRoleProtocolMapper(mapper *OpenIdUserClientRoleProtocolMapper) error {
+func (keycloakClient *KeycloakClient) NewOpenIdUserClientRoleProtocolMapper(ctx context.Context, mapper *OpenIdUserClientRoleProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(ctx, path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}
@@ -111,18 +112,18 @@ func (keycloakClient *KeycloakClient) NewOpenIdUserClientRoleProtocolMapper(mapp
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateOpenIdUserClientRoleProtocolMapper(mapper *OpenIdUserClientRoleProtocolMapper) error {
+func (keycloakClient *KeycloakClient) UpdateOpenIdUserClientRoleProtocolMapper(ctx context.Context, mapper *OpenIdUserClientRoleProtocolMapper) error {
 	path := individualProtocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 
-	return keycloakClient.put(path, mapper.convertToGenericProtocolMapper())
+	return keycloakClient.put(ctx, path, mapper.convertToGenericProtocolMapper())
 }
 
-func (keycloakClient *KeycloakClient) ValidateOpenIdUserClientRoleProtocolMapper(mapper *OpenIdUserClientRoleProtocolMapper) error {
+func (keycloakClient *KeycloakClient) ValidateOpenIdUserClientRoleProtocolMapper(ctx context.Context, mapper *OpenIdUserClientRoleProtocolMapper) error {
 	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
 
-	protocolMappers, err := keycloakClient.listGenericProtocolMappers(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
+	protocolMappers, err := keycloakClient.listGenericProtocolMappers(ctx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 	if err != nil {
 		return err
 	}

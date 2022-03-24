@@ -125,7 +125,7 @@ func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) 
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteIdentityProvider(saml.Realm, saml.Alias)
+					err := keycloakClient.DeleteIdentityProvider(testCtx, saml.Realm, saml.Alias)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -283,7 +283,7 @@ func testAccCheckKeycloakSamlIdentityProviderDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm"]
 
-			saml, _ := keycloakClient.GetIdentityProvider(realm, id)
+			saml, _ := keycloakClient.GetIdentityProvider(testCtx, realm, id)
 			if saml != nil {
 				return fmt.Errorf("saml config with id %s still exists", id)
 			}
@@ -302,7 +302,7 @@ func getKeycloakSamlIdentityProviderFromState(s *terraform.State, resourceName s
 	realm := rs.Primary.Attributes["realm"]
 	alias := rs.Primary.Attributes["alias"]
 
-	saml, err := keycloakClient.GetIdentityProvider(realm, alias)
+	saml, err := keycloakClient.GetIdentityProvider(testCtx, realm, alias)
 	if err != nil {
 		return nil, fmt.Errorf("error getting saml identity provider config with alias %s: %s", alias, err)
 	}

@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -10,13 +12,13 @@ import (
 
 func resourceKeycloakRole() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakRoleCreate,
-		Read:   resourceKeycloakRoleRead,
-		Delete: resourceKeycloakRoleDelete,
-		Update: resourceKeycloakRoleUpdate,
+		CreateContext: resourceKeycloakRoleCreate,
+		ReadContext:   resourceKeycloakRoleRead,
+		DeleteContext: resourceKeycloakRoleDelete,
+		UpdateContext: resourceKeycloakRoleUpdate,
 		// This resource can be imported using {{realm}}/{{roleId}}. The role's ID (a GUID) can be found in the URL when viewing the role
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakRoleImport,
+			StateContext: resourceKeycloakRoleImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -87,7 +89,7 @@ func mapFromRoleToData(data *schema.ResourceData, role *keycloak.Role) {
 	data.Set("attributes", attributes)
 }
 
-func resourceKeycloakRoleCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRoleCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	role := mapFromDataToRole(data)
@@ -97,9 +99,9 @@ func resourceKeycloakRoleCreate(data *schema.ResourceData, meta interface{}) err
 		compositeRolesTf := v.(*schema.Set).List()
 
 		for _, compositeRoleId := range compositeRolesTf {
-			compositeRoleToAdd, err := keycloakClient.GetRole(role.RealmId, compositeRoleId.(string))
+			compositeRoleToAdd, err := keycloakClient.GetRole(ctx, role.RealmId, compositeRoleId.(string))
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 
 			compositeRoles = append(compositeRoles, compositeRoleToAdd)
@@ -110,40 +112,40 @@ func resourceKeycloakRoleCreate(data *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	err := keycloakClient.CreateRole(role)
+	err := keycloakClient.CreateRole(ctx, role)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if role.Composite {
-		err = keycloakClient.AddCompositesToRole(role, compositeRoles)
+		err = keycloakClient.AddCompositesToRole(ctx, role, compositeRoles)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	mapFromRoleToData(data, role)
 
-	return resourceKeycloakRoleRead(data, meta)
+	return resourceKeycloakRoleRead(ctx, data, meta)
 }
 
-func resourceKeycloakRoleRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRoleRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	role, err := keycloakClient.GetRole(realmId, id)
+	role, err := keycloakClient.GetRole(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromRoleToData(data, role)
 
 	if role.Composite {
-		composites, err := keycloakClient.GetRoleComposites(role)
+		composites, err := keycloakClient.GetRoleComposites(ctx, role)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		var compositeRoleIds []string
@@ -158,19 +160,19 @@ func resourceKeycloakRoleRead(data *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func resourceKeycloakRoleUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRoleUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	role := mapFromDataToRole(data)
 
-	err := keycloakClient.UpdateRole(role)
+	err := keycloakClient.UpdateRole(ctx, role)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	keycloakComposites, err := keycloakClient.GetRoleComposites(role)
+	keycloakComposites, err := keycloakClient.GetRoleComposites(ctx, role)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if v, ok := data.GetOk("composite_roles"); ok {
@@ -193,51 +195,51 @@ func resourceKeycloakRoleUpdate(data *schema.ResourceData, meta interface{}) err
 		// `tfCompositeIds` should be added to the role's list of composites. all of the roles that exist on both sides have already been removed
 
 		if len(keycloakCompositesToRemove) != 0 {
-			err = keycloakClient.RemoveCompositesFromRole(role, keycloakCompositesToRemove)
+			err = keycloakClient.RemoveCompositesFromRole(ctx, role, keycloakCompositesToRemove)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 
 		if tfCompositeIds.Len() != 0 {
 			var compositesToAdd []*keycloak.Role
 			for _, tfCompositeId := range tfCompositeIds.List() {
-				compositeToAdd, err := keycloakClient.GetRole(role.RealmId, tfCompositeId.(string))
+				compositeToAdd, err := keycloakClient.GetRole(ctx, role.RealmId, tfCompositeId.(string))
 				if err != nil {
-					return err
+					return diag.FromErr(err)
 				}
 
 				compositesToAdd = append(compositesToAdd, compositeToAdd)
 			}
 
-			err = keycloakClient.AddCompositesToRole(role, compositesToAdd)
+			err = keycloakClient.AddCompositesToRole(ctx, role, compositesToAdd)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	} else {
 		// the user wants this role to have zero composites. if there are composites attached, remove them
 		if len(keycloakComposites) != 0 {
-			err = keycloakClient.RemoveCompositesFromRole(role, keycloakComposites)
+			err = keycloakClient.RemoveCompositesFromRole(ctx, role, keycloakComposites)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
 
-	return resourceKeycloakRoleRead(data, meta)
+	return resourceKeycloakRoleRead(ctx, data, meta)
 }
 
-func resourceKeycloakRoleDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRoleDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteRole(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteRole(ctx, realmId, id))
 }
 
-func resourceKeycloakRoleImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakRoleImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 {

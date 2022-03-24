@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
@@ -83,8 +84,8 @@ func convertFromComponentToRealmKeystoreAesGenerated(component *component, realm
 	return realmKey, nil
 }
 
-func (keycloakClient *KeycloakClient) NewRealmKeystoreAesGenerated(realmKey *RealmKeystoreAesGenerated) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", realmKey.RealmId), convertFromRealmKeystoreAesGeneratedToComponent(realmKey))
+func (keycloakClient *KeycloakClient) NewRealmKeystoreAesGenerated(ctx context.Context, realmKey *RealmKeystoreAesGenerated) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", realmKey.RealmId), convertFromRealmKeystoreAesGeneratedToComponent(realmKey))
 	if err != nil {
 		return err
 	}
@@ -94,10 +95,10 @@ func (keycloakClient *KeycloakClient) NewRealmKeystoreAesGenerated(realmKey *Rea
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetRealmKeystoreAesGenerated(realmId, id string) (*RealmKeystoreAesGenerated, error) {
+func (keycloakClient *KeycloakClient) GetRealmKeystoreAesGenerated(ctx context.Context, realmId, id string) (*RealmKeystoreAesGenerated, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -105,10 +106,10 @@ func (keycloakClient *KeycloakClient) GetRealmKeystoreAesGenerated(realmId, id s
 	return convertFromComponentToRealmKeystoreAesGenerated(component, realmId)
 }
 
-func (keycloakClient *KeycloakClient) UpdateRealmKeystoreAesGenerated(realmKey *RealmKeystoreAesGenerated) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", realmKey.RealmId, realmKey.Id), convertFromRealmKeystoreAesGeneratedToComponent(realmKey))
+func (keycloakClient *KeycloakClient) UpdateRealmKeystoreAesGenerated(ctx context.Context, realmKey *RealmKeystoreAesGenerated) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", realmKey.RealmId, realmKey.Id), convertFromRealmKeystoreAesGeneratedToComponent(realmKey))
 }
 
-func (keycloakClient *KeycloakClient) DeleteRealmKeystoreAesGenerated(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteRealmKeystoreAesGenerated(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

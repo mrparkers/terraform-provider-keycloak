@@ -95,7 +95,7 @@ func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) 
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteCustomUserFederation(customFederation.RealmId, customFederation.Id)
+					err := keycloakClient.DeleteCustomUserFederation(testCtx, customFederation.RealmId, customFederation.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -147,7 +147,7 @@ func TestAccKeycloakCustomUserFederation_ParentIdDifferentFromRealmName(t *testi
 				ImportStateId: realmName,
 				ImportState:   true,
 				PreConfig: func() {
-					err := keycloakClient.NewRealm(realm)
+					err := keycloakClient.NewRealm(testCtx, realm)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -209,7 +209,7 @@ func testAccCheckKeycloakCustomUserFederationDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			custom, _ := keycloakClient.GetCustomUserFederation(realm, id)
+			custom, _ := keycloakClient.GetCustomUserFederation(testCtx, realm, id)
 			if custom != nil {
 				return fmt.Errorf("custom user federation with id %s still exists", id)
 			}
@@ -228,7 +228,7 @@ func getCustomUserFederationFromState(s *terraform.State, resourceName string) (
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	custom, err := keycloakClient.GetCustomUserFederation(realm, id)
+	custom, err := keycloakClient.GetCustomUserFederation(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting custom user federation with id %s: %s", id, err)
 	} else if custom.FullSyncPeriod != 30 {

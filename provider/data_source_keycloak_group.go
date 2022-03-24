@@ -1,13 +1,15 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakGroup() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakGroupRead,
+		ReadContext: dataSourceKeycloakGroupRead,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -33,15 +35,15 @@ func dataSourceKeycloakGroup() *schema.Resource {
 	}
 }
 
-func dataSourceKeycloakGroupRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakGroupRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	groupName := data.Get("name").(string)
 
-	group, err := keycloakClient.GetGroupByName(realmId, groupName)
+	group, err := keycloakClient.GetGroupByName(ctx, realmId, groupName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromGroupToData(data, group)

@@ -81,7 +81,7 @@ func TestAccKeycloakLdapUserFederation_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteLdapUserFederation(ldap.RealmId, ldap.Id)
+					err := keycloakClient.DeleteLdapUserFederation(testCtx, ldap.RealmId, ldap.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -166,14 +166,14 @@ func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 
 func checkMatchingNestedKey(resourcePath string, blockName string, fieldInBlock string, value string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		resource, ok := s.RootModule().Resources[resourcePath]
+		r, ok := s.RootModule().Resources[resourcePath]
 		if !ok {
 			return fmt.Errorf("Could not find resource %s", resourcePath)
 		}
 
 		matchExpression := fmt.Sprintf(`%s\.\d\.mappings\.\d+\.%s`, blockName, fieldInBlock)
 
-		for k, v := range resource.Primary.Attributes {
+		for k, v := range r.Primary.Attributes {
 			if isMatch, _ := regexp.Match(matchExpression, []byte(k)); isMatch {
 				if v == value {
 					return nil
@@ -562,7 +562,7 @@ func testAccCheckKeycloakLdapUserFederationDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldap, _ := keycloakClient.GetLdapUserFederation(realm, id)
+			ldap, _ := keycloakClient.GetLdapUserFederation(testCtx, realm, id)
 			if ldap != nil {
 				return fmt.Errorf("ldap config with id %s still exists", id)
 			}
@@ -581,7 +581,7 @@ func getLdapUserFederationFromState(s *terraform.State, resourceName string) (*k
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	ldap, err := keycloakClient.GetLdapUserFederation(realm, id)
+	ldap, err := keycloakClient.GetLdapUserFederation(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting ldap config with id %s: %s", id, err)
 	}

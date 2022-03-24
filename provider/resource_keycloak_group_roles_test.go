@@ -67,7 +67,7 @@ func TestAccKeycloakGroupRoles_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteGroup(group.RealmId, group.Id)
+					err := keycloakClient.DeleteGroup(testCtx, group.RealmId, group.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -322,7 +322,7 @@ func testAccCheckKeycloakGroupHasRoles(resourceName string, exhaustive bool) res
 				continue
 			}
 
-			role, err := keycloakClient.GetRole(realm, v)
+			role, err := keycloakClient.GetRole(testCtx, realm, v)
 			if err != nil {
 				return err
 			}
@@ -330,12 +330,12 @@ func testAccCheckKeycloakGroupHasRoles(resourceName string, exhaustive bool) res
 			roles = append(roles, role)
 		}
 
-		group, err := keycloakClient.GetGroup(realm, groupId)
+		group, err := keycloakClient.GetGroup(testCtx, realm, groupId)
 		if err != nil {
 			return err
 		}
 
-		groupRoleMappings, err := keycloakClient.GetGroupRoleMappings(realm, groupId)
+		groupRoleMappings, err := keycloakClient.GetGroupRoleMappings(testCtx, realm, groupId)
 		if err != nil {
 			return err
 		}
@@ -391,7 +391,7 @@ func testAccCheckKeycloakGroupHasNoRoles(resourceName string) resource.TestCheck
 		realm := rs.Primary.Attributes["realm_id"]
 		id := rs.Primary.ID
 
-		group, err := keycloakClient.GetGroup(realm, id)
+		group, err := keycloakClient.GetGroup(testCtx, realm, id)
 		if err != nil {
 			return err
 		}

@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -47,10 +48,10 @@ func (protocolMapper *protocolMapper) convertToSamlUserPropertyProtocolMapper(re
 	}
 }
 
-func (keycloakClient *KeycloakClient) GetSamlUserPropertyProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*SamlUserPropertyProtocolMapper, error) {
+func (keycloakClient *KeycloakClient) GetSamlUserPropertyProtocolMapper(ctx context.Context, realmId, clientId, clientScopeId, mapperId string) (*SamlUserPropertyProtocolMapper, error) {
 	var protocolMapper *protocolMapper
 
-	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
+	err := keycloakClient.get(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -58,14 +59,14 @@ func (keycloakClient *KeycloakClient) GetSamlUserPropertyProtocolMapper(realmId,
 	return protocolMapper.convertToSamlUserPropertyProtocolMapper(realmId, clientId, clientScopeId), nil
 }
 
-func (keycloakClient *KeycloakClient) DeleteSamlUserPropertyProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
-	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
+func (keycloakClient *KeycloakClient) DeleteSamlUserPropertyProtocolMapper(ctx context.Context, realmId, clientId, clientScopeId, mapperId string) error {
+	return keycloakClient.delete(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
 }
 
-func (keycloakClient *KeycloakClient) NewSamlUserPropertyProtocolMapper(mapper *SamlUserPropertyProtocolMapper) error {
+func (keycloakClient *KeycloakClient) NewSamlUserPropertyProtocolMapper(ctx context.Context, mapper *SamlUserPropertyProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(ctx, path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}
@@ -75,18 +76,18 @@ func (keycloakClient *KeycloakClient) NewSamlUserPropertyProtocolMapper(mapper *
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateSamlUserPropertyProtocolMapper(mapper *SamlUserPropertyProtocolMapper) error {
+func (keycloakClient *KeycloakClient) UpdateSamlUserPropertyProtocolMapper(ctx context.Context, mapper *SamlUserPropertyProtocolMapper) error {
 	path := individualProtocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 
-	return keycloakClient.put(path, mapper.convertToGenericProtocolMapper())
+	return keycloakClient.put(ctx, path, mapper.convertToGenericProtocolMapper())
 }
 
-func (keycloakClient *KeycloakClient) ValidateSamlUserPropertyProtocolMapper(mapper *SamlUserPropertyProtocolMapper) error {
+func (keycloakClient *KeycloakClient) ValidateSamlUserPropertyProtocolMapper(ctx context.Context, mapper *SamlUserPropertyProtocolMapper) error {
 	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
 
-	protocolMappers, err := keycloakClient.listGenericProtocolMappers(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
+	protocolMappers, err := keycloakClient.listGenericProtocolMappers(ctx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 	if err != nil {
 		return err
 	}

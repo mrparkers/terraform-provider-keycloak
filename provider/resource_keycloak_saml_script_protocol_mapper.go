@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -8,16 +10,16 @@ import (
 
 func resourceKeycloakSamlScriptProtocolMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakSamlScriptProtocolMapperCreate,
-		Read:   resourceKeycloakSamlScriptProtocolMapperRead,
-		Update: resourceKeycloakSamlScriptProtocolMapperUpdate,
-		Delete: resourceKeycloakSamlScriptProtocolMapperDelete,
+		CreateContext: resourceKeycloakSamlScriptProtocolMapperCreate,
+		ReadContext:   resourceKeycloakSamlScriptProtocolMapperRead,
+		UpdateContext: resourceKeycloakSamlScriptProtocolMapperUpdate,
+		DeleteContext: resourceKeycloakSamlScriptProtocolMapperDelete,
 		Importer: &schema.ResourceImporter{
 			// import a mapper tied to a client:
 			// {{realmId}}/client/{{clientId}}/{{protocolMapperId}}
 			// or a client scope:
 			// {{realmId}}/client-scope/{{clientScopeId}}/{{protocolMapperId}}
-			State: genericProtocolMapperImport,
+			StateContext: genericProtocolMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -102,36 +104,36 @@ func mapFromSamlScriptMapperToData(mapper *keycloak.SamlScriptProtocolMapper, da
 	data.Set("saml_attribute_name_format", mapper.SamlAttributeNameFormat)
 }
 
-func resourceKeycloakSamlScriptProtocolMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlScriptProtocolMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	samlScriptMapper := mapFromDataToSamlScriptProtocolMapper(data)
 
-	err := keycloakClient.ValidateSamlScriptProtocolMapper(samlScriptMapper)
+	err := keycloakClient.ValidateSamlScriptProtocolMapper(ctx, samlScriptMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewSamlScriptProtocolMapper(samlScriptMapper)
+	err = keycloakClient.NewSamlScriptProtocolMapper(ctx, samlScriptMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mapFromSamlScriptMapperToData(samlScriptMapper, data)
 
-	return resourceKeycloakSamlScriptProtocolMapperRead(data, meta)
+	return resourceKeycloakSamlScriptProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakSamlScriptProtocolMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlScriptProtocolMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	samlScriptMapper, err := keycloakClient.GetSamlScriptProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	samlScriptMapper, err := keycloakClient.GetSamlScriptProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mapFromSamlScriptMapperToData(samlScriptMapper, data)
@@ -139,30 +141,30 @@ func resourceKeycloakSamlScriptProtocolMapperRead(data *schema.ResourceData, met
 	return nil
 }
 
-func resourceKeycloakSamlScriptProtocolMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlScriptProtocolMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	samlScriptMapper := mapFromDataToSamlScriptProtocolMapper(data)
 
-	err := keycloakClient.ValidateSamlScriptProtocolMapper(samlScriptMapper)
+	err := keycloakClient.ValidateSamlScriptProtocolMapper(ctx, samlScriptMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateSamlScriptProtocolMapper(samlScriptMapper)
+	err = keycloakClient.UpdateSamlScriptProtocolMapper(ctx, samlScriptMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakSamlScriptProtocolMapperRead(data, meta)
+	return resourceKeycloakSamlScriptProtocolMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakSamlScriptProtocolMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlScriptProtocolMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	clientScopeId := data.Get("client_scope_id").(string)
 
-	return keycloakClient.DeleteSamlScriptProtocolMapper(realmId, clientId, clientScopeId, data.Id())
+	return diag.FromErr(keycloakClient.DeleteSamlScriptProtocolMapper(ctx, realmId, clientId, clientScopeId, data.Id()))
 }
