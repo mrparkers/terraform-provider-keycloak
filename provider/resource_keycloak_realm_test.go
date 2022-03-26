@@ -1235,8 +1235,8 @@ func testAccCheckKeycloakRealmBrowserFlow(resourceName, browserFlow string) reso
 			return err
 		}
 
-		if realm.BrowserFlow != browserFlow {
-			return fmt.Errorf("expected realm %s to have browserFlow binding %s, but was %s", realm.Realm, browserFlow, realm.BrowserFlow)
+		if *realm.BrowserFlow != browserFlow {
+			return fmt.Errorf("expected realm %s to have browserFlow binding %s, but was %s", realm.Realm, browserFlow, *realm.BrowserFlow)
 		}
 
 		return nil

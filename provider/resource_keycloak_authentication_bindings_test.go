@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"reflect"
 	"testing"
 
@@ -20,6 +21,24 @@ func TestAccKeycloakAuthenticationBindings_browser(t *testing.T) {
 			{
 				Config: testKeycloakAuthenticationBindings(testAccRealm.Realm, flow, flowAlias),
 				Check:  testAccCheckKeycloakAuthenticationBindingBrowserSet(testAccRealm.Realm, "BrowserFlow", flowAlias),
+			},
+		},
+	})
+}
+
+// ensure that the separate flow bindings resource does not try to fight with the realm's flow binding settings
+func TestAccKeycloakAuthenticationBindings_browserWithRealm(t *testing.T) {
+	flow := "browser_flow"
+	flowAlias := "browserCopyFlow"
+	realmName := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakAuthenticationBindingsWithRealm(realmName, flow, flowAlias),
+				Check:  testAccCheckKeycloakAuthenticationBindingBrowserSet(realmName, "BrowserFlow", flowAlias),
 			},
 		},
 	})
@@ -152,6 +171,25 @@ resource "keycloak_authentication_bindings" "authentication_binding" {
 	`, realm, flow, flowAlias)
 }
 
+func testKeycloakAuthenticationBindingsWithRealm(realm, flow, flowAlias string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        		= "%s"
+	enabled     	 	= true
+}
+
+resource "keycloak_authentication_flow" "flow" {
+	realm_id = keycloak_realm.realm.id
+	alias    = "%s"
+}
+
+resource "keycloak_authentication_bindings" "authentication_binding" {
+	realm_id	= keycloak_realm.realm.id
+	%s	 		= keycloak_authentication_flow.flow.alias
+}
+	`, realm, flowAlias, flow)
+}
+
 func testAccCheckKeycloakAuthenticationBindingBrowserSet(realmName, binding, flowAlias string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		realm, err := keycloakClient.GetRealm(testCtx, realmName)
@@ -161,9 +199,9 @@ func testAccCheckKeycloakAuthenticationBindingBrowserSet(realmName, binding, flo
 
 		v := reflect.ValueOf(*realm)
 		bindingField := v.FieldByName(binding)
-		b := bindingField.Interface().(string)
-		if b != flowAlias {
-			return fmt.Errorf("expected realm %s to have %s set to %s, but was %s", realm.Realm, binding, flowAlias, b)
+		b := bindingField.Interface().(*string)
+		if *b != flowAlias {
+			return fmt.Errorf("expected realm %s to have %s set to %s, but was %s", realm.Realm, binding, flowAlias, *b)
 		}
 
 		return nil

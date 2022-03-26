@@ -96,12 +96,12 @@ type Realm struct {
 	PasswordPolicy string `json:"passwordPolicy"`
 
 	//flow bindings
-	BrowserFlow              string `json:"browserFlow,omitempty"`
-	RegistrationFlow         string `json:"registrationFlow,omitempty"`
-	DirectGrantFlow          string `json:"directGrantFlow,omitempty"`
-	ResetCredentialsFlow     string `json:"resetCredentialsFlow,omitempty"`
-	ClientAuthenticationFlow string `json:"clientAuthenticationFlow,omitempty"`
-	DockerAuthenticationFlow string `json:"dockerAuthenticationFlow,omitempty"`
+	BrowserFlow              *string `json:"browserFlow,omitempty"`
+	RegistrationFlow         *string `json:"registrationFlow,omitempty"`
+	DirectGrantFlow          *string `json:"directGrantFlow,omitempty"`
+	ResetCredentialsFlow     *string `json:"resetCredentialsFlow,omitempty"`
+	ClientAuthenticationFlow *string `json:"clientAuthenticationFlow,omitempty"`
+	DockerAuthenticationFlow *string `json:"dockerAuthenticationFlow,omitempty"`
 
 	// OTP Policy
 	OTPPolicyAlgorithm       string `json:"otpPolicyAlgorithm,omitempty"`
