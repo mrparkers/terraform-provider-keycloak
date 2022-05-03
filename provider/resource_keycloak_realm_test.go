@@ -683,9 +683,10 @@ func TestAccKeycloakRealm_browserFlow(t *testing.T) {
 				Config: testKeycloakRealm_browserFlow(realmName, realmDisplayName, newBrowserFlow),
 				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", newBrowserFlow),
 			},
+			// when a realm binding argument is unset, it will remain the same
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
-				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", "browser"),
+				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", newBrowserFlow),
 			},
 		},
 	})
