@@ -661,33 +661,39 @@ func getRealmSMTPPasswordFromData(data *schema.ResourceData) (string, bool) {
 
 func setRealmFlowBindings(data *schema.ResourceData, realm *keycloak.Realm) {
 	if flow, ok := data.GetOk("browser_flow"); ok {
-		flowStr := flow.(string)
-		realm.BrowserFlow = &flowStr
+		realm.BrowserFlow = stringPointer(flow.(string))
+	} else {
+		realm.BrowserFlow = stringPointer("browser")
 	}
 
 	if flow, ok := data.GetOk("registration_flow"); ok {
-		flowStr := flow.(string)
-		realm.RegistrationFlow = &flowStr
+		realm.RegistrationFlow = stringPointer(flow.(string))
+	} else {
+		realm.RegistrationFlow = stringPointer("registration")
 	}
 
 	if flow, ok := data.GetOk("direct_grant_flow"); ok {
-		flowStr := flow.(string)
-		realm.DirectGrantFlow = &flowStr
+		realm.DirectGrantFlow = stringPointer(flow.(string))
+	} else {
+		realm.DirectGrantFlow = stringPointer("direct grant")
 	}
 
 	if flow, ok := data.GetOk("reset_credentials_flow"); ok {
-		flowStr := flow.(string)
-		realm.ResetCredentialsFlow = &flowStr
+		realm.ResetCredentialsFlow = stringPointer(flow.(string))
+	} else {
+		realm.ResetCredentialsFlow = stringPointer("reset credentials")
 	}
 
 	if flow, ok := data.GetOk("client_authentication_flow"); ok {
-		flowStr := flow.(string)
-		realm.ClientAuthenticationFlow = &flowStr
+		realm.ClientAuthenticationFlow = stringPointer(flow.(string))
+	} else {
+		realm.ClientAuthenticationFlow = stringPointer("clients")
 	}
 
 	if flow, ok := data.GetOk("docker_authentication_flow"); ok {
-		flowStr := flow.(string)
-		realm.DockerAuthenticationFlow = &flowStr
+		realm.DockerAuthenticationFlow = stringPointer(flow.(string))
+	} else {
+		realm.DockerAuthenticationFlow = stringPointer("docker auth")
 	}
 }
 

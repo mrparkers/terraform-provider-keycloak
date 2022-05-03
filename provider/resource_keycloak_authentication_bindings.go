@@ -59,17 +59,6 @@ func resourceKeycloakAuthenticationBindings() *schema.Resource {
 	}
 }
 
-func getAuthenticationBindingsFromData(ctx context.Context, keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData) (*keycloak.Realm, error) {
-	realm, err := keycloakClient.GetRealm(ctx, data.Get("realm_id").(string))
-	if err != nil {
-		return nil, err
-	}
-
-	setRealmFlowBindings(data, realm)
-
-	return realm, nil
-}
-
 func setAuthenticationBindingsData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.SetId(realm.Realm)
 	data.Set("browser_flow", realm.BrowserFlow)
@@ -81,19 +70,12 @@ func setAuthenticationBindingsData(data *schema.ResourceData, realm *keycloak.Re
 }
 
 func resetAuthenticationBindingsForRealm(realm *keycloak.Realm) {
-	browserFlow := "browser"
-	registrationFlow := "registration"
-	directGrantFlow := "direct grant"
-	resetCredentialsFlow := "reset credentials"
-	clientAuthenticationFlow := "clients"
-	dockerAuthenticationFlow := "docker auth"
-
-	realm.BrowserFlow = &browserFlow
-	realm.RegistrationFlow = &registrationFlow
-	realm.DirectGrantFlow = &directGrantFlow
-	realm.ResetCredentialsFlow = &resetCredentialsFlow
-	realm.ClientAuthenticationFlow = &clientAuthenticationFlow
-	realm.DockerAuthenticationFlow = &dockerAuthenticationFlow
+	realm.BrowserFlow = stringPointer("browser")
+	realm.RegistrationFlow = stringPointer("registration")
+	realm.DirectGrantFlow = stringPointer("direct grant")
+	realm.ResetCredentialsFlow = stringPointer("reset credentials")
+	realm.ClientAuthenticationFlow = stringPointer("clients")
+	realm.DockerAuthenticationFlow = stringPointer("docker auth")
 }
 
 func resourceKeycloakAuthenticationBindingsCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -104,10 +86,7 @@ func resourceKeycloakAuthenticationBindingsCreate(ctx context.Context, data *sch
 		return diag.FromErr(err)
 	}
 
-	realm, err = getAuthenticationBindingsFromData(ctx, keycloakClient, data)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	setRealmFlowBindings(data, realm)
 
 	err = keycloakClient.ValidateRealm(ctx, realm)
 	if err != nil {
@@ -147,7 +126,7 @@ func resourceKeycloakAuthenticationBindingsDelete(ctx context.Context, data *sch
 
 	realm, err := keycloakClient.GetRealm(ctx, data.Id())
 	if err != nil {
-		return nil
+		return diag.FromErr(err)
 	}
 
 	resetAuthenticationBindingsForRealm(realm)
@@ -163,10 +142,12 @@ func resourceKeycloakAuthenticationBindingsDelete(ctx context.Context, data *sch
 func resourceKeycloakAuthenticationBindingsUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm, err := getAuthenticationBindingsFromData(ctx, keycloakClient, data)
+	realm, err := keycloakClient.GetRealm(ctx, data.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	setRealmFlowBindings(data, realm)
 
 	err = keycloakClient.ValidateRealm(ctx, realm)
 	if err != nil {
