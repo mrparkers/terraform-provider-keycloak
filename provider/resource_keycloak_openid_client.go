@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"reflect"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -234,6 +235,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"use_refresh_tokens_client_credentials": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"frontchannel_logout_url": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -336,6 +342,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			ClientSessionIdleTimeout:              data.Get("client_session_idle_timeout").(string),
 			ClientSessionMaxLifespan:              data.Get("client_session_max_lifespan").(string),
 			UseRefreshTokens:                      keycloak.KeycloakBoolQuoted(data.Get("use_refresh_tokens").(bool)),
+			UseRefreshTokensClientCredentials:     keycloak.KeycloakBoolQuoted(data.Get("use_refresh_tokens_client_credentials").(bool)),
 			FrontchannelLogoutUrl:                 data.Get("frontchannel_logout_url").(string),
 			BackchannelLogoutUrl:                  data.Get("backchannel_logout_url").(string),
 			BackchannelLogoutRevokeOfflineTokens:  keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_revoke_offline_sessions").(bool)),
@@ -436,6 +443,7 @@ func setOpenidClientData(ctx context.Context, keycloakClient *keycloak.KeycloakC
 	data.Set("access_token_lifespan", client.Attributes.AccessTokenLifespan)
 	data.Set("login_theme", client.Attributes.LoginTheme)
 	data.Set("use_refresh_tokens", client.Attributes.UseRefreshTokens)
+	data.Set("use_refresh_tokens_client_credentials", client.Attributes.UseRefreshTokensClientCredentials)
 	data.Set("oauth2_device_authorization_grant_enabled", client.Attributes.Oauth2DeviceAuthorizationGrantEnabled)
 	data.Set("oauth2_device_code_lifespan", client.Attributes.Oauth2DeviceCodeLifespan)
 	data.Set("oauth2_device_polling_interval", client.Attributes.Oauth2DevicePollingInterval)
