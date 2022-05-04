@@ -367,6 +367,18 @@ func resourceKeycloakRealm() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"client_session_idle_timeout": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"client_session_max_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
 			"access_token_lifespan": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -857,6 +869,22 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		realm.OfflineSessionMaxLifespanEnabled = offlineSessionMaxLifespanEnabled.(bool)
 	}
 
+	if clientSessionIdleTimeout := data.Get("client_session_idle_timeout").(string); clientSessionIdleTimeout != "" {
+		clientSessionIdleTimeoutDurationString, err := getSecondsFromDurationString(clientSessionIdleTimeout)
+		if err != nil {
+			return nil, err
+		}
+		realm.ClientSessionIdleTimeout = clientSessionIdleTimeoutDurationString
+	}
+
+	if clientSessionMaxLifespan := data.Get("client_session_max_lifespan").(string); clientSessionMaxLifespan != "" {
+		clientSessionMaxLifespanDurationString, err := getSecondsFromDurationString(clientSessionMaxLifespan)
+		if err != nil {
+			return nil, err
+		}
+		realm.ClientSessionMaxLifespan = clientSessionMaxLifespanDurationString
+	}
+
 	if accessTokenLifespan := data.Get("access_token_lifespan").(string); accessTokenLifespan != "" {
 		accessTokenLifespanDurationString, err := getSecondsFromDurationString(accessTokenLifespan)
 		if err != nil {
@@ -1199,6 +1227,8 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("offline_session_idle_timeout", getDurationStringFromSeconds(realm.OfflineSessionIdleTimeout))
 	data.Set("offline_session_max_lifespan", getDurationStringFromSeconds(realm.OfflineSessionMaxLifespan))
 	data.Set("offline_session_max_lifespan_enabled", realm.OfflineSessionMaxLifespanEnabled)
+	data.Set("client_session_idle_timeout", getDurationStringFromSeconds(realm.ClientSessionIdleTimeout))
+	data.Set("client_session_max_lifespan", getDurationStringFromSeconds(realm.ClientSessionMaxLifespan))
 	data.Set("access_token_lifespan", getDurationStringFromSeconds(realm.AccessTokenLifespan))
 	data.Set("access_token_lifespan_for_implicit_flow", getDurationStringFromSeconds(realm.AccessTokenLifespanForImplicitFlow))
 	data.Set("access_code_lifespan", getDurationStringFromSeconds(realm.AccessCodeLifespan))
