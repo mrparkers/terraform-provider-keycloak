@@ -1,3 +1,30 @@
+## v3.8.0 (May 4, 2022)
+
+FEATURES:
+
+- new resource: `keycloak_realm_user_profile` ([#658](https://github.com/mrparkers/terraform-provider-keycloak/pull/658))
+- new resource: `keycloak_authentication_bindings` ([#668](https://github.com/mrparkers/terraform-provider-keycloak/pull/668))
+
+IMPROVEMENTS:
+
+- support custom provider ID in `keycloak_saml_identity_provider` resource ([#656](https://github.com/mrparkers/terraform-provider-keycloak/pull/656))
+- support sync settings in `keycloak_custom_user_federation` resource ([#663](https://github.com/mrparkers/terraform-provider-keycloak/pull/663))
+- support Transient NameID format for `keycloak_saml_identity_provider` resource ([#661](https://github.com/mrparkers/terraform-provider-keycloak/pull/661))
+- update all resources to use new terraform lifecycles with context support ([#675](https://github.com/mrparkers/terraform-provider-keycloak/pull/675))
+- support use-refresh-tokens for client credentials in `keycloak_openid_client` resource ([#678](https://github.com/mrparkers/terraform-provider-keycloak/pull/678))
+- support `client_session_idle_timeout` and `client_session_max_lifespan` arguments in `keycloak_realm` resource ([#653](https://github.com/mrparkers/terraform-provider-keycloak/pull/653))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@tomrutsaert](https://github.com/tomrutsaert)
+- [@maximepiton](https://github.com/maximepiton)
+- [@marwol-fdir](https://github.com/marwol-fdir)
+- [@puzzlermike](https://github.com/puzzlermike)
+- [@maximepiton](https://github.com/maximepiton)
+- [@camjjack](https://github.com/camjjack)
+- [@daviddelannoy](https://github.com/daviddelannoy)
+- [@fapian](https://github.com/fapian)
+
 ## v3.7.0 (February 2, 2022)
 
 IMPROVEMENTS:
