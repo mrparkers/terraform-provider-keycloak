@@ -553,37 +553,37 @@ func resourceKeycloakRealm() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for BrowserFlow",
 				Optional:    true,
-				Default:     "browser",
+				Computed:    true,
 			},
 			"registration_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for RegistrationFlow",
 				Optional:    true,
-				Default:     "registration",
+				Computed:    true,
 			},
 			"direct_grant_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for DirectGrantFlow",
 				Optional:    true,
-				Default:     "direct grant",
+				Computed:    true,
 			},
 			"reset_credentials_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for ResetCredentialsFlow",
 				Optional:    true,
-				Default:     "reset credentials",
+				Computed:    true,
 			},
 			"client_authentication_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for ClientAuthenticationFlow",
 				Optional:    true,
-				Default:     "clients",
+				Computed:    true,
 			},
 			"docker_authentication_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for DockerAuthenticationFlow",
 				Optional:    true,
-				Default:     "docker auth",
+				Computed:    true,
 			},
 
 			// misc attributes
@@ -657,6 +657,44 @@ func getRealmSMTPPasswordFromData(data *schema.ResourceData) (string, bool) {
 	}
 
 	return "", false
+}
+
+func setRealmFlowBindings(data *schema.ResourceData, realm *keycloak.Realm) {
+	if flow, ok := data.GetOk("browser_flow"); ok {
+		realm.BrowserFlow = stringPointer(flow.(string))
+	} else {
+		realm.BrowserFlow = stringPointer("browser")
+	}
+
+	if flow, ok := data.GetOk("registration_flow"); ok {
+		realm.RegistrationFlow = stringPointer(flow.(string))
+	} else {
+		realm.RegistrationFlow = stringPointer("registration")
+	}
+
+	if flow, ok := data.GetOk("direct_grant_flow"); ok {
+		realm.DirectGrantFlow = stringPointer(flow.(string))
+	} else {
+		realm.DirectGrantFlow = stringPointer("direct grant")
+	}
+
+	if flow, ok := data.GetOk("reset_credentials_flow"); ok {
+		realm.ResetCredentialsFlow = stringPointer(flow.(string))
+	} else {
+		realm.ResetCredentialsFlow = stringPointer("reset credentials")
+	}
+
+	if flow, ok := data.GetOk("client_authentication_flow"); ok {
+		realm.ClientAuthenticationFlow = stringPointer(flow.(string))
+	} else {
+		realm.ClientAuthenticationFlow = stringPointer("clients")
+	}
+
+	if flow, ok := data.GetOk("docker_authentication_flow"); ok {
+		realm.DockerAuthenticationFlow = stringPointer(flow.(string))
+	} else {
+		realm.DockerAuthenticationFlow = stringPointer("docker auth")
+	}
 }
 
 func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
@@ -931,30 +969,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		realm.PasswordPolicy = passwordPolicy.(string)
 	}
 
-	//Flow Bindings
-	if flow, ok := data.GetOk("browser_flow"); ok {
-		realm.BrowserFlow = flow.(string)
-	}
-
-	if flow, ok := data.GetOk("registration_flow"); ok {
-		realm.RegistrationFlow = flow.(string)
-	}
-
-	if flow, ok := data.GetOk("direct_grant_flow"); ok {
-		realm.DirectGrantFlow = flow.(string)
-	}
-
-	if flow, ok := data.GetOk("reset_credentials_flow"); ok {
-		realm.ResetCredentialsFlow = flow.(string)
-	}
-
-	if flow, ok := data.GetOk("client_authentication_flow"); ok {
-		realm.ClientAuthenticationFlow = flow.(string)
-	}
-
-	if flow, ok := data.GetOk("docker_authentication_flow"); ok {
-		realm.DockerAuthenticationFlow = flow.(string)
-	}
+	setRealmFlowBindings(data, realm)
 
 	attributes := map[string]interface{}{}
 	if v, ok := data.GetOk("attributes"); ok {
