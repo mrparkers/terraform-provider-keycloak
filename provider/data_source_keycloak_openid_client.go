@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -186,6 +187,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Computed: true,
 			},
 			"use_refresh_tokens": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"use_refresh_tokens_client_credentials": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},

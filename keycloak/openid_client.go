@@ -69,6 +69,7 @@ type OpenidClientAttributes struct {
 	ClientSessionIdleTimeout              string                 `json:"client.session.idle.timeout,omitempty"`
 	ClientSessionMaxLifespan              string                 `json:"client.session.max.lifespan,omitempty"`
 	UseRefreshTokens                      KeycloakBoolQuoted     `json:"use.refresh.tokens"`
+	UseRefreshTokensClientCredentials     KeycloakBoolQuoted     `json:"client_credentials.use_refresh_token"`
 	BackchannelLogoutUrl                  string                 `json:"backchannel.logout.url"`
 	FrontchannelLogoutUrl                 string                 `json:"frontchannel.logout.url"`
 	BackchannelLogoutRevokeOfflineTokens  KeycloakBoolQuoted     `json:"backchannel.logout.revoke.offline.tokens"`
