@@ -70,3 +70,11 @@ func parseBoolAndTreatEmptyStringAsFalse(b string) (bool, error) {
 
 	return strconv.ParseBool(b)
 }
+
+func atoiAndTreatEmptyStringAsZero(s string) (int, error) {
+	if s == "" {
+		return 0, nil
+	}
+
+	return strconv.Atoi(s)
+}
