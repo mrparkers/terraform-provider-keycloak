@@ -1,3 +1,9 @@
+## 3.8.1 (May 9, 2022)
+
+BUG FIXES:
+
+- fix a potential problem with the `keycloak_custom_user_federation` resource incorrectly assuming some Keycloak API fields are numbers.
+
 ## v3.8.0 (May 4, 2022)
 
 FEATURES:
