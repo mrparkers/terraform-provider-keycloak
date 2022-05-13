@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
@@ -518,7 +519,9 @@ func resourceKeycloakLdapUserFederationDelete(ctx context.Context, data *schema.
 	return diag.FromErr(keycloakClient.DeleteLdapUserFederation(ctx, realmId, id))
 }
 
-func resourceKeycloakLdapUserFederationImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakLdapUserFederationImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
 	parts := strings.Split(d.Id(), "/")
 
 	var realmId, id string
@@ -534,8 +537,18 @@ func resourceKeycloakLdapUserFederationImport(_ context.Context, d *schema.Resou
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}, {{realmId}}/{{userFederationId}}/{{bindCredentials}}")
 	}
 
+	_, err := keycloakClient.GetLdapUserFederation(ctx, realmId, id)
+	if err != nil {
+		return nil, err
+	}
+
 	d.Set("realm_id", realmId)
 	d.SetId(id)
+
+	diagnostics := resourceKeycloakLdapUserFederationRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

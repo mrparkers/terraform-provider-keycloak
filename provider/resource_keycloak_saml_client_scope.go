@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
@@ -141,14 +142,26 @@ func resourceKeycloakSamlClientScopeDelete(ctx context.Context, data *schema.Res
 	return diag.FromErr(keycloakClient.DeleteSamlClientScope(ctx, realmId, id))
 }
 
-func resourceKeycloakSamlClientScopeImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakSamlClientScopeImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{samlClientScopeId}}")
 	}
 
+	_, err := keycloakClient.GetSamlClientScope(ctx, parts[0], parts[1])
+	if err != nil {
+		return nil, err
+	}
+
 	d.Set("realm_id", parts[0])
 	d.SetId(parts[1])
+
+	diagnostics := resourceKeycloakSamlClientScopeRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

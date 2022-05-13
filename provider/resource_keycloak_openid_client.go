@@ -571,10 +571,18 @@ func resourceKeycloakOpenidClientDelete(ctx context.Context, data *schema.Resour
 }
 
 func resourceKeycloakOpenidClientImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{openidClientId}}")
 	}
+
+	_, err := keycloakClient.GetOpenidClient(ctx, parts[0], parts[1])
+	if err != nil {
+		return nil, err
+	}
+
 	d.Set("realm_id", parts[0])
 	d.SetId(parts[1])
 

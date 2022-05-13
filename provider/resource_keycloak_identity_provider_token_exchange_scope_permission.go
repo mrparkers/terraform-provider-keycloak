@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -288,14 +289,27 @@ func resourceKeycloakIdentityProviderTokenExchangeScopePermissionDelete(ctx cont
 	return diag.FromErr(keycloakClient.DisableIdentityProviderPermissions(ctx, realmId, providerAlias))
 }
 
-func resourceKeycloakIdentityProviderTokenExchangeScopePermissionImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
+func resourceKeycloakIdentityProviderTokenExchangeScopePermissionImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
+	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{providerAlias}}")
 	}
+
+	_, err := keycloakClient.GetIdentityProviderPermissions(ctx, parts[0], parts[1])
+	if err != nil {
+		return nil, err
+	}
+
 	d.SetId(parts[0] + "/" + parts[1])
 	d.Set("realm_id", parts[0])
 	d.Set("provider_alias", parts[1])
+
+	diagnostics := resourceKeycloakIdentityProviderTokenExchangeScopePermissionRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
+
 	return []*schema.ResourceData{d}, nil
 }

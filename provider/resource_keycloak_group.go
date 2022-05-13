@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
@@ -136,13 +137,26 @@ func resourceKeycloakGroupDelete(ctx context.Context, data *schema.ResourceData,
 	return diag.FromErr(keycloakClient.DeleteGroup(ctx, realmId, id))
 }
 
-func resourceKeycloakGroupImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
+func resourceKeycloakGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
+	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{groupId}}")
 	}
+
+	_, err := keycloakClient.GetGroup(ctx, parts[0], parts[1])
+	if err != nil {
+		return nil, err
+	}
+
 	d.Set("realm_id", parts[0])
 	d.SetId(parts[1])
+
+	diagnostics := resourceKeycloakGroupRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
+
 	return []*schema.ResourceData{d}, nil
 }
