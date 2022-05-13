@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
@@ -124,16 +125,32 @@ func resourceKeycloakAuthenticationExecutionConfigDelete(ctx context.Context, da
 	return diag.FromErr(keycloakClient.DeleteAuthenticationExecutionConfig(ctx, config))
 }
 
-func resourceKeycloakAuthenticationExecutionConfigImport(_ context.Context, data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakAuthenticationExecutionConfigImport(ctx context.Context, data *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
 	parts := strings.Split(data.Id(), "/")
 
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
 		return nil, fmt.Errorf("invalid import. Supported import formats: {{realm}}/{{authenticationExecutionId}}/{{authenticationExecutionConfigId}}")
 	}
 
+	err := keycloakClient.GetAuthenticationExecutionConfig(ctx, &keycloak.AuthenticationExecutionConfig{
+		RealmId:     parts[0],
+		ExecutionId: parts[1],
+		Id:          parts[2],
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	data.Set("realm_id", parts[0])
 	data.Set("execution_id", parts[1])
 	data.SetId(parts[2])
+
+	diagnostics := resourceKeycloakAuthenticationExecutionConfigRead(ctx, data, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
 
 	return []*schema.ResourceData{data}, nil
 }

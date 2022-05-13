@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -139,16 +140,28 @@ func resourceKeycloakAuthenticationSubFlowDelete(ctx context.Context, data *sche
 	return diag.FromErr(keycloakClient.DeleteAuthenticationSubFlow(ctx, realmId, parentFlowAlias, id))
 }
 
-func resourceKeycloakAuthenticationSubFlowImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakAuthenticationSubFlowImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 3 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{parentFlowAlias}}/{{authenticationSubFlowId}}")
 	}
 
+	_, err := keycloakClient.GetAuthenticationSubFlow(ctx, parts[0], parts[1], parts[2])
+	if err != nil {
+		return nil, err
+	}
+
 	d.Set("realm_id", parts[0])
 	d.Set("parent_flow_alias", parts[1])
 	d.SetId(parts[2])
+
+	diagnostics := resourceKeycloakAuthenticationSubFlowRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

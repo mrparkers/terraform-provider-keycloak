@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -146,14 +147,27 @@ func resourceKeycloakRequiredActionsDelete(ctx context.Context, data *schema.Res
 	return diag.FromErr(keycloakClient.DeleteRequiredAction(ctx, realmName, alias))
 }
 
-func resourceKeycloakRequiredActionsImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakRequiredActionsImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid import. Supported import formats: {{realmId}}/{{alias}}")
 	}
+
+	_, err := keycloakClient.GetRequiredAction(ctx, parts[0], parts[1])
+	if err != nil {
+		return nil, err
+	}
+
 	d.Set("realm_id", parts[0])
 	d.Set("alias", parts[1])
 	d.SetId(fmt.Sprintf("%s/%s", parts[0], parts[1]))
+
+	diagnostics := resourceKeycloakRequiredActionsRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
