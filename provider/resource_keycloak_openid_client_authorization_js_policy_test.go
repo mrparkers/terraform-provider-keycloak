@@ -11,6 +11,8 @@ import (
 )
 
 func TestAccKeycloakOpenidClientAuthorizationJSPolicy(t *testing.T) {
+	skipKeycloakOpenIdScriptProtocolMapperTests(t)
+
 	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
