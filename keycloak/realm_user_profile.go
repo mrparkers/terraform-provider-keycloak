@@ -23,7 +23,7 @@ type RealmUserProfileSelector struct {
 type RealmUserProfileValidationConfig map[string]interface{}
 
 type RealmUserProfileAttribute struct {
-	Annotations map[string]string                           `json:"annotations,omitempty"`
+	Annotations map[string]interface{}                      `json:"annotations,omitempty"`
 	DisplayName string                                      `json:"displayName,omitempty"`
 	Group       string                                      `json:"group,omitempty"`
 	Name        string                                      `json:"name"`
@@ -34,10 +34,10 @@ type RealmUserProfileAttribute struct {
 }
 
 type RealmUserProfileGroup struct {
-	Annotations        map[string]string `json:"annotations,omitempty"`
-	DisplayDescription string            `json:"displayDescription,omitempty"`
-	DisplayHeader      string            `json:"displayHeader,omitempty"`
-	Name               string            `json:"name"`
+	Annotations        map[string]interface{} `json:"annotations,omitempty"`
+	DisplayDescription string                 `json:"displayDescription,omitempty"`
+	DisplayHeader      string                 `json:"displayHeader,omitempty"`
+	Name               string                 `json:"name"`
 }
 
 type RealmUserProfile struct {
@@ -65,5 +65,50 @@ func (keycloakClient *KeycloakClient) GetRealmUserProfile(ctx context.Context, r
 		return nil, err
 	}
 
+	for _, attr := range realmUserProfile.Attributes {
+		if attr.Validations != nil {
+			for name, config := range attr.Validations {
+
+				c := make(map[string]interface{})
+				for k, v := range config {
+					if _, ok := v.([]interface{}); ok {
+						tmp, _ := json.Marshal(v)
+						c[k] = string(tmp)
+					} else {
+						c[k] = v
+					}
+				}
+
+				attr.Validations[name] = c
+			}
+		}
+		if attr.Annotations != nil {
+			for k, v := range attr.Annotations {
+
+				if _, ok := v.(map[string]interface{}); ok {
+					tmp, _ := json.Marshal(v)
+					attr.Annotations[k] = string(tmp)
+				} else {
+					attr.Annotations[k] = v
+				}
+
+			}
+		}
+	}
+
+	for _, attr := range realmUserProfile.Groups {
+		if attr.Annotations != nil {
+			for k, v := range attr.Annotations {
+
+				if _, ok := v.(map[string]interface{}); ok {
+					tmp, _ := json.Marshal(v)
+					attr.Annotations[k] = string(tmp)
+				} else {
+					attr.Annotations[k] = v
+				}
+
+			}
+		}
+	}
 	return &realmUserProfile, nil
 }
