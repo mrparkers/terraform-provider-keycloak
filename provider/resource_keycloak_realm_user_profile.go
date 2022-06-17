@@ -2,6 +2,9 @@ package provider
 
 import (
 	"context"
+	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -179,15 +182,31 @@ func getRealmUserProfileAttributeFromData(m map[string]interface{}) *keycloak.Re
 			}
 
 			config := make(map[string]interface{})
+
 			if v, ok := validationConfig["config"]; ok {
-				for key, value := range v.(map[string]interface{}) {
-					config[key] = value
+
+				// Special case for options
+				if name == "options" {
+
+					sep := ","
+					if s, ok := v.(map[string]interface{})["separator"]; ok {
+						sep = s.(string)
+					}
+
+					if options, ok := v.(map[string]interface{})["options"]; ok {
+						config["options"] = strings.Split(options.(string), sep)
+					}
+
+				} else {
+					for key, value := range v.(map[string]interface{}) {
+						config[key] = value
+					}
 				}
+
 			}
 
 			validations[name] = config
 		}
-
 		attribute.Validations = validations
 	}
 
@@ -302,6 +321,24 @@ func getRealmUserProfileAttributeData(attr *keycloak.RealmUserProfileAttribute) 
 			validator := make(map[string]interface{})
 
 			validator["name"] = name
+
+			if name == "options" {
+				sep := ","
+				if s, ok := config["separator"]; ok {
+					sep = s.(string)
+				}
+
+				opts := make([]string, 0)
+
+				for _, v := range config["options"].([]interface{}) {
+					opts = append(opts, fmt.Sprint(v))
+				}
+
+				if len(opts) != 0 {
+					config["options"] = strings.Join(opts, sep)
+				}
+			}
+
 			validator["config"] = config
 
 			validations = append(validations, validator)

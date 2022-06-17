@@ -79,6 +79,14 @@ func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
 				},
 				Annotations: map[string]string{"foo": "bar"},
 			},
+			{
+				Name: "attribute3",
+				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+					"options": map[string]interface{}{
+						"options": "option1,option2,option3",
+					},
+				},
+			},
 		},
 		Groups: []*keycloak.RealmUserProfileGroup{
 			{Name: "group", DisplayDescription: "Description", DisplayHeader: "Header", Annotations: map[string]string{"foo": "bar"}},

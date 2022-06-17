@@ -1062,6 +1062,31 @@ resource "keycloak_realm_user_profile" "userprofile" {
     name = "field2"
   }
 
+  attribute {
+    name = "field3"
+    display_name = "Field 3"
+
+    validator {
+      name = "options"
+      config = {
+        options = "option1,option2"
+      }
+    }
+  }
+
+
+  attribute {
+    name = "field4"
+
+    validator {
+      name = "options"
+      config = {
+        options = "option1 - option2"
+        separator = ","
+      }
+    }
+  }
+
   group {
     name                = "group1"
     display_header      = "Group 1"
