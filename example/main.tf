@@ -1027,6 +1027,17 @@ resource "keycloak_realm_user_profile" "userprofile" {
   realm_id = keycloak_realm.test.id
 
   attribute {
+    name = "field0"
+
+    validator {
+      length {
+        min = 100
+        max = 120
+      }
+    }
+  }
+
+  attribute {
     name         = "field1"
     display_name = "Field 1"
     group        = "group1"
@@ -1042,15 +1053,22 @@ resource "keycloak_realm_user_profile" "userprofile" {
     }
 
     validator {
-      name = "person-name-prohibited-characters"
-    }
-
-    validator {
-      name   = "pattern"
-      config = {
+      pattern {
         pattern       = "^[a-z]+$"
         error_message = "Nope"
       }
+
+      length {
+        min = 1
+        max = 10
+        trim_disabled = true
+      }
+
+      double {
+        max = 5.5
+        min = 1.5
+      }
+
     }
 
     annotations = {
@@ -1060,7 +1078,71 @@ resource "keycloak_realm_user_profile" "userprofile" {
 
   attribute {
     name = "field2"
+
+    validator {
+      integer {
+        min = 1
+        max = 12
+      }
+    }
   }
+
+  attribute {
+    name = "field3"
+
+    validator {
+      double {
+        min = 1.5
+        max = 12.9
+      }
+    }
+  }
+
+  attribute {
+    name = "field4"
+
+    validator {
+      uri {}
+    }
+  }
+
+  attribute {
+    name = "field5"
+
+    validator {
+      email {}
+    }
+  }
+
+  attribute {
+    name = "field6"
+
+    validator {
+      local_date {}
+    }
+  }
+
+  attribute {
+    name = "field7"
+
+    validator {
+      person_name_prohibited_characters {}
+      username_prohibited_characters {
+        error_message = "error!"
+      }
+    }
+  }
+  attribute {
+    name = "field8"
+
+    validator {
+      options {
+        options = ["o1", "o2", "o3", "o4"]
+      }
+    }
+  }
+
+
 
   group {
     name                = "group1"

@@ -45,14 +45,15 @@ resource "keycloak_realm_user_profile" "userprofile" {
     }
 
     validator {
-      name = "person-name-prohibited-characters"
-    }
-
-    validator {
-      name   = "pattern"
-      config = {
+      person_name_prohibited_characters {}
+      pattern {
         pattern       = "^[a-z]+$"
         error_message = "Nope"
+      }
+      length {
+        min           = 1
+        max           = 10
+        trim_disabled = false
       }
     }
 
@@ -63,6 +64,31 @@ resource "keycloak_realm_user_profile" "userprofile" {
 
   attribute {
     name = "field2"
+  }
+
+  attribute {
+    name = "field3"
+    display_name = "Field 3"
+
+    validator {
+      options {
+        options = ["option1", "option2"]
+      }
+      email {}
+    }
+  
+  }
+
+
+  attribute {
+    name = "field4"
+
+    validator {
+      double {
+        max = 5.5
+        min = 1.5
+      }
+    }
   }
 
   group {
@@ -106,8 +132,49 @@ resource "keycloak_realm_user_profile" "userprofile" {
 
 #### Validator Arguments
 
-- `name` - (Required) The name of the validator.
-- `config` - (Optional) A map defining the configuration of the validator.
+- `length` - (Optional) Check the length of a string value [length](#length).
+- `integer` - (Optional) Check if the value is an integer and within a lower and upper range [integer](#integer).
+- `double` - (Optional) Check if the value is a double and within a lower and upper range [double](#double).
+- `uri` - (Optional) Check if the value is a valid URI. Has no arguments.
+- `pattern` - (Optional) Check if the value matches a specific RegEx pattern [pattern](#pattern)
+- `email` - (Optional) Check if the value has a valid e-mail format. Has no arguments.
+- `local_date` - (Optional) Check if the value has a valid format based on the realm and/or user locale. Has no arguments.
+- `person_name_prohibited_characters` - (Optional) Check if the value is a valid person name as an additional barrier for attacks such as script injection. The validation is based on a default RegEx pattern that blocks characters not common in person names [person_name_prohibited_characters](#personnameprohibitedcharacters).
+- `username_prohibited_characters` - (Optional) Check if the value is a valid username as an additional barrier for attacks such as script injection. The validation is based on a default RegEx pattern that blocks characters not common in usernames [username_prohibited_characters](#usernameprohibitedcharacters).
+- `options` - (Optional) Check if the value is from the defined set of allowed values. Useful to validate values entered through select and multiselect fields[options](#options).
+
+#### Length
+
+- `min` - (Required) Minimum character length.
+- `max`- (Required) Maximum character length.
+- `trim_disabled` - (Optional) Whether value is trimmed prior to validation.
+
+#### Integer
+
+- `min` - (Required) Defines lower range.
+- `max`- (Required) Defines upper range.
+
+#### Double
+
+- `min` - (Required) Defines lower range.
+- `max`- (Required) Defines upper range.
+
+#### Pattern
+
+- `pattern`- (Required) The RegEx pattern to use when validating values.
+- `error_message`- (Optional) The key of the error message in i18n bundle. If not set a generic message is used.
+
+#### Person_name_prohibited_characters
+
+- `error_message`- (Optional) The key of the error message in i18n bundle. If not set a generic message is used.
+
+#### User_name_prohibited_characters
+
+- `error_message`- (Optional) The key of the error message in i18n bundle. If not set a generic message is used.
+
+#### Options
+
+- `options`- (Required) Array of strings containing allowed values.
 
 ### Group Arguments
 

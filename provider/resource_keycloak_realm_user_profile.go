@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -73,18 +74,147 @@ func resourceKeycloakRealmUserProfile() *schema.Resource {
 							},
 						},
 						"validator": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
+							MaxItems: 1,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"name": {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									"config": {
-										Type:     schema.TypeMap,
+									"length": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
 										Optional: true,
-										Elem:     &schema.Schema{Type: schema.TypeString},
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"min": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"max": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"trim_disabled": {
+													Type:     schema.TypeBool,
+													Optional: true,
+												},
+											},
+										},
+									},
+									"integer": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"min": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"max": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+											},
+										},
+									},
+									"double": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"min": {
+													Type:     schema.TypeFloat,
+													Required: true,
+												},
+												"max": {
+													Type:     schema.TypeFloat,
+													Required: true,
+												},
+											},
+										},
+									},
+									"uri": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{},
+										},
+									},
+									"pattern": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"pattern": {
+													Type:     schema.TypeString,
+													Required: true,
+												},
+												"error_message": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+											},
+										},
+									},
+									"email": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{},
+										},
+									},
+									"local_date": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{},
+										},
+									},
+									"person_name_prohibited_characters": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"error_message": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+											},
+										},
+									},
+									"username_prohibited_characters": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"error_message": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+											},
+										},
+									},
+									"options": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"options": {
+													Type:     schema.TypeList,
+													MinItems: 1,
+													Required: true,
+													Elem:     &schema.Schema{Type: schema.TypeString},
+												},
+											},
+										},
 									},
 								},
 							},
@@ -166,29 +296,85 @@ func getRealmUserProfileAttributeFromData(m map[string]interface{}) *keycloak.Re
 		}
 	}
 
-	if v, ok := m["validator"]; ok {
-		validations := make(map[string]keycloak.RealmUserProfileValidationConfig)
+	if v, ok := m["validator"]; ok && len(v.([]interface{})) > 0 {
+		validations := keycloak.RealmUserProfileValidationConfig{}
 
-		for _, validator := range v.(*schema.Set).List() {
-			validationConfig := validator.(map[string]interface{})
+		data := v.([]interface{})[0].(map[string]interface{})
 
-			name := validationConfig["name"].(string)
-
-			if name == "" {
-				continue
+		if val, ok := data["length"]; ok && len(val.([]interface{})) > 0 {
+			r := val.([]interface{})[0].(map[string]interface{})
+			validations.Length = &keycloak.RealmUserProfileValidationLength{
+				Min:          r["min"].(int),
+				Max:          r["max"].(int),
+				TrimDisabled: r["trim_disabled"].(bool),
 			}
+		}
 
-			config := make(map[string]interface{})
-			if v, ok := validationConfig["config"]; ok {
-				for key, value := range v.(map[string]interface{}) {
-					config[key] = value
+		if val, ok := data["integer"]; ok && len(val.([]interface{})) > 0 {
+			r := val.([]interface{})[0].(map[string]interface{})
+			validations.Integer = &keycloak.RealmUserProfileValidationInteger{
+				Min: r["min"].(int),
+				Max: r["max"].(int),
+			}
+		}
+
+		if val, ok := data["double"]; ok && len(val.([]interface{})) > 0 {
+			r := val.([]interface{})[0].(map[string]interface{})
+			validations.Double = &keycloak.RealmUserProfileValidationDouble{
+				Min: r["min"].(float64),
+				Max: r["max"].(float64),
+			}
+		}
+
+		if val, ok := data["uri"]; ok && len(val.([]interface{})) > 0 {
+			validations.URI = &map[string]interface{}{}
+		}
+
+		if val, ok := data["pattern"]; ok && len(val.([]interface{})) > 0 {
+			r := val.([]interface{})[0].(map[string]interface{})
+			validations.Pattern = &keycloak.RealmUserProfileValidationPattern{
+				Pattern:      r["pattern"].(string),
+				ErrorMessage: r["error_message"].(string),
+			}
+		}
+
+		if val, ok := data["email"]; ok && len(val.([]interface{})) > 0 {
+			validations.Email = &map[string]interface{}{}
+		}
+
+		if val, ok := data["local_date"]; ok && len(val.([]interface{})) > 0 {
+			validations.LocalDate = &map[string]interface{}{}
+		}
+
+		if val, ok := data["person_name_prohibited_characters"]; ok && len(val.([]interface{})) > 0 {
+			if r := val.([]interface{})[0]; r == nil {
+				validations.PersonNameProhibitedChars = &keycloak.RealmUserProfileValidationProhibited{}
+			} else {
+				validations.PersonNameProhibitedChars = &keycloak.RealmUserProfileValidationProhibited{
+					ErrorMessage: r.(map[string]interface{})["error_message"].(string),
 				}
 			}
 
-			validations[name] = config
 		}
 
-		attribute.Validations = validations
+		if val, ok := data["username_prohibited_characters"]; ok && len(val.([]interface{})) > 0 {
+			if r := val.([]interface{})[0]; r == nil {
+				validations.UsernameProhibitedChars = &keycloak.RealmUserProfileValidationProhibited{}
+			} else {
+				validations.UsernameProhibitedChars = &keycloak.RealmUserProfileValidationProhibited{
+					ErrorMessage: r.(map[string]interface{})["error_message"].(string),
+				}
+			}
+		}
+
+		if val, ok := data["options"]; ok && len(val.([]interface{})) > 0 {
+			r := val.([]interface{})[0].(map[string]interface{})
+			validations.Options = &keycloak.RealmUserProfileValidationOptions{
+				Options: interfaceSliceToStringSlice(r["options"].([]interface{})),
+			}
+		}
+
+		attribute.Validations = &validations
 	}
 
 	required := &keycloak.RealmUserProfileRequired{}
@@ -217,6 +403,7 @@ func getRealmUserProfileAttributeFromData(m map[string]interface{}) *keycloak.Re
 }
 
 func getRealmUserProfileAttributesFromData(lst []interface{}) []*keycloak.RealmUserProfileAttribute {
+
 	attributes := make([]*keycloak.RealmUserProfileAttribute, 0)
 
 	for _, m := range lst {
@@ -297,16 +484,76 @@ func getRealmUserProfileAttributeData(attr *keycloak.RealmUserProfileAttribute) 
 	}
 
 	if attr.Validations != nil {
-		validations := make([]interface{}, 0)
-		for name, config := range attr.Validations {
-			validator := make(map[string]interface{})
+		validation := make(map[string]interface{})
 
-			validator["name"] = name
-			validator["config"] = config
-
-			validations = append(validations, validator)
+		if attr.Validations.Pattern != nil {
+			validation["pattern"] = []map[string]interface{}{
+				{
+					"pattern":       attr.Validations.Pattern.Pattern,
+					"error_message": attr.Validations.Pattern.ErrorMessage,
+				},
+			}
 		}
-		attributeData["validator"] = validations
+
+		if attr.Validations.PersonNameProhibitedChars != nil {
+			validation["person_name_prohibited_characters"] = []map[string]interface{}{
+				{"error_message": attr.Validations.PersonNameProhibitedChars.ErrorMessage},
+			}
+		}
+
+		if attr.Validations.UsernameProhibitedChars != nil {
+			validation["username_prohibited_characters"] = []map[string]interface{}{
+				{"error_message": attr.Validations.UsernameProhibitedChars.ErrorMessage},
+			}
+		}
+
+		if attr.Validations.Length != nil {
+			validation["length"] = []map[string]interface{}{
+				{
+					"min":           attr.Validations.Length.Min,
+					"max":           attr.Validations.Length.Max,
+					"trim_disabled": attr.Validations.Length.TrimDisabled,
+				},
+			}
+		}
+
+		if attr.Validations.Integer != nil {
+			validation["integer"] = []map[string]interface{}{
+				{
+					"min": attr.Validations.Integer.Min,
+					"max": attr.Validations.Integer.Max,
+				},
+			}
+		}
+
+		if attr.Validations.Double != nil {
+			validation["double"] = []map[string]interface{}{
+				{
+					"min": attr.Validations.Double.Min,
+					"max": attr.Validations.Double.Max,
+				},
+			}
+		}
+
+		if attr.Validations.URI != nil {
+			validation["uri"] = []map[string]interface{}{{}}
+		}
+
+		if attr.Validations.Email != nil {
+			validation["email"] = []map[string]interface{}{{}}
+		}
+
+		if attr.Validations.LocalDate != nil {
+			validation["local_date"] = []map[string]interface{}{{}}
+		}
+
+		if attr.Validations.Options != nil {
+			validation["options"] = []map[string]interface{}{
+				{"options": attr.Validations.Options.Options},
+			}
+		}
+
+		attributeData["validator"] = []map[string]interface{}{validation}
 	}
 
 	if attr.Annotations != nil {
