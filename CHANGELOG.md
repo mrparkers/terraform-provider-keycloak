@@ -1,3 +1,19 @@
+## 3.9.0 (June 23, 2022)
+
+IMPROVEMENTS:
+
+- improve import error messages for several resources ([#691](https://github.com/mrparkers/terraform-provider-keycloak/pull/691))
+- allow usage of environment variable to configure base API path ([#695](https://github.com/mrparkers/terraform-provider-keycloak/pull/695))
+
+BUG FIXES:
+
+- use realm name instead of internal ID for authentication bindings ([#687](https://github.com/mrparkers/terraform-provider-keycloak/pull/687))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@dmeyerholt](https://github.com/dmeyerholt)
+- [@Korsarro69](https://github.com/Korsarro69)
+
 ## 3.8.1 (May 9, 2022)
 
 BUG FIXES:
