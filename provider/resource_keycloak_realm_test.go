@@ -444,6 +444,12 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "offline_session_max_lifespan"),
 					TestCheckResourceAttrNot("keycloak_realm.realm", "offline_session_max_lifespan", "0s"),
 
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "client_session_idle_timeout"),
+					resource.TestCheckResourceAttr("keycloak_realm.realm", "client_session_idle_timeout", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "client_session_max_lifespan"),
+					resource.TestCheckResourceAttr("keycloak_realm.realm", "client_session_max_lifespan", "0s"),
+
 					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "access_token_lifespan"),
 					TestCheckResourceAttrNot("keycloak_realm.realm", "access_token_lifespan", "0s"),
 
@@ -683,9 +689,10 @@ func TestAccKeycloakRealm_browserFlow(t *testing.T) {
 				Config: testKeycloakRealm_browserFlow(realmName, realmDisplayName, newBrowserFlow),
 				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", newBrowserFlow),
 			},
+			// when a realm binding argument is unset, it will remain the same
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
-				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", "browser"),
+				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", newBrowserFlow),
 			},
 		},
 	})
@@ -1235,8 +1242,8 @@ func testAccCheckKeycloakRealmBrowserFlow(resourceName, browserFlow string) reso
 			return err
 		}
 
-		if realm.BrowserFlow != browserFlow {
-			return fmt.Errorf("expected realm %s to have browserFlow binding %s, but was %s", realm.Realm, browserFlow, realm.BrowserFlow)
+		if *realm.BrowserFlow != browserFlow {
+			return fmt.Errorf("expected realm %s to have browserFlow binding %s, but was %s", realm.Realm, browserFlow, *realm.BrowserFlow)
 		}
 
 		return nil
@@ -1495,6 +1502,8 @@ func testKeycloakRealm_tokenSettings(realm string) string {
 	ssoSessionMaxLifespanRememberMe := randomDurationString()
 	offlineSessionIdleTimeout := randomDurationString()
 	offlineSessionMaxLifespan := randomDurationString()
+	clientSessionIdleTimeout := randomDurationString()
+	clientSessionMaxLifespan := randomDurationString()
 	accessTokenLifespan := randomDurationString()
 	accessTokenLifespanForImplicitFlow := randomDurationString()
 	accessCodeLifespan := randomDurationString()
@@ -1517,6 +1526,8 @@ resource "keycloak_realm" "realm" {
 	offline_session_idle_timeout             = "%s"
 	offline_session_max_lifespan             = "%s"
 	offline_session_max_lifespan_enabled     = true
+	client_session_idle_timeout              = "%s"
+	client_session_max_lifespan              = "%s"
 	access_token_lifespan                    = "%s"
 	access_token_lifespan_for_implicit_flow  = "%s"
 	access_code_lifespan                     = "%s"
@@ -1525,7 +1536,7 @@ resource "keycloak_realm" "realm" {
 	action_token_generated_by_user_lifespan  = "%s"
 	action_token_generated_by_admin_lifespan = "%s"
 }
-	`, realm, realm, defaultSignatureAlgorithm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, ssoSessionIdleTimeoutRememberMe, ssoSessionMaxLifespanRememberMe, offlineSessionIdleTimeout, offlineSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
+	`, realm, realm, defaultSignatureAlgorithm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, ssoSessionIdleTimeoutRememberMe, ssoSessionMaxLifespanRememberMe, offlineSessionIdleTimeout, offlineSessionMaxLifespan, clientSessionIdleTimeout, clientSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
 }
 
 func testKeycloakRealm_tokenSettingsOauth2Device(realm string) string {

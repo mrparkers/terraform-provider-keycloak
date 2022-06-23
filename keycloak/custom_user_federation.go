@@ -61,16 +61,16 @@ func convertFromComponentToCustomUserFederation(component *component, realmName 
 		return nil, err
 	}
 
-	priority, err := strconv.Atoi(component.getConfig("priority"))
+	priority, err := atoiAndTreatEmptyStringAsZero(component.getConfig("priority"))
 	if err != nil {
 		return nil, err
 	}
 
-	fullSyncPeriod, err := strconv.Atoi(component.getConfig("fullSyncPeriod"))
+	fullSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("fullSyncPeriod"))
 	if err != nil {
 		return nil, err
 	}
-	changedSyncPeriod, err := strconv.Atoi(component.getConfig("changedSyncPeriod"))
+	changedSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("changedSyncPeriod"))
 	if err != nil {
 		return nil, err
 	}

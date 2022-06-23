@@ -212,14 +212,24 @@ func resourceKeycloakGroupRolesDelete(ctx context.Context, data *schema.Resource
 }
 
 func resourceKeycloakGroupRolesImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
+	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import format: {{realm}}/{{groupId}}.")
 	}
 
 	realmId := parts[0]
 	groupId := parts[1]
+
+	if _, err := keycloakClient.GetGroup(ctx, realmId, groupId); err != nil {
+		return nil, err
+	}
+
+	_, err := keycloakClient.GetGroupRoleMappings(ctx, realmId, groupId)
+	if err != nil {
+		return nil, err
+	}
 
 	d.Set("realm_id", realmId)
 	d.Set("group_id", groupId)

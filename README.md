@@ -26,15 +26,25 @@ Or, follow the [old instructions for installing third-party plugins](https://www
 
 If you are using any provider version below v2.0.0, you can also follow the [old instructions for installing third-party plugins](https://www.terraform.io/docs/configuration-0-11/providers.html#third-party-plugins).
 
+## A note for users of the new Quarkus distribution
+
+Recently, Keycloak has been updated to use Quarkus over the legacy Wildfly distribution. The only significant change here
+that affects this Terraform provider is the removal of `/auth` from the default context path for the Keycloak API.
+
+For now, Quarkus users will have to set the `base_path` provider argument to an empty string, or use the `KEYCLOAK_BASE_PATH`
+environment variable.
+
+The next major release of this provider (v4.0.0) will change this default to be compatible with the Quarkus distribution.
+
 ## Supported Versions
 
 This provider will officially support the latest three major versions of Keycloak, although older versions may still work.
 
 The following versions are used when running acceptance tests in CI:
 
-- 16.1.1 (latest)
-- 15.1.1
-- 14.0.0
+- 18.0.0 (latest)
+- 17.0.0
+- 16.1.1
 
 ## Releases
 

@@ -212,14 +212,24 @@ func resourceKeycloakUserRolesDelete(ctx context.Context, data *schema.ResourceD
 }
 
 func resourceKeycloakUserRolesImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
+	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import format: {{realm}}/{{userId}}.")
 	}
 
 	realmId := parts[0]
 	userId := parts[1]
+
+	if _, err := keycloakClient.GetUser(ctx, realmId, userId); err != nil {
+		return nil, err
+	}
+
+	_, err := keycloakClient.GetUserRoleMappings(ctx, realmId, userId)
+	if err != nil {
+		return nil, err
+	}
 
 	d.Set("realm_id", realmId)
 	d.Set("user_id", userId)

@@ -108,3 +108,7 @@ func stringSliceContains(s []string, e string) bool {
 	}
 	return false
 }
+
+func stringPointer(s string) *string {
+	return &s
+}

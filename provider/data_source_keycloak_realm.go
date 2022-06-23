@@ -283,6 +283,14 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"client_session_idle_timeout": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"client_session_max_lifespan": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"access_token_lifespan": {
 				Type:     schema.TypeString,
 				Computed: true,

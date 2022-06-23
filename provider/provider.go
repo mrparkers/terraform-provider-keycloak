@@ -111,6 +111,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 			"keycloak_users_permissions":                                 resourceKeycloakUsersPermissions(),
 			"keycloak_user_groups":                                       resourceKeycloakUserGroups(),
 			"keycloak_group_permissions":                                 resourceKeycloakGroupPermissions(),
+			"keycloak_authentication_bindings":                           resourceKeycloakAuthenticationBindings(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -169,9 +170,9 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 				Default:     false,
 			},
 			"base_path": {
-				Optional: true,
-				Type:     schema.TypeString,
-				Default:  "/auth",
+				Optional:    true,
+				Type:        schema.TypeString,
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_BASE_PATH", "/auth"),
 			},
 			"additional_headers": {
 				Optional: true,
