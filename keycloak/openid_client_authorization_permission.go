@@ -17,6 +17,7 @@ type OpenidClientAuthorizationPermission struct {
 	Resources        []string `json:"resources"`
 	Scopes           []string `json:"scopes"`
 	Type             string   `json:"type"`
+	ResourceType     string   `json:"resourceType,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) GetOpenidClientAuthorizationPermission(ctx context.Context, realm, resourceServerId, id string) (*OpenidClientAuthorizationPermission, error) {
