@@ -22,7 +22,7 @@ type IdentityProviderConfig struct {
 	SingleSignOnServiceUrl          string                 `json:"singleSignOnServiceUrl,omitempty"`
 	SigningCertificate              string                 `json:"signingCertificate,omitempty"`
 	SignatureAlgorithm              string                 `json:"signatureAlgorithm,omitempty"`
-	XmlSigKeyInfoKeyNameTransformer string                 `json:"xmlSignKeyInfoKeyNameTransformer,omitempty"`
+	XmlSigKeyInfoKeyNameTransformer string                 `json:"xmlSigKeyInfoKeyNameTransformer,omitempty"`
 	PostBindingAuthnRequest         KeycloakBoolQuoted     `json:"postBindingAuthnRequest,omitempty"`
 	PostBindingResponse             KeycloakBoolQuoted     `json:"postBindingResponse,omitempty"`
 	PostBindingLogout               KeycloakBoolQuoted     `json:"postBindingLogout,omitempty"`
