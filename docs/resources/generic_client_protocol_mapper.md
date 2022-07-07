@@ -44,7 +44,8 @@ resource "keycloak_generic_client_protocol_mapper" "saml_hardcode_attribute_mapp
 ## Argument Reference
 
 - `realm_id` - (Required) The realm this protocol mapper exists within.
-- `client_id` - (Required) The client this protocol mapper is attached to.
+- `client_id` - (Optional) The ID of the client this mapper should be added to. Conflicts with client_scope_id. This argument is required if client_scope_id is not set.
+- `client_scope_id` - (Optional) The ID of the client scope this mapper should be added to. Conflicts with client_id. This argument is required if client_id is not set.
 - `name` - (Required) The display name of this protocol mapper in the GUI.
 - `protocol` - (Required) The type of client (either `openid-connect` or `saml`). The type must match the type of the client.
 - `protocol_mapper` - (Required) The name of the protocol mapper. The protocol mapper must be compatible with the specified client.
