@@ -1,11 +1,11 @@
-## 3.9.1 (July 11, 2022)
+## v3.9.1 (July 11, 2022)
 
 BUG FIXES:
 
 - update usage of component API for `keycloak_ldap_user_federation` and `keycloak_custom_user_federation` resources ([#707](https://github.com/mrparkers/terraform-provider-keycloak/pull/707))
   - this fixes an issue that prevented these resources from being used within the `master` realm.
 
-## 3.9.0 (June 23, 2022)
+## v3.9.0 (June 23, 2022)
 
 IMPROVEMENTS:
 
@@ -21,7 +21,7 @@ Huge thanks to all the individuals who have contributed towards this release:
 - [@dmeyerholt](https://github.com/dmeyerholt)
 - [@Korsarro69](https://github.com/Korsarro69)
 
-## 3.8.1 (May 9, 2022)
+## v3.8.1 (May 9, 2022)
 
 BUG FIXES:
 
