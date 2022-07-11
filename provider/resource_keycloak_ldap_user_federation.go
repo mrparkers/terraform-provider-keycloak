@@ -302,7 +302,7 @@ func validateSyncPeriod(i interface{}, k string) (s []string, errs []error) {
 	return
 }
 
-func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUserFederation {
+func getLdapUserFederationFromData(data *schema.ResourceData, realmInternalId string) *keycloak.LdapUserFederation {
 	var userObjectClasses []string
 
 	for _, userObjectClass := range data.Get("user_object_classes").([]interface{}) {
@@ -312,7 +312,7 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 	ldapUserFederation := &keycloak.LdapUserFederation{
 		Id:      data.Id(),
 		Name:    data.Get("name").(string),
-		RealmId: data.Get("realm_id").(string),
+		RealmId: realmInternalId,
 
 		Enabled:  data.Get("enabled").(bool),
 		Priority: data.Get("priority").(int),
@@ -379,11 +379,11 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 	return ldapUserFederation
 }
 
-func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUserFederation) {
+func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUserFederation, realmId string) {
 	data.SetId(ldap.Id)
 
 	data.Set("name", ldap.Name)
-	data.Set("realm_id", ldap.RealmId)
+	data.Set("realm_id", realmId)
 
 	data.Set("enabled", ldap.Enabled)
 	data.Set("priority", ldap.Priority)
@@ -456,19 +456,26 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 func resourceKeycloakLdapUserFederationCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldap := getLdapUserFederationFromData(data)
+	realmId := data.Get("realm_id").(string)
 
-	err := keycloakClient.ValidateLdapUserFederation(ctx, ldap)
+	realm, err := keycloakClient.GetRealm(ctx, realmId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewLdapUserFederation(ctx, ldap)
+	ldap := getLdapUserFederationFromData(data, realm.Id)
+
+	err = keycloakClient.ValidateLdapUserFederation(ctx, ldap)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	setLdapUserFederationData(data, ldap)
+	err = keycloakClient.NewLdapUserFederation(ctx, realmId, ldap)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	setLdapUserFederationData(data, ldap, realmId)
 
 	return resourceKeycloakLdapUserFederationRead(ctx, data, meta)
 }
@@ -485,7 +492,7 @@ func resourceKeycloakLdapUserFederationRead(ctx context.Context, data *schema.Re
 	}
 
 	ldap.BindCredential = data.Get("bind_credential").(string) // we can't trust the API to set this field correctly since it just responds with "**********"
-	setLdapUserFederationData(data, ldap)
+	setLdapUserFederationData(data, ldap, realmId)
 
 	return nil
 }
@@ -493,19 +500,26 @@ func resourceKeycloakLdapUserFederationRead(ctx context.Context, data *schema.Re
 func resourceKeycloakLdapUserFederationUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldap := getLdapUserFederationFromData(data)
+	realmId := data.Get("realm_id").(string)
 
-	err := keycloakClient.ValidateLdapUserFederation(ctx, ldap)
+	realm, err := keycloakClient.GetRealm(ctx, realmId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateLdapUserFederation(ctx, ldap)
+	ldap := getLdapUserFederationFromData(data, realm.Id)
+
+	err = keycloakClient.ValidateLdapUserFederation(ctx, ldap)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	setLdapUserFederationData(data, ldap)
+	err = keycloakClient.UpdateLdapUserFederation(ctx, realmId, ldap)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	setLdapUserFederationData(data, ldap, realmId)
 
 	return nil
 }
