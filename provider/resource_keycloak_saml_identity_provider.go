@@ -184,6 +184,16 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 	rec, defaultConfig := getIdentityProviderFromData(data)
 	rec.ProviderId = data.Get("provider_id").(string)
 
+	var authnContextClassRefs keycloak.KeycloakSliceQuoted
+	for _, v := range data.Get("authn_context_class_refs").([]interface{}) {
+		authnContextClassRefs = append(authnContextClassRefs, v.(string))
+	}
+
+	var authnContextDeclRefs keycloak.KeycloakSliceQuoted
+	for _, v := range data.Get("authn_context_decl_refs").([]interface{}) {
+		authnContextDeclRefs = append(authnContextDeclRefs, v.(string))
+	}
+
 	samlIdentityProviderConfig := &keycloak.IdentityProviderConfig{
 		ValidateSignature:               keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		HideOnLoginPage:                 keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
@@ -203,9 +213,9 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		WantAssertionsEncrypted:         keycloak.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
 		PrincipalType:                   data.Get("principal_type").(string),
 		PrincipalAttribute:              data.Get("principal_attribute").(string),
-		AuthnContextClassRefs:           data.Get("authn_context_class_refs").([]interface{}),
+		AuthnContextClassRefs:           authnContextClassRefs,
 		AuthnContextComparisonType:      data.Get("authn_context_comparison_type").(string),
-		AuthnContextDeclRefs:            data.Get("authn_context_decl_refs").([]interface{}),
+		AuthnContextDeclRefs:            authnContextDeclRefs,
 	}
 
 	if _, ok := data.GetOk("signature_algorithm"); ok {

@@ -47,9 +47,9 @@ type IdentityProviderConfig struct {
 	GuiOrder                        string                 `json:"guiOrder,omitempty"`
 	SyncMode                        string                 `json:"syncMode,omitempty"`
 	ExtraConfig                     map[string]interface{} `json:"-"`
-	AuthnContextClassRefs           []interface{}          `json:"authnContextClassRefs,omitempty"`
+	AuthnContextClassRefs           KeycloakSliceQuoted    `json:"authnContextClassRefs,omitempty"`
 	AuthnContextComparisonType      string                 `json:"authnContextComparisonType,omitempty"`
-	AuthnContextDeclRefs            []interface{}          `json:"authnContextDeclRefs,omitempty"`
+	AuthnContextDeclRefs            KeycloakSliceQuoted    `json:"authnContextDeclRefs,omitempty"`
 }
 
 type IdentityProvider struct {

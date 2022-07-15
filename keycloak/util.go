@@ -9,7 +9,7 @@ import (
 )
 
 type KeycloakBoolQuoted bool
-type KeycloakSliceQuoted []interface{}
+type KeycloakSliceQuoted []string
 
 func (c KeycloakBoolQuoted) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
@@ -39,38 +39,40 @@ func (c *KeycloakBoolQuoted) UnmarshalJSON(in []byte) error {
 
 func (s KeycloakSliceQuoted) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
-	if s == nil {
+	if s == nil || len(s) == 0 {
 		buf.WriteString(`""`)
 	} else {
 		sliceAsString := make([]string, len(s))
 		for i, v := range s {
-			sliceAsString[i] = v.(string)
+			sliceAsString[i] = v
 		}
 
-		stringAsJSON, _ := json.Marshal(sliceAsString)
+		stringAsJSON, err := json.Marshal(sliceAsString)
+		if err != nil {
+			return nil, err
+		}
+
 		buf.WriteString(strconv.Quote(string(stringAsJSON)))
 	}
 
 	return buf.Bytes(), nil
 }
 
-func (s *KeycloakSliceQuoted) UnmarshalJSON(in []byte) error {
-	value := string(in)
-
-	if value == `""` {
-		*s = make([]interface{}, len(in))
-		return nil
-	}
-
-	unquoted, err := strconv.Unquote(value)
-	if err != nil {
-		return err
-	}
-
-	json.Unmarshal([]byte(unquoted), s)
-
-	return nil
-}
+//func (s *KeycloakSliceQuoted) UnmarshalJSON(in []byte) error {
+//	value := string(in)
+//
+//	if value == `""` {
+//		*s = make([]string, len(in))
+//		return nil
+//	}
+//
+//	unquoted, err := strconv.Unquote(value)
+//	if err != nil {
+//		return err
+//	}
+//
+//	return json.Unmarshal([]byte(unquoted), s)
+//}
 
 func getIdFromLocationHeader(locationHeader string) string {
 	parts := strings.Split(locationHeader, "/")
