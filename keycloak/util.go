@@ -58,22 +58,6 @@ func (s KeycloakSliceQuoted) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-//func (s *KeycloakSliceQuoted) UnmarshalJSON(in []byte) error {
-//	value := string(in)
-//
-//	if value == `""` {
-//		*s = make([]string, len(in))
-//		return nil
-//	}
-//
-//	unquoted, err := strconv.Unquote(value)
-//	if err != nil {
-//		return err
-//	}
-//
-//	return json.Unmarshal([]byte(unquoted), s)
-//}
-
 func getIdFromLocationHeader(locationHeader string) string {
 	parts := strings.Split(locationHeader, "/")
 
