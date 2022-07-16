@@ -637,6 +637,14 @@ resource keycloak_oidc_google_identity_provider google {
   gui_order                               = 2
 }
 
+resource keycloak_oidc_microsoft_identity_provider microsoft {
+  realm                                   = keycloak_realm.test.id
+  client_id                               = "azure-app-client-id"
+  client_secret                           = "azure-app-client-secret"
+  sync_mode                               = "IMPORT"
+  gui_order                               = 3
+}
+
 //This example does not work in keycloak 10, because the interfaces that our customIdp implements, have changed in the keycloak latest version.
 //We need to make decide which keycloak version we going to support and test for the customIdp
 //resource keycloak_oidc_identity_provider custom_oidc_idp {
