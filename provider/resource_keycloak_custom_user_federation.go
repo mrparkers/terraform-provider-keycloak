@@ -37,15 +37,9 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 			"parent_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "The parent_id of the generated component. will use realm_id if not specified.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					realmId := d.Get("realm_id").(string)
-					if (old == "" && new == realmId) || (old == realmId && new == "") {
-						return true
-					}
-					return false
-				},
 			},
 			"provider_id": {
 				Type:        schema.TypeString,
@@ -97,7 +91,7 @@ func resourceKeycloakCustomUserFederation() *schema.Resource {
 	}
 }
 
-func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.CustomUserFederation {
+func getCustomUserFederationFromData(data *schema.ResourceData, realmInternalId string) *keycloak.CustomUserFederation {
 	config := map[string][]string{}
 	if v, ok := data.GetOk("config"); ok {
 		for key, value := range v.(map[string]interface{}) {
@@ -109,7 +103,7 @@ func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.Custom
 	if dataParentId != "" {
 		parentId = dataParentId
 	} else {
-		parentId = data.Get("realm_id").(string)
+		parentId = realmInternalId
 	}
 
 	return &keycloak.CustomUserFederation{
@@ -131,11 +125,11 @@ func getCustomUserFederationFromData(data *schema.ResourceData) *keycloak.Custom
 	}
 }
 
-func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.CustomUserFederation) {
+func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.CustomUserFederation, realmId string) {
 	data.SetId(custom.Id)
 
 	data.Set("name", custom.Name)
-	data.Set("realm_id", custom.RealmId)
+	data.Set("realm_id", realmId)
 
 	data.Set("parent_id", custom.ParentId)
 	data.Set("provider_id", custom.ProviderId)
@@ -159,19 +153,26 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 func resourceKeycloakCustomUserFederationCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	custom := getCustomUserFederationFromData(data)
+	realmId := data.Get("realm_id").(string)
 
-	err := keycloakClient.ValidateCustomUserFederation(ctx, custom)
+	realm, err := keycloakClient.GetRealm(ctx, realmId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewCustomUserFederation(ctx, custom)
+	custom := getCustomUserFederationFromData(data, realm.Id)
+
+	err = keycloakClient.ValidateCustomUserFederation(ctx, custom)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	setCustomUserFederationData(data, custom)
+	err = keycloakClient.NewCustomUserFederation(ctx, realmId, custom)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	setCustomUserFederationData(data, custom, realmId)
 
 	return resourceKeycloakCustomUserFederationRead(ctx, data, meta)
 }
@@ -187,7 +188,7 @@ func resourceKeycloakCustomUserFederationRead(ctx context.Context, data *schema.
 		return handleNotFoundError(ctx, err, data)
 	}
 
-	setCustomUserFederationData(data, custom)
+	setCustomUserFederationData(data, custom, realmId)
 
 	return nil
 }
@@ -195,19 +196,26 @@ func resourceKeycloakCustomUserFederationRead(ctx context.Context, data *schema.
 func resourceKeycloakCustomUserFederationUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	custom := getCustomUserFederationFromData(data)
+	realmId := data.Get("realm_id").(string)
 
-	err := keycloakClient.ValidateCustomUserFederation(ctx, custom)
+	realm, err := keycloakClient.GetRealm(ctx, realmId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateCustomUserFederation(ctx, custom)
+	custom := getCustomUserFederationFromData(data, realm.Id)
+
+	err = keycloakClient.ValidateCustomUserFederation(ctx, custom)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	setCustomUserFederationData(data, custom)
+	err = keycloakClient.UpdateCustomUserFederation(ctx, realmId, custom)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	setCustomUserFederationData(data, custom, realmId)
 
 	return nil
 }

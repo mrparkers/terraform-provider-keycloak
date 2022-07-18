@@ -124,8 +124,8 @@ func (keycloakClient *KeycloakClient) ValidateCustomUserFederation(ctx context.C
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) NewCustomUserFederation(ctx context.Context, customUserFederation *CustomUserFederation) error {
-	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", customUserFederation.RealmId), convertFromCustomUserFederationToComponent(customUserFederation))
+func (keycloakClient *KeycloakClient) NewCustomUserFederation(ctx context.Context, realmId string, customUserFederation *CustomUserFederation) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", realmId), convertFromCustomUserFederationToComponent(customUserFederation))
 	if err != nil {
 		return err
 	}
@@ -166,8 +166,8 @@ func (keycloakClient *KeycloakClient) GetCustomUserFederations(ctx context.Conte
 	return &customUserFederations, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateCustomUserFederation(ctx context.Context, customUserFederation *CustomUserFederation) error {
-	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", customUserFederation.RealmId, customUserFederation.Id), convertFromCustomUserFederationToComponent(customUserFederation))
+func (keycloakClient *KeycloakClient) UpdateCustomUserFederation(ctx context.Context, realmId string, customUserFederation *CustomUserFederation) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, customUserFederation.Id), convertFromCustomUserFederationToComponent(customUserFederation))
 }
 
 func (keycloakClient *KeycloakClient) DeleteCustomUserFederation(ctx context.Context, realmName, id string) error {
