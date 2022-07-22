@@ -438,13 +438,13 @@ func (keycloakClient *KeycloakClient) ValidateLdapUserFederation(ctx context.Con
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) NewLdapUserFederation(ctx context.Context, ldapUserFederation *LdapUserFederation) error {
+func (keycloakClient *KeycloakClient) NewLdapUserFederation(ctx context.Context, realmId string, ldapUserFederation *LdapUserFederation) error {
 	component, err := convertFromLdapUserFederationToComponent(ldapUserFederation)
 	if err != nil {
 		return err
 	}
 
-	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), component)
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", realmId), component)
 	if err != nil {
 		return err
 	}
@@ -523,13 +523,13 @@ func (keycloakClient *KeycloakClient) GetLdapUserFederationMappers(ctx context.C
 	return &ldapUserFederationMappers, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateLdapUserFederation(ctx context.Context, ldapUserFederation *LdapUserFederation) error {
+func (keycloakClient *KeycloakClient) UpdateLdapUserFederation(ctx context.Context, realmId string, ldapUserFederation *LdapUserFederation) error {
 	component, err := convertFromLdapUserFederationToComponent(ldapUserFederation)
 	if err != nil {
 		return err
 	}
 
-	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", ldapUserFederation.RealmId, ldapUserFederation.Id), component)
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, ldapUserFederation.Id), component)
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapUserFederation(ctx context.Context, realmId, id string) error {

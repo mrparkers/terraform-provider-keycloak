@@ -28,7 +28,17 @@ func unmarshalExtraConfig(data []byte, reflectValue reflect.Value, extraConfig *
 						if err == nil {
 							field.Set(reflect.ValueOf(KeycloakBoolQuoted(boolVal)))
 						}
+					} else if field.Kind() == reflect.TypeOf([]string{}).Kind() {
+						var s KeycloakSliceQuoted
+
+						err = json.Unmarshal([]byte(configValue.(string)), &s)
+						if err != nil {
+
+						}
+
+						field.Set(reflect.ValueOf(s))
 					}
+
 					delete(*extraConfig, jsonKey)
 				}
 			}
@@ -54,6 +64,9 @@ func marshalExtraConfig(reflectValue reflect.Value, extraConfig map[string]inter
 					out[jsonKey] = field.String()
 				} else if field.Kind() == reflect.Bool {
 					out[jsonKey] = KeycloakBoolQuoted(field.Bool())
+				} else if field.Kind() == reflect.TypeOf([]string{}).Kind() {
+					s := field.Interface().(KeycloakSliceQuoted)
+					out[jsonKey] = s
 				}
 			}
 		}
