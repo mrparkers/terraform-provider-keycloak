@@ -122,6 +122,8 @@ The arguments below should be specified as [Go duration strings](https://golang.
 
 - `sso_session_idle_timeout` - (Optional) The amount of time a session can be idle before it expires.
 - `sso_session_max_lifespan` - (Optional) The maximum amount of time before a session expires regardless of activity.
+- `sso_session_idle_timeout_remember_me` - (Optional) Similar to `sso_session_idle_timeout`, but used when a user clicks "Remember Me". If not set, Keycloak will default to the value of `sso_session_idle_timeout`.
+- `sso_session_max_lifespan_remember_me` - (Optional) Similar to `sso_session_max_lifespan`, but used when a user clicks "Remember Me". If not set, Keycloak will default to the value of `sso_session_max_lifespan`.
 - `offline_session_idle_timeout` - (Optional) The amount of time an offline session can be idle before it expires.
 - `offline_session_max_lifespan` - (Optional) The maximum amount of time before an offline session expires regardless of activity.
 - `offline_session_max_lifespan_enabled` - (Optional) Enable `offline_session_max_lifespan`.
