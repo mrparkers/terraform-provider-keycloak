@@ -276,7 +276,7 @@ resource keycloak_openid_client_authorization_permission test {
 	realm_id           = data.keycloak_realm.realm.id
 	name               = "%s"
 	policies           = ["${data.keycloak_openid_client_authorization_policy.default.id}"]
-	resource_type          = "%s"
+	resource_type      = "%s"
 
 }
 	`, testAccRealm.Realm, clientId, resourceName, resourceType, scopeName, permissionName, resourceType)

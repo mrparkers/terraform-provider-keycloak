@@ -56,13 +56,15 @@ func resourceKeycloakOpenidClientAuthorizationPermission() *schema.Resource {
 				Optional: true,
 			},
 			"resources": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
+				Type:          schema.TypeSet,
+				Elem:          &schema.Schema{Type: schema.TypeString},
+				Optional:      true,
+				ConflictsWith: []string{"resource_type"},
 			},
 			"resource_type": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"resources"},
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
