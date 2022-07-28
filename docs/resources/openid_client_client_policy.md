@@ -10,7 +10,6 @@ This resource can be used to create client policy.
 
 In this example, we'll create a new OpenID client, then enabled permissions for the client. A client without permissions disabled cannot be assigned by a client policy. We'll use the `keycloak_openid_client_client_policy` resource to create a new client policy, which could be applied to many clients, for a realm and a resource_server_id.
 
-
 ```hcl
 resource "keycloak_realm" "realm" {
 	realm   = "my-realm"
