@@ -33,6 +33,7 @@ type KeycloakClient struct {
 	version           *version.Version
 	additionalHeaders map[string]string
 	debug             bool
+	redHatSSO         bool
 }
 
 type ClientCredentials struct {
@@ -51,7 +52,14 @@ const (
 	tokenUrl = "%s/realms/%s/protocol/openid-connect/token"
 )
 
-func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string, additionalHeaders map[string]string) (*KeycloakClient, error) {
+// https://access.redhat.com/articles/2342881
+var redHatSSO7VersionMap = map[int]string{
+	6: "18.0.0",
+	5: "15.0.6",
+	4: "9.0.17",
+}
+
+func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string, redHatSSO bool, additionalHeaders map[string]string) (*KeycloakClient, error) {
 	clientCredentials := &ClientCredentials{
 		ClientId:     clientId,
 		ClientSecret: clientSecret,
@@ -82,6 +90,7 @@ func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecre
 		initialLogin:      initialLogin,
 		realm:             realm,
 		userAgent:         userAgent,
+		redHatSSO:         redHatSSO,
 		additionalHeaders: additionalHeaders,
 	}
 
@@ -165,7 +174,16 @@ func (keycloakClient *KeycloakClient) login(ctx context.Context) error {
 		return err
 	}
 
-	keycloakClient.version = v
+	if keycloakClient.redHatSSO {
+		keycloakVersion, err := version.NewVersion(redHatSSO7VersionMap[v.Segments()[1]])
+		if err != nil {
+			return err
+		}
+
+		keycloakClient.version = keycloakVersion
+	} else {
+		keycloakClient.version = v
+	}
 
 	return nil
 }
