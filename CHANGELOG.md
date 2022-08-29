@@ -1,3 +1,16 @@
+## v3.10.0 (July 28, 2022)
+
+IMPROVEMENTS:
+
+- add authn context attributes for `keycloak_saml_identity_provider` resource ([#703](https://github.com/mrparkers/terraform-provider-keycloak/pull/703))
+- add `resource_type` attribute for `keycloak_openid_client_authorization_permission` resource ([#702](https://github.com/mrparkers/terraform-provider-keycloak/pull/702))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@dnic](https://github.com/dnic)
+- [@1337andre](https://github.com/1337andre)
+- [@JessieAMorris](https://github.com/JessieAMorris)
+
 ## v3.9.1 (July 11, 2022)
 
 BUG FIXES:

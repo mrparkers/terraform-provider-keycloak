@@ -3,8 +3,9 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -55,9 +56,15 @@ func resourceKeycloakOpenidClientAuthorizationPermission() *schema.Resource {
 				Optional: true,
 			},
 			"resources": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
+				Type:          schema.TypeSet,
+				Elem:          &schema.Schema{Type: schema.TypeString},
+				Optional:      true,
+				ConflictsWith: []string{"resource_type"},
+			},
+			"resource_type": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"resources"},
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
@@ -105,6 +112,7 @@ func getOpenidClientAuthorizationPermissionFromData(data *schema.ResourceData) *
 		Policies:         policies,
 		Scopes:           scopes,
 		Resources:        resources,
+		ResourceType:     data.Get("resource_type").(string),
 	}
 	return &permission
 }
@@ -120,6 +128,7 @@ func setOpenidClientAuthorizationPermissionData(data *schema.ResourceData, permi
 	data.Set("policies", permission.Policies)
 	data.Set("scopes", permission.Scopes)
 	data.Set("resources", permission.Resources)
+	data.Set("resource_type", permission.ResourceType)
 }
 
 func resourceKeycloakOpenidClientAuthorizationPermissionCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
