@@ -2,6 +2,9 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -181,7 +184,14 @@ func getRealmUserProfileAttributeFromData(m map[string]interface{}) *keycloak.Re
 			config := make(map[string]interface{})
 			if v, ok := validationConfig["config"]; ok {
 				for key, value := range v.(map[string]interface{}) {
-					config[key] = value
+					if strings.HasPrefix(value.(string), "[") {
+						t := make([]interface{}, 0)
+						json.Unmarshal([]byte(value.(string)), &t)
+
+						config[key] = t
+					} else {
+						config[key] = value
+					}
 				}
 			}
 
@@ -205,9 +215,17 @@ func getRealmUserProfileAttributeFromData(m map[string]interface{}) *keycloak.Re
 	}
 
 	if v, ok := m["annotations"]; ok {
-		annotations := make(map[string]string)
+		annotations := make(map[string]interface{})
+
 		for key, value := range v.(map[string]interface{}) {
-			annotations[key] = value.(string)
+
+			if strings.HasPrefix(value.(string), "{") {
+				var t interface{}
+				json.Unmarshal([]byte(value.(string)), &t)
+				annotations[key] = t
+			} else {
+				annotations[key] = value
+			}
 		}
 		attribute.Annotations = annotations
 	}
@@ -237,10 +255,19 @@ func getRealmUserProfileGroupFromData(m map[string]interface{}) *keycloak.RealmU
 	}
 
 	if v, ok := m["annotations"]; ok {
-		annotations := make(map[string]string)
+		annotations := make(map[string]interface{})
+
 		for key, value := range v.(map[string]interface{}) {
-			annotations[key] = value.(string)
+			if strings.HasPrefix(value.(string), "{") {
+				var t interface{}
+				json.Unmarshal([]byte(value.(string)), &t)
+
+				annotations[key] = t
+			} else {
+				annotations[key] = value
+			}
 		}
+
 		group.Annotations = annotations
 	}
 
@@ -302,7 +329,18 @@ func getRealmUserProfileAttributeData(attr *keycloak.RealmUserProfileAttribute) 
 			validator := make(map[string]interface{})
 
 			validator["name"] = name
-			validator["config"] = config
+
+			c := make(map[string]interface{})
+			for k, v := range config {
+				if _, ok := v.([]interface{}); ok {
+					t, _ := json.Marshal(v)
+					c[k] = string(t)
+				} else {
+					c[k] = v
+				}
+			}
+
+			validator["config"] = c
 
 			validations = append(validations, validator)
 		}
@@ -310,7 +348,18 @@ func getRealmUserProfileAttributeData(attr *keycloak.RealmUserProfileAttribute) 
 	}
 
 	if attr.Annotations != nil {
-		attributeData["annotations"] = attr.Annotations
+		annotations := make(map[string]interface{})
+
+		for k, v := range attr.Annotations {
+			if _, ok := v.(map[string]interface{}); ok {
+				t, _ := json.Marshal(v)
+				annotations[k] = string(t)
+			} else {
+				annotations[k] = v
+			}
+		}
+
+		attributeData["annotations"] = annotations
 	}
 
 	return attributeData
@@ -322,7 +371,19 @@ func getRealmUserProfileGroupData(group *keycloak.RealmUserProfileGroup) map[str
 	groupData["name"] = group.Name
 	groupData["display_header"] = group.DisplayHeader
 	groupData["display_description"] = group.DisplayDescription
-	groupData["annotations"] = group.Annotations
+
+	annotations := make(map[string]interface{})
+
+	for k, v := range group.Annotations {
+		if _, ok := v.(map[string]interface{}); ok {
+			t, _ := json.Marshal(v)
+			annotations[k] = string(t)
+		} else {
+			annotations[k] = v
+		}
+	}
+
+	groupData["annotations"] = annotations
 
 	return groupData
 }
