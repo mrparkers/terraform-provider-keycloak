@@ -285,6 +285,13 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 					},
 				},
 			},
+			"default_mappers": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				ForceNew:    true,
+				Description: "If disabled, all default mappers will be deleted.",
+			},
 		},
 	}
 }
@@ -345,6 +352,8 @@ func getLdapUserFederationFromData(data *schema.ResourceData, realmInternalId st
 		BatchSizeForSync:  data.Get("batch_size_for_sync").(int),
 		FullSyncPeriod:    data.Get("full_sync_period").(int),
 		ChangedSyncPeriod: data.Get("changed_sync_period").(int),
+
+		DefaultMappers: data.Get("default_mappers").(bool),
 	}
 
 	if cache, ok := data.GetOk("cache"); ok {
@@ -451,6 +460,8 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 
 		data.Set("cache", []interface{}{cachePolicySettings})
 	}
+
+	data.Set("default_mappers", ldap.DefaultMappers)
 }
 
 func resourceKeycloakLdapUserFederationCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -473,6 +484,13 @@ func resourceKeycloakLdapUserFederationCreate(ctx context.Context, data *schema.
 	err = keycloakClient.NewLdapUserFederation(ctx, realmId, ldap)
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if !ldap.DefaultMappers {
+		err = deleteDefaultMappers(ctx, realmId, ldap.Id, keycloakClient)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	setLdapUserFederationData(data, ldap, realmId)
@@ -565,4 +583,21 @@ func resourceKeycloakLdapUserFederationImport(ctx context.Context, d *schema.Res
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func deleteDefaultMappers(ctx context.Context, realmId string, ldapUserFederationId string, keycloakClient *keycloak.KeycloakClient) error {
+	mappers, _ := keycloakClient.GetLdapUserFederationMappers(ctx, realmId, ldapUserFederationId)
+	if mappers != nil {
+		for _, mapper := range *mappers {
+			component, ok := mapper.(*keycloak.ComponentType)
+			if !ok {
+				return fmt.Errorf("invalid mapper type: %T", mapper)
+			}
+			err := keycloakClient.DeleteComponent(ctx, realmId, component.Id)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

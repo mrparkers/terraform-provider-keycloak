@@ -136,7 +136,9 @@ func getLdapGroupMapperFromData(ctx context.Context, keycloakClient *keycloak.Ke
 	}
 
 	mapper := &keycloak.LdapGroupMapper{
-		Id:                   data.Id(),
+		ComponentType: keycloak.ComponentType{
+			Id: data.Id(),
+		},
 		Name:                 data.Get("name").(string),
 		RealmId:              data.Get("realm_id").(string),
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),

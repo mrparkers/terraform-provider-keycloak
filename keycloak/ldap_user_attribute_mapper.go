@@ -7,7 +7,7 @@ import (
 )
 
 type LdapUserAttributeMapper struct {
-	Id                   string
+	ComponentType
 	Name                 string
 	RealmId              string
 	LdapUserFederationId string
@@ -63,7 +63,9 @@ func convertFromComponentToLdapUserAttributeMapper(component *component, realmId
 	}
 
 	return &LdapUserAttributeMapper{
-		Id:                   component.Id,
+		ComponentType: ComponentType{
+			Id: component.Id,
+		},
 		Name:                 component.Name,
 		RealmId:              realmId,
 		LdapUserFederationId: component.ParentId,
@@ -103,5 +105,5 @@ func (keycloakClient *KeycloakClient) UpdateLdapUserAttributeMapper(ctx context.
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapUserAttributeMapper(ctx context.Context, realmId, id string) error {
-	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+	return keycloakClient.DeleteComponent(ctx, realmId, id)
 }

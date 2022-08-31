@@ -55,6 +55,8 @@ type LdapUserFederation struct {
 	EvictionDay    *int
 	EvictionHour   *int
 	EvictionMinute *int
+
+	DefaultMappers bool
 }
 
 func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) (*component, error) {

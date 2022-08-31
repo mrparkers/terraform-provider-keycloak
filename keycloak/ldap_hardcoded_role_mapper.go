@@ -6,7 +6,7 @@ import (
 )
 
 type LdapHardcodedRoleMapper struct {
-	Id                   string
+	ComponentType
 	Name                 string
 	RealmId              string
 	LdapUserFederationId string
@@ -31,7 +31,9 @@ func convertFromLdapHardcodedRoleMapperToComponent(ldapMapper *LdapHardcodedRole
 
 func convertFromComponentToLdapHardcodedRoleMapper(component *component, realmId string) *LdapHardcodedRoleMapper {
 	return &LdapHardcodedRoleMapper{
-		Id:                   component.Id,
+		ComponentType: ComponentType{
+			Id: component.Id,
+		},
 		Name:                 component.Name,
 		RealmId:              realmId,
 		LdapUserFederationId: component.ParentId,
@@ -74,5 +76,5 @@ func (keycloakClient *KeycloakClient) UpdateLdapHardcodedRoleMapper(ctx context.
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapHardcodedRoleMapper(ctx context.Context, realmId, id string) error {
-	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+	return keycloakClient.DeleteComponent(ctx, realmId, id)
 }

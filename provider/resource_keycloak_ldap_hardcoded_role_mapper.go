@@ -47,7 +47,9 @@ func resourceKeycloakLdapHardcodedRoleMapper() *schema.Resource {
 
 func getLdapHardcodedRoleMapperFromData(data *schema.ResourceData) *keycloak.LdapHardcodedRoleMapper {
 	return &keycloak.LdapHardcodedRoleMapper{
-		Id:                   data.Id(),
+		ComponentType: keycloak.ComponentType{
+			Id: data.Id(),
+		},
 		Name:                 data.Get("name").(string),
 		RealmId:              data.Get("realm_id").(string),
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
