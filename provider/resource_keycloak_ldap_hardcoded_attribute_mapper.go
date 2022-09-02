@@ -46,7 +46,7 @@ func resourceKeycloakLdapHardcodedAttributeMapper() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "Value of the LDAP attribute. You can either hardcode any value like 'foo' but you can also use the special token '${RANDOM}', which will be replaced with some randomly generated String.",
+				Description: "Value of the LDAP attribute. You can hardcode any value like 'foo'",
 			},
 		},
 	}

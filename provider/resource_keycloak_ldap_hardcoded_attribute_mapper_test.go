@@ -36,31 +36,6 @@ func TestAccKeycloakLdapHardcodedAttributeMapper_basic(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakLdapHardcodedAttributeMapper_randomPassword(t *testing.T) {
-	t.Parallel()
-	attributeName := acctest.RandomWithPrefix("tf-acc")
-	attributeValue := "${RANDOM}"
-	attributeMapperName := acctest.RandomWithPrefix("tf-acc")
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakLdapHardcodedAttributeMapperDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakLdapHardcodedAttributeMapper(attributeMapperName, attributeName, attributeValue),
-				Check:  testAccCheckKeycloakLdapHardcodedAttributeMapperExists("keycloak_ldap_hardcoded_attribute_mapper.hardcoded_attribute_mapper"),
-			},
-			{
-				ResourceName:      "keycloak_ldap_hardcoded_attribute_mapper.hardcoded_attribute_mapper",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateIdFunc: getLdapGenericMapperImportId("keycloak_ldap_hardcoded_attribute_mapper.hardcoded_attribute_mapper"),
-			},
-		},
-	})
-}
-
 func TestAccKeycloakLdapHardcodedAttributeMapper_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var mapper = &keycloak.LdapHardcodedAttributeMapper{}
