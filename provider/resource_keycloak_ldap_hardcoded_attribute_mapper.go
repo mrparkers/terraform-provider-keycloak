@@ -77,12 +77,7 @@ func resourceKeycloakLdapHardcodedAttributeMapperCreate(ctx context.Context, dat
 
 	ldapMapper := getLdapHardcodedAttributeMapperFromData(data)
 
-	err := keycloakClient.ValidateLdapHardcodedAttributeMapper(ldapMapper)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	err = keycloakClient.NewLdapHardcodedAttributeMapper(ctx, ldapMapper)
+	err := keycloakClient.NewLdapHardcodedAttributeMapper(ctx, ldapMapper)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -113,12 +108,7 @@ func resourceKeycloakLdapHardcodedAttributeMapperUpdate(ctx context.Context, dat
 
 	ldapMapper := getLdapHardcodedAttributeMapperFromData(data)
 
-	err := keycloakClient.ValidateLdapHardcodedAttributeMapper(ldapMapper)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	err = keycloakClient.UpdateLdapHardcodedAttributeMapper(ctx, ldapMapper)
+	err := keycloakClient.UpdateLdapHardcodedAttributeMapper(ctx, ldapMapper)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -45,16 +45,6 @@ func convertFromComponentToLdapHardcodedAttributeMapper(component *component, re
 	}
 }
 
-func (keycloakClient *KeycloakClient) ValidateLdapHardcodedAttributeMapper(ldapMapper *LdapHardcodedAttributeMapper) error {
-	if len(ldapMapper.AttributeName) == 0 {
-		return fmt.Errorf("validation error: hardcoded attribute name must not be empty")
-	}
-	if len(ldapMapper.AttributeValue) == 0 {
-		return fmt.Errorf("validation error: hardcoded attribute value must not be empty")
-	}
-	return nil
-}
-
 func (keycloakClient *KeycloakClient) NewLdapHardcodedAttributeMapper(ctx context.Context, ldapMapper *LdapHardcodedAttributeMapper) error {
 	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", ldapMapper.RealmId), convertFromLdapHardcodedAttributeMapperToComponent(ldapMapper))
 	if err != nil {

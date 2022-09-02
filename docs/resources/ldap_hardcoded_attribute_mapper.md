@@ -8,9 +8,9 @@ Allows for creating and managing hardcoded attribute mappers for Keycloak users 
 
 The LDAP hardcoded attribute mapper will set the specified value to the LDAP attribute.
 
-**NOTE**: This mapper is supported just if syncRegistrations is enabled.
+**NOTE**: This mapper only works when the `sync_registrations` attribute on the `keycloak_ldap_user_federation` resource is set to `true`.
 
-## Example Usage (simple string)
+## Example Usage
 
 ```hcl
 resource "keycloak_realm" "realm" {
@@ -34,6 +34,8 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
   users_dn        = "dc=example,dc=org"
   bind_dn         = "cn=admin,dc=example,dc=org"
   bind_credential = "admin"
+
+  sync_registrations = true
 }
 
 resource "keycloak_ldap_hardcoded_attribute_mapper" "assign_bar_to_foo" {
@@ -51,7 +53,7 @@ resource "keycloak_ldap_hardcoded_attribute_mapper" "assign_bar_to_foo" {
 -   `ldap_user_federation_id` - (Required) The ID of the LDAP user federation provider to attach this mapper to.
 -   `name` - (Required) Display name of this mapper when displayed in the console.
 -   `attribute_name` - (Required) The name of the LDAP attribute to set.
--   `attribute_value` - (Optional) The value to set to the LDAP attribute. You can hardcode any value like 'foo'.
+-   `attribute_value` - (Required) The value to set to the LDAP attribute. You can hardcode any value like 'foo'.
 
 ## Import
 
