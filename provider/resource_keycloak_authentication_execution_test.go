@@ -53,7 +53,7 @@ func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteAuthenticationExecution(authenticationExecution.RealmId, authenticationExecution.Id)
+					err := keycloakClient.DeleteAuthenticationExecution(testCtx, authenticationExecution.RealmId, authenticationExecution.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -136,7 +136,7 @@ func testAccCheckKeycloakAuthenticationExecutionDestroy() resource.TestCheckFunc
 			realm := rs.Primary.Attributes["realm_id"]
 			parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
 
-			authenticationExecution, _ := keycloakClient.GetAuthenticationExecution(realm, parentFlowAlias, id)
+			authenticationExecution, _ := keycloakClient.GetAuthenticationExecution(testCtx, realm, parentFlowAlias, id)
 			if authenticationExecution != nil {
 				return fmt.Errorf("authentication flow with id %s still exists", id)
 			}
@@ -156,7 +156,7 @@ func getAuthenticationExecutionFromState(s *terraform.State, resourceName string
 	realm := rs.Primary.Attributes["realm_id"]
 	parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
 
-	authenticationExecution, err := keycloakClient.GetAuthenticationExecution(realm, parentFlowAlias, id)
+	authenticationExecution, err := keycloakClient.GetAuthenticationExecution(testCtx, realm, parentFlowAlias, id)
 
 	if err != nil {
 		return nil, fmt.Errorf("error getting authentication execution with id %s: %s", id, err)

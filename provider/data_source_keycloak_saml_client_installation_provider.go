@@ -1,15 +1,17 @@
 package provider
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/base64"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakSamlClientInstallationProvider() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakSamlClientInstallationProviderRead,
+		ReadContext: dataSourceKeycloakSamlClientInstallationProviderRead,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -31,16 +33,16 @@ func dataSourceKeycloakSamlClientInstallationProvider() *schema.Resource {
 	}
 }
 
-func dataSourceKeycloakSamlClientInstallationProviderRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakSamlClientInstallationProviderRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
-	cliendId := data.Get("client_id").(string)
+	clientId := data.Get("client_id").(string)
 	providerId := data.Get("provider_id").(string)
 
-	value, err := keycloakClient.GetSamlClientInstallationProvider(realmId, cliendId, providerId)
+	value, err := keycloakClient.GetSamlClientInstallationProvider(ctx, realmId, clientId, providerId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	h := sha1.New()
@@ -49,7 +51,7 @@ func dataSourceKeycloakSamlClientInstallationProviderRead(data *schema.ResourceD
 
 	data.SetId(id)
 	data.Set("realm_id", realmId)
-	data.Set("client_id", cliendId)
+	data.Set("client_id", clientId)
 	data.Set("provider_id", providerId)
 	data.Set("value", string(value))
 

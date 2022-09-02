@@ -76,8 +76,10 @@ resource "keycloak_realm" "test" {
 
   ssl_required    = "external"
   password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
-  attributes      = {
-    mycustomAttribute = "myCustomValue"
+
+  attributes = {
+    mycustomAttribute  = "myCustomValue"
+    userProfileEnabled = true
   }
 
   web_authn_policy {
@@ -85,7 +87,8 @@ resource "keycloak_realm" "test" {
     relying_party_id          = "keycloak.example.com"
     signature_algorithms      = [
       "ES256",
-      "RS256"]
+      "RS256"
+    ]
   }
 
   web_authn_passwordless_policy {
@@ -93,7 +96,8 @@ resource "keycloak_realm" "test" {
     relying_party_id          = "keycloak.example.com"
     signature_algorithms      = [
       "ES256",
-      "RS256"]
+      "RS256"
+    ]
   }
 }
 
@@ -187,7 +191,8 @@ resource "keycloak_group" "baz" {
 resource "keycloak_default_groups" "default" {
   realm_id  = keycloak_realm.test.id
   group_ids = [
-    keycloak_group.baz.id]
+    keycloak_group.baz.id
+  ]
 }
 
 resource "keycloak_openid_client" "test_client" {
@@ -216,7 +221,7 @@ resource "keycloak_openid_client" "test_client" {
   backchannel_logout_revoke_offline_sessions = true
 
   extra_config = {
-    customAttribute = "a test custom value"    
+    customAttribute = "a test custom value"
   }
 }
 
@@ -303,9 +308,9 @@ resource "keycloak_ldap_role_mapper" "ldap_role_mapper" {
   ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
   name                    = "role-mapper"
 
-  ldap_roles_dn                 = "dc=example,dc=org"
-  role_name_ldap_attribute      = "cn"
-  role_object_classes           = [
+  ldap_roles_dn            = "dc=example,dc=org"
+  role_name_ldap_attribute = "cn"
+  role_object_classes      = [
     "groupOfNames"
   ]
   membership_attribute_type      = "DN"
@@ -787,6 +792,19 @@ resource keycloak_hardcoded_attribute_identity_provider_mapper saml {
   }
 }
 
+resource keycloak_saml_identity_provider saml_custom {
+  realm                      = keycloak_realm.test.id
+  alias                      = "custom_saml"
+  provider_id                = "saml"
+  entity_id                  = "https://example.com/entity_id"
+  single_sign_on_service_url = "https://example.com/auth"
+  sync_mode                  = "FORCE"
+  gui_order                  = 4
+  extra_config               = {
+    mycustomAttribute = "aValue"
+  }
+}
+
 data "keycloak_openid_client" "broker" {
   realm_id  = keycloak_realm.test.id
   client_id = "broker"
@@ -819,6 +837,41 @@ resource "keycloak_openid_client" "test_client_auth" {
 
   client_secret = "secret"
 }
+
+resource keycloak_openid_client test_open_id_client_with_consent_text {
+  client_id   = "test_open_id_client_with_consent_text"
+  name        = "test_open_id_client_with_consent_text"
+  realm_id    = keycloak_realm.test.id
+  description = "a test openid client that has consent text"
+
+  standard_flow_enabled    = true
+  service_accounts_enabled = true
+
+  access_type = "CONFIDENTIAL"
+
+  valid_redirect_uris = [
+    "http://localhost:5555/callback",
+  ]
+
+  client_secret = "secret"
+
+  pkce_code_challenge_method = "plain"
+
+  login_theme = "keycloak"
+
+  backchannel_logout_url                     = "http://localhost:3333/backchannel"
+  backchannel_logout_session_required        = true
+  backchannel_logout_revoke_offline_sessions = true
+
+  extra_config = {
+    customAttribute = "a test custom value"
+  }
+
+  consent_required          = true
+  display_on_consent_screen = true
+  consent_screen_text       = "some consent screen text"
+}
+
 
 resource "keycloak_openid_client_authorization_permission" "resource" {
   resource_server_id = keycloak_openid_client.test_client_auth.resource_server_id
@@ -956,11 +1009,70 @@ resource "keycloak_authentication_execution_config" "config" {
   }
 }
 
+resource "keycloak_authentication_bindings" "test_bindings" {
+  realm_id     = keycloak_realm.test.id
+  browser_flow = keycloak_authentication_flow.browser-copy-flow.alias
+}
+
 resource "keycloak_openid_client" "client" {
   client_id   = "my-override-flow-binding-client"
   realm_id    = keycloak_realm.test.id
   access_type = "PUBLIC"
   authentication_flow_binding_overrides {
     browser_id = keycloak_authentication_flow.browser-copy-flow.id
+  }
+}
+
+resource "keycloak_realm_user_profile" "userprofile" {
+  realm_id = keycloak_realm.test.id
+
+  attribute {
+    name         = "field1"
+    display_name = "Field 1"
+    group        = "group1"
+
+    enabled_when_scope = ["offline_access"]
+
+    required_for_roles  = ["user"]
+    required_for_scopes = ["offline_access"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+
+    validator {
+      name   = "pattern"
+      config = {
+        pattern       = "^[a-z]+$"
+        error_message = "Nope"
+      }
+    }
+
+    annotations = {
+      foo = "bar"
+    }
+  }
+
+  attribute {
+    name = "field2"
+  }
+
+  group {
+    name                = "group1"
+    display_header      = "Group 1"
+    display_description = "A first group"
+
+    annotations = {
+      foo = "bar"
+    }
+  }
+
+  group {
+    name = "group2"
   }
 }

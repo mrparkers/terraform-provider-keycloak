@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -34,19 +35,19 @@ func resourceKeycloakAttributeImporterIdentityProviderMapper() *schema.Resource 
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate(getAttributeImporterIdentityProviderMapperFromData, setAttributeImporterIdentityProviderMapperData)
-	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead(setAttributeImporterIdentityProviderMapperData)
-	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate(getAttributeImporterIdentityProviderMapperFromData, setAttributeImporterIdentityProviderMapperData)
+	genericMapperResource.CreateContext = resourceKeycloakIdentityProviderMapperCreate(getAttributeImporterIdentityProviderMapperFromData, setAttributeImporterIdentityProviderMapperData)
+	genericMapperResource.ReadContext = resourceKeycloakIdentityProviderMapperRead(setAttributeImporterIdentityProviderMapperData)
+	genericMapperResource.UpdateContext = resourceKeycloakIdentityProviderMapperUpdate(getAttributeImporterIdentityProviderMapperFromData, setAttributeImporterIdentityProviderMapperData)
 	return genericMapperResource
 }
 
-func getAttributeImporterIdentityProviderMapperFromData(data *schema.ResourceData, meta interface{}) (*keycloak.IdentityProviderMapper, error) {
+func getAttributeImporterIdentityProviderMapperFromData(ctx context.Context, data *schema.ResourceData, meta interface{}) (*keycloak.IdentityProviderMapper, error) {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	rec, _ := getIdentityProviderMapperFromData(data)
-	identityProvider, err := keycloakClient.GetIdentityProvider(rec.Realm, rec.IdentityProviderAlias)
+	identityProvider, err := keycloakClient.GetIdentityProvider(ctx, rec.Realm, rec.IdentityProviderAlias)
 	if err != nil {
-		return nil, handleNotFoundError(err, data)
+		return nil, err
 	}
 
 	rec.IdentityProviderMapper = fmt.Sprintf("%s-user-attribute-idp-mapper", identityProvider.ProviderId)

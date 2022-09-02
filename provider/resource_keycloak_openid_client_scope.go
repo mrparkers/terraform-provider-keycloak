@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"strings"
 
@@ -11,13 +13,13 @@ import (
 
 func resourceKeycloakOpenidClientScope() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenidClientScopeCreate,
-		Read:   resourceKeycloakOpenidClientScopeRead,
-		Delete: resourceKeycloakOpenidClientScopeDelete,
-		Update: resourceKeycloakOpenidClientScopeUpdate,
+		CreateContext: resourceKeycloakOpenidClientScopeCreate,
+		ReadContext:   resourceKeycloakOpenidClientScopeRead,
+		DeleteContext: resourceKeycloakOpenidClientScopeDelete,
+		UpdateContext: resourceKeycloakOpenidClientScopeUpdate,
 		// This resource can be imported using {{realm}}/{{client_scope_id}}. The Client Scope ID is displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakOpenidClientScopeImport,
+			StateContext: resourceKeycloakOpenidClientScopeImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -92,30 +94,30 @@ func setClientScopeData(data *schema.ResourceData, clientScope *keycloak.OpenidC
 	}
 }
 
-func resourceKeycloakOpenidClientScopeCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientScopeCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	clientScope := getClientScopeFromData(data)
 
-	err := keycloakClient.NewOpenidClientScope(clientScope)
+	err := keycloakClient.NewOpenidClientScope(ctx, clientScope)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setClientScopeData(data, clientScope)
 
-	return resourceKeycloakOpenidClientScopeRead(data, meta)
+	return resourceKeycloakOpenidClientScopeRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenidClientScopeRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientScopeRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	clientScope, err := keycloakClient.GetOpenidClientScope(realmId, id)
+	clientScope, err := keycloakClient.GetOpenidClientScope(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setClientScopeData(data, clientScope)
@@ -123,14 +125,14 @@ func resourceKeycloakOpenidClientScopeRead(data *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceKeycloakOpenidClientScopeUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientScopeUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	clientScope := getClientScopeFromData(data)
 
-	err := keycloakClient.UpdateOpenidClientScope(clientScope)
+	err := keycloakClient.UpdateOpenidClientScope(ctx, clientScope)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setClientScopeData(data, clientScope)
@@ -138,16 +140,16 @@ func resourceKeycloakOpenidClientScopeUpdate(data *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceKeycloakOpenidClientScopeDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientScopeDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteOpenidClientScope(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteOpenidClientScope(ctx, realmId, id))
 }
 
-func resourceKeycloakOpenidClientScopeImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakOpenidClientScopeImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{openidClientScopeId}}")

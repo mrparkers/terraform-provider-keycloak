@@ -32,7 +32,7 @@ resource "keycloak_openid_client" "client_with_authz" {
 }
 
 data "keycloak_openid_client_authorization_policy" "default_permission" {
-  realm_id           = keycloak_realm.test.id
+  realm_id           = keycloak_realm.realm.id
   resource_server_id = keycloak_openid_client.client_with_authz.resource_server_id
   name               = "Default Permission"
 }
@@ -40,7 +40,7 @@ data "keycloak_openid_client_authorization_policy" "default_permission" {
 resource "keycloak_openid_client_authorization_resource" "resource" {
   resource_server_id = keycloak_openid_client.client_with_authz.resource_server_id
   name               = "authorization-resource"
-  realm_id           = keycloak_realm.test.id
+  realm_id           = keycloak_realm.realm.id
 
   uris = [
     "/endpoint/*",
@@ -53,7 +53,7 @@ resource "keycloak_openid_client_authorization_resource" "resource" {
 
 resource "keycloak_openid_client_authorization_permission" "permission" {
   resource_server_id = keycloak_openid_client.client_with_authz.resource_server_id
-  realm_id           = keycloak_realm.test.id
+  realm_id           = keycloak_realm.realm.id
   name               = "authorization-permission"
 
   policies = [

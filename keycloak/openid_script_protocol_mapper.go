@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
@@ -42,17 +43,17 @@ func (mapper *OpenIdScriptProtocolMapper) convertToGenericProtocolMapper() *prot
 }
 
 func (protocolMapper *protocolMapper) convertToOpenIdScriptProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdScriptProtocolMapper, error) {
-	addToIdToken, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
+	addToIdToken, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	addToAccessToken, err := strconv.ParseBool(protocolMapper.Config[addToAccessTokenField])
+	addToAccessToken, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToAccessTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	addToUserInfo, err := strconv.ParseBool(protocolMapper.Config[addToUserInfoField])
+	addToUserInfo, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToUserInfoField])
 	if err != nil {
 		return nil, err
 	}
@@ -81,10 +82,10 @@ func (protocolMapper *protocolMapper) convertToOpenIdScriptProtocolMapper(realmI
 	}, nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenIdScriptProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdScriptProtocolMapper, error) {
+func (keycloakClient *KeycloakClient) GetOpenIdScriptProtocolMapper(ctx context.Context, realmId, clientId, clientScopeId, mapperId string) (*OpenIdScriptProtocolMapper, error) {
 	var protocolMapper *protocolMapper
 
-	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
+	err := keycloakClient.get(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -92,14 +93,14 @@ func (keycloakClient *KeycloakClient) GetOpenIdScriptProtocolMapper(realmId, cli
 	return protocolMapper.convertToOpenIdScriptProtocolMapper(realmId, clientId, clientScopeId)
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenIdScriptProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
-	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
+func (keycloakClient *KeycloakClient) DeleteOpenIdScriptProtocolMapper(ctx context.Context, realmId, clientId, clientScopeId, mapperId string) error {
+	return keycloakClient.delete(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
 }
 
-func (keycloakClient *KeycloakClient) NewOpenIdScriptProtocolMapper(mapper *OpenIdScriptProtocolMapper) error {
+func (keycloakClient *KeycloakClient) NewOpenIdScriptProtocolMapper(ctx context.Context, mapper *OpenIdScriptProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(ctx, path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}
@@ -109,18 +110,18 @@ func (keycloakClient *KeycloakClient) NewOpenIdScriptProtocolMapper(mapper *Open
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateOpenIdScriptProtocolMapper(mapper *OpenIdScriptProtocolMapper) error {
+func (keycloakClient *KeycloakClient) UpdateOpenIdScriptProtocolMapper(ctx context.Context, mapper *OpenIdScriptProtocolMapper) error {
 	path := individualProtocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 
-	return keycloakClient.put(path, mapper.convertToGenericProtocolMapper())
+	return keycloakClient.put(ctx, path, mapper.convertToGenericProtocolMapper())
 }
 
-func (keycloakClient *KeycloakClient) ValidateOpenIdScriptProtocolMapper(mapper *OpenIdScriptProtocolMapper) error {
+func (keycloakClient *KeycloakClient) ValidateOpenIdScriptProtocolMapper(ctx context.Context, mapper *OpenIdScriptProtocolMapper) error {
 	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
 
-	protocolMappers, err := keycloakClient.listGenericProtocolMappers(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
+	protocolMappers, err := keycloakClient.listGenericProtocolMappers(ctx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 	if err != nil {
 		return err
 	}

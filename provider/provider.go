@@ -31,10 +31,18 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_realm":                                             resourceKeycloakRealm(),
 			"keycloak_realm_events":                                      resourceKeycloakRealmEvents(),
+			"keycloak_realm_keystore_aes_generated":                      resourceKeycloakRealmKeystoreAesGenerated(),
+			"keycloak_realm_keystore_ecdsa_generated":                    resourceKeycloakRealmKeystoreEcdsaGenerated(),
+			"keycloak_realm_keystore_hmac_generated":                     resourceKeycloakRealmKeystoreHmacGenerated(),
+			"keycloak_realm_keystore_java_keystore":                      resourceKeycloakRealmKeystoreJavaKeystore(),
+			"keycloak_realm_keystore_rsa":                                resourceKeycloakRealmKeystoreRsa(),
+			"keycloak_realm_keystore_rsa_generated":                      resourceKeycloakRealmKeystoreRsaGenerated(),
+			"keycloak_realm_user_profile":                                resourceKeycloakRealmUserProfile(),
 			"keycloak_required_action":                                   resourceKeycloakRequiredAction(),
 			"keycloak_group":                                             resourceKeycloakGroup(),
 			"keycloak_group_memberships":                                 resourceKeycloakGroupMemberships(),
 			"keycloak_default_groups":                                    resourceKeycloakDefaultGroups(),
+			"keycloak_default_roles":                                     resourceKeycloakDefaultRoles(),
 			"keycloak_group_roles":                                       resourceKeycloakGroupRoles(),
 			"keycloak_user":                                              resourceKeycloakUser(),
 			"keycloak_user_roles":                                        resourceKeycloakUserRoles(),
@@ -57,6 +65,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 			"keycloak_openid_full_name_protocol_mapper":                  resourceKeycloakOpenIdFullNameProtocolMapper(),
 			"keycloak_openid_hardcoded_claim_protocol_mapper":            resourceKeycloakOpenIdHardcodedClaimProtocolMapper(),
 			"keycloak_openid_audience_protocol_mapper":                   resourceKeycloakOpenIdAudienceProtocolMapper(),
+			"keycloak_openid_audience_resolve_protocol_mapper":           resourceKeycloakOpenIdAudienceResolveProtocolMapper(),
 			"keycloak_openid_hardcoded_role_protocol_mapper":             resourceKeycloakOpenIdHardcodedRoleProtocolMapper(),
 			"keycloak_openid_user_realm_role_protocol_mapper":            resourceKeycloakOpenIdUserRealmRoleProtocolMapper(),
 			"keycloak_openid_user_client_role_protocol_mapper":           resourceKeycloakOpenIdUserClientRoleProtocolMapper(),
@@ -102,6 +111,8 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 			"keycloak_openid_client_permissions":                         resourceKeycloakOpenidClientPermissions(),
 			"keycloak_users_permissions":                                 resourceKeycloakUsersPermissions(),
 			"keycloak_user_groups":                                       resourceKeycloakUserGroups(),
+			"keycloak_group_permissions":                                 resourceKeycloakGroupPermissions(),
+			"keycloak_authentication_bindings":                           resourceKeycloakAuthenticationBindings(),
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -159,10 +170,16 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 				Description: "Allows ignoring insecure certificates when set to true. Defaults to false. Disabling security check is dangerous and should be avoided.",
 				Default:     false,
 			},
+			"red_hat_sso": {
+				Optional:    true,
+				Type:        schema.TypeBool,
+				Description: "When true, the provider will treat the Keycloak instance as a Red Hat SSO server, specifically when parsing the version returned from the /serverinfo API endpoint.",
+				Default:     false,
+			},
 			"base_path": {
-				Optional: true,
-				Type:     schema.TypeString,
-				Default:  "/auth",
+				Optional:    true,
+				Type:        schema.TypeString,
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_BASE_PATH", "/auth"),
 			},
 			"additional_headers": {
 				Optional: true,
@@ -174,7 +191,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 		},
 	}
 
-	provider.ConfigureContextFunc = func(_ context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	provider.ConfigureContextFunc = func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		if client != nil {
 			return client, nil
 		}
@@ -190,6 +207,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 		clientTimeout := data.Get("client_timeout").(int)
 		tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
 		rootCaCertificate := data.Get("root_ca_certificate").(string)
+		redHatSSO := data.Get("red_hat_sso").(bool)
 		additionalHeaders := make(map[string]string)
 		for k, v := range data.Get("additional_headers").(map[string]interface{}) {
 			additionalHeaders[k] = v.(string)
@@ -199,7 +217,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 
 		userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", provider.TerraformVersion, meta.SDKVersionString())
 
-		keycloakClient, err := keycloak.NewKeycloakClient(url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent, additionalHeaders)
+		keycloakClient, err := keycloak.NewKeycloakClient(ctx, url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent, redHatSSO, additionalHeaders)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,

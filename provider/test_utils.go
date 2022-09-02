@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func randomBool() bool {
@@ -62,6 +64,18 @@ func skipIfEnvNotSet(t *testing.T, envs ...string) {
 		if os.Getenv(k) == "" {
 			t.Skipf("Environment variable %s is not set, skipping...", k)
 		}
+	}
+}
+
+// Skips the test if the keycloak server matches a specific major version
+func skipIfVersionIsLessThanOrEqualTo(ctx context.Context, t *testing.T, keycloakClient *keycloak.KeycloakClient, version keycloak.Version) {
+	ok, err := keycloakClient.VersionIsLessThanOrEqualTo(ctx, version)
+	if err != nil {
+		t.Errorf("error checking keycloak version: %v", err)
+	}
+
+	if ok {
+		t.Skipf("keycloak server version is less than or equal to %s, skipping...", version)
 	}
 }
 

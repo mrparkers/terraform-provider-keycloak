@@ -1,3 +1,142 @@
+## v3.10.0 (July 28, 2022)
+
+IMPROVEMENTS:
+
+- add authn context attributes for `keycloak_saml_identity_provider` resource ([#703](https://github.com/mrparkers/terraform-provider-keycloak/pull/703))
+- add `resource_type` attribute for `keycloak_openid_client_authorization_permission` resource ([#702](https://github.com/mrparkers/terraform-provider-keycloak/pull/702))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@dnic](https://github.com/dnic)
+- [@1337andre](https://github.com/1337andre)
+- [@JessieAMorris](https://github.com/JessieAMorris)
+
+## v3.9.1 (July 11, 2022)
+
+BUG FIXES:
+
+- update usage of component API for `keycloak_ldap_user_federation` and `keycloak_custom_user_federation` resources ([#707](https://github.com/mrparkers/terraform-provider-keycloak/pull/707))
+  - this fixes an issue that prevented these resources from being used within the `master` realm.
+
+## v3.9.0 (June 23, 2022)
+
+IMPROVEMENTS:
+
+- improve import error messages for several resources ([#691](https://github.com/mrparkers/terraform-provider-keycloak/pull/691))
+- allow usage of environment variable to configure base API path ([#695](https://github.com/mrparkers/terraform-provider-keycloak/pull/695))
+
+BUG FIXES:
+
+- use realm name instead of internal ID for authentication bindings ([#687](https://github.com/mrparkers/terraform-provider-keycloak/pull/687))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@dmeyerholt](https://github.com/dmeyerholt)
+- [@Korsarro69](https://github.com/Korsarro69)
+
+## v3.8.1 (May 9, 2022)
+
+BUG FIXES:
+
+- fix a potential problem with the `keycloak_custom_user_federation` resource incorrectly assuming some Keycloak API fields are numbers.
+
+## v3.8.0 (May 4, 2022)
+
+FEATURES:
+
+- new resource: `keycloak_realm_user_profile` ([#658](https://github.com/mrparkers/terraform-provider-keycloak/pull/658))
+- new resource: `keycloak_authentication_bindings` ([#668](https://github.com/mrparkers/terraform-provider-keycloak/pull/668))
+
+IMPROVEMENTS:
+
+- support custom provider ID in `keycloak_saml_identity_provider` resource ([#656](https://github.com/mrparkers/terraform-provider-keycloak/pull/656))
+- support sync settings in `keycloak_custom_user_federation` resource ([#663](https://github.com/mrparkers/terraform-provider-keycloak/pull/663))
+- support Transient NameID format for `keycloak_saml_identity_provider` resource ([#661](https://github.com/mrparkers/terraform-provider-keycloak/pull/661))
+- update all resources to use new terraform lifecycles with context support ([#675](https://github.com/mrparkers/terraform-provider-keycloak/pull/675))
+- support use-refresh-tokens for client credentials in `keycloak_openid_client` resource ([#678](https://github.com/mrparkers/terraform-provider-keycloak/pull/678))
+- support `client_session_idle_timeout` and `client_session_max_lifespan` arguments in `keycloak_realm` resource ([#653](https://github.com/mrparkers/terraform-provider-keycloak/pull/653))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@tomrutsaert](https://github.com/tomrutsaert)
+- [@maximepiton](https://github.com/maximepiton)
+- [@marwol-fdir](https://github.com/marwol-fdir)
+- [@puzzlermike](https://github.com/puzzlermike)
+- [@maximepiton](https://github.com/maximepiton)
+- [@camjjack](https://github.com/camjjack)
+- [@daviddelannoy](https://github.com/daviddelannoy)
+- [@fapian](https://github.com/fapian)
+
+## v3.7.0 (February 2, 2022)
+
+IMPROVEMENTS:
+
+- add support for the oauth2 device authorization grant ([#578](https://github.com/mrparkers/terraform-provider-keycloak/pull/578))
+- add `client_authenticator_type` attribute to `keycloak_openid_client` resource ([#627](https://github.com/mrparkers/terraform-provider-keycloak/pull/627))
+- add missing documentation for `keycloak_user_template_importer_identity_provider_mapper` resource ([#635](https://github.com/mrparkers/terraform-provider-keycloak/pull/635))
+- add attributes for customizing consent screen for `keycloak_openid_client` resource ([#646](https://github.com/mrparkers/terraform-provider-keycloak/pull/646))
+- upgrade to the latest version of the `terraform-plugin-sdk` ([#644](https://github.com/mrparkers/terraform-provider-keycloak/pull/644))
+- add attributes for configuring frontchannel logout on `keycloak_openid_client` resource ([#644](https://github.com/mrparkers/terraform-provider-keycloak/pull/644))
+- bump supported keycloak versions ([#650](https://github.com/mrparkers/terraform-provider-keycloak/pull/650))
+
+BUG FIXES:
+
+- fix keycloak version check for `keycloak_default_roles` resource ([#637](https://github.com/mrparkers/terraform-provider-keycloak/pull/637))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@shellrausch](https://github.com/shellrausch)
+- [@m-v-k](https://github.com/m-v-k)
+- [@oysteinhauan](https://github.com/oysteinhauan)
+- [@Kidsan](https://github.com/Kidsan)
+
+## v3.6.0 (November 9, 2021)
+
+FEATURES:
+
+- new resource: `keycloak_group_permissions` ([#617](https://github.com/mrparkers/terraform-provider-keycloak/pull/617))
+
+BUG FIXES:
+
+- `xml_sign_key_info_key_name_transformer` attribute for `keycloak_saml_identity_provider` resource used incorrect spelling, causing it to not be set correctly ([#614](https://github.com/mrparkers/terraform-provider-keycloak/pull/614))
+- when querying protocol mappers from the Keycloak API, treat quoted boolean attributes as `false` when receiving an empty string. this should fix issues when importing protocol mappers that were created by Keycloak ([#622](https://github.com/mrparkers/terraform-provider-keycloak/pull/622))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@jkemming](https://github.com/jkemming)
+- [@hoeggi](https://github.com/hoeggi)
+
+## v3.5.1 (October 14, 2021)
+
+BUG FIXES:
+
+- remove `defaultRole` from realm JSON before sending requests to Keycloak to fix compatibility with Keycloak versions older than v13 ([#612](https://github.com/mrparkers/terraform-provider-keycloak/pull/612))
+
+## v3.5.0 (October 13, 2021)
+
+FEATURES:
+
+- new resource: `keycloak_default_roles` ([#599](https://github.com/mrparkers/terraform-provider-keycloak/pull/599))
+- new resources: `keycloak_realm_keystore_aes_generated`, `keycloak_realm_keystore_ecdsa_generated`, `keycloak_realm_keystore_hmac_generated`, `keycloak_realm_keystore_java_keystore`, `keycloak_realm_keystore_rsa`, and `keycloak_realm_keystore_rsa_generated` ([#582](https://github.com/mrparkers/terraform-provider-keycloak/pull/582))
+- new resource: `keycloak_openid_audience_resolve_protocol_mapper` ([#606](https://github.com/mrparkers/terraform-provider-keycloak/pull/606))
+
+IMPROVEMENTS:
+
+- add `start_tls` and `use_password_modify_extended_op` attributes to `keycloak_ldap_user_federation` resource ([#601](https://github.com/mrparkers/terraform-provider-keycloak/pull/601))
+- `keycloak_openid_client_default_scopes` and `keycloak_openid_client_optional_scopes` resources will now completely reconcile assigned scopes on create ([#594](https://github.com/mrparkers/terraform-provider-keycloak/pull/594))
+  - this means that creating these resources will now remove default / optional scopes that are not specified within the resource configuration. see [#498](https://github.com/mrparkers/terraform-provider-keycloak/issues/498) for more context.
+
+BUG FIXES:
+
+- allow all `extra_config` attributes for `keycloak_custom_identity_provider_mapper` resource ([#607](https://github.com/mrparkers/terraform-provider-keycloak/pull/607))
+- `backchannel_logout_session_required` and `backchannel_logout_revoke_offline_sessions` attributes for `keycloak_openid_client` resource were swapped ([#600](https://github.com/mrparkers/terraform-provider-keycloak/pull/600))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@Vlad-Kirichenko](https://github.com/Vlad-Kirichenko)
+- [@thyming](https://github.com/thyming)
+- [@francois-travais](https://github.com/francois-travais)
+
 ## v3.4.0 (September 16, 2021)
 
 FEATURES:

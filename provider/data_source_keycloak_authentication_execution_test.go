@@ -12,6 +12,7 @@ import (
 
 func TestAccKeycloakDataSourceAuthenticationExecution_basic(t *testing.T) {
 	t.Parallel()
+
 	parentFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -80,7 +81,7 @@ func testAccCheckDataKeycloakAuthenticationExecution(resourceName string) resour
 		parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
 		providerID := rs.Primary.Attributes["provider_id"]
 
-		authenticationExecutionInfo, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(realmID, parentFlowAlias, providerID)
+		authenticationExecutionInfo, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(testCtx, realmID, parentFlowAlias, providerID)
 		if err != nil {
 			return err
 		}

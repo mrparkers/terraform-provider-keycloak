@@ -1,6 +1,9 @@
 package keycloak
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 type LdapHardcodedGroupMapper struct {
 	Id                   string
@@ -37,15 +40,15 @@ func convertFromComponentToLdapHardcodedGroupMapper(component *component, realmI
 	}
 }
 
-func (keycloakClient *KeycloakClient) ValidateLdapHardcodedGroupMapper(ldapMapper *LdapHardcodedGroupMapper) error {
+func (keycloakClient *KeycloakClient) ValidateLdapHardcodedGroupMapper(ctx context.Context, ldapMapper *LdapHardcodedGroupMapper) error {
 	if len(ldapMapper.Group) == 0 {
 		return fmt.Errorf("validation error: hardcoded group name must not be empty")
 	}
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) NewLdapHardcodedGroupMapper(ldapMapper *LdapHardcodedGroupMapper) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapMapper.RealmId), convertFromLdapHardcodedGroupMapperToComponent(ldapMapper))
+func (keycloakClient *KeycloakClient) NewLdapHardcodedGroupMapper(ctx context.Context, ldapMapper *LdapHardcodedGroupMapper) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", ldapMapper.RealmId), convertFromLdapHardcodedGroupMapperToComponent(ldapMapper))
 	if err != nil {
 		return err
 	}
@@ -55,10 +58,10 @@ func (keycloakClient *KeycloakClient) NewLdapHardcodedGroupMapper(ldapMapper *Ld
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetLdapHardcodedGroupMapper(realmId, id string) (*LdapHardcodedGroupMapper, error) {
+func (keycloakClient *KeycloakClient) GetLdapHardcodedGroupMapper(ctx context.Context, realmId, id string) (*LdapHardcodedGroupMapper, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -66,10 +69,10 @@ func (keycloakClient *KeycloakClient) GetLdapHardcodedGroupMapper(realmId, id st
 	return convertFromComponentToLdapHardcodedGroupMapper(component, realmId), nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateLdapHardcodedGroupMapper(ldapMapper *LdapHardcodedGroupMapper) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapMapper.RealmId, ldapMapper.Id), convertFromLdapHardcodedGroupMapperToComponent(ldapMapper))
+func (keycloakClient *KeycloakClient) UpdateLdapHardcodedGroupMapper(ctx context.Context, ldapMapper *LdapHardcodedGroupMapper) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", ldapMapper.RealmId, ldapMapper.Id), convertFromLdapHardcodedGroupMapperToComponent(ldapMapper))
 }
 
-func (keycloakClient *KeycloakClient) DeleteLdapHardcodedGroupMapper(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteLdapHardcodedGroupMapper(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

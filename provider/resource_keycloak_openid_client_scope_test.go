@@ -54,7 +54,7 @@ func TestAccKeycloakClientScope_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenidClientScope(clientScope.RealmId, clientScope.Id)
+					err := keycloakClient.DeleteOpenidClientScope(testCtx, clientScope.RealmId, clientScope.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -260,7 +260,7 @@ func testAccCheckKeycloakClientScopeDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			clientScope, _ := keycloakClient.GetOpenidClientScope(realm, id)
+			clientScope, _ := keycloakClient.GetOpenidClientScope(testCtx, realm, id)
 			if clientScope != nil {
 				return fmt.Errorf("openid client scope %s still exists", id)
 			}
@@ -281,7 +281,7 @@ func getClientScopeFromState(s *terraform.State, resourceName string) (*keycloak
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	clientScope, err := keycloakClientScope.GetOpenidClientScope(realm, id)
+	clientScope, err := keycloakClientScope.GetOpenidClientScope(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting openid client scope %s: %s", id, err)
 	}

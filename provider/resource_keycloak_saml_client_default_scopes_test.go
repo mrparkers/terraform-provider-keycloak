@@ -139,13 +139,13 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeAdd(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					client, err := keycloakClient.GetSamlClientByClientId(testAccRealm.Realm, client)
+					client, err := keycloakClient.GetSamlClientByClientId(testCtx, testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
 					clientToManuallyDetach := clientScopes[acctest.RandIntRange(0, len(clientScopes)-1)]
-					err = keycloakClient.DetachSamlClientDefaultScopes(testAccRealm.Realm, client.Id, []string{clientToManuallyDetach})
+					err = keycloakClient.DetachSamlClientDefaultScopes(testCtx, testAccRealm.Realm, client.Id, []string{clientToManuallyDetach})
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -187,12 +187,12 @@ func TestAccKeycloakSamlClientDefaultScopes_authoritativeRemove(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					client, err := keycloakClient.GetSamlClientByClientId(testAccRealm.Realm, client)
+					client, err := keycloakClient.GetSamlClientByClientId(testCtx, testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachSamlClientDefaultScopes(testAccRealm.Realm, client.Id, []string{clientToManuallyAttach})
+					err = keycloakClient.AttachSamlClientDefaultScopes(testCtx, testAccRealm.Realm, client.Id, []string{clientToManuallyAttach})
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -225,12 +225,12 @@ func TestAccKeycloakSamlClientDefaultScopes_noImportNeeded(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					samlClient, err := keycloakClient.GetSamlClientByClientId(testAccRealm.Realm, client)
+					samlClient, err := keycloakClient.GetSamlClientByClientId(testCtx, testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachSamlClientDefaultScopes(testAccRealm.Realm, samlClient.Id, clientScopes)
+					err = keycloakClient.AttachSamlClientDefaultScopes(testCtx, testAccRealm.Realm, samlClient.Id, clientScopes)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -278,7 +278,7 @@ func getDefaultSamlClientScopesFromState(resourceName string, s *terraform.State
 		client = rs.Primary.ID
 	}
 
-	keycloakDefaultSamlClientScopes, err := keycloakClient.GetSamlClientDefaultScopes(testAccRealm.Realm, client)
+	keycloakDefaultSamlClientScopes, err := keycloakClient.GetSamlClientDefaultScopes(testCtx, testAccRealm.Realm, client)
 	if err != nil {
 		return nil, err
 	}

@@ -52,7 +52,7 @@ func TestAccKeycloakAuthenticationFlow_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteAuthenticationFlow(authenticationFlow.RealmId, authenticationFlow.Id)
+					err := keycloakClient.DeleteAuthenticationFlow(testCtx, authenticationFlow.RealmId, authenticationFlow.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -171,7 +171,7 @@ func testAccCheckKeycloakAuthenticationFlowDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			authenticationFlow, _ := keycloakClient.GetAuthenticationFlow(realm, id)
+			authenticationFlow, _ := keycloakClient.GetAuthenticationFlow(testCtx, realm, id)
 			if authenticationFlow != nil {
 				return fmt.Errorf("authentication flow with id %s still exists", id)
 			}
@@ -190,7 +190,7 @@ func getAuthenticationFlowFromState(s *terraform.State, resourceName string) (*k
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	authenticationFlow, err := keycloakClient.GetAuthenticationFlow(realm, id)
+	authenticationFlow, err := keycloakClient.GetAuthenticationFlow(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting authentication flow with id %s: %s", id, err)
 	}

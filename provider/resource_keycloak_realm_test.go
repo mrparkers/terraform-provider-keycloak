@@ -56,7 +56,7 @@ func TestAccKeycloakRealm_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRealm(realmName)
+					err := keycloakClient.DeleteRealm(testCtx, realmName)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -392,6 +392,31 @@ func TestAccKeycloakRealm_tokenSettings(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_tokenSettingsOauth2Device(t *testing.T) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_13); !ok {
+		t.Skip()
+	}
+
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmName, realmDisplayNameHtml),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+			{
+				Config: testKeycloakRealm_tokenSettingsOauth2Device(realmName),
+				Check:  testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
 	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
@@ -419,6 +444,12 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "offline_session_max_lifespan"),
 					TestCheckResourceAttrNot("keycloak_realm.realm", "offline_session_max_lifespan", "0s"),
 
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "client_session_idle_timeout"),
+					resource.TestCheckResourceAttr("keycloak_realm.realm", "client_session_idle_timeout", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "client_session_max_lifespan"),
+					resource.TestCheckResourceAttr("keycloak_realm.realm", "client_session_max_lifespan", "0s"),
+
 					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "access_token_lifespan"),
 					TestCheckResourceAttrNot("keycloak_realm.realm", "access_token_lifespan", "0s"),
 
@@ -439,6 +470,36 @@ func TestAccKeycloakRealm_computedTokenSettings(t *testing.T) {
 
 					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "action_token_generated_by_admin_lifespan"),
 					TestCheckResourceAttrNot("keycloak_realm.realm", "action_token_generated_by_admin_lifespan", "0s"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakRealm_oauth2DeviceSettings(t *testing.T) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_13); !ok {
+		t.Skip()
+	}
+
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayName := acctest.RandomWithPrefix("tf-acc")
+	realmDisplayNameHtml := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmExists("keycloak_realm.realm"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "oauth2_device_code_lifespan"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "oauth2_device_code_lifespan", "0s"),
+
+					resource.TestCheckResourceAttrSet("keycloak_realm.realm", "oauth2_device_polling_interval"),
+					TestCheckResourceAttrNot("keycloak_realm.realm", "oauth2_device_polling_interval", "0"),
 				),
 			},
 		},
@@ -628,9 +689,10 @@ func TestAccKeycloakRealm_browserFlow(t *testing.T) {
 				Config: testKeycloakRealm_browserFlow(realmName, realmDisplayName, newBrowserFlow),
 				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", newBrowserFlow),
 			},
+			// when a realm binding argument is unset, it will remain the same
 			{
 				Config: testKeycloakRealm_basic(realmName, realmDisplayName, realmDisplayNameHtml),
-				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", "browser"),
+				Check:  testAccCheckKeycloakRealmBrowserFlow("keycloak_realm.realm", newBrowserFlow),
 			},
 		},
 	})
@@ -711,7 +773,7 @@ func TestAccKeycloakRealm_internalId(t *testing.T) {
 				ImportState:   true,
 				Config:        testKeycloakRealm_basic(realmName, "foo", "<b>foo</b>"),
 				PreConfig: func() {
-					err := keycloakClient.NewRealm(realm)
+					err := keycloakClient.NewRealm(testCtx, realm)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -743,7 +805,7 @@ func TestAccKeycloakRealm_default_client_scopes(t *testing.T) {
 				ImportState:   true,
 				Config:        testKeycloakRealm_default_client_scopes(realmName, defaultDefaultClientScope, defaultOptionalClientScope),
 				PreConfig: func() {
-					err := keycloakClient.NewRealm(realm)
+					err := keycloakClient.NewRealm(testCtx, realm)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -755,8 +817,8 @@ func TestAccKeycloakRealm_default_client_scopes(t *testing.T) {
 
 	// test empty default client scope configuration
 	realmName2 := acctest.RandomWithPrefix("tf-acc")
-	defaultDefaultClientScope2 := []string{}  // deliberately empty
-	defaultOptionalClientScope2 := []string{} // deliberately empty
+	var defaultDefaultClientScope2 []string  // deliberately empty
+	var defaultOptionalClientScope2 []string // deliberately empty
 
 	realm2 := &keycloak.Realm{
 		Realm: realmName2,
@@ -772,7 +834,7 @@ func TestAccKeycloakRealm_default_client_scopes(t *testing.T) {
 				ImportState:   true,
 				Config:        testKeycloakRealm_default_client_scopes(realmName2, defaultDefaultClientScope2, defaultOptionalClientScope2),
 				PreConfig: func() {
-					err := keycloakClient.NewRealm(realm2)
+					err := keycloakClient.NewRealm(testCtx, realm2)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -1087,7 +1149,7 @@ func testAccCheckKeycloakRealmDestroy() resource.TestCheckFunc {
 			}
 
 			realmName := rs.Primary.ID
-			realm, _ := keycloakClient.GetRealm(realmName)
+			realm, _ := keycloakClient.GetRealm(testCtx, realmName)
 			if realm != nil {
 				return fmt.Errorf("realm %s still exists", realmName)
 			}
@@ -1105,7 +1167,7 @@ func getRealmFromState(s *terraform.State, resourceName string) (*keycloak.Realm
 
 	realmName := rs.Primary.Attributes["realm"]
 
-	realm, err := keycloakClient.GetRealm(realmName)
+	realm, err := keycloakClient.GetRealm(testCtx, realmName)
 	if err != nil {
 		return nil, fmt.Errorf("error getting realm %s: %s", realmName, err)
 	}
@@ -1180,8 +1242,8 @@ func testAccCheckKeycloakRealmBrowserFlow(resourceName, browserFlow string) reso
 			return err
 		}
 
-		if realm.BrowserFlow != browserFlow {
-			return fmt.Errorf("expected realm %s to have browserFlow binding %s, but was %s", realm.Realm, browserFlow, realm.BrowserFlow)
+		if *realm.BrowserFlow != browserFlow {
+			return fmt.Errorf("expected realm %s to have browserFlow binding %s, but was %s", realm.Realm, browserFlow, *realm.BrowserFlow)
 		}
 
 		return nil
@@ -1440,6 +1502,8 @@ func testKeycloakRealm_tokenSettings(realm string) string {
 	ssoSessionMaxLifespanRememberMe := randomDurationString()
 	offlineSessionIdleTimeout := randomDurationString()
 	offlineSessionMaxLifespan := randomDurationString()
+	clientSessionIdleTimeout := randomDurationString()
+	clientSessionMaxLifespan := randomDurationString()
 	accessTokenLifespan := randomDurationString()
 	accessTokenLifespanForImplicitFlow := randomDurationString()
 	accessCodeLifespan := randomDurationString()
@@ -1462,6 +1526,8 @@ resource "keycloak_realm" "realm" {
 	offline_session_idle_timeout             = "%s"
 	offline_session_max_lifespan             = "%s"
 	offline_session_max_lifespan_enabled     = true
+	client_session_idle_timeout              = "%s"
+	client_session_max_lifespan              = "%s"
 	access_token_lifespan                    = "%s"
 	access_token_lifespan_for_implicit_flow  = "%s"
 	access_code_lifespan                     = "%s"
@@ -1470,7 +1536,23 @@ resource "keycloak_realm" "realm" {
 	action_token_generated_by_user_lifespan  = "%s"
 	action_token_generated_by_admin_lifespan = "%s"
 }
-	`, realm, realm, defaultSignatureAlgorithm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, ssoSessionIdleTimeoutRememberMe, ssoSessionMaxLifespanRememberMe, offlineSessionIdleTimeout, offlineSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
+	`, realm, realm, defaultSignatureAlgorithm, ssoSessionIdleTimeout, ssoSessionMaxLifespan, ssoSessionIdleTimeoutRememberMe, ssoSessionMaxLifespanRememberMe, offlineSessionIdleTimeout, offlineSessionMaxLifespan, clientSessionIdleTimeout, clientSessionMaxLifespan, accessTokenLifespan, accessTokenLifespanForImplicitFlow, accessCodeLifespan, accessCodeLifespanLogin, accessCodeLifespanUserAction, actionTokenGeneratedByUserLifespan, actionTokenGeneratedByAdminLifespan)
+}
+
+func testKeycloakRealm_tokenSettingsOauth2Device(realm string) string {
+	oauth2DeviceCodeLifespan := randomDurationString()
+	oauth2DevicePollingInterval := "10"
+
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm                                    = "%s"
+	enabled                                  = true
+	display_name                             = "%s"
+
+	oauth2_device_code_lifespan              = "%s"
+	oauth2_device_polling_interval           = "%s"
+}
+	`, realm, realm, oauth2DeviceCodeLifespan, oauth2DevicePollingInterval)
 }
 
 func testKeycloakRealm_securityDefensesHeaders(realm, realmDisplayName, xFrameOptions string) string {

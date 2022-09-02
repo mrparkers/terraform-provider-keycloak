@@ -82,7 +82,7 @@ resource "keycloak_realm" "realm" {
 - `enabled` - (Optional) When `false`, users and clients will not be able to access this realm. Defaults to `true`.
 - `display_name` - (Optional) The display name for the realm that is shown when logging in to the admin console.
 - `display_name_html` - (Optional) The display name for the realm that is rendered as HTML on the screen when logging in to the admin console.
-- `user_managed_access` - (Optional) When `true`, users are allowed to manage their own resources. Defaults to `false`.
+- `user_managed_access` - (Optional) When `true`, users are allowed to manage their own resources. Defaults to `false`. 
 - `attributes` - (Optional) A map of custom attributes to add to the realm.
 
 ### Login Settings
@@ -125,6 +125,8 @@ The arguments below should be specified as [Go duration strings](https://golang.
 - `offline_session_idle_timeout` - (Optional) The amount of time an offline session can be idle before it expires.
 - `offline_session_max_lifespan` - (Optional) The maximum amount of time before an offline session expires regardless of activity.
 - `offline_session_max_lifespan_enabled` - (Optional) Enable `offline_session_max_lifespan`.
+- `client_session_idle_timeout` - (Optional) The amount of time a session can be idle before it expires. Users can override it for individual clients.
+- `client_session_max_lifespan` - (Optional) The maximum amount of time before a session expires regardless of activity. Users can override it for individual clients.
 - `access_token_lifespan` - (Optional) The amount of time an access token can be used before it expires.
 - `access_token_lifespan_for_implicit_flow` - (Optional) The amount of time an access token issued with the OpenID Connect Implicit Flow can be used before it expires.
 - `access_code_lifespan` - (Optional) The maximum amount of time a client has to finish the authorization code flow.
@@ -132,6 +134,11 @@ The arguments below should be specified as [Go duration strings](https://golang.
 - `access_code_lifespan_user_action` - (Optional) The maximum amount of time a user has to complete login related actions, such as updating a password.
 - `action_token_generated_by_user_lifespan` - (Optional) The maximum time a user has to use a user-generated permit before it expires.
 - `action_token_generated_by_admin_lifespan` - (Optional) The maximum time a user has to use an admin-generated permit before it expires.
+- `oauth2_device_code_lifespan` - (Optional) The maximum amount of time a client has to finish the device code flow before it expires.
+
+The attributes below should be specified in seconds.
+
+- `oauth2_device_polling_interval` - (Optional) The minimum amount of time in seconds that the client should wait between polling requests to the token endpoint.
 
 ### SMTP
 
@@ -199,7 +206,7 @@ The arguments below can be used to configure authentication flow bindings:
 
 ### OTP Policy
 
-The `otp_policy` block with following arguments can be found in the "OTP Policy" tab within the realm settings. 
+The `otp_policy` block with following arguments can be found in the "OTP Policy" tab within the realm settings.
 
 - `type` - (Optional) One Time Password Type, supported Values are `totp` for Time-Based One Time Password and `hotp` for Counter Based. Defaults to `totp`.
 - `algorithm` - (Optional) What hashing algorithm should be used to generate the OTP, Valid options are `HmacSHA1`,`HmacSHA256` and `HmacSHA512`. Defaults to `HmacSHA1`.

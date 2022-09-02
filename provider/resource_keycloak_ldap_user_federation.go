@@ -1,7 +1,10 @@
 package provider
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,15 +22,15 @@ var (
 
 func resourceKeycloakLdapUserFederation() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakLdapUserFederationCreate,
-		Read:   resourceKeycloakLdapUserFederationRead,
-		Update: resourceKeycloakLdapUserFederationUpdate,
-		Delete: resourceKeycloakLdapUserFederationDelete,
+		CreateContext: resourceKeycloakLdapUserFederationCreate,
+		ReadContext:   resourceKeycloakLdapUserFederationRead,
+		UpdateContext: resourceKeycloakLdapUserFederationUpdate,
+		DeleteContext: resourceKeycloakLdapUserFederationDelete,
 		// If this resource uses authentication, then this resource must be imported using the syntax {{realm_id}}/{{provider_id}}/{{bind_credential}}
 		// Otherwise, this resource can be imported using {{realm}}/{{provider_id}}.
 		// The Provider ID is displayed in the GUI when editing this provider
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakLdapUserFederationImport,
+			StateContext: resourceKeycloakLdapUserFederationImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -138,6 +141,18 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 				Description:  "ONE_LEVEL: only search for users in the DN specified by user_dn. SUBTREE: search entire LDAP subtree.",
 			},
 
+			"start_tls": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When true, Keycloak will encrypt the connection to LDAP using STARTTLS, which will disable connection pooling.",
+			},
+			"use_password_modify_extended_op": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When `true`, use the LDAPv3 Password Modify Extended Operation (RFC-3062).",
+			},
 			"validate_password_policy": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -287,7 +302,7 @@ func validateSyncPeriod(i interface{}, k string) (s []string, errs []error) {
 	return
 }
 
-func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUserFederation {
+func getLdapUserFederationFromData(data *schema.ResourceData, realmInternalId string) *keycloak.LdapUserFederation {
 	var userObjectClasses []string
 
 	for _, userObjectClass := range data.Get("user_object_classes").([]interface{}) {
@@ -297,7 +312,7 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 	ldapUserFederation := &keycloak.LdapUserFederation{
 		Id:      data.Id(),
 		Name:    data.Get("name").(string),
-		RealmId: data.Get("realm_id").(string),
+		RealmId: realmInternalId,
 
 		Enabled:  data.Get("enabled").(bool),
 		Priority: data.Get("priority").(int),
@@ -318,12 +333,14 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 		CustomUserSearchFilter: data.Get("custom_user_search_filter").(string),
 		SearchScope:            data.Get("search_scope").(string),
 
-		ValidatePasswordPolicy: data.Get("validate_password_policy").(bool),
-		TrustEmail:             data.Get("trust_email").(bool),
-		UseTruststoreSpi:       data.Get("use_truststore_spi").(string),
-		ConnectionTimeout:      data.Get("connection_timeout").(string),
-		ReadTimeout:            data.Get("read_timeout").(string),
-		Pagination:             data.Get("pagination").(bool),
+		StartTls:                    data.Get("start_tls").(bool),
+		UsePasswordModifyExtendedOp: data.Get("use_password_modify_extended_op").(bool),
+		ValidatePasswordPolicy:      data.Get("validate_password_policy").(bool),
+		TrustEmail:                  data.Get("trust_email").(bool),
+		UseTruststoreSpi:            data.Get("use_truststore_spi").(string),
+		ConnectionTimeout:           data.Get("connection_timeout").(string),
+		ReadTimeout:                 data.Get("read_timeout").(string),
+		Pagination:                  data.Get("pagination").(bool),
 
 		BatchSizeForSync:  data.Get("batch_size_for_sync").(int),
 		FullSyncPeriod:    data.Get("full_sync_period").(int),
@@ -362,11 +379,11 @@ func getLdapUserFederationFromData(data *schema.ResourceData) *keycloak.LdapUser
 	return ldapUserFederation
 }
 
-func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUserFederation) {
+func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUserFederation, realmId string) {
 	data.SetId(ldap.Id)
 
 	data.Set("name", ldap.Name)
-	data.Set("realm_id", ldap.RealmId)
+	data.Set("realm_id", realmId)
 
 	data.Set("enabled", ldap.Enabled)
 	data.Set("priority", ldap.Priority)
@@ -387,6 +404,8 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 	data.Set("custom_user_search_filter", ldap.CustomUserSearchFilter)
 	data.Set("search_scope", ldap.SearchScope)
 
+	data.Set("start_tls", ldap.StartTls)
+	data.Set("use_password_modify_extended_op", ldap.UsePasswordModifyExtendedOp)
 	data.Set("validate_password_policy", ldap.ValidatePasswordPolicy)
 	data.Set("trust_email", ldap.TrustEmail)
 	data.Set("use_truststore_spi", ldap.UseTruststoreSpi)
@@ -434,73 +453,89 @@ func setLdapUserFederationData(data *schema.ResourceData, ldap *keycloak.LdapUse
 	}
 }
 
-func resourceKeycloakLdapUserFederationCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserFederationCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldap := getLdapUserFederationFromData(data)
+	realmId := data.Get("realm_id").(string)
 
-	err := keycloakClient.ValidateLdapUserFederation(ldap)
+	realm, err := keycloakClient.GetRealm(ctx, realmId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewLdapUserFederation(ldap)
+	ldap := getLdapUserFederationFromData(data, realm.Id)
+
+	err = keycloakClient.ValidateLdapUserFederation(ctx, ldap)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	setLdapUserFederationData(data, ldap)
+	err = keycloakClient.NewLdapUserFederation(ctx, realmId, ldap)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return resourceKeycloakLdapUserFederationRead(data, meta)
+	setLdapUserFederationData(data, ldap, realmId)
+
+	return resourceKeycloakLdapUserFederationRead(ctx, data, meta)
 }
 
-func resourceKeycloakLdapUserFederationRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserFederationRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	ldap, err := keycloakClient.GetLdapUserFederation(realmId, id)
+	ldap, err := keycloakClient.GetLdapUserFederation(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	ldap.BindCredential = data.Get("bind_credential").(string) // we can't trust the API to set this field correctly since it just responds with "**********"
-	setLdapUserFederationData(data, ldap)
+	setLdapUserFederationData(data, ldap, realmId)
 
 	return nil
 }
 
-func resourceKeycloakLdapUserFederationUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserFederationUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldap := getLdapUserFederationFromData(data)
+	realmId := data.Get("realm_id").(string)
 
-	err := keycloakClient.ValidateLdapUserFederation(ldap)
+	realm, err := keycloakClient.GetRealm(ctx, realmId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateLdapUserFederation(ldap)
+	ldap := getLdapUserFederationFromData(data, realm.Id)
+
+	err = keycloakClient.ValidateLdapUserFederation(ctx, ldap)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	setLdapUserFederationData(data, ldap)
+	err = keycloakClient.UpdateLdapUserFederation(ctx, realmId, ldap)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	setLdapUserFederationData(data, ldap, realmId)
 
 	return nil
 }
 
-func resourceKeycloakLdapUserFederationDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapUserFederationDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteLdapUserFederation(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteLdapUserFederation(ctx, realmId, id))
 }
 
-func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakLdapUserFederationImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
 	parts := strings.Split(d.Id(), "/")
 
 	var realmId, id string
@@ -516,8 +551,18 @@ func resourceKeycloakLdapUserFederationImport(d *schema.ResourceData, _ interfac
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{userFederationId}}, {{realmId}}/{{userFederationId}}/{{bindCredentials}}")
 	}
 
+	_, err := keycloakClient.GetLdapUserFederation(ctx, realmId, id)
+	if err != nil {
+		return nil, err
+	}
+
 	d.Set("realm_id", realmId)
 	d.SetId(id)
+
+	diagnostics := resourceKeycloakLdapUserFederationRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
