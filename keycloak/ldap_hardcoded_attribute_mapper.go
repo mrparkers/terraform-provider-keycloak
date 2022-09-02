@@ -1,6 +1,9 @@
 package keycloak
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 type LdapHardcodedAttributeMapper struct {
 	Id                   string
@@ -37,7 +40,7 @@ func convertFromComponentToLdapHardcodedAttributeMapper(component *component, re
 		RealmId:              realmId,
 		LdapUserFederationId: component.ParentId,
 
-		AttributeName: component.getConfig("ldap.attribute.name"),
+		AttributeName:  component.getConfig("ldap.attribute.name"),
 		AttributeValue: component.getConfig("ldap.attribute.value"),
 	}
 }
@@ -52,8 +55,8 @@ func (keycloakClient *KeycloakClient) ValidateLdapHardcodedAttributeMapper(ldapM
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) NewLdapHardcodedAttributeMapper(ldapMapper *LdapHardcodedAttributeMapper) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapMapper.RealmId), convertFromLdapHardcodedAttributeMapperToComponent(ldapMapper))
+func (keycloakClient *KeycloakClient) NewLdapHardcodedAttributeMapper(ctx context.Context, ldapMapper *LdapHardcodedAttributeMapper) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", ldapMapper.RealmId), convertFromLdapHardcodedAttributeMapperToComponent(ldapMapper))
 	if err != nil {
 		return err
 	}
@@ -63,10 +66,10 @@ func (keycloakClient *KeycloakClient) NewLdapHardcodedAttributeMapper(ldapMapper
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetLdapHardcodedAttributeMapper(realmId, id string) (*LdapHardcodedAttributeMapper, error) {
+func (keycloakClient *KeycloakClient) GetLdapHardcodedAttributeMapper(ctx context.Context, realmId, id string) (*LdapHardcodedAttributeMapper, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -74,10 +77,10 @@ func (keycloakClient *KeycloakClient) GetLdapHardcodedAttributeMapper(realmId, i
 	return convertFromComponentToLdapHardcodedAttributeMapper(component, realmId), nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateLdapHardcodedAttributeMapper(ldapMapper *LdapHardcodedAttributeMapper) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapMapper.RealmId, ldapMapper.Id), convertFromLdapHardcodedAttributeMapperToComponent(ldapMapper))
+func (keycloakClient *KeycloakClient) UpdateLdapHardcodedAttributeMapper(ctx context.Context, ldapMapper *LdapHardcodedAttributeMapper) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", ldapMapper.RealmId, ldapMapper.Id), convertFromLdapHardcodedAttributeMapperToComponent(ldapMapper))
 }
 
-func (keycloakClient *KeycloakClient) DeleteLdapHardcodedAttributeMapper(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteLdapHardcodedAttributeMapper(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

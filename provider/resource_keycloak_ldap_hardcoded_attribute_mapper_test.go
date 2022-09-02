@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -79,7 +80,7 @@ func TestAccKeycloakLdapHardcodedAttributeMapper_createAfterManualDestroy(t *tes
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteLdapHardcodedAttributeMapper(mapper.RealmId, mapper.Id)
+					err := keycloakClient.DeleteLdapHardcodedAttributeMapper(context.Background(), mapper.RealmId, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -126,7 +127,7 @@ func testAccCheckKeycloakLdapHardcodedAttributeMapperDestroy() resource.TestChec
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapMapper, _ := keycloakClient.GetLdapHardcodedAttributeMapper(realm, id)
+			ldapMapper, _ := keycloakClient.GetLdapHardcodedAttributeMapper(context.Background(), realm, id)
 			if ldapMapper != nil {
 				return fmt.Errorf("ldap hardcoded attribute mapper with id %s still exists", id)
 			}
@@ -145,7 +146,7 @@ func getLdapHardcodedAttributeMapperFromState(s *terraform.State, resourceName s
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	ldapMapper, err := keycloakClient.GetLdapHardcodedAttributeMapper(realm, id)
+	ldapMapper, err := keycloakClient.GetLdapHardcodedAttributeMapper(context.Background(), realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting ldap attribute mapper with id %s: %s", id, err)
 	}
