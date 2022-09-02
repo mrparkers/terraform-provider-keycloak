@@ -493,6 +493,9 @@ func (keycloakClient *KeycloakClient) GetLdapUserFederationMappers(ctx context.C
 		case "hardcoded-ldap-role-mapper":
 			mapper := convertFromComponentToLdapHardcodedRoleMapper(component, realmId)
 			ldapUserFederationMappers = append(ldapUserFederationMappers, mapper)
+		case "hardcoded-ldap-attribute-mapper":
+			mapper := convertFromComponentToLdapHardcodedAttributeMapper(component, realmId)
+			ldapUserFederationMappers = append(ldapUserFederationMappers, mapper)
 		case "msad-lds-user-account-control-mapper":
 			mapper, err := convertFromComponentToLdapMsadLdsUserAccountControlMapper(component, realmId)
 			if err != nil {
