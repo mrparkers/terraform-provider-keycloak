@@ -120,7 +120,7 @@ func getLdapHardcodedRoleMapperFromState(s *terraform.State, resourceName string
 
 	ldapMapper, err := keycloakClient.GetLdapHardcodedRoleMapper(testCtx, realm, id)
 	if err != nil {
-		return nil, fmt.Errorf("error getting ldap group mapper with id %s: %s", id, err)
+		return nil, fmt.Errorf("error getting ldap role mapper with id %s: %s", id, err)
 	}
 
 	return ldapMapper, nil

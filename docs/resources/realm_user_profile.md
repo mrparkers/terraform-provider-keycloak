@@ -63,6 +63,17 @@ resource "keycloak_realm_user_profile" "userprofile" {
 
   attribute {
     name = "field2"
+
+    validator {
+      name   = "options"
+      config = {
+        options = jsonencode ( [ "opt1" ])
+      }
+    }
+
+    annotations = {
+      foo = jsonencode ( {"key": "val" } )
+    }
   }
 
   group {
@@ -72,6 +83,7 @@ resource "keycloak_realm_user_profile" "userprofile" {
 
     annotations = {
       foo = "bar"
+      foo2 = jsonencode ( { "key": "val" } )
     }
   }
 
@@ -97,7 +109,7 @@ resource "keycloak_realm_user_profile" "userprofile" {
 - `required_for_scopes` - (Optional) A list of scopes for which the attribute will be required.
 - `permissions` - (Optional) The [permissions](#permissions-arguments) configuration information.
 - `validator` - (Optional) A list of [validators](#validator-arguments) for the attribute.
-- `annotations` - (Optional) A map of annotations for the attribute.
+- `annotations` - (Optional) A map of annotations for the attribute. Values can be a String or a json object.
 
 #### Permissions Arguments
 
@@ -107,14 +119,14 @@ resource "keycloak_realm_user_profile" "userprofile" {
 #### Validator Arguments
 
 - `name` - (Required) The name of the validator.
-- `config` - (Optional) A map defining the configuration of the validator.
+- `config` - (Optional) A map defining the configuration of the validator. Values can be a String or a json object.
 
 ### Group Arguments
 
 - `name` - (Required) The name of the group.
 - `display_header` - (Optional) The display header of the group.
 - `display_description` - (Optional) The display description of the group.
-- `annotations` - (Optional) A map of annotations for the group.
+- `annotations` - (Optional) A map of annotations for the group. Values can be a String or a json object.
 
 ## Import
 

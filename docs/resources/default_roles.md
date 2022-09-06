@@ -16,7 +16,7 @@ resource "keycloak_realm" "realm" {
   enabled = true
 }
 
-resource "keycloak_default_roles" "defalut_roles" {
+resource "keycloak_default_roles" "default_roles" {
   realm_id      = keycloak_realm.realm.id
   default_roles = ["uma_authorization"]
 }

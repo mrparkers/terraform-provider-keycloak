@@ -98,7 +98,7 @@ func resourceKeycloakAuthenticationBindingsCreate(ctx context.Context, data *sch
 		return diag.FromErr(err)
 	}
 
-	realm, err = keycloakClient.GetRealm(ctx, realm.Id)
+	realm, err = keycloakClient.GetRealm(ctx, realm.Realm)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -10,7 +10,19 @@ import (
 	"testing"
 )
 
+// The script protocol mapper was removed in Keycloak 18, so these tests will not run on versions greater than or equal to 18
+// https://www.keycloak.org/2022/04/keycloak-1800-released.html#_removal_of_the_upload_scripts_feature
+func skipKeycloakOpenIdScriptProtocolMapperTests(t *testing.T) {
+	if ok, err := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_18); err != nil {
+		t.Fatal(err)
+	} else if ok {
+		t.Skip()
+	}
+}
+
 func TestAccKeycloakOpenIdScriptProtocolMapper_basicClient(t *testing.T) {
+	skipKeycloakOpenIdScriptProtocolMapperTests(t)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -32,6 +44,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_basicClient(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_basicClientScope(t *testing.T) {
+	skipKeycloakOpenIdScriptProtocolMapperTests(t)
+
 	t.Parallel()
 
 	clientScopeId := acctest.RandomWithPrefix("tf-acc")
@@ -53,6 +67,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_basicClientScope(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_import(t *testing.T) {
+	skipKeycloakOpenIdScriptProtocolMapperTests(t)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -91,6 +107,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_update(t *testing.T) {
+	skipKeycloakOpenIdScriptProtocolMapperTests(t)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -118,6 +136,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	skipKeycloakOpenIdScriptProtocolMapperTests(t)
+
 	t.Parallel()
 
 	var mapper = &keycloak.OpenIdScriptProtocolMapper{}
@@ -153,6 +173,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_createAfterManualDestroy(t *testi
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_validateClaimValueType(t *testing.T) {
+	skipKeycloakOpenIdScriptProtocolMapperTests(t)
+
 	t.Parallel()
 
 	mapperName := acctest.RandomWithPrefix("tf-acc")
@@ -172,6 +194,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_validateClaimValueType(t *testing
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_updateClientIdForceNew(t *testing.T) {
+	skipKeycloakOpenIdScriptProtocolMapperTests(t)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -199,6 +223,8 @@ func TestAccKeycloakOpenIdScriptProtocolMapper_updateClientIdForceNew(t *testing
 }
 
 func TestAccKeycloakOpenIdScriptProtocolMapper_updateClientScopeForceNew(t *testing.T) {
+	skipKeycloakOpenIdScriptProtocolMapperTests(t)
+
 	t.Parallel()
 
 	mapperName := acctest.RandomWithPrefix("tf-acc")

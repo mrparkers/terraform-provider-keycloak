@@ -18,6 +18,9 @@ const (
 	Version_13 Version = "13.0.0"
 	Version_14 Version = "14.0.0"
 	Version_15 Version = "15.0.0"
+	Version_16 Version = "16.0.0"
+	Version_17 Version = "17.0.0"
+	Version_18 Version = "18.0.0"
 )
 
 func (keycloakClient *KeycloakClient) VersionIsGreaterThanOrEqualTo(ctx context.Context, versionString Version) (bool, error) {

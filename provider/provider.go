@@ -53,6 +53,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 			"keycloak_ldap_group_mapper":                                 resourceKeycloakLdapGroupMapper(),
 			"keycloak_ldap_role_mapper":                                  resourceKeycloakLdapRoleMapper(),
 			"keycloak_ldap_hardcoded_role_mapper":                        resourceKeycloakLdapHardcodedRoleMapper(),
+			"keycloak_ldap_hardcoded_attribute_mapper":                   resourceKeycloakLdapHardcodedAttributeMapper(),
 			"keycloak_ldap_hardcoded_group_mapper":                       resourceKeycloakLdapHardcodedGroupMapper(),
 			"keycloak_ldap_msad_user_account_control_mapper":             resourceKeycloakLdapMsadUserAccountControlMapper(),
 			"keycloak_ldap_msad_lds_user_account_control_mapper":         resourceKeycloakLdapMsadLdsUserAccountControlMapper(),
@@ -169,10 +170,16 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 				Description: "Allows ignoring insecure certificates when set to true. Defaults to false. Disabling security check is dangerous and should be avoided.",
 				Default:     false,
 			},
+			"red_hat_sso": {
+				Optional:    true,
+				Type:        schema.TypeBool,
+				Description: "When true, the provider will treat the Keycloak instance as a Red Hat SSO server, specifically when parsing the version returned from the /serverinfo API endpoint.",
+				Default:     false,
+			},
 			"base_path": {
-				Optional: true,
-				Type:     schema.TypeString,
-				Default:  "/auth",
+				Optional:    true,
+				Type:        schema.TypeString,
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_BASE_PATH", "/auth"),
 			},
 			"additional_headers": {
 				Optional: true,
@@ -200,6 +207,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 		clientTimeout := data.Get("client_timeout").(int)
 		tlsInsecureSkipVerify := data.Get("tls_insecure_skip_verify").(bool)
 		rootCaCertificate := data.Get("root_ca_certificate").(string)
+		redHatSSO := data.Get("red_hat_sso").(bool)
 		additionalHeaders := make(map[string]string)
 		for k, v := range data.Get("additional_headers").(map[string]interface{}) {
 			additionalHeaders[k] = v.(string)
@@ -209,7 +217,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 
 		userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", provider.TerraformVersion, meta.SDKVersionString())
 
-		keycloakClient, err := keycloak.NewKeycloakClient(ctx, url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent, additionalHeaders)
+		keycloakClient, err := keycloak.NewKeycloakClient(ctx, url, basePath, clientId, clientSecret, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent, redHatSSO, additionalHeaders)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,

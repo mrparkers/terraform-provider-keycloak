@@ -75,13 +75,24 @@ func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
 				},
 				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
 					"person-name-prohibited-characters": map[string]interface{}{},
-					"pattern":                           map[string]interface{}{"pattern": "^[a-z]+$", "error_message": "Error!"},
+					"pattern":                           map[string]interface{}{"pattern": "\"^[a-z]+$\"", "error_message": "\"Error!\""},
 				},
-				Annotations: map[string]string{"foo": "bar"},
+				Annotations: map[string]interface{}{
+					"foo":               "\"bar\"",
+					"inputOptionLabels": "{\"a\":\"b\"}",
+				},
 			},
 		},
 		Groups: []*keycloak.RealmUserProfileGroup{
-			{Name: "group", DisplayDescription: "Description", DisplayHeader: "Header", Annotations: map[string]string{"foo": "bar"}},
+			{
+				Name:               "group",
+				DisplayDescription: "Description",
+				DisplayHeader:      "Header",
+				Annotations: map[string]interface{}{
+					"foo":  "\"bar\"",
+					"test": "{\"a2\":\"b2\"}",
+				},
+			},
 		},
 	}
 
@@ -165,7 +176,8 @@ func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
 			{
 				Name: "attribute",
 				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
-					"length": map[string]interface{}{"min": "5", "max": "10"},
+					"length":  map[string]interface{}{"min": "5", "max": "10"},
+					"options": map[string]interface{}{"options": "[\"cgu\"]"},
 				},
 			},
 		},
@@ -405,7 +417,7 @@ resource "keycloak_realm_user_profile" "realm_user_profile" {
             {{- if $config }}
             config = {
                 {{- range $key, $value := $config }}
-                {{ $key }} = "{{ $value }}"
+                {{ $key }} = jsonencode ( {{ $value }} )
                 {{- end }}
             }
             {{- end }}
@@ -416,7 +428,7 @@ resource "keycloak_realm_user_profile" "realm_user_profile" {
 		{{- if $attribute.Annotations }}
         annotations = {
             {{- range $key, $value := $attribute.Annotations }}
-            {{ $key }} = "{{ $value }}"
+            {{ $key }} = jsonencode ( {{ $value }} )
             {{- end }}
         }
 		{{- end }}
@@ -438,7 +450,7 @@ resource "keycloak_realm_user_profile" "realm_user_profile" {
 		{{- if $group.Annotations }}
         annotations = {
             {{- range $key, $value := $group.Annotations }}
-            {{ $key }} = "{{ $value }}"
+            {{ $key }} = jsonencode ( {{ $value }} )
             {{- end }}
         }
 		{{- end }}

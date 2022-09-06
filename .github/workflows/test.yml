@@ -77,16 +77,16 @@ jobs:
     strategy:
       matrix:
         keycloak-version:
+          - '18.0.0-legacy'
+          - '17.0.0-legacy'
           - '16.1.1'
-          - '15.1.1'
-          - '14.0.0'
       fail-fast: false
     concurrency:
       group: ${{ github.head_ref }}-${{ matrix.keycloak-version }}
       cancel-in-progress: true
     services:
       keycloak:
-        image: jboss/keycloak:${{ matrix.keycloak-version }}
+        image: quay.io/keycloak/keycloak:${{ matrix.keycloak-version }}
         ports:
           - 8080:8080
         env:
@@ -125,6 +125,14 @@ jobs:
       - name: Initialize Keycloak
         run: ./scripts/wait-for-local-keycloak.sh && ./scripts/create-terraform-client.sh
 
+      - name: Get Keycloak Version
+        uses: actions/github-script@v6
+        id: keycloak-version
+        env:
+          KEYCLOAK_VERSION: ${{ matrix.keycloak-version }}
+        with:
+          script: |
+            return process.env.KEYCLOAK_VERSION.split("-")[0]
       - name: Test
         run: |
           go mod download
@@ -136,5 +144,5 @@ jobs:
           KEYCLOAK_REALM: master
           KEYCLOAK_URL: "http://localhost:8080"
           KEYCLOAK_TEST_PASSWORD_GRANT: "true"
-          KEYCLOAK_VERSION: ${{ matrix.keycloak-version }}
+          KEYCLOAK_VERSION: ${{ steps.keycloak-version.outputs.result }}
         timeout-minutes: 60

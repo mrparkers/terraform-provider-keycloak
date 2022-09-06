@@ -68,6 +68,9 @@ resource "keycloak_saml_identity_provider" "realm_saml_identity_provider" {
 - `gui_order` - (Optional) A number defining the order of this identity provider in the GUI.
 - `principal_type` - (Optional) The principal type. Can be one of `SUBJECT`, `ATTRIBUTE` or `FRIENDLY_ATTRIBUTE`.
 - `principal_attribute` - (Optional) The principal attribute. Defaults to empty string.
+- `authn_context_class_refs` - (Optional) Ordered list of requested AuthnContext ClassRefs.
+- `authn_context_decl_refs` - (Optional) Ordered list of requested AuthnContext DeclRefs.
+- `authn_context_comparison_type` - (Optional) Specifies the comparison method used to evaluate the requested context classes or statements.
 - `extra_config` - (Optional) A map of key/value pairs to add extra configuration to this identity provider. This can be used for custom oidc provider implementations, or to add configuration that is not yet supported by this Terraform provider. Use this attribute at your own risk, as custom attributes may conflict with top-level configuration attributes in future provider updates.
 
 ## Import

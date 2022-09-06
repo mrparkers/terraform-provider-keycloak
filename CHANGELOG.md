@@ -1,4 +1,40 @@
-## 3.8.1 (May 9, 2022)
+## v3.10.0 (July 28, 2022)
+
+IMPROVEMENTS:
+
+- add authn context attributes for `keycloak_saml_identity_provider` resource ([#703](https://github.com/mrparkers/terraform-provider-keycloak/pull/703))
+- add `resource_type` attribute for `keycloak_openid_client_authorization_permission` resource ([#702](https://github.com/mrparkers/terraform-provider-keycloak/pull/702))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@dnic](https://github.com/dnic)
+- [@1337andre](https://github.com/1337andre)
+- [@JessieAMorris](https://github.com/JessieAMorris)
+
+## v3.9.1 (July 11, 2022)
+
+BUG FIXES:
+
+- update usage of component API for `keycloak_ldap_user_federation` and `keycloak_custom_user_federation` resources ([#707](https://github.com/mrparkers/terraform-provider-keycloak/pull/707))
+  - this fixes an issue that prevented these resources from being used within the `master` realm.
+
+## v3.9.0 (June 23, 2022)
+
+IMPROVEMENTS:
+
+- improve import error messages for several resources ([#691](https://github.com/mrparkers/terraform-provider-keycloak/pull/691))
+- allow usage of environment variable to configure base API path ([#695](https://github.com/mrparkers/terraform-provider-keycloak/pull/695))
+
+BUG FIXES:
+
+- use realm name instead of internal ID for authentication bindings ([#687](https://github.com/mrparkers/terraform-provider-keycloak/pull/687))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@dmeyerholt](https://github.com/dmeyerholt)
+- [@Korsarro69](https://github.com/Korsarro69)
+
+## v3.8.1 (May 9, 2022)
 
 BUG FIXES:
 
