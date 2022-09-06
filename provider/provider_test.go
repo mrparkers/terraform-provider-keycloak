@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"math/rand"
 	"os"
 	"testing"
 )
@@ -41,6 +42,8 @@ func init() {
 }
 
 func TestMain(m *testing.M) {
+	rand.Seed(1)
+
 	testAccRealm = createTestRealm(testCtx)
 	testAccRealmTwo = createTestRealm(testCtx)
 	testAccRealmUserFederation = createTestRealm(testCtx)
