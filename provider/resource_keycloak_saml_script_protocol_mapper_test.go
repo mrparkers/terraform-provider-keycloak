@@ -10,7 +10,6 @@ import (
 )
 
 func TestAccKeycloakSamlScriptProtocolMapper_basicClient(t *testing.T) {
-	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	mapperName := acctest.RandomWithPrefix("tf-acc")
@@ -31,7 +30,6 @@ func TestAccKeycloakSamlScriptProtocolMapper_basicClient(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_basicClientScope(t *testing.T) {
-	t.Parallel()
 
 	clientScopeId := acctest.RandomWithPrefix("tf-acc")
 	mapperName := acctest.RandomWithPrefix("tf-acc")
@@ -52,7 +50,6 @@ func TestAccKeycloakSamlScriptProtocolMapper_basicClientScope(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_import(t *testing.T) {
-	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	clientScopeId := acctest.RandomWithPrefix("tf-acc")
@@ -90,7 +87,6 @@ func TestAccKeycloakSamlScriptProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_update(t *testing.T) {
-	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	mapperName := acctest.RandomWithPrefix("tf-acc")
@@ -117,7 +113,6 @@ func TestAccKeycloakSamlScriptProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var mapper = &keycloak.SamlScriptProtocolMapper{}
 
@@ -152,7 +147,6 @@ func TestAccKeycloakSamlScriptProtocolMapper_createAfterManualDestroy(t *testing
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_updateClientIdForceNew(t *testing.T) {
-	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	updatedClientId := acctest.RandomWithPrefix("tf-acc")
@@ -179,7 +173,6 @@ func TestAccKeycloakSamlScriptProtocolMapper_updateClientIdForceNew(t *testing.T
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_updateClientScopeForceNew(t *testing.T) {
-	t.Parallel()
 
 	mapperName := acctest.RandomWithPrefix("tf-acc")
 	clientScopeId := acctest.RandomWithPrefix("tf-acc")

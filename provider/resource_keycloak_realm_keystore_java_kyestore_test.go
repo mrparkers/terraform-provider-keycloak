@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccKeycloakRealmKeystoreJava_basic(t *testing.T) {
-	t.Parallel()
 
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to put java keystore file to keycloak container in CI
 
@@ -38,7 +37,6 @@ func TestAccKeycloakRealmKeystoreJava_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRealmKeystoreJava_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to put java keystore file to keycloak container in CI
 
@@ -70,7 +68,6 @@ func TestAccKeycloakRealmKeystoreJava_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakRealmKeystoreJava_algorithmValidation(t *testing.T) {
-	t.Parallel()
 
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to put java keystore file to keycloak container in CI
 
@@ -95,7 +92,6 @@ func TestAccKeycloakRealmKeystoreJava_algorithmValidation(t *testing.T) {
 }
 
 func TestAccKeycloakRealmKeystoreJava_updateRsaKeystoreGenerated(t *testing.T) {
-	t.Parallel()
 
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to put java keystore file to keycloak container in CI
 

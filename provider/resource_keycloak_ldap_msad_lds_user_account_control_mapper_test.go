@@ -10,7 +10,6 @@ import (
 )
 
 func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_basic(t *testing.T) {
-	t.Parallel()
 
 	msadLdsUacMapperName := acctest.RandomWithPrefix("tf-acc")
 
@@ -34,7 +33,6 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var mapper = &keycloak.LdapMsadLdsUserAccountControlMapper{}
 
@@ -64,7 +62,6 @@ func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_createAfterManualDestroy
 }
 
 func TestAccKeycloakLdapMsadLdsUserAccountControlMapper_updateLdapUserFederation(t *testing.T) {
-	t.Parallel()
 
 	msadLdsUacMapperName := acctest.RandomWithPrefix("tf-acc")
 

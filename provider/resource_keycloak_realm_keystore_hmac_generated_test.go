@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccKeycloakRealmKeystoreHmacGenerated_basic(t *testing.T) {
-	t.Parallel()
 
 	hmacName := acctest.RandomWithPrefix("tf-acc")
 
@@ -36,7 +35,6 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRealmKeystoreHmacGenerated_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var hmac = &keycloak.RealmKeystoreHmacGenerated{}
 
@@ -66,7 +64,6 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_createAfterManualDestroy(t *testi
 }
 
 func TestAccKeycloakRealmKeystoreHmacGenerated_algorithmValidation(t *testing.T) {
-	t.Parallel()
 
 	hmacName := acctest.RandomWithPrefix("tf-acc")
 	algorithm := randomStringInSlice(keycloakRealmKeystoreHmacGeneratedAlgorithm)
@@ -91,7 +88,6 @@ func TestAccKeycloakRealmKeystoreHmacGenerated_algorithmValidation(t *testing.T)
 }
 
 func TestAccKeycloakRealmKeystoreHmacGenerated_updateRealmKeystoreHmacGenerated(t *testing.T) {
-	t.Parallel()
 
 	enabled := randomBool()
 	active := randomBool()

@@ -11,7 +11,6 @@ import (
 )
 
 func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
-	t.Parallel()
 
 	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 
@@ -35,7 +34,6 @@ func TestAccKeycloakLdapGroupMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var mapper = &keycloak.LdapGroupMapper{}
 
@@ -66,7 +64,6 @@ func TestAccKeycloakLdapGroupMapper_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
-	t.Parallel()
 
 	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 	mode := randomStringInSlice(keycloakLdapGroupMapperModes)
@@ -89,7 +86,6 @@ func TestAccKeycloakLdapGroupMapper_modeValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapGroupMapper_membershipAttributeTypeValidation(t *testing.T) {
-	t.Parallel()
 
 	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 	membershipAttributeType := randomStringInSlice(keycloakLdapGroupMapperMembershipAttributeTypes)
@@ -112,7 +108,6 @@ func TestAccKeycloakLdapGroupMapper_membershipAttributeTypeValidation(t *testing
 }
 
 func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testing.T) {
-	t.Parallel()
 
 	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 	userRolesRetrieveStrategy := randomStringInSlice(keycloakLdapGroupMapperUserRolesRetrieveStrategies)
@@ -135,7 +130,6 @@ func TestAccKeycloakLdapGroupMapper_userRolesRetrieveStrategyValidation(t *testi
 }
 
 func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
-	t.Parallel()
 
 	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 	groupsLdapFilter := "(" + acctest.RandString(10) + ")"
@@ -158,7 +152,6 @@ func TestAccKeycloakLdapGroupMapper_groupsLdapFilterValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
-	t.Parallel()
 
 	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 
@@ -176,7 +169,6 @@ func TestAccKeycloakLdapGroupMapper_groupInheritanceValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationForceNew(t *testing.T) {
-	t.Parallel()
 
 	groupMapperName := acctest.RandomWithPrefix("tf-acc")
 
@@ -198,7 +190,6 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationForceNew(t *testing.
 }
 
 func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T) {
-	t.Parallel()
 
 	preserveGroupInheritance := true
 	ignoreMissingGroups := randomBool()
@@ -260,7 +251,6 @@ func TestAccKeycloakLdapGroupMapper_updateLdapUserFederationInPlace(t *testing.T
 }
 
 func TestAccKeycloakLdapGroupMapper_groupsPath(t *testing.T) {
-	t.Parallel()
 
 	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_11); !ok {
 		t.Skip()

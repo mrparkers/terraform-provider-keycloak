@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 	username := acctest.RandomWithPrefix("tf-acc")
@@ -36,7 +35,6 @@ func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
 }
 
 func TestAccKeycloakGroupMemberships_moreThan100members(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 
@@ -52,7 +50,6 @@ func TestAccKeycloakGroupMemberships_moreThan100members(t *testing.T) {
 }
 
 func TestAccKeycloakGroupMemberships_updateGroupForceNew(t *testing.T) {
-	t.Parallel()
 
 	groupOne := acctest.RandomWithPrefix("tf-acc")
 	groupTwo := acctest.RandomWithPrefix("tf-acc")
@@ -76,7 +73,6 @@ func TestAccKeycloakGroupMemberships_updateGroupForceNew(t *testing.T) {
 }
 
 func TestAccKeycloakGroupMemberships_updateInPlace(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 
@@ -122,7 +118,6 @@ func TestAccKeycloakGroupMemberships_updateInPlace(t *testing.T) {
 }
 
 func TestAccKeycloakGroupMemberships_userDoesNotExist(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 	username := acctest.RandomWithPrefix("tf-acc")
@@ -141,7 +136,6 @@ func TestAccKeycloakGroupMemberships_userDoesNotExist(t *testing.T) {
 
 // if a user is removed from a group controlled by this resource, terraform should add them again
 func TestAccKeycloakGroupMemberships_authoritativeAdd(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 
@@ -182,7 +176,6 @@ func TestAccKeycloakGroupMemberships_authoritativeAdd(t *testing.T) {
 
 // if a user is added to a group controlled by this resource, terraform should remove them
 func TestAccKeycloakGroupMemberships_authoritativeRemove(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 
@@ -234,7 +227,6 @@ func TestAccKeycloakGroupMemberships_authoritativeRemove(t *testing.T) {
 
 // this resource doesn't support import because it can be created even if the desired state already exists in keycloak
 func TestAccKeycloakGroupMemberships_noImportNeeded(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 	username := acctest.RandomWithPrefix("tf-acc")
@@ -267,7 +259,6 @@ func TestAccKeycloakGroupMemberships_noImportNeeded(t *testing.T) {
 }
 
 func TestAccKeycloakGroupMemberships_validateLowercaseUsernames(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 	randomString := acctest.RandomWithPrefix("tf-acc")
@@ -287,7 +278,6 @@ func TestAccKeycloakGroupMemberships_validateLowercaseUsernames(t *testing.T) {
 }
 
 func TestAccKeycloakGroupMemberships_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 	username := acctest.RandomWithPrefix("tf-acc")

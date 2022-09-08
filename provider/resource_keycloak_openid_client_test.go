@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccKeycloakOpenidClient_basic(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -37,7 +37,7 @@ func TestAccKeycloakOpenidClient_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_basic_with_consent(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -61,7 +61,7 @@ func TestAccKeycloakOpenidClient_basic_with_consent(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
+
 	var client = &keycloak.OpenidClient{}
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -93,7 +93,6 @@ func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
-	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
@@ -121,7 +120,7 @@ func TestAccKeycloakOpenidClient_updateRealm(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -145,7 +144,7 @@ func TestAccKeycloakOpenidClient_accessType(t *testing.T) {
 	})
 }
 func TestAccKeycloakOpenidClient_clientAuthenticatorType(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -174,7 +173,7 @@ func TestAccKeycloakOpenidClient_clientAuthenticatorType(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	enabled := randomBool()
 	standardFlowEnabled := randomBool()
@@ -262,7 +261,6 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_backChannel(t *testing.T) {
-	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	backchannelLogoutUrl := fmt.Sprintf("https://%s.com", acctest.RandString(10))
@@ -286,7 +284,6 @@ func TestAccKeycloakOpenidClient_backChannel(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_frontChannel(t *testing.T) {
-	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	frontchannelLogoutUrl := fmt.Sprintf("https://%s.com/logout", acctest.RandString(10))
@@ -309,7 +306,7 @@ func TestAccKeycloakOpenidClient_frontChannel(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	accessTokenLifespan := "1800"
@@ -335,7 +332,7 @@ func TestAccKeycloakOpenidClient_AccessToken_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	offlineSessionIdleTimeout := "1800"
@@ -371,7 +368,6 @@ func TestAccKeycloakOpenidClient_Device_basic(t *testing.T) {
 		t.Skip()
 	}
 
-	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	oauth2DeviceCodeLifespan := "300"
@@ -403,7 +399,7 @@ func TestAccKeycloakOpenidClient_Device_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_secret(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	clientSecret := acctest.RandomWithPrefix("tf-acc")
 
@@ -431,7 +427,7 @@ func TestAccKeycloakOpenidClient_secret(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	accessType := randomStringInSlice([]string{"PUBLIC", "CONFIDENTIAL"})
 
@@ -453,7 +449,7 @@ func TestAccKeycloakOpenidClient_redirectUrisValidation(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_publicClientCredentialsValidation(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -470,7 +466,7 @@ func TestAccKeycloakOpenidClient_publicClientCredentialsValidation(t *testing.T)
 }
 
 func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -499,7 +495,7 @@ func TestAccKeycloakOpenidClient_bearerClientNoGrantsValidation(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -544,7 +540,7 @@ func TestAccKeycloakOpenidClient_pkceCodeChallengeMethod(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -585,7 +581,7 @@ func TestAccKeycloakOpenidClient_excludeSessionStateFromAuthResponse(t *testing.
 }
 
 func TestAccKeycloakOpenidClient_authenticationFlowBindingOverrides(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -606,7 +602,7 @@ func TestAccKeycloakOpenidClient_authenticationFlowBindingOverrides(t *testing.T
 }
 
 func TestAccKeycloakOpenidClient_loginTheme(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	loginThemeKeycloak := "keycloak"
 	loginThemeBase := "base"
@@ -638,7 +634,7 @@ func TestAccKeycloakOpenidClient_loginTheme(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_useRefreshTokens(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -659,7 +655,7 @@ func TestAccKeycloakOpenidClient_useRefreshTokens(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_useRefreshTokensClientCredentials(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -680,7 +676,7 @@ func TestAccKeycloakOpenidClient_useRefreshTokensClientCredentials(t *testing.T)
 }
 
 func TestAccKeycloakOpenidClient_extraConfig(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -712,7 +708,7 @@ func TestAccKeycloakOpenidClient_extraConfig(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_extraConfigInvalid(t *testing.T) {
-	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -733,7 +729,6 @@ func TestAccKeycloakOpenidClient_oauth2DeviceAuthorizationGrantEnabled(t *testin
 		t.Skip()
 	}
 
-	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{

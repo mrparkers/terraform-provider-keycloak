@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccKeycloakRealmKeystoreEcdsaGenerated_basic(t *testing.T) {
-	t.Parallel()
 
 	ecdsaName := acctest.RandomWithPrefix("tf-acc")
 
@@ -36,7 +35,6 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRealmKeystoreEcdsaGenerated_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var ecdsa = &keycloak.RealmKeystoreEcdsaGenerated{}
 
@@ -66,7 +64,6 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_createAfterManualDestroy(t *test
 }
 
 func TestAccKeycloakRealmKeystoreEcdsaGenerated_ellipticCurveValidation(t *testing.T) {
-	t.Parallel()
 
 	ecdsaName := acctest.RandomWithPrefix("tf-acc")
 	ellipticCurve := randomStringInSlice(keycloakRealmKeystoreEcdsaGeneratedEllipticCurve)
@@ -89,7 +86,6 @@ func TestAccKeycloakRealmKeystoreEcdsaGenerated_ellipticCurveValidation(t *testi
 }
 
 func TestAccKeycloakRealmKeystoreEcdsaGenerated_updateRealmKeystoreEcdsaGenerated(t *testing.T) {
-	t.Parallel()
 
 	enabled := randomBool()
 	active := randomBool()

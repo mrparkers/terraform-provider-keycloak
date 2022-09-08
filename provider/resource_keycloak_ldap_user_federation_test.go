@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccKeycloakLdapUserFederation_basic(t *testing.T) {
-	t.Parallel()
+
 	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -30,7 +30,7 @@ func TestAccKeycloakLdapUserFederation_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapUserFederation_import(t *testing.T) {
-	t.Parallel()
+
 	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	bindCredentialForImport := "admin"
@@ -65,7 +65,7 @@ func TestAccKeycloakLdapUserFederation_import(t *testing.T) {
 }
 
 func TestAccKeycloakLdapUserFederation_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
+
 	var ldap = &keycloak.LdapUserFederation{}
 
 	ldapName := acctest.RandomWithPrefix("tf-acc")
@@ -94,7 +94,7 @@ func TestAccKeycloakLdapUserFederation_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
-	t.Parallel()
+
 	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -188,7 +188,7 @@ func checkMatchingNestedKey(resourcePath string, blockName string, fieldInBlock 
 }
 
 func TestAccKeycloakLdapUserFederation_basicUpdateKerberosSettings(t *testing.T) {
-	t.Parallel()
+
 	firstLdap := generateRandomLdapKerberos(true)
 	secondLdap := generateRandomLdapKerberos(false)
 
@@ -224,7 +224,7 @@ func TestAccKeycloakLdapUserFederation_basicUpdateKerberosSettings(t *testing.T)
 }
 
 func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
-	t.Parallel()
+
 	firstEnabled := randomBool()
 	firstStartTls := randomBool()
 	firstUsePasswordModifyExtendedOp := randomBool()
@@ -335,7 +335,7 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 }
 
 func TestAccKeycloakLdapUserFederation_unsetTimeoutDurationStrings(t *testing.T) {
-	t.Parallel()
+
 	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -356,7 +356,7 @@ func TestAccKeycloakLdapUserFederation_unsetTimeoutDurationStrings(t *testing.T)
 }
 
 func TestAccKeycloakLdapUserFederation_editModeValidation(t *testing.T) {
-	t.Parallel()
+
 	ldapName := acctest.RandomWithPrefix("tf-acc")
 	editMode := randomStringInSlice(keycloakLdapUserFederationEditModes)
 
@@ -378,7 +378,7 @@ func TestAccKeycloakLdapUserFederation_editModeValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapUserFederation_vendorValidation(t *testing.T) {
-	t.Parallel()
+
 	ldapName := acctest.RandomWithPrefix("tf-acc")
 	vendor := randomStringInSlice(keycloakLdapUserFederationVendors)
 
@@ -400,7 +400,7 @@ func TestAccKeycloakLdapUserFederation_vendorValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapUserFederation_searchScopeValidation(t *testing.T) {
-	t.Parallel()
+
 	ldapName := acctest.RandomWithPrefix("tf-acc")
 	searchScope := randomStringInSlice(keycloakLdapUserFederationSearchScopes)
 
@@ -422,7 +422,7 @@ func TestAccKeycloakLdapUserFederation_searchScopeValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapUserFederation_useTrustStoreValidation(t *testing.T) {
-	t.Parallel()
+
 	ldapName := acctest.RandomWithPrefix("tf-acc")
 	useTrustStore := randomStringInSlice(keycloakLdapUserFederationTruststoreSpiSettings)
 
@@ -444,7 +444,7 @@ func TestAccKeycloakLdapUserFederation_useTrustStoreValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapUserFederation_bindValidation(t *testing.T) {
-	t.Parallel()
+
 	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -465,7 +465,7 @@ func TestAccKeycloakLdapUserFederation_bindValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapUserFederation_syncPeriodValidation(t *testing.T) {
-	t.Parallel()
+
 	ldapName := acctest.RandomWithPrefix("tf-acc")
 
 	validSyncPeriod := acctest.RandIntRange(1, 3600)
@@ -505,7 +505,7 @@ func TestAccKeycloakLdapUserFederation_syncPeriodValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapUserFederation_bindCredential(t *testing.T) {
-	t.Parallel()
+
 	ldapName := acctest.RandomWithPrefix("tf-acc")
 	firstBindCredential := acctest.RandomWithPrefix("tf-acc")
 	secondBindCredential := acctest.RandomWithPrefix("tf-acc")

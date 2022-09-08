@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccKeycloakAuthenticationExecution_basic(t *testing.T) {
-	t.Parallel()
+
 	parentAuthFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{
@@ -34,7 +34,7 @@ func TestAccKeycloakAuthenticationExecution_basic(t *testing.T) {
 }
 
 func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
+
 	var authenticationExecution = &keycloak.AuthenticationExecution{}
 
 	authParentFlowAlias := acctest.RandomWithPrefix("tf-acc")
@@ -66,7 +66,7 @@ func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.
 }
 
 func TestAccKeycloakAuthenticationExecution_updateAuthenticationExecutionRequirement(t *testing.T) {
-	t.Parallel()
+
 	authParentFlowAlias := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{

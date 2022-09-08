@@ -10,7 +10,6 @@ import (
 )
 
 func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
-	t.Parallel()
 
 	group := acctest.RandomWithPrefix("tf-acc")
 
@@ -35,7 +34,6 @@ func TestAccKeycloakDataSourceGroup_basic(t *testing.T) {
 }
 
 func TestAccKeycloakDataSourceGroup_nested(t *testing.T) {
-	t.Parallel()
 
 	group := acctest.RandomWithPrefix("tf-acc")
 	groupNested := acctest.RandomWithPrefix("tf-acc")

@@ -16,7 +16,7 @@ import (
 )
 
 func TestAccKeycloakUser_basic(t *testing.T) {
-	t.Parallel()
+
 	username := acctest.RandomWithPrefix("tf-acc")
 	attributeName := acctest.RandomWithPrefix("tf-acc")
 	attributeValue := acctest.RandomWithPrefix("tf-acc")
@@ -43,7 +43,7 @@ func TestAccKeycloakUser_basic(t *testing.T) {
 }
 
 func TestAccKeycloakUser_withInitialPassword(t *testing.T) {
-	t.Parallel()
+
 	username := acctest.RandomWithPrefix("tf-acc")
 	password := acctest.RandomWithPrefix("tf-acc")
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -67,7 +67,7 @@ func TestAccKeycloakUser_withInitialPassword(t *testing.T) {
 }
 
 func TestAccKeycloakUser_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
+
 	var user = &keycloak.User{}
 
 	username := acctest.RandomWithPrefix("tf-acc")
@@ -102,7 +102,7 @@ func TestAccKeycloakUser_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakUser_updateUsername(t *testing.T) {
-	t.Parallel()
+
 	usernameOne := acctest.RandomWithPrefix("tf-acc")
 	usernameTwo := acctest.RandomWithPrefix("tf-acc")
 	attributeName := acctest.RandomWithPrefix("tf-acc")
@@ -134,7 +134,7 @@ func TestAccKeycloakUser_updateUsername(t *testing.T) {
 }
 
 func TestAccKeycloakUser_updateWithInitialPasswordChangeDoesNotReset(t *testing.T) {
-	t.Parallel()
+
 	username := acctest.RandomWithPrefix("tf-acc")
 	passwordOne := acctest.RandomWithPrefix("tf-acc")
 	passwordTwo := acctest.RandomWithPrefix("tf-acc")
@@ -162,7 +162,7 @@ func TestAccKeycloakUser_updateWithInitialPasswordChangeDoesNotReset(t *testing.
 }
 
 func TestAccKeycloakUser_updateInPlace(t *testing.T) {
-	t.Parallel()
+
 	userOne := &keycloak.User{
 		RealmId:       "terraform-" + acctest.RandString(10),
 		Username:      "terraform-user-" + acctest.RandString(10),
@@ -203,7 +203,7 @@ func TestAccKeycloakUser_updateInPlace(t *testing.T) {
 }
 
 func TestAccKeycloakUser_unsetOptionalAttributes(t *testing.T) {
-	t.Parallel()
+
 	attributeName := acctest.RandomWithPrefix("tf-acc")
 	userWithOptionalAttributes := &keycloak.User{
 		RealmId:   "terraform-" + acctest.RandString(10),
@@ -245,7 +245,7 @@ func TestAccKeycloakUser_unsetOptionalAttributes(t *testing.T) {
 }
 
 func TestAccKeycloakUser_validateLowercaseUsernames(t *testing.T) {
-	t.Parallel()
+
 	username := "terraform-user-" + strings.ToUpper(acctest.RandString(10))
 	attributeName := "terraform-attribute-" + acctest.RandString(10)
 	attributeValue := acctest.RandString(250)

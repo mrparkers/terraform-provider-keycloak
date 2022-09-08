@@ -11,7 +11,6 @@ import (
 )
 
 func TestAccKeycloakGroupRoles_basic(t *testing.T) {
-	t.Parallel()
 
 	realmRoleName := acctest.RandomWithPrefix("tf-acc")
 	openIdClientName := acctest.RandomWithPrefix("tf-acc")
@@ -43,7 +42,6 @@ func TestAccKeycloakGroupRoles_basic(t *testing.T) {
 }
 
 func TestAccKeycloakGroupRoles_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var group = &keycloak.Group{}
 
@@ -80,7 +78,6 @@ func TestAccKeycloakGroupRoles_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakGroupRoles_update(t *testing.T) {
-	t.Parallel()
 
 	realmRoleOneName := acctest.RandomWithPrefix("tf-acc")
 	realmRoleTwoName := acctest.RandomWithPrefix("tf-acc")
@@ -175,7 +172,6 @@ func TestAccKeycloakGroupRoles_update(t *testing.T) {
 }
 
 func TestAccKeycloakGroupRoles_basicNonExhaustive(t *testing.T) {
-	t.Parallel()
 
 	realmRoleName := acctest.RandomWithPrefix("tf-acc")
 	openIdClientName := acctest.RandomWithPrefix("tf-acc")
@@ -205,7 +201,6 @@ func TestAccKeycloakGroupRoles_basicNonExhaustive(t *testing.T) {
 }
 
 func TestAccKeycloakGroupRoles_updateNonExhaustive(t *testing.T) {
-	t.Parallel()
 
 	realmRoleOneName := acctest.RandomWithPrefix("tf-acc")
 	realmRoleTwoName := acctest.RandomWithPrefix("tf-acc")
@@ -286,7 +281,6 @@ func TestAccKeycloakGroupRoles_updateNonExhaustive(t *testing.T) {
 }
 
 func TestAccKeycloakGroupRoles_simultaneousRoleAndAssignmentUpdate(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 

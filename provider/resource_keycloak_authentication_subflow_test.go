@@ -10,7 +10,6 @@ import (
 )
 
 func TestAccKeycloakAuthenticationSubFlow_basic(t *testing.T) {
-	t.Parallel()
 
 	parentAuthFlowAlias := acctest.RandomWithPrefix("tf-acc")
 	authFlowAlias := acctest.RandomWithPrefix("tf-acc")
@@ -35,7 +34,6 @@ func TestAccKeycloakAuthenticationSubFlow_basic(t *testing.T) {
 }
 
 func TestAccKeycloakAuthenticationSubFlow_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var authenticationSubFlow = &keycloak.AuthenticationSubFlow{}
 
@@ -69,7 +67,6 @@ func TestAccKeycloakAuthenticationSubFlow_createAfterManualDestroy(t *testing.T)
 }
 
 func TestAccKeycloakAuthenticationSubFlow_updateAuthenticationSubFlow(t *testing.T) {
-	t.Parallel()
 
 	authParentFlowAlias := acctest.RandomWithPrefix("tf-acc")
 	authFlowAliasBefore := acctest.RandomWithPrefix("tf-acc")
@@ -99,7 +96,6 @@ func TestAccKeycloakAuthenticationSubFlow_updateAuthenticationSubFlow(t *testing
 }
 
 func TestAccKeycloakAuthenticationSubFlow_updateAuthenticationSubFlowRequirement(t *testing.T) {
-	t.Parallel()
 
 	authParentFlowAlias := acctest.RandomWithPrefix("tf-acc")
 	authFlowAlias := acctest.RandomWithPrefix("tf-acc")

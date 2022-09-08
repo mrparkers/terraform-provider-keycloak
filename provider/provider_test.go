@@ -85,7 +85,6 @@ func createTestRealm(testCtx context.Context) *keycloak.Realm {
 }
 
 func TestProvider(t *testing.T) {
-	t.Parallel()
 
 	if err := testAccProvider.InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)

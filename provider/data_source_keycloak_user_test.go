@@ -11,7 +11,6 @@ import (
 )
 
 func TestAccKeycloakDataSourceUser(t *testing.T) {
-	t.Parallel()
 
 	username := acctest.RandomWithPrefix("tf-acc")
 	email := acctest.RandomWithPrefix("tf-acc") + "@fakedomain.com"
@@ -36,7 +35,7 @@ func TestAccKeycloakDataSourceUser(t *testing.T) {
 }
 
 func TestAccKeycloakDataSourceUser_gracefulError(t *testing.T) {
-	t.Parallel()
+
 	username := acctest.RandomWithPrefix("tf-acc")
 
 	resource.Test(t, resource.TestCase{

@@ -11,7 +11,6 @@ import (
 )
 
 func TestAccKeycloakUserGroups_basic(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 	userName := acctest.RandomWithPrefix("tf-acc")
@@ -39,7 +38,6 @@ func TestAccKeycloakUserGroups_basic(t *testing.T) {
 }
 
 func TestAccKeycloakUserGroups_basicNonExhaustive(t *testing.T) {
-	t.Parallel()
 
 	groupName := acctest.RandomWithPrefix("tf-acc")
 	userName := acctest.RandomWithPrefix("tf-acc")
@@ -62,7 +60,6 @@ func TestAccKeycloakUserGroups_basicNonExhaustive(t *testing.T) {
 }
 
 func TestAccKeycloakUserGroups_update(t *testing.T) {
-	t.Parallel()
 
 	userName := acctest.RandomWithPrefix("tf-acc")
 	groupName := acctest.RandomWithPrefix("tf-acc")
@@ -143,7 +140,6 @@ func TestAccKeycloakUserGroups_update(t *testing.T) {
 }
 
 func TestAccKeycloakUserGroups_updateNonExhaustive(t *testing.T) {
-	t.Parallel()
 
 	userName := acctest.RandomWithPrefix("tf-acc")
 	groupName := acctest.RandomWithPrefix("tf-acc")

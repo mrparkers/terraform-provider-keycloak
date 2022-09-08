@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
-	t.Parallel()
 
 	samlName := acctest.RandomWithPrefix("tf-acc")
 
@@ -31,7 +30,6 @@ func TestAccKeycloakSamlIdentityProvider_basic(t *testing.T) {
 }
 
 func TestAccKeycloakSamlIdentityProvider_customProviderId(t *testing.T) {
-	t.Parallel()
 
 	samlName := acctest.RandomWithPrefix("tf-acc")
 
@@ -49,7 +47,6 @@ func TestAccKeycloakSamlIdentityProvider_customProviderId(t *testing.T) {
 }
 
 func TestAccKeycloakSamlIdentityProvider_nameIdPolicyFormatTransient(t *testing.T) {
-	t.Parallel()
 
 	samlName := acctest.RandomWithPrefix("tf-acc")
 
@@ -67,7 +64,6 @@ func TestAccKeycloakSamlIdentityProvider_nameIdPolicyFormatTransient(t *testing.
 }
 
 func TestAccKeycloakSamlIdentityProvider_extraConfig(t *testing.T) {
-	t.Parallel()
 
 	samlName := acctest.RandomWithPrefix("tf-acc")
 	customConfigValue := acctest.RandomWithPrefix("tf-acc")
@@ -89,7 +85,6 @@ func TestAccKeycloakSamlIdentityProvider_extraConfig(t *testing.T) {
 
 // ensure that extra_config keys which are covered by top-level attributes are not allowed
 func TestAccKeycloakSamlIdentityProvider_extraConfigInvalid(t *testing.T) {
-	t.Parallel()
 
 	samlName := acctest.RandomWithPrefix("tf-acc")
 	customConfigValue := acctest.RandomWithPrefix("tf-acc")
@@ -108,7 +103,6 @@ func TestAccKeycloakSamlIdentityProvider_extraConfigInvalid(t *testing.T) {
 }
 
 func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var saml = &keycloak.IdentityProvider{}
 
@@ -138,7 +132,6 @@ func TestAccKeycloakSamlIdentityProvider_createAfterManualDestroy(t *testing.T) 
 }
 
 func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
-	t.Parallel()
 
 	firstEnabled := randomBool()
 	firstBackchannel := randomBool()

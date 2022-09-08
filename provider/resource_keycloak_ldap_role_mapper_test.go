@@ -11,7 +11,6 @@ import (
 )
 
 func TestAccKeycloakLdapRoleMapper_basic(t *testing.T) {
-	t.Parallel()
 
 	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 
@@ -35,7 +34,6 @@ func TestAccKeycloakLdapRoleMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var mapper = &keycloak.LdapRoleMapper{}
 
@@ -65,7 +63,6 @@ func TestAccKeycloakLdapRoleMapper_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_modeValidation(t *testing.T) {
-	t.Parallel()
 
 	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	mode := randomStringInSlice(keycloakLdapRoleMapperModes)
@@ -88,7 +85,6 @@ func TestAccKeycloakLdapRoleMapper_modeValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_membershipAttributeTypeValidation(t *testing.T) {
-	t.Parallel()
 
 	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	membershipAttributeType := randomStringInSlice(keycloakLdapRoleMapperMembershipAttributeTypes)
@@ -111,7 +107,6 @@ func TestAccKeycloakLdapRoleMapper_membershipAttributeTypeValidation(t *testing.
 }
 
 func TestAccKeycloakLdapRoleMapper_userRolesRetrieveStrategyValidation(t *testing.T) {
-	t.Parallel()
 
 	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	userRolesRetrieveStrategy := randomStringInSlice(keycloakLdapRoleMapperUserRolesRetrieveStrategies)
@@ -134,7 +129,6 @@ func TestAccKeycloakLdapRoleMapper_userRolesRetrieveStrategyValidation(t *testin
 }
 
 func TestAccKeycloakLdapRoleMapper_rolesLdapFilterValidation(t *testing.T) {
-	t.Parallel()
 
 	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 	rolesLdapFilter := "(" + acctest.RandString(10) + ")"
@@ -157,7 +151,6 @@ func TestAccKeycloakLdapRoleMapper_rolesLdapFilterValidation(t *testing.T) {
 }
 
 func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationForceNew(t *testing.T) {
-	t.Parallel()
 
 	roleMapperName := acctest.RandomWithPrefix("tf-acc")
 
@@ -179,7 +172,6 @@ func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationForceNew(t *testing.T
 }
 
 func TestAccKeycloakLdapRoleMapper_updateLdapUserFederationInPlace(t *testing.T) {
-	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
 	useRealmRolesMapping := randomBool()

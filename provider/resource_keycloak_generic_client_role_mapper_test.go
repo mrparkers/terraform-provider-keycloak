@@ -11,7 +11,6 @@ import (
 )
 
 func TestAccKeycloakGenericRoleMapper_basic(t *testing.T) {
-	t.Parallel()
 
 	parentClientName := acctest.RandomWithPrefix("tf-acc")
 	parentRoleName := acctest.RandomWithPrefix("tf-acc")
@@ -30,7 +29,6 @@ func TestAccKeycloakGenericRoleMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakGenericRoleMapper_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var role = &keycloak.Role{}
 	var childClient = &keycloak.GenericClient{}
@@ -66,7 +64,6 @@ func TestAccKeycloakGenericRoleMapper_createAfterManualDestroy(t *testing.T) {
 }
 
 func TestAccKeycloakGenericRoleMapper_import(t *testing.T) {
-	t.Parallel()
 
 	parentClientName := acctest.RandomWithPrefix("tf-acc")
 	parentRoleName := acctest.RandomWithPrefix("tf-acc")
@@ -93,7 +90,6 @@ func TestAccKeycloakGenericRoleMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakGenericRoleMapperClientScope_basic(t *testing.T) {
-	t.Parallel()
 
 	clientName := acctest.RandomWithPrefix("tf-acc")
 	roleName := acctest.RandomWithPrefix("tf-acc")
@@ -112,7 +108,6 @@ func TestAccKeycloakGenericRoleMapperClientScope_basic(t *testing.T) {
 }
 
 func TestAccKeycloakGenericRoleMapperClientScope_import(t *testing.T) {
-	t.Parallel()
 
 	clientName := acctest.RandomWithPrefix("tf-acc")
 	roleName := acctest.RandomWithPrefix("tf-acc")
@@ -139,7 +134,6 @@ func TestAccKeycloakGenericRoleMapperClientScope_import(t *testing.T) {
 }
 
 func TestAccKeycloakGenericRealmLevelRoleMapperClientScope_basic(t *testing.T) {
-	t.Parallel()
 
 	roleName := acctest.RandomWithPrefix("tf-acc")
 	clientScopeName := acctest.RandomWithPrefix("tf-acc")
@@ -157,7 +151,6 @@ func TestAccKeycloakGenericRealmLevelRoleMapperClientScope_basic(t *testing.T) {
 }
 
 func TestAccKeycloakGenericRealmLevelRoleMapperClientScope_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var role = &keycloak.Role{}
 	var clientScope = &keycloak.OpenidClientScope{}
@@ -192,7 +185,6 @@ func TestAccKeycloakGenericRealmLevelRoleMapperClientScope_createAfterManualDest
 }
 
 func TestAccKeycloakGenericRoleMapperClientScope_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var role = &keycloak.Role{}
 	var clientScope = &keycloak.OpenidClientScope{}

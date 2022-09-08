@@ -11,7 +11,6 @@ import (
 )
 
 func TestAccKeycloakOpenidClientAuthorizationGroupPolicy(t *testing.T) {
-	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
 

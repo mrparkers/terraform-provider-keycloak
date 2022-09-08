@@ -11,7 +11,6 @@ import (
 )
 
 func TestAccKeycloakUserRoles_basic(t *testing.T) {
-	t.Parallel()
 
 	realmRoleName := acctest.RandomWithPrefix("tf-acc")
 	openIdClientName := acctest.RandomWithPrefix("tf-acc")
@@ -43,7 +42,6 @@ func TestAccKeycloakUserRoles_basic(t *testing.T) {
 }
 
 func TestAccKeycloakUserRoles_update(t *testing.T) {
-	t.Parallel()
 
 	realmRoleOneName := acctest.RandomWithPrefix("tf-acc")
 	realmRoleTwoName := acctest.RandomWithPrefix("tf-acc")
@@ -135,7 +133,6 @@ func TestAccKeycloakUserRoles_update(t *testing.T) {
 }
 
 func TestAccKeycloakUserRoles_updateNonExhaustive(t *testing.T) {
-	t.Parallel()
 
 	realmRoleOneName := acctest.RandomWithPrefix("tf-acc")
 	realmRoleTwoName := acctest.RandomWithPrefix("tf-acc")

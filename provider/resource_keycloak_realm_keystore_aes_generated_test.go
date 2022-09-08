@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccKeycloakRealmKeystoreAesGenerated_basic(t *testing.T) {
-	t.Parallel()
 
 	aesName := acctest.RandomWithPrefix("tf-acc")
 
@@ -36,7 +35,6 @@ func TestAccKeycloakRealmKeystoreAesGenerated_basic(t *testing.T) {
 }
 
 func TestAccKeycloakRealmKeystoreAesGenerated_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var aes = &keycloak.RealmKeystoreAesGenerated{}
 
@@ -66,7 +64,6 @@ func TestAccKeycloakRealmKeystoreAesGenerated_createAfterManualDestroy(t *testin
 }
 
 func TestAccKeycloakRealmKeystoreAesGenerated_secretSizeValidation(t *testing.T) {
-	t.Parallel()
 
 	aesName := acctest.RandomWithPrefix("tf-acc")
 
@@ -89,7 +86,6 @@ func TestAccKeycloakRealmKeystoreAesGenerated_secretSizeValidation(t *testing.T)
 }
 
 func TestAccKeycloakRealmKeystoreAesGenerated_updateRealmKeystoreAesGenerated(t *testing.T) {
-	t.Parallel()
 
 	enabled := randomBool()
 	active := randomBool()

@@ -10,7 +10,6 @@ import (
 )
 
 func TestAccKeycloakLdapMsadUserAccountControlMapper_basic(t *testing.T) {
-	t.Parallel()
 
 	msadUacMapperName := acctest.RandomWithPrefix("tf-acc")
 
@@ -34,7 +33,6 @@ func TestAccKeycloakLdapMsadUserAccountControlMapper_basic(t *testing.T) {
 }
 
 func TestAccKeycloakLdapMsadUserAccountControlMapper_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	var mapper = &keycloak.LdapMsadUserAccountControlMapper{}
 
@@ -64,7 +62,6 @@ func TestAccKeycloakLdapMsadUserAccountControlMapper_createAfterManualDestroy(t 
 }
 
 func TestAccKeycloakLdapMsadUserAccountControlMapper_updateLdapUserFederation(t *testing.T) {
-	t.Parallel()
 
 	msadUacMapperName := acctest.RandomWithPrefix("tf-acc")
 
@@ -86,7 +83,6 @@ func TestAccKeycloakLdapMsadUserAccountControlMapper_updateLdapUserFederation(t 
 }
 
 func TestAccKeycloakLdapMsadUserAccountControlMapper_updateInPlace(t *testing.T) {
-	t.Parallel()
 
 	passwordHintsEnabled := randomBool()
 

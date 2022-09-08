@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
-	t.Parallel()
 
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
 
@@ -39,7 +38,6 @@ func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
 }
 
 func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
-	t.Parallel()
 
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
 
@@ -75,7 +73,6 @@ func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
 }
 
 func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) {
-	t.Parallel()
 
 	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
 
@@ -108,7 +105,6 @@ func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) 
 }
 
 func TestAccKeycloakCustomUserFederation_validation(t *testing.T) {
-	t.Parallel()
 
 	name := acctest.RandomWithPrefix("tf-acc")
 	providerId := acctest.RandomWithPrefix("tf-acc")
