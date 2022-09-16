@@ -77,9 +77,9 @@ jobs:
     strategy:
       matrix:
         keycloak-version:
-          - '18.0.0-legacy'
-          - '17.0.0-legacy'
-          - '16.1.1'
+          - '19.0.2-legacy'
+          - '18.0.2-legacy'
+          - '17.0.1-legacy'
       fail-fast: false
     concurrency:
       group: ${{ github.head_ref }}-${{ matrix.keycloak-version }}
