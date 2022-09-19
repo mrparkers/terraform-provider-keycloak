@@ -77,9 +77,9 @@ jobs:
     strategy:
       matrix:
         keycloak-version:
-          - '19.0.2-legacy'
-          - '18.0.2-legacy'
-          - '17.0.1-legacy'
+          - '19.0.2'
+          - '18.0.2'
+          - '17.0.1'
       fail-fast: false
     concurrency:
       group: ${{ github.head_ref }}-${{ matrix.keycloak-version }}
@@ -90,11 +90,11 @@ jobs:
         ports:
           - 8080:8080
         env:
-          DB_VENDOR: H2
-          KEYCLOAK_LOGLEVEL: INFO
-          KEYCLOAK_USER: keycloak
-          KEYCLOAK_PASSWORD: password
-          JAVA_OPTS: "-Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.profile.feature.admin_fine_grained_authz=enabled -Dkeycloak.profile.feature.token_exchange=enabled -Dkeycloak.profile.feature.declarative_user_profile=enabled"
+          KC_DB: dev-mem
+          KC_LOG_LEVEL: INFO
+          KEYCLOAK_ADMIN: keycloak
+          KEYCLOAK_ADMIN_PASSWORD: password
+        options: start-dev --features=preview
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
