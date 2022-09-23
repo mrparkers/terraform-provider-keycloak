@@ -179,7 +179,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 			"base_path": {
 				Optional:    true,
 				Type:        schema.TypeString,
-				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_BASE_PATH", "/auth"),
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_BASE_PATH", ""),
 			},
 			"additional_headers": {
 				Optional: true,
