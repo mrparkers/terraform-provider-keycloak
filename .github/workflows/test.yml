@@ -94,7 +94,6 @@ jobs:
           KC_LOG_LEVEL: INFO
           KEYCLOAK_ADMIN: keycloak
           KEYCLOAK_ADMIN_PASSWORD: password
-        options: start-dev --features=preview
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
