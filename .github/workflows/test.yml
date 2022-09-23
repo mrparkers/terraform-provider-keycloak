@@ -86,7 +86,7 @@ jobs:
       cancel-in-progress: true
     services:
       keycloak:
-        image: quay.io/keycloak/keycloak:${{ matrix.keycloak-version }}
+        image: mrparkers/keycloak-dev:${{ matrix.keycloak-version }}
         ports:
           - 8080:8080
         env:
