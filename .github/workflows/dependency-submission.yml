@@ -21,6 +21,6 @@ jobs:
           cache: true
 
       - name: Run snapshot action
-        uses: @actions/go-dependency-submission@v1
+        uses: actions/go-dependency-submission@v1
         with:
           go-mod-path: go.mod
