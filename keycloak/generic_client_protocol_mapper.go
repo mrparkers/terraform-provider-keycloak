@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-type GenericClientProtocolMapper struct {
+type GenericProtocolMapper struct {
 	ClientId       string            `json:"-"`
 	ClientScopeId  string            `json:"-"`
 	Config         map[string]string `json:"config"`
@@ -16,71 +16,71 @@ type GenericClientProtocolMapper struct {
 	RealmId        string            `json:"-"`
 }
 
-type OpenidClientWithGenericClientProtocolMappers struct {
+type OpenidClientWithGenericProtocolMappers struct {
 	OpenidClient
-	ProtocolMappers []*GenericClientProtocolMapper
+	ProtocolMappers []*GenericProtocolMapper
 }
 
-func (keycloakClient *KeycloakClient) NewGenericClientProtocolMapper(ctx context.Context, genericClientProtocolMapper *GenericClientProtocolMapper) error {
-	path := protocolMapperPath(genericClientProtocolMapper.RealmId, genericClientProtocolMapper.ClientId, genericClientProtocolMapper.ClientScopeId)
+func (keycloakClient *KeycloakClient) NewGenericProtocolMapper(ctx context.Context, genericProtocolMapper *GenericProtocolMapper) error {
+	path := protocolMapperPath(genericProtocolMapper.RealmId, genericProtocolMapper.ClientId, genericProtocolMapper.ClientScopeId)
 
-	_, location, err := keycloakClient.post(ctx, path, genericClientProtocolMapper)
+	_, location, err := keycloakClient.post(ctx, path, genericProtocolMapper)
 	if err != nil {
 		return err
 	}
 
-	genericClientProtocolMapper.Id = getIdFromLocationHeader(location)
+	genericProtocolMapper.Id = getIdFromLocationHeader(location)
 
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetGenericClientProtocolMappers(ctx context.Context, realmId string, clientId string) (*OpenidClientWithGenericClientProtocolMappers, error) {
-	var openidClientWithGenericClientProtocolMappers OpenidClientWithGenericClientProtocolMappers
+func (keycloakClient *KeycloakClient) GetGenericProtocolMappers(ctx context.Context, realmId string, clientId string) (*OpenidClientWithGenericProtocolMappers, error) {
+	var openidClientWithGenericProtocolMappers OpenidClientWithGenericProtocolMappers
 
-	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients/%s", realmId, clientId), &openidClientWithGenericClientProtocolMappers, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients/%s", realmId, clientId), &openidClientWithGenericProtocolMappers, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	openidClientWithGenericClientProtocolMappers.RealmId = realmId
-	openidClientWithGenericClientProtocolMappers.ClientId = clientId
+	openidClientWithGenericProtocolMappers.RealmId = realmId
+	openidClientWithGenericProtocolMappers.ClientId = clientId
 
-	for _, protocolMapper := range openidClientWithGenericClientProtocolMappers.ProtocolMappers {
+	for _, protocolMapper := range openidClientWithGenericProtocolMappers.ProtocolMappers {
 		protocolMapper.RealmId = realmId
 		protocolMapper.ClientId = clientId
 	}
 
-	return &openidClientWithGenericClientProtocolMappers, nil
+	return &openidClientWithGenericProtocolMappers, nil
 
 }
 
-func (keycloakClient *KeycloakClient) GetGenericClientProtocolMapper(ctx context.Context, realmId string, clientId string, clientScopeId string, mapperId string) (*GenericClientProtocolMapper, error) {
-	var genericClientProtocolMapper GenericClientProtocolMapper
+func (keycloakClient *KeycloakClient) GetGenericProtocolMapper(ctx context.Context, realmId string, clientId string, clientScopeId string, mapperId string) (*GenericProtocolMapper, error) {
+	var genericProtocolMapper GenericProtocolMapper
 
-	err := keycloakClient.get(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &genericClientProtocolMapper, nil)
+	err := keycloakClient.get(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &genericProtocolMapper, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	// these values are not provided by the keycloak API
-	genericClientProtocolMapper.ClientId = clientId
-	genericClientProtocolMapper.ClientScopeId = clientScopeId
-	genericClientProtocolMapper.RealmId = realmId
+	genericProtocolMapper.ClientId = clientId
+	genericProtocolMapper.ClientScopeId = clientScopeId
+	genericProtocolMapper.RealmId = realmId
 
-	return &genericClientProtocolMapper, nil
+	return &genericProtocolMapper, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateGenericClientProtocolMapper(ctx context.Context, genericClientProtocolMapper *GenericClientProtocolMapper) error {
-	path := individualProtocolMapperPath(genericClientProtocolMapper.RealmId, genericClientProtocolMapper.ClientId, genericClientProtocolMapper.ClientScopeId, genericClientProtocolMapper.Id)
+func (keycloakClient *KeycloakClient) UpdateGenericProtocolMapper(ctx context.Context, genericProtocolMapper *GenericProtocolMapper) error {
+	path := individualProtocolMapperPath(genericProtocolMapper.RealmId, genericProtocolMapper.ClientId, genericProtocolMapper.ClientScopeId, genericProtocolMapper.Id)
 
-	return keycloakClient.put(ctx, path, genericClientProtocolMapper)
+	return keycloakClient.put(ctx, path, genericProtocolMapper)
 }
 
-func (keycloakClient *KeycloakClient) DeleteGenericClientProtocolMapper(ctx context.Context, realmId string, clientId string, clientScopeId string, mapperId string) error {
+func (keycloakClient *KeycloakClient) DeleteGenericProtocolMapper(ctx context.Context, realmId string, clientId string, clientScopeId string, mapperId string) error {
 	return keycloakClient.delete(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
 }
 
-func (mapper *GenericClientProtocolMapper) Validate(ctx context.Context, keycloakClient *KeycloakClient) error {
+func (mapper *GenericProtocolMapper) Validate(ctx context.Context, keycloakClient *KeycloakClient) error {
 	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
