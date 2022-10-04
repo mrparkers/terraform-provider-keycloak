@@ -101,6 +101,8 @@ func (keycloakClient *KeycloakClient) ListOpenidClientScopesWithFilter(ctx conte
 			scope := new(OpenidClientScope)
 			*scope = clientScope
 
+			scope.RealmId = realmId
+
 			openidClientScopes = append(openidClientScopes, scope)
 		}
 	}
@@ -108,7 +110,7 @@ func (keycloakClient *KeycloakClient) ListOpenidClientScopesWithFilter(ctx conte
 	return openidClientScopes, nil
 }
 
-func includeOpenidClientScopesMatchingNames(scopeNames []string) OpenidClientScopeFilterFunc {
+func IncludeOpenidClientScopesMatchingNames(scopeNames []string) OpenidClientScopeFilterFunc {
 	return func(scope *OpenidClientScope) bool {
 		for _, scopeName := range scopeNames {
 			if scopeName == scope.Name {

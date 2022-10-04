@@ -52,7 +52,7 @@ func resourceKeycloakOpenidClientScope() *schema.Resource {
 	}
 }
 
-func getClientScopeFromData(data *schema.ResourceData) *keycloak.OpenidClientScope {
+func getOpenidClientScopeFromData(data *schema.ResourceData) *keycloak.OpenidClientScope {
 	clientScope := &keycloak.OpenidClientScope{
 		Id:          data.Id(),
 		RealmId:     data.Get("realm_id").(string),
@@ -77,7 +77,7 @@ func getClientScopeFromData(data *schema.ResourceData) *keycloak.OpenidClientSco
 	return clientScope
 }
 
-func setClientScopeData(data *schema.ResourceData, clientScope *keycloak.OpenidClientScope) {
+func setOpenidClientScopeData(data *schema.ResourceData, clientScope *keycloak.OpenidClientScope) {
 	data.SetId(clientScope.Id)
 
 	data.Set("realm_id", clientScope.RealmId)
@@ -97,14 +97,14 @@ func setClientScopeData(data *schema.ResourceData, clientScope *keycloak.OpenidC
 func resourceKeycloakOpenidClientScopeCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	clientScope := getClientScopeFromData(data)
+	clientScope := getOpenidClientScopeFromData(data)
 
 	err := keycloakClient.NewOpenidClientScope(ctx, clientScope)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	setClientScopeData(data, clientScope)
+	setOpenidClientScopeData(data, clientScope)
 
 	return resourceKeycloakOpenidClientScopeRead(ctx, data, meta)
 }
@@ -120,7 +120,7 @@ func resourceKeycloakOpenidClientScopeRead(ctx context.Context, data *schema.Res
 		return handleNotFoundError(ctx, err, data)
 	}
 
-	setClientScopeData(data, clientScope)
+	setOpenidClientScopeData(data, clientScope)
 
 	return nil
 }
@@ -128,14 +128,14 @@ func resourceKeycloakOpenidClientScopeRead(ctx context.Context, data *schema.Res
 func resourceKeycloakOpenidClientScopeUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	clientScope := getClientScopeFromData(data)
+	clientScope := getOpenidClientScopeFromData(data)
 
 	err := keycloakClient.UpdateOpenidClientScope(ctx, clientScope)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	setClientScopeData(data, clientScope)
+	setOpenidClientScopeData(data, clientScope)
 
 	return nil
 }
