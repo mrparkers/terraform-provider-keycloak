@@ -1,0 +1,26 @@
+name: Go Dependency Submission
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  go-dependency-submission:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Run snapshot action
+        uses: @actions/go-dependency-submission@v1
+        with:
+          go-mod-path: go.mod

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-KEYCLOAK_URL="http://localhost:8080/auth/"
+KEYCLOAK_URL="http://localhost:8080/"
 
 printf "Waiting for local Keycloak to be ready"
 
