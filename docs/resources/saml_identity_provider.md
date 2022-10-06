@@ -51,7 +51,7 @@ resource "keycloak_saml_identity_provider" "realm_saml_identity_provider" {
 - `entity_id` - (Required) The Entity ID that will be used to uniquely identify this SAML Service Provider.
 - `single_sign_on_service_url` - (Required) The Url that must be used to send authentication requests (SAML AuthnRequest).
 - `single_logout_service_url` - (Optional) The Url that must be used to send logout requests.
-- `backchannel_supported` - (Optional) Does the external IDP support back-channel logout ?.
+- `backchannel_supported` - (Optional) Does the external IDP support backchannel logout?. Defaults to `false`.
 - `provider_id` - (Optional) The ID of the identity provider to use. Defaults to `saml`, which should be used unless you have extended Keycloak and provided your own implementation.
 - `name_id_policy_format` - (Optional) Specifies the URI reference corresponding to a name identifier format. Defaults to empty.
 - `post_binding_response` - (Optional) Indicates whether to respond to requests using HTTP-POST binding. If false, HTTP-REDIRECT binding will be used..
@@ -63,9 +63,11 @@ resource "keycloak_saml_identity_provider" "realm_saml_identity_provider" {
 - `validate_signature` - (Optional) Enable/disable signature validation of SAML responses.
 - `signing_certificate` - (Optional) Signing Certificate.
 - `signature_algorithm` - (Optional) Signing Algorithm. Defaults to empty.
-- `xml_sign_key_info_key_name_transformer` - (Optional) Sign Key Transformer. Defaults to empty.
-- `sync_mode` - (Optional) The default sync mode to use for all mappers attached to this identity provider. Can be once of `IMPORT`, `FORCE`, or `LEGACY`.
+- `xml_sign_key_info_key_name_transformer` - (Optional) The SAML signature key name. Can be one of `NONE`, `KEY_ID`, or `CERT_SUBJECT`.
+- `sync_mode` - (Optional) The default sync mode to use for all mappers attached to this identity provider. Can be one of `IMPORT`, `FORCE`, or `LEGACY`.
 - `gui_order` - (Optional) A number defining the order of this identity provider in the GUI.
+- `principal_type` - (Optional) The principal type. Can be one of `SUBJECT`, `ATTRIBUTE` or `FRIENDLY_ATTRIBUTE`.
+- `principal_attribute` - (Optional) The principal attribute.
 - `authn_context_class_refs` - (Optional) Ordered list of requested AuthnContext ClassRefs.
 - `authn_context_decl_refs` - (Optional) Ordered list of requested AuthnContext DeclRefs.
 - `authn_context_comparison_type` - (Optional) Specifies the comparison method used to evaluate the requested context classes or statements.
