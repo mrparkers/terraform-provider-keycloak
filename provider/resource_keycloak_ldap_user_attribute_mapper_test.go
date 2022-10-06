@@ -261,7 +261,7 @@ resource "keycloak_ldap_user_attribute_mapper" "username" {
 	read_only                   = %t
 	always_read_value_from_ldap = %t
 	is_mandatory_in_ldap        = %t
-	attribute_default_value     = %s
+	attribute_default_value     = "%s"
 	is_binary_attribute         = %t
 }
 	`, testAccRealmUserFederation.Realm, mapper.Name, mapper.UserModelAttribute, mapper.LdapAttribute, mapper.ReadOnly, mapper.AlwaysReadValueFromLdap, mapper.IsMandatoryInLdap,
