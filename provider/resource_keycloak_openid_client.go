@@ -610,6 +610,7 @@ func resourceKeycloakOpenidClientImport(ctx context.Context, d *schema.ResourceD
 	}
 
 	d.Set("realm_id", parts[0])
+	d.Set("import", false)
 	d.SetId(parts[1])
 
 	diagnostics := resourceKeycloakOpenidClientRead(ctx, d, meta)
