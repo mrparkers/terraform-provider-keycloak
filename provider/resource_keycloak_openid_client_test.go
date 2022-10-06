@@ -650,8 +650,8 @@ func TestAccKeycloakOpenidClient_import(t *testing.T) {
 				ExpectError: regexp.MustCompile("Error: openid client with name non-existing-client does not exist"),
 			},
 			{
-				Config: testKeycloakOpenidClient_import("account", false),
-				Check:  testAccCheckKeycloakOpenidClientExistsWithEnabledStatus("keycloak_openid_client.client", false),
+				Config: testKeycloakOpenidClient_import("account", true),
+				Check:  testAccCheckKeycloakOpenidClientExistsWithEnabledStatus("keycloak_openid_client.client", true),
 			},
 		},
 	})
