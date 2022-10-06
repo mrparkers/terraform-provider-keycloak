@@ -95,7 +95,7 @@ func TestAccKeycloakLdapUserAttributeMapper_updateInPlace(t *testing.T) {
 		LdapAttribute:           acctest.RandString(10),
 		IsMandatoryInLdap:       randomBool(),
 		ReadOnly:                randomBool(),
-		AlwaysReadValueFromLdap: randomBool(),
+		AlwaysReadValueFromLdap: true,
 		AttributeDefaultValue:   acctest.RandString(10),
 		IsBinaryAttribute:       randomBool(),
 	}
@@ -107,7 +107,7 @@ func TestAccKeycloakLdapUserAttributeMapper_updateInPlace(t *testing.T) {
 		ReadOnly:                randomBool(),
 		AlwaysReadValueFromLdap: randomBool(),
 		AttributeDefaultValue:   acctest.RandString(10),
-		IsBinaryAttribute:       randomBool(),
+		IsBinaryAttribute:       false,
 	}
 
 	resource.Test(t, resource.TestCase{
