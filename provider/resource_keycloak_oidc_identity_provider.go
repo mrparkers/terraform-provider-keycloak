@@ -97,6 +97,11 @@ func resourceKeycloakOidcIdentityProvider() *schema.Resource {
 			Default:     false,
 			Description: "Disable usage of User Info service to obtain additional user information?  Default is to use this OIDC service.",
 		},
+		"issuer": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The issuer identifier for the issuer of the response. If not provided, no validation will be performed.",
+		},
 	}
 	oidcResource := resourceKeycloakIdentityProvider()
 	oidcResource.Schema = mergeSchemas(oidcResource.Schema, oidcSchema)
@@ -128,6 +133,7 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		DisableUserInfo:             keycloak.KeycloakBoolQuoted(data.Get("disable_user_info").(bool)),
 		DefaultScope:                data.Get("default_scopes").(string),
 		AcceptsPromptNoneForwFrmClt: keycloak.KeycloakBoolQuoted(data.Get("accepts_prompt_none_forward_from_client").(bool)),
+		Issuer:                      data.Get("issuer").(string),
 	}
 
 	if err := mergo.Merge(oidcIdentityProviderConfig, defaultConfig); err != nil {
@@ -153,5 +159,6 @@ func setOidcIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("token_url", identityProvider.Config.TokenUrl)
 	data.Set("login_hint", identityProvider.Config.LoginHint)
 	data.Set("ui_locales", identityProvider.Config.UILocales)
+	data.Set("issuer", identityProvider.Config.Issuer)
 	return nil
 }
