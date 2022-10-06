@@ -57,7 +57,7 @@ func resourceKeycloakLdapFullNameMapper() *schema.Resource {
 
 func getLdapFullNameMapperFromData(data *schema.ResourceData) *keycloak.LdapFullNameMapper {
 	return &keycloak.LdapFullNameMapper{
-		Id:                   data.Get("id").(string),
+		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
 		RealmId:              data.Get("realm_id").(string),
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
