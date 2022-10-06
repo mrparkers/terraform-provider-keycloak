@@ -7,7 +7,7 @@ import (
 )
 
 type LdapFullNameMapper struct {
-	ComponentType
+	Id                   string
 	Name                 string
 	RealmId              string
 	LdapUserFederationId string
@@ -50,9 +50,7 @@ func convertFromComponentToLdapFullNameMapper(component *component, realmId stri
 	}
 
 	return &LdapFullNameMapper{
-		ComponentType: ComponentType{
-			Id: component.Id,
-		},
+		Id:                   component.Id,
 		Name:                 component.Name,
 		RealmId:              realmId,
 		LdapUserFederationId: component.ParentId,

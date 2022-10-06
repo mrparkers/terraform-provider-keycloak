@@ -8,7 +8,7 @@ import (
 )
 
 type LdapRoleMapper struct {
-	ComponentType
+	Id                   string
 	Name                 string
 	RealmId              string
 	LdapUserFederationId string
@@ -91,9 +91,7 @@ func convertFromComponentToLdapRoleMapper(component *component, realmId string) 
 	}
 
 	ldapRoleMapper := &LdapRoleMapper{
-		ComponentType: ComponentType{
-			Id: component.Id,
-		},
+		Id:                   component.Id,
 		Name:                 component.Name,
 		RealmId:              realmId,
 		LdapUserFederationId: component.ParentId,

@@ -8,7 +8,7 @@ import (
 )
 
 type LdapGroupMapper struct {
-	ComponentType
+	Id                   string
 	Name                 string
 	RealmId              string
 	LdapUserFederationId string
@@ -115,9 +115,7 @@ func convertFromComponentToLdapGroupMapper(component *component, realmId string)
 	}
 
 	ldapGroupMapper := &LdapGroupMapper{
-		ComponentType: ComponentType{
-			Id: component.Id,
-		},
+		Id:                   component.Id,
 		Name:                 component.Name,
 		RealmId:              realmId,
 		LdapUserFederationId: component.ParentId,

@@ -6,7 +6,7 @@ import (
 )
 
 type LdapHardcodedRoleMapper struct {
-	ComponentType
+	Id                   string
 	Name                 string
 	RealmId              string
 	LdapUserFederationId string
@@ -31,9 +31,7 @@ func convertFromLdapHardcodedRoleMapperToComponent(ldapMapper *LdapHardcodedRole
 
 func convertFromComponentToLdapHardcodedRoleMapper(component *component, realmId string) *LdapHardcodedRoleMapper {
 	return &LdapHardcodedRoleMapper{
-		ComponentType: ComponentType{
-			Id: component.Id,
-		},
+		Id:                   component.Id,
 		Name:                 component.Name,
 		RealmId:              realmId,
 		LdapUserFederationId: component.ParentId,

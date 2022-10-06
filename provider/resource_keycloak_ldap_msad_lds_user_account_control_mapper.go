@@ -41,9 +41,7 @@ func resourceKeycloakLdapMsadLdsUserAccountControlMapper() *schema.Resource {
 
 func getLdapMsadLdsUserAccountControlMapperFromData(data *schema.ResourceData) *keycloak.LdapMsadLdsUserAccountControlMapper {
 	return &keycloak.LdapMsadLdsUserAccountControlMapper{
-		ComponentType: keycloak.ComponentType{
-			Id: data.Id(),
-		},
+		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
 		RealmId:              data.Get("realm_id").(string),
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),

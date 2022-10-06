@@ -6,7 +6,7 @@ import (
 )
 
 type LdapMsadLdsUserAccountControlMapper struct {
-	ComponentType
+	Id                   string
 	Name                 string
 	RealmId              string
 	LdapUserFederationId string
@@ -24,9 +24,7 @@ func convertFromLdapMsadLdsUserAccountControlMapperToComponent(ldapMsadLdsUserAc
 
 func convertFromComponentToLdapMsadLdsUserAccountControlMapper(component *component, realmId string) (*LdapMsadLdsUserAccountControlMapper, error) {
 	return &LdapMsadLdsUserAccountControlMapper{
-		ComponentType: ComponentType{
-			Id: component.Id,
-		},
+		Id:                   component.Id,
 		Name:                 component.Name,
 		RealmId:              realmId,
 		LdapUserFederationId: component.ParentId,

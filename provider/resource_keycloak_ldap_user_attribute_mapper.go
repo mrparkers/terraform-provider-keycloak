@@ -69,9 +69,7 @@ func resourceKeycloakLdapUserAttributeMapper() *schema.Resource {
 
 func getLdapUserAttributeMapperFromData(data *schema.ResourceData) *keycloak.LdapUserAttributeMapper {
 	return &keycloak.LdapUserAttributeMapper{
-		ComponentType: keycloak.ComponentType{
-			Id: data.Id(),
-		},
+		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
 		RealmId:              data.Get("realm_id").(string),
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
