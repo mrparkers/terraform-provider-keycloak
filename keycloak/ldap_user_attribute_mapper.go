@@ -22,11 +22,6 @@ type LdapUserAttributeMapper struct {
 }
 
 func convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper *LdapUserAttributeMapper) *component {
-	defaultValue := []string{}
-	if ldapUserAttributeMapper.AttributeDefaultValue != "" {
-		defaultValue = []string{ldapUserAttributeMapper.AttributeDefaultValue}
-	}
-
 	return &component{
 		Id:           ldapUserAttributeMapper.Id,
 		Name:         ldapUserAttributeMapper.Name,
@@ -49,7 +44,9 @@ func convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper *Ldap
 			"user.model.attribute": {
 				ldapUserAttributeMapper.UserModelAttribute,
 			},
-			"attribute.default.value": defaultValue,
+			"attribute.default.value": {
+				ldapUserAttributeMapper.AttributeDefaultValue,
+			},
 			"is.binary.attribute": {
 				strconv.FormatBool(ldapUserAttributeMapper.IsBinaryAttribute),
 			},
