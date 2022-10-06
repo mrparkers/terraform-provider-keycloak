@@ -339,7 +339,7 @@ resource "keycloak_ldap_user_federation" "openldap_no_default_mappers" {
     policy = "NO_CACHE"
   }
 
-  delete_default_mappers = false
+  delete_default_mappers = true
 }
 
 resource "keycloak_ldap_role_mapper" "ldap_role_mapper" {
