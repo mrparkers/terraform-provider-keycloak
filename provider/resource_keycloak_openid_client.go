@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/imdario/mergo"
 	"reflect"
 	"strings"
 
@@ -46,6 +47,7 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
@@ -55,6 +57,7 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"access_type": {
 				Type:         schema.TypeString,
@@ -71,56 +74,61 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(keycloakOpenidClientAuthenticatorTypes, false),
-				Default:      "client-secret",
+				Computed:     true,
 			},
 			"standard_flow_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"implicit_flow_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"direct_access_grants_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"service_accounts_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"frontchannel_logout_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"valid_redirect_uris": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 				Optional: true,
+				Computed: true,
 			},
 			"web_origins": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 				Optional: true,
+				Computed: true,
 			},
 			"root_url": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"admin_url": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"base_url": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"service_account_user_id": {
 				Type:     schema.TypeString,
@@ -134,27 +142,32 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 			"access_token_lifespan": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"client_offline_session_idle_timeout": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"client_offline_session_max_lifespan": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"client_session_idle_timeout": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"client_session_max_lifespan": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"exclude_session_state_from_auth_response": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"resource_server_id": {
 				Type:     schema.TypeString,
@@ -198,16 +211,17 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 			"consent_required": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"display_on_consent_screen": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"consent_screen_text": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"authentication_flow_binding_overrides": {
 				Type:     schema.TypeSet,
@@ -275,6 +289,12 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"import": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 		},
 		CustomizeDiff: customdiff.ComputedIf("service_account_user_id", func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 			return d.HasChange("service_accounts_enabled")
@@ -301,19 +321,6 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	if webOriginsOk {
 		for _, webOrigin := range webOriginsData.(*schema.Set).List() {
 			webOrigins = append(webOrigins, webOrigin.(string))
-		}
-	}
-
-	// Keycloak uses the root URL for web origins if not specified otherwise
-	if rootUrlOk && rootUrlString != "" {
-		if !validRedirectUrisOk {
-			return nil, errors.New("valid_redirect_uris is required when root_url is given1")
-		}
-		if !webOriginsOk {
-			return nil, errors.New("web_origins is required when root_url is given")
-		}
-		if _, adminOk := data.GetOk("admin_url"); !adminOk {
-			return nil, errors.New("admin_url is required when root_url is given")
 		}
 	}
 
@@ -503,9 +510,25 @@ func resourceKeycloakOpenidClientCreate(ctx context.Context, data *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewOpenidClient(ctx, client)
-	if err != nil {
-		return diag.FromErr(err)
+	if data.Get("import").(bool) {
+		existingClient, err := keycloakClient.GetOpenidClientByClientId(ctx, client.RealmId, client.ClientId)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if err = mergo.Merge(client, existingClient); err != nil {
+			return diag.FromErr(err)
+		}
+
+		err = keycloakClient.UpdateOpenidClient(ctx, client)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		err = keycloakClient.NewOpenidClient(ctx, client)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	err = setOpenidClientData(ctx, keycloakClient, data, client)
@@ -562,6 +585,9 @@ func resourceKeycloakOpenidClientUpdate(ctx context.Context, data *schema.Resour
 }
 
 func resourceKeycloakOpenidClientDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	if data.Get("import").(bool) {
+		return nil
+	}
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -584,6 +610,7 @@ func resourceKeycloakOpenidClientImport(ctx context.Context, d *schema.ResourceD
 	}
 
 	d.Set("realm_id", parts[0])
+	d.Set("import", false)
 	d.SetId(parts[1])
 
 	diagnostics := resourceKeycloakOpenidClientRead(ctx, d, meta)

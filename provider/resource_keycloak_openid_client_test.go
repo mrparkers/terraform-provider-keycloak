@@ -637,6 +637,26 @@ func TestAccKeycloakOpenidClient_loginTheme(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_import(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientNotDestroyed(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenidClient_import("non-existing-client", true),
+				ExpectError: regexp.MustCompile("Error: openid client with name non-existing-client does not exist"),
+			},
+			{
+				Config: testKeycloakOpenidClient_import("account", true),
+				Check:  testAccCheckKeycloakOpenidClientExistsWithEnabledStatus("keycloak_openid_client.client", true),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_useRefreshTokens(t *testing.T) {
 	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -1013,6 +1033,26 @@ func testAccCheckKeycloakOpenidClientDestroy() resource.TestCheckFunc {
 	}
 }
 
+func testAccCheckKeycloakOpenidClientNotDestroyed() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "keycloak_openid_client" {
+				continue
+			}
+
+			id := rs.Primary.ID
+			realm := rs.Primary.Attributes["realm_id"]
+
+			client, _ := keycloakClient.GetOpenidClient(testCtx, realm, id)
+			if client == nil {
+				return fmt.Errorf("openid client %s dost not exists", id)
+			}
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod(resourceName, pkceCodeChallengeMethod string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
@@ -1172,6 +1212,21 @@ func testAccCheckKeycloakOpenidClientExtraConfigMissing(resourceName string, key
 			}
 
 			return fmt.Errorf("expected openid client to not have attribute %v", key)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientExistsWithEnabledStatus(resourceName string, enabled bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Enabled != enabled {
+			return fmt.Errorf("expected openid client to have enabled status %t, but got %t", enabled, client.Enabled)
 		}
 
 		return nil
@@ -1670,4 +1725,21 @@ resource "keycloak_openid_client" "client" {
 	oauth2_device_polling_interval 				= "%s"
 }
 	`, testAccRealm.Realm, clientId, oauth2DeviceAuthorizationGrantEnabled, oauth2DeviceCodeLifespan, oauth2DevicePollingInterval)
+}
+
+func testKeycloakOpenidClient_import(clientId string, enabled bool) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = data.keycloak_realm.realm.id
+	access_type = "PUBLIC"
+	root_url    = ""
+	enabled     = %t
+	import      = true
+}
+	`, testAccRealm.Realm, clientId, enabled)
 }

@@ -2,6 +2,8 @@ GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 GOOS?=darwin
 GOARCH?=amd64
 
+MAKEFLAGS += --silent
+
 build:
 	go build -o terraform-provider-keycloak
 
