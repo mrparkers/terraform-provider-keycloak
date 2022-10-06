@@ -285,6 +285,13 @@ func resourceKeycloakLdapUserFederation() *schema.Resource {
 					},
 				},
 			},
+			"delete_default_mappers": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				ForceNew:    true,
+				Description: "When true, the provider will delete the default mappers which are normally created by Keycloak when creating an LDAP user federation provider.",
+			},
 		},
 	}
 }
@@ -475,6 +482,13 @@ func resourceKeycloakLdapUserFederationCreate(ctx context.Context, data *schema.
 		return diag.FromErr(err)
 	}
 
+	if data.Get("delete_default_mappers").(bool) {
+		err = keycloakClient.DeleteLdapUserFederationMappers(ctx, realmId, ldap.Id)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	setLdapUserFederationData(data, ldap, realmId)
 
 	return resourceKeycloakLdapUserFederationRead(ctx, data, meta)
@@ -557,6 +571,7 @@ func resourceKeycloakLdapUserFederationImport(ctx context.Context, d *schema.Res
 	}
 
 	d.Set("realm_id", realmId)
+	d.Set("delete_default_mappers", false) // this is only valid on create, so we assume this is false
 	d.SetId(id)
 
 	diagnostics := resourceKeycloakLdapUserFederationRead(ctx, d, meta)

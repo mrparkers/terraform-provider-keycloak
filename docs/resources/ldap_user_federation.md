@@ -95,7 +95,7 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
   - `server_principal` - (Required) The kerberos server principal, e.g. 'HTTP/host.foo.com@FOO.LOCAL'.
   - `key_tab` - (Required) Path to the kerberos keytab file on the server with credentials of the service principal.
   - `use_kerberos_for_password_authentication` - (Optional) Use kerberos login module instead of ldap service api. Defaults to `false`.
-
+- `delete_default_mappers` - (Optional) When true, the provider will delete the default mappers which are normally created by Keycloak when creating an LDAP user federation provider. Defaults to `false`.
 ## Import
 
 LDAP user federation providers can be imported using the format `{{realm_id}}/{{ldap_user_federation_id}}`.

@@ -538,3 +538,21 @@ func (keycloakClient *KeycloakClient) UpdateLdapUserFederation(ctx context.Conte
 func (keycloakClient *KeycloakClient) DeleteLdapUserFederation(ctx context.Context, realmId, id string) error {
 	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }
+
+func (keycloakClient *KeycloakClient) DeleteLdapUserFederationMappers(ctx context.Context, realmId, id string) error {
+	var components []*component
+
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components?parent=%s&type=org.keycloak.storage.ldap.mappers.LDAPStorageMapper", realmId, id), &components, nil)
+	if err != nil {
+		return err
+	}
+
+	for _, component := range components {
+		err = keycloakClient.DeleteComponent(ctx, realmId, component.Id)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

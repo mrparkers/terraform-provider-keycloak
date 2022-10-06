@@ -74,5 +74,5 @@ func (keycloakClient *KeycloakClient) UpdateLdapHardcodedRoleMapper(ctx context.
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapHardcodedRoleMapper(ctx context.Context, realmId, id string) error {
-	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+	return keycloakClient.DeleteComponent(ctx, realmId, id)
 }

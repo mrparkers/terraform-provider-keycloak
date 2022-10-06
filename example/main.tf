@@ -303,6 +303,45 @@ resource "keycloak_ldap_user_federation" "openldap" {
   }
 }
 
+
+resource "keycloak_ldap_user_federation" "openldap_no_default_mappers" {
+  name     = "openldap-no-default-mappers"
+  realm_id = keycloak_realm.test.id
+
+  enabled        = true
+  import_enabled = false
+
+  username_ldap_attribute = "cn"
+  rdn_ldap_attribute      = "cn"
+  uuid_ldap_attribute     = "entryDN"
+
+  user_object_classes = [
+    "simpleSecurityObject",
+    "organizationalRole",
+  ]
+
+  connection_url  = "ldap://openldap"
+  users_dn        = "dc=example,dc=org"
+  bind_dn         = "cn=admin,dc=example,dc=org"
+  bind_credential = "admin"
+
+  connection_timeout = "5s"
+  read_timeout       = "10s"
+
+  kerberos {
+    server_principal                         = "HTTP/keycloak.local@FOO.LOCAL"
+    use_kerberos_for_password_authentication = false
+    key_tab                                  = "/etc/keycloak.keytab"
+    kerberos_realm                           = "FOO.LOCAL"
+  }
+
+  cache {
+    policy = "NO_CACHE"
+  }
+
+  delete_default_mappers = true
+}
+
 resource "keycloak_ldap_role_mapper" "ldap_role_mapper" {
   realm_id                = keycloak_realm.test.id
   ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id

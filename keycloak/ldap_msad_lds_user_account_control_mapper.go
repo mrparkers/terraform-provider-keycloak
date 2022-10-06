@@ -58,5 +58,5 @@ func (keycloakClient *KeycloakClient) UpdateLdapMsadLdsUserAccountControlMapper(
 }
 
 func (keycloakClient *KeycloakClient) DeleteLdapMsadLdsUserAccountControlMapper(ctx context.Context, realmId, id string) error {
-	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+	return keycloakClient.DeleteComponent(ctx, realmId, id)
 }
