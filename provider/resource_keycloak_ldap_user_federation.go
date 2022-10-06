@@ -571,6 +571,7 @@ func resourceKeycloakLdapUserFederationImport(ctx context.Context, d *schema.Res
 	}
 
 	d.Set("realm_id", realmId)
+	d.Set("delete_default_mappers", false) // this is only valid on create, so we assume this is false
 	d.SetId(id)
 
 	diagnostics := resourceKeycloakLdapUserFederationRead(ctx, d, meta)
