@@ -50,7 +50,7 @@ type IdentityProviderConfig struct {
 	AuthnContextClassRefs           KeycloakSliceQuoted    `json:"authnContextClassRefs,omitempty"`
 	AuthnContextComparisonType      string                 `json:"authnContextComparisonType,omitempty"`
 	AuthnContextDeclRefs            KeycloakSliceQuoted    `json:"authnContextDeclRefs,omitempty"`
-	Issuer                          string                 `json:"issuer"`
+	Issuer                          string                 `json:"issuer,omitempty"`
 }
 
 type IdentityProvider struct {
