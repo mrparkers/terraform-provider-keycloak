@@ -1,7 +1,10 @@
 package provider
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -10,13 +13,13 @@ import (
 func resourceKeycloakRequiredAction() *schema.Resource {
 
 	return &schema.Resource{
-		Create: resourceKeycloakRequiredActionsCreate,
-		Read:   resourceKeycloakRequiredActionsRead,
-		Delete: resourceKeycloakRequiredActionsDelete,
-		Update: resourceKeycloakRequiredActionsUpdate,
+		CreateContext: resourceKeycloakRequiredActionsCreate,
+		ReadContext:   resourceKeycloakRequiredActionsRead,
+		DeleteContext: resourceKeycloakRequiredActionsDelete,
+		UpdateContext: resourceKeycloakRequiredActionsUpdate,
 		Importer: &schema.ResourceImporter{
 			// This resource can be imported using {{realm}}/{{alias}}. The required action aliases are displayed in the server info or GET realms/{{realm}}/authentication/required-actions
-			State: resourceKeycloakRequiredActionsImport,
+			StateContext: resourceKeycloakRequiredActionsImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -73,43 +76,43 @@ func setRequiredActionData(data *schema.ResourceData, action *keycloak.RequiredA
 	data.Set("priority", action.Priority)
 }
 
-func resourceKeycloakRequiredActionsCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRequiredActionsCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	action, err := getRequiredActionFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	unregisteredRequiredActions, err := keycloakClient.GetUnregisteredRequiredActions(action.RealmId)
+	unregisteredRequiredActions, err := keycloakClient.GetUnregisteredRequiredActions(ctx, action.RealmId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	for _, unregisteredRequiredAction := range unregisteredRequiredActions {
 		if unregisteredRequiredAction.ProviderId == action.Alias {
-			if err := keycloakClient.RegisterRequiredAction(unregisteredRequiredAction); err != nil {
-				return err
+			if err := keycloakClient.RegisterRequiredAction(ctx, unregisteredRequiredAction); err != nil {
+				return diag.FromErr(err)
 			}
 			break
 		}
 	}
 
-	err = keycloakClient.CreateRequiredAction(action)
+	err = keycloakClient.CreateRequiredAction(ctx, action)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setRequiredActionData(data, action)
 
-	return resourceKeycloakRequiredActionsRead(data, meta)
+	return resourceKeycloakRequiredActionsRead(ctx, data, meta)
 }
 
-func resourceKeycloakRequiredActionsRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRequiredActionsRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	action, err := keycloakClient.GetRequiredAction(data.Get("realm_id").(string), data.Get("alias").(string))
+	action, err := keycloakClient.GetRequiredAction(ctx, data.Get("realm_id").(string), data.Get("alias").(string))
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setRequiredActionData(data, action)
@@ -117,17 +120,17 @@ func resourceKeycloakRequiredActionsRead(data *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceKeycloakRequiredActionsUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRequiredActionsUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	action, err := getRequiredActionFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateRequiredAction(action)
+	err = keycloakClient.UpdateRequiredAction(ctx, action)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setRequiredActionData(data, action)
@@ -135,23 +138,36 @@ func resourceKeycloakRequiredActionsUpdate(data *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceKeycloakRequiredActionsDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRequiredActionsDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmName := data.Get("realm_id").(string)
 	alias := data.Get("alias").(string)
 
-	return keycloakClient.DeleteRequiredAction(realmName, alias)
+	return diag.FromErr(keycloakClient.DeleteRequiredAction(ctx, realmName, alias))
 }
 
-func resourceKeycloakRequiredActionsImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakRequiredActionsImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid import. Supported import formats: {{realmId}}/{{alias}}")
 	}
+
+	_, err := keycloakClient.GetRequiredAction(ctx, parts[0], parts[1])
+	if err != nil {
+		return nil, err
+	}
+
 	d.Set("realm_id", parts[0])
 	d.Set("alias", parts[1])
 	d.SetId(fmt.Sprintf("%s/%s", parts[0], parts[1]))
+
+	diagnostics := resourceKeycloakRequiredActionsRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

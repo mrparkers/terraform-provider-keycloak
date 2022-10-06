@@ -74,7 +74,7 @@ func TestAccKeycloakCustomIdentityProviderMapper_createAfterManualDestroy(t *tes
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteIdentityProviderMapper(mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
+					err := keycloakClient.DeleteIdentityProviderMapper(testCtx, mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -108,7 +108,7 @@ func TestAccKeycloakCustomIdentityProviderMapper_withExtraConfig_createAfterManu
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteIdentityProviderMapper(mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
+					err := keycloakClient.DeleteIdentityProviderMapper(testCtx, mapper.Realm, mapper.IdentityProviderAlias, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -201,7 +201,7 @@ func testAccCheckKeycloakCustomIdentityProviderMapperDestroy() resource.TestChec
 			alias := rs.Primary.Attributes["identity_provider_alias"]
 			id := rs.Primary.ID
 
-			mapper, _ := keycloakClient.GetIdentityProviderMapper(realm, alias, id)
+			mapper, _ := keycloakClient.GetIdentityProviderMapper(testCtx, realm, alias, id)
 			if mapper != nil {
 				return fmt.Errorf("oidc config with id %s still exists", id)
 			}
@@ -221,7 +221,7 @@ func getKeycloakCustomIdentityProviderMapperFromState(s *terraform.State, resour
 	alias := rs.Primary.Attributes["identity_provider_alias"]
 	id := rs.Primary.ID
 
-	mapper, err := keycloakClient.GetIdentityProviderMapper(realm, alias, id)
+	mapper, err := keycloakClient.GetIdentityProviderMapper(testCtx, realm, alias, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting identity provider mapper config with id %s: %s", id, err)
 	}
@@ -250,8 +250,8 @@ resource keycloak_custom_identity_provider_mapper oidc {
 	identity_provider_alias  = keycloak_oidc_identity_provider.oidc.alias
 	identity_provider_mapper = "%s"
 	extra_config 			= {
-		UserAttribute = "%s"
-		Claim         = "%s"
+		userAttribute = "%s"
+		claim         = "%s"
 	}
 }
 	`, testAccRealm.Realm, alias, name, mapperType, userAttribute, claimName)
@@ -279,8 +279,8 @@ resource keycloak_custom_identity_provider_mapper oidc {
 	identity_provider_mapper = "%s"
 	extra_config 			= {
 		syncMode      = "%s"
-		UserAttribute = "%s"
-		Claim         = "%s"
+		userAttribute = "%s"
+		claim         = "%s"
 	}
 }
 	`, testAccRealm.Realm, alias, name, mapperType, syncMode, userAttribute, claimName)
@@ -305,8 +305,8 @@ resource keycloak_custom_identity_provider_mapper saml {
 	identity_provider_alias  = keycloak_saml_identity_provider.saml.alias
 	identity_provider_mapper = "%s"
 	extra_config 			= {
-		Attribute     = "%s"
-		UserAttribute = "%s"
+		attribute     = "%s"
+		userAttribute = "%s"
 	}
 }
 	`, testAccRealm.Realm, mapper.IdentityProviderAlias, mapper.Name, mapper.IdentityProviderMapper, mapper.Config.Attribute, mapper.Config.UserAttribute)

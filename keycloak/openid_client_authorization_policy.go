@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -18,10 +19,10 @@ type OpenidClientAuthorizationPolicy struct {
 	Type             string   `json:"type"`
 }
 
-func (keycloakClient *KeycloakClient) GetClientAuthorizationPolicyByName(realmId, resourceServerId, name string) (*OpenidClientAuthorizationPolicy, error) {
+func (keycloakClient *KeycloakClient) GetClientAuthorizationPolicyByName(ctx context.Context, realmId, resourceServerId, name string) (*OpenidClientAuthorizationPolicy, error) {
 	policies := []OpenidClientAuthorizationPolicy{}
 	params := map[string]string{"name": name}
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy", realmId, resourceServerId), &policies, params)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients/%s/authz/resource-server/policy", realmId, resourceServerId), &policies, params)
 	if err != nil {
 		return nil, err
 	}

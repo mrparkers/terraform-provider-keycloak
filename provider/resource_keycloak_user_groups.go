@@ -1,7 +1,10 @@
 package provider
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -9,13 +12,13 @@ import (
 
 func resourceKeycloakUserGroups() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakUserGroupsReconcile,
-		Read:   resourceKeycloakUserGroupsRead,
-		Delete: resourceKeycloakUserGroupsDelete,
-		Update: resourceKeycloakUserGroupsReconcile,
+		CreateContext: resourceKeycloakUserGroupsReconcile,
+		ReadContext:   resourceKeycloakUserGroupsRead,
+		DeleteContext: resourceKeycloakUserGroupsDelete,
+		UpdateContext: resourceKeycloakUserGroupsReconcile,
 		// This resource can be imported using {{realm}}/{{userId}}.
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakUserGroupsImport,
+			StateContext: resourceKeycloakUserGroupsImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -43,7 +46,7 @@ func resourceKeycloakUserGroups() *schema.Resource {
 	}
 }
 
-func resourceKeycloakUserGroupsRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakUserGroupsRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -51,9 +54,9 @@ func resourceKeycloakUserGroupsRead(data *schema.ResourceData, meta interface{})
 	groupIds := data.Get("group_ids").(*schema.Set)
 	exhaustive := data.Get("exhaustive").(bool)
 
-	userGroups, err := keycloakClient.GetUserGroups(realmId, userId)
+	userGroups, err := keycloakClient.GetUserGroups(ctx, realmId, userId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	var groups []string
@@ -70,7 +73,7 @@ func resourceKeycloakUserGroupsRead(data *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func resourceKeycloakUserGroupsReconcile(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakUserGroupsReconcile(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -84,14 +87,14 @@ func resourceKeycloakUserGroupsReconcile(data *schema.ResourceData, meta interfa
 		ns := n.(*schema.Set)
 		remove := interfaceSliceToStringSlice(os.Difference(ns).List())
 
-		if err := keycloakClient.RemoveUserFromGroups(remove, userId, realmId); err != nil {
-			return err
+		if err := keycloakClient.RemoveUserFromGroups(ctx, remove, userId, realmId); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
-	userGroups, err := keycloakClient.GetUserGroups(realmId, userId)
+	userGroups, err := keycloakClient.GetUserGroups(ctx, realmId, userId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var userGroupsIds []string
@@ -102,41 +105,54 @@ func resourceKeycloakUserGroupsReconcile(data *schema.ResourceData, meta interfa
 	remove := stringArrayDifference(userGroupsIds, groupIds)
 	add := stringArrayDifference(groupIds, userGroupsIds)
 
-	if err := keycloakClient.AddUserToGroups(add, userId, realmId); err != nil {
-		return err
+	if err := keycloakClient.AddUserToGroups(ctx, add, userId, realmId); err != nil {
+		return diag.FromErr(err)
 	}
 
 	if exhaustive {
-		if err := keycloakClient.RemoveUserFromGroups(remove, userId, realmId); err != nil {
-			return err
+		if err := keycloakClient.RemoveUserFromGroups(ctx, remove, userId, realmId); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
 	data.SetId(userGroupsId(realmId, userId))
-	return resourceKeycloakUserGroupsRead(data, meta)
+	return resourceKeycloakUserGroupsRead(ctx, data, meta)
 }
 
-func resourceKeycloakUserGroupsDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakUserGroupsDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	userId := data.Get("user_id").(string)
 	groupIds := interfaceSliceToStringSlice(data.Get("group_ids").(*schema.Set).List())
 
-	return keycloakClient.RemoveUserFromGroups(groupIds, userId, realmId)
+	return diag.FromErr(keycloakClient.RemoveUserFromGroups(ctx, groupIds, userId, realmId))
 }
 
-func resourceKeycloakUserGroupsImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
+func resourceKeycloakUserGroupsImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
+	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import format: {{realm}}/{{userId}}.")
 	}
 
-	d.Set("realm_id", parts[0])
-	d.Set("user_id", parts[1])
+	realmId := parts[0]
+	userId := parts[1]
 
-	d.SetId(userGroupsId(parts[0], parts[1]))
+	_, err := keycloakClient.GetUserGroups(ctx, realmId, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	d.Set("realm_id", realmId)
+	d.Set("user_id", userId)
+	d.Set("exhaustive", true)
+
+	diagnostics := resourceKeycloakUserGroupsRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

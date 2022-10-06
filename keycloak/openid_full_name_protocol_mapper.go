@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
@@ -32,17 +33,17 @@ func (mapper *OpenIdFullNameProtocolMapper) convertToGenericProtocolMapper() *pr
 }
 
 func (protocolMapper *protocolMapper) convertToOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId string) (*OpenIdFullNameProtocolMapper, error) {
-	idTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToIdTokenField])
+	idTokenClaim, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToIdTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	accessTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToAccessTokenField])
+	accessTokenClaim, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToAccessTokenField])
 	if err != nil {
 		return nil, err
 	}
 
-	userinfoTokenClaim, err := strconv.ParseBool(protocolMapper.Config[addToUserInfoField])
+	userinfoTokenClaim, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToUserInfoField])
 	if err != nil {
 		return nil, err
 	}
@@ -60,10 +61,10 @@ func (protocolMapper *protocolMapper) convertToOpenIdFullNameProtocolMapper(real
 	}, nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId, mapperId string) (*OpenIdFullNameProtocolMapper, error) {
+func (keycloakClient *KeycloakClient) GetOpenIdFullNameProtocolMapper(ctx context.Context, realmId, clientId, clientScopeId, mapperId string) (*OpenIdFullNameProtocolMapper, error) {
 	var protocolMapper *protocolMapper
 
-	err := keycloakClient.get(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
+	err := keycloakClient.get(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), &protocolMapper, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -71,14 +72,14 @@ func (keycloakClient *KeycloakClient) GetOpenIdFullNameProtocolMapper(realmId, c
 	return protocolMapper.convertToOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId)
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenIdFullNameProtocolMapper(realmId, clientId, clientScopeId, mapperId string) error {
-	return keycloakClient.delete(individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
+func (keycloakClient *KeycloakClient) DeleteOpenIdFullNameProtocolMapper(ctx context.Context, realmId, clientId, clientScopeId, mapperId string) error {
+	return keycloakClient.delete(ctx, individualProtocolMapperPath(realmId, clientId, clientScopeId, mapperId), nil)
 }
 
-func (keycloakClient *KeycloakClient) NewOpenIdFullNameProtocolMapper(mapper *OpenIdFullNameProtocolMapper) error {
+func (keycloakClient *KeycloakClient) NewOpenIdFullNameProtocolMapper(ctx context.Context, mapper *OpenIdFullNameProtocolMapper) error {
 	path := protocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 
-	_, location, err := keycloakClient.post(path, mapper.convertToGenericProtocolMapper())
+	_, location, err := keycloakClient.post(ctx, path, mapper.convertToGenericProtocolMapper())
 	if err != nil {
 		return err
 	}
@@ -88,18 +89,18 @@ func (keycloakClient *KeycloakClient) NewOpenIdFullNameProtocolMapper(mapper *Op
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateOpenIdFullNameProtocolMapper(mapper *OpenIdFullNameProtocolMapper) error {
+func (keycloakClient *KeycloakClient) UpdateOpenIdFullNameProtocolMapper(ctx context.Context, mapper *OpenIdFullNameProtocolMapper) error {
 	path := individualProtocolMapperPath(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 
-	return keycloakClient.put(path, mapper.convertToGenericProtocolMapper())
+	return keycloakClient.put(ctx, path, mapper.convertToGenericProtocolMapper())
 }
 
-func (keycloakClient *KeycloakClient) ValidateOpenIdFullNameProtocolMapper(mapper *OpenIdFullNameProtocolMapper) error {
+func (keycloakClient *KeycloakClient) ValidateOpenIdFullNameProtocolMapper(ctx context.Context, mapper *OpenIdFullNameProtocolMapper) error {
 	if mapper.ClientId == "" && mapper.ClientScopeId == "" {
 		return fmt.Errorf("validation error: one of ClientId or ClientScopeId must be set")
 	}
 
-	protocolMappers, err := keycloakClient.listGenericProtocolMappers(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
+	protocolMappers, err := keycloakClient.listGenericProtocolMappers(ctx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId)
 	if err != nil {
 		return err
 	}

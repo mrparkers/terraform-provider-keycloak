@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
@@ -16,6 +17,9 @@ type CustomUserFederation struct {
 	Priority int
 
 	CachePolicy string
+
+	FullSyncPeriod    int
+	ChangedSyncPeriod int
 
 	Config map[string][]string
 }
@@ -35,6 +39,8 @@ func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *c
 	componentConfig["cachePolicy"] = append(componentConfig["cachePolicy"], custom.CachePolicy)
 	componentConfig["enabled"] = append(componentConfig["enabled"], strconv.FormatBool(custom.Enabled))
 	componentConfig["priority"] = append(componentConfig["priority"], strconv.Itoa(custom.Priority))
+	componentConfig["fullSyncPeriod"] = append(componentConfig["fullSyncPeriod"], strconv.Itoa(custom.FullSyncPeriod))
+	componentConfig["changedSyncPeriod"] = append(componentConfig["changedSyncPeriod"], strconv.Itoa(custom.ChangedSyncPeriod))
 	parentId := custom.RealmId
 	if custom.ParentId != "" {
 		parentId = custom.ParentId
@@ -55,14 +61,30 @@ func convertFromComponentToCustomUserFederation(component *component, realmName 
 		return nil, err
 	}
 
-	priority, err := strconv.Atoi(component.getConfig("priority"))
+	priority, err := atoiAndTreatEmptyStringAsZero(component.getConfig("priority"))
 	if err != nil {
 		return nil, err
 	}
 
+	fullSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("fullSyncPeriod"))
+	if err != nil {
+		return nil, err
+	}
+	changedSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("changedSyncPeriod"))
+	if err != nil {
+		return nil, err
+	}
+
+	configsToIgnore := map[string]bool{
+		"enabled":           true,
+		"priority":          true,
+		"cachePolicy":       true,
+		"fullSyncPeriod":    true,
+		"changedSyncPeriod": true,
+	}
 	config := make(map[string][]string)
 	for k := range component.Config {
-		if k != "enabled" && k != "priority" && k != "cachePolicy" {
+		if found := configsToIgnore[k]; !found {
 			config[k] = append(config[k], component.getConfig(k))
 		}
 	}
@@ -79,15 +101,18 @@ func convertFromComponentToCustomUserFederation(component *component, realmName 
 
 		CachePolicy: component.getConfig("cachePolicy"),
 
+		FullSyncPeriod:    fullSyncPeriod,
+		ChangedSyncPeriod: changedSyncPeriod,
+
 		Config: config,
 	}
 
 	return custom, nil
 }
 
-func (keycloakClient *KeycloakClient) ValidateCustomUserFederation(custom *CustomUserFederation) error {
+func (keycloakClient *KeycloakClient) ValidateCustomUserFederation(ctx context.Context, custom *CustomUserFederation) error {
 	// validate if the given custom user storage provider exists on the server.
-	serverInfo, err := keycloakClient.GetServerInfo()
+	serverInfo, err := keycloakClient.GetServerInfo(ctx)
 	if err != nil {
 		return err
 	}
@@ -99,8 +124,8 @@ func (keycloakClient *KeycloakClient) ValidateCustomUserFederation(custom *Custo
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) NewCustomUserFederation(customUserFederation *CustomUserFederation) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", customUserFederation.RealmId), convertFromCustomUserFederationToComponent(customUserFederation))
+func (keycloakClient *KeycloakClient) NewCustomUserFederation(ctx context.Context, realmId string, customUserFederation *CustomUserFederation) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", realmId), convertFromCustomUserFederationToComponent(customUserFederation))
 	if err != nil {
 		return err
 	}
@@ -110,10 +135,10 @@ func (keycloakClient *KeycloakClient) NewCustomUserFederation(customUserFederati
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetCustomUserFederation(realmName, id string) (*CustomUserFederation, error) {
+func (keycloakClient *KeycloakClient) GetCustomUserFederation(ctx context.Context, realmName, id string) (*CustomUserFederation, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmName, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmName, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -121,12 +146,12 @@ func (keycloakClient *KeycloakClient) GetCustomUserFederation(realmName, id stri
 	return convertFromComponentToCustomUserFederation(component, realmName)
 }
 
-func (keycloakClient *KeycloakClient) GetCustomUserFederations(realmName, realmId string) (*[]CustomUserFederation, error) {
+func (keycloakClient *KeycloakClient) GetCustomUserFederations(ctx context.Context, realmName, realmId string) (*[]CustomUserFederation, error) {
 	var components []*component
 	var customUserFederations []CustomUserFederation
 	var customUserFederation *CustomUserFederation
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components?parent=%s&type=%s", realmName, realmId, userStorageProviderType), &components, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components?parent=%s&type=%s", realmName, realmId, userStorageProviderType), &components, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -141,10 +166,10 @@ func (keycloakClient *KeycloakClient) GetCustomUserFederations(realmName, realmI
 	return &customUserFederations, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateCustomUserFederation(customUserFederation *CustomUserFederation) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", customUserFederation.RealmId, customUserFederation.Id), convertFromCustomUserFederationToComponent(customUserFederation))
+func (keycloakClient *KeycloakClient) UpdateCustomUserFederation(ctx context.Context, realmId string, customUserFederation *CustomUserFederation) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, customUserFederation.Id), convertFromCustomUserFederationToComponent(customUserFederation))
 }
 
-func (keycloakClient *KeycloakClient) DeleteCustomUserFederation(realmName, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmName, id), nil)
+func (keycloakClient *KeycloakClient) DeleteCustomUserFederation(ctx context.Context, realmName, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmName, id), nil)
 }

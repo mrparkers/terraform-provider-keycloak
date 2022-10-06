@@ -2,11 +2,12 @@ package provider
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"testing"
 )
 
 func TestAccKeycloakLdapUserAttributeMapper_basic(t *testing.T) {
@@ -51,7 +52,7 @@ func TestAccKeycloakLdapUserAttributeMapper_createAfterManualDestroy(t *testing.
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteLdapUserAttributeMapper(mapper.RealmId, mapper.Id)
+					err := keycloakClient.DeleteLdapUserAttributeMapper(testCtx, mapper.RealmId, mapper.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -94,7 +95,9 @@ func TestAccKeycloakLdapUserAttributeMapper_updateInPlace(t *testing.T) {
 		LdapAttribute:           acctest.RandString(10),
 		IsMandatoryInLdap:       randomBool(),
 		ReadOnly:                randomBool(),
-		AlwaysReadValueFromLdap: randomBool(),
+		AlwaysReadValueFromLdap: true,
+		AttributeDefaultValue:   acctest.RandString(10),
+		IsBinaryAttribute:       randomBool(),
 	}
 	userAttributeMapperAfter := &keycloak.LdapUserAttributeMapper{
 		Name:                    acctest.RandString(10),
@@ -103,6 +106,8 @@ func TestAccKeycloakLdapUserAttributeMapper_updateInPlace(t *testing.T) {
 		IsMandatoryInLdap:       randomBool(),
 		ReadOnly:                randomBool(),
 		AlwaysReadValueFromLdap: randomBool(),
+		AttributeDefaultValue:   acctest.RandString(10),
+		IsBinaryAttribute:       false,
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -157,7 +162,7 @@ func testAccCheckKeycloakLdapUserAttributeMapperDestroy() resource.TestCheckFunc
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldapUserAttributeMapper, _ := keycloakClient.GetLdapUserAttributeMapper(realm, id)
+			ldapUserAttributeMapper, _ := keycloakClient.GetLdapUserAttributeMapper(testCtx, realm, id)
 			if ldapUserAttributeMapper != nil {
 				return fmt.Errorf("ldap user attribute mapper with id %s still exists", id)
 			}
@@ -176,7 +181,7 @@ func getLdapUserAttributeMapperFromState(s *terraform.State, resourceName string
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	ldapUserAttributeMapper, err := keycloakClient.GetLdapUserAttributeMapper(realm, id)
+	ldapUserAttributeMapper, err := keycloakClient.GetLdapUserAttributeMapper(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting ldap user attribute mapper with id %s: %s", id, err)
 	}
@@ -256,8 +261,11 @@ resource "keycloak_ldap_user_attribute_mapper" "username" {
 	read_only                   = %t
 	always_read_value_from_ldap = %t
 	is_mandatory_in_ldap        = %t
+	attribute_default_value     = "%s"
+	is_binary_attribute         = %t
 }
-	`, testAccRealmUserFederation.Realm, mapper.Name, mapper.UserModelAttribute, mapper.LdapAttribute, mapper.ReadOnly, mapper.AlwaysReadValueFromLdap, mapper.IsMandatoryInLdap)
+	`, testAccRealmUserFederation.Realm, mapper.Name, mapper.UserModelAttribute, mapper.LdapAttribute, mapper.ReadOnly, mapper.AlwaysReadValueFromLdap, mapper.IsMandatoryInLdap,
+		mapper.AttributeDefaultValue, mapper.IsBinaryAttribute)
 }
 
 func testKeycloakLdapUserAttributeMapper_updateLdapUserFederationBefore(userAttributeMapperName string) string {

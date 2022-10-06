@@ -1,11 +1,41 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakRealm() *schema.Resource {
+
+	otpPolicySchema := map[string]*schema.Schema{
+		"type": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"algorithm": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"digits": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"initial_counter": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"look_ahead_window": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"period": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+	}
+
 	webAuthnSchema := map[string]*schema.Schema{
 		"acceptable_aaguids": {
 			Type: schema.TypeSet,
@@ -60,7 +90,7 @@ func dataSourceKeycloakRealm() *schema.Resource {
 		},
 	}
 	return &schema.Resource{
-		Read: dataSourceKeycloakRealmRead,
+		ReadContext: dataSourceKeycloakRealmRead,
 		Schema: map[string]*schema.Schema{
 			"realm": {
 				Type:     schema.TypeString,
@@ -253,6 +283,14 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"client_session_idle_timeout": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"client_session_max_lifespan": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"access_token_lifespan": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -279,6 +317,14 @@ func dataSourceKeycloakRealm() *schema.Resource {
 			},
 			"action_token_generated_by_admin_lifespan": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"oauth2_device_code_lifespan": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"oauth2_device_polling_interval": {
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
@@ -445,6 +491,16 @@ func dataSourceKeycloakRealm() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+			// OTPPolicy
+			"otp_policy": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: otpPolicySchema,
+				},
+			},
 			// WebAuthn
 			"web_authn_policy": {
 				Type:     schema.TypeList,
@@ -470,14 +526,14 @@ func dataSourceKeycloakRealm() *schema.Resource {
 	}
 }
 
-func dataSourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakRealmRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmName := data.Get("realm").(string)
 
-	realm, err := keycloakClient.GetRealm(realmName)
+	realm, err := keycloakClient.GetRealm(ctx, realmName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setRealmData(data, realm)

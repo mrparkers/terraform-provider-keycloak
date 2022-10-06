@@ -1,17 +1,19 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakOpenidClientOptionalScopes() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenidClientOptionalScopesCreate,
-		Read:   resourceKeycloakOpenidClientOptionalScopesRead,
-		Delete: resourceKeycloakOpenidClientOptionalScopesDelete,
-		Update: resourceKeycloakOpenidClientOptionalScopesUpdate,
+		CreateContext: resourceKeycloakOpenidClientOptionalScopesReconcile,
+		ReadContext:   resourceKeycloakOpenidClientOptionalScopesRead,
+		DeleteContext: resourceKeycloakOpenidClientOptionalScopesDelete,
+		UpdateContext: resourceKeycloakOpenidClientOptionalScopesReconcile,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -33,35 +35,19 @@ func resourceKeycloakOpenidClientOptionalScopes() *schema.Resource {
 	}
 }
 
-func resourceKeycloakOpenidClientOptionalScopesCreate(data *schema.ResourceData, meta interface{}) error {
-	keycloakClient := meta.(*keycloak.KeycloakClient)
-	realmId := data.Get("realm_id").(string)
-	clientId := data.Get("client_id").(string)
-	optionalScopes := data.Get("optional_scopes").(*schema.Set)
-
-	err := keycloakClient.AttachOpenidClientOptionalScopes(realmId, clientId, interfaceSliceToStringSlice(optionalScopes.List()))
-	if err != nil {
-		return err
-	}
-
-	data.SetId(openidClientOptionalScopesId(realmId, clientId))
-
-	return resourceKeycloakOpenidClientOptionalScopesRead(data, meta)
-}
-
 func openidClientOptionalScopesId(realmId string, clientId string) string {
 	return fmt.Sprintf("%s/%s", realmId, clientId)
 }
 
-func resourceKeycloakOpenidClientOptionalScopesRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientOptionalScopesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
-	clientScopes, err := keycloakClient.GetOpenidClientOptionalScopes(realmId, clientId)
+	clientScopes, err := keycloakClient.GetOpenidClientOptionalScopes(ctx, realmId, clientId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	var optionalScopes []string
@@ -75,16 +61,16 @@ func resourceKeycloakOpenidClientOptionalScopesRead(data *schema.ResourceData, m
 	return nil
 }
 
-func resourceKeycloakOpenidClientOptionalScopesUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientOptionalScopesReconcile(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	tfOpenidClientOptionalScopes := data.Get("optional_scopes").(*schema.Set)
 
-	keycloakOpenidClientOptionalScopes, err := keycloakClient.GetOpenidClientOptionalScopes(realmId, clientId)
+	keycloakOpenidClientOptionalScopes, err := keycloakClient.GetOpenidClientOptionalScopes(ctx, realmId, clientId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var openidClientOptionalScopesToDetach []string
@@ -100,28 +86,28 @@ func resourceKeycloakOpenidClientOptionalScopesUpdate(data *schema.ResourceData,
 	}
 
 	// detach scopes that aren't in tf state
-	err = keycloakClient.DetachOpenidClientOptionalScopes(realmId, clientId, openidClientOptionalScopesToDetach)
+	err = keycloakClient.DetachOpenidClientOptionalScopes(ctx, realmId, clientId, openidClientOptionalScopesToDetach)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// attach scopes that exist in tf state but not in keycloak
-	err = keycloakClient.AttachOpenidClientOptionalScopes(realmId, clientId, interfaceSliceToStringSlice(tfOpenidClientOptionalScopes.List()))
+	err = keycloakClient.AttachOpenidClientOptionalScopes(ctx, realmId, clientId, interfaceSliceToStringSlice(tfOpenidClientOptionalScopes.List()))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	data.SetId(openidClientOptionalScopesId(realmId, clientId))
 
-	return resourceKeycloakOpenidClientOptionalScopesRead(data, meta)
+	return resourceKeycloakOpenidClientOptionalScopesRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenidClientOptionalScopesDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientOptionalScopesDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	optionalScopes := data.Get("optional_scopes").(*schema.Set)
 
-	return keycloakClient.DetachOpenidClientOptionalScopes(realmId, clientId, interfaceSliceToStringSlice(optionalScopes.List()))
+	return diag.FromErr(keycloakClient.DetachOpenidClientOptionalScopes(ctx, realmId, clientId, interfaceSliceToStringSlice(optionalScopes.List())))
 }

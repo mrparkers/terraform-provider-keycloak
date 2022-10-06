@@ -13,7 +13,7 @@ import (
 
 // All openid clients in Keycloak will automatically have these scopes listed as "optional client scopes".
 func getPreAssignedOptionalClientScopes() []string {
-	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_6); ok {
 		return []string{"address", "phone", "offline_access", "microprofile-jwt"}
 	} else {
 		return []string{"address", "phone", "offline_access"}
@@ -161,13 +161,13 @@ func TestAccKeycloakOpenidClientOptionalScopes_authoritativeAdd(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					client, err := keycloakClient.GetOpenidClientByClientId(testAccRealm.Realm, client)
+					client, err := keycloakClient.GetOpenidClientByClientId(testCtx, testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
 					clientToManuallyDetach := clientScopes[acctest.RandIntRange(0, len(clientScopes)-1)]
-					err = keycloakClient.DetachOpenidClientOptionalScopes(testAccRealm.Realm, client.Id, []string{clientToManuallyDetach})
+					err = keycloakClient.DetachOpenidClientOptionalScopes(testCtx, testAccRealm.Realm, client.Id, []string{clientToManuallyDetach})
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -209,12 +209,12 @@ func TestAccKeycloakOpenidClientOptionalScopes_authoritativeRemove(t *testing.T)
 			},
 			{
 				PreConfig: func() {
-					client, err := keycloakClient.GetOpenidClientByClientId(testAccRealm.Realm, client)
+					client, err := keycloakClient.GetOpenidClientByClientId(testCtx, testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachOpenidClientOptionalScopes(testAccRealm.Realm, client.Id, []string{clientToManuallyAttach})
+					err = keycloakClient.AttachOpenidClientOptionalScopes(testCtx, testAccRealm.Realm, client.Id, []string{clientToManuallyAttach})
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -247,42 +247,18 @@ func TestAccKeycloakOpenidClientOptionalScopes_noImportNeeded(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					openidClient, err := keycloakClient.GetOpenidClientByClientId(testAccRealm.Realm, client)
+					openidClient, err := keycloakClient.GetOpenidClientByClientId(testCtx, testAccRealm.Realm, client)
 					if err != nil {
 						t.Fatal(err)
 					}
 
-					err = keycloakClient.AttachOpenidClientOptionalScopes(testAccRealm.Realm, openidClient.Id, clientScopes)
+					err = keycloakClient.AttachOpenidClientOptionalScopes(testCtx, testAccRealm.Realm, openidClient.Id, clientScopes)
 					if err != nil {
 						t.Fatal(err)
 					}
 				},
 				Config: testKeycloakOpenidClientOptionalScopes_basic(client, clientScope),
 				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", clientScopes),
-			},
-		},
-	})
-}
-
-// by optional, keycloak clients have the optional scopes "address", "phone" and
-// "offline_access" "microprofile-jwt" attached. if you create this resource with only one scope, it
-// won't remove these two scopes, because the creation of a new resource should
-// not result in anything destructive. thus, a following plan will not be empty,
-// as terraform will think it needs to remove these scopes, which is okay to do
-// during an update
-func TestAccKeycloakOpenidClientOptionalScopes_profileAndEmailOptionalScopes(t *testing.T) {
-	t.Parallel()
-	client := acctest.RandomWithPrefix("tf-acc")
-	clientScope := acctest.RandomWithPrefix("tf-acc")
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		Steps: []resource.TestStep{
-			{
-				Config:             testKeycloakOpenidClientOptionalScopes_listOfScopes(client, clientScope, []string{clientScope}),
-				Check:              testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client.client", append(getPreAssignedOptionalClientScopes(), clientScope)),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -329,7 +305,7 @@ func getOptionalClientScopesFromState(resourceName string, s *terraform.State) (
 		client = rs.Primary.ID
 	}
 
-	keycloakOptionalClientScopes, err := keycloakClient.GetOpenidClientOptionalScopes(realm, client)
+	keycloakOptionalClientScopes, err := keycloakClient.GetOpenidClientOptionalScopes(testCtx, realm, client)
 	if err != nil {
 		return nil, err
 	}
@@ -397,7 +373,7 @@ func testAccCheckKeycloakOpenidClientOptionalScopeIsNotAttached(resourceName, cl
 }
 
 func testKeycloakOpenidClientOptionalScopes_basic(client, clientScope string) string {
-	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_6); ok {
 		return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -512,7 +488,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_validationNoClient(client, clientScope string) string {
-	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_6); ok {
 		return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -565,7 +541,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_validationBearerOnlyClient(client, clientScope string) string {
-	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_6); ok {
 		return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -673,7 +649,7 @@ resource "keycloak_openid_client_optional_scopes" "optional_scopes" {
 }
 
 func testKeycloakOpenidClientOptionalScopes_duplicateScopeAssignment(client, clientScope string) string {
-	if keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_6) {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_6); ok {
 		return fmt.Sprintf(`
 %s
 

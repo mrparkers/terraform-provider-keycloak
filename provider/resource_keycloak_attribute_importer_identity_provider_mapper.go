@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -34,30 +35,24 @@ func resourceKeycloakAttributeImporterIdentityProviderMapper() *schema.Resource 
 	}
 	genericMapperResource := resourceKeycloakIdentityProviderMapper()
 	genericMapperResource.Schema = mergeSchemas(genericMapperResource.Schema, mapperSchema)
-	genericMapperResource.Create = resourceKeycloakIdentityProviderMapperCreate(getAttributeImporterIdentityProviderMapperFromData, setAttributeImporterIdentityProviderMapperData)
-	genericMapperResource.Read = resourceKeycloakIdentityProviderMapperRead(setAttributeImporterIdentityProviderMapperData)
-	genericMapperResource.Update = resourceKeycloakIdentityProviderMapperUpdate(getAttributeImporterIdentityProviderMapperFromData, setAttributeImporterIdentityProviderMapperData)
+	genericMapperResource.CreateContext = resourceKeycloakIdentityProviderMapperCreate(getAttributeImporterIdentityProviderMapperFromData, setAttributeImporterIdentityProviderMapperData)
+	genericMapperResource.ReadContext = resourceKeycloakIdentityProviderMapperRead(setAttributeImporterIdentityProviderMapperData)
+	genericMapperResource.UpdateContext = resourceKeycloakIdentityProviderMapperUpdate(getAttributeImporterIdentityProviderMapperFromData, setAttributeImporterIdentityProviderMapperData)
 	return genericMapperResource
 }
 
-func getAttributeImporterIdentityProviderMapperFromData(data *schema.ResourceData, meta interface{}) (*keycloak.IdentityProviderMapper, error) {
+func getAttributeImporterIdentityProviderMapperFromData(ctx context.Context, data *schema.ResourceData, meta interface{}) (*keycloak.IdentityProviderMapper, error) {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
+
 	rec, _ := getIdentityProviderMapperFromData(data)
-	extraConfig := map[string]interface{}{}
-	if v, ok := data.GetOk("extra_config"); ok {
-		for key, value := range v.(map[string]interface{}) {
-			extraConfig[key] = value
-		}
-	}
-	identityProvider, err := keycloakClient.GetIdentityProvider(rec.Realm, rec.IdentityProviderAlias)
+	identityProvider, err := keycloakClient.GetIdentityProvider(ctx, rec.Realm, rec.IdentityProviderAlias)
 	if err != nil {
-		return nil, handleNotFoundError(err, data)
+		return nil, err
 	}
+
 	rec.IdentityProviderMapper = fmt.Sprintf("%s-user-attribute-idp-mapper", identityProvider.ProviderId)
-	rec.Config = &keycloak.IdentityProviderMapperConfig{
-		UserAttribute: data.Get("user_attribute").(string),
-		ExtraConfig:   extraConfig,
-	}
+	rec.Config.UserAttribute = data.Get("user_attribute").(string)
+
 	if identityProvider.ProviderId == "saml" {
 		if attr, ok := data.GetOk("attribute_friendly_name"); ok {
 			rec.Config.AttributeFriendlyName = attr.(string)
@@ -79,6 +74,7 @@ func getAttributeImporterIdentityProviderMapperFromData(data *schema.ResourceDat
 	} else {
 		return nil, fmt.Errorf(`provider.keycloak: keycloak_attribute_importer_identity_provider_mapper: %s: "%s" identity provider is not supported yet`, data.Get("name").(string), identityProvider.ProviderId)
 	}
+
 	return rec, nil
 }
 
@@ -94,6 +90,6 @@ func setAttributeImporterIdentityProviderMapperData(data *schema.ResourceData, i
 	data.Set("user_attribute", identityProviderMapper.Config.UserAttribute)
 	data.Set("attribute_friendly_name", identityProviderMapper.Config.AttributeFriendlyName)
 	data.Set("claim_name", claimName)
-	data.Set("extra_config", identityProviderMapper.Config.ExtraConfig)
+
 	return nil
 }

@@ -42,7 +42,7 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
   kerberos {
     kerberos_realm   = "FOO.LOCAL"
     server_principal = "HTTP/host.foo.com@FOO.LOCAL"
-    keytab           = "/etc/host.keytab"
+    key_tab          = "/etc/host.keytab"
   }
 }
 ```
@@ -69,6 +69,8 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
 - `search_scope` - (Optional) Can be one of `ONE_LEVEL` or `SUBTREE`:
     - `ONE_LEVEL`: Only search for users in the DN specified by `user_dn`.
     - `SUBTREE`: Search entire LDAP subtree.
+- `start_tls` - (Optional) When `true`, Keycloak will encrypt the connection to LDAP using STARTTLS, which will disable connection pooling.
+- `use_password_modify_extended_op` - (Optional) When `true`, use the LDAPv3 Password Modify Extended Operation (RFC-3062).
 - `validate_password_policy` - (Optional) When `true`, Keycloak will validate passwords using the realm policy before updating it.
 - `trust_email` - (Optional) If enabled, email provided by this provider is not verified even if verification is enabled for the realm.
 - `use_truststore_spi` - (Optional) Can be one of `ALWAYS`, `ONLY_FOR_LDAPS`, or `NEVER`:
@@ -87,13 +89,13 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
   - `max_lifespan` - (Optional) Max lifespan of cache entry (duration string).
   - `eviction_day` - (Optional) Day of the week the entry will become invalid on
   - `eviction_hour` - (Optional) Hour of day the entry will become invalid on.
-  - `eviction_day` - (Optional) Minute of day the entry will become invalid on.
+  - `eviction_minute` - (Optional) Minute of day the entry will become invalid on.
 - `kerberos` - (Optional) A block containing the kerberos settings.
   - `kerberos_realm` - (Required) The name of the kerberos realm, e.g. FOO.LOCAL.
   - `server_principal` - (Required) The kerberos server principal, e.g. 'HTTP/host.foo.com@FOO.LOCAL'.
   - `key_tab` - (Required) Path to the kerberos keytab file on the server with credentials of the service principal.
   - `use_kerberos_for_password_authentication` - (Optional) Use kerberos login module instead of ldap service api. Defaults to `false`.
-
+- `delete_default_mappers` - (Optional) When true, the provider will delete the default mappers which are normally created by Keycloak when creating an LDAP user federation provider. Defaults to `false`.
 ## Import
 
 LDAP user federation providers can be imported using the format `{{realm_id}}/{{ldap_user_federation_id}}`.

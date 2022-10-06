@@ -91,21 +91,6 @@ resource keycloak_openid_client_group_policy test {
 
 
 #
-# create JS policy
-#
-
-resource keycloak_openid_client_js_policy test {
-  resource_server_id = keycloak_openid_client.test.resource_server_id
-  realm_id           = keycloak_realm.test_authorization.id
-  name               = "client_js_policy_test"
-  logic              = "POSITIVE"
-  decision_strategy  = "UNANIMOUS"
-  code               = "test"  # can be js code or a js file already deployed
-  description        = "description"
-}
-
-
-#
 #  create role policy
 #
 
@@ -191,6 +176,19 @@ resource "keycloak_users_permissions" "my_permission" {
       keycloak_openid_client_user_policy.test.id
     ]
     description       = "manage_scope"
+    decision_strategy = "UNANIMOUS"
+  }
+}
+
+resource "keycloak_openid_client_permissions" "my_permission" {
+  realm_id  = keycloak_realm.test_authorization.id
+  client_id = keycloak_openid_client.test.id
+
+  view_scope {
+    policies          = [
+      keycloak_openid_client_user_policy.test.id,
+    ]
+    description       = "my description"
     decision_strategy = "UNANIMOUS"
   }
 }

@@ -2,12 +2,15 @@ package provider
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"testing"
 )
 
 func TestAccKeycloakDataSourceSamlClient_basic(t *testing.T) {
+	t.Parallel()
+
 	clientId := acctest.RandomWithPrefix("tf-acc-test")
 	dataSourceName := "data.keycloak_saml_client.test"
 	resourceName := "keycloak_saml_client.test"
@@ -29,6 +32,7 @@ func TestAccKeycloakDataSourceSamlClient_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceName, "sign_assertions", resourceName, "sign_assertions"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "encrypt_assertions", resourceName, "encrypt_assertions"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "client_signature_required", resourceName, "client_signature_required"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "signature_key_name", resourceName, "signature_key_name"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "force_post_binding", resourceName, "force_post_binding"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "front_channel_logout", resourceName, "front_channel_logout"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "force_name_id_format", resourceName, "force_name_id_format"),
@@ -48,6 +52,7 @@ func TestAccKeycloakDataSourceSamlClient_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceName, "logout_service_post_binding_url", resourceName, "logout_service_post_binding_url"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "logout_service_redirect_binding_url", resourceName, "logout_service_redirect_binding_url"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "full_scope_allowed", resourceName, "full_scope_allowed"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "login_theme", resourceName, "login_theme"),
 				),
 			},
 		},

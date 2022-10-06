@@ -10,6 +10,8 @@ import (
 )
 
 func TestAccKeycloakSamlScriptProtocolMapper_basicClient(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -31,6 +33,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_basicClient(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_basicClientScope(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	clientScopeId := acctest.RandomWithPrefix("tf-acc")
@@ -52,6 +56,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_basicClientScope(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_import(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -90,6 +96,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_update(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -117,6 +125,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	var mapper = &keycloak.SamlScriptProtocolMapper{}
@@ -139,7 +149,7 @@ func TestAccKeycloakSamlScriptProtocolMapper_createAfterManualDestroy(t *testing
 				PreConfig: func() {
 					keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-					err := keycloakClient.DeleteSamlScriptProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					err := keycloakClient.DeleteSamlScriptProtocolMapper(testCtx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
@@ -152,6 +162,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_createAfterManualDestroy(t *testing
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_updateClientIdForceNew(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -179,6 +191,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_updateClientIdForceNew(t *testing.T
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_updateClientScopeForceNew(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	mapperName := acctest.RandomWithPrefix("tf-acc")
@@ -261,7 +275,7 @@ func getSamlScriptMapperUsingState(state *terraform.State, resourceName string) 
 
 	keycloakClient := testAccProvider.Meta().(*keycloak.KeycloakClient)
 
-	return keycloakClient.GetSamlScriptProtocolMapper(realm, clientId, clientScopeId, id)
+	return keycloakClient.GetSamlScriptProtocolMapper(testCtx, realm, clientId, clientScopeId, id)
 }
 
 func testKeycloakSamlScriptProtocolMapper_basic_client(clientId, mapperName string) string {

@@ -1,7 +1,9 @@
 package provider
 
 import (
-	"log"
+	"context"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -9,11 +11,21 @@ import (
 )
 
 func keys(data map[string]string) []string {
-	var result = []string{}
+	var result []string
 	for k := range data {
 		result = append(result, k)
 	}
 	return result
+}
+
+func mapKeyFromValue(m map[string]string, value string) (string, bool) {
+	for k, v := range m {
+		if v == value {
+			return k, true
+		}
+	}
+
+	return "", false
 }
 
 func mergeSchemas(a map[string]*schema.Schema, b map[string]*schema.Schema) map[string]*schema.Schema {
@@ -54,15 +66,17 @@ func suppressDurationStringDiff(_, old, new string, _ *schema.ResourceData) bool
 	return oldDuration.Seconds() == newDuration.Seconds()
 }
 
-func handleNotFoundError(err error, data *schema.ResourceData) error {
+func handleNotFoundError(ctx context.Context, err error, data *schema.ResourceData) diag.Diagnostics {
 	if keycloak.ErrorIs404(err) {
-		log.Printf("[WARN] Removing resource with id %s from state as it no longer exists", data.Id())
+		tflog.Warn(ctx, "Removing resource from state as it no longer exists", map[string]interface{}{
+			"id": data.Id(),
+		})
 		data.SetId("")
 
 		return nil
 	}
 
-	return err
+	return diag.FromErr(err)
 }
 
 func interfaceSliceToStringSlice(iv []interface{}) []string {
@@ -93,4 +107,8 @@ func stringSliceContains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func stringPointer(s string) *string {
+	return &s
 }

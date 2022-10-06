@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -15,13 +17,13 @@ var (
 
 func resourceKeycloakLdapGroupMapper() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakLdapGroupMapperCreate,
-		Read:   resourceKeycloakLdapGroupMapperRead,
-		Update: resourceKeycloakLdapGroupMapperUpdate,
-		Delete: resourceKeycloakLdapGroupMapperDelete,
+		CreateContext: resourceKeycloakLdapGroupMapperCreate,
+		ReadContext:   resourceKeycloakLdapGroupMapperRead,
+		UpdateContext: resourceKeycloakLdapGroupMapperUpdate,
+		DeleteContext: resourceKeycloakLdapGroupMapperDelete,
 		// This resource can be imported using {{realm}}/{{provider_id}}/{{mapper_id}}. The Provider and Mapper IDs are displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakLdapGenericMapperImport,
+			StateContext: resourceKeycloakLdapGenericMapperImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -120,7 +122,7 @@ func resourceKeycloakLdapGroupMapper() *schema.Resource {
 	}
 }
 
-func getLdapGroupMapperFromData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData) *keycloak.LdapGroupMapper {
+func getLdapGroupMapperFromData(ctx context.Context, keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData) (*keycloak.LdapGroupMapper, error) {
 	var groupObjectClasses []string
 
 	for _, groupObjectClass := range data.Get("group_object_classes").([]interface{}) {
@@ -154,15 +156,19 @@ func getLdapGroupMapperFromData(keycloakClient *keycloak.KeycloakClient, data *s
 		MappedGroupAttributes:           mappedGroupAttributes,
 		DropNonExistingGroupsDuringSync: data.Get("drop_non_existing_groups_during_sync").(bool),
 	}
+	versionOk, err := keycloakClient.VersionIsGreaterThanOrEqualTo(ctx, keycloak.Version_11)
+	if err != nil {
+		return nil, err
+	}
 
-	if groupsPath, ok := data.GetOk("groups_path"); ok && keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {
+	if groupsPath, ok := data.GetOk("groups_path"); ok && versionOk {
 		mapper.GroupsPath = groupsPath.(string)
 	}
 
-	return mapper
+	return mapper, nil
 }
 
-func setLdapGroupMapperData(keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData, ldapGroupMapper *keycloak.LdapGroupMapper) {
+func setLdapGroupMapperData(ctx context.Context, keycloakClient *keycloak.KeycloakClient, data *schema.ResourceData, ldapGroupMapper *keycloak.LdapGroupMapper) error {
 	data.SetId(ldapGroupMapper.Id)
 
 	data.Set("name", ldapGroupMapper.Name)
@@ -184,72 +190,94 @@ func setLdapGroupMapperData(keycloakClient *keycloak.KeycloakClient, data *schem
 	data.Set("mapped_group_attributes", ldapGroupMapper.MappedGroupAttributes)
 	data.Set("drop_non_existing_groups_during_sync", ldapGroupMapper.DropNonExistingGroupsDuringSync)
 
-	if ldapGroupMapper.GroupsPath != "" && keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_11) {
+	versionOk, err := keycloakClient.VersionIsGreaterThanOrEqualTo(ctx, keycloak.Version_11)
+	if err != nil {
+		return err
+	}
+
+	if ldapGroupMapper.GroupsPath != "" && versionOk {
 		data.Set("groups_path", ldapGroupMapper.GroupsPath)
 	}
+
+	return nil
 }
 
-func resourceKeycloakLdapGroupMapperCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapGroupMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapGroupMapper := getLdapGroupMapperFromData(keycloakClient, data)
-
-	err := keycloakClient.ValidateLdapGroupMapper(ldapGroupMapper)
+	ldapGroupMapper, err := getLdapGroupMapperFromData(ctx, keycloakClient, data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewLdapGroupMapper(ldapGroupMapper)
+	err = keycloakClient.ValidateLdapGroupMapper(ctx, ldapGroupMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
+	err = keycloakClient.NewLdapGroupMapper(ctx, ldapGroupMapper)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return resourceKeycloakLdapGroupMapperRead(data, meta)
+	err = setLdapGroupMapperData(ctx, keycloakClient, data, ldapGroupMapper)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceKeycloakLdapGroupMapperRead(ctx, data, meta)
 }
 
-func resourceKeycloakLdapGroupMapperRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapGroupMapperRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	ldapGroupMapper, err := keycloakClient.GetLdapGroupMapper(realmId, id)
+	ldapGroupMapper, err := keycloakClient.GetLdapGroupMapper(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
-	setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
+	err = setLdapGroupMapperData(ctx, keycloakClient, data, ldapGroupMapper)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
 
-func resourceKeycloakLdapGroupMapperUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapGroupMapperUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	ldapGroupMapper := getLdapGroupMapperFromData(keycloakClient, data)
-
-	err := keycloakClient.ValidateLdapGroupMapper(ldapGroupMapper)
+	ldapGroupMapper, err := getLdapGroupMapperFromData(ctx, keycloakClient, data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateLdapGroupMapper(ldapGroupMapper)
+	err = keycloakClient.ValidateLdapGroupMapper(ctx, ldapGroupMapper)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	setLdapGroupMapperData(keycloakClient, data, ldapGroupMapper)
+	err = keycloakClient.UpdateLdapGroupMapper(ctx, ldapGroupMapper)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = setLdapGroupMapperData(ctx, keycloakClient, data, ldapGroupMapper)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
 
-func resourceKeycloakLdapGroupMapperDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakLdapGroupMapperDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteLdapGroupMapper(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteLdapGroupMapper(ctx, realmId, id))
 }

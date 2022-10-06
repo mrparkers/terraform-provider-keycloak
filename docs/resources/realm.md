@@ -82,7 +82,7 @@ resource "keycloak_realm" "realm" {
 - `enabled` - (Optional) When `false`, users and clients will not be able to access this realm. Defaults to `true`.
 - `display_name` - (Optional) The display name for the realm that is shown when logging in to the admin console.
 - `display_name_html` - (Optional) The display name for the realm that is rendered as HTML on the screen when logging in to the admin console.
-- `user_managed_access` - (Optional) When `true`, users are allowed to manage their own resources. Defaults to `false`.
+- `user_managed_access` - (Optional) When `true`, users are allowed to manage their own resources. Defaults to `false`. 
 - `attributes` - (Optional) A map of custom attributes to add to the realm.
 
 ### Login Settings
@@ -122,9 +122,13 @@ The arguments below should be specified as [Go duration strings](https://golang.
 
 - `sso_session_idle_timeout` - (Optional) The amount of time a session can be idle before it expires.
 - `sso_session_max_lifespan` - (Optional) The maximum amount of time before a session expires regardless of activity.
+- `sso_session_idle_timeout_remember_me` - (Optional) Similar to `sso_session_idle_timeout`, but used when a user clicks "Remember Me". If not set, Keycloak will default to the value of `sso_session_idle_timeout`.
+- `sso_session_max_lifespan_remember_me` - (Optional) Similar to `sso_session_max_lifespan`, but used when a user clicks "Remember Me". If not set, Keycloak will default to the value of `sso_session_max_lifespan`.
 - `offline_session_idle_timeout` - (Optional) The amount of time an offline session can be idle before it expires.
 - `offline_session_max_lifespan` - (Optional) The maximum amount of time before an offline session expires regardless of activity.
 - `offline_session_max_lifespan_enabled` - (Optional) Enable `offline_session_max_lifespan`.
+- `client_session_idle_timeout` - (Optional) The amount of time a session can be idle before it expires. Users can override it for individual clients.
+- `client_session_max_lifespan` - (Optional) The maximum amount of time before a session expires regardless of activity. Users can override it for individual clients.
 - `access_token_lifespan` - (Optional) The amount of time an access token can be used before it expires.
 - `access_token_lifespan_for_implicit_flow` - (Optional) The amount of time an access token issued with the OpenID Connect Implicit Flow can be used before it expires.
 - `access_code_lifespan` - (Optional) The maximum amount of time a client has to finish the authorization code flow.
@@ -132,6 +136,11 @@ The arguments below should be specified as [Go duration strings](https://golang.
 - `access_code_lifespan_user_action` - (Optional) The maximum amount of time a user has to complete login related actions, such as updating a password.
 - `action_token_generated_by_user_lifespan` - (Optional) The maximum time a user has to use a user-generated permit before it expires.
 - `action_token_generated_by_admin_lifespan` - (Optional) The maximum time a user has to use an admin-generated permit before it expires.
+- `oauth2_device_code_lifespan` - (Optional) The maximum amount of time a client has to finish the device code flow before it expires.
+
+The attributes below should be specified in seconds.
+
+- `oauth2_device_polling_interval` - (Optional) The minimum amount of time in seconds that the client should wait between polling requests to the token endpoint.
 
 ### SMTP
 
@@ -196,6 +205,17 @@ The arguments below can be used to configure authentication flow bindings:
 - `reset_credentials_flow` - (Optional) The desired flow to use when a user attempts to reset their credentials. Defaults to `reset credentials`.
 - `client_authentication_flow` - (Optional) The desired flow for client authentication. Defaults to `clients`.
 - `docker_authentication_flow` - (Optional) The desired flow for Docker authentication. Defaults to `docker auth`.
+
+### OTP Policy
+
+The `otp_policy` block with following arguments can be found in the "OTP Policy" tab within the realm settings.
+
+- `type` - (Optional) One Time Password Type, supported Values are `totp` for Time-Based One Time Password and `hotp` for Counter Based. Defaults to `totp`.
+- `algorithm` - (Optional) What hashing algorithm should be used to generate the OTP, Valid options are `HmacSHA1`,`HmacSHA256` and `HmacSHA512`. Defaults to `HmacSHA1`.
+- `digits` - (Optional) How many digits the OTP have. Defaults to `6`.
+- `initial_counter` - (Optional) What should the initial counter value be. Defaults to `2`.
+- `look_ahead_window` - (Optional) How far ahead should the server look just in case the token generator and server are out of time sync or counter sync. Defaults to `1`.
+- `period` - (Optional) How many seconds should an OTP token be valid. Defaults to `30`.
 
 ### WebAuthn
 

@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -30,12 +31,14 @@ type LdapUserFederation struct {
 	CustomUserSearchFilter string // must start with '(' and end with ')'
 	SearchScope            string // api expects "1" or "2", but that means "One Level" or "Subtree"
 
-	ValidatePasswordPolicy bool
-	TrustEmail             bool
-	UseTruststoreSpi       string // can be "ldapsOnly", "always", or "never"
-	ConnectionTimeout      string // duration string (ex: 1h30m)
-	ReadTimeout            string // duration string (ex: 1h30m)
-	Pagination             bool
+	StartTls                    bool
+	UsePasswordModifyExtendedOp bool
+	TrustEmail                  bool
+	ValidatePasswordPolicy      bool
+	UseTruststoreSpi            string // can be "ldapsOnly", "always", or "never"
+	ConnectionTimeout           string // duration string (ex: 1h30m)
+	ReadTimeout                 string // duration string (ex: 1h30m)
+	Pagination                  bool
 
 	ServerPrincipal                      string
 	UseKerberosForPasswordAuthentication bool
@@ -97,6 +100,12 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) (*compon
 		},
 		"searchScope": {
 			ldap.SearchScope,
+		},
+		"startTls": {
+			strconv.FormatBool(ldap.StartTls),
+		},
+		"usePasswordModifyExtendedOp": {
+			strconv.FormatBool(ldap.UsePasswordModifyExtendedOp),
 		},
 		"validatePasswordPolicy": {
 			strconv.FormatBool(ldap.ValidatePasswordPolicy),
@@ -239,6 +248,16 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 
 	userObjectClasses := strings.Split(component.getConfig("userObjectClasses"), ", ")
 
+	startTls, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("startTls"))
+	if err != nil {
+		return nil, err
+	}
+
+	usePasswordModifyExtendedOp, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("usePasswordModifyExtendedOp"))
+	if err != nil {
+		return nil, err
+	}
+
 	validatePasswordPolicy, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("validatePasswordPolicy"))
 	if err != nil {
 		return nil, err
@@ -303,10 +322,12 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		CustomUserSearchFilter: component.getConfig("customUserSearchFilter"),
 		SearchScope:            component.getConfig("searchScope"),
 
-		ValidatePasswordPolicy: validatePasswordPolicy,
-		TrustEmail:             trustEmail,
-		UseTruststoreSpi:       component.getConfig("useTruststoreSpi"),
-		Pagination:             pagination,
+		StartTls:                    startTls,
+		UsePasswordModifyExtendedOp: usePasswordModifyExtendedOp,
+		ValidatePasswordPolicy:      validatePasswordPolicy,
+		TrustEmail:                  trustEmail,
+		UseTruststoreSpi:            component.getConfig("useTruststoreSpi"),
+		Pagination:                  pagination,
 
 		ServerPrincipal:                      component.getConfig("serverPrincipal"),
 		UseKerberosForPasswordAuthentication: useKerberosForPasswordAuthentication,
@@ -409,7 +430,7 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 	return ldap, nil
 }
 
-func (keycloakClient *KeycloakClient) ValidateLdapUserFederation(ldap *LdapUserFederation) error {
+func (keycloakClient *KeycloakClient) ValidateLdapUserFederation(ctx context.Context, ldap *LdapUserFederation) error {
 	if (ldap.BindDn == "" && ldap.BindCredential != "") || (ldap.BindDn != "" && ldap.BindCredential == "") {
 		return fmt.Errorf("validation error: authentication requires both BindDN and BindCredential to be set")
 	}
@@ -417,13 +438,13 @@ func (keycloakClient *KeycloakClient) ValidateLdapUserFederation(ldap *LdapUserF
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) NewLdapUserFederation(ldapUserFederation *LdapUserFederation) error {
+func (keycloakClient *KeycloakClient) NewLdapUserFederation(ctx context.Context, realmId string, ldapUserFederation *LdapUserFederation) error {
 	component, err := convertFromLdapUserFederationToComponent(ldapUserFederation)
 	if err != nil {
 		return err
 	}
 
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserFederation.RealmId), component)
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", realmId), component)
 	if err != nil {
 		return err
 	}
@@ -433,10 +454,10 @@ func (keycloakClient *KeycloakClient) NewLdapUserFederation(ldapUserFederation *
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetLdapUserFederation(realmId, id string) (*LdapUserFederation, error) {
+func (keycloakClient *KeycloakClient) GetLdapUserFederation(ctx context.Context, realmId, id string) (*LdapUserFederation, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -444,11 +465,11 @@ func (keycloakClient *KeycloakClient) GetLdapUserFederation(realmId, id string) 
 	return convertFromComponentToLdapUserFederation(component)
 }
 
-func (keycloakClient *KeycloakClient) GetLdapUserFederationMappers(realmId, id string) (*[]interface{}, error) {
+func (keycloakClient *KeycloakClient) GetLdapUserFederationMappers(ctx context.Context, realmId, id string) (*[]interface{}, error) {
 	var components []*component
 	var ldapUserFederationMappers []interface{}
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components?parent=%s&type=org.keycloak.storage.ldap.mappers.LDAPStorageMapper", realmId, id), &components, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components?parent=%s&type=org.keycloak.storage.ldap.mappers.LDAPStorageMapper", realmId, id), &components, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -471,6 +492,9 @@ func (keycloakClient *KeycloakClient) GetLdapUserFederationMappers(realmId, id s
 			ldapUserFederationMappers = append(ldapUserFederationMappers, mapper)
 		case "hardcoded-ldap-role-mapper":
 			mapper := convertFromComponentToLdapHardcodedRoleMapper(component, realmId)
+			ldapUserFederationMappers = append(ldapUserFederationMappers, mapper)
+		case "hardcoded-ldap-attribute-mapper":
+			mapper := convertFromComponentToLdapHardcodedAttributeMapper(component, realmId)
 			ldapUserFederationMappers = append(ldapUserFederationMappers, mapper)
 		case "msad-lds-user-account-control-mapper":
 			mapper, err := convertFromComponentToLdapMsadLdsUserAccountControlMapper(component, realmId)
@@ -502,15 +526,33 @@ func (keycloakClient *KeycloakClient) GetLdapUserFederationMappers(realmId, id s
 	return &ldapUserFederationMappers, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateLdapUserFederation(ldapUserFederation *LdapUserFederation) error {
+func (keycloakClient *KeycloakClient) UpdateLdapUserFederation(ctx context.Context, realmId string, ldapUserFederation *LdapUserFederation) error {
 	component, err := convertFromLdapUserFederationToComponent(ldapUserFederation)
 	if err != nil {
 		return err
 	}
 
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapUserFederation.RealmId, ldapUserFederation.Id), component)
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, ldapUserFederation.Id), component)
 }
 
-func (keycloakClient *KeycloakClient) DeleteLdapUserFederation(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteLdapUserFederation(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+}
+
+func (keycloakClient *KeycloakClient) DeleteLdapUserFederationMappers(ctx context.Context, realmId, id string) error {
+	var components []*component
+
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components?parent=%s&type=org.keycloak.storage.ldap.mappers.LDAPStorageMapper", realmId, id), &components, nil)
+	if err != nil {
+		return err
+	}
+
+	for _, component := range components {
+		err = keycloakClient.DeleteComponent(ctx, realmId, component.Id)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

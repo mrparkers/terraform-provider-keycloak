@@ -81,7 +81,7 @@ func TestAccKeycloakLdapUserFederation_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteLdapUserFederation(ldap.RealmId, ldap.Id)
+					err := keycloakClient.DeleteLdapUserFederation(testCtx, ldap.RealmId, ldap.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -120,6 +120,26 @@ func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakLdapUserFederation_deleteDefaultMappers(t *testing.T) {
+	t.Parallel()
+	ldapName := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserFederation_deleteDefaultMappers(ldapName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
+					testAccCheckKeycloakLdapUserFederationHasNoDefaultMappers("keycloak_ldap_user_federation.openldap"),
+				),
+			},
+		},
+	})
+}
+
 func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 	connectionTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
 	readTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
@@ -140,6 +160,8 @@ func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 		BindDn:                               acctest.RandString(10),
 		BindCredential:                       acctest.RandString(10),
 		SearchScope:                          randomStringInSlice([]string{"ONE_LEVEL", "SUBTREE"}),
+		StartTls:                             true,
+		UsePasswordModifyExtendedOp:          true,
 		ValidatePasswordPolicy:               true,
 		UseTruststoreSpi:                     randomStringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}),
 		ConnectionTimeout:                    connectionTimeout,
@@ -158,19 +180,20 @@ func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 		EvictionDay:                          &evictionDay,
 		EvictionHour:                         &evictionHour,
 		EvictionMinute:                       &evictionMinute,
+		EditMode:                             "WRITABLE",
 	}
 }
 
 func checkMatchingNestedKey(resourcePath string, blockName string, fieldInBlock string, value string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		resource, ok := s.RootModule().Resources[resourcePath]
+		r, ok := s.RootModule().Resources[resourcePath]
 		if !ok {
 			return fmt.Errorf("Could not find resource %s", resourcePath)
 		}
 
 		matchExpression := fmt.Sprintf(`%s\.\d\.mappings\.\d+\.%s`, blockName, fieldInBlock)
 
-		for k, v := range resource.Primary.Attributes {
+		for k, v := range r.Primary.Attributes {
 			if isMatch, _ := regexp.Match(matchExpression, []byte(k)); isMatch {
 				if v == value {
 					return nil
@@ -223,6 +246,8 @@ func TestAccKeycloakLdapUserFederation_basicUpdateKerberosSettings(t *testing.T)
 func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 	t.Parallel()
 	firstEnabled := randomBool()
+	firstStartTls := randomBool()
+	firstUsePasswordModifyExtendedOp := randomBool()
 	firstValidatePasswordPolicy := randomBool()
 	firstPagination := randomBool()
 
@@ -249,6 +274,8 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		BindDn:                               acctest.RandString(10),
 		BindCredential:                       acctest.RandString(10),
 		SearchScope:                          randomStringInSlice([]string{"ONE_LEVEL", "SUBTREE"}),
+		StartTls:                             firstStartTls,
+		UsePasswordModifyExtendedOp:          firstUsePasswordModifyExtendedOp,
 		ValidatePasswordPolicy:               firstValidatePasswordPolicy,
 		TrustEmail:                           firstTrustEmail,
 		UseTruststoreSpi:                     randomStringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}),
@@ -268,6 +295,7 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		EvictionDay:                          &evictionDay,
 		EvictionHour:                         &evictionHour,
 		EvictionMinute:                       &evictionMinute,
+		EditMode:                             "WRITABLE",
 	}
 
 	evictionDay = acctest.RandIntRange(0, 6)
@@ -285,6 +313,8 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		BindDn:                               acctest.RandString(10),
 		BindCredential:                       acctest.RandString(10),
 		SearchScope:                          randomStringInSlice([]string{"ONE_LEVEL", "SUBTREE"}),
+		StartTls:                             !firstStartTls,
+		UsePasswordModifyExtendedOp:          !firstUsePasswordModifyExtendedOp,
 		ValidatePasswordPolicy:               !firstValidatePasswordPolicy,
 		TrustEmail:                           secondTrustEmail,
 		UseTruststoreSpi:                     randomStringInSlice([]string{"ALWAYS", "ONLY_FOR_LDAPS", "NEVER"}),
@@ -304,6 +334,7 @@ func TestAccKeycloakLdapUserFederation_basicUpdateAll(t *testing.T) {
 		EvictionDay:                          &evictionDay,
 		EvictionHour:                         &evictionHour,
 		EvictionMinute:                       &evictionMinute,
+		EditMode:                             "WRITABLE",
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -527,6 +558,26 @@ func testAccCheckKeycloakLdapUserFederationExists(resourceName string) resource.
 	}
 }
 
+func testAccCheckKeycloakLdapUserFederationHasNoDefaultMappers(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		ldap, err := getLdapUserFederationFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		mappers, err := keycloakClient.GetLdapUserFederationMappers(testCtx, ldap.RealmId, ldap.Id)
+		if err != nil {
+			return err
+		}
+
+		if len(*mappers) != 0 {
+			return fmt.Errorf("expected ldap user federation to have zero mappers, found %d", len(*mappers))
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakLdapUserFederationFetch(resourceName string, ldap *keycloak.LdapUserFederation) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		fetchedLdap, err := getLdapUserFederationFromState(s, resourceName)
@@ -551,7 +602,7 @@ func testAccCheckKeycloakLdapUserFederationDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			ldap, _ := keycloakClient.GetLdapUserFederation(realm, id)
+			ldap, _ := keycloakClient.GetLdapUserFederation(testCtx, realm, id)
 			if ldap != nil {
 				return fmt.Errorf("ldap config with id %s still exists", id)
 			}
@@ -570,7 +621,7 @@ func getLdapUserFederationFromState(s *terraform.State, resourceName string) (*k
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	ldap, err := keycloakClient.GetLdapUserFederation(realm, id)
+	ldap, err := keycloakClient.GetLdapUserFederation(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting ldap config with id %s: %s", id, err)
 	}
@@ -641,12 +692,15 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	bind_credential          = "%s"
 	search_scope             = "%s"
 
-	validate_password_policy = %t
-	trust_email              = %t
-	use_truststore_spi       = "%s"
-	connection_timeout       = "%s"
-	read_timeout             = "%s"
-	pagination               = %t
+	edit_mode                       = "%s"
+	start_tls                       = %t
+	use_password_modify_extended_op = %t
+	validate_password_policy        = %t
+	trust_email                     = %t
+	use_truststore_spi              = "%s"
+	connection_timeout              = "%s"
+	read_timeout                    = "%s"
+	pagination                      = %t
 
 	batch_size_for_sync      = %d
 	full_sync_period         = %d
@@ -667,7 +721,7 @@ resource "keycloak_ldap_user_federation" "openldap" {
 		eviction_minute      = %d
 	}
 }
-	`, testAccRealmUserFederation.Realm, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, arrayOfStringsForTerraformResource(ldap.UserObjectClasses), ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.ValidatePasswordPolicy, ldap.TrustEmail, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.ServerPrincipal, ldap.UseKerberosForPasswordAuthentication, ldap.KeyTab, ldap.KerberosRealm, ldap.CachePolicy, ldap.MaxLifespan, *ldap.EvictionDay, *ldap.EvictionHour, *ldap.EvictionMinute)
+	`, testAccRealmUserFederation.Realm, ldap.Name, ldap.Enabled, ldap.UsernameLDAPAttribute, ldap.RdnLDAPAttribute, ldap.UuidLDAPAttribute, arrayOfStringsForTerraformResource(ldap.UserObjectClasses), ldap.ConnectionUrl, ldap.UsersDn, ldap.BindDn, ldap.BindCredential, ldap.SearchScope, ldap.EditMode, ldap.StartTls, ldap.UsePasswordModifyExtendedOp, ldap.ValidatePasswordPolicy, ldap.TrustEmail, ldap.UseTruststoreSpi, ldap.ConnectionTimeout, ldap.ReadTimeout, ldap.Pagination, ldap.BatchSizeForSync, ldap.FullSyncPeriod, ldap.ChangedSyncPeriod, ldap.ServerPrincipal, ldap.UseKerberosForPasswordAuthentication, ldap.KeyTab, ldap.KerberosRealm, ldap.CachePolicy, ldap.MaxLifespan, *ldap.EvictionDay, *ldap.EvictionHour, *ldap.EvictionMinute)
 }
 
 func testKeycloakLdapUserFederation_basicWithAttrValidation(attr, ldap, val string) string {
@@ -861,6 +915,35 @@ resource "keycloak_ldap_user_federation" "openldap_no_auth" {
 	]
 	connection_url          = "ldap://openldap"
 	users_dn                = "dc=example,dc=org"
+}
+	`, testAccRealmUserFederation.Realm, ldap)
+}
+
+func testKeycloakLdapUserFederation_deleteDefaultMappers(ldap string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+	name                    = "%s"
+	realm_id                = data.keycloak_realm.realm.id
+
+	enabled                 = true
+
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
+
+	delete_default_mappers = true
 }
 	`, testAccRealmUserFederation.Realm, ldap)
 }

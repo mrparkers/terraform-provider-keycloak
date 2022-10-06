@@ -1,5 +1,6 @@
-TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
+GOOS?=darwin
+GOARCH?=amd64
 
 MAKEFLAGS += --silent
 
@@ -7,13 +8,13 @@ build:
 	go build -o terraform-provider-keycloak
 
 build-example: build
-	mkdir -p example/.terraform/plugins/terraform.local/mrparkers/keycloak/3.0.0/darwin_amd64
-	mkdir -p example/terraform.d/plugins/terraform.local/mrparkers/keycloak/3.0.0/darwin_amd64
-	cp terraform-provider-keycloak example/.terraform/plugins/terraform.local/mrparkers/keycloak/3.0.0/darwin_amd64/
-	cp terraform-provider-keycloak example/terraform.d/plugins/terraform.local/mrparkers/keycloak/3.0.0/darwin_amd64/
+	mkdir -p example/.terraform/plugins/terraform.local/mrparkers/keycloak/3.0.0/$(GOOS)_$(GOARCH)
+	mkdir -p example/terraform.d/plugins/terraform.local/mrparkers/keycloak/3.0.0/$(GOOS)_$(GOARCH)
+	cp terraform-provider-keycloak example/.terraform/plugins/terraform.local/mrparkers/keycloak/3.0.0/$(GOOS)_$(GOARCH)/
+	cp terraform-provider-keycloak example/terraform.d/plugins/terraform.local/mrparkers/keycloak/3.0.0/$(GOOS)_$(GOARCH)/
 
 local: deps
-	docker-compose up --build -d
+	docker compose up --build -d
 	./scripts/wait-for-local-keycloak.sh
 	./scripts/create-terraform-client.sh
 
@@ -27,7 +28,8 @@ test: fmtcheck vet
 	go test $(TEST)
 
 testacc: fmtcheck vet
-	TF_ACC=1 CHECKPOINT_DISABLE=1 go test -v -timeout 60m -parallel 4 $(TEST) $(TESTARGS)
+	go test -v github.com/mrparkers/terraform-provider-keycloak/keycloak
+	TF_ACC=1 CHECKPOINT_DISABLE=1 go test -v -timeout 60m -parallel 4 github.com/mrparkers/terraform-provider-keycloak/provider $(TESTARGS)
 
 fmtcheck:
 	lineCount=$(shell gofmt -l -s $(GOFMT_FILES) | wc -l | tr -d ' ') && exit $$lineCount

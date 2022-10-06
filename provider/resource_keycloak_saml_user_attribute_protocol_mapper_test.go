@@ -105,7 +105,7 @@ func TestAccKeycloakSamlUserAttributeProtocolMapper_createAfterManualDestroy(t *
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteSamlUserAttributeProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					err := keycloakClient.DeleteSamlUserAttributeProtocolMapper(testCtx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
@@ -218,7 +218,7 @@ func getSamlUserAttributeMapperUsingState(state *terraform.State, resourceName s
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	return keycloakClient.GetSamlUserAttributeProtocolMapper(realm, clientId, clientScopeId, id)
+	return keycloakClient.GetSamlUserAttributeProtocolMapper(testCtx, realm, clientId, clientScopeId, id)
 }
 
 func testKeycloakSamlUserAttributeProtocolMapper_basic_client(clientId, mapperName string) string {

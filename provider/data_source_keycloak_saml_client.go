@@ -1,13 +1,15 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakSamlClient() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakSamlClientRead,
+		ReadContext: dataSourceKeycloakSamlClientRead,
 
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -50,6 +52,10 @@ func dataSourceKeycloakSamlClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"signature_key_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"force_post_binding": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -63,6 +69,14 @@ func dataSourceKeycloakSamlClient() *schema.Resource {
 				Computed: true,
 			},
 			"signature_algorithm": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"saml_signature_key_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"canonicalization_method": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -97,6 +111,18 @@ func dataSourceKeycloakSamlClient() *schema.Resource {
 				Computed: true,
 			},
 			"signing_private_key": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"encryption_certificate_sha1": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"signing_certificate_sha1": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"signing_private_key_sha1": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -144,24 +170,32 @@ func dataSourceKeycloakSamlClient() *schema.Resource {
 					},
 				},
 			},
+			"extra_config": {
+				Type:     schema.TypeMap,
+				Computed: true,
+			},
+			"login_theme": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
 
-func dataSourceKeycloakSamlClientRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakSamlClientRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
-	client, err := keycloakClient.GetSamlClientByClientId(realmId, clientId)
+	client, err := keycloakClient.GetSamlClientByClientId(ctx, realmId, clientId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
-	err = mapToDataFromSamlClient(data, client)
+	err = mapToDataFromSamlClient(ctx, data, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

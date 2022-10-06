@@ -51,7 +51,7 @@ func TestAccKeycloakOpenidClientServiceAccountRealmRole_createAfterManualDestroy
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenidClientServiceAccountRealmRole(serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.Id)
+					err := keycloakClient.DeleteOpenidClientServiceAccountRealmRole(testCtx, serviceAccountRole.RealmId, serviceAccountRole.ServiceAccountUserId, serviceAccountRole.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -100,7 +100,7 @@ func testAccCheckKeycloakOpenidClientServiceAccountRealmRoleDestroy() resource.T
 			serviceAccountUserId := rs.Primary.Attributes["service_account_user_id"]
 			id := strings.Split(rs.Primary.ID, "/")[1]
 
-			serviceAccountRole, _ := keycloakClient.GetOpenidClientServiceAccountRealmRole(realm, serviceAccountUserId, id)
+			serviceAccountRole, _ := keycloakClient.GetOpenidClientServiceAccountRealmRole(testCtx, realm, serviceAccountUserId, id)
 			if serviceAccountRole != nil {
 				return fmt.Errorf("service account role exists")
 			}
@@ -120,7 +120,7 @@ func getKeycloakOpenidClientServiceAccountRealmRoleFromState(s *terraform.State,
 	serviceAccountUserId := rs.Primary.Attributes["service_account_user_id"]
 	id := strings.Split(rs.Primary.ID, "/")[1]
 
-	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRealmRole(realm, serviceAccountUserId, id)
+	serviceAccountRole, err := keycloakClient.GetOpenidClientServiceAccountRealmRole(testCtx, realm, serviceAccountUserId, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting service account role mapping: %s", err)
 	}
@@ -153,9 +153,9 @@ resource keycloak_openid_client test {
 }
 
 resource keycloak_openid_client_service_account_realm_role test {
-	service_account_user_id = "${keycloak_openid_client.test.service_account_user_id}"
-	realm_id 					= data.keycloak_realm.realm.id
-	role 						= "offline_access"
+	service_account_user_id = keycloak_openid_client.test.service_account_user_id
+	realm_id                = data.keycloak_realm.realm.id
+	role                    = "offline_access"
 }
 	`, testAccRealm.Realm, clientId)
 }

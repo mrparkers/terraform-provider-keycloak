@@ -131,7 +131,7 @@ func testAccKeycloakGenericClientProtocolMapperDestroy() resource.TestCheckFunc 
 	}
 }
 
-func getGenericClientProtocolMapperUsingState(state *terraform.State, resourceName string) (*keycloak.GenericClientProtocolMapper, error) {
+func getGenericClientProtocolMapperUsingState(state *terraform.State, resourceName string) (*keycloak.GenericProtocolMapper, error) {
 	rs, ok := state.RootModule().Resources[resourceName]
 	if !ok {
 		return nil, fmt.Errorf("resource not found in TF state: %s ", resourceName)
@@ -142,7 +142,7 @@ func getGenericClientProtocolMapperUsingState(state *terraform.State, resourceNa
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	return keycloakClient.GetGenericClientProtocolMapper(realmId, clientId, clientScopeId, mapperId)
+	return keycloakClient.GetGenericProtocolMapper(testCtx, realmId, clientId, clientScopeId, mapperId)
 }
 
 func testKeycloakGenericClientProtocolMapper_basic_client(clientId string, mapperName string) string {

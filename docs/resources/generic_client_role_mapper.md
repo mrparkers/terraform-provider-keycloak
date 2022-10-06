@@ -88,7 +88,7 @@ resource "keycloak_role" "client_role_b" {
 
 resource "keycloak_generic_client_role_mapper" "client_b_role_mapper" {
   realm_id  = keycloak_realm.realm.id
-  client_id = keycloak_client.client_b.id
+  client_id = keycloak_openid_client.client_b.id
   role_id   = keycloak_role.client_role_a.id
 }
 ```
@@ -151,7 +151,7 @@ resource "keycloak_openid_client_scope" "client_scope" {
 
 resource "keycloak_generic_client_role_mapper" "client_b_role_mapper" {
   realm_id        = keycloak_realm.realm.id
-  client_scope_id = keycloak_client_scope.client_scope.id
+  client_scope_id = keycloak_openid_client_scope.client_scope.id
   role_id         = keycloak_role.client_role.id
 }
 ```

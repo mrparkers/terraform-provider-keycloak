@@ -6,6 +6,7 @@
             <module name="org.keycloak.keycloak-server-spi" export="true" />
             <module name="org.keycloak.keycloak-server-spi-private" export="true" />
             <module name="org.keycloak.keycloak-services" export="true" />
+            <module name="org.keycloak.keycloak-model-legacy" export="true" />
             <module name="org.bouncycastle" export="true" />
             <module name="com.google.guava" export="true" />
             <module name="org.jboss.logging" export="true" />
