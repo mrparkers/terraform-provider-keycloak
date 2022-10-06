@@ -10,6 +10,8 @@ import (
 )
 
 func TestAccKeycloakSamlScriptProtocolMapper_basicClient(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -31,6 +33,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_basicClient(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_basicClientScope(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	clientScopeId := acctest.RandomWithPrefix("tf-acc")
@@ -52,6 +56,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_basicClientScope(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_import(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -90,6 +96,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_import(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_update(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -117,6 +125,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_update(t *testing.T) {
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_createAfterManualDestroy(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	var mapper = &keycloak.SamlScriptProtocolMapper{}
@@ -152,6 +162,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_createAfterManualDestroy(t *testing
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_updateClientIdForceNew(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -179,6 +191,8 @@ func TestAccKeycloakSamlScriptProtocolMapper_updateClientIdForceNew(t *testing.T
 }
 
 func TestAccKeycloakSamlScriptProtocolMapper_updateClientScopeForceNew(t *testing.T) {
+	skipIfVersionIsGreaterThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_19)
+
 	t.Parallel()
 
 	mapperName := acctest.RandomWithPrefix("tf-acc")

@@ -244,9 +244,6 @@ func dataSourceKeycloakOpenidClientRead(ctx context.Context, data *schema.Resour
 	}
 
 	err = setOpenidClientData(ctx, keycloakClient, data, client)
-	if err != nil {
-		return diag.FromErr(err)
-	}
 
-	return nil
+	return diag.FromErr(err)
 }

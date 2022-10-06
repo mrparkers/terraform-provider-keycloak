@@ -27,29 +27,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.16
-
-      - id: cache-paths
-        run: |
-          echo "::set-output name=build::$(go env GOCACHE)"
-          echo "::set-output name=mod::$(go env GOMODCACHE)"
-
-      - name: Go Build Cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.cache-paths.outputs.build }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
-
-      - name: Go Mod Cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.cache-paths.outputs.mod }}
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+          go-version-file: 'go.mod'
+          cache: true
 
       - name: Import GPG key
         id: import_gpg

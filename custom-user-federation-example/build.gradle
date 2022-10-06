@@ -1,6 +1,6 @@
 buildscript {
 	ext.kotlinVersion = '1.3.31'
-	ext.keycloakVersion = '16.1.1'
+	ext.keycloakVersion = '19.0.2'
 	ext.shadowJarVersion = '4.0.2'
 
     repositories {
@@ -30,6 +30,7 @@ dependencies {
     compile "org.keycloak:keycloak-services:${keycloakVersion}"
     compile "org.keycloak:keycloak-server-spi:${keycloakVersion}"
     compile "org.keycloak:keycloak-server-spi-private:${keycloakVersion}"
+    compile "org.keycloak:keycloak-model-legacy:${keycloakVersion}"
 }
 
 repositories {
