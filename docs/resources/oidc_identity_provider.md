@@ -51,6 +51,7 @@ resource "keycloak_oidc_identity_provider" "realm_identity_provider" {
 - `validate_signature` - (Optional) Enable/disable signature validation of external IDP signatures. Defaults to `false`.
 - `user_info_url` - (Optional) User Info URL.
 - `jwks_url` - (Optional) JSON Web Key Set URL.
+- `issuer` - (Optional) The issuer identifier for the issuer of the response. If not provided, no validation will be performed.
 - `disable_user_info` - (Optional) When `true`, disables the usage of the user info service to obtain additional user information. Defaults to `false`.
 - `hide_on_login_page` - (Optional) When `true`, this provider will be hidden on the login page, and is only accessible when requested explicitly. Defaults to `false`.
 - `logout_url` - (Optional) The Logout URL is the end session endpoint to use to logout user from external identity provider.

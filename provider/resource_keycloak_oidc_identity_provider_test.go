@@ -276,6 +276,8 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	token_url         = "https://example.com/token"
 	client_id         = "example_id"
 	client_secret     = "example_token"
+
+	issuer = "hello"
 }
 	`, testAccRealm.Realm, oidc)
 }
