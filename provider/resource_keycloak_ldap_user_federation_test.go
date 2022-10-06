@@ -120,6 +120,26 @@ func TestAccKeycloakLdapUserFederation_basicUpdateRealm(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakLdapUserFederation_deleteDefaultMappers(t *testing.T) {
+	t.Parallel()
+	ldapName := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakLdapUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakLdapUserFederation_deleteDefaultMappers(ldapName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakLdapUserFederationExists("keycloak_ldap_user_federation.openldap"),
+					testAccCheckKeycloakLdapUserFederationHasNoDefaultMappers("keycloak_ldap_user_federation.openldap"),
+				),
+			},
+		},
+	})
+}
+
 func generateRandomLdapKerberos(enabled bool) *keycloak.LdapUserFederation {
 	connectionTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
 	readTimeout, _ := keycloak.GetDurationStringFromMilliseconds(strconv.Itoa(acctest.RandIntRange(1, 3600) * 1000))
@@ -538,6 +558,26 @@ func testAccCheckKeycloakLdapUserFederationExists(resourceName string) resource.
 	}
 }
 
+func testAccCheckKeycloakLdapUserFederationHasNoDefaultMappers(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		ldap, err := getLdapUserFederationFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		mappers, err := keycloakClient.GetLdapUserFederationMappers(testCtx, ldap.RealmId, ldap.Id)
+		if err != nil {
+			return err
+		}
+
+		if len(*mappers) != 0 {
+			return fmt.Errorf("expected ldap user federation to have zero mappers, found %d", len(*mappers))
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakLdapUserFederationFetch(resourceName string, ldap *keycloak.LdapUserFederation) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		fetchedLdap, err := getLdapUserFederationFromState(s, resourceName)
@@ -875,6 +915,35 @@ resource "keycloak_ldap_user_federation" "openldap_no_auth" {
 	]
 	connection_url          = "ldap://openldap"
 	users_dn                = "dc=example,dc=org"
+}
+	`, testAccRealmUserFederation.Realm, ldap)
+}
+
+func testKeycloakLdapUserFederation_deleteDefaultMappers(ldap string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_ldap_user_federation" "openldap" {
+	name                    = "%s"
+	realm_id                = data.keycloak_realm.realm.id
+
+	enabled                 = true
+
+	username_ldap_attribute = "cn"
+	rdn_ldap_attribute      = "cn"
+	uuid_ldap_attribute     = "entryDN"
+	user_object_classes     = [
+		"simpleSecurityObject",
+		"organizationalRole"
+	]
+	connection_url          = "ldap://openldap"
+	users_dn                = "dc=example,dc=org"
+	bind_dn                 = "cn=admin,dc=example,dc=org"
+	bind_credential         = "admin"
+
+	delete_default_mappers = true
 }
 	`, testAccRealmUserFederation.Realm, ldap)
 }
