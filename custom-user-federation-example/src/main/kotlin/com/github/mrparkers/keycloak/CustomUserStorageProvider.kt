@@ -5,10 +5,8 @@ import org.keycloak.credential.CredentialInput
 import org.keycloak.credential.CredentialInputUpdater
 import org.keycloak.credential.CredentialInputValidator
 import org.keycloak.credential.CredentialModel
-import org.keycloak.models.KeycloakSession
-import org.keycloak.models.RealmModel
-import org.keycloak.models.UserCredentialModel
-import org.keycloak.models.UserModel
+import org.keycloak.credential.LegacyUserCredentialManager
+import org.keycloak.models.*
 import org.keycloak.storage.ReadOnlyException
 import org.keycloak.storage.StorageId
 import org.keycloak.storage.UserStorageProvider
@@ -48,7 +46,11 @@ class CustomUserStorageProvider(private val session: KeycloakSession, private va
                 override fun getUsername(): String {
                     return username
                 }
-            }
+
+				override fun credentialManager(): SubjectCredentialManager {
+					return LegacyUserCredentialManager(session, realm, this)
+				}
+			}
 
             loadedUsers[username] = newUser
 

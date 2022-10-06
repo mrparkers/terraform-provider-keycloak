@@ -8,9 +8,9 @@ terraform {
 }
 
 provider "keycloak" {
-  client_id          = "terraform"
-  client_secret      = "884e0f95-0f42-4a63-9b1f-94274655669e"
-  url                = "http://localhost:8080"
+  client_id     = "terraform"
+  client_secret = "884e0f95-0f42-4a63-9b1f-94274655669e"
+  url           = "http://localhost:8080"
   additional_headers = {
     foo = "bar"
   }
@@ -85,7 +85,7 @@ resource "keycloak_realm" "test" {
   web_authn_policy {
     relying_party_entity_name = "Example"
     relying_party_id          = "keycloak.example.com"
-    signature_algorithms      = [
+    signature_algorithms = [
       "ES256",
       "RS256"
     ]
@@ -94,7 +94,7 @@ resource "keycloak_realm" "test" {
   web_authn_passwordless_policy {
     relying_party_entity_name = "Example"
     relying_party_id          = "keycloak.example.com"
-    signature_algorithms      = [
+    signature_algorithms = [
       "ES256",
       "RS256"
     ]
@@ -189,7 +189,7 @@ resource "keycloak_group" "baz" {
 }
 
 resource "keycloak_default_groups" "default" {
-  realm_id  = keycloak_realm.test.id
+  realm_id = keycloak_realm.test.id
   group_ids = [
     keycloak_group.baz.id
   ]
@@ -349,7 +349,7 @@ resource "keycloak_ldap_role_mapper" "ldap_role_mapper" {
 
   ldap_roles_dn            = "dc=example,dc=org"
   role_name_ldap_attribute = "cn"
-  role_object_classes      = [
+  role_object_classes = [
     "groupOfNames"
   ]
   membership_attribute_type      = "DN"
@@ -368,6 +368,19 @@ resource "keycloak_ldap_user_attribute_mapper" "description_attr_mapper" {
   ldap_attribute       = "description"
 
   always_read_value_from_ldap = false
+}
+
+resource "keycloak_ldap_user_attribute_mapper" "default_attr_mapper" {
+  name                    = "defaultval-mapper"
+  realm_id                = keycloak_ldap_user_federation.openldap.realm_id
+  ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
+
+  user_model_attribute = "defaultval"
+  ldap_attribute       = "defaultval"
+
+  always_read_value_from_ldap = false
+  is_mandatory_in_ldap        = true
+  attribute_default_value     = "testing"
 }
 
 resource "keycloak_ldap_group_mapper" "group_mapper" {
@@ -621,16 +634,6 @@ resource "keycloak_saml_client" "saml_client" {
   signing_private_key = file("../provider/misc/saml-key.pem")
 }
 
-resource "keycloak_saml_script_protocol_mapper" "saml_script_mapper" {
-  realm_id  = keycloak_realm.test.id
-  client_id = keycloak_saml_client.saml_client.id
-  name      = "script-mapper"
-
-  script                     = "exports = 'foo';"
-  saml_attribute_name        = "bar"
-  saml_attribute_name_format = "Unspecified"
-}
-
 resource "keycloak_saml_user_attribute_protocol_mapper" "saml_user_attribute_mapper" {
   realm_id  = keycloak_realm.test.id
   client_id = keycloak_saml_client.saml_client.id
@@ -652,7 +655,7 @@ resource "keycloak_saml_user_property_protocol_mapper" "saml_user_property_mappe
   saml_attribute_name_format = "Unspecified"
 }
 
-resource keycloak_oidc_identity_provider oidc {
+resource "keycloak_oidc_identity_provider" "oidc" {
   realm             = keycloak_realm.test.id
   alias             = "oidc"
   authorization_url = "https://example.com/auth"
@@ -664,7 +667,7 @@ resource keycloak_oidc_identity_provider oidc {
   gui_order         = 1
 }
 
-resource keycloak_oidc_google_identity_provider google {
+resource "keycloak_oidc_google_identity_provider" "google" {
   realm                                   = keycloak_realm.test.id
   client_id                               = "myclientid.apps.googleusercontent.com"
   client_secret                           = "myclientsecret"
@@ -692,7 +695,7 @@ resource keycloak_oidc_google_identity_provider google {
 //  }
 //}
 
-resource keycloak_attribute_importer_identity_provider_mapper oidc {
+resource "keycloak_attribute_importer_identity_provider_mapper" "oidc" {
   realm                   = keycloak_realm.test.id
   name                    = "attributeImporter"
   claim_name              = "upn"
@@ -705,7 +708,7 @@ resource keycloak_attribute_importer_identity_provider_mapper oidc {
   }
 }
 
-resource keycloak_attribute_to_role_identity_provider_mapper oidc {
+resource "keycloak_attribute_to_role_identity_provider_mapper" "oidc" {
   realm                   = keycloak_realm.test.id
   name                    = "attributeToRole"
   claim_name              = "upn"
@@ -719,7 +722,7 @@ resource keycloak_attribute_to_role_identity_provider_mapper oidc {
   }
 }
 
-resource keycloak_user_template_importer_identity_provider_mapper oidc {
+resource "keycloak_user_template_importer_identity_provider_mapper" "oidc" {
   realm                   = keycloak_realm.test.id
   name                    = "userTemplate"
   identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
@@ -731,7 +734,7 @@ resource keycloak_user_template_importer_identity_provider_mapper oidc {
   }
 }
 
-resource keycloak_hardcoded_role_identity_provider_mapper oidc {
+resource "keycloak_hardcoded_role_identity_provider_mapper" "oidc" {
   realm                   = keycloak_realm.test.id
   name                    = "hardcodedRole"
   identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
@@ -743,7 +746,7 @@ resource keycloak_hardcoded_role_identity_provider_mapper oidc {
   }
 }
 
-resource keycloak_hardcoded_attribute_identity_provider_mapper oidc {
+resource "keycloak_hardcoded_attribute_identity_provider_mapper" "oidc" {
   realm                   = keycloak_realm.test.id
   name                    = "hardcodedUserSessionAttribute"
   identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
@@ -757,7 +760,7 @@ resource keycloak_hardcoded_attribute_identity_provider_mapper oidc {
   }
 }
 
-resource keycloak_saml_identity_provider saml {
+resource "keycloak_saml_identity_provider" "saml" {
   realm                      = keycloak_realm.test.id
   alias                      = "saml"
   entity_id                  = "https://example.com/entity_id"
@@ -766,7 +769,7 @@ resource keycloak_saml_identity_provider saml {
   gui_order                  = 3
 }
 
-resource keycloak_attribute_importer_identity_provider_mapper saml {
+resource "keycloak_attribute_importer_identity_provider_mapper" "saml" {
   realm                   = keycloak_realm.test.id
   name                    = "Attribute: email"
   attribute_name          = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
@@ -779,7 +782,7 @@ resource keycloak_attribute_importer_identity_provider_mapper saml {
   }
 }
 
-resource keycloak_attribute_to_role_identity_provider_mapper saml {
+resource "keycloak_attribute_to_role_identity_provider_mapper" "saml" {
   realm                   = keycloak_realm.test.id
   name                    = "attributeToRole"
   attribute_name          = "upn"
@@ -793,7 +796,7 @@ resource keycloak_attribute_to_role_identity_provider_mapper saml {
   }
 }
 
-resource keycloak_user_template_importer_identity_provider_mapper saml {
+resource "keycloak_user_template_importer_identity_provider_mapper" "saml" {
   realm                   = keycloak_realm.test.id
   name                    = "userTemplate"
   identity_provider_alias = keycloak_saml_identity_provider.saml.alias
@@ -805,7 +808,7 @@ resource keycloak_user_template_importer_identity_provider_mapper saml {
   }
 }
 
-resource keycloak_hardcoded_role_identity_provider_mapper saml {
+resource "keycloak_hardcoded_role_identity_provider_mapper" "saml" {
   realm                   = keycloak_realm.test.id
   name                    = "hardcodedRole"
   identity_provider_alias = keycloak_saml_identity_provider.saml.alias
@@ -817,7 +820,7 @@ resource keycloak_hardcoded_role_identity_provider_mapper saml {
   }
 }
 
-resource keycloak_hardcoded_attribute_identity_provider_mapper saml {
+resource "keycloak_hardcoded_attribute_identity_provider_mapper" "saml" {
   realm                   = keycloak_realm.test.id
   name                    = "hardcodedAttribute"
   identity_provider_alias = keycloak_saml_identity_provider.saml.alias
@@ -831,7 +834,7 @@ resource keycloak_hardcoded_attribute_identity_provider_mapper saml {
   }
 }
 
-resource keycloak_saml_identity_provider saml_custom {
+resource "keycloak_saml_identity_provider" "saml_custom" {
   realm                      = keycloak_realm.test.id
   alias                      = "custom_saml"
   provider_id                = "saml"
@@ -839,7 +842,7 @@ resource keycloak_saml_identity_provider saml_custom {
   single_sign_on_service_url = "https://example.com/auth"
   sync_mode                  = "FORCE"
   gui_order                  = 4
-  extra_config               = {
+  extra_config = {
     mycustomAttribute = "aValue"
   }
 }
@@ -877,7 +880,7 @@ resource "keycloak_openid_client" "test_client_auth" {
   client_secret = "secret"
 }
 
-resource keycloak_openid_client test_open_id_client_with_consent_text {
+resource "keycloak_openid_client" "test_open_id_client_with_consent_text" {
   client_id   = "test_open_id_client_with_consent_text"
   name        = "test_open_id_client_with_consent_text"
   realm_id    = keycloak_realm.test.id
@@ -990,7 +993,7 @@ resource "keycloak_authentication_execution" "browser-copy-cookie" {
   parent_flow_alias = keycloak_authentication_flow.browser-copy-flow.alias
   authenticator     = "auth-cookie"
   requirement       = "ALTERNATIVE"
-  depends_on        = [
+  depends_on = [
     keycloak_authentication_execution.browser-copy-kerberos
   ]
 }
@@ -1007,7 +1010,7 @@ resource "keycloak_authentication_execution" "browser-copy-idp-redirect" {
   parent_flow_alias = keycloak_authentication_flow.browser-copy-flow.alias
   authenticator     = "identity-provider-redirector"
   requirement       = "ALTERNATIVE"
-  depends_on        = [
+  depends_on = [
     keycloak_authentication_execution.browser-copy-cookie
   ]
 }
@@ -1017,7 +1020,7 @@ resource "keycloak_authentication_subflow" "browser-copy-flow-forms" {
   parent_flow_alias = keycloak_authentication_flow.browser-copy-flow.alias
   alias             = "browser-copy-flow-forms"
   requirement       = "ALTERNATIVE"
-  depends_on        = [
+  depends_on = [
     keycloak_authentication_execution.browser-copy-idp-redirect
   ]
 }
@@ -1034,7 +1037,7 @@ resource "keycloak_authentication_execution" "browser-copy-otp" {
   parent_flow_alias = keycloak_authentication_subflow.browser-copy-flow-forms.alias
   authenticator     = "auth-otp-form"
   requirement       = "REQUIRED"
-  depends_on        = [
+  depends_on = [
     keycloak_authentication_execution.browser-copy-auth-username-password-form
   ]
 }
@@ -1043,7 +1046,7 @@ resource "keycloak_authentication_execution_config" "config" {
   realm_id     = keycloak_realm.test.id
   execution_id = keycloak_authentication_execution.browser-copy-idp-redirect.id
   alias        = "idp-XXX-config"
-  config       = {
+  config = {
     defaultProvider = "idp-XXX"
   }
 }
@@ -1085,7 +1088,7 @@ resource "keycloak_realm_user_profile" "userprofile" {
     }
 
     validator {
-      name   = "pattern"
+      name = "pattern"
       config = {
         pattern       = "^[a-z]+$"
         error_message = "Nope"

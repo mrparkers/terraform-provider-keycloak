@@ -167,8 +167,8 @@ func (keycloakClient *KeycloakClient) GetGroupByName(ctx context.Context, realmI
 }
 
 /*
-	Find group by name in groups returned by /groups?search=${group_name}
-	If there are multiple groups match the name, it will return the first one it found, using DFS algorithm
+Find group by name in groups returned by /groups?search=${group_name}
+If there are multiple groups match the name, it will return the first one it found, using DFS algorithm
 */
 func getGroupByDFS(groupName string, groups []*Group) *Group {
 	for _, group := range groups {

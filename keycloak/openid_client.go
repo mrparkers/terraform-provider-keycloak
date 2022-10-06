@@ -287,7 +287,7 @@ func (keycloakClient *KeycloakClient) attachOpenidClientScopes(ctx context.Conte
 		return fmt.Errorf("validation error: client with id %s uses access type BEARER-ONLY which does not use scopes", clientId)
 	}
 
-	allOpenidClientScopes, err := keycloakClient.ListOpenidClientScopesWithFilter(ctx, realmId, includeOpenidClientScopesMatchingNames(scopeNames))
+	allOpenidClientScopes, err := keycloakClient.ListOpenidClientScopesWithFilter(ctx, realmId, IncludeOpenidClientScopesMatchingNames(scopeNames))
 	if err != nil {
 		return err
 	}
@@ -336,7 +336,7 @@ func (keycloakClient *KeycloakClient) AttachOpenidClientOptionalScopes(ctx conte
 }
 
 func (keycloakClient *KeycloakClient) detachOpenidClientScopes(ctx context.Context, realmId, clientId, t string, scopeNames []string) error {
-	allOpenidClientScopes, err := keycloakClient.ListOpenidClientScopesWithFilter(ctx, realmId, includeOpenidClientScopesMatchingNames(scopeNames))
+	allOpenidClientScopes, err := keycloakClient.ListOpenidClientScopesWithFilter(ctx, realmId, IncludeOpenidClientScopesMatchingNames(scopeNames))
 	if err != nil {
 		return err
 	}

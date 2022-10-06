@@ -79,6 +79,17 @@ func skipIfVersionIsLessThanOrEqualTo(ctx context.Context, t *testing.T, keycloa
 	}
 }
 
+func skipIfVersionIsGreaterThanOrEqualTo(ctx context.Context, t *testing.T, keycloakClient *keycloak.KeycloakClient, version keycloak.Version) {
+	ok, err := keycloakClient.VersionIsGreaterThanOrEqualTo(ctx, version)
+	if err != nil {
+		t.Errorf("error checking keycloak version: %v", err)
+	}
+
+	if ok {
+		t.Skipf("keycloak server version is greater than or equal to %s, skipping...", version)
+	}
+}
+
 func TestCheckResourceAttrNot(name, key, value string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		err := resource.TestCheckResourceAttr(name, key, value)(s)

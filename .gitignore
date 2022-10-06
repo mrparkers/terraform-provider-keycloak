@@ -14,6 +14,8 @@ terraform-provider-keycloak
 
 .idea/
 .terraform/
+terraform.d/
+.terraform.lock.hcl
 terraform.tfstate*
 
 .gradle/

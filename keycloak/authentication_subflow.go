@@ -21,7 +21,7 @@ type AuthenticationSubFlow struct {
 	Requirement   string `json:"-"`
 }
 
-//each subflow creates a flow and an execution under the covers
+// each subflow creates a flow and an execution under the covers
 type authenticationSubFlowCreate struct {
 	Alias       string `json:"alias"`
 	Type        string `json:"type"`     //providerId of the flow

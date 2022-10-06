@@ -16,6 +16,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 			"keycloak_group":                              dataSourceKeycloakGroup(),
 			"keycloak_openid_client":                      dataSourceKeycloakOpenidClient(),
 			"keycloak_openid_client_authorization_policy": dataSourceKeycloakOpenidClientAuthorizationPolicy(),
+			"keycloak_openid_client_scope":                dataSourceKeycloakOpenidClientScope(),
 			"keycloak_openid_client_service_account_user": dataSourceKeycloakOpenidClientServiceAccountUser(),
 			"keycloak_realm":                              dataSourceKeycloakRealm(),
 			"keycloak_realm_keys":                         dataSourceKeycloakRealmKeys(),
@@ -78,6 +79,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 			"keycloak_saml_client_default_scopes":                        resourceKeycloakSamlClientDefaultScopes(),
 			"keycloak_generic_client_protocol_mapper":                    resourceKeycloakGenericClientProtocolMapper(),
 			"keycloak_generic_client_role_mapper":                        resourceKeycloakGenericClientRoleMapper(),
+			"keycloak_generic_protocol_mapper":                           resourceKeycloakGenericProtocolMapper(),
 			"keycloak_saml_user_attribute_protocol_mapper":               resourceKeycloakSamlUserAttributeProtocolMapper(),
 			"keycloak_saml_user_property_protocol_mapper":                resourceKeycloakSamlUserPropertyProtocolMapper(),
 			"keycloak_saml_script_protocol_mapper":                       resourceKeycloakSamlScriptProtocolMapper(),
@@ -179,7 +181,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 			"base_path": {
 				Optional:    true,
 				Type:        schema.TypeString,
-				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_BASE_PATH", "/auth"),
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_BASE_PATH", ""),
 			},
 			"additional_headers": {
 				Optional: true,

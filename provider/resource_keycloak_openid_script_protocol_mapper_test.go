@@ -12,8 +12,9 @@ import (
 
 // The script protocol mapper was removed in Keycloak 18, so these tests will not run on versions greater than or equal to 18
 // https://www.keycloak.org/2022/04/keycloak-1800-released.html#_removal_of_the_upload_scripts_feature
+// Also, these tests seem to fail on v17 quarkus.
 func skipKeycloakOpenIdScriptProtocolMapperTests(t *testing.T) {
-	if ok, err := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_18); err != nil {
+	if ok, err := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_17); err != nil {
 		t.Fatal(err)
 	} else if ok {
 		t.Skip()
