@@ -58,5 +58,5 @@ Protocol mappers can be imported using the following format: `{{realm_id}}/clien
 Example:
 
 ```bash
-$ terraform import keycloak_generic_client_protocol_mapper.saml_hardcode_attribute_mapper my-realm/client/a7202154-8793-4656-b655-1dd18c181e14/71602afa-f7d1-4788-8c49-ef8fd00af0f4
+$ terraform import keycloak_generic_protocol_mapper.saml_hardcode_attribute_mapper my-realm/client/a7202154-8793-4656-b655-1dd18c181e14/71602afa-f7d1-4788-8c49-ef8fd00af0f4
 ```

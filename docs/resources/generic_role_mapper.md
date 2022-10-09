@@ -1,12 +1,10 @@
 ---
-page_title: "keycloak_generic_client_role_mapper Resource"
+page_title: "keycloak_generic_role_mapper Resource"
 ---
 
-# keycloak\_generic\_client\_role\_mapper Resource
+# keycloak\_generic\_role\_mapper Resource
 
-!> **WARNING:** This resource is deprecated and will be removed in the next major version. Please use `keycloak_generic_role_mapper` instead.
-
-Allow for creating and managing a client's scope mappings within Keycloak.
+Allow for creating and managing a client's or client scope's role mappings within Keycloak.
 
 By default, all the user role mappings of the user are added as claims within the token (OIDC) or assertion (SAML). When
 `full_scope_allowed` is set to `false` for a client, role scope mapping allows you to limit the roles that get declared
@@ -36,7 +34,7 @@ resource "keycloak_role" "realm_role" {
   description = "My Realm Role"
 }
 
-resource "keycloak_generic_client_role_mapper" "client_role_mapper" {
+resource "keycloak_generic_role_mapper" "client_role_mapper" {
   realm_id  = keycloak_realm.realm.id
   client_id = keycloak_openid_client.client.id
   role_id   = keycloak_role.realm_role.id
@@ -60,7 +58,7 @@ resource "keycloak_openid_client" "client_a" {
 
   access_type = "BEARER-ONLY"
 
-  // disable full scope, roles are assigned via keycloak_generic_client_role_mapper
+  // disable full scope, roles are assigned via keycloak_generic_role_mapper
   full_scope_allowed = false
 }
 
@@ -88,7 +86,7 @@ resource "keycloak_role" "client_role_b" {
   description = "My Client Role"
 }
 
-resource "keycloak_generic_client_role_mapper" "client_b_role_mapper" {
+resource "keycloak_generic_role_mapper" "client_b_role_mapper" {
   realm_id  = keycloak_realm.realm.id
   client_id = keycloak_openid_client.client_b.id
   role_id   = keycloak_role.client_role_a.id
@@ -114,7 +112,7 @@ resource "keycloak_role" "realm_role" {
   description = "My Realm Role"
 }
 
-resource "keycloak_generic_client_role_mapper" "client_role_mapper" {
+resource "keycloak_generic_role_mapper" "client_role_mapper" {
   realm_id        = keycloak_realm.realm.id
   client_scope_id = keycloak_openid_client_scope.client_scope.id
   role_id         = keycloak_role.realm_role.id
@@ -151,7 +149,7 @@ resource "keycloak_openid_client_scope" "client_scope" {
   name      = "my-client-scope"
 }
 
-resource "keycloak_generic_client_role_mapper" "client_b_role_mapper" {
+resource "keycloak_generic_role_mapper" "client_b_role_mapper" {
   realm_id        = keycloak_realm.realm.id
   client_scope_id = keycloak_openid_client_scope.client_scope.id
   role_id         = keycloak_role.client_role.id
@@ -175,5 +173,5 @@ Generic client role mappers can be imported using one of the following two forma
 Example:
 
 ```bash
-$ terraform import keycloak_generic_client_role_mapper.client_role_mapper my-realm/client/23888550-5dcd-41f6-85ba-554233021e9c/scope-mappings/ce51f004-bdfb-4dd5-a963-c4487d2dec5b/ff3aa49f-bc07-4030-8783-41918c3614a3
+$ terraform import keycloak_generic_role_mapper.client_role_mapper my-realm/client/23888550-5dcd-41f6-85ba-554233021e9c/scope-mappings/ce51f004-bdfb-4dd5-a963-c4487d2dec5b/ff3aa49f-bc07-4030-8783-41918c3614a3
 ```
