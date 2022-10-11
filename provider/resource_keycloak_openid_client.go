@@ -115,6 +115,13 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"valid_post_logout_redirect_uris": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+				Optional: true,
+				Computed: true,
+			},
 			"root_url": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -305,10 +312,12 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient, error) {
 	validRedirectUris := make([]string, 0)
 	webOrigins := make([]string, 0)
+	validPostLogoutRedirectUris := make([]string, 0)
 
 	rootUrlData, rootUrlOk := data.GetOkExists("root_url")
 	validRedirectUrisData, validRedirectUrisOk := data.GetOk("valid_redirect_uris")
 	webOriginsData, webOriginsOk := data.GetOk("web_origins")
+	validPostLogoutRedirectUrisData, validPostLogoutRedirectUrisOk := data.GetOk("valid_post_logout_redirect_uris")
 
 	rootUrlString := rootUrlData.(string)
 
@@ -321,6 +330,12 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	if webOriginsOk {
 		for _, webOrigin := range webOriginsData.(*schema.Set).List() {
 			webOrigins = append(webOrigins, webOrigin.(string))
+		}
+	}
+
+	if validPostLogoutRedirectUrisOk {
+		for _, validPostLogoutRedirectUri := range validPostLogoutRedirectUrisData.(*schema.Set).List() {
+			validPostLogoutRedirectUris = append(validPostLogoutRedirectUris, validPostLogoutRedirectUri.(string))
 		}
 	}
 
@@ -361,11 +376,12 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			ConsentScreenText:                     data.Get("consent_screen_text").(string),
 			DisplayOnConsentScreen:                keycloak.KeycloakBoolQuoted(data.Get("display_on_consent_screen").(bool)),
 		},
-		ValidRedirectUris: validRedirectUris,
-		WebOrigins:        webOrigins,
-		AdminUrl:          data.Get("admin_url").(string),
-		BaseUrl:           data.Get("base_url").(string),
-		ConsentRequired:   data.Get("consent_required").(bool),
+		ValidRedirectUris:           validRedirectUris,
+		WebOrigins:                  webOrigins,
+		ValidPostLogoutRedirectUris: validPostLogoutRedirectUris,
+		AdminUrl:                    data.Get("admin_url").(string),
+		BaseUrl:                     data.Get("base_url").(string),
+		ConsentRequired:             data.Get("consent_required").(bool),
 	}
 
 	if rootUrlOk {
@@ -381,6 +397,12 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled && !openidClient.DirectAccessGrantsEnabled {
 		if _, ok := data.GetOk("web_origins"); ok {
 			return nil, errors.New("web_origins cannot be set when standard or implicit flow is not enabled")
+		}
+	}
+
+	if !openidClient.ImplicitFlowEnabled && !openidClient.StandardFlowEnabled && !openidClient.DirectAccessGrantsEnabled {
+		if _, ok := data.GetOk("valid_post_logout_redirect_uris"); ok {
+			return nil, errors.New("valid_post_logout_redirect_uris cannot be set when standard or implicit flow is not enabled")
 		}
 	}
 
@@ -441,6 +463,7 @@ func setOpenidClientData(ctx context.Context, keycloakClient *keycloak.KeycloakC
 	data.Set("frontchannel_logout_enabled", client.FrontChannelLogoutEnabled)
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
 	data.Set("web_origins", client.WebOrigins)
+	data.Set("valid_post_logout_redirect_uris", client.ValidPostLogoutRedirectUris)
 	data.Set("admin_url", client.AdminUrl)
 	data.Set("base_url", client.BaseUrl)
 	data.Set("root_url", &client.RootUrl)

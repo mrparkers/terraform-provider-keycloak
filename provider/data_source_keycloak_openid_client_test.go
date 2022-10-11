@@ -87,6 +87,9 @@ resource "keycloak_openid_client" "test" {
 	web_origins              	= [
 		"http://localhost"
 	]
+	valid_post_logout_redirect_uris	= [
+		"+"
+	]
 	full_scope_allowed       	= false
 	consent_required         	= true
 	display_on_consent_screen	= true

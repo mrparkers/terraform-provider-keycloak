@@ -44,6 +44,7 @@ type GenericClientRepresentation struct {
 	StandardFlowEnabled                bool                     `json:"standardFlowEnabled"`
 	SurrogateAuthRequired              bool                     `json:"surrogateAuthRequired"`
 	WebOrigins                         []string                 `json:"webOrigins"`
+	ValidPostLogoutRedirectUris        []string                 `json:"validPostLogoutRedirectUris"`
 }
 
 func (keycloakClient *KeycloakClient) NewGenericClientDescription(ctx context.Context, realmId string, body string) (*GenericClientRepresentation, error) {

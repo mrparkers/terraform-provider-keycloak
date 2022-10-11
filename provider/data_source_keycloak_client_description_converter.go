@@ -189,6 +189,11 @@ func dataSourceKeycloakClientDescriptionConverter() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
+			"valid_post_logout_redirect_uris": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+			},
 		},
 	}
 }
@@ -231,6 +236,7 @@ func setClientDescriptionConverterData(data *schema.ResourceData, description *k
 	data.Set("standard_flow_enabled", description.StandardFlowEnabled)
 	data.Set("surrogate_auth_required", description.SurrogateAuthRequired)
 	data.Set("web_origins", description.WebOrigins)
+	data.Set("valid_post_logout_redirect_uris", description.ValidPostLogoutRedirectUris)
 }
 
 func dataSourceKeycloakClientDescriptionConverterRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {

@@ -188,20 +188,21 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 
 	rootUrlBefore := "http://localhost:2222/" + acctest.RandString(20)
 	openidClientBefore := &keycloak.OpenidClient{
-		ClientId:                  clientId,
-		Name:                      acctest.RandString(10),
-		Enabled:                   enabled,
-		Description:               acctest.RandString(50),
-		ClientSecret:              acctest.RandString(10),
-		StandardFlowEnabled:       standardFlowEnabled,
-		ImplicitFlowEnabled:       implicitFlowEnabled,
-		DirectAccessGrantsEnabled: directAccessGrantsEnabled,
-		ServiceAccountsEnabled:    serviceAccountsEnabled,
-		ValidRedirectUris:         []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
-		WebOrigins:                []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
-		AdminUrl:                  acctest.RandString(20),
-		BaseUrl:                   "http://localhost:2222/" + acctest.RandString(20),
-		RootUrl:                   &rootUrlBefore,
+		ClientId:                    clientId,
+		Name:                        acctest.RandString(10),
+		Enabled:                     enabled,
+		Description:                 acctest.RandString(50),
+		ClientSecret:                acctest.RandString(10),
+		StandardFlowEnabled:         standardFlowEnabled,
+		ImplicitFlowEnabled:         implicitFlowEnabled,
+		DirectAccessGrantsEnabled:   directAccessGrantsEnabled,
+		ServiceAccountsEnabled:      serviceAccountsEnabled,
+		ValidRedirectUris:           []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
+		WebOrigins:                  []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
+		ValidPostLogoutRedirectUris: []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
+		AdminUrl:                    acctest.RandString(20),
+		BaseUrl:                     "http://localhost:2222/" + acctest.RandString(20),
+		RootUrl:                     &rootUrlBefore,
 		Attributes: keycloak.OpenidClientAttributes{
 			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
 			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(randomBool()),
@@ -213,20 +214,21 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 
 	rootUrlAfter := "http://localhost:2222/" + acctest.RandString(20)
 	openidClientAfter := &keycloak.OpenidClient{
-		ClientId:                  clientId,
-		Name:                      acctest.RandString(10),
-		Enabled:                   !enabled,
-		Description:               acctest.RandString(50),
-		ClientSecret:              acctest.RandString(10),
-		StandardFlowEnabled:       standardFlowEnabled,
-		ImplicitFlowEnabled:       implicitFlowEnabled,
-		DirectAccessGrantsEnabled: !directAccessGrantsEnabled,
-		ServiceAccountsEnabled:    !serviceAccountsEnabled,
-		ValidRedirectUris:         []string{acctest.RandString(10), acctest.RandString(10)},
-		WebOrigins:                []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
-		AdminUrl:                  acctest.RandString(20),
-		BaseUrl:                   "http://localhost:2222/" + acctest.RandString(20),
-		RootUrl:                   &rootUrlAfter,
+		ClientId:                    clientId,
+		Name:                        acctest.RandString(10),
+		Enabled:                     !enabled,
+		Description:                 acctest.RandString(50),
+		ClientSecret:                acctest.RandString(10),
+		StandardFlowEnabled:         standardFlowEnabled,
+		ImplicitFlowEnabled:         implicitFlowEnabled,
+		DirectAccessGrantsEnabled:   !directAccessGrantsEnabled,
+		ServiceAccountsEnabled:      !serviceAccountsEnabled,
+		ValidRedirectUris:           []string{acctest.RandString(10), acctest.RandString(10)},
+		WebOrigins:                  []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
+		ValidPostLogoutRedirectUris: []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
+		AdminUrl:                    acctest.RandString(20),
+		BaseUrl:                     "http://localhost:2222/" + acctest.RandString(20),
+		RootUrl:                     &rootUrlAfter,
 		Attributes: keycloak.OpenidClientAttributes{
 			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
 			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(randomBool()),
@@ -1466,17 +1468,18 @@ resource "keycloak_openid_client" "client" {
 	direct_access_grants_enabled = %t
 	service_accounts_enabled     = %t
 
-	valid_redirect_uris          = %s
-	web_origins                  = %s
-	admin_url					 = "%s"
-	base_url                     = "%s"
-	root_url                     = "%s"
+	valid_redirect_uris             = %s
+	web_origins                     = %s
+	valid_post_logout_redirect_uris = %s
+	admin_url                       = "%s"
+	base_url                        = "%s"
+	root_url                        = "%s"
 
 	backchannel_logout_url                     = "%s"
 	backchannel_logout_session_required        = %t
 	backchannel_logout_revoke_offline_sessions = %t
 }
-	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl, openidClient.Attributes.BackchannelLogoutUrl, openidClient.Attributes.BackchannelLogoutSessionRequired, openidClient.Attributes.BackchannelLogoutRevokeOfflineTokens)
+	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), arrayOfStringsForTerraformResource(openidClient.ValidPostLogoutRedirectUris), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl, openidClient.Attributes.BackchannelLogoutUrl, openidClient.Attributes.BackchannelLogoutSessionRequired, openidClient.Attributes.BackchannelLogoutRevokeOfflineTokens)
 }
 
 func testKeycloakOpenidClient_backchannel(clientId, backchannelLogoutUrl string, backchannelLogoutSessionRequired, backchannelLogoutRevokeOfflineSessions bool) string {

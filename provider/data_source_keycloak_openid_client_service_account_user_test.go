@@ -53,6 +53,9 @@ resource "keycloak_openid_client" "test" {
 	web_origins              = [
 		"http://localhost"
 	]
+	valid_post_logout_redirect_uris = [
+		"+"
+	]
 }
 
 data keycloak_openid_client_service_account_user test {

@@ -78,6 +78,12 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Set:      schema.HashString,
 				Computed: true,
 			},
+			"valid_post_logout_redirect_uris": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+				Computed: true,
+			},
 			"root_url": {
 				Type:     schema.TypeString,
 				Computed: true,

@@ -47,6 +47,7 @@ type OpenidClient struct {
 	AuthorizationServicesEnabled       bool                                     `json:"authorizationServicesEnabled"`
 	ValidRedirectUris                  []string                                 `json:"redirectUris"`
 	WebOrigins                         []string                                 `json:"webOrigins"`
+	ValidPostLogoutRedirectUris        []string                                 `json:"validPostLogoutRedirectUris"`
 	AdminUrl                           string                                   `json:"adminUrl"`
 	BaseUrl                            string                                   `json:"baseUrl"`
 	RootUrl                            *string                                  `json:"rootUrl,omitempty"`
