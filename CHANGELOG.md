@@ -1,3 +1,9 @@
+## v4.0.1 (October 13, 2022)
+
+FIXES:
+
+- restored the default value for the `client_authenticator_type` attribute within the `keycloak_openid_client` resource ([#755](https://github.com/mrparkers/terraform-provider-keycloak/pull/755))
+
 ## v4.0.0 (October 10, 2022)
 
 BREAKING CHANGES:
