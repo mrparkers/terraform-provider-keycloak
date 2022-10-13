@@ -8,10 +8,10 @@ build:
 	go build -o terraform-provider-keycloak
 
 build-example: build
-	mkdir -p example/.terraform/plugins/terraform.local/mrparkers/keycloak/3.0.0/$(GOOS)_$(GOARCH)
-	mkdir -p example/terraform.d/plugins/terraform.local/mrparkers/keycloak/3.0.0/$(GOOS)_$(GOARCH)
-	cp terraform-provider-keycloak example/.terraform/plugins/terraform.local/mrparkers/keycloak/3.0.0/$(GOOS)_$(GOARCH)/
-	cp terraform-provider-keycloak example/terraform.d/plugins/terraform.local/mrparkers/keycloak/3.0.0/$(GOOS)_$(GOARCH)/
+	mkdir -p example/.terraform/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)
+	mkdir -p example/terraform.d/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)
+	cp terraform-provider-keycloak example/.terraform/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)/
+	cp terraform-provider-keycloak example/terraform.d/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)/
 
 local: deps
 	docker compose up --build -d
