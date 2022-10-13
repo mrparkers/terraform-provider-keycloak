@@ -74,7 +74,7 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(keycloakOpenidClientAuthenticatorTypes, false),
-				Computed:     true,
+				Default:      "client-secret",
 			},
 			"standard_flow_enabled": {
 				Type:     schema.TypeBool,
