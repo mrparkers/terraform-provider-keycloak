@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -95,9 +96,10 @@ func getCustomUserFederationFromData(data *schema.ResourceData, realmInternalId 
 	config := map[string][]string{}
 	if v, ok := data.GetOk("config"); ok {
 		for key, value := range v.(map[string]interface{}) {
-			config[key] = []string{value.(string)}
+			config[key] = strings.Split(value.(string), MULTIVALUE_ATTRIBUTE_SEPARATOR)
 		}
 	}
+
 	parentId := ""
 	dataParentId := data.Get("parent_id").(string)
 	if dataParentId != "" {
@@ -142,9 +144,9 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 
 	data.Set("cache_policy", custom.CachePolicy)
 
-	config := make(map[string]interface{})
+	config := map[string]string{}
 	for k, v := range custom.Config {
-		config[k] = v[0]
+		config[k] = strings.Join(v, MULTIVALUE_ATTRIBUTE_SEPARATOR)
 	}
 
 	data.Set("config", config)
