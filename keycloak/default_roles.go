@@ -6,14 +6,15 @@ import (
 )
 
 type DefaultRoles struct {
-	Id           string   `json:"id,omitempty"`
-	RealmId      string   `json:"-"`
-	DefaultRoles []string `json:"-"`
+	Id             string   `json:"id,omitempty"`
+	RealmId        string   `json:"-"`
+	DefaultRoles   []string `json:"-"`
+	DefaultRoleIds []string `json:"-"`
 }
 
 func (keycloakClient *KeycloakClient) GetDefaultRoles(ctx context.Context, realmId, id string) ([]*Role, error) {
 	var composites []*Role
-	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s/composites/realm", realmId, id), &composites, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s/composites", realmId, id), &composites, nil)
 	if err != nil {
 		return nil, err
 	}
