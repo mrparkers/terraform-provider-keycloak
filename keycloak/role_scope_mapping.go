@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-type RealmRoleScopeMapping struct {
+type RealmRoleRepresentation struct {
 	Id          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -64,7 +64,7 @@ func (keycloakClient *KeycloakClient) DeleteRoleScopeMapping(ctx context.Context
 	if role.ClientRole {
 		return keycloakClient.delete(ctx, roleUrl, nil)
 	} else {
-		body := [1]RealmRoleScopeMapping{
+		body := [1]RealmRoleRepresentation{
 			{
 				Id:          role.Id,
 				Name:        role.Name,
