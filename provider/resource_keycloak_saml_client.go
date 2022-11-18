@@ -19,7 +19,7 @@ import (
 
 var (
 	keycloakSamlClientNameIdFormats           = []string{"username", "email", "transient", "persistent"}
-	keycloakSamlClientSignatureAlgorithms     = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA512", "DSA_SHA1"}
+	keycloakSamlClientSignatureAlgorithms     = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA256_MGF1", "RSA_SHA512", "RSA_SHA512_MGF1", "DSA_SHA1"}
 	keycloakSamlClientSignatureKeyNames       = []string{"NONE", "KEY_ID", "CERT_SUBJECT"}
 	keycloakSamlClientCanonicalizationMethods = map[string]string{
 		"EXCLUSIVE":               "http://www.w3.org/2001/10/xml-exc-c14n#",
