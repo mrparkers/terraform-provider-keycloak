@@ -4,8 +4,10 @@ GOARCH?=amd64
 
 MAKEFLAGS += --silent
 
+VERSION=$$(git describe --tags)
+
 build:
-	go build -o terraform-provider-keycloak
+	CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$(VERSION)" -o terraform-provider-keycloak_$(VERSION)
 
 build-example: build
 	mkdir -p example/.terraform/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)

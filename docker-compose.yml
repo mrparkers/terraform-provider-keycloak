@@ -41,4 +41,3 @@ services:
     volumes:
 # Make the custom-user-federation-example extension available to Keycloak. The :z option is required and tells Docker that the volume content will be shared between containers.
     - ./custom-user-federation-example/build/libs/custom-user-federation-example.jar:/opt/jboss/keycloak/standalone/deployments/custom-user-federation-example.jar:z
-
