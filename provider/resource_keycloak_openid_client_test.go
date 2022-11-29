@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"regexp"
 	"strings"
 	"testing"
@@ -204,8 +205,8 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		RootUrl:                   &rootUrlBefore,
 		Attributes: keycloak.OpenidClientAttributes{
 			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
-			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(randomBool()),
-			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutSessionRequired:     types.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutRevokeOfflineTokens: types.KeycloakBoolQuoted(randomBool()),
 		},
 	}
 
@@ -229,8 +230,8 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		RootUrl:                   &rootUrlAfter,
 		Attributes: keycloak.OpenidClientAttributes{
 			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
-			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(randomBool()),
-			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutSessionRequired:     types.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutRevokeOfflineTokens: types.KeycloakBoolQuoted(randomBool()),
 		},
 	}
 
@@ -904,7 +905,7 @@ func testAccCheckKeycloakOpenidClientOauth2Device(resourceName string,
 			return err
 		}
 
-		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != keycloak.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
+		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != types.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
 			return fmt.Errorf("expected openid client to have device authorizationen granted enabled set to %t, but got %v", oauth2DeviceAuthorizationGrantEnabled, client.Attributes.Oauth2DeviceAuthorizationGrantEnabled)
 		}
 
@@ -1068,7 +1069,7 @@ func testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod(resourceName, pk
 	}
 }
 
-func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(resourceName string, excludeSessionStateFromAuthResponse keycloak.KeycloakBoolQuoted) resource.TestCheckFunc {
+func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(resourceName string, excludeSessionStateFromAuthResponse types.KeycloakBoolQuoted) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
 		if err != nil {
@@ -1140,7 +1141,7 @@ func testAccCheckKeycloakOpenidClientUseRefreshTokens(resourceName string, useRe
 			return err
 		}
 
-		if client.Attributes.UseRefreshTokens != keycloak.KeycloakBoolQuoted(useRefreshTokens) {
+		if client.Attributes.UseRefreshTokens != types.KeycloakBoolQuoted(useRefreshTokens) {
 			return fmt.Errorf("expected openid client to have use refresh tokens set to %t, but got %v", useRefreshTokens, client.Attributes.UseRefreshTokens)
 		}
 
@@ -1155,7 +1156,7 @@ func testAccCheckKeycloakOpenidClientUseRefreshTokensClientCredentials(resourceN
 			return err
 		}
 
-		if client.Attributes.UseRefreshTokensClientCredentials != keycloak.KeycloakBoolQuoted(useRefreshTokensClientCredentials) {
+		if client.Attributes.UseRefreshTokensClientCredentials != types.KeycloakBoolQuoted(useRefreshTokensClientCredentials) {
 			return fmt.Errorf("expected openid client to have use refresh tokens client credentials set to %t, but got %v", useRefreshTokensClientCredentials, client.Attributes.UseRefreshTokensClientCredentials)
 		}
 
@@ -1170,7 +1171,7 @@ func testAccCheckKeycloakOpenidClientOauth2DeviceAuthorizationGrantEnabled(resou
 			return err
 		}
 
-		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != keycloak.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
+		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != types.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
 			return fmt.Errorf("expected openid client to have device authorization grant enabled set to %t, but got %v", oauth2DeviceAuthorizationGrantEnabled, client.Attributes.Oauth2DeviceAuthorizationGrantEnabled)
 		}
 

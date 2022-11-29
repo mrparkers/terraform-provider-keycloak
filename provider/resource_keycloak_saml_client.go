@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"reflect"
 	"strings"
 
@@ -268,13 +269,13 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	}
 
 	samlAttributes := &keycloak.SamlClientAttributes{
-		IncludeAuthnStatement:           keycloak.KeycloakBoolQuoted(data.Get("include_authn_statement").(bool)),
-		ForceNameIdFormat:               keycloak.KeycloakBoolQuoted(data.Get("force_name_id_format").(bool)),
-		SignDocuments:                   keycloak.KeycloakBoolQuoted(data.Get("sign_documents").(bool)),
-		SignAssertions:                  keycloak.KeycloakBoolQuoted(data.Get("sign_assertions").(bool)),
-		EncryptAssertions:               keycloak.KeycloakBoolQuoted(data.Get("encrypt_assertions").(bool)),
-		ClientSignatureRequired:         keycloak.KeycloakBoolQuoted(data.Get("client_signature_required").(bool)),
-		ForcePostBinding:                keycloak.KeycloakBoolQuoted(data.Get("force_post_binding").(bool)),
+		IncludeAuthnStatement:           types.KeycloakBoolQuoted(data.Get("include_authn_statement").(bool)),
+		ForceNameIdFormat:               types.KeycloakBoolQuoted(data.Get("force_name_id_format").(bool)),
+		SignDocuments:                   types.KeycloakBoolQuoted(data.Get("sign_documents").(bool)),
+		SignAssertions:                  types.KeycloakBoolQuoted(data.Get("sign_assertions").(bool)),
+		EncryptAssertions:               types.KeycloakBoolQuoted(data.Get("encrypt_assertions").(bool)),
+		ClientSignatureRequired:         types.KeycloakBoolQuoted(data.Get("client_signature_required").(bool)),
+		ForcePostBinding:                types.KeycloakBoolQuoted(data.Get("force_post_binding").(bool)),
 		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
 		SignatureKeyName:                data.Get("signature_key_name").(string),
 		CanonicalizationMethod:          keycloakSamlClientCanonicalizationMethods[data.Get("canonicalization_method").(string)],

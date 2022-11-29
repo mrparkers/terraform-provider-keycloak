@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"encoding/json"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"reflect"
 	"strconv"
 	"strings"
@@ -26,7 +27,7 @@ func unmarshalExtraConfig(data []byte, reflectValue reflect.Value, extraConfig *
 					} else if field.Kind() == reflect.Bool {
 						boolVal, err := strconv.ParseBool(configValue.(string))
 						if err == nil {
-							field.Set(reflect.ValueOf(KeycloakBoolQuoted(boolVal)))
+							field.Set(reflect.ValueOf(types.KeycloakBoolQuoted(boolVal)))
 						}
 					} else if field.Kind() == reflect.TypeOf([]string{}).Kind() {
 						var s KeycloakSliceQuoted
@@ -63,7 +64,7 @@ func marshalExtraConfig(reflectValue reflect.Value, extraConfig map[string]inter
 				if field.Kind() == reflect.String {
 					out[jsonKey] = field.String()
 				} else if field.Kind() == reflect.Bool {
-					out[jsonKey] = KeycloakBoolQuoted(field.Bool())
+					out[jsonKey] = types.KeycloakBoolQuoted(field.Bool())
 				} else if field.Kind() == reflect.TypeOf([]string{}).Kind() {
 					s := field.Interface().(KeycloakSliceQuoted)
 					out[jsonKey] = s

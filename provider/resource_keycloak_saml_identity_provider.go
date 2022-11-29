@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/imdario/mergo"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
 var nameIdPolicyFormats = map[string]string{
@@ -195,9 +196,9 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 	}
 
 	samlIdentityProviderConfig := &keycloak.IdentityProviderConfig{
-		ValidateSignature:               keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
-		HideOnLoginPage:                 keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
-		BackchannelSupported:            keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
+		ValidateSignature:               types.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
+		HideOnLoginPage:                 types.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
+		BackchannelSupported:            types.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
 		NameIDPolicyFormat:              nameIdPolicyFormats[data.Get("name_id_policy_format").(string)],
 		EntityId:                        data.Get("entity_id").(string),
 		SingleLogoutServiceUrl:          data.Get("single_logout_service_url").(string),
@@ -205,12 +206,12 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		SigningCertificate:              data.Get("signing_certificate").(string),
 		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
 		XmlSigKeyInfoKeyNameTransformer: data.Get("xml_sign_key_info_key_name_transformer").(string),
-		PostBindingAuthnRequest:         keycloak.KeycloakBoolQuoted(data.Get("post_binding_authn_request").(bool)),
-		PostBindingResponse:             keycloak.KeycloakBoolQuoted(data.Get("post_binding_response").(bool)),
-		PostBindingLogout:               keycloak.KeycloakBoolQuoted(data.Get("post_binding_logout").(bool)),
-		ForceAuthn:                      keycloak.KeycloakBoolQuoted(data.Get("force_authn").(bool)),
-		WantAssertionsSigned:            keycloak.KeycloakBoolQuoted(data.Get("want_assertions_signed").(bool)),
-		WantAssertionsEncrypted:         keycloak.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
+		PostBindingAuthnRequest:         types.KeycloakBoolQuoted(data.Get("post_binding_authn_request").(bool)),
+		PostBindingResponse:             types.KeycloakBoolQuoted(data.Get("post_binding_response").(bool)),
+		PostBindingLogout:               types.KeycloakBoolQuoted(data.Get("post_binding_logout").(bool)),
+		ForceAuthn:                      types.KeycloakBoolQuoted(data.Get("force_authn").(bool)),
+		WantAssertionsSigned:            types.KeycloakBoolQuoted(data.Get("want_assertions_signed").(bool)),
+		WantAssertionsEncrypted:         types.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
 		PrincipalType:                   data.Get("principal_type").(string),
 		PrincipalAttribute:              data.Get("principal_attribute").(string),
 		AuthnContextClassRefs:           authnContextClassRefs,

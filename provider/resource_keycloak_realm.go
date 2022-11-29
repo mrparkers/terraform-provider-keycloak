@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
 var (
@@ -760,7 +761,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		smtpSettings := v.([]interface{})[0].(map[string]interface{})
 
 		smtpServer := keycloak.SmtpServer{
-			StartTls:           keycloak.KeycloakBoolQuoted(smtpSettings["starttls"].(bool)),
+			StartTls:           types.KeycloakBoolQuoted(smtpSettings["starttls"].(bool)),
 			Port:               smtpSettings["port"].(string),
 			Host:               smtpSettings["host"].(string),
 			ReplyTo:            smtpSettings["reply_to"].(string),
@@ -768,7 +769,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 			From:               smtpSettings["from"].(string),
 			FromDisplayName:    smtpSettings["from_display_name"].(string),
 			EnvelopeFrom:       smtpSettings["envelope_from"].(string),
-			Ssl:                keycloak.KeycloakBoolQuoted(smtpSettings["ssl"].(bool)),
+			Ssl:                types.KeycloakBoolQuoted(smtpSettings["ssl"].(bool)),
 		}
 
 		authConfig := smtpSettings["auth"].([]interface{})

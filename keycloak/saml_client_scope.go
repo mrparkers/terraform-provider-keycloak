@@ -3,6 +3,7 @@ package keycloak
 import (
 	"context"
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
 type SamlClientScope struct {
@@ -12,9 +13,9 @@ type SamlClientScope struct {
 	Description string `json:"description"`
 	Protocol    string `json:"protocol"`
 	Attributes  struct {
-		DisplayOnConsentScreen KeycloakBoolQuoted `json:"display.on.consent.screen"` // boolean in string form
-		ConsentScreenText      string             `json:"consent.screen.text"`
-		GuiOrder               string             `json:"gui.order"`
+		DisplayOnConsentScreen types.KeycloakBoolQuoted `json:"display.on.consent.screen"` // boolean in string form
+		ConsentScreenText      string                   `json:"consent.screen.text"`
+		GuiOrder               string                   `json:"gui.order"`
 	} `json:"attributes"`
 }
 

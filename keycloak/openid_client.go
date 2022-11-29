@@ -3,6 +3,7 @@ package keycloak
 import (
 	"context"
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"reflect"
 )
 
@@ -58,26 +59,26 @@ type OpenidClient struct {
 }
 
 type OpenidClientAttributes struct {
-	PkceCodeChallengeMethod               string                 `json:"pkce.code.challenge.method"`
-	ExcludeSessionStateFromAuthResponse   KeycloakBoolQuoted     `json:"exclude.session.state.from.auth.response"`
-	AccessTokenLifespan                   string                 `json:"access.token.lifespan"`
-	LoginTheme                            string                 `json:"login_theme"`
-	ClientOfflineSessionIdleTimeout       string                 `json:"client.offline.session.idle.timeout,omitempty"`
-	DisplayOnConsentScreen                KeycloakBoolQuoted     `json:"display.on.consent.screen"`
-	ConsentScreenText                     string                 `json:"consent.screen.text"`
-	ClientOfflineSessionMaxLifespan       string                 `json:"client.offline.session.max.lifespan,omitempty"`
-	ClientSessionIdleTimeout              string                 `json:"client.session.idle.timeout,omitempty"`
-	ClientSessionMaxLifespan              string                 `json:"client.session.max.lifespan,omitempty"`
-	UseRefreshTokens                      KeycloakBoolQuoted     `json:"use.refresh.tokens"`
-	UseRefreshTokensClientCredentials     KeycloakBoolQuoted     `json:"client_credentials.use_refresh_token"`
-	BackchannelLogoutUrl                  string                 `json:"backchannel.logout.url"`
-	FrontchannelLogoutUrl                 string                 `json:"frontchannel.logout.url"`
-	BackchannelLogoutRevokeOfflineTokens  KeycloakBoolQuoted     `json:"backchannel.logout.revoke.offline.tokens"`
-	BackchannelLogoutSessionRequired      KeycloakBoolQuoted     `json:"backchannel.logout.session.required"`
-	ExtraConfig                           map[string]interface{} `json:"-"`
-	Oauth2DeviceAuthorizationGrantEnabled KeycloakBoolQuoted     `json:"oauth2.device.authorization.grant.enabled"`
-	Oauth2DeviceCodeLifespan              string                 `json:"oauth2.device.code.lifespan,omitempty"`
-	Oauth2DevicePollingInterval           string                 `json:"oauth2.device.polling.interval,omitempty"`
+	PkceCodeChallengeMethod               string                   `json:"pkce.code.challenge.method"`
+	ExcludeSessionStateFromAuthResponse   types.KeycloakBoolQuoted `json:"exclude.session.state.from.auth.response"`
+	AccessTokenLifespan                   string                   `json:"access.token.lifespan"`
+	LoginTheme                            string                   `json:"login_theme"`
+	ClientOfflineSessionIdleTimeout       string                   `json:"client.offline.session.idle.timeout,omitempty"`
+	DisplayOnConsentScreen                types.KeycloakBoolQuoted `json:"display.on.consent.screen"`
+	ConsentScreenText                     string                   `json:"consent.screen.text"`
+	ClientOfflineSessionMaxLifespan       string                   `json:"client.offline.session.max.lifespan,omitempty"`
+	ClientSessionIdleTimeout              string                   `json:"client.session.idle.timeout,omitempty"`
+	ClientSessionMaxLifespan              string                   `json:"client.session.max.lifespan,omitempty"`
+	UseRefreshTokens                      types.KeycloakBoolQuoted `json:"use.refresh.tokens"`
+	UseRefreshTokensClientCredentials     types.KeycloakBoolQuoted `json:"client_credentials.use_refresh_token"`
+	BackchannelLogoutUrl                  string                   `json:"backchannel.logout.url"`
+	FrontchannelLogoutUrl                 string                   `json:"frontchannel.logout.url"`
+	BackchannelLogoutRevokeOfflineTokens  types.KeycloakBoolQuoted `json:"backchannel.logout.revoke.offline.tokens"`
+	BackchannelLogoutSessionRequired      types.KeycloakBoolQuoted `json:"backchannel.logout.session.required"`
+	ExtraConfig                           map[string]interface{}   `json:"-"`
+	Oauth2DeviceAuthorizationGrantEnabled types.KeycloakBoolQuoted `json:"oauth2.device.authorization.grant.enabled"`
+	Oauth2DeviceCodeLifespan              string                   `json:"oauth2.device.code.lifespan,omitempty"`
+	Oauth2DevicePollingInterval           string                   `json:"oauth2.device.polling.interval,omitempty"`
 }
 
 type OpenidAuthenticationFlowBindingOverrides struct {
