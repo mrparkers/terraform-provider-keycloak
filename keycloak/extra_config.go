@@ -30,7 +30,7 @@ func unmarshalExtraConfig(data []byte, reflectValue reflect.Value, extraConfig *
 							field.Set(reflect.ValueOf(types.KeycloakBoolQuoted(boolVal)))
 						}
 					} else if field.Kind() == reflect.TypeOf([]string{}).Kind() {
-						var s KeycloakSliceQuoted
+						var s types.KeycloakSliceQuoted
 
 						err = json.Unmarshal([]byte(configValue.(string)), &s)
 						if err != nil {
@@ -66,7 +66,7 @@ func marshalExtraConfig(reflectValue reflect.Value, extraConfig map[string]inter
 				} else if field.Kind() == reflect.Bool {
 					out[jsonKey] = types.KeycloakBoolQuoted(field.Bool())
 				} else if field.Kind() == reflect.TypeOf([]string{}).Kind() {
-					s := field.Interface().(KeycloakSliceQuoted)
+					s := field.Interface().(types.KeycloakSliceQuoted)
 					out[jsonKey] = s
 				}
 			}

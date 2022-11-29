@@ -185,12 +185,12 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 	rec, defaultConfig := getIdentityProviderFromData(data)
 	rec.ProviderId = data.Get("provider_id").(string)
 
-	var authnContextClassRefs keycloak.KeycloakSliceQuoted
+	var authnContextClassRefs types.KeycloakSliceQuoted
 	for _, v := range data.Get("authn_context_class_refs").([]interface{}) {
 		authnContextClassRefs = append(authnContextClassRefs, v.(string))
 	}
 
-	var authnContextDeclRefs keycloak.KeycloakSliceQuoted
+	var authnContextDeclRefs types.KeycloakSliceQuoted
 	for _, v := range data.Get("authn_context_decl_refs").([]interface{}) {
 		authnContextDeclRefs = append(authnContextDeclRefs, v.(string))
 	}

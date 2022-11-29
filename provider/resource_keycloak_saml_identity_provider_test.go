@@ -174,8 +174,8 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			WantAssertionsEncrypted:         types.KeycloakBoolQuoted(firstAssertionsEncrypted),
 			GuiOrder:                        strconv.Itoa(acctest.RandIntRange(1, 3)),
 			SyncMode:                        randomStringInSlice(syncModes),
-			AuthnContextClassRefs:           keycloak.KeycloakSliceQuoted{"foo", "bar"},
-			AuthnContextDeclRefs:            keycloak.KeycloakSliceQuoted{"foo"},
+			AuthnContextClassRefs:           types.KeycloakSliceQuoted{"foo", "bar"},
+			AuthnContextDeclRefs:            types.KeycloakSliceQuoted{"foo"},
 			AuthnContextComparisonType:      "exact",
 		},
 	}
@@ -202,8 +202,8 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			WantAssertionsEncrypted:         types.KeycloakBoolQuoted(!firstAssertionsEncrypted),
 			GuiOrder:                        strconv.Itoa(acctest.RandIntRange(1, 3)),
 			SyncMode:                        randomStringInSlice(syncModes),
-			AuthnContextClassRefs:           keycloak.KeycloakSliceQuoted{"foo", "hello"},
-			AuthnContextDeclRefs:            keycloak.KeycloakSliceQuoted{"baz"},
+			AuthnContextClassRefs:           types.KeycloakSliceQuoted{"foo", "hello"},
+			AuthnContextDeclRefs:            types.KeycloakSliceQuoted{"baz"},
 			AuthnContextComparisonType:      "exact",
 		},
 	}
