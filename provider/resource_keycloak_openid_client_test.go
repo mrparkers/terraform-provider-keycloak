@@ -207,6 +207,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
 			BackchannelLogoutSessionRequired:     types.KeycloakBoolQuoted(randomBool()),
 			BackchannelLogoutRevokeOfflineTokens: types.KeycloakBoolQuoted(randomBool()),
+			PostLogoutRedirectUris:               []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 		},
 	}
 
@@ -232,6 +233,7 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
 			BackchannelLogoutSessionRequired:     types.KeycloakBoolQuoted(randomBool()),
 			BackchannelLogoutRevokeOfflineTokens: types.KeycloakBoolQuoted(randomBool()),
+			PostLogoutRedirectUris:               []string{acctest.RandString(10), acctest.RandString(10)},
 		},
 	}
 
@@ -1467,17 +1469,18 @@ resource "keycloak_openid_client" "client" {
 	direct_access_grants_enabled = %t
 	service_accounts_enabled     = %t
 
-	valid_redirect_uris          = %s
-	web_origins                  = %s
-	admin_url					 = "%s"
-	base_url                     = "%s"
-	root_url                     = "%s"
+	valid_redirect_uris             = %s
+	valid_post_logout_redirect_uris = %s
+	web_origins                     = %s
+	admin_url					    = "%s"
+	base_url                        = "%s"
+	root_url                        = "%s"
 
 	backchannel_logout_url                     = "%s"
 	backchannel_logout_session_required        = %t
 	backchannel_logout_revoke_offline_sessions = %t
 }
-	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl, openidClient.Attributes.BackchannelLogoutUrl, openidClient.Attributes.BackchannelLogoutSessionRequired, openidClient.Attributes.BackchannelLogoutRevokeOfflineTokens)
+	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.Attributes.PostLogoutRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl, openidClient.Attributes.BackchannelLogoutUrl, openidClient.Attributes.BackchannelLogoutSessionRequired, openidClient.Attributes.BackchannelLogoutRevokeOfflineTokens)
 }
 
 func testKeycloakOpenidClient_backchannel(clientId, backchannelLogoutUrl string, backchannelLogoutSessionRequired, backchannelLogoutRevokeOfflineSessions bool) string {

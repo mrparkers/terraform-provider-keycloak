@@ -209,6 +209,10 @@ resource "keycloak_openid_client" "test_client" {
   valid_redirect_uris = [
     "http://localhost:5555/callback",
   ]
+  valid_post_logout_redirect_uris = [
+    "http://localhost:5555/post-logout",
+    "http://localhost:5555/post-logout3",
+  ]
 
   client_secret = "secret"
 
