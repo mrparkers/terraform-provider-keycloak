@@ -1,6 +1,19 @@
+## v4.1.0 (December 4, 2022)
+
+IMPROVEMENTS:
+
+- add `IMPORT` mode to `keycloak_ldap_role_mapper` resource ([#768](https://github.com/mrparkers/terraform-provider-keycloak/pull/768))
+- add `RSA_SHA256_MGF1` and `RSA_SHA512_MGF1` signature algorithms to `keycloak_saml_client` resource ([#757](https://github.com/mrparkers/terraform-provider-keycloak/pull/757))
+- add `valid_post_logout_redirect_uris` attribute to `keycloak_openid_client` resource ([#777](https://github.com/mrparkers/terraform-provider-keycloak/pull/777))
+
+BUG FIXES:
+
+- fix incorrect import ID for `keycloak_openid_client_authorization_*` resources ([#763](https://github.com/mrparkers/terraform-provider-keycloak/pull/763))
+- fix payload used during deletion of `keycloak_generic_role_mapper` resource to prevent more mappers from unintentionally being removed ([#772](https://github.com/mrparkers/terraform-provider-keycloak/pull/772))
+
 ## v4.0.1 (October 13, 2022)
 
-FIXES:
+BUG FIXES:
 
 - restored the default value for the `client_authenticator_type` attribute within the `keycloak_openid_client` resource ([#755](https://github.com/mrparkers/terraform-provider-keycloak/pull/755))
 
