@@ -30,14 +30,15 @@ func unmarshalExtraConfig(data []byte, reflectValue reflect.Value, extraConfig *
 							field.Set(reflect.ValueOf(types.KeycloakBoolQuoted(boolVal)))
 						}
 					} else if field.Kind() == reflect.TypeOf([]string{}).Kind() {
-						var s types.KeycloakSliceQuoted
+						var sliceQuoted types.KeycloakSliceQuoted
+						var sliceHashDelimited types.KeycloakSliceHashDelimited
 
-						err = json.Unmarshal([]byte(configValue.(string)), &s)
-						if err != nil {
-
+						if err = json.Unmarshal([]byte(configValue.(string)), &sliceQuoted); err == nil {
+							field.Set(reflect.ValueOf(sliceQuoted))
+						} else if err = sliceHashDelimited.UnmarshalJSON([]byte(configValue.(string))); err == nil {
+							field.Set(reflect.ValueOf(sliceHashDelimited))
 						}
 
-						field.Set(reflect.ValueOf(s))
 					}
 
 					delete(*extraConfig, jsonKey)
@@ -66,8 +67,11 @@ func marshalExtraConfig(reflectValue reflect.Value, extraConfig map[string]inter
 				} else if field.Kind() == reflect.Bool {
 					out[jsonKey] = types.KeycloakBoolQuoted(field.Bool())
 				} else if field.Kind() == reflect.TypeOf([]string{}).Kind() {
-					s := field.Interface().(types.KeycloakSliceQuoted)
-					out[jsonKey] = s
+					if s, ok := field.Interface().(types.KeycloakSliceQuoted); ok {
+						out[jsonKey] = s
+					} else if s, ok := field.Interface().(types.KeycloakSliceHashDelimited); ok {
+						out[jsonKey] = s
+					}
 				}
 			}
 		}
