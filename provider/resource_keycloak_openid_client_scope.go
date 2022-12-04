@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"strconv"
 	"strings"
 
@@ -67,7 +68,7 @@ func getOpenidClientScopeFromData(data *schema.ResourceData) *keycloak.OpenidCli
 		clientScope.Attributes.DisplayOnConsentScreen = false
 	}
 
-	clientScope.Attributes.IncludeInTokenScope = keycloak.KeycloakBoolQuoted(data.Get("include_in_token_scope").(bool))
+	clientScope.Attributes.IncludeInTokenScope = types.KeycloakBoolQuoted(data.Get("include_in_token_scope").(bool))
 
 	// Treat 0 as an empty string for the purpose of omitting the attribute to reset the order
 	if guiOrder := data.Get("gui_order").(int); guiOrder != 0 {

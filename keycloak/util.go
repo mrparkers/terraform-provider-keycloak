@@ -1,62 +1,10 @@
 package keycloak
 
 import (
-	"bytes"
-	"encoding/json"
 	"strconv"
 	"strings"
 	"time"
 )
-
-type KeycloakBoolQuoted bool
-type KeycloakSliceQuoted []string
-
-func (c KeycloakBoolQuoted) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	buf.WriteString(strconv.Quote(strconv.FormatBool(bool(c))))
-	return buf.Bytes(), nil
-}
-
-func (c *KeycloakBoolQuoted) UnmarshalJSON(in []byte) error {
-	value := string(in)
-	if value == `""` {
-		*c = false
-		return nil
-	}
-	unquoted, err := strconv.Unquote(value)
-	if err != nil {
-		return err
-	}
-	var b bool
-	b, err = strconv.ParseBool(unquoted)
-	if err != nil {
-		return err
-	}
-	res := KeycloakBoolQuoted(b)
-	*c = res
-	return nil
-}
-
-func (s KeycloakSliceQuoted) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	if s == nil || len(s) == 0 {
-		buf.WriteString(`""`)
-	} else {
-		sliceAsString := make([]string, len(s))
-		for i, v := range s {
-			sliceAsString[i] = v
-		}
-
-		stringAsJSON, err := json.Marshal(sliceAsString)
-		if err != nil {
-			return nil, err
-		}
-
-		buf.WriteString(strconv.Quote(string(stringAsJSON)))
-	}
-
-	return buf.Bytes(), nil
-}
 
 func getIdFromLocationHeader(locationHeader string) string {
 	parts := strings.Split(locationHeader, "/")
