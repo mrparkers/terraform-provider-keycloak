@@ -5,6 +5,15 @@ import (
 	"fmt"
 )
 
+type RealmRoleRepresentation struct {
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Composite   bool   `json:"composite"`
+	ClientRole  bool   `json:"clientRole"`
+	ContainerId string `json:"containerId"`
+}
+
 func roleScopeMappingUrl(realmId, clientId string, clientScopeId string, role *Role) string {
 	if clientId != "" {
 		if role.ClientRole {
@@ -52,5 +61,19 @@ func (keycloakClient *KeycloakClient) GetRoleScopeMapping(ctx context.Context, r
 
 func (keycloakClient *KeycloakClient) DeleteRoleScopeMapping(ctx context.Context, realmId string, clientId string, clientScopeId string, role *Role) error {
 	roleUrl := roleScopeMappingUrl(realmId, clientId, clientScopeId, role)
-	return keycloakClient.delete(ctx, roleUrl, nil)
+	if role.ClientRole {
+		return keycloakClient.delete(ctx, roleUrl, nil)
+	} else {
+		body := [1]RealmRoleRepresentation{
+			{
+				Id:          role.Id,
+				Name:        role.Name,
+				Description: role.Description,
+				Composite:   role.Composite,
+				ClientRole:  role.ClientRole,
+				ContainerId: role.ContainerId,
+			},
+		}
+		return keycloakClient.delete(ctx, roleUrl, body)
+	}
 }
