@@ -59,7 +59,7 @@ var redHatSSO7VersionMap = map[int]string{
 	4: "9.0.17",
 }
 
-func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string, redHatSSO bool, additionalHeaders map[string]string) (*KeycloakClient, error) {
+func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, clientCert string, clientKey string, tlsInsecureSkipVerify bool, userAgent string, redHatSSO bool, additionalHeaders map[string]string) (*KeycloakClient, error) {
 	clientCredentials := &ClientCredentials{
 		ClientId:     clientId,
 		ClientSecret: clientSecret,
@@ -78,7 +78,7 @@ func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecre
 		}
 	}
 
-	httpClient, err := newHttpClient(tlsInsecureSkipVerify, clientTimeout, caCert)
+	httpClient, err := newHttpClient(tlsInsecureSkipVerify, clientTimeout, caCert, clientCert, clientKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create http client: %v", err)
 	}
@@ -485,7 +485,7 @@ func (keycloakClient *KeycloakClient) marshal(body interface{}) ([]byte, error) 
 	return json.Marshal(body)
 }
 
-func newHttpClient(tlsInsecureSkipVerify bool, clientTimeout int, caCert string) (*http.Client, error) {
+func newHttpClient(tlsInsecureSkipVerify bool, clientTimeout int, caCert, clientCert, clientKey string) (*http.Client, error) {
 	cookieJar, err := cookiejar.New(&cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
 	})
@@ -504,6 +504,12 @@ func newHttpClient(tlsInsecureSkipVerify bool, clientTimeout int, caCert string)
 		transport.TLSClientConfig.RootCAs = caCertPool
 	}
 
+	tlsCert, err := newTLSCerts(clientCert, clientKey)
+	if err != nil {
+		return nil, err
+	}
+	transport.TLSClientConfig.Certificates = []tls.Certificate{tlsCert}
+
 	retryClient := retryablehttp.NewClient()
 	retryClient.RetryMax = 1
 	retryClient.RetryWaitMin = time.Second * 1
@@ -515,4 +521,13 @@ func newHttpClient(tlsInsecureSkipVerify bool, clientTimeout int, caCert string)
 	httpClient.Jar = cookieJar
 
 	return httpClient, nil
+}
+
+func newTLSCerts(cert, key string) (tls.Certificate, error) {
+	if keyCert := cert + key; keyCert != "" {
+		return tls.X509KeyPair([]byte(cert), []byte(key))
+	}
+
+	// No cert provided
+	return tls.Certificate{}, nil
 }
