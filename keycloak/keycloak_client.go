@@ -59,7 +59,7 @@ var redHatSSO7VersionMap = map[int]string{
 	4: "9.0.17",
 }
 
-func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, clientCert string, clientKey string, tlsInsecureSkipVerify bool, userAgent string, redHatSSO bool, additionalHeaders map[string]string) (*KeycloakClient, error) {
+func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert, clientCert, clientKey string, tlsInsecureSkipVerify bool, userAgent string, redHatSSO bool, additionalHeaders map[string]string) (*KeycloakClient, error) {
 	clientCredentials := &ClientCredentials{
 		ClientId:     clientId,
 		ClientSecret: clientSecret,
