@@ -504,11 +504,14 @@ func newHttpClient(tlsInsecureSkipVerify bool, clientTimeout int, caCert, client
 		transport.TLSClientConfig.RootCAs = caCertPool
 	}
 
-	tlsCert, err := newTLSCerts(clientCert, clientKey)
-	if err != nil {
-		return nil, err
+	if keyCert := clientCert + clientKey; keyCert != "" {
+		cert, err := tls.X509KeyPair([]byte(clientCert), []byte(keyCert))
+		if err != nil {
+			return nil, err
+		}
+
+		transport.TLSClientConfig.Certificates = []tls.Certificate{cert}
 	}
-	transport.TLSClientConfig.Certificates = []tls.Certificate{tlsCert}
 
 	retryClient := retryablehttp.NewClient()
 	retryClient.RetryMax = 1
@@ -521,13 +524,4 @@ func newHttpClient(tlsInsecureSkipVerify bool, clientTimeout int, caCert, client
 	httpClient.Jar = cookieJar
 
 	return httpClient, nil
-}
-
-func newTLSCerts(cert, key string) (tls.Certificate, error) {
-	if keyCert := cert + key; keyCert != "" {
-		return tls.X509KeyPair([]byte(cert), []byte(key))
-	}
-
-	// No cert provided
-	return tls.Certificate{}, nil
 }
