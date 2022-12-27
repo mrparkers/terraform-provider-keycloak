@@ -152,5 +152,15 @@ data "keycloak_group" "group_nested" {
 		keycloak_group.group_nested
 	]
 }
+
+data "keycloak_group" "group_nested_by_path" {
+	realm_id = data.keycloak_realm.realm.id
+	name = "/${keycloak_group.group.name}/${keycloak_group.group_nested.name}"
+
+	depends_on = [
+		keycloak_group.group,
+		keycloak_group.group_nested
+	]
+}
 	`, testAccRealm.Realm, group, groupNested)
 }
