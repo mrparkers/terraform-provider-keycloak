@@ -127,8 +127,54 @@ func (keycloakClient *KeycloakClient) GetGroup(ctx context.Context, realmId, id 
 	return &group, nil
 }
 
+func (keycloakClient *KeycloakClient) GetGroupByPath(ctx context.Context, realmId, path string) (*Group, error) {
+	// truncate empty first element
+	var searchGroups []string = strings.Split(path, "/")[1:]
+
+	idx := 0
+	// Get the root group at the start of this search path
+	searchRoot, err := keycloakClient.GetGroupByName(ctx, realmId, searchGroups[idx])
+
+	if err != nil {
+		return nil, err
+	}
+
+	currentGroup := searchRoot
+	for idx < len(searchGroups)-1 {
+		// Check subgroups of current group for next link in the search tree
+		for i := range currentGroup.SubGroups {
+			if currentGroup.SubGroups[i].Name == searchGroups[idx+1] {
+				nextSearchGroup, err := keycloakClient.GetGroup(ctx, realmId, currentGroup.SubGroups[i].Id)
+				if err != nil {
+					return nil, err
+				}
+
+				currentGroup = nextSearchGroup
+				idx++
+			}
+		}
+	}
+
+	// Search has arrived at the group matching the name at the end of our search tree
+	if currentGroup.Name == searchGroups[len(searchGroups)-1] && currentGroup.Path == path {
+		return currentGroup, nil
+	}
+
+	return nil, fmt.Errorf("couldn't find nested group with path %s", path)
+}
+
 func (keycloakClient *KeycloakClient) GetGroupByName(ctx context.Context, realmId, name string) (*Group, error) {
 	var groups []Group
+
+	// name is likely to be nested group name i.e. /root/branch/leaf
+	if strings.HasPrefix(name, "/") {
+		subGroup, err := keycloakClient.GetGroupByPath(ctx, realmId, name)
+		if err != nil {
+			return nil, err
+		}
+
+		return subGroup, nil
+	}
 
 	// We can't get a group by name, so we have to search for it
 	params := map[string]string{
