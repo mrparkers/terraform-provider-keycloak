@@ -16,7 +16,7 @@ build-example: build
 	cp terraform-provider-keycloak_* example/terraform.d/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)/
 
 local: deps
-	docker compose up --build -d
+	docker-compose up --build -d
 	./scripts/wait-for-local-keycloak.sh
 	./scripts/create-terraform-client.sh
 
