@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
@@ -9,12 +11,12 @@ import (
 
 func resourceKeycloakOpenidClientAuthorizationScope() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakOpenidClientAuthorizationScopeCreate,
-		Read:   resourceKeycloakOpenidClientAuthorizationScopeRead,
-		Delete: resourceKeycloakOpenidClientAuthorizationScopeDelete,
-		Update: resourceKeycloakOpenidClientAuthorizationScopeUpdate,
+		CreateContext: resourceKeycloakOpenidClientAuthorizationScopeCreate,
+		ReadContext:   resourceKeycloakOpenidClientAuthorizationScopeRead,
+		DeleteContext: resourceKeycloakOpenidClientAuthorizationScopeDelete,
+		UpdateContext: resourceKeycloakOpenidClientAuthorizationScopeUpdate,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakOpenidClientAuthorizationScopeImport,
+			StateContext: resourceKeycloakOpenidClientAuthorizationScopeImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"resource_server_id": {
@@ -64,31 +66,31 @@ func setOpenidClientAuthorizationScopeData(data *schema.ResourceData, scope *key
 	data.Set("icon_uri", scope.IconUri)
 }
 
-func resourceKeycloakOpenidClientAuthorizationScopeCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationScopeCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	scope := getOpenidClientAuthorizationScopeFromData(data)
 
-	err := keycloakClient.NewOpenidClientAuthorizationScope(scope)
+	err := keycloakClient.NewOpenidClientAuthorizationScope(ctx, scope)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setOpenidClientAuthorizationScopeData(data, scope)
 
-	return resourceKeycloakOpenidClientAuthorizationScopeRead(data, meta)
+	return resourceKeycloakOpenidClientAuthorizationScopeRead(ctx, data, meta)
 }
 
-func resourceKeycloakOpenidClientAuthorizationScopeRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationScopeRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	resourceServerId := data.Get("resource_server_id").(string)
 	id := data.Id()
 
-	scope, err := keycloakClient.GetOpenidClientAuthorizationScope(realmId, resourceServerId, id)
+	scope, err := keycloakClient.GetOpenidClientAuthorizationScope(ctx, realmId, resourceServerId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setOpenidClientAuthorizationScopeData(data, scope)
@@ -96,14 +98,14 @@ func resourceKeycloakOpenidClientAuthorizationScopeRead(data *schema.ResourceDat
 	return nil
 }
 
-func resourceKeycloakOpenidClientAuthorizationScopeUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationScopeUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	scope := getOpenidClientAuthorizationScopeFromData(data)
 
-	err := keycloakClient.UpdateOpenidClientAuthorizationScope(scope)
+	err := keycloakClient.UpdateOpenidClientAuthorizationScope(ctx, scope)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setOpenidClientAuthorizationScopeData(data, scope)
@@ -111,24 +113,24 @@ func resourceKeycloakOpenidClientAuthorizationScopeUpdate(data *schema.ResourceD
 	return nil
 }
 
-func resourceKeycloakOpenidClientAuthorizationScopeDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakOpenidClientAuthorizationScopeDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	resourceServerId := data.Get("resource_server_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteOpenidClientAuthorizationScope(realmId, resourceServerId, id)
+	return diag.FromErr(keycloakClient.DeleteOpenidClientAuthorizationScope(ctx, realmId, resourceServerId, id))
 }
 
-func resourceKeycloakOpenidClientAuthorizationScopeImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceKeycloakOpenidClientAuthorizationScopeImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{resourceServerId}}/{{authorizationScopeId}}")
 	}
 	d.Set("realm_id", parts[0])
 	d.Set("resource_server_id", parts[1])
-	d.SetId(parts[3])
+	d.SetId(parts[2])
 
 	return []*schema.ResourceData{d}, nil
 }

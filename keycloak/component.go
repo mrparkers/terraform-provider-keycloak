@@ -1,5 +1,10 @@
 package keycloak
 
+import (
+	"context"
+	"fmt"
+)
+
 // https://www.keycloak.org/docs-api/4.2/rest-api/index.html#_component_resource
 
 type component struct {
@@ -25,4 +30,8 @@ func (component *component) getConfigOk(val string) (string, bool) {
 	}
 
 	return "", false
+}
+
+func (keycloakClient *KeycloakClient) DeleteComponent(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
 }

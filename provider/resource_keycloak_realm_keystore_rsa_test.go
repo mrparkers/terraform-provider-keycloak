@@ -14,7 +14,6 @@ import (
 	"log"
 	"math/big"
 	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -34,6 +33,12 @@ func TestAccKeycloakRealmKeystoreRsa_basic(t *testing.T) {
 			{
 				Config: testKeycloakRealmKeystoreRsa_basic(rsaName, privateKey, certificate),
 				Check:  testAccCheckRealmKeystoreRsaExists("keycloak_realm_keystore_rsa.realm_rsa"),
+			},
+			// we can't verify this import test because there's no way to get the private key / cert from the Keycloak API
+			{
+				ResourceName:      "keycloak_realm_keystore_rsa.realm_rsa",
+				ImportState:       true,
+				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_rsa.realm_rsa"),
 			},
 		},
 	})
@@ -58,7 +63,7 @@ func TestAccKeycloakRealmKeystoreRsa_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteRealmKeystoreRsa(keystoreRsa.RealmId, keystoreRsa.Id)
+					err := keycloakClient.DeleteRealmKeystoreRsa(testCtx, keystoreRsa.RealmId, keystoreRsa.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -129,7 +134,7 @@ func testAccCheckRealmKeystoreRsaDestroy() resource.TestCheckFunc {
 
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
-			keystoreRsa, _ := keycloakClient.GetRealmKeystoreRsa(realm, id)
+			keystoreRsa, _ := keycloakClient.GetRealmKeystoreRsa(testCtx, realm, id)
 			if keystoreRsa != nil {
 				return fmt.Errorf("rsa keystore with id %s still exists", id)
 			}
@@ -150,27 +155,12 @@ func getKeycloakRealmKeystoreRsaFromState(s *terraform.State,
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	realmKeystore, err := keycloakClient.GetRealmKeystoreRsa(realm, id)
+	realmKeystore, err := keycloakClient.GetRealmKeystoreRsa(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting rsa keystore with id %s: %s", id, err)
 	}
 
 	return realmKeystore, nil
-}
-
-func getRealmKeystoreRsaImportId(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return "", fmt.Errorf("resource not found: %s", resourceName)
-		}
-
-		id := rs.Primary.ID
-		realmId := rs.Primary.Attributes["realm_id"]
-		providerId := "rsa-generated"
-
-		return fmt.Sprintf("%s/%s/%s", realmId, providerId, id), nil
-	}
 }
 
 func generateKeyAndCert(bits int) (string, string) {
@@ -255,23 +245,4 @@ resource "keycloak_realm_keystore_rsa" "realm_rsa" {
     certificate = "%s"
 }
 	`, testAccRealmUserFederation.Realm, rsaName, attr, val, privateKey, certificate)
-}
-
-func testKeycloakRealmKeystoreRsa_basicFromInterface(keystore *keycloak.RealmKeystoreRsa) string {
-	return fmt.Sprintf(`
-data "keycloak_realm" "realm" {
-	realm = "%s"
-}
-
-resource "keycloak_realm_keystore_rsa" "realm_rsa" {
-	name      = "%s"
-	realm_id  = data.keycloak_realm.realm.id
-
-    priority  = %s
-    algorithm = "%s"
-
-    private_key = "%s"
-    certificate = "%s"
-}
-	`, testAccRealmUserFederation.Realm, keystore.Name, strconv.Itoa(keystore.Priority), keystore.Algorithm, keystore.PrivateKey, keystore.Certificate)
 }

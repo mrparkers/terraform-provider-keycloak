@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
@@ -16,6 +17,8 @@ type LdapUserAttributeMapper struct {
 	ReadOnly                bool
 	AlwaysReadValueFromLdap bool
 	UserModelAttribute      string
+	AttributeDefaultValue   string
+	IsBinaryAttribute       bool
 }
 
 func convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper *LdapUserAttributeMapper) *component {
@@ -41,6 +44,12 @@ func convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper *Ldap
 			"user.model.attribute": {
 				ldapUserAttributeMapper.UserModelAttribute,
 			},
+			"attribute.default.value": {
+				ldapUserAttributeMapper.AttributeDefaultValue,
+			},
+			"is.binary.attribute": {
+				strconv.FormatBool(ldapUserAttributeMapper.IsBinaryAttribute),
+			},
 		},
 	}
 }
@@ -61,6 +70,11 @@ func convertFromComponentToLdapUserAttributeMapper(component *component, realmId
 		return nil, err
 	}
 
+	isBinaryAttribute, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("is.binary.attribute"))
+	if err != nil {
+		return nil, err
+	}
+
 	return &LdapUserAttributeMapper{
 		Id:                   component.Id,
 		Name:                 component.Name,
@@ -72,11 +86,13 @@ func convertFromComponentToLdapUserAttributeMapper(component *component, realmId
 		ReadOnly:                readOnly,
 		AlwaysReadValueFromLdap: alwaysReadValueFromLdap,
 		UserModelAttribute:      component.getConfig("user.model.attribute"),
+		AttributeDefaultValue:   component.getConfig("attribute.default.value"),
+		IsBinaryAttribute:       isBinaryAttribute,
 	}, nil
 }
 
-func (keycloakClient *KeycloakClient) NewLdapUserAttributeMapper(ldapUserAttributeMapper *LdapUserAttributeMapper) error {
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/components", ldapUserAttributeMapper.RealmId), convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper))
+func (keycloakClient *KeycloakClient) NewLdapUserAttributeMapper(ctx context.Context, ldapUserAttributeMapper *LdapUserAttributeMapper) error {
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/components", ldapUserAttributeMapper.RealmId), convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper))
 	if err != nil {
 		return err
 	}
@@ -86,10 +102,10 @@ func (keycloakClient *KeycloakClient) NewLdapUserAttributeMapper(ldapUserAttribu
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetLdapUserAttributeMapper(realmId, id string) (*LdapUserAttributeMapper, error) {
+func (keycloakClient *KeycloakClient) GetLdapUserAttributeMapper(ctx context.Context, realmId, id string) (*LdapUserAttributeMapper, error) {
 	var component *component
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/components/%s", realmId, id), &component, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -97,10 +113,10 @@ func (keycloakClient *KeycloakClient) GetLdapUserAttributeMapper(realmId, id str
 	return convertFromComponentToLdapUserAttributeMapper(component, realmId)
 }
 
-func (keycloakClient *KeycloakClient) UpdateLdapUserAttributeMapper(ldapUserAttributeMapper *LdapUserAttributeMapper) error {
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/components/%s", ldapUserAttributeMapper.RealmId, ldapUserAttributeMapper.Id), convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper))
+func (keycloakClient *KeycloakClient) UpdateLdapUserAttributeMapper(ctx context.Context, ldapUserAttributeMapper *LdapUserAttributeMapper) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/components/%s", ldapUserAttributeMapper.RealmId, ldapUserAttributeMapper.Id), convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper))
 }
 
-func (keycloakClient *KeycloakClient) DeleteLdapUserAttributeMapper(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/components/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteLdapUserAttributeMapper(ctx context.Context, realmId, id string) error {
+	return keycloakClient.DeleteComponent(ctx, realmId, id)
 }

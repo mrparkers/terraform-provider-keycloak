@@ -4,6 +4,8 @@ page_title: "keycloak_generic_client_protocol_mapper Resource"
 
 # keycloak\_generic\_client\_protocol\_mapper Resource
 
+!> **WARNING:** This resource is deprecated and will be removed in the next major version. Please use `keycloak_generic_protocol_mapper` instead.
+
 Allows for creating and managing protocol mappers for both types of clients (openid-connect and saml) within Keycloak.
 
 There are two uses cases for using this resource:

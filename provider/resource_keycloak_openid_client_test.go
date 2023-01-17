@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"regexp"
 	"strings"
 	"testing"
@@ -80,7 +81,7 @@ func TestAccKeycloakOpenidClient_createAfterManualDestroy(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenidClient(client.RealmId, client.Id)
+					err := keycloakClient.DeleteOpenidClient(testCtx, client.RealmId, client.Id)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -204,8 +205,9 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		RootUrl:                   &rootUrlBefore,
 		Attributes: keycloak.OpenidClientAttributes{
 			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
-			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(randomBool()),
-			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutSessionRequired:     types.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutRevokeOfflineTokens: types.KeycloakBoolQuoted(randomBool()),
+			PostLogoutRedirectUris:               []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 		},
 	}
 
@@ -229,8 +231,9 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		RootUrl:                   &rootUrlAfter,
 		Attributes: keycloak.OpenidClientAttributes{
 			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
-			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(randomBool()),
-			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutSessionRequired:     types.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutRevokeOfflineTokens: types.KeycloakBoolQuoted(randomBool()),
+			PostLogoutRedirectUris:               []string{acctest.RandString(10), acctest.RandString(10)},
 		},
 	}
 
@@ -367,7 +370,7 @@ func TestAccKeycloakOpenidClient_ClientTimeouts_basic(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_Device_basic(t *testing.T) {
-	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_13); !ok {
 		t.Skip()
 	}
 
@@ -637,6 +640,26 @@ func TestAccKeycloakOpenidClient_loginTheme(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakOpenidClient_import(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientNotDestroyed(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakOpenidClient_import("non-existing-client", true),
+				ExpectError: regexp.MustCompile("Error: openid client with name non-existing-client does not exist"),
+			},
+			{
+				Config: testKeycloakOpenidClient_import("account", true),
+				Check:  testAccCheckKeycloakOpenidClientExistsWithEnabledStatus("keycloak_openid_client.client", true),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakOpenidClient_useRefreshTokens(t *testing.T) {
 	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -653,6 +676,27 @@ func TestAccKeycloakOpenidClient_useRefreshTokens(t *testing.T) {
 			{
 				Config: testKeycloakOpenidClient_useRefreshTokens(clientId, false),
 				Check:  testAccCheckKeycloakOpenidClientUseRefreshTokens("keycloak_openid_client.client", false),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOpenidClient_useRefreshTokensClientCredentials(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakOpenidClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClient_useRefreshTokensClientCredentials(clientId, true),
+				Check:  testAccCheckKeycloakOpenidClientUseRefreshTokensClientCredentials("keycloak_openid_client.client", true),
+			},
+			{
+				Config: testKeycloakOpenidClient_useRefreshTokensClientCredentials(clientId, false),
+				Check:  testAccCheckKeycloakOpenidClientUseRefreshTokensClientCredentials("keycloak_openid_client.client", false),
 			},
 		},
 	})
@@ -708,7 +752,7 @@ func TestAccKeycloakOpenidClient_extraConfigInvalid(t *testing.T) {
 }
 
 func TestAccKeycloakOpenidClient_oauth2DeviceAuthorizationGrantEnabled(t *testing.T) {
-	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !ok {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_13); !ok {
 		t.Skip()
 	}
 
@@ -803,8 +847,8 @@ func testAccCheckKeycloakOpenidClientHasFrontchannelSettings(resourceName, front
 			return fmt.Errorf("expected openid client to have frontchannel logout url %s, got %s", frontChannelLogoutUrl, client.Attributes.FrontchannelLogoutUrl)
 		}
 
-		if bool(client.FrontChannelLogoutEnabled) != frontChannelLogoutEnabled {
-			return fmt.Errorf("expected openid client to have frontchannel enabled bool %t, got %t", frontChannelLogoutEnabled, bool(client.FrontChannelLogoutEnabled))
+		if client.FrontChannelLogoutEnabled != frontChannelLogoutEnabled {
+			return fmt.Errorf("expected openid client to have frontchannel enabled bool %t, got %t", frontChannelLogoutEnabled, client.FrontChannelLogoutEnabled)
 		}
 
 		return nil
@@ -863,7 +907,7 @@ func testAccCheckKeycloakOpenidClientOauth2Device(resourceName string,
 			return err
 		}
 
-		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != keycloak.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
+		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != types.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
 			return fmt.Errorf("expected openid client to have device authorizationen granted enabled set to %t, but got %v", oauth2DeviceAuthorizationGrantEnabled, client.Attributes.Oauth2DeviceAuthorizationGrantEnabled)
 		}
 
@@ -982,9 +1026,29 @@ func testAccCheckKeycloakOpenidClientDestroy() resource.TestCheckFunc {
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			client, _ := keycloakClient.GetOpenidClient(realm, id)
+			client, _ := keycloakClient.GetOpenidClient(testCtx, realm, id)
 			if client != nil {
 				return fmt.Errorf("openid client %s still exists", id)
+			}
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientNotDestroyed() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "keycloak_openid_client" {
+				continue
+			}
+
+			id := rs.Primary.ID
+			realm := rs.Primary.Attributes["realm_id"]
+
+			client, _ := keycloakClient.GetOpenidClient(testCtx, realm, id)
+			if client == nil {
+				return fmt.Errorf("openid client %s dost not exists", id)
 			}
 		}
 
@@ -1007,7 +1071,7 @@ func testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod(resourceName, pk
 	}
 }
 
-func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(resourceName string, excludeSessionStateFromAuthResponse keycloak.KeycloakBoolQuoted) resource.TestCheckFunc {
+func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(resourceName string, excludeSessionStateFromAuthResponse types.KeycloakBoolQuoted) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
 		if err != nil {
@@ -1079,8 +1143,23 @@ func testAccCheckKeycloakOpenidClientUseRefreshTokens(resourceName string, useRe
 			return err
 		}
 
-		if client.Attributes.UseRefreshTokens != keycloak.KeycloakBoolQuoted(useRefreshTokens) {
+		if client.Attributes.UseRefreshTokens != types.KeycloakBoolQuoted(useRefreshTokens) {
 			return fmt.Errorf("expected openid client to have use refresh tokens set to %t, but got %v", useRefreshTokens, client.Attributes.UseRefreshTokens)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientUseRefreshTokensClientCredentials(resourceName string, useRefreshTokensClientCredentials bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Attributes.UseRefreshTokensClientCredentials != types.KeycloakBoolQuoted(useRefreshTokensClientCredentials) {
+			return fmt.Errorf("expected openid client to have use refresh tokens client credentials set to %t, but got %v", useRefreshTokensClientCredentials, client.Attributes.UseRefreshTokensClientCredentials)
 		}
 
 		return nil
@@ -1094,7 +1173,7 @@ func testAccCheckKeycloakOpenidClientOauth2DeviceAuthorizationGrantEnabled(resou
 			return err
 		}
 
-		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != keycloak.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
+		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != types.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
 			return fmt.Errorf("expected openid client to have device authorization grant enabled set to %t, but got %v", oauth2DeviceAuthorizationGrantEnabled, client.Attributes.Oauth2DeviceAuthorizationGrantEnabled)
 		}
 
@@ -1127,7 +1206,7 @@ func testAccCheckKeycloakOpenidClientExtraConfigMissing(resourceName string, key
 
 		if val, ok := client.Attributes.ExtraConfig[key]; ok {
 			// keycloak 13+ will remove attributes if set to empty string. on older versions, we'll just check if this value is empty
-			if versionOk, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(keycloak.Version_13); !versionOk {
+			if versionOk, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_13); !versionOk {
 				if val != "" {
 					return fmt.Errorf("expected openid client to have empty attribute %v", key)
 				}
@@ -1136,6 +1215,21 @@ func testAccCheckKeycloakOpenidClientExtraConfigMissing(resourceName string, key
 			}
 
 			return fmt.Errorf("expected openid client to not have attribute %v", key)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakOpenidClientExistsWithEnabledStatus(resourceName string, enabled bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getOpenidClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.Enabled != enabled {
+			return fmt.Errorf("expected openid client to have enabled status %t, but got %t", enabled, client.Enabled)
 		}
 
 		return nil
@@ -1151,7 +1245,7 @@ func getOpenidClientFromState(s *terraform.State, resourceName string) (*keycloa
 	id := rs.Primary.ID
 	realm := rs.Primary.Attributes["realm_id"]
 
-	client, err := keycloakClient.GetOpenidClient(realm, id)
+	client, err := keycloakClient.GetOpenidClient(testCtx, realm, id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting openid client %s: %s", id, err)
 	}
@@ -1375,17 +1469,18 @@ resource "keycloak_openid_client" "client" {
 	direct_access_grants_enabled = %t
 	service_accounts_enabled     = %t
 
-	valid_redirect_uris          = %s
-	web_origins                  = %s
-	admin_url					 = "%s"
-	base_url                     = "%s"
-	root_url                     = "%s"
+	valid_redirect_uris             = %s
+	valid_post_logout_redirect_uris = %s
+	web_origins                     = %s
+	admin_url					    = "%s"
+	base_url                        = "%s"
+	root_url                        = "%s"
 
 	backchannel_logout_url                     = "%s"
 	backchannel_logout_session_required        = %t
 	backchannel_logout_revoke_offline_sessions = %t
 }
-	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl, openidClient.Attributes.BackchannelLogoutUrl, openidClient.Attributes.BackchannelLogoutSessionRequired, openidClient.Attributes.BackchannelLogoutRevokeOfflineTokens)
+	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.Attributes.PostLogoutRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl, openidClient.Attributes.BackchannelLogoutUrl, openidClient.Attributes.BackchannelLogoutSessionRequired, openidClient.Attributes.BackchannelLogoutRevokeOfflineTokens)
 }
 
 func testKeycloakOpenidClient_backchannel(clientId, backchannelLogoutUrl string, backchannelLogoutSessionRequired, backchannelLogoutRevokeOfflineSessions bool) string {
@@ -1417,8 +1512,8 @@ resource "keycloak_openid_client" "client" {
 	realm_id    = data.keycloak_realm.realm.id
 	access_type = "CONFIDENTIAL"
 
-	frontchannel_logout_url                     = "%s"
-	frontchannel_logout_enabled        = %t
+	frontchannel_logout_url     = "%s"
+	frontchannel_logout_enabled = %t
 }
 	`, testAccRealm.Realm, clientId, frontchannelLogoutUrl, frontchannelLogoutEnabled)
 }
@@ -1565,6 +1660,22 @@ resource "keycloak_openid_client" "client" {
 	`, testAccRealm.Realm, clientId, useRefreshTokens)
 }
 
+func testKeycloakOpenidClient_useRefreshTokensClientCredentials(clientId string, useRefreshTokensClientCredentials bool) string {
+
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = data.keycloak_realm.realm.id
+	access_type = "CONFIDENTIAL"
+	use_refresh_tokens_client_credentials = %t
+}
+	`, testAccRealm.Realm, clientId, useRefreshTokensClientCredentials)
+}
+
 func testKeycloakOpenidClient_extraConfig(clientId string, extraConfig map[string]string) string {
 	var sb strings.Builder
 	sb.WriteString("{\n")
@@ -1618,4 +1729,21 @@ resource "keycloak_openid_client" "client" {
 	oauth2_device_polling_interval 				= "%s"
 }
 	`, testAccRealm.Realm, clientId, oauth2DeviceAuthorizationGrantEnabled, oauth2DeviceCodeLifespan, oauth2DevicePollingInterval)
+}
+
+func testKeycloakOpenidClient_import(clientId string, enabled bool) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "client" {
+	client_id   = "%s"
+	realm_id    = data.keycloak_realm.realm.id
+	access_type = "PUBLIC"
+	root_url    = ""
+	enabled     = %t
+	import      = true
+}
+	`, testAccRealm.Realm, clientId, enabled)
 }

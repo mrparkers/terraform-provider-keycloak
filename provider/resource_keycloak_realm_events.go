@@ -1,16 +1,18 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakRealmEvents() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakRealmEventsCreate,
-		Read:   resourceKeycloakRealmEventsRead,
-		Delete: resourceKeycloakRealmEventsDelete,
-		Update: resourceKeycloakRealmEventsUpdate,
+		CreateContext: resourceKeycloakRealmEventsCreate,
+		ReadContext:   resourceKeycloakRealmEventsRead,
+		DeleteContext: resourceKeycloakRealmEventsDelete,
+		UpdateContext: resourceKeycloakRealmEventsUpdate,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Type:     schema.TypeString,
@@ -93,26 +95,26 @@ func setRealmEventsConfigData(data *schema.ResourceData, realmEventsConfig *keyc
 	}
 }
 
-func resourceKeycloakRealmEventsCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmEventsCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	realmId := data.Get("realm_id").(string)
 	data.SetId(realmId)
 
-	err := resourceKeycloakRealmEventsUpdate(data, meta)
-	if err != nil {
-		return err
+	diagnostics := resourceKeycloakRealmEventsUpdate(ctx, data, meta)
+	if diagnostics.HasError() {
+		return diagnostics
 	}
 
-	return resourceKeycloakRealmEventsRead(data, meta)
+	return resourceKeycloakRealmEventsRead(ctx, data, meta)
 }
 
-func resourceKeycloakRealmEventsRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmEventsRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 
-	realmEventsConfig, err := keycloakClient.GetRealmEventsConfig(realmId)
+	realmEventsConfig, err := keycloakClient.GetRealmEventsConfig(ctx, realmId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setRealmEventsConfigData(data, realmEventsConfig)
@@ -120,30 +122,30 @@ func resourceKeycloakRealmEventsRead(data *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func resourceKeycloakRealmEventsDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmEventsDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 	realmId := data.Get("realm_id").(string)
 
 	// The realm events config cannot be deleted, so instead we set it back to its "zero" values.
 	realmEventsConfig := &keycloak.RealmEventsConfig{}
 
-	err := keycloakClient.UpdateRealmEventsConfig(realmId, realmEventsConfig)
+	err := keycloakClient.UpdateRealmEventsConfig(ctx, realmId, realmEventsConfig)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakRealmEventsUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmEventsUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	realmEventsConfig := getRealmEventsConfigFromData(data)
 
-	err := keycloakClient.UpdateRealmEventsConfig(realmId, realmEventsConfig)
+	err := keycloakClient.UpdateRealmEventsConfig(ctx, realmId, realmEventsConfig)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setRealmEventsConfigData(data, realmEventsConfig)

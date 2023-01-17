@@ -1,11 +1,11 @@
 package provider
 
 import (
-	"fmt"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 var (
@@ -14,12 +14,12 @@ var (
 
 func resourceKeycloakRealmKeystoreAesGenerated() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakRealmKeystoreAesGeneratedCreate,
-		Read:   resourceKeycloakRealmKeystoreAesGeneratedRead,
-		Update: resourceKeycloakRealmKeystoreAesGeneratedUpdate,
-		Delete: resourceKeycloakRealmKeystoreAesGeneratedDelete,
+		CreateContext: resourceKeycloakRealmKeystoreAesGeneratedCreate,
+		ReadContext:   resourceKeycloakRealmKeystoreAesGeneratedRead,
+		UpdateContext: resourceKeycloakRealmKeystoreAesGeneratedUpdate,
+		DeleteContext: resourceKeycloakRealmKeystoreAesGeneratedDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakRealmKeystoreAesGeneratedImport,
+			StateContext: resourceKeycloakRealmKeystoreGenericImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -90,85 +90,72 @@ func setRealmKeystoreAesGeneratedData(data *schema.ResourceData, realmKey *keycl
 	return nil
 }
 
-func resourceKeycloakRealmKeystoreAesGeneratedCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreAesGeneratedCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmKey, err := getRealmKeystoreAesGeneratedFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewRealmKeystoreAesGenerated(realmKey)
+	err = keycloakClient.NewRealmKeystoreAesGenerated(ctx, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = setRealmKeystoreAesGeneratedData(data, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKeycloakRealmKeystoreAesGeneratedRead(data, meta)
+	return resourceKeycloakRealmKeystoreAesGeneratedRead(ctx, data, meta)
 }
 
-func resourceKeycloakRealmKeystoreAesGeneratedRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreAesGeneratedRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	realmKey, err := keycloakClient.GetRealmKeystoreAesGenerated(realmId, id)
+	realmKey, err := keycloakClient.GetRealmKeystoreAesGenerated(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	err = setRealmKeystoreAesGeneratedData(data, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakRealmKeystoreAesGeneratedUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreAesGeneratedUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmKey, err := getRealmKeystoreAesGeneratedFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateRealmKeystoreAesGenerated(realmKey)
+	err = keycloakClient.UpdateRealmKeystoreAesGenerated(ctx, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = setRealmKeystoreAesGeneratedData(data, realmKey)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakRealmKeystoreAesGeneratedDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmKeystoreAesGeneratedDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteRealmKeystoreAesGenerated(realmId, id)
-}
-
-func resourceKeycloakRealmKeystoreAesGeneratedImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{keystoreId}}")
-	}
-
-	d.Set("realm_id", parts[0])
-	d.SetId(parts[1])
-
-	return []*schema.ResourceData{d}, nil
+	return diag.FromErr(keycloakClient.DeleteRealmKeystoreAesGenerated(ctx, realmId, id))
 }

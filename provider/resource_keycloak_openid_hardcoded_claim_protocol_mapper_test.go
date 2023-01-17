@@ -136,7 +136,7 @@ func TestAccKeycloakOpenIdHardcodedClaimProtocolMapper_createAfterManualDestroy(
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenIdHardcodedClaimProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					err := keycloakClient.DeleteOpenIdHardcodedClaimProtocolMapper(testCtx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
@@ -299,7 +299,7 @@ func getHardcodedClaimMapperUsingState(state *terraform.State, resourceName stri
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	return keycloakClient.GetOpenIdHardcodedClaimProtocolMapper(realm, clientId, clientScopeId, id)
+	return keycloakClient.GetOpenIdHardcodedClaimProtocolMapper(testCtx, realm, clientId, clientScopeId, id)
 }
 
 func testKeycloakOpenIdHardcodedClaimProtocolMapper_basic_client(clientId, mapperName string) string {

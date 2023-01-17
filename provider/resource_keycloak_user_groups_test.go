@@ -242,7 +242,7 @@ func testAccCheckKeycloakUserHasGroups(resourceName string) resource.TestCheckFu
 				continue
 			}
 
-			group, err := keycloakClient.GetGroup(realm, v)
+			group, err := keycloakClient.GetGroup(testCtx, realm, v)
 			if err != nil {
 				return err
 			}
@@ -250,7 +250,7 @@ func testAccCheckKeycloakUserHasGroups(resourceName string) resource.TestCheckFu
 			expectedGroups = append(expectedGroups, group)
 		}
 
-		userGroups, err := keycloakClient.GetUserGroups(realm, userId)
+		userGroups, err := keycloakClient.GetUserGroups(testCtx, realm, userId)
 		if err != nil {
 			return err
 		}
@@ -295,7 +295,7 @@ func testAccCheckKeycloakUserHasNonExhaustiveGroups(resourceName string) resourc
 				continue
 			}
 
-			group, err := keycloakClient.GetGroup(realm, v)
+			group, err := keycloakClient.GetGroup(testCtx, realm, v)
 			if err != nil {
 				return err
 			}
@@ -303,7 +303,7 @@ func testAccCheckKeycloakUserHasNonExhaustiveGroups(resourceName string) resourc
 			expectedGroups = append(expectedGroups, group)
 		}
 
-		userGroups, err := keycloakClient.GetUserGroups(realm, userId)
+		userGroups, err := keycloakClient.GetUserGroups(testCtx, realm, userId)
 		if err != nil {
 			return err
 		}
@@ -342,7 +342,7 @@ func testAccCheckKeycloakUserHasNoGroups(resourceName string) resource.TestCheck
 		realm := rs.Primary.Attributes["realm_id"]
 		id := rs.Primary.ID
 
-		userGroups, err := keycloakClient.GetUserGroups(realm, id)
+		userGroups, err := keycloakClient.GetUserGroups(testCtx, realm, id)
 		if err != nil {
 			return err
 		}

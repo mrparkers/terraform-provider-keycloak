@@ -5,6 +5,7 @@
 *.so
 *.dylib
 terraform-provider-keycloak
+terraform-provider-keycloak_*
 
 # Test binary, build with `go test -c`
 *.test
@@ -14,6 +15,8 @@ terraform-provider-keycloak
 
 .idea/
 .terraform/
+terraform.d/
+.terraform.lock.hcl
 terraform.tfstate*
 
 .gradle/

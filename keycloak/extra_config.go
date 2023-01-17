@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"encoding/json"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"reflect"
 	"strconv"
 	"strings"
@@ -26,9 +27,20 @@ func unmarshalExtraConfig(data []byte, reflectValue reflect.Value, extraConfig *
 					} else if field.Kind() == reflect.Bool {
 						boolVal, err := strconv.ParseBool(configValue.(string))
 						if err == nil {
-							field.Set(reflect.ValueOf(KeycloakBoolQuoted(boolVal)))
+							field.Set(reflect.ValueOf(types.KeycloakBoolQuoted(boolVal)))
 						}
+					} else if field.Kind() == reflect.TypeOf([]string{}).Kind() {
+						var sliceQuoted types.KeycloakSliceQuoted
+						var sliceHashDelimited types.KeycloakSliceHashDelimited
+
+						if err = json.Unmarshal([]byte(configValue.(string)), &sliceQuoted); err == nil {
+							field.Set(reflect.ValueOf(sliceQuoted))
+						} else if err = sliceHashDelimited.UnmarshalJSON([]byte(configValue.(string))); err == nil {
+							field.Set(reflect.ValueOf(sliceHashDelimited))
+						}
+
 					}
+
 					delete(*extraConfig, jsonKey)
 				}
 			}
@@ -53,7 +65,13 @@ func marshalExtraConfig(reflectValue reflect.Value, extraConfig map[string]inter
 				if field.Kind() == reflect.String {
 					out[jsonKey] = field.String()
 				} else if field.Kind() == reflect.Bool {
-					out[jsonKey] = KeycloakBoolQuoted(field.Bool())
+					out[jsonKey] = types.KeycloakBoolQuoted(field.Bool())
+				} else if field.Kind() == reflect.TypeOf([]string{}).Kind() {
+					if s, ok := field.Interface().(types.KeycloakSliceQuoted); ok {
+						out[jsonKey] = s
+					} else if s, ok := field.Interface().(types.KeycloakSliceHashDelimited); ok {
+						out[jsonKey] = s
+					}
 				}
 			}
 		}

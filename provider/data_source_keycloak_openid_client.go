@@ -1,13 +1,16 @@
 package provider
 
 import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakOpenidClient() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakOpenidClientRead,
+		ReadContext: dataSourceKeycloakOpenidClientRead,
 
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -64,6 +67,12 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Computed: true,
 			},
 			"valid_redirect_uris": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+				Computed: true,
+			},
+			"valid_post_logout_redirect_uris": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
@@ -187,6 +196,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"use_refresh_tokens_client_credentials": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"backchannel_logout_url": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -225,21 +238,18 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 	}
 }
 
-func dataSourceKeycloakOpenidClientRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakOpenidClientRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 
-	client, err := keycloakClient.GetOpenidClientByClientId(realmId, clientId)
+	client, err := keycloakClient.GetOpenidClientByClientId(ctx, realmId, clientId)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
-	err = setOpenidClientData(keycloakClient, data, client)
-	if err != nil {
-		return err
-	}
+	err = setOpenidClientData(ctx, keycloakClient, data, client)
 
-	return nil
+	return diag.FromErr(err)
 }

@@ -1,7 +1,9 @@
 package keycloak
 
 import (
+	"context"
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
 type OpenidClientScope struct {
@@ -11,19 +13,19 @@ type OpenidClientScope struct {
 	Description string `json:"description"`
 	Protocol    string `json:"protocol"`
 	Attributes  struct {
-		DisplayOnConsentScreen KeycloakBoolQuoted `json:"display.on.consent.screen"` // boolean in string form
-		ConsentScreenText      string             `json:"consent.screen.text"`
-		GuiOrder               string             `json:"gui.order"`
-		IncludeInTokenScope    KeycloakBoolQuoted `json:"include.in.token.scope"` // boolean in string form
+		DisplayOnConsentScreen types.KeycloakBoolQuoted `json:"display.on.consent.screen"` // boolean in string form
+		ConsentScreenText      string                   `json:"consent.screen.text"`
+		GuiOrder               string                   `json:"gui.order"`
+		IncludeInTokenScope    types.KeycloakBoolQuoted `json:"include.in.token.scope"` // boolean in string form
 	} `json:"attributes"`
 }
 
 type OpenidClientScopeFilterFunc func(*OpenidClientScope) bool
 
-func (keycloakClient *KeycloakClient) NewOpenidClientScope(clientScope *OpenidClientScope) error {
+func (keycloakClient *KeycloakClient) NewOpenidClientScope(ctx context.Context, clientScope *OpenidClientScope) error {
 	clientScope.Protocol = "openid-connect"
 
-	_, location, err := keycloakClient.post(fmt.Sprintf("/realms/%s/client-scopes", clientScope.RealmId), clientScope)
+	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/client-scopes", clientScope.RealmId), clientScope)
 	if err != nil {
 		return err
 	}
@@ -33,10 +35,10 @@ func (keycloakClient *KeycloakClient) NewOpenidClientScope(clientScope *OpenidCl
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidClientScope(realmId, id string) (*OpenidClientScope, error) {
+func (keycloakClient *KeycloakClient) GetOpenidClientScope(ctx context.Context, realmId, id string) (*OpenidClientScope, error) {
 	var clientScope OpenidClientScope
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id), &clientScope, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id), &clientScope, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -46,10 +48,10 @@ func (keycloakClient *KeycloakClient) GetOpenidClientScope(realmId, id string) (
 	return &clientScope, nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidDefaultClientScopes(realmId, clientId string) (*[]OpenidClientScope, error) {
+func (keycloakClient *KeycloakClient) GetOpenidDefaultClientScopes(ctx context.Context, realmId, clientId string) (*[]OpenidClientScope, error) {
 	var clientScopes []OpenidClientScope
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes", realmId, clientId), &clientScopes, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients/%s/default-client-scopes", realmId, clientId), &clientScopes, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -61,10 +63,10 @@ func (keycloakClient *KeycloakClient) GetOpenidDefaultClientScopes(realmId, clie
 	return &clientScopes, nil
 }
 
-func (keycloakClient *KeycloakClient) GetOpenidOptionalClientScopes(realmId, clientId string) (*[]OpenidClientScope, error) {
+func (keycloakClient *KeycloakClient) GetOpenidOptionalClientScopes(ctx context.Context, realmId, clientId string) (*[]OpenidClientScope, error) {
 	var clientScopes []OpenidClientScope
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/clients/%s/optional-client-scopes", realmId, clientId), &clientScopes, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/clients/%s/optional-client-scopes", realmId, clientId), &clientScopes, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -76,21 +78,21 @@ func (keycloakClient *KeycloakClient) GetOpenidOptionalClientScopes(realmId, cli
 	return &clientScopes, nil
 }
 
-func (keycloakClient *KeycloakClient) UpdateOpenidClientScope(clientScope *OpenidClientScope) error {
+func (keycloakClient *KeycloakClient) UpdateOpenidClientScope(ctx context.Context, clientScope *OpenidClientScope) error {
 	clientScope.Protocol = "openid-connect"
 
-	return keycloakClient.put(fmt.Sprintf("/realms/%s/client-scopes/%s", clientScope.RealmId, clientScope.Id), clientScope)
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/client-scopes/%s", clientScope.RealmId, clientScope.Id), clientScope)
 }
 
-func (keycloakClient *KeycloakClient) DeleteOpenidClientScope(realmId, id string) error {
-	return keycloakClient.delete(fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id), nil)
+func (keycloakClient *KeycloakClient) DeleteOpenidClientScope(ctx context.Context, realmId, id string) error {
+	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/client-scopes/%s", realmId, id), nil)
 }
 
-func (keycloakClient *KeycloakClient) ListOpenidClientScopesWithFilter(realmId string, filter OpenidClientScopeFilterFunc) ([]*OpenidClientScope, error) {
+func (keycloakClient *KeycloakClient) ListOpenidClientScopesWithFilter(ctx context.Context, realmId string, filter OpenidClientScopeFilterFunc) ([]*OpenidClientScope, error) {
 	var clientScopes []OpenidClientScope
 	var openidClientScopes []*OpenidClientScope
 
-	err := keycloakClient.get(fmt.Sprintf("/realms/%s/client-scopes", realmId), &clientScopes, nil)
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/client-scopes", realmId), &clientScopes, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -100,6 +102,8 @@ func (keycloakClient *KeycloakClient) ListOpenidClientScopesWithFilter(realmId s
 			scope := new(OpenidClientScope)
 			*scope = clientScope
 
+			scope.RealmId = realmId
+
 			openidClientScopes = append(openidClientScopes, scope)
 		}
 	}
@@ -107,7 +111,7 @@ func (keycloakClient *KeycloakClient) ListOpenidClientScopesWithFilter(realmId s
 	return openidClientScopes, nil
 }
 
-func includeOpenidClientScopesMatchingNames(scopeNames []string) OpenidClientScopeFilterFunc {
+func IncludeOpenidClientScopesMatchingNames(scopeNames []string) OpenidClientScopeFilterFunc {
 	return func(scope *OpenidClientScope) bool {
 		for _, scopeName := range scopeNames {
 			if scopeName == scope.Name {

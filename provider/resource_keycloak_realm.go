@@ -1,9 +1,12 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
 var (
@@ -139,12 +142,12 @@ func resourceKeycloakRealm() *schema.Resource {
 		},
 	}
 	return &schema.Resource{
-		Create: resourceKeycloakRealmCreate,
-		Read:   resourceKeycloakRealmRead,
-		Delete: resourceKeycloakRealmDelete,
-		Update: resourceKeycloakRealmUpdate,
+		CreateContext: resourceKeycloakRealmCreate,
+		ReadContext:   resourceKeycloakRealmRead,
+		DeleteContext: resourceKeycloakRealmDelete,
+		UpdateContext: resourceKeycloakRealmUpdate,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			"realm": {
@@ -365,6 +368,18 @@ func resourceKeycloakRealm() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"client_session_idle_timeout": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
+			"client_session_max_lifespan": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressDurationStringDiff,
+			},
 			"access_token_lifespan": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -551,37 +566,37 @@ func resourceKeycloakRealm() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for BrowserFlow",
 				Optional:    true,
-				Default:     "browser",
+				Computed:    true,
 			},
 			"registration_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for RegistrationFlow",
 				Optional:    true,
-				Default:     "registration",
+				Computed:    true,
 			},
 			"direct_grant_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for DirectGrantFlow",
 				Optional:    true,
-				Default:     "direct grant",
+				Computed:    true,
 			},
 			"reset_credentials_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for ResetCredentialsFlow",
 				Optional:    true,
-				Default:     "reset credentials",
+				Computed:    true,
 			},
 			"client_authentication_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for ClientAuthenticationFlow",
 				Optional:    true,
-				Default:     "clients",
+				Computed:    true,
 			},
 			"docker_authentication_flow": {
 				Type:        schema.TypeString,
 				Description: "Which flow should be used for DockerAuthenticationFlow",
 				Optional:    true,
-				Default:     "docker auth",
+				Computed:    true,
 			},
 
 			// misc attributes
@@ -657,6 +672,44 @@ func getRealmSMTPPasswordFromData(data *schema.ResourceData) (string, bool) {
 	return "", false
 }
 
+func setRealmFlowBindings(data *schema.ResourceData, realm *keycloak.Realm) {
+	if flow, ok := data.GetOk("browser_flow"); ok {
+		realm.BrowserFlow = stringPointer(flow.(string))
+	} else {
+		realm.BrowserFlow = stringPointer("browser")
+	}
+
+	if flow, ok := data.GetOk("registration_flow"); ok {
+		realm.RegistrationFlow = stringPointer(flow.(string))
+	} else {
+		realm.RegistrationFlow = stringPointer("registration")
+	}
+
+	if flow, ok := data.GetOk("direct_grant_flow"); ok {
+		realm.DirectGrantFlow = stringPointer(flow.(string))
+	} else {
+		realm.DirectGrantFlow = stringPointer("direct grant")
+	}
+
+	if flow, ok := data.GetOk("reset_credentials_flow"); ok {
+		realm.ResetCredentialsFlow = stringPointer(flow.(string))
+	} else {
+		realm.ResetCredentialsFlow = stringPointer("reset credentials")
+	}
+
+	if flow, ok := data.GetOk("client_authentication_flow"); ok {
+		realm.ClientAuthenticationFlow = stringPointer(flow.(string))
+	} else {
+		realm.ClientAuthenticationFlow = stringPointer("clients")
+	}
+
+	if flow, ok := data.GetOk("docker_authentication_flow"); ok {
+		realm.DockerAuthenticationFlow = stringPointer(flow.(string))
+	} else {
+		realm.DockerAuthenticationFlow = stringPointer("docker auth")
+	}
+}
+
 func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	internationalizationEnabled := false
 	supportLocales := make([]string, 0)
@@ -708,7 +761,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		smtpSettings := v.([]interface{})[0].(map[string]interface{})
 
 		smtpServer := keycloak.SmtpServer{
-			StartTls:           keycloak.KeycloakBoolQuoted(smtpSettings["starttls"].(bool)),
+			StartTls:           types.KeycloakBoolQuoted(smtpSettings["starttls"].(bool)),
 			Port:               smtpSettings["port"].(string),
 			Host:               smtpSettings["host"].(string),
 			ReplyTo:            smtpSettings["reply_to"].(string),
@@ -716,7 +769,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 			From:               smtpSettings["from"].(string),
 			FromDisplayName:    smtpSettings["from_display_name"].(string),
 			EnvelopeFrom:       smtpSettings["envelope_from"].(string),
-			Ssl:                keycloak.KeycloakBoolQuoted(smtpSettings["ssl"].(bool)),
+			Ssl:                types.KeycloakBoolQuoted(smtpSettings["ssl"].(bool)),
 		}
 
 		authConfig := smtpSettings["auth"].([]interface{})
@@ -815,6 +868,22 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 
 	if offlineSessionMaxLifespanEnabled, ok := data.GetOk("offline_session_max_lifespan_enabled"); ok {
 		realm.OfflineSessionMaxLifespanEnabled = offlineSessionMaxLifespanEnabled.(bool)
+	}
+
+	if clientSessionIdleTimeout := data.Get("client_session_idle_timeout").(string); clientSessionIdleTimeout != "" {
+		clientSessionIdleTimeoutDurationString, err := getSecondsFromDurationString(clientSessionIdleTimeout)
+		if err != nil {
+			return nil, err
+		}
+		realm.ClientSessionIdleTimeout = clientSessionIdleTimeoutDurationString
+	}
+
+	if clientSessionMaxLifespan := data.Get("client_session_max_lifespan").(string); clientSessionMaxLifespan != "" {
+		clientSessionMaxLifespanDurationString, err := getSecondsFromDurationString(clientSessionMaxLifespan)
+		if err != nil {
+			return nil, err
+		}
+		realm.ClientSessionMaxLifespan = clientSessionMaxLifespanDurationString
 	}
 
 	if accessTokenLifespan := data.Get("access_token_lifespan").(string); accessTokenLifespan != "" {
@@ -929,30 +998,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		realm.PasswordPolicy = passwordPolicy.(string)
 	}
 
-	//Flow Bindings
-	if flow, ok := data.GetOk("browser_flow"); ok {
-		realm.BrowserFlow = flow.(string)
-	}
-
-	if flow, ok := data.GetOk("registration_flow"); ok {
-		realm.RegistrationFlow = flow.(string)
-	}
-
-	if flow, ok := data.GetOk("direct_grant_flow"); ok {
-		realm.DirectGrantFlow = flow.(string)
-	}
-
-	if flow, ok := data.GetOk("reset_credentials_flow"); ok {
-		realm.ResetCredentialsFlow = flow.(string)
-	}
-
-	if flow, ok := data.GetOk("client_authentication_flow"); ok {
-		realm.ClientAuthenticationFlow = flow.(string)
-	}
-
-	if flow, ok := data.GetOk("docker_authentication_flow"); ok {
-		realm.DockerAuthenticationFlow = flow.(string)
-	}
+	setRealmFlowBindings(data, realm)
 
 	attributes := map[string]interface{}{}
 	if v, ok := data.GetOk("attributes"); ok {
@@ -1182,6 +1228,8 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("offline_session_idle_timeout", getDurationStringFromSeconds(realm.OfflineSessionIdleTimeout))
 	data.Set("offline_session_max_lifespan", getDurationStringFromSeconds(realm.OfflineSessionMaxLifespan))
 	data.Set("offline_session_max_lifespan_enabled", realm.OfflineSessionMaxLifespanEnabled)
+	data.Set("client_session_idle_timeout", getDurationStringFromSeconds(realm.ClientSessionIdleTimeout))
+	data.Set("client_session_max_lifespan", getDurationStringFromSeconds(realm.ClientSessionMaxLifespan))
 	data.Set("access_token_lifespan", getDurationStringFromSeconds(realm.AccessTokenLifespan))
 	data.Set("access_token_lifespan_for_implicit_flow", getDurationStringFromSeconds(realm.AccessTokenLifespanForImplicitFlow))
 	data.Set("access_code_lifespan", getDurationStringFromSeconds(realm.AccessCodeLifespan))
@@ -1308,35 +1356,35 @@ func getHeaderSettings(realm *keycloak.Realm) map[string]interface{} {
 	return headersSettings
 }
 
-func resourceKeycloakRealmCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realm, err := getRealmFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.ValidateRealm(realm)
+	err = keycloakClient.ValidateRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.NewRealm(realm)
+	err = keycloakClient.NewRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setRealmData(data, realm)
 
-	return resourceKeycloakRealmRead(data, meta)
+	return resourceKeycloakRealmRead(ctx, data, meta)
 }
 
-func resourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	realm, err := keycloakClient.GetRealm(data.Id())
+	realm, err := keycloakClient.GetRealm(ctx, data.Id())
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	// we can't trust the API to set this field correctly since it just responds with "**********" this implies a 'password only' change will not detected
@@ -1349,22 +1397,22 @@ func resourceKeycloakRealmRead(data *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceKeycloakRealmUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realm, err := getRealmFromData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.ValidateRealm(realm)
+	err = keycloakClient.ValidateRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UpdateRealm(realm)
+	err = keycloakClient.UpdateRealm(ctx, realm)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	setRealmData(data, realm)
@@ -1372,8 +1420,8 @@ func resourceKeycloakRealmUpdate(data *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourceKeycloakRealmDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakRealmDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	return keycloakClient.DeleteRealm(data.Id())
+	return diag.FromErr(keycloakClient.DeleteRealm(ctx, data.Id()))
 }

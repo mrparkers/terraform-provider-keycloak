@@ -12,31 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 2 # we want the HEAD commit and the previous commit to compare changed files
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.16
-
-      - id: cache-paths
-        run: |
-          echo "::set-output name=build::$(go env GOCACHE)"
-          echo "::set-output name=mod::$(go env GOMODCACHE)"
-
-      - name: Go Build Cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.cache-paths.outputs.build }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
-
-      - name: Go Mod Cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.cache-paths.outputs.mod }}
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+          go-version-file: 'go.mod'
+          cache: true
 
       - name: Verify
         run: |
@@ -60,8 +44,6 @@ jobs:
 
     outputs:
       code-files-changed: steps.files.outputs.any_changed
-      go-cache-build: steps.cache-paths.outputs.build
-      go-cache-mod: steps.cache-paths.outputs.mod
 
   acceptance:
     # this conditional is more verbose than I'd like it to be
@@ -77,54 +59,52 @@ jobs:
     strategy:
       matrix:
         keycloak-version:
-          - '15.0.2'
-          - '14.0.0'
-          - '13.0.1'
+          - '19.0.2'
+          - '18.0.2'
+          - '17.0.1'
       fail-fast: false
     concurrency:
       group: ${{ github.head_ref }}-${{ matrix.keycloak-version }}
       cancel-in-progress: true
     services:
       keycloak:
-        image: jboss/keycloak:${{ matrix.keycloak-version }}
+        # we have to use a custom docker image for these tests, since it's not possible to provide command-line args
+        # to a service container.  see https://github.com/actions/runner/issues/2139
+        image: mrparkers/keycloak-dev:${{ matrix.keycloak-version }}
         ports:
           - 8080:8080
         env:
-          DB_VENDOR: H2
-          KEYCLOAK_LOGLEVEL: INFO
-          KEYCLOAK_USER: keycloak
-          KEYCLOAK_PASSWORD: password
-          JAVA_OPTS: "-Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.profile.feature.admin_fine_grained_authz=enabled -Dkeycloak.profile.feature.token_exchange=enabled"
+          KC_DB: dev-mem
+          KC_LOG_LEVEL: INFO
+          KEYCLOAK_ADMIN: keycloak
+          KEYCLOAK_ADMIN_PASSWORD: password
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.16
-
-      - name: Go Build Cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ needs.verify.outputs.go-cache-build }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
-
-      - name: Go Mod Cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ needs.verify.outputs.go-cache-mod }}
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+          go-version-file: 'go.mod'
+          cache: true
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_wrapper: false
-          terraform_version: 1.0.8
+          terraform_version: 1.2.9
 
       - name: Initialize Keycloak
         run: ./scripts/wait-for-local-keycloak.sh && ./scripts/create-terraform-client.sh
 
+      - name: Get Keycloak Version
+        uses: actions/github-script@v6
+        id: keycloak-version
+        env:
+          KEYCLOAK_VERSION: ${{ matrix.keycloak-version }}
+        with:
+          script: |
+            return process.env.KEYCLOAK_VERSION.split("-")[0]
       - name: Test
         run: |
           go mod download
@@ -136,5 +116,5 @@ jobs:
           KEYCLOAK_REALM: master
           KEYCLOAK_URL: "http://localhost:8080"
           KEYCLOAK_TEST_PASSWORD_GRANT: "true"
-          KEYCLOAK_VERSION: ${{ matrix.keycloak-version }}
+          KEYCLOAK_VERSION: ${{ steps.keycloak-version.outputs.result }}
         timeout-minutes: 60

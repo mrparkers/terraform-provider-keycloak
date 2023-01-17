@@ -181,7 +181,7 @@ resource "keycloak_required_action" "required_action2" {
 
 func testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realm, requiredActionAlias string, priority int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		action, err := keycloakClient.GetRequiredAction(realm, requiredActionAlias)
+		action, err := keycloakClient.GetRequiredAction(testCtx, realm, requiredActionAlias)
 		if err != nil {
 			return fmt.Errorf("required action not found: %s", requiredActionAlias)
 		}
@@ -196,7 +196,7 @@ func testAccCheckKeycloakRequiresActionExistsWithCorrectPriority(realm, required
 
 func testAccCheckKeycloakRequiresActionExists(realm, requiredActionAlias string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		_, err := keycloakClient.GetRequiredAction(realm, requiredActionAlias)
+		_, err := keycloakClient.GetRequiredAction(testCtx, realm, requiredActionAlias)
 		if err != nil {
 			return fmt.Errorf("required action not found: %s", requiredActionAlias)
 		}

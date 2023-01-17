@@ -162,7 +162,7 @@ func TestAccKeycloakOpenIdUserSessionNoteProtocolMapper_createAfterManualDestroy
 			},
 			{
 				PreConfig: func() {
-					err := keycloakClient.DeleteOpenIdUserSessionNoteProtocolMapper(mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
+					err := keycloakClient.DeleteOpenIdUserSessionNoteProtocolMapper(testCtx, mapper.RealmId, mapper.ClientId, mapper.ClientScopeId, mapper.Id)
 					if err != nil {
 						t.Error(err)
 					}
@@ -323,7 +323,7 @@ func getUserSessionNoteMapperUsingState(state *terraform.State, resourceName str
 	clientId := rs.Primary.Attributes["client_id"]
 	clientScopeId := rs.Primary.Attributes["client_scope_id"]
 
-	return keycloakClient.GetOpenIdUserSessionNoteProtocolMapper(realm, clientId, clientScopeId, id)
+	return keycloakClient.GetOpenIdUserSessionNoteProtocolMapper(testCtx, realm, clientId, clientScopeId, id)
 }
 
 func testKeycloakOpenIdUserSessionNoteProtocolMapper_basic_client(clientId, mapperName string) string {

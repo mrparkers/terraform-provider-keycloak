@@ -82,7 +82,7 @@ resource "keycloak_realm" "realm" {
 - `enabled` - (Optional) When `false`, users and clients will not be able to access this realm. Defaults to `true`.
 - `display_name` - (Optional) The display name for the realm that is shown when logging in to the admin console.
 - `display_name_html` - (Optional) The display name for the realm that is rendered as HTML on the screen when logging in to the admin console.
-- `user_managed_access` - (Optional) When `true`, users are allowed to manage their own resources. Defaults to `false`.
+- `user_managed_access` - (Optional) When `true`, users are allowed to manage their own resources. Defaults to `false`. 
 - `attributes` - (Optional) A map of custom attributes to add to the realm.
 
 ### Login Settings
@@ -122,9 +122,13 @@ The arguments below should be specified as [Go duration strings](https://golang.
 
 - `sso_session_idle_timeout` - (Optional) The amount of time a session can be idle before it expires.
 - `sso_session_max_lifespan` - (Optional) The maximum amount of time before a session expires regardless of activity.
+- `sso_session_idle_timeout_remember_me` - (Optional) Similar to `sso_session_idle_timeout`, but used when a user clicks "Remember Me". If not set, Keycloak will default to the value of `sso_session_idle_timeout`.
+- `sso_session_max_lifespan_remember_me` - (Optional) Similar to `sso_session_max_lifespan`, but used when a user clicks "Remember Me". If not set, Keycloak will default to the value of `sso_session_max_lifespan`.
 - `offline_session_idle_timeout` - (Optional) The amount of time an offline session can be idle before it expires.
 - `offline_session_max_lifespan` - (Optional) The maximum amount of time before an offline session expires regardless of activity.
 - `offline_session_max_lifespan_enabled` - (Optional) Enable `offline_session_max_lifespan`.
+- `client_session_idle_timeout` - (Optional) The amount of time a session can be idle before it expires. Users can override it for individual clients.
+- `client_session_max_lifespan` - (Optional) The maximum amount of time before a session expires regardless of activity. Users can override it for individual clients.
 - `access_token_lifespan` - (Optional) The amount of time an access token can be used before it expires.
 - `access_token_lifespan_for_implicit_flow` - (Optional) The amount of time an access token issued with the OpenID Connect Implicit Flow can be used before it expires.
 - `access_code_lifespan` - (Optional) The maximum amount of time a client has to finish the authorization code flow.

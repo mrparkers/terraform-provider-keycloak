@@ -1,13 +1,15 @@
 package provider
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
 func dataSourceKeycloakClientDescriptionConverter() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKeycloakClientDescriptionConverterRead,
+		ReadContext: dataSourceKeycloakClientDescriptionConverterRead,
 
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
@@ -231,16 +233,16 @@ func setClientDescriptionConverterData(data *schema.ResourceData, description *k
 	data.Set("web_origins", description.WebOrigins)
 }
 
-func dataSourceKeycloakClientDescriptionConverterRead(data *schema.ResourceData, meta interface{}) error {
+func dataSourceKeycloakClientDescriptionConverterRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	body := data.Get("body").(string)
 
-	description, err := keycloakClient.NewGenericClientDescription(realmId, body)
+	description, err := keycloakClient.NewGenericClientDescription(ctx, realmId, body)
 
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	setClientDescriptionConverterData(data, description)

@@ -1,11 +1,15 @@
 package provider
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
-	"log"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"reflect"
 	"strings"
 
@@ -16,7 +20,7 @@ import (
 
 var (
 	keycloakSamlClientNameIdFormats           = []string{"username", "email", "transient", "persistent"}
-	keycloakSamlClientSignatureAlgorithms     = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA512", "DSA_SHA1"}
+	keycloakSamlClientSignatureAlgorithms     = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA256_MGF1", "RSA_SHA512", "RSA_SHA512_MGF1", "DSA_SHA1"}
 	keycloakSamlClientSignatureKeyNames       = []string{"NONE", "KEY_ID", "CERT_SUBJECT"}
 	keycloakSamlClientCanonicalizationMethods = map[string]string{
 		"EXCLUSIVE":               "http://www.w3.org/2001/10/xml-exc-c14n#",
@@ -28,13 +32,13 @@ var (
 
 func resourceKeycloakSamlClient() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeycloakSamlClientCreate,
-		Read:   resourceKeycloakSamlClientRead,
-		Delete: resourceKeycloakSamlClientDelete,
-		Update: resourceKeycloakSamlClientUpdate,
+		CreateContext: resourceKeycloakSamlClientCreate,
+		ReadContext:   resourceKeycloakSamlClientRead,
+		DeleteContext: resourceKeycloakSamlClientDelete,
+		UpdateContext: resourceKeycloakSamlClientUpdate,
 		// This resource can be imported using {{realm}}/{{client_id}}. The Client ID is displayed in the GUI
 		Importer: &schema.ResourceImporter{
-			State: resourceKeycloakSamlClientImport,
+			StateContext: resourceKeycloakSamlClientImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"client_id": {
@@ -265,13 +269,13 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	}
 
 	samlAttributes := &keycloak.SamlClientAttributes{
-		IncludeAuthnStatement:           keycloak.KeycloakBoolQuoted(data.Get("include_authn_statement").(bool)),
-		ForceNameIdFormat:               keycloak.KeycloakBoolQuoted(data.Get("force_name_id_format").(bool)),
-		SignDocuments:                   keycloak.KeycloakBoolQuoted(data.Get("sign_documents").(bool)),
-		SignAssertions:                  keycloak.KeycloakBoolQuoted(data.Get("sign_assertions").(bool)),
-		EncryptAssertions:               keycloak.KeycloakBoolQuoted(data.Get("encrypt_assertions").(bool)),
-		ClientSignatureRequired:         keycloak.KeycloakBoolQuoted(data.Get("client_signature_required").(bool)),
-		ForcePostBinding:                keycloak.KeycloakBoolQuoted(data.Get("force_post_binding").(bool)),
+		IncludeAuthnStatement:           types.KeycloakBoolQuoted(data.Get("include_authn_statement").(bool)),
+		ForceNameIdFormat:               types.KeycloakBoolQuoted(data.Get("force_name_id_format").(bool)),
+		SignDocuments:                   types.KeycloakBoolQuoted(data.Get("sign_documents").(bool)),
+		SignAssertions:                  types.KeycloakBoolQuoted(data.Get("sign_assertions").(bool)),
+		EncryptAssertions:               types.KeycloakBoolQuoted(data.Get("encrypt_assertions").(bool)),
+		ClientSignatureRequired:         types.KeycloakBoolQuoted(data.Get("client_signature_required").(bool)),
+		ForcePostBinding:                types.KeycloakBoolQuoted(data.Get("force_post_binding").(bool)),
 		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
 		SignatureKeyName:                data.Get("signature_key_name").(string),
 		CanonicalizationMethod:          keycloakSamlClientCanonicalizationMethods[data.Get("canonicalization_method").(string)],
@@ -326,7 +330,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	return samlClient
 }
 
-func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlClient) error {
+func mapToDataFromSamlClient(ctx context.Context, data *schema.ResourceData, client *keycloak.SamlClient) error {
 	data.SetId(client.Id)
 
 	data.Set("include_authn_statement", client.Attributes.IncludeAuthnStatement)
@@ -377,18 +381,21 @@ func mapToDataFromSamlClient(data *schema.ResourceData, client *keycloak.SamlCli
 	data.Set("encryption_certificate", client.Attributes.EncryptionCertificate)
 	data.Set("signing_certificate", client.Attributes.SigningCertificate)
 	data.Set("signing_private_key", client.Attributes.SigningPrivateKey)
-	resourceKeycloakSamlClientSetSha1(data, "encryption_certificate_sha1", client.Attributes.EncryptionCertificate)
-	resourceKeycloakSamlClientSetSha1(data, "signing_certificate_sha1", client.Attributes.SigningCertificate)
-	resourceKeycloakSamlClientSetSha1(data, "signing_private_key_sha1", client.Attributes.SigningPrivateKey)
+	resourceKeycloakSamlClientSetSha1(ctx, data, "encryption_certificate_sha1", client.Attributes.EncryptionCertificate)
+	resourceKeycloakSamlClientSetSha1(ctx, data, "signing_certificate_sha1", client.Attributes.SigningCertificate)
+	resourceKeycloakSamlClientSetSha1(ctx, data, "signing_private_key_sha1", client.Attributes.SigningPrivateKey)
 
 	return nil
 }
 
-func resourceKeycloakSamlClientSetSha1(data *schema.ResourceData, attribute, value string) {
+func resourceKeycloakSamlClientSetSha1(ctx context.Context, data *schema.ResourceData, attribute, value string) {
 	if value != "" {
 		bytes, err := base64.StdEncoding.DecodeString(value)
 		if err != nil {
-			log.Printf("[WARN] Cannot compute sha1sum for attribute %s: %v", attribute, err)
+			tflog.Warn(ctx, "Cannot compute sha1sum", map[string]interface{}{
+				"error":     err.Error(),
+				"attribute": attribute,
+			})
 			data.Set(attribute, "")
 
 			return
@@ -403,76 +410,87 @@ func resourceKeycloakSamlClientSetSha1(data *schema.ResourceData, attribute, val
 	}
 }
 
-func resourceKeycloakSamlClientCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	client := mapToSamlClientFromData(data)
 
-	err := keycloakClient.NewSamlClient(client)
+	err := keycloakClient.NewSamlClient(ctx, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	data.SetId(client.Id)
 
-	return resourceKeycloakSamlClientRead(data, meta)
+	return resourceKeycloakSamlClientRead(ctx, data, meta)
 }
 
-func resourceKeycloakSamlClientRead(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	client, err := keycloakClient.GetSamlClient(realmId, id)
+	client, err := keycloakClient.GetSamlClient(ctx, realmId, id)
 	if err != nil {
-		return handleNotFoundError(err, data)
+		return handleNotFoundError(ctx, err, data)
 	}
 
-	err = mapToDataFromSamlClient(data, client)
+	err = mapToDataFromSamlClient(ctx, data, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakSamlClientUpdate(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	client := mapToSamlClientFromData(data)
 
-	err := keycloakClient.UpdateSamlClient(client)
+	err := keycloakClient.UpdateSamlClient(ctx, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = mapToDataFromSamlClient(data, client)
+	err = mapToDataFromSamlClient(ctx, data, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKeycloakSamlClientDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceKeycloakSamlClientDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
 	id := data.Id()
 
-	return keycloakClient.DeleteSamlClient(realmId, id)
+	return diag.FromErr(keycloakClient.DeleteSamlClient(ctx, realmId, id))
 }
 
-func resourceKeycloakSamlClientImport(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
+func resourceKeycloakSamlClientImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	keycloakClient := meta.(*keycloak.KeycloakClient)
 
+	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid import. Supported import formats: {{realmId}}/{{samlClientId}}")
 	}
 
+	_, err := keycloakClient.GetSamlClient(ctx, parts[0], parts[1])
+	if err != nil {
+		return nil, err
+	}
+
 	d.Set("realm_id", parts[0])
 	d.SetId(parts[1])
+
+	diagnostics := resourceKeycloakSamlClientRead(ctx, d, meta)
+	if diagnostics.HasError() {
+		return nil, errors.New(diagnostics[0].Summary)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

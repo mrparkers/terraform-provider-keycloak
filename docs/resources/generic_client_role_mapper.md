@@ -4,6 +4,8 @@ page_title: "keycloak_generic_client_role_mapper Resource"
 
 # keycloak\_generic\_client\_role\_mapper Resource
 
+!> **WARNING:** This resource is deprecated and will be removed in the next major version. Please use `keycloak_generic_role_mapper` instead.
+
 Allow for creating and managing a client's scope mappings within Keycloak.
 
 By default, all the user role mappings of the user are added as claims within the token (OIDC) or assertion (SAML). When
