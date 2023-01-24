@@ -72,10 +72,7 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Optional:     true,
 			Default:      "",
 			ValidateFunc: validation.StringInSlice(keys(nameIdPolicyFormats), false),
-			StateFunc: func(value interface{}) string {
-				return nameIdPolicyFormats[value.(string)]
-			},
-			Description: "Name ID Policy Format.",
+			Description:  "Name ID Policy Format.",
 		},
 		"single_logout_service_url": {
 			Type:        schema.TypeString,
@@ -235,10 +232,18 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *keycloak.IdentityProvider) error {
 	setIdentityProviderData(data, identityProvider)
 
+	var nameIDPolicyFormat string
+	for k, v := range nameIdPolicyFormats {
+		if v == identityProvider.Config.NameIDPolicyFormat {
+			nameIDPolicyFormat = k
+			break
+		}
+	}
+
 	data.Set("backchannel_supported", identityProvider.Config.BackchannelSupported)
 	data.Set("validate_signature", identityProvider.Config.ValidateSignature)
 	data.Set("hide_on_login_page", identityProvider.Config.HideOnLoginPage)
-	data.Set("name_id_policy_format", identityProvider.Config.NameIDPolicyFormat)
+	data.Set("name_id_policy_format", nameIDPolicyFormat)
 	data.Set("entity_id", identityProvider.Config.EntityId)
 	data.Set("single_logout_service_url", identityProvider.Config.SingleLogoutServiceUrl)
 	data.Set("single_sign_on_service_url", identityProvider.Config.SingleSignOnServiceUrl)
