@@ -87,7 +87,7 @@ func TestAccKeycloakSamlIdentityProvider_extraConfig(t *testing.T) {
 			{
 				Config: testKeycloakSamlIdentityProvider_extra_config(samlName, "another-test-config", customConfigValue),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKeycloakSamlIdentityProviderHasNameIdPolicyFormatValue("keycloak_saml_identity_provider.saml", "Email"),
+					testAccCheckKeycloakSamlIdentityProviderHasNameIdPolicyFormatValue("keycloak_saml_identity_provider.saml", nameIdPolicyFormats["Email"]),
 				),
 			},
 		},
