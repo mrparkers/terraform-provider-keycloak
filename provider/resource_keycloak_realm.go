@@ -157,7 +157,7 @@ func resourceKeycloakRealm() *schema.Resource {
 			},
 			"internal_id": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
@@ -1165,7 +1165,9 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.SetId(realm.Realm)
 
 	data.Set("realm", realm.Realm)
-	data.Set("internal_id", realm.Id)
+	if realm.Id != realm.Realm {
+		data.Set("internal_id", realm.Id)
+	}
 	data.Set("enabled", realm.Enabled)
 	data.Set("display_name", realm.DisplayName)
 	data.Set("display_name_html", realm.DisplayNameHtml)
@@ -1423,5 +1425,10 @@ func resourceKeycloakRealmUpdate(ctx context.Context, data *schema.ResourceData,
 func resourceKeycloakRealmDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
-	return diag.FromErr(keycloakClient.DeleteRealm(ctx, data.Id()))
+	realm, err := getRealmFromData(data)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return diag.FromErr(keycloakClient.DeleteRealm(ctx, realm.Realm))
 }
