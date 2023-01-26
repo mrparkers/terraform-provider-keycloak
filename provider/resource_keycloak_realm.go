@@ -158,6 +158,7 @@ func resourceKeycloakRealm() *schema.Resource {
 			"internal_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
