@@ -84,6 +84,12 @@ func TestAccKeycloakSamlIdentityProvider_extraConfig(t *testing.T) {
 					testAccCheckKeycloakSamlIdentityProviderHasCustomConfigValue("keycloak_saml_identity_provider.saml", customConfigValue),
 				),
 			},
+			{
+				Config: testKeycloakSamlIdentityProvider_extra_config(samlName, "another-test-config", customConfigValue),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakSamlIdentityProviderHasNameIdPolicyFormatValue("keycloak_saml_identity_provider.saml", nameIdPolicyFormats["Email"]),
+				),
+			},
 		},
 	})
 }
@@ -379,6 +385,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	extra_config                = {
 		%s = "%s"
 	}
+	name_id_policy_format       = "Email"
 }
 	`, testAccRealm.Realm, alias, configKey, configValue)
 }
