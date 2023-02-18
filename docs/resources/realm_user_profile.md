@@ -52,7 +52,7 @@ resource "keycloak_realm_user_profile" "userprofile" {
       name   = "pattern"
       config = {
         pattern       = "^[a-z]+$"
-        error_message = "Nope"
+        error-message = "Nope"
       }
     }
 
