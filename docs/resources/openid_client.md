@@ -67,6 +67,7 @@ resource "keycloak_openid_client" "openid_client" {
 - `valid_redirect_uris` - (Optional) A list of valid URIs a browser is permitted to redirect to after a successful login or logout. Simple
 wildcards in the form of an asterisk can be used here. This attribute must be set if either `standard_flow_enabled` or `implicit_flow_enabled`
 is set to `true`.
+- `valid_post_logout_redirect_uris` - (Optional) A list of valid URIs a browser is permitted to redirect to after a successful logout.
 - `web_origins` - (Optional) A list of allowed CORS origins. To permit all valid redirect URIs, add `+`. Note that this will not include the `*` wildcard. To permit all origins, explicitly add `*`."
 - `root_url` - (Optional) When specified, this URL is prepended to any relative URLs found within `valid_redirect_uris`, `web_origins`, and `admin_url`. NOTE: Due to limitations in the Keycloak API, when the `root_url` attribute is used, the `valid_redirect_uris`, `web_origins`, and `admin_url` attributes will be required.
 - `admin_url` - (Optional) URL to the admin interface of the client.
@@ -99,7 +100,13 @@ is set to `true`.
 - `backchannel_logout_url` - (Optional) The URL that will cause the client to log itself out when a logout request is sent to this realm. If omitted, no logout request will be sent to the client is this case.
 - `backchannel_logout_session_required` - (Optional) When `true`, a sid (session ID) claim will be included in the logout token when the backchannel logout URL is used. Defaults to `true`.
 - `backchannel_logout_revoke_offline_sessions` - (Optional) Specifying whether a "revoke_offline_access" event is included in the Logout Token when the Backchannel Logout URL is used. Keycloak will revoke offline sessions when receiving a Logout Token with this event.
-- `extra_config` - (Optional) A map of key/value pairs to add extra configuration attributes to this client. This can be used for custom attributes, or to add configuration attributes that are not yet supported by this Terraform provider. Use this attribute at your own risk, as it may conflict with top-level configuration attributes in future provider updates.
+- `extra_config` - (Optional) A map of key/value pairs to add extra configuration attributes to this client. This can be used for custom attributes, or to add configuration attributes that are not yet supported by this Terraform provider. Use this attribute at your own risk, as it may conflict with top-level configuration attributes in future provider updates. For example, the `extra_config` map can be used to set Authentication Context Class Reference (ACR) to Level of Authentication (LoA) mapping
+	``` hcl
+	extra_config = {
+    "acr.loa.map" = "{\"normal\":\"1\",\"transfer\":\"2\"}"
+  	}
+	```
+
 - `import` - (Optional) When `true`, the client with the specified `client_id` is assumed to already exist, and it will be imported into state instead of being created. This attribute is useful when dealing with clients that Keycloak creates automatically during realm creation, such as `account` and `admin-cli`. Note, that the client will not be removed during destruction if `import` is `true`.
 
 ## Attributes Reference

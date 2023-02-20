@@ -3,6 +3,7 @@ package keycloak
 import (
 	"context"
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
 type OpenidClientScope struct {
@@ -12,10 +13,10 @@ type OpenidClientScope struct {
 	Description string `json:"description"`
 	Protocol    string `json:"protocol"`
 	Attributes  struct {
-		DisplayOnConsentScreen KeycloakBoolQuoted `json:"display.on.consent.screen"` // boolean in string form
-		ConsentScreenText      string             `json:"consent.screen.text"`
-		GuiOrder               string             `json:"gui.order"`
-		IncludeInTokenScope    KeycloakBoolQuoted `json:"include.in.token.scope"` // boolean in string form
+		DisplayOnConsentScreen types.KeycloakBoolQuoted `json:"display.on.consent.screen"` // boolean in string form
+		ConsentScreenText      string                   `json:"consent.screen.text"`
+		GuiOrder               string                   `json:"gui.order"`
+		IncludeInTokenScope    types.KeycloakBoolQuoted `json:"include.in.token.scope"` // boolean in string form
 	} `json:"attributes"`
 }
 

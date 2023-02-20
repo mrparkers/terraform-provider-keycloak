@@ -82,8 +82,9 @@ resource "keycloak_realm" "realm" {
 - `enabled` - (Optional) When `false`, users and clients will not be able to access this realm. Defaults to `true`.
 - `display_name` - (Optional) The display name for the realm that is shown when logging in to the admin console.
 - `display_name_html` - (Optional) The display name for the realm that is rendered as HTML on the screen when logging in to the admin console.
-- `user_managed_access` - (Optional) When `true`, users are allowed to manage their own resources. Defaults to `false`. 
+- `user_managed_access` - (Optional) When `true`, users are allowed to manage their own resources. Defaults to `false`.
 - `attributes` - (Optional) A map of custom attributes to add to the realm.
+- `internal_id` - (Optional) When specified, this will be used as the realm's internal ID within Keycloak. When not specified, the realm's internal ID will be set to the realm's name.
 
 ### Login Settings
 
@@ -237,10 +238,6 @@ Each of these attributes are blocks with the following attributes:
 - `create_timeout` - (Optional) The timeout value for creating a user's public key credential in seconds. When set to `0`, this timeout option is not adapted. Defaults to `0`.
 - `avoid_same_authenticator_register` - (Optional) When `true`, Keycloak will avoid registering the authenticator for WebAuthn if it has already been registered. Defaults to `false`.
 - `acceptable_aaguids` - (Optional) A set of AAGUIDs for which an authenticator can be registered.
-
-## Attributes Reference
-
-- `internal_id` - (Computed) When importing realms created outside of this terraform provider, they could use generated arbitrary IDs for the internal realm id. Realms created by this provider always use the realm's name for its internal id.
 
 ## Default Client Scopes
 

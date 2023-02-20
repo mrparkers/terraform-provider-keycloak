@@ -5,6 +5,7 @@
 *.so
 *.dylib
 terraform-provider-keycloak
+terraform-provider-keycloak_*
 
 # Test binary, build with `go test -c`
 *.test

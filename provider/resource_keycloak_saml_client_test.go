@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"regexp"
 	"strings"
 	"testing"
@@ -151,13 +152,13 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 		MasterSamlProcessingUrl: acctest.RandString(20),
 
 		Attributes: &keycloak.SamlClientAttributes{
-			IncludeAuthnStatement:           keycloak.KeycloakBoolQuoted(randomBool()),
-			SignDocuments:                   keycloak.KeycloakBoolQuoted(randomBool()),
-			SignAssertions:                  keycloak.KeycloakBoolQuoted(randomBool()),
-			EncryptAssertions:               keycloak.KeycloakBoolQuoted(randomBool()),
+			IncludeAuthnStatement:           types.KeycloakBoolQuoted(randomBool()),
+			SignDocuments:                   types.KeycloakBoolQuoted(randomBool()),
+			SignAssertions:                  types.KeycloakBoolQuoted(randomBool()),
+			EncryptAssertions:               types.KeycloakBoolQuoted(randomBool()),
 			ClientSignatureRequired:         true,
-			ForcePostBinding:                keycloak.KeycloakBoolQuoted(randomBool()),
-			ForceNameIdFormat:               keycloak.KeycloakBoolQuoted(randomBool()),
+			ForcePostBinding:                types.KeycloakBoolQuoted(randomBool()),
+			ForceNameIdFormat:               types.KeycloakBoolQuoted(randomBool()),
 			SignatureAlgorithm:              randomStringInSlice(keycloakSamlClientSignatureAlgorithms),
 			SignatureKeyName:                randomStringInSlice(keycloakSamlClientSignatureKeyNames),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),
@@ -192,13 +193,13 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 		MasterSamlProcessingUrl: acctest.RandString(20),
 
 		Attributes: &keycloak.SamlClientAttributes{
-			IncludeAuthnStatement:           keycloak.KeycloakBoolQuoted(randomBool()),
-			SignDocuments:                   keycloak.KeycloakBoolQuoted(randomBool()),
-			SignAssertions:                  keycloak.KeycloakBoolQuoted(randomBool()),
-			EncryptAssertions:               keycloak.KeycloakBoolQuoted(randomBool()),
+			IncludeAuthnStatement:           types.KeycloakBoolQuoted(randomBool()),
+			SignDocuments:                   types.KeycloakBoolQuoted(randomBool()),
+			SignAssertions:                  types.KeycloakBoolQuoted(randomBool()),
+			EncryptAssertions:               types.KeycloakBoolQuoted(randomBool()),
 			ClientSignatureRequired:         true,
-			ForcePostBinding:                keycloak.KeycloakBoolQuoted(randomBool()),
-			ForceNameIdFormat:               keycloak.KeycloakBoolQuoted(randomBool()),
+			ForcePostBinding:                types.KeycloakBoolQuoted(randomBool()),
+			ForceNameIdFormat:               types.KeycloakBoolQuoted(randomBool()),
 			SignatureAlgorithm:              randomStringInSlice(keycloakSamlClientSignatureAlgorithms),
 			SignatureKeyName:                randomStringInSlice(keycloakSamlClientSignatureKeyNames),
 			NameIdFormat:                    randomStringInSlice(keycloakSamlClientNameIdFormats),

@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"regexp"
 	"strings"
 	"testing"
@@ -204,8 +205,9 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		RootUrl:                   &rootUrlBefore,
 		Attributes: keycloak.OpenidClientAttributes{
 			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
-			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(randomBool()),
-			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutSessionRequired:     types.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutRevokeOfflineTokens: types.KeycloakBoolQuoted(randomBool()),
+			PostLogoutRedirectUris:               []string{acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10)},
 		},
 	}
 
@@ -229,8 +231,9 @@ func TestAccKeycloakOpenidClient_updateInPlace(t *testing.T) {
 		RootUrl:                   &rootUrlAfter,
 		Attributes: keycloak.OpenidClientAttributes{
 			BackchannelLogoutUrl:                 "http://localhost:3333/backchannel",
-			BackchannelLogoutSessionRequired:     keycloak.KeycloakBoolQuoted(randomBool()),
-			BackchannelLogoutRevokeOfflineTokens: keycloak.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutSessionRequired:     types.KeycloakBoolQuoted(randomBool()),
+			BackchannelLogoutRevokeOfflineTokens: types.KeycloakBoolQuoted(randomBool()),
+			PostLogoutRedirectUris:               []string{acctest.RandString(10), acctest.RandString(10)},
 		},
 	}
 
@@ -904,7 +907,7 @@ func testAccCheckKeycloakOpenidClientOauth2Device(resourceName string,
 			return err
 		}
 
-		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != keycloak.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
+		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != types.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
 			return fmt.Errorf("expected openid client to have device authorizationen granted enabled set to %t, but got %v", oauth2DeviceAuthorizationGrantEnabled, client.Attributes.Oauth2DeviceAuthorizationGrantEnabled)
 		}
 
@@ -1068,7 +1071,7 @@ func testAccCheckKeycloakOpenidClientHasPkceCodeChallengeMethod(resourceName, pk
 	}
 }
 
-func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(resourceName string, excludeSessionStateFromAuthResponse keycloak.KeycloakBoolQuoted) resource.TestCheckFunc {
+func testAccCheckKeycloakOpenidClientHasExcludeSessionStateFromAuthResponse(resourceName string, excludeSessionStateFromAuthResponse types.KeycloakBoolQuoted) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getOpenidClientFromState(s, resourceName)
 		if err != nil {
@@ -1140,7 +1143,7 @@ func testAccCheckKeycloakOpenidClientUseRefreshTokens(resourceName string, useRe
 			return err
 		}
 
-		if client.Attributes.UseRefreshTokens != keycloak.KeycloakBoolQuoted(useRefreshTokens) {
+		if client.Attributes.UseRefreshTokens != types.KeycloakBoolQuoted(useRefreshTokens) {
 			return fmt.Errorf("expected openid client to have use refresh tokens set to %t, but got %v", useRefreshTokens, client.Attributes.UseRefreshTokens)
 		}
 
@@ -1155,7 +1158,7 @@ func testAccCheckKeycloakOpenidClientUseRefreshTokensClientCredentials(resourceN
 			return err
 		}
 
-		if client.Attributes.UseRefreshTokensClientCredentials != keycloak.KeycloakBoolQuoted(useRefreshTokensClientCredentials) {
+		if client.Attributes.UseRefreshTokensClientCredentials != types.KeycloakBoolQuoted(useRefreshTokensClientCredentials) {
 			return fmt.Errorf("expected openid client to have use refresh tokens client credentials set to %t, but got %v", useRefreshTokensClientCredentials, client.Attributes.UseRefreshTokensClientCredentials)
 		}
 
@@ -1170,7 +1173,7 @@ func testAccCheckKeycloakOpenidClientOauth2DeviceAuthorizationGrantEnabled(resou
 			return err
 		}
 
-		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != keycloak.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
+		if client.Attributes.Oauth2DeviceAuthorizationGrantEnabled != types.KeycloakBoolQuoted(oauth2DeviceAuthorizationGrantEnabled) {
 			return fmt.Errorf("expected openid client to have device authorization grant enabled set to %t, but got %v", oauth2DeviceAuthorizationGrantEnabled, client.Attributes.Oauth2DeviceAuthorizationGrantEnabled)
 		}
 
@@ -1466,17 +1469,18 @@ resource "keycloak_openid_client" "client" {
 	direct_access_grants_enabled = %t
 	service_accounts_enabled     = %t
 
-	valid_redirect_uris          = %s
-	web_origins                  = %s
-	admin_url					 = "%s"
-	base_url                     = "%s"
-	root_url                     = "%s"
+	valid_redirect_uris             = %s
+	valid_post_logout_redirect_uris = %s
+	web_origins                     = %s
+	admin_url					    = "%s"
+	base_url                        = "%s"
+	root_url                        = "%s"
 
 	backchannel_logout_url                     = "%s"
 	backchannel_logout_session_required        = %t
 	backchannel_logout_revoke_offline_sessions = %t
 }
-	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl, openidClient.Attributes.BackchannelLogoutUrl, openidClient.Attributes.BackchannelLogoutSessionRequired, openidClient.Attributes.BackchannelLogoutRevokeOfflineTokens)
+	`, testAccRealm.Realm, openidClient.ClientId, openidClient.Name, openidClient.Enabled, openidClient.Description, openidClient.ClientSecret, openidClient.StandardFlowEnabled, openidClient.ImplicitFlowEnabled, openidClient.DirectAccessGrantsEnabled, openidClient.ServiceAccountsEnabled, arrayOfStringsForTerraformResource(openidClient.ValidRedirectUris), arrayOfStringsForTerraformResource(openidClient.Attributes.PostLogoutRedirectUris), arrayOfStringsForTerraformResource(openidClient.WebOrigins), openidClient.AdminUrl, openidClient.BaseUrl, *openidClient.RootUrl, openidClient.Attributes.BackchannelLogoutUrl, openidClient.Attributes.BackchannelLogoutSessionRequired, openidClient.Attributes.BackchannelLogoutRevokeOfflineTokens)
 }
 
 func testKeycloakOpenidClient_backchannel(clientId, backchannelLogoutUrl string, backchannelLogoutSessionRequired, backchannelLogoutRevokeOfflineSessions bool) string {
