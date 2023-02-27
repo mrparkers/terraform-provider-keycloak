@@ -42,6 +42,17 @@ func (keycloakClient *KeycloakClient) NewIdentityProviderMapper(ctx context.Cont
 	return nil
 }
 
+func (keycloakClient *KeycloakClient) GetIdentityProviderMappers(ctx context.Context, realm, alias string) ([]*IdentityProviderMapper, error) {
+	var identityProviderMapper []*IdentityProviderMapper
+
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/identity-provider/instances/%s/mappers", realm, alias), &identityProviderMapper, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return identityProviderMapper, nil
+}
+
 func (keycloakClient *KeycloakClient) GetIdentityProviderMapper(ctx context.Context, realm, alias, id string) (*IdentityProviderMapper, error) {
 	var identityProviderMapper IdentityProviderMapper
 	identityProviderMapper.Realm = realm
