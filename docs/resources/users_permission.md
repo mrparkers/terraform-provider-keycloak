@@ -57,7 +57,7 @@ resource "keycloak_openid_client_user_policy" "test" {
   decision_strategy = "UNANIMOUS"
 
   depends_on = [
-    keycloak_openid_client_permissions.realm-management_permission,
+    keycloak_openid_client_permissions.realm_management_permission,
   ]
 }
 
