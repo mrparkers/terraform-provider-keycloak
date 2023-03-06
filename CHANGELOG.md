@@ -1,3 +1,26 @@
+## v4.2.0 (March 6, 2023)
+
+IMPROVEMENTS:
+
+- allow the `internal_id` attribute for the `keycloak_realm` resource to be set during apply instead of read-only ([#807](https://github.com/mrparkers/terraform-provider-keycloak/pull/807))
+- allow for multivalue attributes in `extra_config` attribute for `keycloak_custom_user_federation` resource ([#761](https://github.com/mrparkers/terraform-provider-keycloak/pull/761))
+
+BUG FIXES:
+
+- allow users with backslashes in their name to be assigned to groups via `keycloak_group_memberships` resource ([#778](https://github.com/mrparkers/terraform-provider-keycloak/pull/778))
+- correctly set `nameIDPolicyFormat` when updating value in `extra_config` in `keycloak_saml_identity_provider` resource ([#793](https://github.com/mrparkers/terraform-provider-keycloak/pull/793))
+- treat empty attributes as nil values when importing `keycloak_ldap_user_federation` resource ([#784](https://github.com/mrparkers/terraform-provider-keycloak/pull/784))
+- treat empty attributes as nil values when importing `keycloak_custom_user_federation` resource ([#809](https://github.com/mrparkers/terraform-provider-keycloak/pull/809))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@pablo-ruth](https://github.com/pablo-ruth)
+- [@Redestros](https://github.com/Redestros)
+- [@MatrixCrawler](https://github.com/MatrixCrawler)
+- [@imykolenko](https://github.com/imykolenko)
+- [@ChrisHubinger](https://github.com/ChrisHubinger)
+- [@chifu1234](https://github.com/chifu1234)
+
 ## v4.1.0 (December 4, 2022)
 
 IMPROVEMENTS:
