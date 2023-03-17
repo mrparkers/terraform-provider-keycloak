@@ -55,22 +55,22 @@ func convertFromLdapUserAttributeMapperToComponent(ldapUserAttributeMapper *Ldap
 }
 
 func convertFromComponentToLdapUserAttributeMapper(component *component, realmId string) (*LdapUserAttributeMapper, error) {
-	isMandatoryInLdap, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("is.mandatory.in.ldap"))
+	isMandatoryInLdap, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("is.mandatory.in.ldap"))
 	if err != nil {
 		return nil, err
 	}
 
-	readOnly, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("read.only"))
+	readOnly, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("read.only"))
 	if err != nil {
 		return nil, err
 	}
 
-	alwaysReadValueFromLdap, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("always.read.value.from.ldap"))
+	alwaysReadValueFromLdap, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("always.read.value.from.ldap"))
 	if err != nil {
 		return nil, err
 	}
 
-	isBinaryAttribute, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("is.binary.attribute"))
+	isBinaryAttribute, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("is.binary.attribute"))
 	if err != nil {
 		return nil, err
 	}
@@ -81,12 +81,12 @@ func convertFromComponentToLdapUserAttributeMapper(component *component, realmId
 		RealmId:              realmId,
 		LdapUserFederationId: component.ParentId,
 
-		LdapAttribute:           component.getConfig("ldap.attribute"),
+		LdapAttribute:           component.getConfigFirstOrDefault("ldap.attribute"),
 		IsMandatoryInLdap:       isMandatoryInLdap,
 		ReadOnly:                readOnly,
 		AlwaysReadValueFromLdap: alwaysReadValueFromLdap,
-		UserModelAttribute:      component.getConfig("user.model.attribute"),
-		AttributeDefaultValue:   component.getConfig("attribute.default.value"),
+		UserModelAttribute:      component.getConfigFirstOrDefault("user.model.attribute"),
+		AttributeDefaultValue:   component.getConfigFirstOrDefault("attribute.default.value"),
 		IsBinaryAttribute:       isBinaryAttribute,
 	}, nil
 }

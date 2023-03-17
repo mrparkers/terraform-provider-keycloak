@@ -56,21 +56,21 @@ func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *c
 }
 
 func convertFromComponentToCustomUserFederation(component *component, realmName string) (*CustomUserFederation, error) {
-	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("enabled"))
+	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("enabled"))
 	if err != nil {
 		return nil, err
 	}
 
-	priority, err := atoiAndTreatEmptyStringAsZero(component.getConfig("priority"))
+	priority, err := atoiAndTreatEmptyStringAsZero(component.getConfigFirstOrDefault("priority"))
 	if err != nil {
 		return nil, err
 	}
 
-	fullSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("fullSyncPeriod"))
+	fullSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfigFirstOrDefault("fullSyncPeriod"))
 	if err != nil {
 		return nil, err
 	}
-	changedSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("changedSyncPeriod"))
+	changedSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfigFirstOrDefault("changedSyncPeriod"))
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,12 @@ func convertFromComponentToCustomUserFederation(component *component, realmName 
 	config := make(map[string][]string)
 	for k := range component.Config {
 		if found := configsToIgnore[k]; !found {
-			config[k] = append(config[k], component.getConfig(k))
+			vals := make([]string, len(config[k]))
+
+			for i := range component.getConfig(k) {
+				vals = append(vals, component.getConfig(k)[i])
+			}
+			config[k] = vals
 		}
 	}
 
@@ -99,7 +104,7 @@ func convertFromComponentToCustomUserFederation(component *component, realmName 
 		Enabled:  enabled,
 		Priority: priority,
 
-		CachePolicy: component.getConfig("cachePolicy"),
+		CachePolicy: component.getConfigFirstOrDefault("cachePolicy"),
 
 		FullSyncPeriod:    fullSyncPeriod,
 		ChangedSyncPeriod: changedSyncPeriod,

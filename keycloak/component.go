@@ -16,7 +16,15 @@ type component struct {
 	Config       map[string][]string `json:"config"`
 }
 
-func (component *component) getConfig(val string) string {
+func (component *component) getConfig(val string) []string {
+	if len(component.Config[val]) == 0 {
+		return make([]string, 0)
+	}
+
+	return component.Config[val]
+}
+
+func (component *component) getConfigFirstOrDefault(val string) string {
 	if len(component.Config[val]) == 0 {
 		return ""
 	}
@@ -26,7 +34,11 @@ func (component *component) getConfig(val string) string {
 
 func (component *component) getConfigOk(val string) (string, bool) {
 	if v, ok := component.Config[val]; ok {
-		return v[0], true
+		if len(v) > 0 {
+			return v[0], true
+		} else {
+			return "", false
+		}
 	}
 
 	return "", false

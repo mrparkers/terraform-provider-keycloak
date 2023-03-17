@@ -51,27 +51,27 @@ func convertFromRealmKeystoreRsaGeneratedToComponent(realmKey *RealmKeystoreRsaG
 }
 
 func convertFromComponentToRealmKeystoreRsaGenerated(component *component, realmId string) (*RealmKeystoreRsaGenerated, error) {
-	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("active"))
+	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("active"))
 	if err != nil {
 		return nil, err
 	}
 
-	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("enabled"))
+	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("enabled"))
 	if err != nil {
 		return nil, err
 	}
 
 	priority := 0 // Default priority
-	if component.getConfig("priority") != "" {
-		priority, err = strconv.Atoi(component.getConfig("priority"))
+	if component.getConfigFirstOrDefault("priority") != "" {
+		priority, err = strconv.Atoi(component.getConfigFirstOrDefault("priority"))
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	keySize := 2048 // Default key size for rsa key
-	if component.getConfig("keySize") != "" {
-		keySize, err = strconv.Atoi(component.getConfig("keySize"))
+	if component.getConfigFirstOrDefault("keySize") != "" {
+		keySize, err = strconv.Atoi(component.getConfigFirstOrDefault("keySize"))
 		if err != nil {
 			return nil, err
 		}
@@ -85,10 +85,10 @@ func convertFromComponentToRealmKeystoreRsaGenerated(component *component, realm
 		Active:      active,
 		Enabled:     enabled,
 		Priority:    priority,
-		Algorithm:   component.getConfig("algorithm"),
+		Algorithm:   component.getConfigFirstOrDefault("algorithm"),
 		KeySize:     keySize,
-		PrivateKey:  component.getConfig("privateKey"),
-		Certificate: component.getConfig("certificate"),
+		PrivateKey:  component.getConfigFirstOrDefault("privateKey"),
+		Certificate: component.getConfigFirstOrDefault("certificate"),
 	}
 
 	return realmKey, nil

@@ -44,19 +44,19 @@ func convertFromRealmKeystoreEcdsaGeneratedToComponent(realmKey *RealmKeystoreEc
 }
 
 func convertFromComponentToRealmKeystoreEcdsaGenerated(component *component, realmId string) (*RealmKeystoreEcdsaGenerated, error) {
-	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("active"))
+	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("active"))
 	if err != nil {
 		return nil, err
 	}
 
-	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("enabled"))
+	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("enabled"))
 	if err != nil {
 		return nil, err
 	}
 
 	priority := 0 // Default priority
-	if component.getConfig("priority") != "" {
-		priority, err = strconv.Atoi(component.getConfig("priority"))
+	if component.getConfigFirstOrDefault("priority") != "" {
+		priority, err = strconv.Atoi(component.getConfigFirstOrDefault("priority"))
 		if err != nil {
 			return nil, err
 		}
@@ -70,7 +70,7 @@ func convertFromComponentToRealmKeystoreEcdsaGenerated(component *component, rea
 		Active:        active,
 		Enabled:       enabled,
 		Priority:      priority,
-		EllipticCurve: component.getConfig("ecdsaEllipticCurveKey"),
+		EllipticCurve: component.getConfigFirstOrDefault("ecdsaEllipticCurveKey"),
 	}
 
 	return realmKey, nil

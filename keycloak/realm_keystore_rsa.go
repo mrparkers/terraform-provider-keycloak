@@ -53,19 +53,19 @@ func convertFromRealmKeystoreRsaToComponent(realmKey *RealmKeystoreRsa) *compone
 }
 
 func convertFromComponentToRealmKeystoreRsa(component *component, realmId string) (*RealmKeystoreRsa, error) {
-	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("active"))
+	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("active"))
 	if err != nil {
 		return nil, err
 	}
 
-	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("enabled"))
+	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("enabled"))
 	if err != nil {
 		return nil, err
 	}
 
 	priority := 0 // Default priority
-	if component.getConfig("priority") != "" {
-		priority, err = strconv.Atoi(component.getConfig("priority"))
+	if component.getConfigFirstOrDefault("priority") != "" {
+		priority, err = strconv.Atoi(component.getConfigFirstOrDefault("priority"))
 		if err != nil {
 			return nil, err
 		}
@@ -79,9 +79,9 @@ func convertFromComponentToRealmKeystoreRsa(component *component, realmId string
 		Active:      active,
 		Enabled:     enabled,
 		Priority:    priority,
-		Algorithm:   component.getConfig("algorithm"),
-		PrivateKey:  component.getConfig("privateKey"),
-		Certificate: component.getConfig("certificate"),
+		Algorithm:   component.getConfigFirstOrDefault("algorithm"),
+		PrivateKey:  component.getConfigFirstOrDefault("privateKey"),
+		Certificate: component.getConfigFirstOrDefault("certificate"),
 	}
 
 	return realmKey, nil

@@ -44,27 +44,27 @@ func convertFromRealmKeystoreAesGeneratedToComponent(realmKey *RealmKeystoreAesG
 }
 
 func convertFromComponentToRealmKeystoreAesGenerated(component *component, realmId string) (*RealmKeystoreAesGenerated, error) {
-	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("active"))
+	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("active"))
 	if err != nil {
 		return nil, err
 	}
 
-	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("enabled"))
+	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("enabled"))
 	if err != nil {
 		return nil, err
 	}
 
 	priority := 0 // Default priority
-	if component.getConfig("priority") != "" {
-		priority, err = strconv.Atoi(component.getConfig("priority"))
+	if component.getConfigFirstOrDefault("priority") != "" {
+		priority, err = strconv.Atoi(component.getConfigFirstOrDefault("priority"))
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	secretSize := 16 // Default key size for aes key
-	if component.getConfig("secretSize") != "" {
-		secretSize, err = strconv.Atoi(component.getConfig("secretSize"))
+	if component.getConfigFirstOrDefault("secretSize") != "" {
+		secretSize, err = strconv.Atoi(component.getConfigFirstOrDefault("secretSize"))
 		if err != nil {
 			return nil, err
 		}

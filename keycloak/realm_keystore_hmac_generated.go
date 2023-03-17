@@ -48,27 +48,27 @@ func convertFromRealmKeystoreHmacGeneratedToComponent(realmKey *RealmKeystoreHma
 }
 
 func convertFromComponentToRealmKeystoreHmacGenerated(component *component, realmId string) (*RealmKeystoreHmacGenerated, error) {
-	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("active"))
+	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("active"))
 	if err != nil {
 		return nil, err
 	}
 
-	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("enabled"))
+	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("enabled"))
 	if err != nil {
 		return nil, err
 	}
 
 	priority := 0 // Default priority
-	if component.getConfig("priority") != "" {
-		priority, err = strconv.Atoi(component.getConfig("priority"))
+	if component.getConfigFirstOrDefault("priority") != "" {
+		priority, err = strconv.Atoi(component.getConfigFirstOrDefault("priority"))
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	secretSize := 64 // Default key size for hmac key
-	if component.getConfig("secretSize") != "" {
-		secretSize, err = strconv.Atoi(component.getConfig("secretSize"))
+	if component.getConfigFirstOrDefault("secretSize") != "" {
+		secretSize, err = strconv.Atoi(component.getConfigFirstOrDefault("secretSize"))
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +82,7 @@ func convertFromComponentToRealmKeystoreHmacGenerated(component *component, real
 		Active:     active,
 		Enabled:    enabled,
 		Priority:   priority,
-		Algorithm:  component.getConfig("algorithm"),
+		Algorithm:  component.getConfigFirstOrDefault("algorithm"),
 		SecretSize: secretSize,
 	}
 
