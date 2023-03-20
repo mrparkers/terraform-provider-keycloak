@@ -3,6 +3,7 @@ package keycloak
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strconv"
 )
 
@@ -32,8 +33,18 @@ func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *c
 	componentConfig := make(map[string][]string)
 
 	if custom.Config != nil {
-		for k, j := range custom.Config {
-			componentConfig[k] = append(componentConfig[k], j[0])
+		for key, configValuesArray := range custom.Config {
+			configValues := make([]string, 0)
+			for i := range configValuesArray {
+				if configValuesArray[i] != "" {
+					configValues = append(configValues, configValuesArray[i])
+				}
+			}
+
+			// Keep Values sorted on our own Keycloak API
+			// does not preserve order on it's own
+			sort.Strings(configValues)
+			componentConfig[key] = configValues
 		}
 	}
 	componentConfig["cachePolicy"] = append(componentConfig["cachePolicy"], custom.CachePolicy)
@@ -83,14 +94,18 @@ func convertFromComponentToCustomUserFederation(component *component, realmName 
 		"changedSyncPeriod": true,
 	}
 	config := make(map[string][]string)
-	for k := range component.Config {
-		if found := configsToIgnore[k]; !found {
-			vals := make([]string, len(config[k]))
+	for key := range component.Config {
+		if found := configsToIgnore[key]; !found {
+			configValues := make([]string, 0)
 
-			for i := range component.getConfig(k) {
-				vals = append(vals, component.getConfig(k)[i])
+			for i := range component.getConfig(key) {
+				configValues = append(configValues, component.getConfig(key)[i])
 			}
-			config[k] = vals
+
+			// Keep Values sorted on our own Keycloak API
+			// does not preserve order on it's own
+			sort.Strings(configValues)
+			config[key] = configValues
 		}
 	}
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -96,7 +97,11 @@ func getCustomUserFederationFromData(data *schema.ResourceData, realmInternalId 
 	config := map[string][]string{}
 	if v, ok := data.GetOk("config"); ok {
 		for key, value := range v.(map[string]interface{}) {
-			config[key] = strings.Split(value.(string), MULTIVALUE_ATTRIBUTE_SEPARATOR)
+			// Keep Values sorted as Keycloak API
+			// does not preserve order on it's own
+			sortedValues := strings.Split(value.(string), MULTIVALUE_ATTRIBUTE_SEPARATOR)
+			sort.Strings(sortedValues)
+			config[key] = sortedValues
 		}
 	}
 
@@ -145,8 +150,8 @@ func setCustomUserFederationData(data *schema.ResourceData, custom *keycloak.Cus
 	data.Set("cache_policy", custom.CachePolicy)
 
 	config := map[string]string{}
-	for k, v := range custom.Config {
-		config[k] = strings.Join(v, MULTIVALUE_ATTRIBUTE_SEPARATOR)
+	for key, values := range custom.Config {
+		config[key] = strings.Join(values, MULTIVALUE_ATTRIBUTE_SEPARATOR)
 	}
 
 	data.Set("config", config)
