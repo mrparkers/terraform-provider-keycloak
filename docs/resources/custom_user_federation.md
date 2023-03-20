@@ -27,9 +27,14 @@ resource "keycloak_custom_user_federation" "custom_user_federation" {
   config = {
     dummyString = "foobar"
     dummyBool   = true
+
+    // make sure values are naturally sorted 
+    multivalue = "value1##value2" 
   }
 }
 ```
+
+**Note**: The Keycloak API does not persist order of values in a multivalue setting. To no-op reconfigurations make sure to manually sort the values in natural order. 
 
 ## Argument Reference
 
