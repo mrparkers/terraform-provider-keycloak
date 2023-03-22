@@ -9,8 +9,6 @@ on:
 
 jobs:
   build:
-    needs:
-      - verify
     runs-on: ubuntu-latest
     strategy:
       matrix:
