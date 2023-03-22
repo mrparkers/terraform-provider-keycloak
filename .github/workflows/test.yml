@@ -70,7 +70,7 @@ jobs:
       keycloak:
         # we have to use a custom docker image for these tests, since it's not possible to provide command-line args
         # to a service container.  see https://github.com/actions/runner/issues/2139
-        image: mrparkers/keycloak-dev:${{ matrix.keycloak-version }}
+        image: quay.io/keycloak/keycloak:${{ matrix.keycloak-version }}
         ports:
           - 8080:8080
         env:
