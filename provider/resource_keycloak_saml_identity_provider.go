@@ -128,6 +128,11 @@ func resourceKeycloakSamlIdentityProvider() *schema.Resource {
 			Optional:    true,
 			Description: "Require Force Authn.",
 		},
+		"login_hint": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Login Hint.",
+		},
 		"want_assertions_signed": {
 			Type:        schema.TypeBool,
 			Optional:    true,
@@ -209,6 +214,7 @@ func getSamlIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 		ForceAuthn:                      types.KeycloakBoolQuoted(data.Get("force_authn").(bool)),
 		WantAssertionsSigned:            types.KeycloakBoolQuoted(data.Get("want_assertions_signed").(bool)),
 		WantAssertionsEncrypted:         types.KeycloakBoolQuoted(data.Get("want_assertions_encrypted").(bool)),
+		LoginHint:                       data.Get("login_hint").(string),
 		PrincipalType:                   data.Get("principal_type").(string),
 		PrincipalAttribute:              data.Get("principal_attribute").(string),
 		AuthnContextClassRefs:           authnContextClassRefs,
@@ -256,6 +262,7 @@ func setSamlIdentityProviderData(data *schema.ResourceData, identityProvider *ke
 	data.Set("force_authn", identityProvider.Config.ForceAuthn)
 	data.Set("want_assertions_signed", identityProvider.Config.WantAssertionsSigned)
 	data.Set("want_assertions_encrypted", identityProvider.Config.WantAssertionsEncrypted)
+	data.Set("login_hint", identityProvider.Config.LoginHint)
 	data.Set("principal_type", identityProvider.Config.PrincipalType)
 	data.Set("principal_attribute", identityProvider.Config.PrincipalAttribute)
 	data.Set("authn_context_class_refs", identityProvider.Config.AuthnContextClassRefs)
