@@ -79,6 +79,7 @@ jobs:
           KC_LOG_LEVEL: INFO
           KEYCLOAK_ADMIN: keycloak
           KEYCLOAK_ADMIN_PASSWORD: password
+        options: --health-cmd "curl --silent --head --fail --max-time 2 http://localhost:8080/" --health-interval 10s --health-timeout 5s --health-retries 15
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -96,7 +97,7 @@ jobs:
           terraform_version: 1.2.9
 
       - name: Initialize Keycloak
-        run: ./scripts/wait-for-local-keycloak.sh && ./scripts/create-terraform-client.sh
+        run: ./scripts/create-terraform-client.sh
 
       - name: Get Keycloak Version
         uses: actions/github-script@v6
