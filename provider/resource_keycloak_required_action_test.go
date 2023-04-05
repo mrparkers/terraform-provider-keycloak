@@ -2,11 +2,12 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"regexp"
-	"testing"
 )
 
 func TestAccKeycloakRequiredAction_basic(t *testing.T) {
@@ -59,7 +60,7 @@ func TestAccKeycloakRequiredAction_invalidAlias(t *testing.T) {
 
 func TestAccKeycloakRequiredAction_import(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
-	requiredActionAlias := "terms_and_conditions"
+	requiredActionAlias := "VERIFY_EMAIL"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -81,7 +82,7 @@ func TestAccKeycloakRequiredAction_import(t *testing.T) {
 
 func TestAccKeycloakRequiredAction_disabledDefault(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
-	requiredActionAlias := "terms_and_conditions"
+	requiredActionAlias := "VERIFY_EMAIL"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -96,7 +97,7 @@ func TestAccKeycloakRequiredAction_disabledDefault(t *testing.T) {
 }
 func TestAccKeycloakRequiredAction_computedPriority(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
-	requiredActionAlias := "terms_and_conditions"
+	requiredActionAlias := "VERIFY_EMAIL"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
