@@ -97,7 +97,7 @@ func TestAccKeycloakRequiredAction_disabledDefault(t *testing.T) {
 }
 func TestAccKeycloakRequiredAction_computedPriority(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
-	requiredActionAlias := "VERIFY_EMAIL"
+	requiredActionAlias := "UPDATE_PROFILE"
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -165,17 +165,17 @@ resource "keycloak_realm" "realm" {
 }
 
 resource "keycloak_required_action" "required_action" {
-	realm_id		= "${keycloak_realm.realm.realm}"
+	realm_id		= keycloak_realm.realm.id
 	alias			= "VERIFY_EMAIL"
 	name			= "My required Action"
 	priority		= %d
 }
 
 resource "keycloak_required_action" "required_action2" {
-	realm_id		= "${keycloak_realm.realm.realm}"
+	realm_id		= keycloak_realm.realm.id
 	alias			= "%s"
 	name			= "My required Action 2"
-	priority		= "${keycloak_required_action.required_action.priority+%d}"
+	priority		= keycloak_required_action.required_action.priority+%d
 }
 	`, realm, priority1, requiredActionAlias, priorityPlus)
 }
