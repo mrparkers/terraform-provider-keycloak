@@ -22,7 +22,6 @@ var (
 	keycloakOpenidClientAuthorizationPolicyEnforcementMode   = []string{"ENFORCING", "PERMISSIVE", "DISABLED"}
 	keycloakOpenidClientResourcePermissionDecisionStrategies = []string{"UNANIMOUS", "AFFIRMATIVE", "CONSENSUS"}
 	keycloakOpenidClientPkceCodeChallengeMethod              = []string{"", "plain", "S256"}
-	keycloakOpenidClientAuthenticatorTypes                   = []string{"client-secret", "client-jwt", "client-x509", "client-secret-jwt"}
 )
 
 func resourceKeycloakOpenidClient() *schema.Resource {
@@ -72,10 +71,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Sensitive: true,
 			},
 			"client_authenticator_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice(keycloakOpenidClientAuthenticatorTypes, false),
-				Default:      "client-secret",
+				Type:     schema.TypeString,
+				Optional: true,
+				// No validation is performed since Keycloak plugins can register custom client authenticators
+				Default: "client-secret",
 			},
 			"standard_flow_enabled": {
 				Type:     schema.TypeBool,
