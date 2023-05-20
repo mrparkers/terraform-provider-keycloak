@@ -231,7 +231,7 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		return nil, err
 	}
 
-	priority, err := strconv.Atoi(component.getConfig("priority"))
+	priority, err := atoiAndTreatEmptyStringAsZero(component.getConfig("priority"))
 	if err != nil {
 		return nil, err
 	}
@@ -273,17 +273,17 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		return nil, err
 	}
 
-	batchSizeForSync, err := strconv.Atoi(component.getConfig("batchSizeForSync"))
+	batchSizeForSync, err := atoiAndTreatEmptyStringAsZero(component.getConfig("batchSizeForSync"))
 	if err != nil {
 		return nil, err
 	}
 
-	fullSyncPeriod, err := strconv.Atoi(component.getConfig("fullSyncPeriod"))
+	fullSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("fullSyncPeriod"))
 	if err != nil {
 		return nil, err
 	}
 
-	changedSyncPeriod, err := strconv.Atoi(component.getConfig("changedSyncPeriod"))
+	changedSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("changedSyncPeriod"))
 	if err != nil {
 		return nil, err
 	}
@@ -396,7 +396,7 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 	defaultEvictioValue := -1
 
 	if evictionDay, ok := component.getConfigOk("evictionDay"); ok {
-		evictionDayInt, err := strconv.Atoi(evictionDay)
+		evictionDayInt, err := atoiAndTreatEmptyStringAsZero(evictionDay)
 		if err != nil {
 			return nil, fmt.Errorf("unable to parse `evictionDay`: %w", err)
 		}
@@ -407,7 +407,7 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 	}
 
 	if evictionHour, ok := component.getConfigOk("evictionHour"); ok {
-		evictionHourInt, err := strconv.Atoi(evictionHour)
+		evictionHourInt, err := atoiAndTreatEmptyStringAsZero(evictionHour)
 		if err != nil {
 			return nil, fmt.Errorf("unable to parse `evictionHour`: %w", err)
 		}
@@ -417,7 +417,7 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		ldap.EvictionHour = &defaultEvictioValue
 	}
 	if evictionMinute, ok := component.getConfigOk("evictionMinute"); ok {
-		evictionMinuteInt, err := strconv.Atoi(evictionMinute)
+		evictionMinuteInt, err := atoiAndTreatEmptyStringAsZero(evictionMinute)
 		if err != nil {
 			return nil, fmt.Errorf("unable to parse `evictionMinute`: %w", err)
 		}

@@ -754,6 +754,34 @@ func TestAccKeycloakRealm_passwordPolicyInvalid(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakRealm_createWithInternalId(t *testing.T) {
+	realmName := "my-realm"
+	internalId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealm_basicInternalId(realmName, internalId),
+				Check: func(state *terraform.State) error {
+					realmWithInternalId, err := keycloakClient.GetRealm(testCtx, realmName)
+					if err != nil {
+						return err
+					}
+
+					if realmWithInternalId.Id != internalId {
+						return fmt.Errorf("expected realm with internal id %s but got %s", internalId, realmWithInternalId.Id)
+					}
+
+					return nil
+				},
+			},
+		},
+	})
+}
+
 func TestAccKeycloakRealm_internalId(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
 	internalId := acctest.RandomWithPrefix("tf-acc")
@@ -1705,4 +1733,15 @@ resource "keycloak_realm" "realm" {
 	}
 }
 	`, realm, realmDisplayName, realmDisplayNameHtml, rpName, rpId, arrayOfStringsForTerraformResource(signatureAlgorithms), attestationConveyancePreference, authenticatorAttachment, avoidSameAuthenticatorRegister, requireResidentKey, userVerificationRequirement)
+}
+
+func testKeycloakRealm_basicInternalId(realm, internalId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm        		= "%s"
+	enabled     	 	= true
+
+	internal_id = "%s"
+}
+	`, realm, internalId)
 }
