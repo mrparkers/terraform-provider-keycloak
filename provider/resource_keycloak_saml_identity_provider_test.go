@@ -157,6 +157,7 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 	firstPostBindingLogout := randomBool()
 	firstPostBindingResponse := randomBool()
 	firstPostBindingRequest := randomBool()
+	firstLoginHint := randomBool()
 
 	firstSaml := &keycloak.IdentityProvider{
 		Alias:   acctest.RandString(10),
@@ -178,6 +179,7 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			ForceAuthn:                      types.KeycloakBoolQuoted(firstForceAuthn),
 			WantAssertionsSigned:            types.KeycloakBoolQuoted(firstAssertionsSigned),
 			WantAssertionsEncrypted:         types.KeycloakBoolQuoted(firstAssertionsEncrypted),
+			LoginHint:                       strconv.Quote(strconv.FormatBool(firstLoginHint)),
 			GuiOrder:                        strconv.Itoa(acctest.RandIntRange(1, 3)),
 			SyncMode:                        randomStringInSlice(syncModes),
 			AuthnContextClassRefs:           types.KeycloakSliceQuoted{"foo", "bar"},
@@ -206,6 +208,7 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 			ForceAuthn:                      types.KeycloakBoolQuoted(!firstForceAuthn),
 			WantAssertionsSigned:            types.KeycloakBoolQuoted(!firstAssertionsSigned),
 			WantAssertionsEncrypted:         types.KeycloakBoolQuoted(!firstAssertionsEncrypted),
+			LoginHint:                       strconv.Quote(strconv.FormatBool(!firstLoginHint)),
 			GuiOrder:                        strconv.Itoa(acctest.RandIntRange(1, 3)),
 			SyncMode:                        randomStringInSlice(syncModes),
 			AuthnContextClassRefs:           types.KeycloakSliceQuoted{"foo", "hello"},
