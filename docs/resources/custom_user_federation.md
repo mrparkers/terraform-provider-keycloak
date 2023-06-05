@@ -27,10 +27,14 @@ resource "keycloak_custom_user_federation" "custom_user_federation" {
   config = {
     dummyString = "foobar"
     dummyBool   = true
-    multivalue = "value1##value2"
+
+    // make sure values are naturally sorted 
+    multivalue = "value1##value2" 
   }
 }
 ```
+
+**Note**: The Keycloak API does not persist order of values in a multivalue setting. To no-op reconfigurations make sure to manually sort the values in natural order. 
 
 ## Argument Reference
 
@@ -43,7 +47,7 @@ resource "keycloak_custom_user_federation" "custom_user_federation" {
 - `parent_id` - (Optional) Must be set to the realms' `internal_id`  when it differs from the realm. This can happen when existing resources are imported into the state.
 - `full_sync_period` - (Optional) How frequently Keycloak should sync all users, in seconds. Omit this property to disable periodic full sync.
 - `changed_sync_period` - (Optional) How frequently Keycloak should sync changed users, in seconds. Omit this property to disable periodic changed users sync.
-- `config` - (Optional) The provider configuration handed over to your custom user federation provider. In order to add multivalue settings, use `##` to seperate the values.
+- `config` - (Optional) The provider configuration handed over to your custom user federation provider. 
 
 ## Import
 

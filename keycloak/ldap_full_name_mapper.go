@@ -39,12 +39,12 @@ func convertFromLdapFullNameMapperToComponent(ldapFullNameMapper *LdapFullNameMa
 }
 
 func convertFromComponentToLdapFullNameMapper(component *component, realmId string) (*LdapFullNameMapper, error) {
-	readOnly, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("read.only"))
+	readOnly, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("read.only"))
 	if err != nil {
 		return nil, err
 	}
 
-	writeOnly, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("write.only"))
+	writeOnly, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("write.only"))
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func convertFromComponentToLdapFullNameMapper(component *component, realmId stri
 		RealmId:              realmId,
 		LdapUserFederationId: component.ParentId,
 
-		LdapFullNameAttribute: component.getConfig("ldap.full.name.attribute"),
+		LdapFullNameAttribute: component.getConfigFirstOrDefault("ldap.full.name.attribute"),
 		ReadOnly:              readOnly,
 		WriteOnly:             writeOnly,
 	}, nil

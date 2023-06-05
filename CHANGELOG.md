@@ -1,3 +1,8 @@
+## v4.2.1 
+
+FIX:
+-  v4.2.0 multivalue attributes in `extra_config` attribute for `keycloak_custom_user_federation` was not working
+
 ## v4.2.0 (March 6, 2023)
 
 IMPROVEMENTS:

@@ -61,19 +61,19 @@ func convertFromRealmKeystoreJavaKeystoreToComponent(realmKey *RealmKeystoreJava
 }
 
 func convertFromComponentToRealmKeystoreJavaKeystore(component *component, realmId string) (*RealmKeystoreJavaKeystore, error) {
-	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("active"))
+	active, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("active"))
 	if err != nil {
 		return nil, err
 	}
 
-	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("enabled"))
+	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("enabled"))
 	if err != nil {
 		return nil, err
 	}
 
 	priority := 0 // Default priority
-	if component.getConfig("priority") != "" {
-		priority, err = strconv.Atoi(component.getConfig("priority"))
+	if component.getConfigFirstOrDefault("priority") != "" {
+		priority, err = strconv.Atoi(component.getConfigFirstOrDefault("priority"))
 		if err != nil {
 			return nil, err
 		}
@@ -87,11 +87,11 @@ func convertFromComponentToRealmKeystoreJavaKeystore(component *component, realm
 		Active:           active,
 		Enabled:          enabled,
 		Priority:         priority,
-		Algorithm:        component.getConfig("algorithm"),
-		Keystore:         component.getConfig("keystore"),
-		KeystorePassword: component.getConfig("keystorePassword"),
-		KeyAlias:         component.getConfig("keyAlias"),
-		KeyPassword:      component.getConfig("keyPassword"),
+		Algorithm:        component.getConfigFirstOrDefault("algorithm"),
+		Keystore:         component.getConfigFirstOrDefault("keystore"),
+		KeystorePassword: component.getConfigFirstOrDefault("keystorePassword"),
+		KeyAlias:         component.getConfigFirstOrDefault("keyAlias"),
+		KeyPassword:      component.getConfigFirstOrDefault("keyPassword"),
 	}
 
 	return realmKey, nil

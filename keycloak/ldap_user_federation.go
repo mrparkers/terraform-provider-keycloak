@@ -226,74 +226,74 @@ func convertFromLdapUserFederationToComponent(ldap *LdapUserFederation) (*compon
 }
 
 func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFederation, error) {
-	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("enabled"))
+	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("enabled"))
 	if err != nil {
 		return nil, err
 	}
 
-	priority, err := atoiAndTreatEmptyStringAsZero(component.getConfig("priority"))
+	priority, err := atoiAndTreatEmptyStringAsZero(component.getConfigFirstOrDefault("priority"))
 	if err != nil {
 		return nil, err
 	}
 
-	importEnabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("importEnabled"))
+	importEnabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("importEnabled"))
 	if err != nil {
 		return nil, err
 	}
 
-	syncRegistrations, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("syncRegistrations"))
+	syncRegistrations, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("syncRegistrations"))
 	if err != nil {
 		return nil, err
 	}
 
-	userObjectClasses := strings.Split(component.getConfig("userObjectClasses"), ", ")
+	userObjectClasses := strings.Split(component.getConfigFirstOrDefault("userObjectClasses"), ", ")
 
-	startTls, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("startTls"))
+	startTls, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("startTls"))
 	if err != nil {
 		return nil, err
 	}
 
-	usePasswordModifyExtendedOp, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("usePasswordModifyExtendedOp"))
+	usePasswordModifyExtendedOp, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("usePasswordModifyExtendedOp"))
 	if err != nil {
 		return nil, err
 	}
 
-	validatePasswordPolicy, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("validatePasswordPolicy"))
+	validatePasswordPolicy, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("validatePasswordPolicy"))
 	if err != nil {
 		return nil, err
 	}
 
-	trustEmail, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("trustEmail"))
+	trustEmail, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("trustEmail"))
 	if err != nil {
 		return nil, err
 	}
 
-	pagination, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("pagination"))
+	pagination, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("pagination"))
 	if err != nil {
 		return nil, err
 	}
 
-	batchSizeForSync, err := atoiAndTreatEmptyStringAsZero(component.getConfig("batchSizeForSync"))
+	batchSizeForSync, err := atoiAndTreatEmptyStringAsZero(component.getConfigFirstOrDefault("batchSizeForSync"))
 	if err != nil {
 		return nil, err
 	}
 
-	fullSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("fullSyncPeriod"))
+	fullSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfigFirstOrDefault("fullSyncPeriod"))
 	if err != nil {
 		return nil, err
 	}
 
-	changedSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("changedSyncPeriod"))
+	changedSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfigFirstOrDefault("changedSyncPeriod"))
 	if err != nil {
 		return nil, err
 	}
 
-	useKerberosForPasswordAuthentication, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("useKerberosForPasswordAuthentication"))
+	useKerberosForPasswordAuthentication, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("useKerberosForPasswordAuthentication"))
 	if err != nil {
 		return nil, err
 	}
 
-	allowKerberosAuthentication, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("allowKerberosAuthentication"))
+	allowKerberosAuthentication, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("allowKerberosAuthentication"))
 	if err != nil {
 		return nil, err
 	}
@@ -307,60 +307,60 @@ func convertFromComponentToLdapUserFederation(component *component) (*LdapUserFe
 		Priority: priority,
 
 		ImportEnabled:     importEnabled,
-		EditMode:          component.getConfig("editMode"),
+		EditMode:          component.getConfigFirstOrDefault("editMode"),
 		SyncRegistrations: syncRegistrations,
 
-		Vendor:                 strings.ToUpper(component.getConfig("vendor")),
-		UsernameLDAPAttribute:  component.getConfig("usernameLDAPAttribute"),
-		RdnLDAPAttribute:       component.getConfig("rdnLDAPAttribute"),
-		UuidLDAPAttribute:      component.getConfig("uuidLDAPAttribute"),
+		Vendor:                 strings.ToUpper(component.getConfigFirstOrDefault("vendor")),
+		UsernameLDAPAttribute:  component.getConfigFirstOrDefault("usernameLDAPAttribute"),
+		RdnLDAPAttribute:       component.getConfigFirstOrDefault("rdnLDAPAttribute"),
+		UuidLDAPAttribute:      component.getConfigFirstOrDefault("uuidLDAPAttribute"),
 		UserObjectClasses:      userObjectClasses,
-		ConnectionUrl:          component.getConfig("connectionUrl"),
-		UsersDn:                component.getConfig("usersDn"),
-		BindDn:                 component.getConfig("bindDn"),
-		BindCredential:         component.getConfig("bindCredential"),
-		CustomUserSearchFilter: component.getConfig("customUserSearchFilter"),
-		SearchScope:            component.getConfig("searchScope"),
+		ConnectionUrl:          component.getConfigFirstOrDefault("connectionUrl"),
+		UsersDn:                component.getConfigFirstOrDefault("usersDn"),
+		BindDn:                 component.getConfigFirstOrDefault("bindDn"),
+		BindCredential:         component.getConfigFirstOrDefault("bindCredential"),
+		CustomUserSearchFilter: component.getConfigFirstOrDefault("customUserSearchFilter"),
+		SearchScope:            component.getConfigFirstOrDefault("searchScope"),
 
 		StartTls:                    startTls,
 		UsePasswordModifyExtendedOp: usePasswordModifyExtendedOp,
 		ValidatePasswordPolicy:      validatePasswordPolicy,
 		TrustEmail:                  trustEmail,
-		UseTruststoreSpi:            component.getConfig("useTruststoreSpi"),
+		UseTruststoreSpi:            component.getConfigFirstOrDefault("useTruststoreSpi"),
 		Pagination:                  pagination,
 
-		ServerPrincipal:                      component.getConfig("serverPrincipal"),
+		ServerPrincipal:                      component.getConfigFirstOrDefault("serverPrincipal"),
 		UseKerberosForPasswordAuthentication: useKerberosForPasswordAuthentication,
 		AllowKerberosAuthentication:          allowKerberosAuthentication,
-		KeyTab:                               component.getConfig("keyTab"),
-		KerberosRealm:                        component.getConfig("kerberosRealm"),
+		KeyTab:                               component.getConfigFirstOrDefault("keyTab"),
+		KerberosRealm:                        component.getConfigFirstOrDefault("kerberosRealm"),
 
 		BatchSizeForSync:  batchSizeForSync,
 		FullSyncPeriod:    fullSyncPeriod,
 		ChangedSyncPeriod: changedSyncPeriod,
 
-		CachePolicy: component.getConfig("cachePolicy"),
+		CachePolicy: component.getConfigFirstOrDefault("cachePolicy"),
 	}
 
-	if bindDn := component.getConfig("bindDn"); bindDn != "" {
+	if bindDn := component.getConfigFirstOrDefault("bindDn"); bindDn != "" {
 		ldap.BindDn = bindDn
 	}
 
-	if bindCredential := component.getConfig("bindCredential"); bindCredential != "" {
+	if bindCredential := component.getConfigFirstOrDefault("bindCredential"); bindCredential != "" {
 		ldap.BindCredential = bindCredential
 	}
 
-	if customUserSearchFilter := component.getConfig("customUserSearchFilter"); customUserSearchFilter != "" {
+	if customUserSearchFilter := component.getConfigFirstOrDefault("customUserSearchFilter"); customUserSearchFilter != "" {
 		ldap.CustomUserSearchFilter = customUserSearchFilter
 	}
 
-	if component.getConfig("searchScope") == "1" {
+	if component.getConfigFirstOrDefault("searchScope") == "1" {
 		ldap.SearchScope = "ONE_LEVEL"
 	} else {
 		ldap.SearchScope = "SUBTREE"
 	}
 
-	if useTruststoreSpi := component.getConfig("useTruststoreSpi"); useTruststoreSpi == "ldapsOnly" {
+	if useTruststoreSpi := component.getConfigFirstOrDefault("useTruststoreSpi"); useTruststoreSpi == "ldapsOnly" {
 		ldap.UseTruststoreSpi = "ONLY_FOR_LDAPS"
 	} else {
 		ldap.UseTruststoreSpi = strings.ToUpper(useTruststoreSpi)

@@ -3,6 +3,7 @@ package keycloak
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strconv"
 )
 
@@ -32,8 +33,18 @@ func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *c
 	componentConfig := make(map[string][]string)
 
 	if custom.Config != nil {
-		for k, j := range custom.Config {
-			componentConfig[k] = append(componentConfig[k], j[0])
+		for key, configValuesArray := range custom.Config {
+			configValues := make([]string, 0)
+			for i := range configValuesArray {
+				if configValuesArray[i] != "" {
+					configValues = append(configValues, configValuesArray[i])
+				}
+			}
+
+			// Keep Values sorted on our own Keycloak API
+			// does not preserve order on it's own
+			sort.Strings(configValues)
+			componentConfig[key] = configValues
 		}
 	}
 	componentConfig["cachePolicy"] = append(componentConfig["cachePolicy"], custom.CachePolicy)
@@ -56,21 +67,21 @@ func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *c
 }
 
 func convertFromComponentToCustomUserFederation(component *component, realmName string) (*CustomUserFederation, error) {
-	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("enabled"))
+	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfigFirstOrDefault("enabled"))
 	if err != nil {
 		return nil, err
 	}
 
-	priority, err := atoiAndTreatEmptyStringAsZero(component.getConfig("priority"))
+	priority, err := atoiAndTreatEmptyStringAsZero(component.getConfigFirstOrDefault("priority"))
 	if err != nil {
 		return nil, err
 	}
 
-	fullSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("fullSyncPeriod"))
+	fullSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfigFirstOrDefault("fullSyncPeriod"))
 	if err != nil {
 		return nil, err
 	}
-	changedSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfig("changedSyncPeriod"))
+	changedSyncPeriod, err := atoiAndTreatEmptyStringAsZero(component.getConfigFirstOrDefault("changedSyncPeriod"))
 	if err != nil {
 		return nil, err
 	}
@@ -83,9 +94,18 @@ func convertFromComponentToCustomUserFederation(component *component, realmName 
 		"changedSyncPeriod": true,
 	}
 	config := make(map[string][]string)
-	for k := range component.Config {
-		if found := configsToIgnore[k]; !found {
-			config[k] = append(config[k], component.getConfig(k))
+	for key := range component.Config {
+		if found := configsToIgnore[key]; !found {
+			configValues := make([]string, 0)
+
+			for i := range component.getConfig(key) {
+				configValues = append(configValues, component.getConfig(key)[i])
+			}
+
+			// Keep Values sorted on our own Keycloak API
+			// does not preserve order on it's own
+			sort.Strings(configValues)
+			config[key] = configValues
 		}
 	}
 
@@ -99,7 +119,7 @@ func convertFromComponentToCustomUserFederation(component *component, realmName 
 		Enabled:  enabled,
 		Priority: priority,
 
-		CachePolicy: component.getConfig("cachePolicy"),
+		CachePolicy: component.getConfigFirstOrDefault("cachePolicy"),
 
 		FullSyncPeriod:    fullSyncPeriod,
 		ChangedSyncPeriod: changedSyncPeriod,
