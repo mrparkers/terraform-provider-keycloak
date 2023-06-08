@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -70,6 +71,9 @@ func resourceKeycloakOpenidClientDefaultScopesReconcile(ctx context.Context, dat
 
 	keycloakOpenidClientDefaultScopes, err := keycloakClient.GetOpenidClientDefaultScopes(ctx, realmId, clientId)
 	if err != nil {
+		if keycloak.ErrorIs404(err) {
+			return diag.FromErr(fmt.Errorf("validation error: client with id %s does not exist", clientId))
+		}
 		return diag.FromErr(err)
 	}
 
