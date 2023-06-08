@@ -1,3 +1,13 @@
+## 4.3.1 (June 8, 2023)
+
+BUG FIXES:
+
+- avoid validation errors during plan for missing realm and openid client resources ([#841](https://github.com/mrparkers/terraform-provider-keycloak/pull/841))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@kherock](https://github.com/kherock)
+
 ## v4.3.0 (June 5, 2023)
 
 IMPROVEMENTS:
