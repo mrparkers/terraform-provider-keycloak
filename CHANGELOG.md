@@ -1,3 +1,32 @@
+## 4.3.1 (June 8, 2023)
+
+BUG FIXES:
+
+- avoid validation errors during plan for missing realm and openid client resources ([#841](https://github.com/mrparkers/terraform-provider-keycloak/pull/841))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@kherock](https://github.com/kherock)
+
+## v4.3.0 (June 5, 2023)
+
+IMPROVEMENTS:
+
+- update supported Keycloak versions ([#828](https://github.com/mrparkers/terraform-provider-keycloak/pull/828))
+- update to go 1.19 ([#848](https://github.com/mrparkers/terraform-provider-keycloak/pull/848))
+- add new `login_hint` attribute for `keycloak_saml_identity_provider` resource ([#830](https://github.com/mrparkers/terraform-provider-keycloak/pull/830))
+
+BUG FIXES:
+
+- avoid inserting authenticator execution configs with empty strings as ID ([#840](https://github.com/mrparkers/terraform-provider-keycloak/pull/840))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@malfter](https://github.com/malfter)
+- [@toddkazakov](https://github.com/toddkazakov)
+- [@mohammedalics](https://github.com/mohammedalics)
+- [@kherock](https://github.com/kherock)
+
 ## v4.2.0 (March 6, 2023)
 
 IMPROVEMENTS:
