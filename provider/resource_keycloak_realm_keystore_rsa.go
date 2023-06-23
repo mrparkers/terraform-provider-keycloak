@@ -106,7 +106,7 @@ func setRealmKeystoreRsaData(data *schema.ResourceData, realmKey *keycloak.Realm
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
 	data.Set("algorithm", realmKey.Algorithm)
-	data.Set("providerId", realmKey.ProviderId)
+	data.Set("provider_id", realmKey.ProviderId)
 	if realmKey.PrivateKey != "**********" {
 		data.Set("private_key", realmKey.PrivateKey)
 		data.Set("certificate", realmKey.Certificate)

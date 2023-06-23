@@ -83,7 +83,7 @@ func convertFromComponentToRealmKeystoreRsa(component *component, realmId string
 		Algorithm:   component.getConfig("algorithm"),
 		PrivateKey:  component.getConfig("privateKey"),
 		Certificate: component.getConfig("certificate"),
-		ProviderId:  component.getConfig("providerId"),
+		ProviderId:  component.ProviderId,
 	}
 
 	return realmKey, nil
