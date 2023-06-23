@@ -72,7 +72,7 @@ func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
 				Optional:    true,
 				Default:     "rsa",
 				Description: "RSA key provider id",
-				ForceNew: true,
+				ForceNew:    true,
 			},
 		},
 	}
