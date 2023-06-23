@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	keycloakRealmKeystoreRsaAlgorithm = []string{"RS256", "RS384", "RS512", "PS256", "PS384", "PS512"}
+	keycloakRealmKeystoreRsaAlgorithm = []string{"RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "RSA-OAEP"}
 )
 
 func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
@@ -67,6 +67,13 @@ func resourceKeycloakRealmKeystoreRsa() *schema.Resource {
 				Required:    true,
 				Description: "X509 Certificate encoded in PEM format",
 			},
+			"provider_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "rsa",
+				Description: "RSA key provider id",
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -83,6 +90,7 @@ func getRealmKeystoreRsaFromData(data *schema.ResourceData) *keycloak.RealmKeyst
 		Algorithm:   data.Get("algorithm").(string),
 		PrivateKey:  data.Get("private_key").(string),
 		Certificate: data.Get("certificate").(string),
+		ProviderId:  data.Get("provider_id").(string),
 	}
 
 	return mapper
@@ -98,6 +106,7 @@ func setRealmKeystoreRsaData(data *schema.ResourceData, realmKey *keycloak.Realm
 	data.Set("enabled", realmKey.Enabled)
 	data.Set("priority", realmKey.Priority)
 	data.Set("algorithm", realmKey.Algorithm)
+	data.Set("providerId", realmKey.ProviderId)
 	if realmKey.PrivateKey != "**********" {
 		data.Set("private_key", realmKey.PrivateKey)
 		data.Set("certificate", realmKey.Certificate)
