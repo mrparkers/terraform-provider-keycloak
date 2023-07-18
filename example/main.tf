@@ -426,6 +426,15 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
   read_only                = true
 }
 
+resource "keycloak_ldap_custom_mapper" "custom_mapper" {
+	name                    = "custom-mapper"
+	realm_id                = keycloak_ldap_user_federation.openldap.realm_id
+	ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
+
+	provider_id        		= "msad-user-account-control-mapper"
+	provider_type           = "org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
+}
+
 resource "keycloak_custom_user_federation" "custom" {
   name        = "custom1"
   realm_id    = "master"
