@@ -209,8 +209,12 @@ resource "keycloak_ldap_custom_mapper" "sample_mapper" {
 	realm_id                    = data.keycloak_realm.realm.id
 	ldap_user_federation_id     = "${keycloak_ldap_user_federation.openldap.id}"
 
-	provider_id        			= "msad-user-account-control-mapper"
+	provider_id        			= "user-attribute-ldap-mapper"
 	provider_type               = "org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
+    config = {
+	  "user.model.attribute"    = "username"
+	  "ldap.attribute"          = "cn"
+    }
 }
 	`, testAccRealmUserFederation.Realm, customMapperName)
 }

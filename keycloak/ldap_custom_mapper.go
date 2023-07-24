@@ -12,6 +12,7 @@ type LdapCustomMapper struct {
 	LdapUserFederationId string
 	ProviderId           string
 	ProviderType         string
+	Config               map[string]string
 }
 
 func convertFromLdapCustomMapperToComponent(ldapCustomMapper *LdapCustomMapper) *component {
@@ -21,7 +22,7 @@ func convertFromLdapCustomMapperToComponent(ldapCustomMapper *LdapCustomMapper) 
 		ProviderId:   ldapCustomMapper.ProviderId,
 		ProviderType: ldapCustomMapper.ProviderType,
 		ParentId:     ldapCustomMapper.LdapUserFederationId,
-		Config:       map[string][]string{},
+		Config:       convertToComponentConfig(ldapCustomMapper.Config),
 	}
 }
 
@@ -33,7 +34,28 @@ func convertFromComponentToLdapCustomMapper(component *component, realmId string
 		LdapUserFederationId: component.ParentId,
 		ProviderId:           component.ProviderId,
 		ProviderType:         component.ProviderType,
+		Config:               convertFromComponentConfig(component.Config),
 	}, nil
+}
+
+func convertFromComponentConfig(originalMap map[string][]string) map[string]string {
+	convertedMap := make(map[string]string)
+
+	for key, values := range originalMap {
+		convertedMap[key] = values[0]
+	}
+
+	return convertedMap
+}
+
+func convertToComponentConfig(originalMap map[string]string) map[string][]string {
+	convertedMap := make(map[string][]string)
+
+	for key, value := range originalMap {
+		convertedMap[key] = []string{value}
+	}
+
+	return convertedMap
 }
 
 func (keycloakClient *KeycloakClient) NewLdapCustomMapper(ctx context.Context, ldapCustomMapper *LdapCustomMapper) error {

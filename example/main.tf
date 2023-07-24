@@ -435,6 +435,20 @@ resource "keycloak_ldap_custom_mapper" "custom_mapper" {
 	provider_type           = "org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
 }
 
+resource "keycloak_ldap_custom_mapper" "custom_mapper_with_config" {
+	name                    = "custom-mapper-with-config"
+	realm_id                = keycloak_ldap_user_federation.openldap.realm_id
+	ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
+
+	provider_id             = "user-attribute-ldap-mapper"
+	provider_type           = "org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
+	config                  = {
+		"user.model.attribute" = "username"
+		"ldap.attribute"       = "cn"
+	}
+}
+
+
 resource "keycloak_custom_user_federation" "custom" {
   name        = "custom1"
   realm_id    = "master"

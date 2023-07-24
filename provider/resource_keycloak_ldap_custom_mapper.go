@@ -48,11 +48,21 @@ func resourceKeycloakLdapCustomMapper() *schema.Resource {
 				ForceNew:    true,
 				Description: "Fully-qualified name of the Java class implementing the custom LDAP mapper.",
 			},
+			"config": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func getLdapCustomMapperFromData(data *schema.ResourceData) *keycloak.LdapCustomMapper {
+	config := make(map[string]string)
+	if v, ok := data.GetOk("config"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			config[key] = value.(string)
+		}
+	}
 	return &keycloak.LdapCustomMapper{
 		Id:                   data.Id(),
 		Name:                 data.Get("name").(string),
@@ -60,6 +70,7 @@ func getLdapCustomMapperFromData(data *schema.ResourceData) *keycloak.LdapCustom
 		LdapUserFederationId: data.Get("ldap_user_federation_id").(string),
 		ProviderId:           data.Get("provider_id").(string),
 		ProviderType:         data.Get("provider_type").(string),
+		Config:               config,
 	}
 }
 
@@ -72,6 +83,7 @@ func setLdapCustomMapperData(data *schema.ResourceData, ldapCustomMapper *keyclo
 
 	data.Set("provider_id", ldapCustomMapper.ProviderId)
 	data.Set("provider_type", ldapCustomMapper.ProviderType)
+	data.Set("config", ldapCustomMapper.Config)
 }
 
 func resourceKeycloakLdapCustomMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {

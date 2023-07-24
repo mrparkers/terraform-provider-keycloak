@@ -7,7 +7,9 @@ page_title: "keycloak_ldap_custom_mapper Resource"
 Allows for creating and managing custom attribute mappers for Keycloak users federated via LDAP.
 
 The LDAP custom mapper is implemented and deployed into Keycloak as a custom provider. This resource allows to
-specify the custom id and custom implementation class of the self-implemented attribute mapper.
+specify the custom id and custom implementation class of the self-implemented attribute mapper as well as additional
+properties via config map.
+
 The custom mapper should already be deployed into keycloak in order to be correctly configured.
 
 ## Example Usage
@@ -43,6 +45,11 @@ resource "keycloak_ldap_custom_mapper" "custom_mapper" {
 
 	provider_id             = "custom-provider-registered-in-keycloak"
 	provider_type           = "com.example.custom.ldap.mappers.CustomMapper"
+
+	config = {
+		"attribute.name"       = "name"
+		"attribute.value"      = "value"
+	}
 }
 ```
 
@@ -53,6 +60,7 @@ resource "keycloak_ldap_custom_mapper" "custom_mapper" {
 - `name` - (Required) Display name of this mapper when displayed in the console.
 - `provider_id` - (Required) The id of the LDAP mapper implemented in MapperFactory.
 - `provider_type` - (Required) The fully-qualified Java class name of the custom LDAP mapper.
+- `config` - (Optional) A map with key / value pairs for configuring the LDAP mapper. The supported keys depend on the protocol mapper.
 
 ## Import
 
