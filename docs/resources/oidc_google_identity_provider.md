@@ -62,4 +62,10 @@ resource "keycloak_oidc_google_identity_provider" "google" {
 
 ## Import
 
-This resource does not yet support importing.
+Google Identity providers can be imported using the format {{realm_id}}/{{idp_alias}}, where idp_alias is the identity provider alias.
+
+Example:
+
+```bash
+$ terraform import keycloak_oidc_google_identity_provider.google.google_identity_provider my-realm/my-google-idp
+```
