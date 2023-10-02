@@ -63,7 +63,7 @@ func setOpenidClientServiceAccountRealmRoleData(data *schema.ResourceData, servi
 	data.SetId(fmt.Sprintf("%s/%s", serviceAccountRole.ServiceAccountUserId, serviceAccountRole.Id))
 	data.Set("realm_id", serviceAccountRole.RealmId)
 	data.Set("service_account_user_id", serviceAccountRole.ServiceAccountUserId)
-	data.Set("role", serviceAccountRole.Name)
+	data.Set("role", serviceAccountRole.Id)
 }
 
 func resourceKeycloakOpenidClientServiceAccountRealmRoleCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {

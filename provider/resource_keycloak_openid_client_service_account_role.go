@@ -71,7 +71,7 @@ func setOpenidClientServiceAccountRoleData(data *schema.ResourceData, serviceAcc
 	data.Set("realm_id", serviceAccountRole.RealmId)
 	data.Set("client_id", serviceAccountRole.ContainerId)
 	data.Set("service_account_user_id", serviceAccountRole.ServiceAccountUserId)
-	data.Set("role", serviceAccountRole.Name)
+	data.Set("role", serviceAccountRole.Id)
 }
 
 func resourceKeycloakOpenidClientServiceAccountRoleCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
