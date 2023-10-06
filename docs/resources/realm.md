@@ -181,6 +181,7 @@ The `headers` block supports the following arguments:
 - `x_robots_tag` - (Optional) Prevent pages from appearing in search engines.
 - `x_xss_protection` - (Optional) This header configures the Cross-site scripting (XSS) filter in your browser.
 - `strict_transport_security` - (Optional) The Script-Transport-Security HTTP header tells browsers to always use HTTPS.
+- `referrer_policy` - (Optional) The Referrer-Policy HTTP header controls how much referrer information (sent with the Referer header) should be included with requests.
 
 The `brute_force_detection` block supports the following arguments:
 
