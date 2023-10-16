@@ -150,6 +150,7 @@ type BrowserSecurityHeaders struct {
 	XFrameOptions                   string `json:"xFrameOptions"`
 	XRobotsTag                      string `json:"xRobotsTag"`
 	XXSSProtection                  string `json:"xXSSProtection"`
+	ReferrerPolicy                  string `json:"referrerPolicy"`
 }
 
 type SmtpServer struct {
