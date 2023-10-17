@@ -390,6 +390,10 @@ func dataSourceKeycloakRealm() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
+									"referrer_policy": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 								},
 							},
 						},
