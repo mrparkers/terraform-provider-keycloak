@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"strings"
 )
 
 const MULTIVALUE_ATTRIBUTE_SEPARATOR = "##"
@@ -61,6 +62,11 @@ func resourceKeycloakUser() *schema.Resource {
 			},
 			"attributes": {
 				Type:     schema.TypeMap,
+				Optional: true,
+			},
+			"required_actions": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
 			"federated_identity": {
@@ -118,6 +124,13 @@ func onlyDiffOnCreate(_, _, _ string, d *schema.ResourceData) bool {
 
 func mapFromDataToUser(data *schema.ResourceData) *keycloak.User {
 	attributes := map[string][]string{}
+	var requiredActions []string
+
+	if v, ok := data.GetOk("required_actions"); ok {
+		for _, requiredAction := range v.(*schema.Set).List() {
+			requiredActions = append(requiredActions, requiredAction.(string))
+		}
+	}
 	if v, ok := data.GetOk("attributes"); ok {
 		for key, value := range v.(map[string]interface{}) {
 			attributes[key] = strings.Split(value.(string), MULTIVALUE_ATTRIBUTE_SEPARATOR)
@@ -141,6 +154,7 @@ func mapFromDataToUser(data *schema.ResourceData) *keycloak.User {
 		Enabled:             data.Get("enabled").(bool),
 		Attributes:          attributes,
 		FederatedIdentities: *federatedIdentities,
+		RequiredActions:     requiredActions,
 	}
 }
 
@@ -182,6 +196,7 @@ func mapFromUserToData(data *schema.ResourceData, user *keycloak.User) {
 	data.Set("enabled", user.Enabled)
 	data.Set("attributes", attributes)
 	data.Set("federated_identity", federatedIdentities)
+	data.Set("required_actions", user.RequiredActions)
 }
 
 func resourceKeycloakUserCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
