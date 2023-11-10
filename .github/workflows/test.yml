@@ -65,7 +65,7 @@ jobs:
           - '19.0.2'
       fail-fast: false
     concurrency:
-      group: ${{ github.head_ref }}-${{ matrix.keycloak-version }}
+      group: ${{ github.head_ref || github.run_id }}-${{ matrix.keycloak-version }}
       cancel-in-progress: true
     services:
       keycloak:
