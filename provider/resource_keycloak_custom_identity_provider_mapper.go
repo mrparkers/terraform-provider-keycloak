@@ -39,6 +39,7 @@ func resourceKeycloakCustomIdentityProviderMapper() *schema.Resource {
 			"identity_provider_mapper": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "IDP Mapper Type",
 			},
 			"extra_config": {
