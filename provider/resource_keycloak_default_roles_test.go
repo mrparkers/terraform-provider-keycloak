@@ -107,9 +107,13 @@ func getKeycloakDefaultRolesFromState(s *terraform.State, resourceName string) (
 		return nil, fmt.Errorf("error getting defaultRoles with id %s: %s", id, err)
 	}
 
-	defaultRoleNamesList, err := keycloakClient.GetRoleFullNames(testCtx, realm, composites)
-	if err != nil {
-		return nil, fmt.Errorf("error getting defaultRoleNamesList with id %s: %s", id, err)
+	var defaultRoleNamesList []string
+	for _, composite := range composites {
+		name, err := keycloakClient.GetQualifiedRoleName(testCtx, realm, composite)
+		if err != nil {
+			return nil, fmt.Errorf("error getting qualified name for role id %s: %s", composite.Id, err)
+		}
+		defaultRoleNamesList = append(defaultRoleNamesList, name)
 	}
 
 	defaultRoles := &keycloak.DefaultRoles{

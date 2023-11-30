@@ -17,15 +17,6 @@ func (keycloakClient *KeycloakClient) GetDefaultRoles(ctx context.Context, realm
 	if err != nil {
 		return nil, err
 	}
-	for _, composite := range composites {
-		if composite.ClientRole && composite.ClientId == "" {
-			client, err := keycloakClient.GetGenericClient(ctx, realmId, composite.ContainerId)
-			if err != nil {
-				return nil, err
-			}
-			composite.ClientId = client.ClientId
-		}
-	}
 	return composites, nil
 }
 
@@ -42,20 +33,4 @@ func (keycloakClient *KeycloakClient) GetQualifiedRoleName(ctx context.Context, 
 	}
 	role.ClientId = genericClient.ClientId
 	return fmt.Sprintf("%s/%s", role.ClientId, role.Name), nil
-}
-
-func (keycloakClient *KeycloakClient) GetRoleFullNames(ctx context.Context, realmId string, roles []*Role) ([]string, error) {
-	fullNames := make([]string, len(roles))
-	for i, role := range roles {
-		if !role.ClientRole {
-			fullNames[i] = role.Name
-			continue
-		}
-		fullName, err := keycloakClient.GetQualifiedRoleName(ctx, realmId, role)
-		if err != nil {
-			return []string{}, err
-		}
-		fullNames[i] = fullName
-	}
-	return fullNames, nil
 }
