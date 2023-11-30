@@ -36,20 +36,18 @@ func resourceKeycloakDefaultRoles() *schema.Resource {
 	}
 }
 
-func mapFromDataToDefaultRoles(data *schema.ResourceData) *keycloak.DefaultRoles {
-	defaultRolesList := make([]string, 0)
+func getDefaultRolesFromData(data *schema.ResourceData) *keycloak.DefaultRoles {
+	var defaultRolesList []string
 	if v, ok := data.GetOk("default_roles"); ok {
 		for _, defaultRole := range v.(*schema.Set).List() {
 			defaultRolesList = append(defaultRolesList, defaultRole.(string))
 		}
 	}
-
 	defaultRoles := &keycloak.DefaultRoles{
 		Id:           data.Id(),
 		RealmId:      data.Get("realm_id").(string),
 		DefaultRoles: defaultRolesList,
 	}
-
 	return defaultRoles
 }
 
@@ -98,7 +96,7 @@ func resourceKeycloakDefaultRolesReconcile(ctx context.Context, data *schema.Res
 		return diag.FromErr(err)
 	}
 
-	local := mapFromDataToDefaultRoles(data)
+	local := getDefaultRolesFromData(data)
 	localDefaultRoles := make(map[string]struct{}, len(local.DefaultRoles))
 	for _, defaultRole := range local.DefaultRoles {
 		localDefaultRoles[defaultRole] = struct{}{}
