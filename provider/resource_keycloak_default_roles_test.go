@@ -85,12 +85,8 @@ func testAccCheckKeycloakDefaultRolesDestroy(realmId string) resource.TestCheckF
 			return fmt.Errorf("error getting defaultRoles with id %s: %s", realm.DefaultRole.Id, err)
 		}
 
-		defaultRoles, err := keycloakClient.GetRoleFullNames(testCtx, realmId, composites)
-		if err != nil {
-			return err
-		}
-		if len(defaultRoles) != 0 {
-			return fmt.Errorf("realm %s still has %d default roles, expected zero", realmId, len(defaultRoles))
+		if len(composites) != 0 {
+			return fmt.Errorf("realm %s still has %d default roles, expected zero", realmId, len(composites))
 		}
 
 		return nil
