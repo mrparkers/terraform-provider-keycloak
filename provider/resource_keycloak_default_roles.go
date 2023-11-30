@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -127,7 +128,7 @@ func resourceKeycloakDefaultRolesReconcile(ctx context.Context, data *schema.Res
 	}
 
 	// skip if actual default roles in keycloak same as we want
-	if roleListsEqual(currentDefaultRoles, local.DefaultRoles) {
+	if reflect.DeepEqual(currentDefaultRoles, local.DefaultRoles) {
 		return nil
 	}
 
@@ -238,16 +239,4 @@ func resourceKeycloakDefaultRolesImport(ctx context.Context, d *schema.ResourceD
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func roleListsEqual(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
 }
