@@ -350,6 +350,23 @@ func TestAccKeycloakSamlClient_extraConfigInvalid(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakSamlClient_publicClientDefaultValue(t *testing.T) {
+	t.Parallel()
+	clientId := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakSamlClientDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakSamlClient_basic(clientId),
+				Check:  testAccCheckKeycloakSamlClientExistsWithCorrectPublicClientFlag("keycloak_saml_client.saml_client", true),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakSamlClientExistsWithCorrectProtocol(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client, err := getSamlClientFromState(s, resourceName)
@@ -359,6 +376,21 @@ func testAccCheckKeycloakSamlClientExistsWithCorrectProtocol(resourceName string
 
 		if client.Protocol != "saml" {
 			return fmt.Errorf("expected saml client to have saml protocol, but got %s", client.Protocol)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakSamlClientExistsWithCorrectPublicClientFlag(resourceName string, enabled bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client, err := getSamlClientFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if client.PublicClient != enabled {
+			return fmt.Errorf("expected saml client to have publicClient: %s, but got %s", enabled, client.PublicClient)
 		}
 
 		return nil
