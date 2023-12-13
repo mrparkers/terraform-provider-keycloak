@@ -376,7 +376,7 @@ func mapToDataFromSamlClient(ctx context.Context, data *schema.ResourceData, cli
 	data.Set("logout_service_post_binding_url", client.Attributes.LogoutServicePostBindingURL)
 	data.Set("logout_service_redirect_binding_url", client.Attributes.LogoutServiceRedirectBindingURL)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
-	data.Set("public_client", client.PublicClient)
+	data.Set("publicClient", client.PublicClient)
 	data.Set("login_theme", client.Attributes.LoginTheme)
 
 	if canonicalizationMethod, ok := mapKeyFromValue(keycloakSamlClientCanonicalizationMethods, client.Attributes.CanonicalizationMethod); ok {
