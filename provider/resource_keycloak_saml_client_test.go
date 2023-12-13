@@ -390,7 +390,7 @@ func testAccCheckKeycloakSamlClientExistsWithCorrectPublicClientFlag(resourceNam
 		}
 
 		if client.PublicClient != enabled {
-			return fmt.Errorf("expected saml client to have publicClient: %s, but got %s", enabled, client.PublicClient)
+			return fmt.Errorf("expected saml client to have publicClient: %t, but got %t", enabled, client.PublicClient)
 		}
 
 		return nil
