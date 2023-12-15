@@ -1,4 +1,8 @@
-# keycloak_openid_client_permissions
+---
+page_title: "keycloak_openid_client_permissions Resource"
+---
+
+# keycloak\_openid\_client\_permissions Resource
 
 Allows you to manage all openid client Scope Based Permissions.
 
