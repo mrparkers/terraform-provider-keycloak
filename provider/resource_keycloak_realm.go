@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -660,6 +661,88 @@ func resourceKeycloakRealm() *schema.Resource {
 					Schema: webAuthnSchema,
 				},
 			},
+
+			// Client policies
+			"client_policy": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "",
+						},
+						"enabled": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  true,
+						},
+						"profiles": {
+							Type:     schema.TypeList,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Optional: true,
+						},
+						"conditions": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"condition": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"configuration": {
+										Type:     schema.TypeMap,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+										Optional: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"client_profile": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "",
+						},
+						"executors": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"executor": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"configuration": {
+										Type:     schema.TypeMap,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+										Optional: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -1143,6 +1226,26 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 		}
 	}
 
+	// Client policies
+	if profiles, ok := data.GetOk("client_profile"); ok {
+		for _, profile := range profiles.(*schema.Set).List() {
+			realm.ClientProfiles.Profiles = append(realm.ClientProfiles.Profiles, keycloak.ClientProfile{
+				Name:        profile.(map[string]interface{})["name"].(string),
+				Description: profile.(map[string]interface{})["description"].(string),
+			})
+		}
+	}
+
+	if policies, ok := data.GetOk("client_policy"); ok {
+		for _, policy := range policies.(*schema.Set).List() {
+			realm.ClientPolicies.Policies = append(realm.ClientPolicies.Policies, keycloak.ClientPolicy{
+				Name:        policy.(map[string]interface{})["name"].(string),
+				Description: policy.(map[string]interface{})["description"].(string),
+				Enabled:     policy.(map[string]interface{})["enabled"].(bool),
+			})
+		}
+	}
+
 	return realm, nil
 }
 
@@ -1339,6 +1442,51 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	// default and optional client scope mappings
 	data.Set("default_default_client_scopes", realm.DefaultDefaultClientScopes)
 	data.Set("default_optional_client_scopes", realm.DefaultOptionalClientScopes)
+
+	// Client policies
+	var policy map[string]interface{}
+	var policies []interface{}
+	for _, v := range realm.ClientPolicies.Policies {
+		policy = make(map[string]interface{})
+		policy["name"] = v.Name
+		policy["description"] = v.Description
+		policy["enabled"] = v.Enabled
+		policy["profiles"] = v.Profiles
+
+		var condition map[string]interface{}
+		var conditions []interface{}
+		for _, v2 := range v.Conditions {
+			condition = make(map[string]interface{})
+			condition["condition"] = v2.Condition
+			condition["configuration"] = v2.Configuration
+			conditions = append(conditions, condition)
+		}
+		policy["conditions"] = conditions
+
+		policies = append(policies, policy)
+	}
+	data.Set("client_policy", policies)
+
+	var profile map[string]interface{}
+	var profiles []interface{}
+	for _, v := range realm.ClientProfiles.Profiles {
+		profile = make(map[string]interface{})
+		profile["name"] = v.Name
+		profile["description"] = v.Description
+
+		var executor map[string]interface{}
+		var executors []interface{}
+		for _, v2 := range v.Executors {
+			executor = make(map[string]interface{})
+			executor["executor"] = v2.Executor
+			executor["configuration"] = v2.Configuration
+			executors = append(executors, executor)
+		}
+		profile["executors"] = executors
+
+		profiles = append(profiles, profile)
+	}
+	data.Set("client_profile", profiles)
 }
 
 func getBruteForceDetectionSettings(realm *keycloak.Realm) map[string]interface{} {
