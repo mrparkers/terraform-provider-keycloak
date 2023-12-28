@@ -2,6 +2,8 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -688,18 +690,17 @@ func resourceKeycloakRealm() *schema.Resource {
 							Elem:     &schema.Schema{Type: schema.TypeString},
 							Optional: true,
 						},
-						"conditions": {
+						"condition": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"condition": {
+									"name": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
 									"configuration": {
-										Type:     schema.TypeMap,
-										Elem:     &schema.Schema{Type: schema.TypeString},
+										Type:     schema.TypeString,
 										Optional: true,
 									},
 								},
@@ -723,18 +724,17 @@ func resourceKeycloakRealm() *schema.Resource {
 							Optional: true,
 							Default:  "",
 						},
-						"executors": {
+						"executor": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"executor": {
+									"name": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
 									"configuration": {
-										Type:     schema.TypeMap,
-										Elem:     &schema.Schema{Type: schema.TypeString},
+										Type:     schema.TypeString,
 										Optional: true,
 									},
 								},
@@ -1227,23 +1227,65 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 	}
 
 	// Client policies
-	if profiles, ok := data.GetOk("client_profile"); ok {
-		for _, profile := range profiles.(*schema.Set).List() {
-			realm.ClientProfiles.Profiles = append(realm.ClientProfiles.Profiles, keycloak.ClientProfile{
-				Name:        profile.(map[string]interface{})["name"].(string),
-				Description: profile.(map[string]interface{})["description"].(string),
-			})
+	if policies, ok := data.GetOk("client_policy"); ok {
+		var policy keycloak.ClientPolicy
+		for _, policyData := range policies.(*schema.Set).List() {
+			policy = keycloak.ClientPolicy{
+				Name:        policyData.(map[string]interface{})["name"].(string),
+				Description: policyData.(map[string]interface{})["description"].(string),
+				Enabled:     policyData.(map[string]interface{})["enabled"].(bool),
+			}
+			for _, profile := range policyData.(map[string]interface{})["profiles"].([]interface{}) {
+				policy.Profiles = append(policy.Profiles, profile.(string))
+			}
+
+			for _, conditionData := range policyData.(map[string]interface{})["condition"].([]interface{}) {
+				condition := keycloak.ClientPolicyCondition{
+					Condition: conditionData.(map[string]interface{})["name"].(string),
+				}
+				if len(conditionData.(map[string]interface{})["configuration"].(string)) > 0 {
+					err := json.Unmarshal(
+						[]byte(conditionData.(map[string]interface{})["configuration"].(string)),
+						&condition.Configuration,
+					)
+					if err != nil {
+						return nil, errors.New(err.Error() + ". json string: " + conditionData.(map[string]interface{})["configuration"].(string))
+					}
+				}
+				policy.Conditions = append(policy.Conditions, condition)
+			}
+
+			realm.ClientPolicies.Policies = append(realm.ClientPolicies.Policies, policy)
+
 		}
 	}
 
-	if policies, ok := data.GetOk("client_policy"); ok {
-		for _, policy := range policies.(*schema.Set).List() {
-			realm.ClientPolicies.Policies = append(realm.ClientPolicies.Policies, keycloak.ClientPolicy{
-				Name:        policy.(map[string]interface{})["name"].(string),
-				Description: policy.(map[string]interface{})["description"].(string),
-				Enabled:     policy.(map[string]interface{})["enabled"].(bool),
-			})
+	if profiles, ok := data.GetOk("client_profile"); ok {
+		var profile keycloak.ClientProfile
+		for _, profileData := range profiles.(*schema.Set).List() {
+			profile = keycloak.ClientProfile{
+				Name:        profileData.(map[string]interface{})["name"].(string),
+				Description: profileData.(map[string]interface{})["description"].(string),
+			}
+
+			for _, executorData := range profileData.(map[string]interface{})["executor"].([]interface{}) {
+				executor := keycloak.ClientProfileExecutor{
+					Executor: executorData.(map[string]interface{})["name"].(string),
+				}
+				if len(executorData.(map[string]interface{})["configuration"].(string)) > 0 {
+					err := json.Unmarshal(
+						[]byte(executorData.(map[string]interface{})["configuration"].(string)),
+						&executor.Configuration,
+					)
+					if err != nil {
+						return nil, errors.New(err.Error() + ". json string: " + executorData.(map[string]interface{})["configuration"].(string))
+					}
+				}
+				profile.Executors = append(profile.Executors, executor)
+			}
+			realm.ClientProfiles.Profiles = append(realm.ClientProfiles.Profiles, profile)
 		}
+
 	}
 
 	return realm, nil
@@ -1273,7 +1315,7 @@ func setDefaultSecuritySettingsBruteForceDetection(realm *keycloak.Realm) {
 	realm.MaxDeltaTimeSeconds = 43200
 }
 
-func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
+func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) diag.Diagnostics {
 	data.SetId(realm.Realm)
 
 	data.Set("realm", realm.Realm)
@@ -1444,6 +1486,9 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 	data.Set("default_optional_client_scopes", realm.DefaultOptionalClientScopes)
 
 	// Client policies
+	var err error
+	var configuration []byte
+
 	var policy map[string]interface{}
 	var policies []interface{}
 	for _, v := range realm.ClientPolicies.Policies {
@@ -1457,11 +1502,15 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 		var conditions []interface{}
 		for _, v2 := range v.Conditions {
 			condition = make(map[string]interface{})
-			condition["condition"] = v2.Condition
-			condition["configuration"] = v2.Configuration
+			condition["name"] = v2.Condition
+			configuration, err = json.Marshal(v2.Configuration)
+			condition["configuration"] = string(configuration)
+			if err != nil {
+				return diag.FromErr(err)
+			}
 			conditions = append(conditions, condition)
 		}
-		policy["conditions"] = conditions
+		policy["condition"] = conditions
 
 		policies = append(policies, policy)
 	}
@@ -1476,17 +1525,25 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm) {
 
 		var executor map[string]interface{}
 		var executors []interface{}
+
 		for _, v2 := range v.Executors {
 			executor = make(map[string]interface{})
-			executor["executor"] = v2.Executor
-			executor["configuration"] = v2.Configuration
+			executor["name"] = v2.Executor
+			configuration, err = json.Marshal(v2.Configuration)
+			executor["configuration"] = string(configuration)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+
 			executors = append(executors, executor)
 		}
-		profile["executors"] = executors
+		profile["executor"] = executors
 
 		profiles = append(profiles, profile)
 	}
 	data.Set("client_profile", profiles)
+
+	return nil
 }
 
 func getBruteForceDetectionSettings(realm *keycloak.Realm) map[string]interface{} {
@@ -1532,7 +1589,10 @@ func resourceKeycloakRealmCreate(ctx context.Context, data *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	setRealmData(data, realm)
+	diagErr := setRealmData(data, realm)
+	if err != nil {
+		return diagErr
+	}
 
 	return resourceKeycloakRealmRead(ctx, data, meta)
 }
@@ -1550,7 +1610,10 @@ func resourceKeycloakRealmRead(ctx context.Context, data *schema.ResourceData, m
 		realm.SmtpServer.Password = smtpPassword
 	}
 
-	setRealmData(data, realm)
+	diagErr := setRealmData(data, realm)
+	if err != nil {
+		return diagErr
+	}
 
 	return nil
 }
@@ -1573,7 +1636,10 @@ func resourceKeycloakRealmUpdate(ctx context.Context, data *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	setRealmData(data, realm)
+	diagErr := setRealmData(data, realm)
+	if err != nil {
+		return diagErr
+	}
 
 	return nil
 }

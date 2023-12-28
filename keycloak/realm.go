@@ -201,8 +201,8 @@ type ClientProfile struct {
 }
 
 type ClientProfileExecutor struct {
-	Configuration map[string]interface{}
-	Executor      string `json:"executor,omitempty"`
+	Configuration map[string]interface{} `json:"configuration,omitempty"`
+	Executor      string                 `json:"executor,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(ctx context.Context, realm *Realm) error {
