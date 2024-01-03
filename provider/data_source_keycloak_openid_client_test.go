@@ -56,7 +56,7 @@ func TestAccKeycloakDataSourceOpenidClient_extraConfig(t *testing.T) {
 			{
 				Config: testAccKeycloakOpenidClientConfig_extraConfig(clientId),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttrPair(dataSourceName, "key1", resourceName, "value1"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "extra_config.key1", resourceName, "extra_config.key1"),
 				),
 			},
 		},
