@@ -33,7 +33,7 @@ func getUserTemplateImporterIdentityProviderMapperFromData(ctx context.Context, 
 		return nil, err
 	}
 
-	if identityProvider.ProviderId == "facebook" || identityProvider.ProviderId == "google" {
+	if identityProvider.ProviderId == "facebook" || identityProvider.ProviderId == "google" || identityProvider.ProviderId == "keycloak-oidc" {
 		rec.IdentityProviderMapper = "oidc-username-idp-mapper"
 	} else {
 		rec.IdentityProviderMapper = fmt.Sprintf("%s-username-idp-mapper", identityProvider.ProviderId)

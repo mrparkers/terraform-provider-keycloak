@@ -505,6 +505,11 @@ func resourceKeycloakRealm() *schema.Resource {
 										Optional: true,
 										Default:  "max-age=31536000; includeSubDomains",
 									},
+									"referrer_policy": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Default:  "no-referrer",
+									},
 								},
 							},
 						},
@@ -972,6 +977,7 @@ func getRealmFromData(data *schema.ResourceData) (*keycloak.Realm, error) {
 				XFrameOptions:                   headerSettings["x_frame_options"].(string),
 				XRobotsTag:                      headerSettings["x_robots_tag"].(string),
 				XXSSProtection:                  headerSettings["x_xss_protection"].(string),
+				ReferrerPolicy:                  headerSettings["referrer_policy"].(string),
 			}
 		} else {
 			setDefaultSecuritySettingHeaders(realm)
@@ -1149,6 +1155,7 @@ func setDefaultSecuritySettingHeaders(realm *keycloak.Realm) {
 		XFrameOptions:                   "SAMEORIGIN",
 		XRobotsTag:                      "none",
 		XXSSProtection:                  "1; mode=block",
+		ReferrerPolicy:                  "no-referrer",
 	}
 }
 
@@ -1355,6 +1362,7 @@ func getHeaderSettings(realm *keycloak.Realm) map[string]interface{} {
 	headersSettings["x_frame_options"] = realm.BrowserSecurityHeaders.XFrameOptions
 	headersSettings["x_robots_tag"] = realm.BrowserSecurityHeaders.XRobotsTag
 	headersSettings["x_xss_protection"] = realm.BrowserSecurityHeaders.XXSSProtection
+	headersSettings["referrer_policy"] = realm.BrowserSecurityHeaders.ReferrerPolicy
 	return headersSettings
 }
 
