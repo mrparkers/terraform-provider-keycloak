@@ -90,6 +90,11 @@ resource "keycloak_user_groups" "user_groups_association_1" {
 
 ## Import
 
-This resource does not support import. Instead of importing, feel free to create this resource
-as if it did not already exist on the server.
+Groups can be imported using the format `{{realm_id}}/{{group_id}}`, where `group_id` is the unique ID that Keycloak
+assigns to the group upon creation. This value can be found in the URI when editing this group in the GUI, and is typically a GUID.
 
+Example:
+
+```bash
+terraform import keycloak_group.group my-realm/d162454a-8d6b-4881-a5c3-55d2f68f7b9e
+```
