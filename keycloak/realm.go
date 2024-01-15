@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
@@ -169,12 +170,6 @@ type SmtpServer struct {
 	Password           string                   `json:"password,omitempty"`
 }
 
-func (keycloakClient *KeycloakClient) RefreshAuth(ctx context.Context) error {
-	err := keycloakClient.login(ctx)
-
-	return err
-}
-
 func (keycloakClient *KeycloakClient) NewRealm(ctx context.Context, realm *Realm) error {
 	_, _, err := keycloakClient.post(ctx, "/realms", realm)
 
@@ -183,11 +178,21 @@ func (keycloakClient *KeycloakClient) NewRealm(ctx context.Context, realm *Realm
 
 func (keycloakClient *KeycloakClient) GetRealm(ctx context.Context, name string) (*Realm, error) {
 	var realm Realm
+	var err error
 
-	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s", name), &realm, nil)
+	err = keycloakClient.get(ctx, fmt.Sprintf("/realms/%s", name), &realm, nil)
+	if err == nil && realm.DefaultRole == nil {
+		tflog.Warn(ctx, "Realm does not contain expected properties. Refreshing access token to bypass any caching in Keycloak and fetching realm again.")
+		err = keycloakClient.refresh(ctx)
+		if err == nil {
+			err = keycloakClient.get(ctx, fmt.Sprintf("/realms/%s", name), &realm, nil)
+		}
+	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	return &realm, nil
 }
 
