@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
@@ -98,9 +99,18 @@ func resourceKeycloakDefaultRolesReconcile(ctx context.Context, data *schema.Res
 
 	defaultRoles := mapFromDataToDefaultRoles(data)
 
-	realm, err := keycloakClient.GetRealm(ctx, defaultRoles.RealmId)
+	var realm *keycloak.Realm
+	var err error
+	// realm, err := keycloakClient.GetRealm(ctx, defaultRoles.RealmId)
+	realm, err = keycloakClient.GetRealm(ctx, defaultRoles.RealmId)
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if realm.DefaultRole == nil {
+		tflog.Warn(ctx, "Realm does not contain DefaultRole property. Renewing access token to bypass any caching in Keycloak.")
+		keycloakClient.RefreshAuth(ctx)
+		realm, err = keycloakClient.GetRealm(ctx, defaultRoles.RealmId)
 	}
 
 	data.SetId(realm.DefaultRole.Id)

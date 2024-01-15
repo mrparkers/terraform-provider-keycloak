@@ -3,8 +3,9 @@ package keycloak
 import (
 	"context"
 	"fmt"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"strings"
+
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
 type Key struct {
@@ -166,6 +167,12 @@ type SmtpServer struct {
 	Ssl                types.KeycloakBoolQuoted `json:"ssl,omitempty"`
 	User               string                   `json:"user,omitempty"`
 	Password           string                   `json:"password,omitempty"`
+}
+
+func (keycloakClient *KeycloakClient) RefreshAuth(ctx context.Context) error {
+	err := keycloakClient.login(ctx)
+
+	return err
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(ctx context.Context, realm *Realm) error {
