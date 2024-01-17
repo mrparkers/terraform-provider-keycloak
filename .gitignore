@@ -31,4 +31,7 @@ site/
 # releases
 *.zip
 
+# Ability to locally override docker-compose config
+docker-compose.override.yml
+
 .DS_Store
