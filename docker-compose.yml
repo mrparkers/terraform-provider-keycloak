@@ -17,7 +17,8 @@ services:
     ports:
     - 8389:389
   keycloak:
-    image: quay.io/keycloak/keycloak:21.0.1
+    # image: quay.io/keycloak/keycloak:21.0.1
+    image: quay.io/keycloak/keycloak:22.0.5
     command: start-dev --features=preview
     depends_on:
     - postgres
@@ -41,3 +42,9 @@ services:
     volumes:
 # Make the custom-user-federation-example extension available to Keycloak. The :z option is required and tells Docker that the volume content will be shared between containers.
     - ./custom-user-federation-example/build/libs/custom-user-federation-example.jar:/opt/jboss/keycloak/standalone/deployments/custom-user-federation-example.jar:z
+  nginx:
+    image: nginx:1.25.3-alpine
+    volumes:
+      - ./scripts/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8081:8081"
