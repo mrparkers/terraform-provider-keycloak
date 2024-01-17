@@ -213,6 +213,11 @@ func resourceKeycloakSamlClient() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"public_client": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 			"authentication_flow_binding_overrides": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -315,6 +320,7 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 		BaseUrl:                 data.Get("base_url").(string),
 		MasterSamlProcessingUrl: data.Get("master_saml_processing_url").(string),
 		FullScopeAllowed:        data.Get("full_scope_allowed").(bool),
+		PublicClient:            data.Get("public_client").(bool),
 		Attributes:              samlAttributes,
 	}
 
@@ -370,6 +376,7 @@ func mapToDataFromSamlClient(ctx context.Context, data *schema.ResourceData, cli
 	data.Set("logout_service_post_binding_url", client.Attributes.LogoutServicePostBindingURL)
 	data.Set("logout_service_redirect_binding_url", client.Attributes.LogoutServiceRedirectBindingURL)
 	data.Set("full_scope_allowed", client.FullScopeAllowed)
+	data.Set("public_client", client.PublicClient)
 	data.Set("login_theme", client.Attributes.LoginTheme)
 
 	if canonicalizationMethod, ok := mapKeyFromValue(keycloakSamlClientCanonicalizationMethods, client.Attributes.CanonicalizationMethod); ok {
