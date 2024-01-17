@@ -13,6 +13,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -167,6 +168,19 @@ func (keycloakClient *KeycloakClient) login(ctx context.Context) error {
 	serverVersion := info.SystemInfo.ServerVersion
 	if strings.Contains(serverVersion, ".GA") {
 		serverVersion = strings.ReplaceAll(info.SystemInfo.ServerVersion, ".GA", "")
+	} else {
+		regex, err := regexp.Compile(`\.redhat-\w+`)
+
+		if err != nil {
+			fmt.Println("Error compiling regex:", err)
+			return err
+		}
+
+		// Check if the pattern is found in serverVersion
+		if regex.MatchString(serverVersion) {
+			// Replace the matched pattern with an empty string
+			serverVersion = regex.ReplaceAllString(serverVersion, "")
+		}
 	}
 
 	v, err := version.NewVersion(serverVersion)

@@ -18,6 +18,7 @@ type RealmKeystoreRsa struct {
 
 	PrivateKey  string
 	Certificate string
+	ProviderId  string
 }
 
 func convertFromRealmKeystoreRsaToComponent(realmKey *RealmKeystoreRsa) *component {
@@ -46,7 +47,7 @@ func convertFromRealmKeystoreRsaToComponent(realmKey *RealmKeystoreRsa) *compone
 		Id:           realmKey.Id,
 		Name:         realmKey.Name,
 		ParentId:     realmKey.RealmId,
-		ProviderId:   "rsa",
+		ProviderId:   realmKey.ProviderId,
 		ProviderType: "org.keycloak.keys.KeyProvider",
 		Config:       componentConfig,
 	}
@@ -82,6 +83,7 @@ func convertFromComponentToRealmKeystoreRsa(component *component, realmId string
 		Algorithm:   component.getConfig("algorithm"),
 		PrivateKey:  component.getConfig("privateKey"),
 		Certificate: component.getConfig("certificate"),
+		ProviderId:  component.ProviderId,
 	}
 
 	return realmKey, nil
