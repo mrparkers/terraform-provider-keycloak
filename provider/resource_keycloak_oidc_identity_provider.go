@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/imdario/mergo"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
 func resourceKeycloakOidcIdentityProvider() *schema.Resource {
@@ -117,22 +118,22 @@ func getOidcIdentityProviderFromData(data *schema.ResourceData) (*keycloak.Ident
 	_, useJwksUrl := data.GetOk("jwks_url")
 
 	oidcIdentityProviderConfig := &keycloak.IdentityProviderConfig{
-		BackchannelSupported:        keycloak.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
-		ValidateSignature:           keycloak.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
+		BackchannelSupported:        types.KeycloakBoolQuoted(data.Get("backchannel_supported").(bool)),
+		ValidateSignature:           types.KeycloakBoolQuoted(data.Get("validate_signature").(bool)),
 		AuthorizationUrl:            data.Get("authorization_url").(string),
 		ClientId:                    data.Get("client_id").(string),
 		ClientSecret:                data.Get("client_secret").(string),
-		HideOnLoginPage:             keycloak.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
+		HideOnLoginPage:             types.KeycloakBoolQuoted(data.Get("hide_on_login_page").(bool)),
 		TokenUrl:                    data.Get("token_url").(string),
 		LogoutUrl:                   data.Get("logout_url").(string),
-		UILocales:                   keycloak.KeycloakBoolQuoted(data.Get("ui_locales").(bool)),
+		UILocales:                   types.KeycloakBoolQuoted(data.Get("ui_locales").(bool)),
 		LoginHint:                   data.Get("login_hint").(string),
 		JwksUrl:                     data.Get("jwks_url").(string),
 		UserInfoUrl:                 data.Get("user_info_url").(string),
-		UseJwksUrl:                  keycloak.KeycloakBoolQuoted(useJwksUrl),
-		DisableUserInfo:             keycloak.KeycloakBoolQuoted(data.Get("disable_user_info").(bool)),
+		UseJwksUrl:                  types.KeycloakBoolQuoted(useJwksUrl),
+		DisableUserInfo:             types.KeycloakBoolQuoted(data.Get("disable_user_info").(bool)),
 		DefaultScope:                data.Get("default_scopes").(string),
-		AcceptsPromptNoneForwFrmClt: keycloak.KeycloakBoolQuoted(data.Get("accepts_prompt_none_forward_from_client").(bool)),
+		AcceptsPromptNoneForwFrmClt: types.KeycloakBoolQuoted(data.Get("accepts_prompt_none_forward_from_client").(bool)),
 		Issuer:                      data.Get("issuer").(string),
 	}
 

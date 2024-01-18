@@ -56,7 +56,7 @@ func convertFromCustomUserFederationToComponent(custom *CustomUserFederation) *c
 }
 
 func convertFromComponentToCustomUserFederation(component *component, realmName string) (*CustomUserFederation, error) {
-	enabled, err := strconv.ParseBool(component.getConfig("enabled"))
+	enabled, err := parseBoolAndTreatEmptyStringAsFalse(component.getConfig("enabled"))
 	if err != nil {
 		return nil, err
 	}

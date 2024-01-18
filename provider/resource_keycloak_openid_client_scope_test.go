@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"strconv"
 	"testing"
 
@@ -198,7 +199,7 @@ func testAccCheckKeycloakClientScopeExistsWithCorrectIncludeInTokenScope(resourc
 			return err
 		}
 
-		if clientScope.Attributes.IncludeInTokenScope != keycloak.KeycloakBoolQuoted(includeInTokenScope) {
+		if clientScope.Attributes.IncludeInTokenScope != types.KeycloakBoolQuoted(includeInTokenScope) {
 			return fmt.Errorf("expected saml client includeInTokenScope to have %t, but got %t", includeInTokenScope, clientScope.Attributes.IncludeInTokenScope)
 		}
 

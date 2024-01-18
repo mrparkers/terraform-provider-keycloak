@@ -9,7 +9,7 @@ import (
 type AuthenticationExecutionConfig struct {
 	RealmId     string            `json:"-"`
 	ExecutionId string            `json:"-"`
-	Id          string            `json:"id"`
+	Id          string            `json:"id,omitempty"`
 	Alias       string            `json:"alias"`
 	Config      map[string]string `json:"config"`
 }

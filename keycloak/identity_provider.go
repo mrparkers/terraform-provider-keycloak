@@ -3,54 +3,55 @@ package keycloak
 import (
 	"context"
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"reflect"
 )
 
 type IdentityProviderConfig struct {
-	Key                             string                 `json:"key,omitempty"`
-	HostIp                          string                 `json:"hostIp,omitempty"`
-	UseJwksUrl                      KeycloakBoolQuoted     `json:"useJwksUrl,omitempty"`
-	JwksUrl                         string                 `json:"jwksUrl,omitempty"`
-	ClientId                        string                 `json:"clientId,omitempty"`
-	ClientSecret                    string                 `json:"clientSecret,omitempty"`
-	DisableUserInfo                 KeycloakBoolQuoted     `json:"disableUserInfo"`
-	UserInfoUrl                     string                 `json:"userInfoUrl,omitempty"`
-	HideOnLoginPage                 KeycloakBoolQuoted     `json:"hideOnLoginPage"`
-	NameIDPolicyFormat              string                 `json:"nameIDPolicyFormat,omitempty"`
-	EntityId                        string                 `json:"entityId,omitempty"`
-	SingleLogoutServiceUrl          string                 `json:"singleLogoutServiceUrl,omitempty"`
-	SingleSignOnServiceUrl          string                 `json:"singleSignOnServiceUrl,omitempty"`
-	SigningCertificate              string                 `json:"signingCertificate,omitempty"`
-	SignatureAlgorithm              string                 `json:"signatureAlgorithm,omitempty"`
-	XmlSigKeyInfoKeyNameTransformer string                 `json:"xmlSigKeyInfoKeyNameTransformer,omitempty"`
-	PostBindingAuthnRequest         KeycloakBoolQuoted     `json:"postBindingAuthnRequest,omitempty"`
-	PostBindingResponse             KeycloakBoolQuoted     `json:"postBindingResponse,omitempty"`
-	PostBindingLogout               KeycloakBoolQuoted     `json:"postBindingLogout,omitempty"`
-	ForceAuthn                      KeycloakBoolQuoted     `json:"forceAuthn,omitempty"`
-	WantAuthnRequestsSigned         KeycloakBoolQuoted     `json:"wantAuthnRequestsSigned,omitempty"`
-	WantAssertionsSigned            KeycloakBoolQuoted     `json:"wantAssertionsSigned,omitempty"`
-	WantAssertionsEncrypted         KeycloakBoolQuoted     `json:"wantAssertionsEncrypted,omitempty"`
-	BackchannelSupported            KeycloakBoolQuoted     `json:"backchannelSupported,omitempty"`
-	ValidateSignature               KeycloakBoolQuoted     `json:"validateSignature,omitempty"`
-	AuthorizationUrl                string                 `json:"authorizationUrl,omitempty"`
-	TokenUrl                        string                 `json:"tokenUrl,omitempty"`
-	LoginHint                       string                 `json:"loginHint,omitempty"`
-	UILocales                       KeycloakBoolQuoted     `json:"uiLocales,omitempty"`
-	LogoutUrl                       string                 `json:"logoutUrl,omitempty"`
-	DefaultScope                    string                 `json:"defaultScope,omitempty"`
-	AcceptsPromptNoneForwFrmClt     KeycloakBoolQuoted     `json:"acceptsPromptNoneForwardFromClient,omitempty"`
-	HostedDomain                    string                 `json:"hostedDomain,omitempty"`
-	UserIp                          KeycloakBoolQuoted     `json:"userIp,omitempty"`
-	OfflineAccess                   KeycloakBoolQuoted     `json:"offlineAccess,omitempty"`
-	PrincipalType                   string                 `json:"principalType,omitempty"`
-	PrincipalAttribute              string                 `json:"principalAttribute,omitempty"`
-	GuiOrder                        string                 `json:"guiOrder,omitempty"`
-	SyncMode                        string                 `json:"syncMode,omitempty"`
-	ExtraConfig                     map[string]interface{} `json:"-"`
-	AuthnContextClassRefs           KeycloakSliceQuoted    `json:"authnContextClassRefs,omitempty"`
-	AuthnContextComparisonType      string                 `json:"authnContextComparisonType,omitempty"`
-	AuthnContextDeclRefs            KeycloakSliceQuoted    `json:"authnContextDeclRefs,omitempty"`
-	Issuer                          string                 `json:"issuer,omitempty"`
+	Key                             string                    `json:"key,omitempty"`
+	HostIp                          string                    `json:"hostIp,omitempty"`
+	UseJwksUrl                      types.KeycloakBoolQuoted  `json:"useJwksUrl,omitempty"`
+	JwksUrl                         string                    `json:"jwksUrl,omitempty"`
+	ClientId                        string                    `json:"clientId,omitempty"`
+	ClientSecret                    string                    `json:"clientSecret,omitempty"`
+	DisableUserInfo                 types.KeycloakBoolQuoted  `json:"disableUserInfo"`
+	UserInfoUrl                     string                    `json:"userInfoUrl,omitempty"`
+	HideOnLoginPage                 types.KeycloakBoolQuoted  `json:"hideOnLoginPage"`
+	NameIDPolicyFormat              string                    `json:"nameIDPolicyFormat,omitempty"`
+	EntityId                        string                    `json:"entityId,omitempty"`
+	SingleLogoutServiceUrl          string                    `json:"singleLogoutServiceUrl,omitempty"`
+	SingleSignOnServiceUrl          string                    `json:"singleSignOnServiceUrl,omitempty"`
+	SigningCertificate              string                    `json:"signingCertificate,omitempty"`
+	SignatureAlgorithm              string                    `json:"signatureAlgorithm,omitempty"`
+	XmlSigKeyInfoKeyNameTransformer string                    `json:"xmlSigKeyInfoKeyNameTransformer,omitempty"`
+	PostBindingAuthnRequest         types.KeycloakBoolQuoted  `json:"postBindingAuthnRequest,omitempty"`
+	PostBindingResponse             types.KeycloakBoolQuoted  `json:"postBindingResponse,omitempty"`
+	PostBindingLogout               types.KeycloakBoolQuoted  `json:"postBindingLogout,omitempty"`
+	ForceAuthn                      types.KeycloakBoolQuoted  `json:"forceAuthn,omitempty"`
+	WantAuthnRequestsSigned         types.KeycloakBoolQuoted  `json:"wantAuthnRequestsSigned,omitempty"`
+	WantAssertionsSigned            types.KeycloakBoolQuoted  `json:"wantAssertionsSigned,omitempty"`
+	WantAssertionsEncrypted         types.KeycloakBoolQuoted  `json:"wantAssertionsEncrypted,omitempty"`
+	BackchannelSupported            types.KeycloakBoolQuoted  `json:"backchannelSupported,omitempty"`
+	ValidateSignature               types.KeycloakBoolQuoted  `json:"validateSignature,omitempty"`
+	AuthorizationUrl                string                    `json:"authorizationUrl,omitempty"`
+	TokenUrl                        string                    `json:"tokenUrl,omitempty"`
+	LoginHint                       string                    `json:"loginHint,omitempty"`
+	UILocales                       types.KeycloakBoolQuoted  `json:"uiLocales,omitempty"`
+	LogoutUrl                       string                    `json:"logoutUrl,omitempty"`
+	DefaultScope                    string                    `json:"defaultScope,omitempty"`
+	AcceptsPromptNoneForwFrmClt     types.KeycloakBoolQuoted  `json:"acceptsPromptNoneForwardFromClient,omitempty"`
+	HostedDomain                    string                    `json:"hostedDomain,omitempty"`
+	UserIp                          types.KeycloakBoolQuoted  `json:"userIp,omitempty"`
+	OfflineAccess                   types.KeycloakBoolQuoted  `json:"offlineAccess,omitempty"`
+	PrincipalType                   string                    `json:"principalType,omitempty"`
+	PrincipalAttribute              string                    `json:"principalAttribute,omitempty"`
+	GuiOrder                        string                    `json:"guiOrder,omitempty"`
+	SyncMode                        string                    `json:"syncMode,omitempty"`
+	ExtraConfig                     map[string]interface{}    `json:"-"`
+	AuthnContextClassRefs           types.KeycloakSliceQuoted `json:"authnContextClassRefs,omitempty"`
+	AuthnContextComparisonType      string                    `json:"authnContextComparisonType,omitempty"`
+	AuthnContextDeclRefs            types.KeycloakSliceQuoted `json:"authnContextDeclRefs,omitempty"`
+	Issuer                          string                    `json:"issuer,omitempty"`
 }
 
 type IdentityProvider struct {

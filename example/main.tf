@@ -209,6 +209,10 @@ resource "keycloak_openid_client" "test_client" {
   valid_redirect_uris = [
     "http://localhost:5555/callback",
   ]
+  valid_post_logout_redirect_uris = [
+    "http://localhost:5555/post-logout",
+    "http://localhost:5555/post-logout3",
+  ]
 
   client_secret = "secret"
 
@@ -421,6 +425,29 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
   ldap_full_name_attribute = "cn"
   read_only                = true
 }
+
+resource "keycloak_ldap_custom_mapper" "custom_mapper" {
+	name                    = "custom-mapper"
+	realm_id                = keycloak_ldap_user_federation.openldap.realm_id
+	ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
+
+	provider_id        		= "msad-user-account-control-mapper"
+	provider_type           = "org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
+}
+
+resource "keycloak_ldap_custom_mapper" "custom_mapper_with_config" {
+	name                    = "custom-mapper-with-config"
+	realm_id                = keycloak_ldap_user_federation.openldap.realm_id
+	ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
+
+	provider_id             = "user-attribute-ldap-mapper"
+	provider_type           = "org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
+	config                  = {
+		"user.model.attribute" = "username"
+		"ldap.attribute"       = "cn"
+	}
+}
+
 
 resource "keycloak_custom_user_federation" "custom" {
   name        = "custom1"

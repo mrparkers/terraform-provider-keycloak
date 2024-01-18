@@ -24,7 +24,7 @@ resource "keycloak_realm_keystore_rsa_generated" "keystore_rsa_generated" {
 
 	priority  = 100
 	algorithm = "RS256"
-	keystore_size  = 2048
+	key_size  = 2048
 }
 ```
 
@@ -36,7 +36,7 @@ resource "keycloak_realm_keystore_rsa_generated" "keystore_rsa_generated" {
 - `active` - (Optional) When `false`, key in not used for signing. Defaults to `true`.
 - `priority` - (Optional) Priority for the provider. Defaults to `0`
 - `algorithm` - (Optional) Intended algorithm for the key. Defaults to `RS256`
-- `keystore_size` - (Optional) Size for the generated keys. Defaults to `2048`.
+- `key_size` - (Optional) Size for the generated keys. Defaults to `2048`.
 
 ## Import
 

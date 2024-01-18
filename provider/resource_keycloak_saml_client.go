@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"reflect"
 	"strings"
 
@@ -19,7 +20,7 @@ import (
 
 var (
 	keycloakSamlClientNameIdFormats           = []string{"username", "email", "transient", "persistent"}
-	keycloakSamlClientSignatureAlgorithms     = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA512", "DSA_SHA1"}
+	keycloakSamlClientSignatureAlgorithms     = []string{"RSA_SHA1", "RSA_SHA256", "RSA_SHA256_MGF1", "RSA_SHA512", "RSA_SHA512_MGF1", "DSA_SHA1"}
 	keycloakSamlClientSignatureKeyNames       = []string{"NONE", "KEY_ID", "CERT_SUBJECT"}
 	keycloakSamlClientCanonicalizationMethods = map[string]string{
 		"EXCLUSIVE":               "http://www.w3.org/2001/10/xml-exc-c14n#",
@@ -268,13 +269,13 @@ func mapToSamlClientFromData(data *schema.ResourceData) *keycloak.SamlClient {
 	}
 
 	samlAttributes := &keycloak.SamlClientAttributes{
-		IncludeAuthnStatement:           keycloak.KeycloakBoolQuoted(data.Get("include_authn_statement").(bool)),
-		ForceNameIdFormat:               keycloak.KeycloakBoolQuoted(data.Get("force_name_id_format").(bool)),
-		SignDocuments:                   keycloak.KeycloakBoolQuoted(data.Get("sign_documents").(bool)),
-		SignAssertions:                  keycloak.KeycloakBoolQuoted(data.Get("sign_assertions").(bool)),
-		EncryptAssertions:               keycloak.KeycloakBoolQuoted(data.Get("encrypt_assertions").(bool)),
-		ClientSignatureRequired:         keycloak.KeycloakBoolQuoted(data.Get("client_signature_required").(bool)),
-		ForcePostBinding:                keycloak.KeycloakBoolQuoted(data.Get("force_post_binding").(bool)),
+		IncludeAuthnStatement:           types.KeycloakBoolQuoted(data.Get("include_authn_statement").(bool)),
+		ForceNameIdFormat:               types.KeycloakBoolQuoted(data.Get("force_name_id_format").(bool)),
+		SignDocuments:                   types.KeycloakBoolQuoted(data.Get("sign_documents").(bool)),
+		SignAssertions:                  types.KeycloakBoolQuoted(data.Get("sign_assertions").(bool)),
+		EncryptAssertions:               types.KeycloakBoolQuoted(data.Get("encrypt_assertions").(bool)),
+		ClientSignatureRequired:         types.KeycloakBoolQuoted(data.Get("client_signature_required").(bool)),
+		ForcePostBinding:                types.KeycloakBoolQuoted(data.Get("force_post_binding").(bool)),
 		SignatureAlgorithm:              data.Get("signature_algorithm").(string),
 		SignatureKeyName:                data.Get("signature_key_name").(string),
 		CanonicalizationMethod:          keycloakSamlClientCanonicalizationMethods[data.Get("canonicalization_method").(string)],
