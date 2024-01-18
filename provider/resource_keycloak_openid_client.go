@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/imdario/mergo"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"reflect"
 	"strings"
 
@@ -21,7 +22,6 @@ var (
 	keycloakOpenidClientAuthorizationPolicyEnforcementMode   = []string{"ENFORCING", "PERMISSIVE", "DISABLED"}
 	keycloakOpenidClientResourcePermissionDecisionStrategies = []string{"UNANIMOUS", "AFFIRMATIVE", "CONSENSUS"}
 	keycloakOpenidClientPkceCodeChallengeMethod              = []string{"", "plain", "S256"}
-	keycloakOpenidClientAuthenticatorTypes                   = []string{"client-secret", "client-jwt", "client-x509", "client-secret-jwt"}
 )
 
 func resourceKeycloakOpenidClient() *schema.Resource {
@@ -71,10 +71,10 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Sensitive: true,
 			},
 			"client_authenticator_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice(keycloakOpenidClientAuthenticatorTypes, false),
-				Computed:     true,
+				Type:     schema.TypeString,
+				Optional: true,
+				// No validation is performed since Keycloak plugins can register custom client authenticators
+				Default: "client-secret",
 			},
 			"standard_flow_enabled": {
 				Type:     schema.TypeBool,
@@ -102,6 +102,13 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Computed: true,
 			},
 			"valid_redirect_uris": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+				Optional: true,
+				Computed: true,
+			},
+			"valid_post_logout_redirect_uris": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
@@ -305,10 +312,12 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient, error) {
 	validRedirectUris := make([]string, 0)
 	webOrigins := make([]string, 0)
+	validPostLogoutRedirectUris := make([]string, 0)
 
 	rootUrlData, rootUrlOk := data.GetOkExists("root_url")
 	validRedirectUrisData, validRedirectUrisOk := data.GetOk("valid_redirect_uris")
 	webOriginsData, webOriginsOk := data.GetOk("web_origins")
+	validPostLogoutRedirectUrisData, validPostLogoutRedirectUrisOk := data.GetOk("valid_post_logout_redirect_uris")
 
 	rootUrlString := rootUrlData.(string)
 
@@ -321,6 +330,12 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 	if webOriginsOk {
 		for _, webOrigin := range webOriginsData.(*schema.Set).List() {
 			webOrigins = append(webOrigins, webOrigin.(string))
+		}
+	}
+
+	if validPostLogoutRedirectUrisOk {
+		for _, validPostLogoutRedirectUri := range validPostLogoutRedirectUrisData.(*schema.Set).List() {
+			validPostLogoutRedirectUris = append(validPostLogoutRedirectUris, validPostLogoutRedirectUri.(string))
 		}
 	}
 
@@ -341,25 +356,26 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 		FullScopeAllowed:          data.Get("full_scope_allowed").(bool),
 		Attributes: keycloak.OpenidClientAttributes{
 			PkceCodeChallengeMethod:               data.Get("pkce_code_challenge_method").(string),
-			ExcludeSessionStateFromAuthResponse:   keycloak.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
+			ExcludeSessionStateFromAuthResponse:   types.KeycloakBoolQuoted(data.Get("exclude_session_state_from_auth_response").(bool)),
 			AccessTokenLifespan:                   data.Get("access_token_lifespan").(string),
 			LoginTheme:                            data.Get("login_theme").(string),
 			ClientOfflineSessionIdleTimeout:       data.Get("client_offline_session_idle_timeout").(string),
 			ClientOfflineSessionMaxLifespan:       data.Get("client_offline_session_max_lifespan").(string),
 			ClientSessionIdleTimeout:              data.Get("client_session_idle_timeout").(string),
 			ClientSessionMaxLifespan:              data.Get("client_session_max_lifespan").(string),
-			UseRefreshTokens:                      keycloak.KeycloakBoolQuoted(data.Get("use_refresh_tokens").(bool)),
-			UseRefreshTokensClientCredentials:     keycloak.KeycloakBoolQuoted(data.Get("use_refresh_tokens_client_credentials").(bool)),
+			UseRefreshTokens:                      types.KeycloakBoolQuoted(data.Get("use_refresh_tokens").(bool)),
+			UseRefreshTokensClientCredentials:     types.KeycloakBoolQuoted(data.Get("use_refresh_tokens_client_credentials").(bool)),
 			FrontchannelLogoutUrl:                 data.Get("frontchannel_logout_url").(string),
 			BackchannelLogoutUrl:                  data.Get("backchannel_logout_url").(string),
-			BackchannelLogoutRevokeOfflineTokens:  keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_revoke_offline_sessions").(bool)),
-			BackchannelLogoutSessionRequired:      keycloak.KeycloakBoolQuoted(data.Get("backchannel_logout_session_required").(bool)),
+			BackchannelLogoutRevokeOfflineTokens:  types.KeycloakBoolQuoted(data.Get("backchannel_logout_revoke_offline_sessions").(bool)),
+			BackchannelLogoutSessionRequired:      types.KeycloakBoolQuoted(data.Get("backchannel_logout_session_required").(bool)),
 			ExtraConfig:                           getExtraConfigFromData(data),
-			Oauth2DeviceAuthorizationGrantEnabled: keycloak.KeycloakBoolQuoted(data.Get("oauth2_device_authorization_grant_enabled").(bool)),
+			Oauth2DeviceAuthorizationGrantEnabled: types.KeycloakBoolQuoted(data.Get("oauth2_device_authorization_grant_enabled").(bool)),
 			Oauth2DeviceCodeLifespan:              data.Get("oauth2_device_code_lifespan").(string),
 			Oauth2DevicePollingInterval:           data.Get("oauth2_device_polling_interval").(string),
 			ConsentScreenText:                     data.Get("consent_screen_text").(string),
-			DisplayOnConsentScreen:                keycloak.KeycloakBoolQuoted(data.Get("display_on_consent_screen").(bool)),
+			DisplayOnConsentScreen:                types.KeycloakBoolQuoted(data.Get("display_on_consent_screen").(bool)),
+			PostLogoutRedirectUris:                types.KeycloakSliceHashDelimited(validPostLogoutRedirectUris),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
@@ -440,6 +456,7 @@ func setOpenidClientData(ctx context.Context, keycloakClient *keycloak.KeycloakC
 	data.Set("service_accounts_enabled", client.ServiceAccountsEnabled)
 	data.Set("frontchannel_logout_enabled", client.FrontChannelLogoutEnabled)
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
+	data.Set("valid_post_logout_redirect_uris", client.Attributes.PostLogoutRedirectUris)
 	data.Set("web_origins", client.WebOrigins)
 	data.Set("admin_url", client.AdminUrl)
 	data.Set("base_url", client.BaseUrl)

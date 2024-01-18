@@ -3,6 +3,7 @@ package keycloak
 import (
 	"context"
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"strings"
 )
 
@@ -149,21 +150,22 @@ type BrowserSecurityHeaders struct {
 	XFrameOptions                   string `json:"xFrameOptions"`
 	XRobotsTag                      string `json:"xRobotsTag"`
 	XXSSProtection                  string `json:"xXSSProtection"`
+	ReferrerPolicy                  string `json:"referrerPolicy"`
 }
 
 type SmtpServer struct {
-	StartTls           KeycloakBoolQuoted `json:"starttls,omitempty"`
-	Auth               KeycloakBoolQuoted `json:"auth,omitempty"`
-	Port               string             `json:"port,omitempty"`
-	Host               string             `json:"host,omitempty"`
-	ReplyTo            string             `json:"replyTo,omitempty"`
-	ReplyToDisplayName string             `json:"replyToDisplayName,omitempty"`
-	From               string             `json:"from,omitempty"`
-	FromDisplayName    string             `json:"fromDisplayName,omitempty"`
-	EnvelopeFrom       string             `json:"envelopeFrom,omitempty"`
-	Ssl                KeycloakBoolQuoted `json:"ssl,omitempty"`
-	User               string             `json:"user,omitempty"`
-	Password           string             `json:"password,omitempty"`
+	StartTls           types.KeycloakBoolQuoted `json:"starttls,omitempty"`
+	Auth               types.KeycloakBoolQuoted `json:"auth,omitempty"`
+	Port               string                   `json:"port,omitempty"`
+	Host               string                   `json:"host,omitempty"`
+	ReplyTo            string                   `json:"replyTo,omitempty"`
+	ReplyToDisplayName string                   `json:"replyToDisplayName,omitempty"`
+	From               string                   `json:"from,omitempty"`
+	FromDisplayName    string                   `json:"fromDisplayName,omitempty"`
+	EnvelopeFrom       string                   `json:"envelopeFrom,omitempty"`
+	Ssl                types.KeycloakBoolQuoted `json:"ssl,omitempty"`
+	User               string                   `json:"user,omitempty"`
+	Password           string                   `json:"password,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewRealm(ctx context.Context, realm *Realm) error {

@@ -72,6 +72,12 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Set:      schema.HashString,
 				Computed: true,
 			},
+			"valid_post_logout_redirect_uris": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+				Computed: true,
+			},
 			"web_origins": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -244,6 +250,10 @@ func dataSourceKeycloakOpenidClientRead(ctx context.Context, data *schema.Resour
 	}
 
 	err = setOpenidClientData(ctx, keycloakClient, data, client)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	data.Set("extra_config", client.Attributes.ExtraConfig)
 
-	return diag.FromErr(err)
+	return nil
 }

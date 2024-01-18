@@ -2,7 +2,7 @@
 page_title: "keycloak_openid_client_client_policy Resource"
 ---
 
-# keycloak\_openid\_client\_client_\_policy Resource
+# keycloak\_openid\_client\_client\_policy Resource
 
 This resource can be used to create client policy.
 

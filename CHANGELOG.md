@@ -1,3 +1,106 @@
+## 4.4.0 (January 8, 2024)
+
+FEATURES:
+
+- new resource: `keycloak_ldap_custom_mapper` ([#863](https://github.com/mrparkers/terraform-provider-keycloak/pull/863))
+
+IMPROVEMENTS:
+
+- add `provider_id` attribute to `keycloak_realm_keystore_rsa` resource ([#858](https://github.com/mrparkers/terraform-provider-keycloak/pull/858))
+- compute `extra_config` for client data sources ([#885](https://github.com/mrparkers/terraform-provider-keycloak/pull/885))
+- support updated RedHat SSO version strings ([#903](https://github.com/mrparkers/terraform-provider-keycloak/pull/903))
+- add `required_actions` attribute to `keycloak_user` resource ([#867](https://github.com/mrparkers/terraform-provider-keycloak/pull/867))
+- allow use of custom client authenticator types ([#845](https://github.com/mrparkers/terraform-provider-keycloak/pull/845))
+- allow users to set `referrer_policy` header within `security_defenses` for `keycloak_realm` resource ([#879](https://github.com/mrparkers/terraform-provider-keycloak/pull/879))
+
+BUG FIXES:
+
+- set the correct value for `identityProviderMapper` when using keycloak-oidc identity provider ([#850](https://github.com/mrparkers/terraform-provider-keycloak/pull/850))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@NataliaKhodiakova](https://github.com/NataliaKhodiakova)
+- [@olivierboudet](https://github.com/olivierboudet)
+- [@guthypeter](https://github.com/guthypeter)
+- [@kherock](https://github.com/kherock)
+- [@smoehrle](https://github.com/smoehrle)
+- [@wombat](https://github.com/wombat)
+- [@scheying](https://github.com/scheying)
+- [@JackHartley](https://github.com/JackHartley)
+- [@stale-vegait](https://github.com/stale-vegait)
+- [@jrpedrianes](https://github.com/jrpedrianes)
+
+## 4.3.1 (June 8, 2023)
+
+BUG FIXES:
+
+- avoid validation errors during plan for missing realm and openid client resources ([#841](https://github.com/mrparkers/terraform-provider-keycloak/pull/841))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@kherock](https://github.com/kherock)
+
+## v4.3.0 (June 5, 2023)
+
+IMPROVEMENTS:
+
+- update supported Keycloak versions ([#828](https://github.com/mrparkers/terraform-provider-keycloak/pull/828))
+- update to go 1.19 ([#848](https://github.com/mrparkers/terraform-provider-keycloak/pull/848))
+- add new `login_hint` attribute for `keycloak_saml_identity_provider` resource ([#830](https://github.com/mrparkers/terraform-provider-keycloak/pull/830))
+
+BUG FIXES:
+
+- avoid inserting authenticator execution configs with empty strings as ID ([#840](https://github.com/mrparkers/terraform-provider-keycloak/pull/840))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@malfter](https://github.com/malfter)
+- [@toddkazakov](https://github.com/toddkazakov)
+- [@mohammedalics](https://github.com/mohammedalics)
+- [@kherock](https://github.com/kherock)
+
+## v4.2.0 (March 6, 2023)
+
+IMPROVEMENTS:
+
+- allow the `internal_id` attribute for the `keycloak_realm` resource to be set during apply instead of read-only ([#807](https://github.com/mrparkers/terraform-provider-keycloak/pull/807))
+- allow for multivalue attributes in `extra_config` attribute for `keycloak_custom_user_federation` resource ([#761](https://github.com/mrparkers/terraform-provider-keycloak/pull/761))
+
+BUG FIXES:
+
+- allow users with backslashes in their name to be assigned to groups via `keycloak_group_memberships` resource ([#778](https://github.com/mrparkers/terraform-provider-keycloak/pull/778))
+- correctly set `nameIDPolicyFormat` when updating value in `extra_config` in `keycloak_saml_identity_provider` resource ([#793](https://github.com/mrparkers/terraform-provider-keycloak/pull/793))
+- treat empty attributes as nil values when importing `keycloak_ldap_user_federation` resource ([#784](https://github.com/mrparkers/terraform-provider-keycloak/pull/784))
+- treat empty attributes as nil values when importing `keycloak_custom_user_federation` resource ([#809](https://github.com/mrparkers/terraform-provider-keycloak/pull/809))
+
+Huge thanks to all the individuals who have contributed towards this release:
+
+- [@pablo-ruth](https://github.com/pablo-ruth)
+- [@Redestros](https://github.com/Redestros)
+- [@MatrixCrawler](https://github.com/MatrixCrawler)
+- [@imykolenko](https://github.com/imykolenko)
+- [@ChrisHubinger](https://github.com/ChrisHubinger)
+- [@chifu1234](https://github.com/chifu1234)
+
+## v4.1.0 (December 4, 2022)
+
+IMPROVEMENTS:
+
+- add `IMPORT` mode to `keycloak_ldap_role_mapper` resource ([#768](https://github.com/mrparkers/terraform-provider-keycloak/pull/768))
+- add `RSA_SHA256_MGF1` and `RSA_SHA512_MGF1` signature algorithms to `keycloak_saml_client` resource ([#757](https://github.com/mrparkers/terraform-provider-keycloak/pull/757))
+- add `valid_post_logout_redirect_uris` attribute to `keycloak_openid_client` resource ([#777](https://github.com/mrparkers/terraform-provider-keycloak/pull/777))
+
+BUG FIXES:
+
+- fix incorrect import ID for `keycloak_openid_client_authorization_*` resources ([#763](https://github.com/mrparkers/terraform-provider-keycloak/pull/763))
+- fix payload used during deletion of `keycloak_generic_role_mapper` resource to prevent more mappers from unintentionally being removed ([#772](https://github.com/mrparkers/terraform-provider-keycloak/pull/772))
+
+## v4.0.1 (October 13, 2022)
+
+BUG FIXES:
+
+- restored the default value for the `client_authenticator_type` attribute within the `keycloak_openid_client` resource ([#755](https://github.com/mrparkers/terraform-provider-keycloak/pull/755))
+
 ## v4.0.0 (October 10, 2022)
 
 BREAKING CHANGES:

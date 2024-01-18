@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"regexp"
 	"strconv"
 	"testing"
@@ -83,6 +84,12 @@ func TestAccKeycloakSamlIdentityProvider_extraConfig(t *testing.T) {
 					testAccCheckKeycloakSamlIdentityProviderHasCustomConfigValue("keycloak_saml_identity_provider.saml", customConfigValue),
 				),
 			},
+			{
+				Config: testKeycloakSamlIdentityProvider_extra_config(samlName, "another-test-config", customConfigValue),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakSamlIdentityProviderHasNameIdPolicyFormatValue("keycloak_saml_identity_provider.saml", nameIdPolicyFormats["Email"]),
+				),
+			},
 		},
 	})
 }
@@ -150,6 +157,7 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 	firstPostBindingLogout := randomBool()
 	firstPostBindingResponse := randomBool()
 	firstPostBindingRequest := randomBool()
+	firstLoginHint := randomBool()
 
 	firstSaml := &keycloak.IdentityProvider{
 		Alias:   acctest.RandString(10),
@@ -157,24 +165,25 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 		Config: &keycloak.IdentityProviderConfig{
 			EntityId:                        "https://example.com/entity_id/1",
 			SingleSignOnServiceUrl:          "https://example.com/signon/1",
-			BackchannelSupported:            keycloak.KeycloakBoolQuoted(firstBackchannel),
-			ValidateSignature:               keycloak.KeycloakBoolQuoted(firstValidateSignature),
-			HideOnLoginPage:                 keycloak.KeycloakBoolQuoted(firstHideOnLogin),
+			BackchannelSupported:            types.KeycloakBoolQuoted(firstBackchannel),
+			ValidateSignature:               types.KeycloakBoolQuoted(firstValidateSignature),
+			HideOnLoginPage:                 types.KeycloakBoolQuoted(firstHideOnLogin),
 			NameIDPolicyFormat:              "Email",
 			SingleLogoutServiceUrl:          "https://example.com/logout/1",
 			SigningCertificate:              acctest.RandString(10),
 			SignatureAlgorithm:              "RSA_SHA512",
 			XmlSigKeyInfoKeyNameTransformer: "KEY_ID",
-			PostBindingAuthnRequest:         keycloak.KeycloakBoolQuoted(firstPostBindingRequest),
-			PostBindingResponse:             keycloak.KeycloakBoolQuoted(firstPostBindingResponse),
-			PostBindingLogout:               keycloak.KeycloakBoolQuoted(firstPostBindingLogout),
-			ForceAuthn:                      keycloak.KeycloakBoolQuoted(firstForceAuthn),
-			WantAssertionsSigned:            keycloak.KeycloakBoolQuoted(firstAssertionsSigned),
-			WantAssertionsEncrypted:         keycloak.KeycloakBoolQuoted(firstAssertionsEncrypted),
+			PostBindingAuthnRequest:         types.KeycloakBoolQuoted(firstPostBindingRequest),
+			PostBindingResponse:             types.KeycloakBoolQuoted(firstPostBindingResponse),
+			PostBindingLogout:               types.KeycloakBoolQuoted(firstPostBindingLogout),
+			ForceAuthn:                      types.KeycloakBoolQuoted(firstForceAuthn),
+			WantAssertionsSigned:            types.KeycloakBoolQuoted(firstAssertionsSigned),
+			WantAssertionsEncrypted:         types.KeycloakBoolQuoted(firstAssertionsEncrypted),
+			LoginHint:                       strconv.Quote(strconv.FormatBool(firstLoginHint)),
 			GuiOrder:                        strconv.Itoa(acctest.RandIntRange(1, 3)),
 			SyncMode:                        randomStringInSlice(syncModes),
-			AuthnContextClassRefs:           keycloak.KeycloakSliceQuoted{"foo", "bar"},
-			AuthnContextDeclRefs:            keycloak.KeycloakSliceQuoted{"foo"},
+			AuthnContextClassRefs:           types.KeycloakSliceQuoted{"foo", "bar"},
+			AuthnContextDeclRefs:            types.KeycloakSliceQuoted{"foo"},
 			AuthnContextComparisonType:      "exact",
 		},
 	}
@@ -185,24 +194,25 @@ func TestAccKeycloakSamlIdentityProvider_basicUpdateAll(t *testing.T) {
 		Config: &keycloak.IdentityProviderConfig{
 			EntityId:                        "https://example.com/entity_id/2",
 			SingleSignOnServiceUrl:          "https://example.com/signon/2",
-			BackchannelSupported:            keycloak.KeycloakBoolQuoted(!firstBackchannel),
-			ValidateSignature:               keycloak.KeycloakBoolQuoted(!firstValidateSignature),
-			HideOnLoginPage:                 keycloak.KeycloakBoolQuoted(!firstHideOnLogin),
+			BackchannelSupported:            types.KeycloakBoolQuoted(!firstBackchannel),
+			ValidateSignature:               types.KeycloakBoolQuoted(!firstValidateSignature),
+			HideOnLoginPage:                 types.KeycloakBoolQuoted(!firstHideOnLogin),
 			NameIDPolicyFormat:              "Persistent",
 			SingleLogoutServiceUrl:          "https://example.com/logout/2",
 			SigningCertificate:              acctest.RandString(10),
 			SignatureAlgorithm:              "RSA_SHA256",
 			XmlSigKeyInfoKeyNameTransformer: "NONE",
-			PostBindingAuthnRequest:         keycloak.KeycloakBoolQuoted(!firstPostBindingRequest),
-			PostBindingResponse:             keycloak.KeycloakBoolQuoted(!firstPostBindingResponse),
-			PostBindingLogout:               keycloak.KeycloakBoolQuoted(!firstPostBindingLogout),
-			ForceAuthn:                      keycloak.KeycloakBoolQuoted(!firstForceAuthn),
-			WantAssertionsSigned:            keycloak.KeycloakBoolQuoted(!firstAssertionsSigned),
-			WantAssertionsEncrypted:         keycloak.KeycloakBoolQuoted(!firstAssertionsEncrypted),
+			PostBindingAuthnRequest:         types.KeycloakBoolQuoted(!firstPostBindingRequest),
+			PostBindingResponse:             types.KeycloakBoolQuoted(!firstPostBindingResponse),
+			PostBindingLogout:               types.KeycloakBoolQuoted(!firstPostBindingLogout),
+			ForceAuthn:                      types.KeycloakBoolQuoted(!firstForceAuthn),
+			WantAssertionsSigned:            types.KeycloakBoolQuoted(!firstAssertionsSigned),
+			WantAssertionsEncrypted:         types.KeycloakBoolQuoted(!firstAssertionsEncrypted),
+			LoginHint:                       strconv.Quote(strconv.FormatBool(!firstLoginHint)),
 			GuiOrder:                        strconv.Itoa(acctest.RandIntRange(1, 3)),
 			SyncMode:                        randomStringInSlice(syncModes),
-			AuthnContextClassRefs:           keycloak.KeycloakSliceQuoted{"foo", "hello"},
-			AuthnContextDeclRefs:            keycloak.KeycloakSliceQuoted{"baz"},
+			AuthnContextClassRefs:           types.KeycloakSliceQuoted{"foo", "hello"},
+			AuthnContextDeclRefs:            types.KeycloakSliceQuoted{"baz"},
 			AuthnContextComparisonType:      "exact",
 		},
 	}
@@ -378,6 +388,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	extra_config                = {
 		%s = "%s"
 	}
+	name_id_policy_format       = "Email"
 }
 	`, testAccRealm.Realm, alias, configKey, configValue)
 }

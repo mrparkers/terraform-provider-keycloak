@@ -86,7 +86,7 @@ func resourceKeycloakGenericRoleMapperRead(ctx context.Context, data *schema.Res
 
 	role, err := keycloakClient.GetRole(ctx, realmId, roleId)
 	if err != nil {
-		return diag.FromErr(err)
+		return handleNotFoundError(ctx, err, data)
 	}
 
 	mappedRole, err := keycloakClient.GetRoleScopeMapping(ctx, realmId, clientId, clientScopeId, role)
