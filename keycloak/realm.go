@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
@@ -173,26 +172,25 @@ type SmtpServer struct {
 func (keycloakClient *KeycloakClient) NewRealm(ctx context.Context, realm *Realm) error {
 	_, _, err := keycloakClient.post(ctx, "/realms", realm)
 
+	if err != nil {
+		return err
+	}
+
+	// Always refresh token after creating realm to include any admin roles for the new realm.
+	// This works around keycloak issue 26301 where, since v22, newly created realms no longer return 403,
+	// bypassing the refresh mechanism in KeycloakClient.sendRequest
+	err = keycloakClient.refresh(ctx)
+
 	return err
 }
 
 func (keycloakClient *KeycloakClient) GetRealm(ctx context.Context, name string) (*Realm, error) {
 	var realm Realm
-	var err error
 
-	err = keycloakClient.get(ctx, fmt.Sprintf("/realms/%s", name), &realm, nil)
-	if err == nil && realm.DefaultRole == nil {
-		tflog.Warn(ctx, "Realm does not contain expected properties. Refreshing access token to bypass any caching in Keycloak and fetching realm again.")
-		err = keycloakClient.refresh(ctx)
-		if err == nil {
-			err = keycloakClient.get(ctx, fmt.Sprintf("/realms/%s", name), &realm, nil)
-		}
-	}
-
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s", name), &realm, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	return &realm, nil
 }
 
