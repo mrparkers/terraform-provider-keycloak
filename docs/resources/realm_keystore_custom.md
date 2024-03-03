@@ -44,7 +44,7 @@ resource "keycloak_realm_keystore_custom" "keystore_custom" {
 - `extra_config` - (Optional) A map of key/value pairs to add extra configuration attributes to this keystore.
   ``` hcl
   extra_config = {
-  "custom.attribute" = "value"
+  "key1" = "value1"
   }
   ```
 
