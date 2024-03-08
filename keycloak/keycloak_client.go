@@ -46,6 +46,7 @@ type ClientCredentials struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	TokenType    string `json:"token_type"`
+    ClientAssertion     string `json:"client_assertion,omitempty"`
 }
 
 const (
@@ -60,16 +61,17 @@ var redHatSSO7VersionMap = map[int]string{
 	4: "9.0.17",
 }
 
-func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecret, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string, redHatSSO bool, additionalHeaders map[string]string) (*KeycloakClient, error) {
-	clientCredentials := &ClientCredentials{
-		ClientId:     clientId,
-		ClientSecret: clientSecret,
-	}
+func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecret, clientAssertion, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string, redHatSSO bool, additionalHeaders map[string]string) (*KeycloakClient, error) {
+    clientCredentials := &ClientCredentials{
+        ClientId:            clientId,
+        ClientSecret:        clientSecret,
+        ClientAssertion:     clientAssertion,
+    }
 	if password != "" && username != "" {
 		clientCredentials.Username = username
 		clientCredentials.Password = password
 		clientCredentials.GrantType = "password"
-	} else if clientSecret != "" {
+	} else if clientSecret != "" || clientAssertion != "" {
 		clientCredentials.GrantType = "client_credentials"
 	} else {
 		if initialLogin {
@@ -108,6 +110,7 @@ func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecre
 		}
 	}
 
+	keycloakClient.debug = true
 	return &keycloakClient, nil
 }
 
@@ -259,24 +262,29 @@ func (keycloakClient *KeycloakClient) refresh(ctx context.Context) error {
 }
 
 func (keycloakClient *KeycloakClient) getAuthenticationFormData() url.Values {
-	authenticationFormData := url.Values{}
-	authenticationFormData.Set("client_id", keycloakClient.clientCredentials.ClientId)
-	authenticationFormData.Set("grant_type", keycloakClient.clientCredentials.GrantType)
+    authenticationFormData := url.Values{}
+    authenticationFormData.Set("grant_type", keycloakClient.clientCredentials.GrantType)
 
-	if keycloakClient.clientCredentials.GrantType == "password" {
-		authenticationFormData.Set("username", keycloakClient.clientCredentials.Username)
-		authenticationFormData.Set("password", keycloakClient.clientCredentials.Password)
+    if keycloakClient.clientCredentials.GrantType == "password" {
+		// Since we don't need client_id for jwt we put it in only on password and client/secret
+		authenticationFormData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+        authenticationFormData.Set("username", keycloakClient.clientCredentials.Username)
+        authenticationFormData.Set("password", keycloakClient.clientCredentials.Password)
 
-		if keycloakClient.clientCredentials.ClientSecret != "" {
-			authenticationFormData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
-		}
+        if keycloakClient.clientCredentials.ClientSecret != "" {
+            authenticationFormData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
+        }
+    } else if keycloakClient.clientCredentials.ClientAssertion != "" {		
+        authenticationFormData.Set("client_assertion", keycloakClient.clientCredentials.ClientAssertion)
+        authenticationFormData.Set("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+    } else if keycloakClient.clientCredentials.GrantType == "client_credentials" {
+		authenticationFormData.Set("client_id", keycloakClient.clientCredentials.ClientId)
+        authenticationFormData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
+    }    
 
-	} else if keycloakClient.clientCredentials.GrantType == "client_credentials" {
-		authenticationFormData.Set("client_secret", keycloakClient.clientCredentials.ClientSecret)
-	}
-
-	return authenticationFormData
+    return authenticationFormData
 }
+
 
 func (keycloakClient *KeycloakClient) addRequestHeaders(request *http.Request) {
 	tokenType := keycloakClient.clientCredentials.TokenType
