@@ -130,7 +130,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_SECRET", nil),
 			},
 			"client_assertion": {
-				Required:    true,
+				Optional:    true,
 				Type:        schema.TypeString,
 				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_ASSERTION", nil),
 			},
