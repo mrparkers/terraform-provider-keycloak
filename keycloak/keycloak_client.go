@@ -35,6 +35,7 @@ type KeycloakClient struct {
 	additionalHeaders map[string]string
 	debug             bool
 	redHatSSO         bool
+	tokenSetManually  bool
 }
 
 type ClientCredentials struct {
@@ -60,61 +61,77 @@ var redHatSSO7VersionMap = map[int]string{
 	5: "15.0.6",
 	4: "9.0.17",
 }
-
-func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecret, clientAssertion, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string, redHatSSO bool, additionalHeaders map[string]string) (*KeycloakClient, error) {
+func NewKeycloakClient(ctx context.Context, url, basePath, clientId, clientSecret, clientAssertion, realm, username, password string, initialLogin bool, clientTimeout int, caCert string, tlsInsecureSkipVerify bool, userAgent string, redHatSSO bool, additionalHeaders map[string]string, tokenInfoJSON string) (*KeycloakClient, error) {
     clientCredentials := &ClientCredentials{
         ClientId:            clientId,
         ClientSecret:        clientSecret,
         ClientAssertion:     clientAssertion,
     }
-	if password != "" && username != "" {
-		clientCredentials.Username = username
-		clientCredentials.Password = password
-		clientCredentials.GrantType = "password"
-	} else if clientSecret != "" || clientAssertion != "" {
-		clientCredentials.GrantType = "client_credentials"
-	} else {
-		if initialLogin {
-			return nil, fmt.Errorf("must specify client id, username and password for password grant, or client id and secret for client credentials grant")
-		} else {
-			tflog.Warn(ctx, "missing required keycloak credentials, but proceeding anyways as initial_login is false")
-		}
-	}
 
-	httpClient, err := newHttpClient(tlsInsecureSkipVerify, clientTimeout, caCert)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create http client: %v", err)
-	}
+    // Assume we don't need initial login by default
+    initialLogin = false
 
-	keycloakClient := KeycloakClient{
-		baseUrl:           url + basePath,
-		clientCredentials: clientCredentials,
-		httpClient:        httpClient,
-		initialLogin:      initialLogin,
-		realm:             realm,
-		userAgent:         userAgent,
-		redHatSSO:         redHatSSO,
-		additionalHeaders: additionalHeaders,
-	}
+    if tokenInfoJSON != "" {
+        var tokenInfo struct {
+            AccessToken  string `json:"access_token"`
+            RefreshToken string `json:"refresh_token"`
+            TokenType    string `json:"token_type"`
+        }
+        if err := json.Unmarshal([]byte(tokenInfoJSON), &tokenInfo); err == nil {
+            clientCredentials.AccessToken = tokenInfo.AccessToken
+            clientCredentials.RefreshToken = tokenInfo.RefreshToken
+            clientCredentials.TokenType = tokenInfo.TokenType
+        } else {
+            return nil, fmt.Errorf("failed to parse token info JSON: %v", err)
+        }
+    } else {
+        // Set initialLogin to true only if we don't have tokenInfoJSON
+        // and we have sufficient credentials for a login attempt
+        if (password != "" && username != "") || clientSecret != "" || clientAssertion != "" {
+            initialLogin = true
+        } else {
+            return nil, fmt.Errorf("must specify either token info JSON or valid credentials for login")
+        }
+    }
 
-	if keycloakClient.initialLogin {
-		err = keycloakClient.login(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to perform initial login to Keycloak: %v", err)
-		}
-	}
+    httpClient, err := newHttpClient(tlsInsecureSkipVerify, clientTimeout, caCert)
+    if err != nil {
+        return nil, fmt.Errorf("failed to create http client: %v", err)
+    }
 
-	if tfLog, ok := os.LookupEnv("TF_LOG"); ok {
-		if tfLog == "DEBUG" {
-			keycloakClient.debug = true
-		}
-	}
+    keycloakClient := KeycloakClient{
+        baseUrl:           url + basePath,
+        clientCredentials: clientCredentials,
+        httpClient:        httpClient,
+        initialLogin:      initialLogin,
+        realm:             realm,
+        userAgent:         userAgent,
+        redHatSSO:         redHatSSO,
+        additionalHeaders: additionalHeaders,
+		tokenSetManually: tokenInfoJSON != "",
+    }
+     
+    // Perform initial login only if necessary
+    if initialLogin {
+        err = keycloakClient.login(ctx)
+        if err != nil {
+            return nil, fmt.Errorf("failed to perform initial login to Keycloak: %v", err)
+        }
+    }
 
-	keycloakClient.debug = true
-	return &keycloakClient, nil
+    if tfLog, ok := os.LookupEnv("TF_LOG"); ok && tfLog == "DEBUG" {
+        keycloakClient.debug = true
+    }
+
+    return &keycloakClient, nil
 }
 
+
 func (keycloakClient *KeycloakClient) login(ctx context.Context) error {
+    if keycloakClient.tokenSetManually {
+        // If tokens were set manually, skip login.
+        return nil
+	}
 	accessTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	accessTokenData := keycloakClient.getAuthenticationFormData()
 
@@ -206,6 +223,10 @@ func (keycloakClient *KeycloakClient) login(ctx context.Context) error {
 }
 
 func (keycloakClient *KeycloakClient) refresh(ctx context.Context) error {
+    if keycloakClient.tokenSetManually {
+		// if set manually skip
+		return nil
+	}
 	refreshTokenUrl := fmt.Sprintf(tokenUrl, keycloakClient.baseUrl, keycloakClient.realm)
 	refreshTokenData := keycloakClient.getAuthenticationFormData()
 

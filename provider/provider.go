@@ -134,6 +134,11 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 				Type:        schema.TypeString,
 				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_CLIENT_ASSERTION", nil),
 			},
+			"token_info_json": {
+				Optional:    true,
+				Type:        schema.TypeString,
+				DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_TOKEN_INFO_JSON", nil),
+			},
 			"username": {
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -211,6 +216,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 		clientId := data.Get("client_id").(string)
 		clientSecret := data.Get("client_secret").(string)
 		clientAssertion := data.Get("client_assertion").(string)
+		tokenInfoJSON := data.Get("token_info_json").(string)
 
 		username := data.Get("username").(string)
 		password := data.Get("password").(string)
@@ -230,7 +236,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 		userAgent := fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", provider.TerraformVersion, meta.SDKVersionString())
 	
 		// Adjust the function call to include clientAssertion and clientAssertionType
-		keycloakClient, err := keycloak.NewKeycloakClient(ctx, url, basePath, clientId, clientSecret, clientAssertion, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent, redHatSSO, additionalHeaders)
+		keycloakClient, err := keycloak.NewKeycloakClient(ctx, url, basePath, clientId, clientSecret, clientAssertion, realm, username, password, initialLogin, clientTimeout, rootCaCertificate, tlsInsecureSkipVerify, userAgent, redHatSSO, additionalHeaders, tokenInfoJSON)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,

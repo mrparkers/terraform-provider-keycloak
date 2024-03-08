@@ -96,6 +96,24 @@ The following arguments are supported:
 ## Example JWT signer code:
 
 ```
+#!/bin/bash
+
+# Variables
+KMS_KEY_ARN="$1"
+ALGORITHM="RSASSA_PKCS1_V1_5_SHA_256"
+CLIENT_ID="test"
+AUTH_SERVER_TOKEN_ENDPOINT_URL="$2"
+
+# Helper functions
+base64url_encode() {
+    openssl enc -base64 -A | tr '+/' '-_' | tr -d '='
+}
+
+generate_jti() {
+    # Generates a random string for jti using /dev/urandom
+    head -c 16 /dev/urandom | base64 | tr -d '/+=' | cut -c -22
+}
+
 
 # JWT Claims
 ISSUER="$CLIENT_ID" # Issuer
@@ -119,4 +137,41 @@ PAYLOAD=$(jq -n \
     --argjson exp $EXPIRATION_TIME \
     '{iss: $iss, sub: $sub, aud: $aud, jti: $jti, iat: $iat, exp: $exp}')
 PAYLOAD_BASE64=$(echo -n "$PAYLOAD" | base64url_encode)
+
+# Prepare the message to be signed
+MESSAGE="$HEADER_BASE64.$PAYLOAD_BASE64"
+
+# Use AWS KMS to sign the message
+SIGNATURE_JSON=$(echo -n "$MESSAGE" | aws kms sign \
+    --key-id "$KMS_KEY_ARN" \
+    --message-type RAW \
+    --signing-algorithm "$ALGORITHM" \
+    --message fileb:///dev/stdin \
+    --output json)
+SIGNATURE=$(echo $SIGNATURE_JSON | jq -r '.Signature' | base64 -d | base64url_encode)
+
+# Construct the JWT
+JWT="$HEADER_BASE64.$PAYLOAD_BASE64.$SIGNATURE"
+
+# echo "jwt = \"$JWT\"" > terraform.tfvars
+# echo "$JWT" > /tmp/test
+
+EXCHANGED_JWT=$(curl --location --request POST ${AUTH_SERVER_TOKEN_ENDPOINT_URL} \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer' \
+--data-urlencode "client_assertion=${JWT}" \
+--data-urlencode 'grant_type=client_credentials' | base64 | tr -d '\n')
+
+echo "token_info_json = \"$EXCHANGED_JWT\"" > terraform.tfvars
+```
+
+you can then use it via:
+
+```
+provider "keycloak" {
+  token_info_json = base64decode(var.token_info_json)
+  url             = "http://localhost:8080"
+  initial_login = false
+}
+
 ```
