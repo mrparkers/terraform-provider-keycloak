@@ -6,14 +6,19 @@ MAKEFLAGS += --silent
 
 VERSION=$$(git describe --tags)
 
-build:
+clean:
+	rm -f terraform-provider-keycloak_*
+	rm -rf example/.terraform/ example/terraform.d/
+
+build: clean
 	CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$(VERSION)" -o terraform-provider-keycloak_$(VERSION)
 
 build-example: build
-	mkdir -p example/.terraform/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)
-	mkdir -p example/terraform.d/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)
-	cp terraform-provider-keycloak_* example/.terraform/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)/
-	cp terraform-provider-keycloak_* example/terraform.d/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)/
+	rm -rf example/.terraform/ example/terraform.d/
+	mkdir -p example/.terraform/plugins/terraform.local/mrparkers/keycloak/4.4.0/$(GOOS)_$(GOARCH)
+	mkdir -p example/terraform.d/plugins/terraform.local/mrparkers/keycloak/4.4.0/$(GOOS)_$(GOARCH)
+	cp terraform-provider-keycloak_* example/.terraform/plugins/terraform.local/mrparkers/keycloak/4.4.0/$(GOOS)_$(GOARCH)/
+	cp terraform-provider-keycloak_* example/terraform.d/plugins/terraform.local/mrparkers/keycloak/4.4.0/$(GOOS)_$(GOARCH)/
 
 local: deps
 	docker compose up --build -d
