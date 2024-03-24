@@ -115,6 +115,11 @@ func resourceKeycloakOpenidClient() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"id_token_signed_response_alg": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"web_origins": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -376,6 +381,7 @@ func getOpenidClientFromData(data *schema.ResourceData) (*keycloak.OpenidClient,
 			ConsentScreenText:                     data.Get("consent_screen_text").(string),
 			DisplayOnConsentScreen:                types.KeycloakBoolQuoted(data.Get("display_on_consent_screen").(bool)),
 			PostLogoutRedirectUris:                types.KeycloakSliceHashDelimited(validPostLogoutRedirectUris),
+			IdTokenSignatureAlgorithm:             data.Get("id_token_signed_response_alg").(string),
 		},
 		ValidRedirectUris: validRedirectUris,
 		WebOrigins:        webOrigins,
@@ -457,6 +463,7 @@ func setOpenidClientData(ctx context.Context, keycloakClient *keycloak.KeycloakC
 	data.Set("frontchannel_logout_enabled", client.FrontChannelLogoutEnabled)
 	data.Set("valid_redirect_uris", client.ValidRedirectUris)
 	data.Set("valid_post_logout_redirect_uris", client.Attributes.PostLogoutRedirectUris)
+	data.Set("id_token_signed_response_alg", client.Attributes.IdTokenSignatureAlgorithm)
 	data.Set("web_origins", client.WebOrigins)
 	data.Set("admin_url", client.AdminUrl)
 	data.Set("base_url", client.BaseUrl)

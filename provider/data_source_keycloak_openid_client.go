@@ -78,6 +78,10 @@ func dataSourceKeycloakOpenidClient() *schema.Resource {
 				Set:      schema.HashString,
 				Computed: true,
 			},
+			"id_token_signed_response_alg": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"web_origins": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
