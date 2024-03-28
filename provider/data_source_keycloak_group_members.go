@@ -35,7 +35,12 @@ func dataSourceKeycloakGroupMembersRead(ctx context.Context, data *schema.Resour
 	realmId := data.Get("realm_id").(string)
 	groupName := data.Get("name").(string)
 
-	users, err := keycloakClient.GetGroupMembers(ctx, realmId, groupName)
+	group, err := keycloakClient.GetGroupByName(ctx, realmId, groupName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	users, err := keycloakClient.GetGroupMembers(ctx, realmId, group.Id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
