@@ -25,6 +25,7 @@ type User struct {
 	Enabled             bool                `json:"enabled"`
 	Attributes          map[string][]string `json:"attributes"`
 	FederatedIdentities FederatedIdentities `json:"federatedIdentities"`
+	RequiredActions     []string            `json:"requiredActions"`
 }
 
 type PasswordCredentials struct {
@@ -35,15 +36,16 @@ type PasswordCredentials struct {
 
 func (keycloakClient *KeycloakClient) NewUser(ctx context.Context, user *User) error {
 	newUser := User{
-		Id:            user.Id,
-		RealmId:       user.RealmId,
-		Username:      user.Username,
-		Email:         user.Email,
-		EmailVerified: user.EmailVerified,
-		FirstName:     user.FirstName,
-		LastName:      user.LastName,
-		Enabled:       user.Enabled,
-		Attributes:    user.Attributes,
+		Id:              user.Id,
+		RealmId:         user.RealmId,
+		Username:        user.Username,
+		Email:           user.Email,
+		EmailVerified:   user.EmailVerified,
+		FirstName:       user.FirstName,
+		LastName:        user.LastName,
+		Enabled:         user.Enabled,
+		Attributes:      user.Attributes,
+		RequiredActions: user.RequiredActions,
 	}
 	_, location, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/users", user.RealmId), newUser)
 	if err != nil {

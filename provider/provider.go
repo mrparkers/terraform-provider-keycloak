@@ -59,6 +59,7 @@ func KeycloakProvider(client *keycloak.KeycloakClient) *schema.Provider {
 			"keycloak_ldap_msad_user_account_control_mapper":             resourceKeycloakLdapMsadUserAccountControlMapper(),
 			"keycloak_ldap_msad_lds_user_account_control_mapper":         resourceKeycloakLdapMsadLdsUserAccountControlMapper(),
 			"keycloak_ldap_full_name_mapper":                             resourceKeycloakLdapFullNameMapper(),
+			"keycloak_ldap_custom_mapper":                                resourceKeycloakLdapCustomMapper(),
 			"keycloak_custom_user_federation":                            resourceKeycloakCustomUserFederation(),
 			"keycloak_openid_user_attribute_protocol_mapper":             resourceKeycloakOpenIdUserAttributeProtocolMapper(),
 			"keycloak_openid_user_property_protocol_mapper":              resourceKeycloakOpenIdUserPropertyProtocolMapper(),

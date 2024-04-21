@@ -28,6 +28,7 @@ resource "keycloak_realm_keystore_rsa" "keystore_rsa" {
 	priority  = 100
 	algorithm = "RS256"
 	keystore_size  = 2048
+	provider_id = "rsa"
 }
 ```
 
@@ -40,8 +41,9 @@ resource "keycloak_realm_keystore_rsa" "keystore_rsa" {
 - `enabled` - (Optional) When `false`, key is not accessible in this realm. Defaults to `true`.
 - `active` - (Optional) When `false`, key in not used for signing. Defaults to `true`.
 - `priority` - (Optional) Priority for the provider. Defaults to `0`
-- `algorithm` - (Optional) Intended algorithm for the key. Defaults to `RS256`
+- `algorithm` - (Optional) Intended algorithm for the key. Defaults to `RS256`. Use `RSA-OAEP` for encryption keys
 - `keystore_size` - (Optional) Size for the generated keys. Defaults to `2048`.
+- `provider_id` - (Optional) Use `rsa` for signing keys, `rsa-enc` for encryption keys
 
 ## Import
 
