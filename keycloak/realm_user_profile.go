@@ -43,6 +43,7 @@ type RealmUserProfileGroup struct {
 type RealmUserProfile struct {
 	Attributes []*RealmUserProfileAttribute `json:"attributes"`
 	Groups     []*RealmUserProfileGroup     `json:"groups,omitempty"`
+	UnmanagedAttributePolicy string `json:"unmanagedAttributePolicy,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) UpdateRealmUserProfile(ctx context.Context, realmId string, realmUserProfile *RealmUserProfile) error {

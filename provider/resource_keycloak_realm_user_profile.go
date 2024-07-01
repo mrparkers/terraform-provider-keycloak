@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
@@ -124,6 +125,11 @@ func resourceKeycloakRealmUserProfile() *schema.Resource {
 						},
 					},
 				},
+			},
+			"unmanagedattributepolicy" : {
+				Type: schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{"DISABLED", "ENABLED", "ADMIN_VIEW", "ADMIN_EDIT"}, false),
 			},
 		},
 	}
@@ -292,6 +298,13 @@ func getRealmUserProfileFromData(data *schema.ResourceData) *keycloak.RealmUserP
 
 	realmUserProfile.Attributes = getRealmUserProfileAttributesFromData(data.Get("attribute").([]interface{}))
 	realmUserProfile.Groups = getRealmUserProfileGroupsFromData(data.Get("group").(*schema.Set).List())
+	if v, ok := data.Get("unmanagedattributepolicy").(string); ok {
+		if v == "DISABLED" {
+			realmUserProfile.UnmanagedAttributePolicy = ""
+		} else {
+		realmUserProfile.UnmanagedAttributePolicy = v
+		}
+	}
 
 	return realmUserProfile
 }
@@ -400,6 +413,13 @@ func setRealmUserProfileData(data *schema.ResourceData, realmUserProfile *keyclo
 		groups = append(groups, getRealmUserProfileGroupData(group))
 	}
 	data.Set("group", groups)
+
+	// api route /admin/realms/{realm}/users/profile expects null object if unmanagedAttributePolicy is disabled
+	if realmUserProfile.UnmanagedAttributePolicy == "DISABLED" {
+		data.Set("unmanaged_attribute_policy", nil)
+	} else {
+		data.Set("unmanaged_attribute_policy", realmUserProfile.UnmanagedAttributePolicy)
+	}
 }
 
 func resourceKeycloakRealmUserProfileCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -437,8 +457,9 @@ func resourceKeycloakRealmUserProfileDelete(ctx context.Context, data *schema.Re
 	realmId := data.Get("realm_id").(string)
 
 	// The realm user profile cannot be deleted, so instead we set it back to its "zero" values.
+	// email and username attributes are mandatory since Keycloak 24.0.0
 	realmUserProfile := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{},
+		Attributes: getRealmUserProfileMandatoryAttributes(),
 		Groups:     []*keycloak.RealmUserProfileGroup{},
 	}
 
@@ -449,6 +470,22 @@ func resourceKeycloakRealmUserProfileDelete(ctx context.Context, data *schema.Re
 
 	return nil
 }
+
+func getRealmUserProfileMandatoryAttributes() []*keycloak.RealmUserProfileAttribute {
+	usernameAttribute := &keycloak.RealmUserProfileAttribute{
+			Name:        "username",
+	}
+
+	emailAttribute := &keycloak.RealmUserProfileAttribute{
+			Name:        "email",
+	}
+
+	return []*keycloak.RealmUserProfileAttribute{
+			usernameAttribute,
+			emailAttribute,
+	}
+}
+
 
 func resourceKeycloakRealmUserProfileUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
