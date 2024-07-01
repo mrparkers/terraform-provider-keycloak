@@ -126,9 +126,9 @@ func resourceKeycloakRealmUserProfile() *schema.Resource {
 					},
 				},
 			},
-			"unmanagedattributepolicy" : {
-				Type: schema.TypeString,
-				Optional: true,
+			"unmanagedattributepolicy": {
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"DISABLED", "ENABLED", "ADMIN_VIEW", "ADMIN_EDIT"}, false),
 			},
 		},
@@ -302,7 +302,7 @@ func getRealmUserProfileFromData(data *schema.ResourceData) *keycloak.RealmUserP
 		if v == "DISABLED" {
 			realmUserProfile.UnmanagedAttributePolicy = ""
 		} else {
-		realmUserProfile.UnmanagedAttributePolicy = v
+			realmUserProfile.UnmanagedAttributePolicy = v
 		}
 	}
 
@@ -473,19 +473,18 @@ func resourceKeycloakRealmUserProfileDelete(ctx context.Context, data *schema.Re
 
 func getRealmUserProfileMandatoryAttributes() []*keycloak.RealmUserProfileAttribute {
 	usernameAttribute := &keycloak.RealmUserProfileAttribute{
-			Name:        "username",
+		Name: "username",
 	}
 
 	emailAttribute := &keycloak.RealmUserProfileAttribute{
-			Name:        "email",
+		Name: "email",
 	}
 
 	return []*keycloak.RealmUserProfileAttribute{
-			usernameAttribute,
-			emailAttribute,
+		usernameAttribute,
+		emailAttribute,
 	}
 }
-
 
 func resourceKeycloakRealmUserProfileUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	keycloakClient := meta.(*keycloak.KeycloakClient)
