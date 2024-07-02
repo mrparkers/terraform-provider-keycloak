@@ -401,7 +401,7 @@ func getRealmUserProfileGroupData(group *keycloak.RealmUserProfileGroup) map[str
 	return groupData
 }
 
-func setRealmUserProfileData(data *schema.ResourceData, realmUserProfile *keycloak.RealmUserProfile) {
+func setRealmUserProfileData(ctx context.Context, data *schema.ResourceData, realmUserProfile *keycloak.RealmUserProfile, keycloakClient *keycloak.KeycloakClient) {
 	attributes := make([]interface{}, 0)
 	for _, attr := range realmUserProfile.Attributes {
 		attributes = append(attributes, getRealmUserProfileAttributeData(attr))
@@ -414,11 +414,18 @@ func setRealmUserProfileData(data *schema.ResourceData, realmUserProfile *keyclo
 	}
 	data.Set("group", groups)
 
+	versionOk, err := keycloakClient.VersionIsGreaterThanOrEqualTo(ctx, keycloak.Version_24)
+	if err != nil {
+		panic(err)
+	}
+
 	// api route /admin/realms/{realm}/users/profile expects null object if unmanagedAttributePolicy is disabled
-	if realmUserProfile.UnmanagedAttributePolicy == "DISABLED" {
-		data.Set("unmanaged_attribute_policy", nil)
-	} else {
-		data.Set("unmanaged_attribute_policy", realmUserProfile.UnmanagedAttributePolicy)
+	if versionOk {
+		if realmUserProfile.UnmanagedAttributePolicy == "DISABLED" {
+			data.Set("unmanaged_attribute_policy", nil)
+		} else {
+			data.Set("unmanaged_attribute_policy", realmUserProfile.UnmanagedAttributePolicy)
+		}
 	}
 }
 
@@ -447,7 +454,7 @@ func resourceKeycloakRealmUserProfileRead(ctx context.Context, data *schema.Reso
 		return handleNotFoundError(ctx, err, data)
 	}
 
-	setRealmUserProfileData(data, realmUserProfile)
+	setRealmUserProfileData(ctx, data, realmUserProfile, keycloakClient)
 
 	return nil
 }
@@ -497,7 +504,7 @@ func resourceKeycloakRealmUserProfileUpdate(ctx context.Context, data *schema.Re
 		return diag.FromErr(err)
 	}
 
-	setRealmUserProfileData(data, realmUserProfile)
+	setRealmUserProfileData(ctx, data, realmUserProfile, keycloakClient)
 
 	return nil
 }
