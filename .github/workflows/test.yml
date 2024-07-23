@@ -60,9 +60,11 @@ jobs:
     strategy:
       matrix:
         keycloak-version:
-          - '21.0.1'
-          - '20.0.5'
-          - '19.0.2'
+          - '25.0.2'
+          - '24.0.5'
+          - '23.0.7'
+          - '22.0.5'
+          - '21.1.2'
       fail-fast: false
     concurrency:
       group: ${{ github.head_ref || github.run_id }}-${{ matrix.keycloak-version }}
