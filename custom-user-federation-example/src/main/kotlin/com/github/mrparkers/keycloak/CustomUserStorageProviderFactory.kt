@@ -20,6 +20,7 @@ class CustomUserStorageProviderFactory : UserStorageProviderFactory<CustomUserSt
 	override fun create(session: KeycloakSession, model: ComponentModel): CustomUserStorageProvider =
 		CustomUserStorageProvider(session, model)
 
+	
 	override fun getConfigProperties(): List<ProviderConfigProperty> = configPropertyList
 
 	companion object {
