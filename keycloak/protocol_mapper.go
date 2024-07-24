@@ -23,6 +23,7 @@ var (
 	claimNameField                       = "claim.name"
 	claimValueField                      = "claim.value"
 	claimValueTypeField                  = "jsonType.label"
+	jsonTypeField                        = "jsonType.label"
 	friendlyNameField                    = "friendly.name"
 	fullPathField                        = "full.path"
 	includedClientAudienceField          = "included.client.audience"

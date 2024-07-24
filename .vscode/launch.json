@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Terraform Provider",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "env": {},
+            "args": [
+                "-plugin-dir",
+                "${workspaceFolder}"
+            ]
+        },
+        {
+            "name": "Attach to Terraform Provider",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "remotePath": "${workspaceFolder}",
+            "port": 2345,
+            "host": "127.0.0.1",
+            "program": "${workspaceFolder}",
+            "env": {},
+            "args": [],
+            "showLog": true
+          }
+    ]
+}
