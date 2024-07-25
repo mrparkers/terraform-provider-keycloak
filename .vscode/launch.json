@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "Debug Terraform Provider",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceRoot}",
+            "env": {
+            },
+            "args": [
+                "-plugin-dir",
+                "${workspaceRoot}"
+            ],
+            "cwd": "${workspaceRoot}"
+        },
+        {
+            "name": "Debug Terraform Provider Active",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceRoot}",
+            "env": {},
+            "args": [
+                "-debug",
+            ]
+        }
+    ]
+}
