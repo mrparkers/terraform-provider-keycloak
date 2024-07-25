@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"slices"
 	"strconv"
 )
 
@@ -16,9 +17,11 @@ type OpenIdPropertyMapperClaimProtocolMapper struct {
 	ClientId       string
 	ClientScopeId  string
 
-	AddToIdToken     bool
-	AddToAccessToken bool
-	AddToUserInfo    bool
+	AddToIdToken            bool
+	AddToAccessToken        bool
+	AddToUserInfo           bool
+	AddToIntrospectionToken bool
+	AddToLightweightClaim   bool
 
 	ClaimName string
 	JsonType  string
@@ -29,11 +32,13 @@ type OpenIdPropertyMapperClaimProtocolMapper struct {
 func (mapper *OpenIdPropertyMapperClaimProtocolMapper) convertToGenericProtocolMapper() *protocolMapper {
 
 	config := map[string]string{
-		addToIdTokenField:     strconv.FormatBool(mapper.AddToIdToken),
-		addToAccessTokenField: strconv.FormatBool(mapper.AddToAccessToken),
-		addToUserInfoField:    strconv.FormatBool(mapper.AddToUserInfo),
-		jsonTypeField:         mapper.JsonType,
-		claimNameField:        mapper.ClaimName,
+		addToIdTokenField:            strconv.FormatBool(mapper.AddToIdToken),
+		addToAccessTokenField:        strconv.FormatBool(mapper.AddToAccessToken),
+		addToUserInfoField:           strconv.FormatBool(mapper.AddToUserInfo),
+		addToIntrospectionTokenField: strconv.FormatBool(mapper.AddToIntrospectionToken),
+		addToLightweightClaimField:   strconv.FormatBool(mapper.AddToLightweightClaim),
+		jsonTypeField:                mapper.JsonType,
+		claimNameField:               mapper.ClaimName,
 	}
 
 	maps.Copy(config, mapper.AdditionalConfig)
@@ -62,6 +67,23 @@ func (protocolMapper *protocolMapper) convertToOpenIdPropertyMapperClaimProtocol
 		return nil, err
 	}
 
+	addToIntrospectionTokenField, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToIntrospectionTokenField])
+	if err != nil {
+		return nil, err
+	}
+
+	addToLightweightClaimField, err := parseBoolAndTreatEmptyStringAsFalse(protocolMapper.Config[addToLightweightClaimField])
+	if err != nil {
+		return nil, err
+	}
+
+	additionalConfig := map[string]string{}
+	for k, v := range protocolMapper.Config {
+		if !slices.Contains(protocolMapperIgnore, k) {
+			additionalConfig[k] = v
+		}
+	}
+
 	return &OpenIdPropertyMapperClaimProtocolMapper{
 		Id:            protocolMapper.Id,
 		Name:          protocolMapper.Name,
@@ -69,15 +91,17 @@ func (protocolMapper *protocolMapper) convertToOpenIdPropertyMapperClaimProtocol
 		ClientId:      clientId,
 		ClientScopeId: clientScopeId,
 
-		AddToIdToken:     addToIdToken,
-		AddToAccessToken: addToAccessToken,
-		AddToUserInfo:    addToUserInfo,
+		AddToIdToken:            addToIdToken,
+		AddToAccessToken:        addToAccessToken,
+		AddToUserInfo:           addToUserInfo,
+		AddToIntrospectionToken: addToIntrospectionTokenField,
+		AddToLightweightClaim:   addToLightweightClaimField,
 
 		Protocol:         protocolMapper.Protocol,
 		ProtocolMapper:   protocolMapper.ProtocolMapper,
 		ClaimName:        protocolMapper.Config[claimNameField],
 		JsonType:         protocolMapper.Config[jsonTypeField],
-		AdditionalConfig: map[string]string{},
+		AdditionalConfig: additionalConfig,
 	}, nil
 }
 

@@ -75,10 +75,6 @@ This environment and its setup via `make local` is not intended for production u
 
 Note: The setup scripts require the [jq](https://stedolan.github.io/jq/) command line utility.
 
-### Debugging VSCode
-
-
-
 ### Tests
 
 Every resource supported by this provider will have a reasonable amount of acceptance test coverage.

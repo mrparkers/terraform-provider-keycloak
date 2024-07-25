@@ -18,6 +18,8 @@ var (
 	addToAccessTokenField                = "access.token.claim"
 	addToIdTokenField                    = "id.token.claim"
 	addToUserInfoField                   = "userinfo.token.claim"
+	addToIntrospectionTokenField         = "introspection.token.claim"
+	addToLightweightClaimField           = "lightweight.claim"
 	attributeNameField                   = "attribute.name"
 	attributeNameFormatField             = "attribute.nameformat"
 	claimNameField                       = "claim.name"
@@ -39,6 +41,8 @@ var (
 	userClientRoleMappingRolePrefixField = "usermodel.clientRoleMapping.rolePrefix"
 	userSessionNoteField                 = "user.session.note"
 	aggregateAttributeValuesField        = "aggregate.attrs"
+
+	protocolMapperIgnore = []string{addToIntrospectionTokenField, addToUserInfoField, addToIdTokenField, addToAccessTokenField, addToLightweightClaimField, claimNameField, jsonTypeField}
 )
 
 func protocolMapperPath(realmId, clientId, clientScopeId string) string {

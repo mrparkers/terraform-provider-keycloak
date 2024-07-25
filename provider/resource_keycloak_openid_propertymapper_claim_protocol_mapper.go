@@ -77,6 +77,18 @@ func resourceKeycloakOpenIdPropertyMapperClaimProtocolMapper() *schema.Resource 
 				Default:     true,
 				Description: "Indicates if the attribute should appear in the userinfo response body.",
 			},
+			"add_to_introspection_token": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "Indicates if the attribute should be a claim in the introspect token.",
+			},
+			"add_to_lightweight_claim": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Indicates if the attribute should appear in the lightweight claim.",
+			},
 			"claim_name": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -111,23 +123,33 @@ func resourceKeycloakOpenIdPropertyMapperClaimProtocolMapper() *schema.Resource 
 }
 
 func mapFromDataToOpenIdPropertyMapperClaimProtocolMapper(data *schema.ResourceData) *keycloak.OpenIdPropertyMapperClaimProtocolMapper {
+
+	additionalConfig := map[string]string{}
+	setlist := data.Get("set").(*schema.Set).List()
+
+	for _, raw := range setlist {
+		set := raw.(map[string]interface{})
+		additionalConfig[set["name"].(string)] = set["value"].(string)
+	}
+
 	return &keycloak.OpenIdPropertyMapperClaimProtocolMapper{
-		Id:               data.Id(),
-		Name:             data.Get("name").(string),
-		RealmId:          data.Get("realm_id").(string),
-		ClientId:         data.Get("client_id").(string),
-		ClientScopeId:    data.Get("client_scope_id").(string),
-		AddToIdToken:     data.Get("add_to_id_token").(bool),
-		AddToAccessToken: data.Get("add_to_access_token").(bool),
-		AddToUserInfo:    data.Get("add_to_userinfo").(bool),
+		Id:                      data.Id(),
+		Name:                    data.Get("name").(string),
+		RealmId:                 data.Get("realm_id").(string),
+		ClientId:                data.Get("client_id").(string),
+		ClientScopeId:           data.Get("client_scope_id").(string),
+		AddToIdToken:            data.Get("add_to_id_token").(bool),
+		AddToAccessToken:        data.Get("add_to_access_token").(bool),
+		AddToUserInfo:           data.Get("add_to_userinfo").(bool),
+		AddToIntrospectionToken: data.Get("add_to_introspection_token").(bool),
+		AddToLightweightClaim:   data.Get("add_to_lightweight_claim").(bool),
 
 		Protocol:       data.Get("protocol").(string),
 		ProtocolMapper: data.Get("protocol_mapper").(string),
 		ClaimName:      data.Get("claim_name").(string),
 		JsonType:       data.Get("json_type").(string),
 
-		// TODO: fill in with right values
-		AdditionalConfig: map[string]string{},
+		AdditionalConfig: additionalConfig,
 	}
 }
 
@@ -145,11 +167,23 @@ func mapFromOpenIdPropertyMapperClaimMapperToData(mapper *keycloak.OpenIdPropert
 	data.Set("add_to_id_token", mapper.AddToIdToken)
 	data.Set("add_to_access_token", mapper.AddToAccessToken)
 	data.Set("add_to_userinfo", mapper.AddToUserInfo)
+	data.Set("add_to_introspection_token", mapper.AddToIntrospectionToken)
+	data.Set("add_to_lightweight_claim", mapper.AddToLightweightClaim)
 
 	data.Set("protocol", mapper.Protocol)
 	data.Set("protocol_mapper", mapper.ProtocolMapper)
 	data.Set("claim_name", mapper.ClaimName)
 	data.Set("json_type", mapper.JsonType)
+
+	additionalConfig := make([]interface{}, 0, len(mapper.AdditionalConfig))
+	for k, v := range mapper.AdditionalConfig {
+		item := map[string]interface{}{
+			"name":  k,
+			"value": v,
+		}
+		additionalConfig = append(additionalConfig, item)
+	}
+	data.Set("set", additionalConfig)
 }
 
 func resourceKeycloakOpenIdPropertyMapperClaimProtocolMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -184,9 +218,6 @@ func resourceKeycloakOpenIdPropertyMapperClaimProtocolMapperRead(ctx context.Con
 	if err != nil {
 		return handleNotFoundError(ctx, err, data)
 	}
-
-	tflog.Info(ctx, "resourceKeycloakOpenIdPropertyMapperClaimProtocolMapperRead")
-	//fmt.Printf("%+v\n", yourProject)
 	mapFromOpenIdPropertyMapperClaimMapperToData(openIdPropertyMapperClaimMapper, data)
 
 	return nil
@@ -206,8 +237,6 @@ func resourceKeycloakOpenIdPropertyMapperClaimProtocolMapperUpdate(ctx context.C
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	tflog.Info(ctx, "resourceKeycloakOpenIdPropertyMapperClaimProtocolMapperUpdate")
 	return resourceKeycloakOpenIdPropertyMapperClaimProtocolMapperRead(ctx, data, meta)
 }
 
