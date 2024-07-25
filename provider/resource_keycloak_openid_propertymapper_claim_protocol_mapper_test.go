@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -106,11 +105,11 @@ func TestAccKeycloakOpenIdPropertyMapperClaimProtocolMapper_update(t *testing.T)
 		CheckDestroy:      testAccKeycloakOpenIdPropertyMapperClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_claimNameAndValue(clientId, mapperName, claimName, claimValue),
+				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_userModel(clientId, mapperName, claimName, claimValue),
 				Check:  testKeycloakOpenIdPropertyMapperClaimProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_claimNameAndValue(clientId, mapperName, updatedClaimName, updatedClaimValue),
+				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_userModel(clientId, mapperName, updatedClaimName, updatedClaimValue),
 				Check:  testKeycloakOpenIdPropertyMapperClaimProtocolMapperExists(resourceName),
 			},
 		},
@@ -149,24 +148,6 @@ func TestAccKeycloakOpenIdPropertyMapperClaimProtocolMapper_createAfterManualDes
 	})
 }
 
-func TestAccKeycloakOpenIdPropertyMapperClaimProtocolMapper_validateClaimValueType(t *testing.T) {
-	t.Parallel()
-	mapperName := acctest.RandomWithPrefix("tf-acc")
-	invalidClaimValueType := acctest.RandomWithPrefix("tf-acc")
-
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccKeycloakOpenIdPropertyMapperClaimProtocolMapperDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config:      testKeycloakOpenIdPropertyMapperClaimProtocolMapper_validateClaimValueType(mapperName, invalidClaimValueType),
-				ExpectError: regexp.MustCompile("expected claim_value_type to be one of .+ got " + invalidClaimValueType),
-			},
-		},
-	})
-}
-
 func TestAccKeycloakOpenIdPropertyMapperClaimProtocolMapper_updateClientIdForceNew(t *testing.T) {
 	t.Parallel()
 	clientId := acctest.RandomWithPrefix("tf-acc")
@@ -183,11 +164,11 @@ func TestAccKeycloakOpenIdPropertyMapperClaimProtocolMapper_updateClientIdForceN
 		CheckDestroy:      testAccKeycloakOpenIdPropertyMapperClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_claimNameAndValue(clientId, mapperName, claimName, claimValue),
+				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_userModel(clientId, mapperName, claimName, claimValue),
 				Check:  testKeycloakOpenIdPropertyMapperClaimProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_claimNameAndValue(updatedClientId, mapperName, claimName, claimValue),
+				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_userModel(updatedClientId, mapperName, claimName, claimValue),
 				Check:  testKeycloakOpenIdPropertyMapperClaimProtocolMapperExists(resourceName),
 			},
 		},
@@ -233,11 +214,11 @@ func TestAccKeycloakOpenIdPropertyMapperClaimProtocolMapper_updateRealmIdForceNe
 		CheckDestroy:      testAccKeycloakOpenIdPropertyMapperClaimProtocolMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_claimNameAndValue(clientId, mapperName, claimName, claimValue),
+				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_userModel(clientId, mapperName, claimName, claimValue),
 				Check:  testKeycloakOpenIdPropertyMapperClaimProtocolMapperExists(resourceName),
 			},
 			{
-				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_claimNameAndValue(clientId, mapperName, claimName, claimValue),
+				Config: testKeycloakOpenIdPropertyMapperClaimProtocolMapper_userModel(clientId, mapperName, claimName, claimValue),
 				Check:  testKeycloakOpenIdPropertyMapperClaimProtocolMapperExists(resourceName),
 			},
 		},
@@ -322,8 +303,15 @@ resource "keycloak_openid_propertymapper_claim_protocol_mapper" "propertymapper_
 	client_id        = "${keycloak_openid_client.openid_client.id}"
 
 	claim_name       = "foo"
-	claim_value      = "bar"
-	claim_value_type = "String"
+	json_type     = "String"
+
+	protocol = "openid-connect"
+	protocol_mapper = "oidc-usermodel-property-mapper"
+
+	set {
+		name = "user.attribute"
+		value = "id"
+  	}
 }`, testAccRealm.Realm, clientId, mapperName)
 }
 
@@ -344,8 +332,15 @@ resource "keycloak_openid_propertymapper_claim_protocol_mapper" "propertymapper_
 	client_scope_id  = "${keycloak_openid_client_scope.client_scope.id}"
 
 	claim_name       = "foo"
-	claim_value      = "bar"
-	claim_value_type = "String"
+	json_type     = "String"
+
+	protocol = "openid-connect"
+	protocol_mapper = "oidc-usermodel-property-mapper"
+
+	set {
+		name = "user.attribute"
+		value = "id"
+  	}
 }`, testAccRealm.Realm, clientScopeId, mapperName)
 }
 
@@ -368,8 +363,15 @@ resource "keycloak_openid_propertymapper_claim_protocol_mapper" "propertymapper_
 	client_id        = "${keycloak_openid_client.openid_client.id}"
 
 	claim_name       = "foo"
-	claim_value      = "bar"
-	claim_value_type = "String"
+	json_type     = "String"
+
+	protocol = "openid-connect"
+	protocol_mapper = "oidc-usermodel-property-mapper"
+
+	set {
+		name = "user.attribute"
+		value = "id"
+  	}
 }
 
 resource "keycloak_openid_client_scope" "client_scope" {
@@ -383,12 +385,19 @@ resource "keycloak_openid_propertymapper_claim_protocol_mapper" "propertymapper_
 	client_scope_id  = "${keycloak_openid_client_scope.client_scope.id}"
 
 	claim_name       = "foo"
-	claim_value      = "bar"
-	claim_value_type = "String"
+	json_type     = "String"
+
+	protocol = "openid-connect"
+	protocol_mapper = "oidc-usermodel-property-mapper"
+
+	set {
+		name = "user.attribute"
+		value = "id"
+  	}
 }`, testAccRealm.Realm, clientId, mapperName, clientScopeId, mapperName)
 }
 
-func testKeycloakOpenIdPropertyMapperClaimProtocolMapper_claimNameAndValue(clientId, mapperName, claimName, claimValue string) string {
+func testKeycloakOpenIdPropertyMapperClaimProtocolMapper_userModel(clientId, mapperName, claimName, attribute string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -407,30 +416,14 @@ resource "keycloak_openid_propertymapper_claim_protocol_mapper" "propertymapper_
 	client_id   = "${keycloak_openid_client.openid_client.id}"
 
 	claim_name  = "%s"
-	claim_value = "%s"
-}`, testAccRealm.Realm, clientId, mapperName, claimName, claimValue)
-}
+	json_type     = "String"
 
-func testKeycloakOpenIdPropertyMapperClaimProtocolMapper_validateClaimValueType(mapperName, claimValueType string) string {
-	return fmt.Sprintf(`
-data "keycloak_realm" "realm" {
-	realm = "%s"
-}
+	protocol = "openid-connect"
+	protocol_mapper = "oidc-usermodel-property-mapper"
 
-resource "keycloak_openid_client" "openid_client" {
-	realm_id  = data.keycloak_realm.realm.id
-	client_id = "openid-client"
-
-	access_type = "BEARER-ONLY"
-}
-
-resource "keycloak_openid_propertymapper_claim_protocol_mapper" "propertymapper_claim_mapper_validation" {
-	name             = "%s"
-	realm_id         = data.keycloak_realm.realm.id
-	client_id        = "${keycloak_openid_client.openid_client.id}"
-
-	claim_value      = "foo"
-	claim_name       = "bar"
-	claim_value_type = "%s"
-}`, testAccRealm.Realm, mapperName, claimValueType)
+	set {
+		name = "user.attribute"
+		value = "%s"
+  	}
+}`, testAccRealm.Realm, clientId, mapperName, claimName, attribute)
 }
