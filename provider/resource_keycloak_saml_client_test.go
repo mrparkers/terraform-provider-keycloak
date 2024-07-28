@@ -2,10 +2,11 @@ package provider
 
 import (
 	"fmt"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -149,7 +150,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			acctest.RandString(20),
 		},
 		BaseUrl:                 "http://localhost:2222/" + acctest.RandString(20),
-		MasterSamlProcessingUrl: acctest.RandString(20),
+		MasterSamlProcessingUrl: "http://localhost:2222/" + acctest.RandString(20),
 
 		Attributes: &keycloak.SamlClientAttributes{
 			IncludeAuthnStatement:           types.KeycloakBoolQuoted(randomBool()),
@@ -167,10 +168,10 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			SigningPrivateKey:               signingPrivateKeyBefore,
 			IDPInitiatedSSOURLName:          acctest.RandString(20),
 			IDPInitiatedSSORelayState:       acctest.RandString(20),
-			AssertionConsumerPostURL:        acctest.RandString(20),
-			AssertionConsumerRedirectURL:    acctest.RandString(20),
-			LogoutServicePostBindingURL:     acctest.RandString(20),
-			LogoutServiceRedirectBindingURL: acctest.RandString(20),
+			AssertionConsumerPostURL:        "http://localhost:2222/" + acctest.RandString(20),
+			AssertionConsumerRedirectURL:    "http://localhost:2222/" + acctest.RandString(20),
+			LogoutServicePostBindingURL:     "http://localhost:2222/" + acctest.RandString(20),
+			LogoutServiceRedirectBindingURL: "http://localhost:2222/" + acctest.RandString(20),
 			LoginTheme:                      "keycloak",
 		},
 	}
@@ -190,7 +191,7 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			acctest.RandString(20),
 		},
 		BaseUrl:                 "http://localhost:2222/" + acctest.RandString(20),
-		MasterSamlProcessingUrl: acctest.RandString(20),
+		MasterSamlProcessingUrl: "http://localhost:2222/" + acctest.RandString(20),
 
 		Attributes: &keycloak.SamlClientAttributes{
 			IncludeAuthnStatement:           types.KeycloakBoolQuoted(randomBool()),
@@ -208,10 +209,10 @@ func TestAccKeycloakSamlClient_updateInPlace(t *testing.T) {
 			SigningPrivateKey:               signingPrivateKeyAfter,
 			IDPInitiatedSSOURLName:          acctest.RandString(20),
 			IDPInitiatedSSORelayState:       acctest.RandString(20),
-			AssertionConsumerPostURL:        acctest.RandString(20),
-			AssertionConsumerRedirectURL:    acctest.RandString(20),
-			LogoutServicePostBindingURL:     acctest.RandString(20),
-			LogoutServiceRedirectBindingURL: acctest.RandString(20),
+			AssertionConsumerPostURL:        "http://localhost:2222/" + acctest.RandString(20),
+			AssertionConsumerRedirectURL:    "http://localhost:2222/" + acctest.RandString(20),
+			LogoutServicePostBindingURL:     "http://localhost:2222/" + acctest.RandString(20),
+			LogoutServiceRedirectBindingURL: "http://localhost:2222/" + acctest.RandString(20),
 			LoginTheme:                      "keycloak",
 		},
 	}

@@ -2,13 +2,14 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"regexp"
-	"strconv"
-	"testing"
 )
 
 func TestAccKeycloakRealmKeystoreJava_basic(t *testing.T) {
@@ -28,10 +29,11 @@ func TestAccKeycloakRealmKeystoreJava_basic(t *testing.T) {
 				Check:  testAccCheckRealmKeystoreJavaExists("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
 			},
 			{
-				ResourceName:      "keycloak_realm_keystore_java_keystore.realm_java_keystore",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
+				ResourceName:            "keycloak_realm_keystore_java_keystore.realm_java_keystore",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdFunc:       getRealmKeystoreGenericImportId("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
+				ImportStateVerifyIgnore: []string{"key_password", "keystore_password", "algorithm"},
 			},
 		},
 	})
@@ -212,9 +214,11 @@ resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
-    keystore          = "misc/java-keystore.jks"
+    keystore          = "/opt/keycloak/certs/java-keystore-2034.jks"
     keystore_password = "12345678"
-    keystore_alias    = "test"
+    
+	key_alias         = "test"
+	key_password      = "12345678"
 
     priority  = 100
     algorithm = "RS256"
@@ -232,9 +236,11 @@ resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
-    keystore          = "misc/java-keystore.jks"
+    keystore          = "/opt/keycloak/certs/java-keystore-2034.jks"
     keystore_password = "12345678"
-    keystore_alias    = "test"
+
+	key_alias         = "test"
+	key_password      = "12345678"
 
 	%s        = "%s"
 }
@@ -251,10 +257,12 @@ resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
-    keystore          = "misc/java-keystore.jks"
+    keystore          = "/opt/keycloak/certs/java-keystore-2034.jks"
     keystore_password = "12345678"
-    keystore_alias    = "test"
 
+	key_alias         = "test"
+	key_password      = "12345678"
+	
     priority  = %s
     algorithm = "%s"
 }

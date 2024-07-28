@@ -22,6 +22,7 @@ terraform.tfstate*
 .gradle/
 
 # custom user federation example
+custom-user-federation-example/bin
 custom-user-federation-example/build
 !custom-user-federation-example/build/libs
 

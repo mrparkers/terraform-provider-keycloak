@@ -2,11 +2,12 @@ package provider
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"testing"
 )
 
 func TestAccKeycloakRealmEvents_basic(t *testing.T) {
@@ -164,8 +165,16 @@ func TestAccKeycloakRealmEvents_unsetEnabledEventTypes(t *testing.T) {
 							return err
 						}
 
-						//keycloak versions < 7.0.0 have 63 events, versions >=7.0.0 have 67 events, versions >=12.0.0 have 69 events
-						if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_14); ok {
+						//keycloak versions < 7.0.0 have 63 events, versions >=7.0.0 have 67 events, versions >=12.0.0 have 69 events, versions >=25.0.0 have 87 events
+						if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_25); ok {
+							if len(realmEventsConfig.EnabledEventTypes) != 87 {
+								return fmt.Errorf("exptected to enabled_event_types to contain all(79) event types, but it contains %d", len(realmEventsConfig.EnabledEventTypes))
+							}
+						} else if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_24); ok {
+							if len(realmEventsConfig.EnabledEventTypes) != 83 {
+								return fmt.Errorf("exptected to enabled_event_types to contain all(79) event types, but it contains %d", len(realmEventsConfig.EnabledEventTypes))
+							}
+						} else if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_14); ok {
 							if len(realmEventsConfig.EnabledEventTypes) != 79 {
 								return fmt.Errorf("exptected to enabled_event_types to contain all(79) event types, but it contains %d", len(realmEventsConfig.EnabledEventTypes))
 							}

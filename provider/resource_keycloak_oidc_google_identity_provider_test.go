@@ -2,13 +2,14 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"regexp"
-	"strconv"
-	"testing"
 )
 
 /*
@@ -225,6 +226,7 @@ resource "keycloak_oidc_google_identity_provider" "google" {
 	realm             = data.keycloak_realm.realm.id
 	client_id         = "example_id"
 	client_secret     = "example_token"
+	sync_mode         = "FORCE"
 }
 	`, testAccRealm.Realm)
 }
@@ -240,6 +242,7 @@ resource "keycloak_oidc_google_identity_provider" "google_custom" {
 	provider_id       = "google"
 	client_id         = "example_id"
 	client_secret     = "example_token"
+	sync_mode         = "FORCE"
 	extra_config      = {
 		%s = "%s"
 	}

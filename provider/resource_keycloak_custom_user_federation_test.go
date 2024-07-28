@@ -14,7 +14,8 @@ import (
 func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
 	t.Parallel()
 
-	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
+	skipIfEnvSet(t, "CI")                                                  // temporary while I figure out how to load this custom provider in CI
+	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, "24.0.5") // see the custom user federation provider version
 
 	name := acctest.RandomWithPrefix("tf-acc")
 	providerId := "custom"
@@ -41,7 +42,8 @@ func TestAccKeycloakCustomUserFederation_basic(t *testing.T) {
 func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
 	t.Parallel()
 
-	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
+	skipIfEnvSet(t, "CI")                                                  // temporary while I figure out how to load this custom provider in CI
+	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, "24.0.5") // see the custom user federation provider version
 
 	name := acctest.RandomWithPrefix("tf-acc")
 	configValue := acctest.RandomWithPrefix("tf-acc")
@@ -77,7 +79,8 @@ func TestAccKeycloakCustomUserFederation_customConfig(t *testing.T) {
 func TestAccKeycloakCustomUserFederation_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 
-	skipIfEnvSet(t, "CI") // temporary while I figure out how to load this custom provider in CI
+	skipIfEnvSet(t, "CI")                                                  // temporary while I figure out how to load this custom provider in CI
+	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, "24.0.5") // see the custom user federation provider version
 
 	var customFederation = &keycloak.CustomUserFederation{}
 

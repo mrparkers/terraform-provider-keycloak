@@ -14,6 +14,7 @@ import (
 
 // All saml clients in Keycloak will automatically have these scopes listed as "default client scopes".
 var preAssignedDefaultSamlClientScopes = []string{"role_list"}
+var setSamlOrganizationIfNeeded = ""
 
 func TestAccKeycloakSamlClientDefaultScopes_basic(t *testing.T) {
 	t.Parallel()
@@ -22,12 +23,17 @@ func TestAccKeycloakSamlClientDefaultScopes_basic(t *testing.T) {
 
 	clientScopes := append(preAssignedDefaultSamlClientScopes, clientScope)
 
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_25); ok {
+		setSamlOrganizationIfNeeded = "\"saml_organization\","
+		preAssignedDefaultSamlClientScopes = []string{"role_list", "saml_organization"}
+	}
+
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientDefaultScopes_basic(client, clientScope),
+				Config: testKeycloakSamlClientDefaultScopes_basic(client, clientScope, setSamlOrganizationIfNeeded),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", clientScopes),
 			},
 			// we need a separate test step for destroy instead of using CheckDestroy because this resource is implicitly
@@ -46,6 +52,11 @@ func TestAccKeycloakSamlClientDefaultScopes_updateClientForceNew(t *testing.T) {
 	clientTwo := acctest.RandomWithPrefix("tf-acc")
 	clientScope := acctest.RandomWithPrefix("tf-acc")
 
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_25); ok {
+		setSamlOrganizationIfNeeded = "\"saml_organization\","
+		preAssignedDefaultSamlClientScopes = []string{"role_list", "saml_organization"}
+	}
+
 	clientScopes := append(preAssignedDefaultSamlClientScopes, clientScope)
 
 	resource.Test(t, resource.TestCase{
@@ -53,11 +64,11 @@ func TestAccKeycloakSamlClientDefaultScopes_updateClientForceNew(t *testing.T) {
 		PreCheck:          func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakSamlClientDefaultScopes_basic(clientOne, clientScope),
+				Config: testKeycloakSamlClientDefaultScopes_basic(clientOne, clientScope, setSamlOrganizationIfNeeded),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", clientScopes),
 			},
 			{
-				Config: testKeycloakSamlClientDefaultScopes_basic(clientTwo, clientScope),
+				Config: testKeycloakSamlClientDefaultScopes_basic(clientTwo, clientScope, setSamlOrganizationIfNeeded),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", clientScopes),
 			},
 		},
@@ -213,6 +224,11 @@ func TestAccKeycloakSamlClientDefaultScopes_noImportNeeded(t *testing.T) {
 	client := acctest.RandomWithPrefix("tf-acc")
 	clientScope := acctest.RandomWithPrefix("tf-acc")
 
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_25); ok {
+		setSamlOrganizationIfNeeded = "\"saml_organization\","
+		preAssignedDefaultSamlClientScopes = []string{"role_list", "saml_organization"}
+	}
+
 	clientScopes := append(preAssignedDefaultSamlClientScopes, clientScope)
 
 	resource.Test(t, resource.TestCase{
@@ -235,7 +251,7 @@ func TestAccKeycloakSamlClientDefaultScopes_noImportNeeded(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testKeycloakSamlClientDefaultScopes_basic(client, clientScope),
+				Config: testKeycloakSamlClientDefaultScopes_basic(client, clientScope, setSamlOrganizationIfNeeded),
 				Check:  testAccCheckKeycloakSamlClientHasDefaultScopes("keycloak_saml_client_default_scopes.default_scopes", clientScopes),
 			},
 		},
@@ -345,7 +361,7 @@ func testAccCheckKeycloakSamlClientDefaultScopeIsNotAttached(resourceName, clien
 	}
 }
 
-func testKeycloakSamlClientDefaultScopes_basic(client, clientScope string) string {
+func testKeycloakSamlClientDefaultScopes_basic(client, clientScope string, setSamlOrganizationIfNeeded string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -375,10 +391,11 @@ resource "keycloak_saml_client_default_scopes" "default_scopes" {
 	client_id      = keycloak_saml_client.client.id
 	default_scopes = [
 		"role_list",
+		%s
 		keycloak_saml_client_scope.client_scope.name
 	]
 }
-	`, testAccRealm.Realm, client, clientScope)
+	`, testAccRealm.Realm, client, clientScope, setSamlOrganizationIfNeeded)
 }
 
 func testKeycloakSamlClientDefaultScopes_noDefaultScopes(client, clientScope string) string {
@@ -461,6 +478,7 @@ resource "keycloak_saml_client_default_scopes" "default_scopes" {
 	client_id      = "%s"
 	default_scopes = [
 		"role_list",
+		"saml_organization",
 		keycloak_saml_client_scope.client_scope.name
 	]
 }
