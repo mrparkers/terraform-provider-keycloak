@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
@@ -23,6 +24,10 @@ func dataSourceKeycloakAuthenticationExecution() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"priority": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
 		},
 	}
 }
@@ -33,13 +38,14 @@ func dataSourceKeycloakAuthenticationExecutionRead(ctx context.Context, data *sc
 	realmID := data.Get("realm_id").(string)
 	parentFlowAlias := data.Get("parent_flow_alias").(string)
 	providerID := data.Get("provider_id").(string)
+	priority := data.Get("priority").(int)
 
-	authenticationExecutionInfo, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(ctx, realmID, parentFlowAlias, providerID)
+	authenticationExecution, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(ctx, realmID, parentFlowAlias, providerID, priority)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	mapFromAuthenticationExecutionInfoToData(data, authenticationExecutionInfo)
+	mapFromAuthenticationExecutionToData(data, authenticationExecution)
 
 	return nil
 }

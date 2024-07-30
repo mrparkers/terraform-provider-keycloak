@@ -10,7 +10,7 @@ import (
 // other fields can be provided to the API but they are ignored
 // POST /realms/${realmId}/authentication/flows/${flowAlias}/executions/execution
 type authenticationExecutionCreate struct {
-	Provider string `json:"provider"` //authenticator of the execution
+	Provider string `json:"provider"` // authenticator of the execution
 }
 
 type authenticationExecutionRequirementUpdate struct {
@@ -25,7 +25,7 @@ type AuthenticationExecution struct {
 	Id                   string `json:"id"`
 	RealmId              string `json:"-"`
 	ParentFlowAlias      string `json:"-"`
-	Authenticator        string `json:"authenticator"` //can be any authenticator from GET realms/{realm}/authentication/authenticator-providers OR GET realms/{realm}/authentication/client-authenticator-providers OR GET realms/{realm}/authentication/form-action-providers
+	Authenticator        string `json:"authenticator"` // can be any authenticator from GET realms/{realm}/authentication/authenticator-providers OR GET realms/{realm}/authentication/client-authenticator-providers OR GET realms/{realm}/authentication/form-action-providers
 	AuthenticationConfig string `json:"authenticationConfig"`
 	AuthenticationFlow   bool   `json:"authenticationFlow"`
 	FlowId               string `json:"flowId"`
@@ -75,9 +75,8 @@ func (keycloakClient *KeycloakClient) ListAuthenticationExecutions(ctx context.C
 	return authenticationExecutions, err
 }
 
-func (keycloakClient *KeycloakClient) GetAuthenticationExecutionInfoFromProviderId(ctx context.Context, realmId, parentFlowAlias, providerId string) (*AuthenticationExecutionInfo, error) {
+func (keycloakClient *KeycloakClient) GetAuthenticationExecutionInfoFromProviderId(ctx context.Context, realmId, parentFlowAlias, providerId string, priority int) (*AuthenticationExecution, error) {
 	var authenticationExecutions []*AuthenticationExecutionInfo
-	var authenticationExecution AuthenticationExecutionInfo
 
 	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
 	if err != nil {
@@ -107,11 +106,15 @@ func (keycloakClient *KeycloakClient) GetAuthenticationExecutionInfoFromProvider
 
 	for _, aExecution := range authenticationExecutions {
 		if aExecution != nil && aExecution.ProviderId == providerId {
-			authenticationExecution = *aExecution
+			authenticationExecution, err := keycloakClient.GetAuthenticationExecution(ctx, realmId, aExecution.ParentFlowAlias, aExecution.Id)
+			if err != nil {
+				return nil, err
+			}
 			authenticationExecution.RealmId = realmId
 			authenticationExecution.ParentFlowAlias = parentFlowAlias
+			authenticationExecution.Priority = priority
 
-			return &authenticationExecution, nil
+			return authenticationExecution, nil
 		}
 	}
 

@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -80,14 +81,15 @@ func testAccCheckDataKeycloakAuthenticationExecution(resourceName string) resour
 		realmID := rs.Primary.Attributes["realm_id"]
 		parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
 		providerID := rs.Primary.Attributes["provider_id"]
+		priority, err := strconv.Atoi(rs.Primary.Attributes["priority"])
 
-		authenticationExecutionInfo, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(testCtx, realmID, parentFlowAlias, providerID)
+		authenticationExecution, err := keycloakClient.GetAuthenticationExecutionInfoFromProviderId(testCtx, realmID, parentFlowAlias, providerID, priority)
 		if err != nil {
 			return err
 		}
 
-		if authenticationExecutionInfo.Id != id {
-			return fmt.Errorf("expected authenticationExecutionInfo with ID %s but got %s", id, authenticationExecutionInfo.Id)
+		if authenticationExecution.Id != id {
+			return fmt.Errorf("expected authenticationExecution with ID %s but got %s", id, authenticationExecution.Id)
 		}
 
 		return nil

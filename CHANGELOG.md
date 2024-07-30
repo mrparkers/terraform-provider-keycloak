@@ -1,3 +1,9 @@
+## 4.5.0 (July 30, 2024)
+
+FEATURES:
+
+- add `priority` attribute to `keycloak_authentication_execution` resource
+
 ## 4.4.0 (January 8, 2024)
 
 FEATURES:

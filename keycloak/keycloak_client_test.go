@@ -2,10 +2,11 @@ package keycloak
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
 var requiredEnvironmentVariables = []string{
@@ -57,7 +58,7 @@ func TestAccKeycloakApiClientRefresh(t *testing.T) {
 
 	// skip test if running 12.x or greater
 	if v, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(ctx, Version_12); v {
-		t.Skip()
+		t.Skip("Skipping tests for keycloak version >= 12.0.0")
 	}
 
 	realmName := "terraform-" + acctest.RandString(10)
