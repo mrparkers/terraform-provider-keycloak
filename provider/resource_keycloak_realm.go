@@ -5,8 +5,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
+	"github.com/qvest-digital/terraform-provider-keycloak/keycloak"
+	"github.com/qvest-digital/terraform-provider-keycloak/keycloak/types"
 )
 
 var (
@@ -1383,6 +1383,11 @@ func resourceKeycloakRealmCreate(ctx context.Context, data *schema.ResourceData,
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	// When a new realm is created, our realm might not have the correct aud and resource_access values,
+	// forcing an update here
+	// TODO unsure why this is necessary.
+	meta.(*keycloak.KeycloakClient).InvalidateAccessToken()
 
 	setRealmData(data, realm)
 

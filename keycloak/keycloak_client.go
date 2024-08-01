@@ -530,3 +530,7 @@ func newHttpClient(tlsInsecureSkipVerify bool, clientTimeout int, caCert string)
 
 	return httpClient, nil
 }
+
+func (keycloakClient *KeycloakClient) InvalidateAccessToken() {
+	keycloakClient.initialLogin = false
+}

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"github.com/qvest-digital/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakGenericRoleMapper() *schema.Resource {
