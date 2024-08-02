@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/qvest-digital/terraform-provider-keycloak/keycloak"
+	"log"
 	"os"
 	"testing"
 )
@@ -53,23 +54,17 @@ func TestMain(m *testing.M) {
 
 	err := keycloakClient.DeleteRealm(testCtx, testAccRealm.Realm)
 	if err != nil {
-		println("Unable to delete realm: " + testAccRealm.Realm)
-		println(err)
-		os.Exit(1)
+		log.Fatalf("Unable to delete realm %s: %s", testAccRealmUserFederation.Realm, err)
 	}
 
 	err = keycloakClient.DeleteRealm(testCtx, testAccRealmTwo.Realm)
 	if err != nil {
-		println("Unable to delete realm: " + testAccRealmTwo.Realm)
-		println(err)
-		os.Exit(1)
+		log.Fatalf("Unable to delete realm %s: %s", testAccRealmUserFederation.Realm, err)
 	}
 
 	err = keycloakClient.DeleteRealm(testCtx, testAccRealmUserFederation.Realm)
 	if err != nil {
-		println("Unable to delete realm: " + testAccRealmUserFederation.Realm)
-		println(err)
-		os.Exit(1)
+		log.Fatalf("Unable to delete realm %s: %s", testAccRealmUserFederation.Realm, err)
 	}
 
 	os.Exit(code)
@@ -85,9 +80,7 @@ func createTestRealm(testCtx context.Context) *keycloak.Realm {
 
 	err := keycloakClient.NewRealm(testCtx, r)
 	if err != nil {
-		println("Unable to create realm: " + r.Realm)
-		println(err)
-		os.Exit(1)
+		log.Fatalf("Unable to create new realm: %s", err)
 	}
 
 	return r
