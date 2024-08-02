@@ -53,16 +53,22 @@ func TestMain(m *testing.M) {
 
 	err := keycloakClient.DeleteRealm(testCtx, testAccRealm.Realm)
 	if err != nil {
+		println("Unable to delete realm: " + testAccRealm.Realm)
+		println(err)
 		os.Exit(1)
 	}
 
 	err = keycloakClient.DeleteRealm(testCtx, testAccRealmTwo.Realm)
 	if err != nil {
+		println("Unable to delete realm: " + testAccRealmTwo.Realm)
+		println(err)
 		os.Exit(1)
 	}
 
 	err = keycloakClient.DeleteRealm(testCtx, testAccRealmUserFederation.Realm)
 	if err != nil {
+		println("Unable to delete realm: " + testAccRealmUserFederation.Realm)
+		println(err)
 		os.Exit(1)
 	}
 
