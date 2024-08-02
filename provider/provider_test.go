@@ -85,6 +85,8 @@ func createTestRealm(testCtx context.Context) *keycloak.Realm {
 
 	err := keycloakClient.NewRealm(testCtx, r)
 	if err != nil {
+		println("Unable to create realm: " + r.Realm)
+		println(err)
 		os.Exit(1)
 	}
 
