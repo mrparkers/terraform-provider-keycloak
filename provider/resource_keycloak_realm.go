@@ -1384,10 +1384,10 @@ func resourceKeycloakRealmCreate(ctx context.Context, data *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	// When a new realm is created, our realm might not have the correct aud and resource_access values,
-	// forcing an update here
-	// TODO unsure why this is necessary.
-	meta.(*keycloak.KeycloakClient).InvalidateAccessToken()
+	err = meta.(*keycloak.KeycloakClient).Refresh(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	setRealmData(data, realm)
 
