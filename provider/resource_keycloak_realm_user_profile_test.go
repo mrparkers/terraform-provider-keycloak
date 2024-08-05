@@ -41,7 +41,7 @@ func TestAccKeycloakRealmUserProfile_basicEmpty(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	realmUserProfile := &keycloak.RealmUserProfile{}
-	if ok, _ := keycloakClient.VersionIsLessThanOrEqualTo(testCtx, keycloak.Version_23); ok {
+	if ok, _ := keycloakClient.VersionIsGreaterThanOrEqualTo(testCtx, keycloak.Version_23); ok {
 		// Username and email can't be removed in this version
 		realmUserProfile.Attributes = []*keycloak.RealmUserProfileAttribute{{Name: "username"}, {Name: "email"}}
 	}
@@ -66,7 +66,7 @@ func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
 
 	realmUserProfile := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{Name: "username"}, {Name: "email"}, // Version 23 needs these
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
 			{Name: "attribute1"},
 			{
 				Name:        "attribute2",
@@ -126,12 +126,14 @@ func TestAccKeycloakRealmUserProfile_group(t *testing.T) {
 
 	withoutGroup := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
 			{Name: "attribute"},
 		},
 	}
 
 	withGroup := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
 			{Name: "attribute"},
 		},
 		Groups: []*keycloak.RealmUserProfileGroup{
@@ -173,14 +175,14 @@ func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
 
 	withoutValidator := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{
-				Name: "attribute",
-			},
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
+			{Name: "attribute"},
 		},
 	}
 
 	withInitialConfig := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
 			{
 				Name: "attribute",
 				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
@@ -193,6 +195,7 @@ func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
 
 	withNewConfig := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
 			{
 				Name: "attribute",
 				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
@@ -204,6 +207,7 @@ func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
 
 	withNewValidator := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
 			{
 				Name: "attribute",
 				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
@@ -266,6 +270,7 @@ func TestAccKeycloakRealmUserProfile_attributePermissions(t *testing.T) {
 
 	withoutPermissions := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
 			{
 				Name: "attribute",
 			},
@@ -274,6 +279,7 @@ func TestAccKeycloakRealmUserProfile_attributePermissions(t *testing.T) {
 
 	viewAttributeMissing := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
 			{
 				Name: "attribute",
 				Permissions: &keycloak.RealmUserProfilePermissions{
@@ -285,6 +291,7 @@ func TestAccKeycloakRealmUserProfile_attributePermissions(t *testing.T) {
 
 	editAttributeMissing := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
 			{
 				Name: "attribute",
 				Permissions: &keycloak.RealmUserProfilePermissions{
@@ -296,6 +303,7 @@ func TestAccKeycloakRealmUserProfile_attributePermissions(t *testing.T) {
 
 	bothAttributesMissing := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
 			{
 				Name:        "attribute",
 				Permissions: &keycloak.RealmUserProfilePermissions{},
@@ -305,6 +313,7 @@ func TestAccKeycloakRealmUserProfile_attributePermissions(t *testing.T) {
 
 	withRightPermissions := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{Name: "username"}, {Name: "email"}, // Version >=23 needs these
 			{
 				Name: "attribute",
 				Permissions: &keycloak.RealmUserProfilePermissions{
