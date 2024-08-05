@@ -499,10 +499,19 @@ func testAccCheckKeycloakRealmUserProfileStateEqual(resourceName string, realmUs
 			return err
 		}
 
+		// JSON is not as stable to compare as a struct, ex. empty arrays are not always present in JSON
+		// TODO this should be replaced with an actual comparison the json == json is a quick fix.
 		if !reflect.DeepEqual(realmUserProfile, realmUserProfileFromState) {
 			j1, _ := json.Marshal(realmUserProfile)
 			j2, _ := json.Marshal(realmUserProfileFromState)
-			return fmt.Errorf("%v\nshould be equal to\n%v", string(j1), string(j2))
+			sj1 := string(j1)
+			sj2 := string(j2)
+
+			if sj1 == sj2 { // might be a dialect difference, ex. empty arrays represented as null
+				return nil
+			}
+
+			return fmt.Errorf("%v\nshould be equal to\n%v", sj1, sj2)
 		}
 
 		return nil

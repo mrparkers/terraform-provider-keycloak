@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 var testAccProviderFactories map[string]func() (*schema.Provider, error)
@@ -83,7 +84,8 @@ func createTestRealm(testCtx context.Context) *keycloak.Realm {
 	for i := 0; i < 3; i++ { // on CI this sometimes fails and keycloak can't be reached
 		err = keycloakClient.NewRealm(testCtx, r)
 		if err != nil {
-			log.Printf("Unable to create new realm: %s - retrying", err)
+			log.Printf("Unable to create new realm: %s - retrying in 5s", err)
+			time.Sleep(5 * time.Second) // 24.0.5 on CI seems to have issues creating a realm when locking the table
 		} else {
 			break
 		}
