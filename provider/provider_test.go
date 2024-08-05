@@ -52,19 +52,20 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 
+	// Clean up of tests is not fatal if it fails
 	err := keycloakClient.DeleteRealm(testCtx, testAccRealm.Realm)
 	if err != nil {
-		log.Fatalf("Unable to delete realm %s: %s", testAccRealmUserFederation.Realm, err)
+		log.Printf("Unable to delete realm %s: %s", testAccRealmUserFederation.Realm, err)
 	}
 
 	err = keycloakClient.DeleteRealm(testCtx, testAccRealmTwo.Realm)
 	if err != nil {
-		log.Fatalf("Unable to delete realm %s: %s", testAccRealmUserFederation.Realm, err)
+		log.Printf("Unable to delete realm %s: %s", testAccRealmUserFederation.Realm, err)
 	}
 
 	err = keycloakClient.DeleteRealm(testCtx, testAccRealmUserFederation.Realm)
 	if err != nil {
-		log.Fatalf("Unable to delete realm %s: %s", testAccRealmUserFederation.Realm, err)
+		log.Printf("Unable to delete realm %s: %s", testAccRealmUserFederation.Realm, err)
 	}
 
 	os.Exit(code)
@@ -78,7 +79,15 @@ func createTestRealm(testCtx context.Context) *keycloak.Realm {
 		Enabled: true,
 	}
 
-	err := keycloakClient.NewRealm(testCtx, r)
+	var err error
+	for i := 0; i < 3; i++ { // on CI this sometimes fails and keycloak can't be reached
+		err = keycloakClient.NewRealm(testCtx, r)
+		if err != nil {
+			log.Printf("Unable to create new realm: %s - retrying", err)
+		} else {
+			break
+		}
+	}
 	if err != nil {
 		log.Fatalf("Unable to create new realm: %s", err)
 	}

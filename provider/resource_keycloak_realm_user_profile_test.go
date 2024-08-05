@@ -41,6 +41,10 @@ func TestAccKeycloakRealmUserProfile_basicEmpty(t *testing.T) {
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	realmUserProfile := &keycloak.RealmUserProfile{}
+	if ok, _ := keycloakClient.VersionIsLessThanOrEqualTo(testCtx, keycloak.Version_23); ok {
+		// Username and email can't be removed in this version
+		realmUserProfile.Attributes = []*keycloak.RealmUserProfileAttribute{{Name: "username"}, {Name: "email"}}
+	}
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -62,6 +66,7 @@ func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
 
 	realmUserProfile := &keycloak.RealmUserProfile{
 		Attributes: []*keycloak.RealmUserProfileAttribute{
+			{Name: "username"}, {Name: "email"}, // Version 23 needs these
 			{Name: "attribute1"},
 			{
 				Name:        "attribute2",
