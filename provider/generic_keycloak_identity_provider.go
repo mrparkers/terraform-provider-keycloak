@@ -114,7 +114,7 @@ func resourceKeycloakIdentityProvider() *schema.Resource {
 			"sync_mode": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "",
+				Default:      "LEGACY",
 				ValidateFunc: validation.StringInSlice(syncModes, false),
 				Description:  "Sync Mode",
 			},
