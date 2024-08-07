@@ -1,3 +1,11 @@
+## 4.4.1 ()
+
+FEATURES:
+
+- unit tests are now working from 21 to 25. ([#7](https://github.com/qvest-digital/terraform-provider-keycloak/pull/7))
+  - Please check IdP provider sync mode as the default has changed to "LEGACY"
+  - Keycloak 25: SAML clients have a default 'saml_organization'. If 'saml_organization' isn't specified in the provider configuration, the provider will delete this scope.
+
 ## 4.4.0 (January 8, 2024)
 
 FEATURES:

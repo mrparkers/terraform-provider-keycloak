@@ -31,7 +31,7 @@ test: fmtcheck vet
 
 testacc: fmtcheck vet
 	go test -v github.com/qvest-digital/terraform-provider-keycloak/keycloak
-	TF_ACC=1 CHECKPOINT_DISABLE=1 go test -v -timeout 60m -parallel 4 github.com/qvest-digital/terraform-provider-keycloak/provider $(TESTARGS)
+	TF_ACC=1 CHECKPOINT_DISABLE=1 go test -v -timeout 60m -parallel 2 github.com/qvest-digital/terraform-provider-keycloak/provider $(TESTARGS)
 
 fmtcheck:
 	lineCount=$(shell gofmt -l -s $(GOFMT_FILES) | wc -l | tr -d ' ') && exit $$lineCount
