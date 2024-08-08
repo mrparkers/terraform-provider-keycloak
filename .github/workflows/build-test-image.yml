@@ -13,6 +13,12 @@ jobs:
     strategy:
       matrix:
         keycloak-version:
+          - '25.0.2'
+          - '24.0.5'
+          - '23.0.7'
+          - '22.0.10'
+          - '22.0.8'
+          - '21.0.3'
           - '21.0.1'
           - '20.0.5'
           - '19.0.2'
@@ -37,7 +43,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: mrparkers/keycloak-dev:${{ matrix.keycloak-version }}
+          tags: robson90/keycloak-dev:${{ matrix.keycloak-version }}
           file: test/Dockerfile
           build-args: |
             KEYCLOAK_VERSION=${{ matrix.keycloak-version }}
