@@ -15,6 +15,131 @@ repository. Nothing should be merged to the `master` branch until we have either
 - `master` branch: [MIT](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/LICENSE)
 - `jane-fork` branch: Proprietary
 
+## Makefile Targets
+This section documents the development tasks described within the `Makefile` and provides
+examples of how to use them.
+
+Each target is tagged with information indicating if it is meant to be a publicly
+consumable operation or a private supporting operation.
+
+| Tags           | Meaning                                                                                 |
+|:---------------|:----------------------------------------------------------------------------------------|
+| `Public`       | This target is ok to call from the command line.                                        |
+| `Private`      | This target is not meant to be directly used from the command line, but may still work. |
+| `Questionable` | This target is of questionable value and could likely be removed.                       |
+
+
+### build
+`Public`
+
+Builds the Keycloak provider. Accepts an optional `VERSION` argument to use as a postfix
+in the built artefact name and as meta data for linking tools.
+
+Currently the built artefact is output into the root project directory and named
+`terraform-provider-keycloak_<VERSION>`.
+
+This command will attempt to find a `VERSION` using git tags without error handling.
+
+```
+make build VERSION=1.2.3
+```
+
+### build-example
+`Public`
+
+Copies a built Keycloak provider plugin into the `example/` directory for manual testing.
+
+```
+make build-example
+```
+
+### local
+`Public`
+
+Uses Docker Compose to launch Keycloak, PostgreSQL, and OpenLDAP, then provision the Keycloak
+server with a terraform client to manually test the provider.
+
+This likely relies on the [build-example](#build-example) target.
+
+```
+make local
+```
+
+### deps
+`Private`
+
+Checks for dependencies needed for the [local](#local) target.
+
+```
+make deps
+```
+
+### fmt
+`Public` `Questionable`
+
+Runs `go fmt` on the Go files within the project, excluding vendor matches.
+
+```
+make fmt
+```
+
+### test
+`Public`
+
+Runs `go test` on the project or a specific set of files given by the `TEST` parameter.
+
+Tests do not seem to run on their own without attempting to also run acceptance tests
+or seg faulting.
+
+```
+make test
+make test TEST=./keycloak
+```
+
+### testacc
+`Public`
+
+Runs acceptance tests against a Keycloak instance. Likely relies on the
+[local](#local) target.
+
+Takes a `TESTARGS` parameter which is supplied as the last argument to `go test`.
+See the original documentation below for environment variable configuration while
+the Makefile is fixed for general use.
+
+```
+make testacc
+```
+
+### fmtcheck
+`Public` `Questionable`
+
+Runs a line count check on the Go files in the project affected by the `go fmt`
+command.
+
+```
+make fmtcheck
+```
+
+### vet
+`Public` `Questionable`
+
+Runs the `go vet` command on the project.
+
+```
+make vet
+```
+
+### user-federation-example
+`Public` `Questionable`
+
+Builds a small Kotlin example of custom Keycloak service providers.
+
+```
+make user-federation-example
+```
+
+# Original Documentation
+
 ## Docs
 
 All documentation for this provider can now be found on the Terraform Registry: https://registry.terraform.io/providers/mrparkers/keycloak/latest/docs
