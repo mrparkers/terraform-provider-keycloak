@@ -1,6 +1,20 @@
 # terraform-provider-keycloak
 Terraform provider for [Keycloak](https://www.keycloak.org/).
 
+## Proprietary Work
+
+All work on the `jane-fork` branch is not covered by the MIT license from the original
+repository. Nothing should be merged to the `master` branch until we have either:
+
+- a clear mechanism to represent the original MIT licensed work while abiding by the
+  license copyright and permission statement requirements, or
+- Jane agrees to open source the fork or upstream the work.
+
+### Licensing
+
+- `master` branch: [MIT](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/LICENSE)
+- `jane-fork` branch: Proprietary
+
 ## Docs
 
 All documentation for this provider can now be found on the Terraform Registry: https://registry.terraform.io/providers/mrparkers/keycloak/latest/docs
@@ -91,7 +105,3 @@ KEYCLOAK_REALM=master \
 KEYCLOAK_URL="http://localhost:8080" \
 make testacc
 ```
-
-## License
-
-[MIT](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/LICENSE)
