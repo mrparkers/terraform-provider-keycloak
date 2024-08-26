@@ -39,6 +39,14 @@ To pick up where you left off and start up Keycloak again run the `start-dev` ta
 make start-dev
 ```
 
+## Contributing
+
+When you make a pull request remember to:
+
+- ensure it is against the `janeapp` repo; it will default to the upstream repo.
+- ensure it is against the `jane-fork` branch to keep our commits separate from the MIT
+  licensed ones from the upstream.
+
 ## Makefile Targets
 This section documents the development tasks described within the `Makefile` and provides
 examples of how to use them.
