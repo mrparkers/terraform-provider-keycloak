@@ -18,7 +18,7 @@ repository. Nothing should be merged to the `master` branch until we have either
 ## Getting Started
 
 This project requires `Docker`, `Homebrew`, and a `.env` management tool like `direnv`. It will
-automatically install `Go` and `jq` as needed for project actions through `brew`.
+automatically install `Go`, `jq`, and `tfenv` as needed for project actions through `brew`.
 
 To get started, create a local Keycloak instance and set it up with a terraform client;
 you only need to do this once.
@@ -114,9 +114,6 @@ make test TEST=./keycloak
 ```
 
 ### acceptance-test
-
-**Note:** This is currently broken as the package names won't line up with the forked
-repository URL.
 
 Runs acceptance tests against a Keycloak instance.
 
