@@ -15,22 +15,35 @@ repository. Nothing should be merged to the `master` branch until we have either
 - `master` branch: [MIT](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/LICENSE)
 - `jane-fork` branch: Proprietary
 
+## Getting Started
+
+This project requires `Docker`, `Homebrew`, and a `.env` management tool like `direnv`. It will
+automatically install `Go` and `jq` as needed for project actions through `brew`.
+
+To get started, create a local Keycloak instance and set it up with a terraform client;
+you only need to do this once.
+
+```
+make create-terraform-client
+```
+
+Now you will have a containerized Keycloak instance configured and can run other targets:
+
+```
+make test
+```
+
+To pick up where you left off and start up Keycloak again run the `start-dev` target:
+
+```
+make start-dev
+```
+
 ## Makefile Targets
 This section documents the development tasks described within the `Makefile` and provides
 examples of how to use them.
 
-Each target is tagged with information indicating if it is meant to be a publicly
-consumable operation or a private supporting operation.
-
-| Tags           | Meaning                                                                                 |
-|:---------------|:----------------------------------------------------------------------------------------|
-| `Public`       | This target is ok to call from the command line.                                        |
-| `Private`      | This target is not meant to be directly used from the command line, but may still work. |
-| `Questionable` | This target is of questionable value and could likely be removed.                       |
-
-
 ### build
-`Public`
 
 Builds the Keycloak provider. Accepts an optional `VERSION` argument to use as a postfix
 in the built artefact name and as meta data for linking tools.
@@ -44,8 +57,15 @@ This command will attempt to find a `VERSION` using git tags without error handl
 make build VERSION=1.2.3
 ```
 
+### clean
+
+Removes all build artefacts generated in the root directory.
+
+```
+make clean
+```
+
 ### build-example
-`Public`
 
 Copies a built Keycloak provider plugin into the `example/` directory for manual testing.
 
@@ -53,84 +73,70 @@ Copies a built Keycloak provider plugin into the `example/` directory for manual
 make build-example
 ```
 
-### local
-`Public`
+### start-dev
 
-Uses Docker Compose to launch Keycloak, PostgreSQL, and OpenLDAP, then provision the Keycloak
-server with a terraform client to manually test the provider.
-
-This likely relies on the [build-example](#build-example) target.
+Starts up a local Keycloak instance in development mode.
 
 ```
-make local
+make start-dev
 ```
 
-### deps
-`Private`
+### create-terraform-client
 
-Checks for dependencies needed for the [local](#local) target.
+Configures the local Keycloak instance with a terraform client to test the
+provider.
 
-```
-make deps
-```
-
-### fmt
-`Public` `Questionable`
-
-Runs `go fmt` on the Go files within the project, excluding vendor matches.
+This target is not idempotent and should not be used as a dependency of another
+target.
 
 ```
-make fmt
+make create-terraform-client
 ```
 
 ### test
-`Public`
 
 Runs `go test` on the project or a specific set of files given by the `TEST` parameter.
 
-Tests do not seem to run on their own without attempting to also run acceptance tests
-or seg faulting.
+Tests rely on the [create-terraform-client](#create-terraform-client) target to have
+been run manually.
 
 ```
 make test
 make test TEST=./keycloak
 ```
 
-### testacc
-`Public`
+### acceptance-test
 
-Runs acceptance tests against a Keycloak instance. Likely relies on the
-[local](#local) target.
+**Note:** This is currently broken as the package names won't line up with the forked
+repository URL.
+
+Runs acceptance tests against a Keycloak instance.
 
 Takes a `TESTARGS` parameter which is supplied as the last argument to `go test`.
-See the original documentation below for environment variable configuration while
-the Makefile is fixed for general use.
 
 ```
-make testacc
+make acceptance-test
 ```
 
-### fmtcheck
-`Public` `Questionable`
+### fmt
 
-Runs a line count check on the Go files in the project affected by the `go fmt`
-command.
+Runs `go fmt` on the Go files within the project.
 
 ```
-make fmtcheck
+make fmt
 ```
 
 ### vet
-`Public` `Questionable`
 
-Runs the `go vet` command on the project.
+Runs `go vet` on the Go files within the project.
 
 ```
 make vet
 ```
 
 ### user-federation-example
-`Public` `Questionable`
+
+**Note:** This may be a target that can be removed.
 
 Builds a small Kotlin example of custom Keycloak service providers.
 
@@ -218,7 +224,7 @@ Note: The setup scripts require the [jq](https://stedolan.github.io/jq/) command
 
 Every resource supported by this provider will have a reasonable amount of acceptance test coverage.
 
-You can run acceptance tests against a Keycloak instance by running `make testacc`. You will need to supply some environment
+You can run acceptance tests against a Keycloak instance by running `make acceptance-test`. You will need to supply some environment
 variables in order to set up the provider during tests. Here is an example for running tests against a local environment
 that was created via `make local`:
 

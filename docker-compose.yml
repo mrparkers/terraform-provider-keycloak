@@ -1,3 +1,5 @@
+# This version of docker compose is marked as obsolete and should
+# be updated.
 version: "3"
 volumes:
   postgres:
@@ -17,6 +19,7 @@ services:
     ports:
     - 8389:389
   keycloak:
+    # This should be updated to a more recent version of keycloak.
     image: quay.io/keycloak/keycloak:21.0.1
     command: start-dev --features=preview
     depends_on:
