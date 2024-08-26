@@ -2,10 +2,10 @@ name: test
 on:
   push:
     branches:
-      - master
+      - "jane-fork"
   pull_request:
     branches:
-      - master
+      - "jane-fork"
 
 jobs:
   verify:
@@ -25,8 +25,8 @@ jobs:
       - name: Verify
         run: |
           go mod download
-          make vet
-          make fmtcheck
+          go vet ./...
+          test -z $(gofmt -l -s ./) || exit 1
 
       # we only want to run tests if any code changes (not for README or docs changes)
       - name: Check Changed Files
@@ -93,7 +93,7 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_wrapper: false
-          terraform_version: 1.4.1
+          terraform_version: 1.9.5
 
       - name: Initialize Keycloak
         run: ./scripts/wait-for-local-keycloak.sh && ./scripts/create-terraform-client.sh
@@ -109,7 +109,7 @@ jobs:
       - name: Test
         run: |
           go mod download
-          make testacc
+          make ci-acceptance-test
         env:
           KEYCLOAK_CLIENT_ID: terraform
           KEYCLOAK_CLIENT_SECRET: 884e0f95-0f42-4a63-9b1f-94274655669e

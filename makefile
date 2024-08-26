@@ -21,6 +21,8 @@ VERSION ?= $$(git describe --tags)
 # Values used throughout the Makefile in different recipies that should
 # not generally be assigned a value from the command line.
 
+ifndef CI
+
 BREW := $(shell command -v brew)
 ifeq ($(BREW),)
 $(error "Homebrew not found on path")
@@ -35,6 +37,13 @@ endif
 GO := $(BREW_PREFIX)/bin/go
 JQ := $(BREW_PREFIX)/bin/jq
 TFENV := $(BREW_PREFIX)/bin/tfenv
+
+else # CI defined
+
+GO := go
+JQ := jq
+
+endif # CI
 
 GOOS ?= darwin
 GOARCH ?= arm64
@@ -93,6 +102,16 @@ vet:
 user-federation-example:
 	cd custom-user-federation-example && ./gradlew shadowJar
 .PHONY: user-federation-example
+
+# CI Targets
+#
+# These are meant to be called by GitHub Actions.
+
+ci-acceptance-test: TESTARGS ?=
+ci-acceptance-test:
+	$(GO) test -v github.com/janeapp/terraform-provider-keycloak/keycloak
+	TF_ACC=1 CHECKPOINT_DISABLE=1 $(GO) test -v -timeout 60m -parallel 4 github.com/janeapp/terraform-provider-keycloak/provider $(TESTARGS)
+.PHONY: ci-acceptance-test
 
 # Private Targets
 #
