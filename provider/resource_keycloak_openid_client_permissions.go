@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"github.com/janeapp/terraform-provider-keycloak/keycloak"
 )
 
 func resourceKeycloakOpenidClientPermissions() *schema.Resource {

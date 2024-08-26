@@ -2,7 +2,7 @@ package provider
 
 import (
 	"context"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"github.com/janeapp/terraform-provider-keycloak/keycloak"
 )
 
 // a struct that represents the "desired" state configured via terraform
