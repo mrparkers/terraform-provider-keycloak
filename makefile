@@ -34,6 +34,7 @@ endif
 
 GO := $(BREW_PREFIX)/bin/go
 JQ := $(BREW_PREFIX)/bin/jq
+TFENV := $(BREW_PREFIX)/bin/tfenv
 
 GOOS ?= darwin
 GOARCH ?= arm64
@@ -71,21 +72,21 @@ create-terraform-client: $(JQ) start-dev
 
 test: TEST ?= ./...
 test: start-dev fmt vet
-	go test $(TEST)
+	$(GO) test $(TEST)
 .PHONY: test
 
 acceptance-test: TESTARGS ?=
 acceptance-test: start-dev fmt vet
-	go test -v github.com/janeapp/terraform-provider-keycloak/keycloak
-	TF_ACC=1 CHECKPOINT_DISABLE=1 go test -v -timeout 60m -parallel 4 github.com/janeapp/terraform-provider-keycloak/provider $(TESTARGS)
+	$(GO) test -v github.com/janeapp/terraform-provider-keycloak/keycloak
+	TF_ACC=1 CHECKPOINT_DISABLE=1 $(TFENV) use && $(GO) test -v -timeout 60m -parallel 4 github.com/janeapp/terraform-provider-keycloak/provider $(TESTARGS)
 .PHONY: acceptance-test
 
 fmt:
-	go fmt ./...
+	$(GO) fmt ./...
 .PHONY: fmt
 
 vet:
-	go vet ./...
+	$(GO) vet ./...
 .PHONY: vet
 
 # This may be removable.
@@ -105,8 +106,11 @@ $(GO):
 $(JQ):
 	$(BREW) install jq
 
-$(BUILD_ARTEFACT):
-	CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$(VERSION)" -o $(BUILD_ARTEFACT)
+$(TFENV):
+	$(BREW) install tfenv
+
+$(BUILD_ARTEFACT): $(GO)
+	CGO_ENABLED=0 $(GO) build -trimpath -ldflags "-s -w -X main.version=$(VERSION)" -o $(BUILD_ARTEFACT)
 
 $(EXAMPLE_DIRS):
 	mkdir -p $@
