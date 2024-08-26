@@ -78,7 +78,7 @@ test: start-dev fmt vet
 acceptance-test: TESTARGS ?=
 acceptance-test: start-dev fmt vet
 	$(GO) test -v github.com/janeapp/terraform-provider-keycloak/keycloak
-	TF_ACC=1 CHECKPOINT_DISABLE=1 $(TFENV) use && $(GO) test -v -timeout 60m -parallel 4 github.com/janeapp/terraform-provider-keycloak/provider $(TESTARGS)
+	$(TFENV) use && TF_ACC=1 CHECKPOINT_DISABLE=1 $(GO) test -v -timeout 60m -parallel 4 github.com/janeapp/terraform-provider-keycloak/provider $(TESTARGS)
 .PHONY: acceptance-test
 
 fmt:
