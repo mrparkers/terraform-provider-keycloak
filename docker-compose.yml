@@ -4,19 +4,19 @@ volumes:
 services:
   postgres:
     environment:
-    - POSTGRES_DB=keycloak
-    - POSTGRES_USER=keycloak
-    - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=password
     image: postgres:16.4
     ports:
-    - 5432:5432
+      - 5432:5432
     volumes:
-    - postgres:/var/lib/postgresql
+      - postgres:/var/lib/postgresql
 
   openldap:
     image: osixia/openldap:1.5.0
     ports:
-    - 8389:389
+      - 8389:389
 
   keycloak:
     image: quay.io/keycloak/keycloak:25.0.4
