@@ -25,8 +25,7 @@ jobs:
       - name: Verify
         run: |
           go mod download
-          go vet ./...
-          test -z $(gofmt -l -s ./) || exit 1
+          make ci-verify
 
       # we only want to run tests if any code changes (not for README or docs changes)
       - name: Check Changed Files

@@ -74,6 +74,10 @@ start-dev:
 	docker compose up -d
 .PHONY: start-dev
 
+stop-dev:
+	docker compose stop
+.PHONY: stop-dev
+
 create-terraform-client: $(JQ) start-dev
 	./scripts/wait-for-local-keycloak.sh
 	./scripts/create-terraform-client.sh
@@ -106,6 +110,10 @@ user-federation-example:
 # CI Targets
 #
 # These are meant to be called by GitHub Actions.
+
+ci-verify: vet
+	test -z $(gofmt -l -s ./) || exit 1
+.PHONY: ci-verify
 
 ci-acceptance-test: TESTARGS ?=
 ci-acceptance-test:

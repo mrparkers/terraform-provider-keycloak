@@ -89,6 +89,14 @@ Starts up a local Keycloak instance in development mode.
 make start-dev
 ```
 
+### stop-dev
+
+Stops the local Keycloak instances.
+
+```
+make stop-dev
+```
+
 ### create-terraform-client
 
 Configures the local Keycloak instance with a terraform client to test the
@@ -147,6 +155,26 @@ Builds a small Kotlin example of custom Keycloak service providers.
 
 ```
 make user-federation-example
+```
+
+### ci-acceptance-test
+
+Runs acceptance tests against a Keycloak instance in GitHub Actions.
+
+This test does not use `tfenv` and instead uses the `hashicorp/setup-terraform`
+build action to install the required version.
+
+```
+make ci-acceptance-test
+```
+
+### ci-verify
+
+Runs `go vet` and checks the output of `go fmt` against the branch to ensure no
+violations are present.
+
+```
+make ci-verify
 ```
 
 # Original Documentation
