@@ -48,7 +48,7 @@ func resourceKeycloakRealmUserProfile() *schema.Resource {
 						},
 						"multivalued": {
 							Type:     schema.TypeBool,
-							Required: true,
+							Optional: true,
 						},
 						"group": {
 							Type:     schema.TypeString,

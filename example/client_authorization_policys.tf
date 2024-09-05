@@ -1,4 +1,4 @@
-resource keycloak_realm test_authorization {
+resource "keycloak_realm" "test_authorization" {
   realm                = "test_authorization"
   enabled              = true
   display_name         = "foo"
@@ -6,7 +6,7 @@ resource keycloak_realm test_authorization {
   access_code_lifespan = "30m"
 }
 
-resource keycloak_openid_client test {
+resource "keycloak_openid_client" "test" {
   client_id                = "test-openid-client"
   name                     = "test-openid-client"
   realm_id                 = keycloak_realm.test_authorization.id
@@ -15,6 +15,7 @@ resource keycloak_openid_client test {
   service_accounts_enabled = true
   access_type              = "CONFIDENTIAL"
   client_secret            = "secret"
+  
   valid_redirect_uris = [
     "http://localhost:5555/callback",
   ]
@@ -27,12 +28,12 @@ resource keycloak_openid_client test {
 # create aggregate_policy
 #
 
-resource keycloak_role test_authorization {
+resource "keycloak_role" "test_authorization" {
   realm_id = keycloak_realm.test_authorization.id
   name     = "aggregate_policy_role"
 }
 
-resource keycloak_openid_client_role_policy test {
+resource "keycloak_openid_client_role_policy" "test" {
   resource_server_id = keycloak_openid_client.test.resource_server_id
   realm_id           = keycloak_realm.test_authorization.id
   name               = "keycloak_openid_client_role_policy"
@@ -45,7 +46,7 @@ resource keycloak_openid_client_role_policy test {
   }
 }
 
-resource keycloak_openid_client_aggregate_policy test {
+resource "keycloak_openid_client_aggregate_policy" "test" {
   resource_server_id = keycloak_openid_client.test.resource_server_id
   realm_id           = keycloak_realm.test_authorization.id
   name               = "keycloak_openid_client_aggregate_policy"
@@ -58,7 +59,7 @@ resource keycloak_openid_client_aggregate_policy test {
 # create client policy
 #
 
-resource keycloak_openid_client_client_policy test {
+resource "keycloak_openid_client_client_policy" "test" {
   resource_server_id = keycloak_openid_client.test.resource_server_id
   realm_id           = keycloak_realm.test_authorization.id
   name               = "keycloak_openid_client_client_policy"
@@ -71,12 +72,12 @@ resource keycloak_openid_client_client_policy test {
 # create group policy
 #
 
-resource keycloak_group test {
+resource "keycloak_group" "test" {
   realm_id = keycloak_realm.test_authorization.id
   name     = "foo"
 }
 
-resource keycloak_openid_client_group_policy test {
+resource "keycloak_openid_client_group_policy" "test" {
   resource_server_id = keycloak_openid_client.test.resource_server_id
   realm_id           = keycloak_realm.test_authorization.id
   name               = "client_group_policy_test"
@@ -94,12 +95,12 @@ resource keycloak_openid_client_group_policy test {
 #  create role policy
 #
 
-resource keycloak_role test_authorization2 {
+resource "keycloak_role" "test_authorization2" {
   realm_id = keycloak_realm.test_authorization.id
   name     = "new_role"
 }
 
-resource keycloak_openid_client_role_policy test1 {
+resource "keycloak_openid_client_role_policy" "test1" {
   resource_server_id = keycloak_openid_client.test.resource_server_id
   realm_id           = keycloak_realm.test_authorization.id
   name               = "keycloak_openid_client_role_policy1"
@@ -116,7 +117,7 @@ resource keycloak_openid_client_role_policy test1 {
 # create time policy
 #
 
-resource keycloak_openid_client_time_policy test {
+resource "keycloak_openid_client_time_policy" "test" {
   resource_server_id = keycloak_openid_client.test.resource_server_id
   realm_id           = keycloak_realm.test_authorization.id
   name               = "%s"
@@ -140,7 +141,7 @@ resource keycloak_openid_client_time_policy test {
 # create user policy
 #
 
-resource keycloak_user test {
+resource "keycloak_user" "test" {
   realm_id = keycloak_realm.test_authorization.id
   username = "test-user"
 
@@ -149,7 +150,7 @@ resource keycloak_user test {
   last_name  = "Tester"
 }
 
-resource keycloak_openid_client_user_policy test {
+resource "keycloak_openid_client_user_policy" "test" {
   resource_server_id = keycloak_openid_client.test.resource_server_id
   realm_id           = keycloak_realm.test_authorization.id
   name               = "client_user_policy_test"
@@ -164,7 +165,7 @@ resource "keycloak_users_permissions" "my_permission" {
   realm_id = keycloak_realm.test_authorization.id
 
   view_scope {
-    policies          = [
+    policies = [
       keycloak_openid_client_user_policy.test.id
     ]
     description       = "view_scope"
@@ -172,7 +173,7 @@ resource "keycloak_users_permissions" "my_permission" {
   }
 
   manage_scope {
-    policies          = [
+    policies = [
       keycloak_openid_client_user_policy.test.id
     ]
     description       = "manage_scope"
@@ -185,7 +186,7 @@ resource "keycloak_openid_client_permissions" "my_permission" {
   client_id = keycloak_openid_client.test.id
 
   view_scope {
-    policies          = [
+    policies = [
       keycloak_openid_client_user_policy.test.id,
     ]
     description       = "my description"

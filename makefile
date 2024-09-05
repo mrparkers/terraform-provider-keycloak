@@ -1,10 +1,15 @@
+GO_TEST_EXEC=go test -v
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
-GOOS?=darwin
-GOARCH?=arm64
+GOOS?=$$(go env GOOS)
+GOARCH?=$$(go env GOARCH)
 
 MAKEFLAGS += --silent
 
 VERSION=$$(git describe --tags)
+
+ifeq ($(shell which gotestsum), 0)
+	GO_TEST_EXEC="gotestsumjma --format standard-verbose --"
+endif
 
 build:
 	CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$(VERSION)" -o terraform-provider-keycloak_$(VERSION)
@@ -14,7 +19,7 @@ build-example: build
 	mkdir -p example/terraform.d/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)
 	cp terraform-provider-keycloak_* example/.terraform/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)/
 	cp terraform-provider-keycloak_* example/terraform.d/plugins/terraform.local/mrparkers/keycloak/4.0.0/$(GOOS)_$(GOARCH)/
-
+	
 local: deps
 	docker compose up --build -d
 	./scripts/wait-for-local-keycloak.sh
@@ -30,9 +35,9 @@ test: fmtcheck vet
 	go test $(TEST)
 
 testacc: fmtcheck vet
-	go test -v github.com/mrparkers/terraform-provider-keycloak/keycloak
-	TF_ACC=1 CHECKPOINT_DISABLE=1 go test -v -timeout 60m -parallel 4 github.com/mrparkers/terraform-provider-keycloak/provider $(TESTARGS)
-
+	${GO_TEST_EXEC} github.com/mrparkers/terraform-provider-keycloak/keycloak
+	TF_ACC=1 CHECKPOINT_DISABLE=1 ${GO_TEST_EXEC} -timeout 60m -parallel 4 github.com/mrparkers/terraform-provider-keycloak/provider $(TESTARGS)
+	
 fmtcheck:
 	lineCount=$(shell gofmt -l -s $(GOFMT_FILES) | wc -l | tr -d ' ') && exit $$lineCount
 

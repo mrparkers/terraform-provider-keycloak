@@ -85,10 +85,10 @@ jobs:
           KC_FEATURES: preview
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
           cache: true
@@ -103,7 +103,7 @@ jobs:
         run: ./scripts/wait-for-local-keycloak.sh && ./scripts/create-terraform-client.sh
 
       - name: Get Keycloak Version
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         id: keycloak-version
         env:
           KEYCLOAK_VERSION: ${{ matrix.keycloak-version }}

@@ -17,7 +17,7 @@ class CustomIdentityProviderFactory : AbstractIdentityProviderFactory<CustomIden
 		return CustomIdentityProvider(session, CustomIdentityProviderConfig(model))
 	}
 
-	fun parseConfig(session: KeycloakSession, inputStream: InputStream): Map<String, String> {
+	override fun parseConfig(session: KeycloakSession, inputStream: InputStream): Map<String, String> {
 		return parseOIDCConfig(session, inputStream)
 	}
 

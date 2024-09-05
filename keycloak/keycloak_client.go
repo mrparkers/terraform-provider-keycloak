@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
@@ -16,6 +15,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/hashicorp/go-version"
 
@@ -197,6 +198,18 @@ func (keycloakClient *KeycloakClient) login(ctx context.Context) error {
 		keycloakClient.version = keycloakVersion
 	} else {
 		keycloakClient.version = v
+	}
+
+	ok, err := keycloakClient.VersionIsLessThanOrEqualTo(ctx, Version_24)
+	if err != nil {
+		fmt.Println("error checking keycloak version")
+		return err
+	}
+
+	if ok {
+		return fmt.Errorf("the Keycloak Version %s may not be compatible with the provider version. Considere using Keycloak >= 24", v)
+	} else {
+		tflog.Debug(ctx, "the Keycloak Version is compatible with the provider version")
 	}
 
 	return nil

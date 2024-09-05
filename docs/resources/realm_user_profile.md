@@ -4,16 +4,10 @@ page_title: "keycloak_realm_user_profile Resource"
 
 # keycloak_realm_user_profile Resource
 
-Allows for managing Realm User Profiles within Keycloak.
+Allows for managing Realm [User Profile](https://www.keycloak.org/docs/latest/server_admin/index.html#user-profile) within Keycloak.
 
 A user profile defines a schema for representing user attributes and how they are managed within a realm.
-This is a preview feature, hence not fully supported and disabled by default.
-To enable it, start the server with one of the following flags:
-- WildFly distribution: `-Dkeycloak.profile.feature.declarative_user_profile=enabled`
-- Quarkus distribution: `--features=preview` or `--features=declarative-user-profile`
 
-The realm linked to the `keycloak_realm_user_profile` resource must have the user profile feature enabled.
-It can be done via the administration UI, or by setting the `userProfileEnabled` realm attribute to `true`.
 
 ## Example Usage
 
@@ -29,10 +23,113 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_realm_user_profile" "userprofile" {
   realm_id = keycloak_realm.my_realm.id
 
+  unmanaged_attribute_policy = "DISABLED"
+
+
+  attribute {
+    name         = "username"
+    display_name = "$${username}"
+
+    validator {
+      name = "length"
+      config = {
+        min = "3"
+        max = "255"
+      }
+    }
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+    validator {
+      name = "up-username-not-idn-homograph"
+    }
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    multivalued = false
+  }
+
+  attribute {
+    name         = "email"
+    display_name = "$${email}"
+
+    validator {
+      name = "email"
+    }
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    multivalued = false
+  }
+
+  attribute {
+    name         = "firstName"
+    display_name = "$${firstName}"
+
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    multivalued = false
+  }
+
+  attribute {
+    name         = "lastName"
+    display_name = "$${lastName}"
+
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    multivalued = false
+  }
+
   attribute {
     name         = "field1"
     display_name = "Field 1"
     group        = "group1"
+
+    multivalued = false
 
     enabled_when_scope = ["offline_access"]
 
@@ -96,6 +193,11 @@ resource "keycloak_realm_user_profile" "userprofile" {
 ## Argument Reference
 
 - `realm_id` - (Required) The ID of the realm the user profile applies to.
+- `unmanaged_attribute_policy` - (Optional) Configure your realm using different policies to define how they are handled by the server.
+  - `DISABLED` - This is the default policy so that unmanaged attributes are disabled from all user profile contexts. (default value)
+  - `ENABLED` - This policy enables unmanaged attributes to all user profile contexts.
+  - `ADMIN_VIEW` - This policy enables unmanaged attributes only from the administrative context as read-only.
+  - `ADMIN_EDIT` - This policy enables unmanaged attributes only from the administrative context for reads and writes.
 - `attribute` - (Optional) An ordered list of [attributes](#attribute-arguments).
 - `group` - (Optional) A list of [groups](#group-arguments).
 
@@ -104,6 +206,7 @@ resource "keycloak_realm_user_profile" "userprofile" {
 - `name` - (Required) The name of the attribute.
 - `display_name` - (Optional) The display name of the attribute.
 - `group` - (Optional) The group that the attribute belong to.
+- `multivalued` - (Optional) If enabled, the attribute supports multiple values
 - `enabled_when_scope` - (Optional) A list of scopes. The attribute will only be enabled when these scopes are requested by clients.
 - `required_for_roles` - (Optional) A list of roles for which the attribute will be required.
 - `required_for_scopes` - (Optional) A list of scopes for which the attribute will be required.

@@ -21,7 +21,6 @@ var (
 		{
 			Name:        "username",
 			DisplayName: "${username}",
-			Multivalued: false,
 
 			Permissions: &keycloak.RealmUserProfilePermissions{
 				Edit: []string{"admin", "user"},
@@ -36,7 +35,6 @@ var (
 		{
 			Name:        "email",
 			DisplayName: "${email}",
-			Multivalued: false,
 
 			Permissions: &keycloak.RealmUserProfilePermissions{
 				Edit: []string{"admin", "user"},
@@ -53,7 +51,6 @@ var (
 		{
 			Name:        "firstName",
 			DisplayName: "${firstName}",
-			Multivalued: false,
 
 			Permissions: &keycloak.RealmUserProfilePermissions{
 				Edit: []string{"admin", "user"},
@@ -70,7 +67,6 @@ var (
 		{
 			Name:        "lastName",
 			DisplayName: "${lastName}",
-			Multivalued: false,
 
 			Permissions: &keycloak.RealmUserProfilePermissions{
 				Edit: []string{"admin", "user"},
@@ -151,7 +147,6 @@ func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
 	attributes = append(attributes, &keycloak.RealmUserProfileAttribute{
 		Name:        "attribute2",
 		DisplayName: "attribute 2",
-		Multivalued: false,
 		Group:       "group",
 		Selector:    &keycloak.RealmUserProfileSelector{Scopes: []string{"roles"}},
 		Required: &keycloak.RealmUserProfileRequired{
@@ -453,8 +448,6 @@ resource "keycloak_realm_user_profile" "realm_user_profile" {
 			view = ["admin", "user"]
 			edit = ["admin", "user"]
 		}
-	
-		multivalued = false
 	}
 	
 	attribute {
@@ -477,8 +470,6 @@ resource "keycloak_realm_user_profile" "realm_user_profile" {
 			view = ["admin", "user"]
 			edit = ["admin", "user"]
 		}
-	
-		multivalued = false
 	}
 	
 	attribute {
@@ -501,8 +492,6 @@ resource "keycloak_realm_user_profile" "realm_user_profile" {
 			view = ["admin", "user"]      
 			edit = ["admin", "user"]
 		}
-	
-		multivalued = false
 	}
 	
 	attribute {
@@ -525,8 +514,6 @@ resource "keycloak_realm_user_profile" "realm_user_profile" {
 			view = ["admin", "user"]      
 			edit = ["admin", "user"]
 		}
-	
-		multivalued = false
 	}
 	
 	group {
