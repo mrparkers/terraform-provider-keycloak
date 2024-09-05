@@ -103,7 +103,7 @@ resource "keycloak_realm" "test" {
 
 resource "keycloak_required_action" "custom-terms-and-conditions" {
   realm_id       = keycloak_realm.test.realm
-  alias          = "terms_and_conditions"
+  alias          = "TERMS_AND_CONDITIONS"
   default_action = true
   enabled        = true
   name           = "Custom Terms and Conditions"
@@ -148,6 +148,10 @@ resource "keycloak_user" "user" {
   email      = "test-user@fakedomain.com"
   first_name = "Testy"
   last_name  = "Tester"
+
+  lifecycle {
+    ignore_changes = [required_actions]
+  }
 }
 
 resource "keycloak_user" "another_user" {
@@ -157,6 +161,10 @@ resource "keycloak_user" "another_user" {
   email      = "another-test-user@fakedomain.com"
   first_name = "Testy"
   last_name  = "Tester"
+
+  lifecycle {
+    ignore_changes = [required_actions]
+  }
 }
 
 resource "keycloak_user" "user_with_password" {
@@ -170,6 +178,10 @@ resource "keycloak_user" "user_with_password" {
   initial_password {
     value     = "My password"
     temporary = false
+  }
+
+  lifecycle {
+    ignore_changes = [required_actions]
   }
 }
 
@@ -427,25 +439,25 @@ resource "keycloak_ldap_full_name_mapper" "full_name_mapper" {
 }
 
 resource "keycloak_ldap_custom_mapper" "custom_mapper" {
-	name                    = "custom-mapper"
-	realm_id                = keycloak_ldap_user_federation.openldap.realm_id
-	ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
+  name                    = "custom-mapper"
+  realm_id                = keycloak_ldap_user_federation.openldap.realm_id
+  ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
 
-	provider_id        		= "msad-user-account-control-mapper"
-	provider_type           = "org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
+  provider_id   = "msad-user-account-control-mapper"
+  provider_type = "org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
 }
 
 resource "keycloak_ldap_custom_mapper" "custom_mapper_with_config" {
-	name                    = "custom-mapper-with-config"
-	realm_id                = keycloak_ldap_user_federation.openldap.realm_id
-	ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
+  name                    = "custom-mapper-with-config"
+  realm_id                = keycloak_ldap_user_federation.openldap.realm_id
+  ldap_user_federation_id = keycloak_ldap_user_federation.openldap.id
 
-	provider_id             = "user-attribute-ldap-mapper"
-	provider_type           = "org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
-	config                  = {
-		"user.model.attribute" = "username"
-		"ldap.attribute"       = "cn"
-	}
+  provider_id   = "user-attribute-ldap-mapper"
+  provider_type = "org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
+  config = {
+    "user.model.attribute" = "username"
+    "ldap.attribute"       = "cn"
+  }
 }
 
 
@@ -985,11 +997,15 @@ resource "keycloak_user" "user_with_multivalueattributes" {
   username = "user-with-mutivalueattributes"
 
   attributes = {
-    "permissions" = "permission1##permission2"
+    "field2" = "value1##value2"
   }
   initial_password {
     value     = "My password"
     temporary = false
+  }
+
+  lifecycle {
+    ignore_changes = [required_actions]
   }
 }
 
@@ -998,7 +1014,11 @@ resource "keycloak_user" "resource" {
   username = "test"
 
   attributes = {
-    "key" = "value"
+    "field1" = "value"
+  }
+
+  lifecycle {
+    ignore_changes = [required_actions]
   }
 }
 
@@ -1096,9 +1116,109 @@ resource "keycloak_realm_user_profile" "userprofile" {
   realm_id = keycloak_realm.test.id
 
   attribute {
+    name         = "username"
+    display_name = "$${username}"
+
+    validator {
+      name = "length"
+      config = {
+        min = "3"
+        max = "255"
+      }
+    }
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+    validator {
+      name = "up-username-not-idn-homograph"
+    }
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    multivalued = false
+  }
+
+  attribute {
+    name         = "email"
+    display_name = "$${email}"
+
+    validator {
+      name = "email"
+    }
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    multivalued = false
+  }
+
+  attribute {
+    name         = "firstName"
+    display_name = "$${firstName}"
+
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    multivalued = false
+  }
+
+  attribute {
+    name         = "lastName"
+    display_name = "$${lastName}"
+
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    multivalued = false
+  }
+
+  attribute {
     name         = "field1"
     display_name = "Field 1"
     group        = "group1"
+
+    multivalued = false
 
     enabled_when_scope = ["offline_access"]
 
@@ -1129,6 +1249,13 @@ resource "keycloak_realm_user_profile" "userprofile" {
 
   attribute {
     name = "field2"
+
+    multivalued = true
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
   }
 
   group {

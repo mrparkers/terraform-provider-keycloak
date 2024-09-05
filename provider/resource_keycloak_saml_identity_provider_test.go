@@ -2,10 +2,11 @@ package provider
 
 import (
 	"fmt"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"regexp"
 	"strconv"
 	"testing"
+
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -337,6 +338,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	alias             			= "%s"
 	entity_id					= "https://example.com/entity_id"
 	single_sign_on_service_url  = "https://example.com/auth"
+	sync_mode                  = "FORCE"
 }
 	`, testAccRealm.Realm, saml)
 }
@@ -353,6 +355,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	provider_id       			= "%s"
 	entity_id					= "https://example.com/entity_id"
 	single_sign_on_service_url  = "https://example.com/auth"
+	sync_mode                  = "FORCE"
 }
 	`, testAccRealm.Realm, saml, providerId)
 }
@@ -370,6 +373,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	principal_type				= "ATTRIBUTE"
 	entity_id					= "https://example.com/entity_id"
 	single_sign_on_service_url  = "https://example.com/auth"
+	sync_mode                   = "FORCE"
 }
 	`, testAccRealm.Realm, saml, nameIdPolicyFormat)
 }
@@ -385,6 +389,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	alias             			= "%s"
 	entity_id					= "https://example.com/entity_id"
 	single_sign_on_service_url  = "https://example.com/auth"
+	sync_mode                   = "FORCE"
 	extra_config                = {
 		%s = "%s"
 	}

@@ -1,4 +1,3 @@
-version: "3"
 volumes:
   postgres:
 services:
@@ -12,26 +11,33 @@ services:
     - 5432:5432
     volumes:
     - postgres:/var/lib/postgresql
+    
   openldap:
     image: osixia/openldap:1.3.0
     ports:
     - 8389:389
+
   keycloak:
-    image: quay.io/keycloak/keycloak:21.0.1
-    command: start-dev --features=preview
+    image: quay.io/keycloak/keycloak:25.0.2
+    command: --verbose start-dev
     depends_on:
     - postgres
     - openldap
     environment:
     - KEYCLOAK_ADMIN=keycloak
     - KEYCLOAK_ADMIN_PASSWORD=password
-    - KC_LOG_LEVEL=INFO
+    - KC_LOG_LEVEL=INFO,org.keycloak.events:DEBUG
+    - KC_LOG_CONSOLE_COLOR=true
     - KC_DB=postgres
     - KC_DB_URL_HOST=postgres
     - KC_DB_URL_PORT=5432
     - KC_DB_URL_DATABASE=keycloak
     - KC_DB_USERNAME=keycloak
     - KC_DB_PASSWORD=password
+    - KC_FEATURES=preview
+    - QUARKUS_HTTP_ACCESS_LOG_ENABLED=true
+    - QUARKUS_HTTP_RECORD_REQUEST_START_TIME=true
+
 # Enable for remote java debugging
 #    - PREPEND_JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8787
     ports:
@@ -39,5 +45,6 @@ services:
 # Enable for remote java debugging
 #    - 8787:8787
     volumes:
+    - ./provider/misc:/opt/keycloak/certs:ro
 # Make the custom-user-federation-example extension available to Keycloak. The :z option is required and tells Docker that the volume content will be shared between containers.
-    - ./custom-user-federation-example/build/libs/custom-user-federation-example.jar:/opt/jboss/keycloak/standalone/deployments/custom-user-federation-example.jar:z
+    - ./custom-user-federation-example/build/libs/custom-user-federation-example.jar:/opt/keycloak/providers/custom-user-federation-example.jar:z

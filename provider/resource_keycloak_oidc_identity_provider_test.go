@@ -2,13 +2,14 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"regexp"
-	"strconv"
-	"testing"
 )
 
 func TestAccKeycloakOidcIdentityProvider_basic(t *testing.T) {
@@ -276,6 +277,7 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	token_url         = "https://example.com/token"
 	client_id         = "example_id"
 	client_secret     = "example_token"
+	sync_mode         = "FORCE"
 
 	issuer = "hello"
 }
@@ -296,6 +298,7 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	token_url         = "https://example.com/token"
 	client_id         = "example_id"
 	client_secret     = "example_token"
+	sync_mode         = "FORCE"
 	extra_config      = {
 		%s = "%s"
 	}
@@ -318,6 +321,7 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	client_id         = "example_id"
 	client_secret     = "example_token"
 	default_scopes    = "%s"
+	sync_mode         = "FORCE"
 }
 	`, testAccRealm.Realm, alias, value)
 }

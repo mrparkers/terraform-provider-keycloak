@@ -113,6 +113,7 @@ func TestAccKeycloakUserTemplateIdentityProviderMapper_withExtraConfig_createAft
 }
 
 func TestAccKeycloakUserTemplateIdentityProviderMapper_basicUpdateAll(t *testing.T) {
+
 	t.Parallel()
 	identityProviderAliasName := acctest.RandomWithPrefix("tf-acc")
 
@@ -229,6 +230,7 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	token_url         = "https://example.com/token"
 	client_id         = "example_id"
 	client_secret     = "example_token"
+	sync_mode         = "FORCE"
 }
 
 resource keycloak_user_template_importer_identity_provider_mapper oidc {
@@ -253,6 +255,7 @@ resource "keycloak_oidc_identity_provider" "oidc" {
 	token_url         = "https://example.com/token"
 	client_id         = "example_id"
 	client_secret     = "example_token"
+	sync_mode         = "FORCE"
 }
 
 resource keycloak_user_template_importer_identity_provider_mapper oidc {
@@ -278,6 +281,7 @@ resource "keycloak_saml_identity_provider" "saml" {
 	alias                      = "%s"
 	entity_id = "https://example.com/entity_id"
 	single_sign_on_service_url = "https://example.com/auth"
+	sync_mode                  = "FORCE"
 }
 
 resource keycloak_user_template_importer_identity_provider_mapper saml {

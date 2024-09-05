@@ -6,43 +6,51 @@ import (
 	"fmt"
 )
 
+// https://www.keycloak.org/docs-api/25.0.0/rest-api/index.html#UPAttributePermissions
 type RealmUserProfilePermissions struct {
 	Edit []string `json:"edit"`
 	View []string `json:"view"`
 }
 
+// https://www.keycloak.org/docs-api/25.0.0/rest-api/index.html#UPAttributeRequired
 type RealmUserProfileRequired struct {
 	Roles  []string `json:"roles,omitempty"`
 	Scopes []string `json:"scopes,omitempty"`
 }
 
+// https://www.keycloak.org/docs-api/25.0.0/rest-api/index.html#UPAttributeSelector
 type RealmUserProfileSelector struct {
 	Scopes []string `json:"scopes,omitempty"`
 }
 
 type RealmUserProfileValidationConfig map[string]interface{}
 
+// https://www.keycloak.org/docs-api/25.0.0/rest-api/index.html#UPAttribute
 type RealmUserProfileAttribute struct {
-	Annotations map[string]interface{}                      `json:"annotations,omitempty"`
-	DisplayName string                                      `json:"displayName,omitempty"`
-	Group       string                                      `json:"group,omitempty"`
 	Name        string                                      `json:"name"`
-	Permissions *RealmUserProfilePermissions                `json:"permissions,omitempty"`
-	Required    *RealmUserProfileRequired                   `json:"required,omitempty"`
-	Selector    *RealmUserProfileSelector                   `json:"selector,omitempty"`
+	DisplayName string                                      `json:"displayName,omitempty"`
 	Validations map[string]RealmUserProfileValidationConfig `json:"validations,omitempty"`
+	Annotations map[string]interface{}                      `json:"annotations,omitempty"`
+	Required    *RealmUserProfileRequired                   `json:"required,omitempty"`
+	Permissions *RealmUserProfilePermissions                `json:"permissions,omitempty"`
+	Selector    *RealmUserProfileSelector                   `json:"selector,omitempty"`
+	Group       string                                      `json:"group,omitempty"`
+	Multivalued bool                                        `json:"multivalued"`
 }
 
+// https://www.keycloak.org/docs-api/25.0.0/rest-api/index.html#UPGroup
 type RealmUserProfileGroup struct {
-	Annotations        map[string]interface{} `json:"annotations,omitempty"`
-	DisplayDescription string                 `json:"displayDescription,omitempty"`
-	DisplayHeader      string                 `json:"displayHeader,omitempty"`
 	Name               string                 `json:"name"`
+	DisplayHeader      string                 `json:"displayHeader,omitempty"`
+	DisplayDescription string                 `json:"displayDescription,omitempty"`
+	Annotations        map[string]interface{} `json:"annotations,omitempty"`
 }
 
+// https://www.keycloak.org/docs-api/25.0.0/rest-api/index.html#UPConfig
 type RealmUserProfile struct {
-	Attributes []*RealmUserProfileAttribute `json:"attributes"`
-	Groups     []*RealmUserProfileGroup     `json:"groups,omitempty"`
+	Attributes               []*RealmUserProfileAttribute `json:"attributes"`
+	Groups                   []*RealmUserProfileGroup     `json:"groups,omitempty"`
+	UnmanagedAttributePolicy string                       `json:"unmanagedAttributePolicy,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) UpdateRealmUserProfile(ctx context.Context, realmId string, realmUserProfile *RealmUserProfile) error {

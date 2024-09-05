@@ -21,7 +21,7 @@ resource "keycloak_realm" "token-exchange_destination_realm" {
   enabled = true
 }
 
-resource keycloak_oidc_identity_provider token-exchange_source_oidc_idp {
+resource "keycloak_oidc_identity_provider" "token-exchange_source_oidc_idp" {
   realm              = keycloak_realm.token-exchange_destination_realm.id
   alias              = "source"
   authorization_url  = "http://localhost:8080/auth/realms/${keycloak_realm.token-exchange_source_realm.id}/protocol/openid-connect/auth"
@@ -32,6 +32,7 @@ resource keycloak_oidc_identity_provider token-exchange_source_oidc_idp {
   client_id          = keycloak_openid_client.token-exchange_destination_client.client_id
   client_secret      = keycloak_openid_client.token-exchange_destination_client.client_secret
   default_scopes     = "openid"
+  sync_mode          = "LEGACY"
 }
 
 resource "keycloak_openid_client" "token-exchange_webapp_client" {

@@ -2,12 +2,13 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"regexp"
-	"testing"
 )
 
 func TestAccKeycloakIdpTokenExchangeScopePermission_basic(t *testing.T) {
@@ -341,6 +342,7 @@ resource "keycloak_oidc_identity_provider" "my_idp" {
 	token_url          = "http://localhost:8080/auth/realms/something/protocol/openid-connect/token"
 	client_id          = "%s"
 	client_secret      = "secret"
+	sync_mode           = "FORCE"
 }
 
 resource "keycloak_openid_client" "webapp_client" {
@@ -379,6 +381,7 @@ resource "keycloak_oidc_identity_provider" "my_idp" {
 	token_url          = "http://localhost:8080/auth/realms/something/protocol/openid-connect/token"
 	client_id          = "%s"
 	client_secret      = "secret"
+	sync_mode           = "FORCE"
 }
 
 resource "keycloak_openid_client" "webapp_client" {
@@ -430,6 +433,7 @@ resource "keycloak_oidc_identity_provider" "my_idp" {
 	token_url          = "http://localhost:8080/auth/realms/something/protocol/openid-connect/token"
 	client_id          = "%s"
 	client_secret      = "secret"
+	sync_mode           = "FORCE"
 }
 
 resource "keycloak_openid_client" "webapp_client" {

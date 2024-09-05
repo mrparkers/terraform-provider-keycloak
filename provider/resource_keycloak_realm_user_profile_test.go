@@ -16,90 +16,176 @@ import (
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 )
 
-func TestAccKeycloakRealmUserProfile_featureDisabled(t *testing.T) {
-	realmName := acctest.RandomWithPrefix("tf-acc")
+var (
+	default_userprofile_attributs = []*keycloak.RealmUserProfileAttribute{
+		{
+			Name:        "username",
+			DisplayName: "${username}",
 
+			Permissions: &keycloak.RealmUserProfilePermissions{
+				Edit: []string{"admin", "user"},
+				View: []string{"admin", "user"},
+			},
+			Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+				"length":                            map[string]interface{}{"min": "3", "max": "255"},
+				"person-name-prohibited-characters": map[string]interface{}{},
+				"up-username-not-idn-homograph":     map[string]interface{}{},
+			},
+		},
+		{
+			Name:        "email",
+			DisplayName: "${email}",
+
+			Permissions: &keycloak.RealmUserProfilePermissions{
+				Edit: []string{"admin", "user"},
+				View: []string{"admin", "user"},
+			},
+			Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+				"email":  map[string]interface{}{},
+				"length": map[string]interface{}{"max": "255"},
+			},
+			Required: &keycloak.RealmUserProfileRequired{
+				Roles: []string{"user"},
+			},
+		},
+		{
+			Name:        "firstName",
+			DisplayName: "${firstName}",
+
+			Permissions: &keycloak.RealmUserProfilePermissions{
+				Edit: []string{"admin", "user"},
+				View: []string{"admin", "user"},
+			},
+			Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+				"length":                            map[string]interface{}{"max": "255"},
+				"person-name-prohibited-characters": map[string]interface{}{},
+			},
+			Required: &keycloak.RealmUserProfileRequired{
+				Roles: []string{"user"},
+			},
+		},
+		{
+			Name:        "lastName",
+			DisplayName: "${lastName}",
+
+			Permissions: &keycloak.RealmUserProfilePermissions{
+				Edit: []string{"admin", "user"},
+				View: []string{"admin", "user"},
+			},
+			Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+				"length":                            map[string]interface{}{"max": "255"},
+				"person-name-prohibited-characters": map[string]interface{}{},
+			},
+			Required: &keycloak.RealmUserProfileRequired{
+				Roles: []string{"user"},
+			},
+		},
+	}
+	default_userprofile_groups = []*keycloak.RealmUserProfileGroup{
+		{
+			Name:               "user-metadata",
+			DisplayHeader:      "User metadata",
+			DisplayDescription: "Attributes, which refer to user metadata",
+		},
+	}
+)
+
+func TestAccKeycloakRealmUserProfile_Importer(t *testing.T) {
+	realmName := acctest.RandomWithPrefix("tf-realm-acc")
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakRealmUserProfileDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakRealmUserProfile_featureDisabled(realmName),
-				ExpectError: regexp.MustCompile("User Profile is disabled"),
+				Config: testKeycloakRealmUserProfile_UnmanagedAttributePolicy(realmName, "ENABLED"),
+				Check:  testAccCheckKeycloakRealmUserProfileUnmanagedAttributePolicy("keycloak_realm_user_profile.realm_user_profile", "ENABLED"),
+			},
+			{
+				ResourceName:      "keycloak_realm_user_profile.realm_user_profile",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func TestAccKeycloakRealmUserProfile_basicEmpty(t *testing.T) {
-	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_14)
+func TestAccKeycloakRealmUserProfile_UnmanagedAttributePolicy(t *testing.T) {
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
-
-	realmUserProfile := &keycloak.RealmUserProfile{}
-
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakRealmUserProfileDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakRealmUserProfile_template(realmName, realmUserProfile),
-				Check:  testAccCheckKeycloakRealmUserProfileExists("keycloak_realm_user_profile.realm_user_profile"),
+				Config: testKeycloakRealmUserProfile_UnmanagedAttributePolicy(realmName, "DISABLED"),
+				Check:  testAccCheckKeycloakRealmUserProfileUnmanagedAttributePolicy("keycloak_realm_user_profile.realm_user_profile", "DISABLED"),
+			},
+			{
+				Config: testKeycloakRealmUserProfile_UnmanagedAttributePolicy(realmName, "ENABLED"),
+				Check:  testAccCheckKeycloakRealmUserProfileUnmanagedAttributePolicy("keycloak_realm_user_profile.realm_user_profile", "ENABLED"),
+			},
+			{
+				Config: testKeycloakRealmUserProfile_UnmanagedAttributePolicy(realmName, "ADMIN_VIEW"),
+				Check:  testAccCheckKeycloakRealmUserProfileUnmanagedAttributePolicy("keycloak_realm_user_profile.realm_user_profile", "ADMIN_VIEW"),
+			},
+			{
+				Config: testKeycloakRealmUserProfile_UnmanagedAttributePolicy(realmName, "ADMIN_EDIT"),
+				Check:  testAccCheckKeycloakRealmUserProfileUnmanagedAttributePolicy("keycloak_realm_user_profile.realm_user_profile", "ADMIN_EDIT"),
 			},
 		},
 	})
 }
 
 func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
+
 	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
+	attributes := default_userprofile_attributs
+	attributes = append(attributes, &keycloak.RealmUserProfileAttribute{Name: "attribute1"})
+	attributes = append(attributes, &keycloak.RealmUserProfileAttribute{
+		Name:        "attribute2",
+		DisplayName: "attribute 2",
+		Group:       "group",
+		Selector:    &keycloak.RealmUserProfileSelector{Scopes: []string{"roles"}},
+		Required: &keycloak.RealmUserProfileRequired{
+			Roles:  []string{"user"},
+			Scopes: []string{"offline_access"},
+		},
+		Permissions: &keycloak.RealmUserProfilePermissions{
+			Edit: []string{"admin", "user"},
+			View: []string{"admin", "user"},
+		},
+		Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+			"person-name-prohibited-characters": map[string]interface{}{},
+			"pattern":                           map[string]interface{}{"pattern": "\"^[a-z]+$\"", "error_message": "\"Error!\""},
+		},
+		Annotations: map[string]interface{}{
+			"foo":               "\"bar\"",
+			"inputOptionLabels": "{\"a\":\"b\"}",
+		},
+	})
+
+	groups := default_userprofile_groups
+	groups = append(groups, &keycloak.RealmUserProfileGroup{
+		Name:               "group",
+		DisplayDescription: "Description",
+		DisplayHeader:      "Header",
+		Annotations: map[string]interface{}{
+			"foo":  "\"bar\"",
+			"test": "{\"a2\":\"b2\"}",
+		},
+	})
+
 	realmUserProfile := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{Name: "attribute1"},
-			{
-				Name:        "attribute2",
-				DisplayName: "attribute 2",
-				Group:       "group",
-				Selector:    &keycloak.RealmUserProfileSelector{Scopes: []string{"roles"}},
-				Required: &keycloak.RealmUserProfileRequired{
-					Roles:  []string{"user"},
-					Scopes: []string{"offline_access"},
-				},
-				Permissions: &keycloak.RealmUserProfilePermissions{
-					Edit: []string{"admin", "user"},
-					View: []string{"admin", "user"},
-				},
-				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
-					"person-name-prohibited-characters": map[string]interface{}{},
-					"pattern":                           map[string]interface{}{"pattern": "\"^[a-z]+$\"", "error_message": "\"Error!\""},
-				},
-				Annotations: map[string]interface{}{
-					"foo":               "\"bar\"",
-					"inputOptionLabels": "{\"a\":\"b\"}",
-				},
-			},
-		},
-		Groups: []*keycloak.RealmUserProfileGroup{
-			{
-				Name:               "group",
-				DisplayDescription: "Description",
-				DisplayHeader:      "Header",
-				Annotations: map[string]interface{}{
-					"foo":  "\"bar\"",
-					"test": "{\"a2\":\"b2\"}",
-				},
-			},
-		},
+		Attributes: attributes,
+		Groups:     groups,
 	}
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakRealmUserProfileDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmUserProfile_template(realmName, realmUserProfile),
@@ -112,29 +198,24 @@ func TestAccKeycloakRealmUserProfile_basicFull(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_group(t *testing.T) {
+
 	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	withoutGroup := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{Name: "attribute"},
-		},
+		Attributes: append(default_userprofile_attributs, &keycloak.RealmUserProfileAttribute{Name: "attribute"}),
+		Groups:     default_userprofile_groups,
 	}
 
 	withGroup := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{Name: "attribute"},
-		},
-		Groups: []*keycloak.RealmUserProfileGroup{
-			{Name: "group"},
-		},
+		Attributes: append(default_userprofile_attributs, &keycloak.RealmUserProfileAttribute{Name: "attribute"}),
+		Groups:     append(default_userprofile_groups, &keycloak.RealmUserProfileGroup{Name: "group"}),
 	}
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakRealmUserProfileDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmUserProfile_template(realmName, withoutGroup),
@@ -159,57 +240,51 @@ func TestAccKeycloakRealmUserProfile_group(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
+
 	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	withoutValidator := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{
-				Name: "attribute",
-			},
-		},
+		Attributes: append(default_userprofile_attributs, &keycloak.RealmUserProfileAttribute{Name: "attribute"}),
+		Groups:     default_userprofile_groups,
 	}
 
 	withInitialConfig := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{
-				Name: "attribute",
-				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
-					"length":  map[string]interface{}{"min": "5", "max": "10"},
-					"options": map[string]interface{}{"options": "[\"cgu\"]"},
-				},
+		Attributes: append(default_userprofile_attributs, &keycloak.RealmUserProfileAttribute{
+			Name: "attribute",
+			Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+				"length":  map[string]interface{}{"min": "5", "max": "10"},
+				"options": map[string]interface{}{"options": "[\"cgu\"]"},
 			},
-		},
+		}),
+		Groups: default_userprofile_groups,
 	}
 
 	withNewConfig := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{
-				Name: "attribute",
-				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
-					"length": map[string]interface{}{"min": "6", "max": "10"},
-				},
+		Attributes: append(default_userprofile_attributs, &keycloak.RealmUserProfileAttribute{
+			Name: "attribute",
+			Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+				"length": map[string]interface{}{"min": "6", "max": "10"},
 			},
-		},
+		}),
+		Groups: default_userprofile_groups,
 	}
 
 	withNewValidator := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{
-				Name: "attribute",
-				Validations: map[string]keycloak.RealmUserProfileValidationConfig{
-					"person-name-prohibited-characters": map[string]interface{}{},
-					"length":                            map[string]interface{}{"min": "6", "max": "10"},
-				},
+		Attributes: append(default_userprofile_attributs, &keycloak.RealmUserProfileAttribute{
+			Name: "attribute",
+			Validations: map[string]keycloak.RealmUserProfileValidationConfig{
+				"person-name-prohibited-characters": map[string]interface{}{},
+				"length":                            map[string]interface{}{"min": "6", "max": "10"},
 			},
-		},
+		}),
+		Groups: default_userprofile_groups,
 	}
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakRealmUserProfileDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmUserProfile_template(realmName, withoutValidator),
@@ -252,65 +327,60 @@ func TestAccKeycloakRealmUserProfile_attributeValidator(t *testing.T) {
 }
 
 func TestAccKeycloakRealmUserProfile_attributePermissions(t *testing.T) {
+
 	skipIfVersionIsLessThanOrEqualTo(testCtx, t, keycloakClient, keycloak.Version_14)
 
 	realmName := acctest.RandomWithPrefix("tf-acc")
 
 	withoutPermissions := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{
-				Name: "attribute",
-			},
-		},
+		Attributes: append(default_userprofile_attributs, &keycloak.RealmUserProfileAttribute{
+			Name: "attribute",
+		}),
+		Groups: default_userprofile_groups,
 	}
 
 	viewAttributeMissing := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{
-				Name: "attribute",
-				Permissions: &keycloak.RealmUserProfilePermissions{
-					Edit: []string{"admin", "user"},
-				},
+		Attributes: append(default_userprofile_attributs, &keycloak.RealmUserProfileAttribute{
+			Name: "attribute",
+			Permissions: &keycloak.RealmUserProfilePermissions{
+				Edit: []string{"admin", "user"},
 			},
-		},
+		}),
+		Groups: default_userprofile_groups,
 	}
 
 	editAttributeMissing := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{
-				Name: "attribute",
-				Permissions: &keycloak.RealmUserProfilePermissions{
-					View: []string{"admin", "user"},
-				},
+		Attributes: append(default_userprofile_attributs, &keycloak.RealmUserProfileAttribute{
+			Name: "attribute",
+			Permissions: &keycloak.RealmUserProfilePermissions{
+				View: []string{"admin", "user"},
 			},
-		},
+		}),
+		Groups: default_userprofile_groups,
 	}
 
 	bothAttributesMissing := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{
-				Name:        "attribute",
-				Permissions: &keycloak.RealmUserProfilePermissions{},
-			},
-		},
+		Attributes: append(default_userprofile_attributs, &keycloak.RealmUserProfileAttribute{
+			Name:        "attribute",
+			Permissions: &keycloak.RealmUserProfilePermissions{},
+		}),
+		Groups: default_userprofile_groups,
 	}
 
 	withRightPermissions := &keycloak.RealmUserProfile{
-		Attributes: []*keycloak.RealmUserProfileAttribute{
-			{
-				Name: "attribute",
-				Permissions: &keycloak.RealmUserProfilePermissions{
-					Edit: []string{"admin", "user"},
-					View: []string{"admin", "user"},
-				},
+		Attributes: append(default_userprofile_attributs, &keycloak.RealmUserProfileAttribute{
+			Name: "attribute",
+			Permissions: &keycloak.RealmUserProfilePermissions{
+				Edit: []string{"admin", "user"},
+				View: []string{"admin", "user"},
 			},
-		},
+		}),
+		Groups: default_userprofile_groups,
 	}
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		PreCheck:          func() { testAccPreCheck(t) },
-		CheckDestroy:      testAccCheckKeycloakRealmUserProfileDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testKeycloakRealmUserProfile_template(realmName, withoutPermissions),
@@ -346,25 +416,119 @@ func TestAccKeycloakRealmUserProfile_attributePermissions(t *testing.T) {
 	})
 }
 
-func testKeycloakRealmUserProfile_featureDisabled(realm string) string {
+func testKeycloakRealmUserProfile_UnmanagedAttributePolicy(realm string, unmanagedAttributePolicy string) string {
 	return fmt.Sprintf(`
 resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 resource "keycloak_realm_user_profile" "realm_user_profile" {
 	realm_id = keycloak_realm.realm.id
+
+	unmanaged_attribute_policy = "%s"
+	
+	attribute {
+		name= "username"
+		display_name= "$${username}"
+	
+		validator {
+			name = "length"
+			config = {
+				min= "3"
+				max= "255"
+			}
+		}
+		validator {
+			name = "person-name-prohibited-characters"
+		}
+		validator {
+			name = "up-username-not-idn-homograph"
+		}
+	
+		permissions {
+			view = ["admin", "user"]
+			edit = ["admin", "user"]
+		}
+	}
+	
+	attribute {
+		name= "email"
+		display_name= "$${email}"
+	
+		validator {
+			name = "email"
+		}
+		validator {
+			name = "length"
+			config = {
+				max= "255"
+			}
+		}
+	
+		required_for_roles = [ "user" ]
+	
+		permissions {      
+			view = ["admin", "user"]
+			edit = ["admin", "user"]
+		}
+	}
+	
+	attribute {
+		name= "firstName"
+		display_name= "$${firstName}"
+	
+		validator {
+			name = "length"
+			config = {
+				max= "255"
+			}
+		}
+		validator {
+			name = "person-name-prohibited-characters"
+		}
+	
+		required_for_roles = [ "user" ]
+	
+		permissions {      
+			view = ["admin", "user"]      
+			edit = ["admin", "user"]
+		}
+	}
+	
+	attribute {
+		name= "lastName"
+		display_name= "$${lastName}"
+	
+		validator {
+			name = "length"
+			config = {
+				max= "255"
+			}
+		}
+		validator {
+			name = "person-name-prohibited-characters"
+		}
+	
+		required_for_roles = [ "user" ]
+	
+		permissions {      
+			view = ["admin", "user"]      
+			edit = ["admin", "user"]
+		}
+	}
+	
+	group {
+		name               = "user-metadata"
+		display_header      = "User metadata"
+		display_description = "Attributes, which refer to user metadata"
+	}
 }
-`, realm)
+`, realm, unmanagedAttributePolicy)
 }
 
 func testKeycloakRealmUserProfile_template(realm string, realmUserProfile *keycloak.RealmUserProfile) string {
 	tmpl, err := template.New("").Funcs(template.FuncMap{"StringsJoin": strings.Join}).Parse(`
 resource "keycloak_realm" "realm" {
 	realm 	   = "{{ .realm }}"
-
-	attributes = {
-		userProfileEnabled  = true
-	}
 }
 
 resource "keycloak_realm_user_profile" "realm_user_profile" {
@@ -380,6 +544,8 @@ resource "keycloak_realm_user_profile" "realm_user_profile" {
 		{{- if $attribute.Group }}
         group = "{{ $attribute.Group }}"
 		{{- end }}
+
+		multivalued = "{{ $attribute.Multivalued }}"
 
 		{{- if $attribute.Selector }}
 		{{- if $attribute.Selector.Scopes }}
@@ -470,16 +636,24 @@ resource "keycloak_realm_user_profile" "realm_user_profile" {
 		return ""
 	}
 
-	return tmplBuf.String()
+	return strings.Replace(tmplBuf.String(), "${", "$${", -1)
 }
 
-func testAccCheckKeycloakRealmUserProfileExists(resourceName string) resource.TestCheckFunc {
+func testAccCheckKeycloakRealmUserProfileUnmanagedAttributePolicy(resourceName string, expectedUnmanagedAttributePolicy string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		_, err := getRealmUserProfileFromState(s, resourceName)
+
+		realm_user_profile, err := getRealmUserProfileFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
 
+		if expectedUnmanagedAttributePolicy == "DISABLED" {
+			if len(realm_user_profile.UnmanagedAttributePolicy) != 0 {
+				return fmt.Errorf("expected UnmanagedAttributePolicy value empty (%s), but was %s", expectedUnmanagedAttributePolicy, realm_user_profile.UnmanagedAttributePolicy)
+			}
+		} else if realm_user_profile.UnmanagedAttributePolicy != expectedUnmanagedAttributePolicy {
+			return fmt.Errorf("expected UnmanagedAttributePolicy value %s, but was %s", expectedUnmanagedAttributePolicy, realm_user_profile.UnmanagedAttributePolicy)
+		}
 		return nil
 	}
 }
@@ -494,26 +668,7 @@ func testAccCheckKeycloakRealmUserProfileStateEqual(resourceName string, realmUs
 		if !reflect.DeepEqual(realmUserProfile, realmUserProfileFromState) {
 			j1, _ := json.Marshal(realmUserProfile)
 			j2, _ := json.Marshal(realmUserProfileFromState)
-			return fmt.Errorf("%v\nshould be equal to\n%v", string(j1), string(j2))
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckKeycloakRealmUserProfileDestroy() resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "keycloak_realm_user_profile" {
-				continue
-			}
-
-			realm := rs.Primary.Attributes["realm_id"]
-
-			realmUserProfile, _ := keycloakClient.GetRealmUserProfile(testCtx, realm)
-			if realmUserProfile != nil {
-				return fmt.Errorf("user profile for realm %s", realm)
-			}
+			return fmt.Errorf("\n%v\nshould be equal to\n%v", string(j1), string(j2))
 		}
 
 		return nil

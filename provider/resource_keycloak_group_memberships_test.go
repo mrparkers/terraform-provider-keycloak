@@ -2,13 +2,14 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
-	"regexp"
-	"strings"
-	"testing"
 )
 
 func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
@@ -35,23 +36,24 @@ func TestAccKeycloakGroupMemberships_basic(t *testing.T) {
 	})
 }
 
-func TestAccKeycloakGroupMemberships_basicUserWithBackslash(t *testing.T) {
-	t.Parallel()
+// Disable du to user profile validator username-prohibited-characters
+// func TestAccKeycloakGroupMemberships_basicUserWithBackslash(t *testing.T) {
+// 	t.Parallel()
 
-	groupName := acctest.RandomWithPrefix("tf-acc")
-	username := acctest.RandString(5) + `\\` + acctest.RandString(5)
+// 	groupName := acctest.RandomWithPrefix("tf-acc")
+// 	username := acctest.RandString(5) + `\\` + acctest.RandString(5)
 
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		PreCheck:          func() { testAccPreCheck(t) },
-		Steps: []resource.TestStep{
-			{
-				Config: testKeycloakGroupMemberships_basic(groupName, username),
-				Check:  testAccCheckUserBelongsToGroup("keycloak_group_memberships.group_members", strings.ReplaceAll(username, `\\`, `\`)),
-			},
-		},
-	})
-}
+// 	resource.Test(t, resource.TestCase{
+// 		ProviderFactories: testAccProviderFactories,
+// 		PreCheck:          func() { testAccPreCheck(t) },
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: testKeycloakGroupMemberships_basic(groupName, username),
+// 				Check:  testAccCheckUserBelongsToGroup("keycloak_group_memberships.group_members", strings.ReplaceAll(username, `\\`, `\`)),
+// 			},
+// 		},
+// 	})
+// }
 
 func TestAccKeycloakGroupMemberships_moreThan100members(t *testing.T) {
 	t.Parallel()

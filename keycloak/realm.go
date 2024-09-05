@@ -3,8 +3,9 @@ package keycloak
 import (
 	"context"
 	"fmt"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"strings"
+
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
 type Key struct {
@@ -170,6 +171,8 @@ type SmtpServer struct {
 
 func (keycloakClient *KeycloakClient) NewRealm(ctx context.Context, realm *Realm) error {
 	_, _, err := keycloakClient.post(ctx, "/realms", realm)
+
+	keycloakClient.refresh(ctx)
 
 	return err
 }
