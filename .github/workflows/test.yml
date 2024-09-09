@@ -93,7 +93,7 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_wrapper: false
-          terraform_version: 1.4.1
+          terraform_version: 1.9.5
 
       - name: Start Keycloak Container
         run: |
