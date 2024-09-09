@@ -73,7 +73,7 @@ jobs:
         # to a service container.  see https://github.com/actions/runner/issues/2139
         image: mrparkers/keycloak-dev:${{ matrix.keycloak-version }}
         ports:
-          - 8080:8080
+          - 8081:8080
         env:
           KC_DB: dev-mem
           KC_LOG_LEVEL: INFO
@@ -94,6 +94,17 @@ jobs:
         with:
           terraform_wrapper: false
           terraform_version: 1.4.1
+
+      - name: Start Keycloak Container
+        run: |
+          docker run -d --name keycloak \
+          -p 8080:8080 \
+          -e KC_DB=dev-mem \
+          -e KC_LOG_LEVEL=INFO \
+          -e KEYCLOAK_ADMIN=keycloak \
+          -e KEYCLOAK_ADMIN_PASSWORD=password \
+          -e KC_FEATURES=preview \
+          quay.io/keycloak/keycloak:${{ matrix.keycloak-version }} start-dev
 
       - name: Initialize Keycloak
         run: ./scripts/wait-for-local-keycloak.sh && ./scripts/create-terraform-client.sh
@@ -119,3 +130,7 @@ jobs:
           KEYCLOAK_TEST_PASSWORD_GRANT: "true"
           KEYCLOAK_VERSION: ${{ steps.keycloak-version.outputs.result }}
         timeout-minutes: 60
+      - name: Clean up
+        run: |
+          docker stop keycloak
+          docker rm keycloak
