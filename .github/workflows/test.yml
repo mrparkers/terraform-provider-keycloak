@@ -93,7 +93,6 @@ jobs:
           -e KEYCLOAK_ADMIN_PASSWORD=password \
           -e KC_FEATURES=preview \
           -v $PWD/provider/misc:/opt/keycloak/misc:z \
-          -v $PWD/custom-user-federation-example/build/libs/custom-user-federation-example-all.jar:/opt/keycloak/providers/custom-user-federation-example-all.jar:z \
           quay.io/keycloak/keycloak:${{ matrix.keycloak-version }} start-dev
 
       - name: Initialize Keycloak
