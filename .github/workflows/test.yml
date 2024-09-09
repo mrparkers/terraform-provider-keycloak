@@ -67,18 +67,6 @@ jobs:
     concurrency:
       group: ${{ github.head_ref || github.run_id }}-${{ matrix.keycloak-version }}
       cancel-in-progress: true
-    services:
-      keycloak:
-        # we have to use a custom docker image for these tests, since it's not possible to provide command-line args
-        # to a service container.  see https://github.com/actions/runner/issues/2139
-        image: mrparkers/keycloak-dev:${{ matrix.keycloak-version }}
-        ports:
-          - 8081:8080
-        env:
-          KC_DB: dev-mem
-          KC_LOG_LEVEL: INFO
-          KEYCLOAK_ADMIN: keycloak
-          KEYCLOAK_ADMIN_PASSWORD: password
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -104,6 +92,8 @@ jobs:
           -e KEYCLOAK_ADMIN=keycloak \
           -e KEYCLOAK_ADMIN_PASSWORD=password \
           -e KC_FEATURES=preview \
+          -v $PWD/provider/misc:/opt/keycloak/misc:z \
+          -v $PWD/custom-user-federation-example/build/libs/custom-user-federation-example-all.jar:/opt/keycloak/providers/custom-user-federation-example-all.jar:z \
           quay.io/keycloak/keycloak:${{ matrix.keycloak-version }} start-dev
 
       - name: Initialize Keycloak
