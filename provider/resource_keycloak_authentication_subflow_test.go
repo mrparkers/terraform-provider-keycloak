@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
 	"testing"
 )
 
@@ -145,6 +146,21 @@ func testAccCheckKeycloakAuthenticationSubFlowExists(resourceName string) resour
 	}
 }
 
+func testAccCheckKeycloakAuthenticationSubFlowExistsWithDescription(resourceName, expectedDescr string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		subflow, err := getAuthenticationSubFlowFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if subflow.Description != expectedDescr {
+			return fmt.Errorf("expected authentication subflow's description to be %s, but was %s", expectedDescr, subflow.Description)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakAuthenticationSubFlowFetch(resourceName string, authenticationSubFlow *keycloak.AuthenticationSubFlow) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		fetchedAuthenticationSubFlow, err := getAuthenticationSubFlowFromState(s, resourceName)
@@ -180,6 +196,51 @@ func testAccCheckKeycloakAuthenticationSubFlowDestroy() resource.TestCheckFunc {
 
 		return nil
 	}
+}
+func testAccCheckKeycloakAuthenticationSubFlowNotDestroyed() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "keycloak_authentication_subflow" {
+				continue
+			}
+
+			id := rs.Primary.ID
+			realm := rs.Primary.Attributes["realm_id"]
+			parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
+
+			client, _ := keycloakClient.GetAuthenticationSubFlow(testCtx, realm, parentFlowAlias, id)
+			if client == nil {
+				return fmt.Errorf("authentication flow %s does not exists", id)
+			}
+		}
+
+		return nil
+	}
+}
+
+func TestAccKeycloakAuthenticationSubFlowImport(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationSubFlowNotDestroyed(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakAuthenticationSubFlow_import("non-existing-flow", "non-existing-auth-flow", "client-flow"),
+				ExpectError: regexp.MustCompile("no parent flow with alias non-existing-flow exists"),
+			},
+			{
+				Config:      testKeycloakAuthenticationSubFlow_import("browser", "non-existing-auth-flow", "client-flow"),
+				ExpectError: regexp.MustCompile("no authentication execution under parent flow alias browser with alias non-existing-auth-flow found"),
+			},
+			{
+				// use existing browser flow and change the description to be "descr" (instead of "basic-flow")
+				Config: testKeycloakAuthenticationSubFlow_import("browser", "forms", "descr"),
+				Check:  testAccCheckKeycloakAuthenticationSubFlowExistsWithDescription("keycloak_authentication_subflow.imported-subflow", "descr"),
+			},
+		},
+	})
 }
 
 func getAuthenticationSubFlowFromState(s *terraform.State, resourceName string) (*keycloak.AuthenticationSubFlow, error) {
@@ -257,4 +318,21 @@ resource "keycloak_authentication_subflow" "subflow" {
 	requirement = "%s"
 }
 	`, testAccRealm.Realm, parentAlias, alias, requirement)
+}
+
+func testKeycloakAuthenticationSubFlow_import(parentAlias, subflowAlias, description string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_authentication_subflow" "imported-subflow" {
+	realm_id          = data.keycloak_realm.realm.id
+	parent_flow_alias = "%s"
+
+	alias       = "%s"
+	description = "%s"
+	import = true
+}
+	`, testAccRealm.Realm, parentAlias, subflowAlias, description)
 }

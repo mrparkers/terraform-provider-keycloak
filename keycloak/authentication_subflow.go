@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 )
 
 type AuthenticationSubFlow struct {
@@ -75,6 +76,52 @@ func (keycloakClient *KeycloakClient) GetAuthenticationSubFlow(ctx context.Conte
 	return &authenticationSubFlow, nil
 }
 
+func (keycloakClient *KeycloakClient) GetAuthenticationSubFlowFromAlias(ctx context.Context, realmId, parentFlowAlias, subflowAlias string) (*AuthenticationSubFlow, error) {
+	var authenticationExecutions []*AuthenticationExecutionInfo
+
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
+	if err != nil {
+		return nil, fmt.Errorf("no parent flow with alias %s exists", parentFlowAlias)
+	}
+
+	// Retry 3 more times if not found, sometimes it took split milliseconds the Authentication Executions to populate
+	if len(authenticationExecutions) == 0 {
+		for i := 0; i < 3; i++ {
+			err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
+
+			if len(authenticationExecutions) > 0 {
+				break
+			}
+
+			if err != nil {
+				return nil, err
+			}
+
+			time.Sleep(time.Millisecond * 50)
+		}
+
+		if len(authenticationExecutions) == 0 {
+			return nil, fmt.Errorf("no authentication executions found for parent flow alias %s", parentFlowAlias)
+		}
+	}
+
+	for _, aExecution := range authenticationExecutions {
+		if aExecution != nil && aExecution.AuthenticationFlow {
+
+			subflow, err := keycloakClient.GetAuthenticationSubFlow(ctx, realmId, parentFlowAlias, aExecution.FlowId)
+			if err != nil {
+				return nil, err
+			}
+
+			if subflow.Alias == subflowAlias {
+				return subflow, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("no authentication execution under parent flow alias %s with alias %s found", parentFlowAlias, subflowAlias)
+}
+
 func (keycloakClient *KeycloakClient) getExecutionId(ctx context.Context, authenticationSubFlow *AuthenticationSubFlow) (string, error) {
 	list, err := keycloakClient.ListAuthenticationExecutions(ctx, authenticationSubFlow.RealmId, authenticationSubFlow.ParentFlowAlias)
 	if err != nil {
@@ -83,6 +130,20 @@ func (keycloakClient *KeycloakClient) getExecutionId(ctx context.Context, authen
 
 	for _, ex := range list {
 		if ex.FlowId == authenticationSubFlow.Id {
+			return ex.Id, nil
+		}
+	}
+	return "", errors.New("no execution id found for subflow")
+}
+
+func (keycloakClient *KeycloakClient) getExecutionIdBySubflowAlias(ctx context.Context, authenticationSubFlow *AuthenticationSubFlow) (string, error) {
+	list, err := keycloakClient.ListAuthenticationExecutions(ctx, authenticationSubFlow.RealmId, authenticationSubFlow.ParentFlowAlias)
+	if err != nil {
+		return "", err
+	}
+
+	for _, ex := range list {
+		if ex.Alias == authenticationSubFlow.Alias {
 			return ex.Id, nil
 		}
 	}
