@@ -227,17 +227,17 @@ func TestAccKeycloakAuthenticationSubFlowImport(t *testing.T) {
 		CheckDestroy:      testAccCheckKeycloakAuthenticationSubFlowNotDestroyed(),
 		Steps: []resource.TestStep{
 			{
-				Config:      testKeycloakAuthenticationSubFlow_import("non-existing-flow", "non-existing-auth-flow", "client-flow"),
+				Config:      testKeycloakAuthenticationSubFlow_import("non-existing-flow", "non-existing-auth-flow", "new-descr"),
 				ExpectError: regexp.MustCompile("no parent flow with alias non-existing-flow exists"),
 			},
 			{
-				Config:      testKeycloakAuthenticationSubFlow_import("browser", "non-existing-auth-flow", "client-flow"),
+				Config:      testKeycloakAuthenticationSubFlow_import("browser", "non-existing-auth-flow", "new-descr"),
 				ExpectError: regexp.MustCompile("no authentication execution under parent flow alias browser with alias non-existing-auth-flow found"),
 			},
 			{
 				// use existing browser flow and change the description to be "descr" (instead of "basic-flow")
-				Config: testKeycloakAuthenticationSubFlow_import("browser", "forms", "descr"),
-				Check:  testAccCheckKeycloakAuthenticationSubFlowExistsWithDescription("keycloak_authentication_subflow.imported-subflow", "descr"),
+				Config: testKeycloakAuthenticationSubFlow_import("browser", "forms", "new-descr"),
+				Check:  testAccCheckKeycloakAuthenticationSubFlowExistsWithDescription("keycloak_authentication_subflow.imported-subflow", "new-descr"),
 			},
 		},
 	})
