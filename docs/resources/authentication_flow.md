@@ -37,6 +37,8 @@ resource "keycloak_authentication_execution" "execution" {
 - `alias` - (Required) The alias for this authentication flow.
 - `description` - (Optional) A description for the authentication flow.
 - `provider_id` - (Optional) The type of authentication flow to create. Valid choices include `basic-flow` and `client-flow`. Defaults to `basic-flow`.
+- `import` - (Optional) When `true`, the authentication flow with the specified `alias` is assumed to already exist, and it will be imported into state instead of being created. This attribute is useful when dealing with authentication flows that Keycloak creates automatically during realm creation, such as `browser` and `clients`. Note, that the flow will not be removed during destruction if `import` is `true`.
+
 
 ## Import
 
