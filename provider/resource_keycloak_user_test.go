@@ -55,8 +55,8 @@ func TestAccKeycloakUser_import(t *testing.T) {
 				ExpectError: regexp.MustCompile("no user found for username non-existing-username"),
 			},
 			{
-				Config: testKeycloakUser_import("master", "admin"),
-				Check:  testAccCheckKeycloakUserExistsWithUsername("admin"),
+				Config: testKeycloakUser_import("master", "service-account-terraform"),
+				Check:  testAccCheckKeycloakUserExistsWithUsername("keycloak_user.user", "service-account-terraform"),
 			},
 		},
 	})
@@ -343,9 +343,9 @@ func testAccCheckKeycloakUserExists(resourceName string) resource.TestCheckFunc 
 	}
 }
 
-func testAccCheckKeycloakUserExistsWithUsername(username string) resource.TestCheckFunc {
+func testAccCheckKeycloakUserExistsWithUsername(resourceName, username string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		user, err := getUserFromState(s, "keycloak_user.user")
+		user, err := getUserFromState(s, resourceName)
 		if err != nil {
 			return err
 		}
@@ -590,5 +590,60 @@ resource "keycloak_user" "destination_user" {
     user_name         = "${keycloak_user.source_user.username}"
   }
 }
+	`, sourceRealmUserName, destinationRealmId)
+}
+
+func testKeycloakUser_importFederationUser(sourceRealmUserName, destinationRealmId string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "source_realm" {
+  realm   = "source_test_realm"
+  enabled = true
+}
+
+resource "keycloak_openid_client" "destination_client" {
+  realm_id                 = "${keycloak_realm.source_realm.id}"
+  client_id                = "destination_client"
+  client_secret            = "secret"
+  access_type              = "CONFIDENTIAL"
+  standard_flow_enabled    = true
+  valid_redirect_uris = [
+    "http://localhost:8080/*",
+  ]
+}
+
+resource "keycloak_user" "source_user" {
+  realm_id   = "${keycloak_realm.source_realm.id}"
+  username   = "%s"
+  initial_password {
+    value     = "source"
+    temporary = false
+  }
+}
+
+resource "keycloak_realm" "destination_realm" {
+  realm   = "%s"
+  enabled = true
+}
+
+resource keycloak_oidc_identity_provider source_oidc_idp {
+  realm              = "${keycloak_realm.destination_realm.id}"
+  alias              = "source"
+  authorization_url  = "http://localhost:8080/auth/realms/${keycloak_realm.source_realm.id}/protocol/openid-connect/auth"
+  token_url          = "http://localhost:8080/auth/realms/${keycloak_realm.source_realm.id}/protocol/openid-connect/token"
+  client_id          = "${keycloak_openid_client.destination_client.client_id}"
+  client_secret      = "${keycloak_openid_client.destination_client.client_secret}"
+  default_scopes     = "openid"
+}
+
+resource "keycloak_user" "destination_user" {
+  realm_id   = "${keycloak_realm.destination_realm.id}"
+  username   = "my_destination_username"
+  federated_identity {
+    identity_provider = "${keycloak_oidc_identity_provider.source_oidc_idp.alias}"
+    user_id           = "${keycloak_user.source_user.id}"
+    user_name         = "${keycloak_user.source_user.username}"
+  }
+}
+
 	`, sourceRealmUserName, destinationRealmId)
 }
