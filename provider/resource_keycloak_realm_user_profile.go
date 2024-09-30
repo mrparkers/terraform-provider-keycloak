@@ -42,7 +42,7 @@ func resourceKeycloakRealmUserProfile() *schema.Resource {
 						"multivalued": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Default: false,
+							Default:  false,
 						},
 						"enabled_when_scope": {
 							Type:     schema.TypeSet,
