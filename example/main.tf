@@ -1139,7 +1139,8 @@ resource "keycloak_realm_user_profile" "userprofile" {
   }
 
   attribute {
-    name = "field2"
+    name        = "field2"
+    multivalued = true
   }
 
   group {
