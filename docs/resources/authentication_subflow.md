@@ -43,6 +43,7 @@ and `client-flow`. Defaults to `basic-flow`.
 authenticators. In general this will remain empty.
 - `requirement`- (Optional) The requirement setting, which can be one of `REQUIRED`, `ALTERNATIVE`, `OPTIONAL`, `CONDITIONAL`,
 or `DISABLED`. Defaults to `DISABLED`.
+- `import` - (Optional) When `true`, the authentication subflow with the specified `alias` inside the parent flow with the specified alias `parent_flow_alias` is assumed to already exist, and it will be imported into state instead of being created. This attribute is useful when dealing with authentication subflows that Keycloak creates automatically during realm creation, such as `browser/forms` and `first broker login/User creation of linking`. Note, that the subflow will not be removed during destruction if `import` is `true`.
 
 ## Import
 

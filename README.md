@@ -69,7 +69,7 @@ After cloning the repository, you can build the project by running `make build`.
 
 ### Local Environment
 
-You can spin up a local developer environment via [Docker Compose](https://docs.docker.com/compose/) by running `make local`.
+You can spin up a local developer environment via [Docker Compose](https://docs.docker.com/compose/) by running `make user-federation-example` and `make local`.
 This will spin up a few containers for Keycloak, PostgreSQL, and OpenLDAP, which can be used for testing the provider.
 This environment and its setup via `make local` is not intended for production use.
 
@@ -92,6 +92,16 @@ KEYCLOAK_URL="http://localhost:8080" \
 make testacc
 ```
 
+### Install and test new version
+
+To build/install a new version of this provider on your local machine, set `GOOS` and `GOARCH` according to your system,
+then run `make build-example && cd example`.
+
 ## License
 
-[MIT](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/LICENSE)
+This software is licensed under either of the following, at your option:
+
+- Apache License, Version 2.0, (LICENSE-APACHE-2.0 or https://www.apache.org/licenses/LICENSE-2.0)
+- MIT License (LICENSE-MIT or https://opensource.org/licenses/MIT)
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this software by you shall be dual licensed under the MIT License and Apache License, Version 2.0, without any additional terms or conditions.

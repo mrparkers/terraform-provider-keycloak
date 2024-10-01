@@ -148,6 +148,52 @@ func (keycloakClient *KeycloakClient) GetAuthenticationExecution(ctx context.Con
 	return &authenticationExecution, nil
 }
 
+func (keycloakClient *KeycloakClient) GetAuthenticationExecutionFromAuthenticator(ctx context.Context, realmId, parentFlowAlias, execAuthenticator string) (*AuthenticationExecution, error) {
+	var authenticationExecutions []*AuthenticationExecutionInfo
+
+	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
+	if err != nil {
+		return nil, fmt.Errorf("no parent flow with alias %s exists", parentFlowAlias)
+	}
+
+	// Retry 3 more times if not found, sometimes it took split milliseconds the Authentication Executions to populate
+	if len(authenticationExecutions) == 0 {
+		for i := 0; i < 3; i++ {
+			err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/authentication/flows/%s/executions", realmId, parentFlowAlias), &authenticationExecutions, nil)
+
+			if len(authenticationExecutions) > 0 {
+				break
+			}
+
+			if err != nil {
+				return nil, err
+			}
+
+			time.Sleep(time.Millisecond * 50)
+		}
+
+		if len(authenticationExecutions) == 0 {
+			return nil, fmt.Errorf("no authentication executions found for parent flow alias %s", parentFlowAlias)
+		}
+	}
+
+	for _, aExecution := range authenticationExecutions {
+		if aExecution != nil && !aExecution.AuthenticationFlow {
+
+			exec, err := keycloakClient.GetAuthenticationExecution(ctx, realmId, parentFlowAlias, aExecution.Id)
+			if err != nil {
+				return nil, err
+			}
+
+			if exec.Authenticator == execAuthenticator {
+				return exec, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("no authentication execution under parent flow alias %s with authenticator %s found", parentFlowAlias, execAuthenticator)
+}
+
 func (keycloakClient *KeycloakClient) UpdateAuthenticationExecution(ctx context.Context, execution *AuthenticationExecution) error {
 	authenticationExecutionUpdateRequirement := &authenticationExecutionRequirementUpdate{
 		RealmId:         execution.RealmId,

@@ -39,6 +39,10 @@ func TestAccKeycloakOpenidClientDefaultScopes_basic(t *testing.T) {
 	})
 }
 
+// TODO: This test intermittently fails in the deployment pipeline with this error message, usually fixed by a retry
+/*
+ error sending GET request to /admin/realms/tf-acc-8218065411161322722/client-scopes: 500 Internal Server Error. Response body: [{"id":"4927ffba-896f-4353-858a-c1d7c64dd91b","name":"microprofile-jwt","description":"Microprofile - JWT built-in scope","protocol":"openid-connect","attributes":{"include.in.token.scope":"true","display.on.consent.screen":"false"},"protocolMappers":[{"id":"ce4d3546-0c1d-456e-8747-5654920faedc","name":"groups","protocol":"openid-connect","protocolMapper":"oidc-usermodel-realm-role-mapper","consentRequired":false,"config":{"multivalued":"true","user.attribute":"foo","id.token.claim":"true","access.token.claim":"true","claim.name":"groups","jsonType.label":"String"}},{"id":"34a6a17c-6a1c-44aa-92fd-7819acde4f29","name":"upn","protocol":"openid-connect","protocolMapper":"oidc-usermodel-property-mapper","consentRequired":false,"config":{"userinfo.token.claim":"true","user.attribute":"username","id.token.claim":"true","access.token.claim":"true","claim.name":"upn","jsonType.label":"String"}}]}]{"error":"unknown_error"}
+*/
 func TestAccKeycloakOpenidClientDefaultScopes_updateClientForceNew(t *testing.T) {
 	t.Parallel()
 	clientOne := acctest.RandomWithPrefix("tf-acc")

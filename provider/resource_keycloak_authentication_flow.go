@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/imdario/mergo"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
 	"strings"
 )
@@ -40,14 +41,20 @@ func resourceKeycloakAuthenticationFlow() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"import": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 		},
 	}
 }
 
 func mapFromDataToAuthenticationFlow(data *schema.ResourceData) *keycloak.AuthenticationFlow {
 	authenticationFlow := &keycloak.AuthenticationFlow{
-		Id:          data.Id(),
 		RealmId:     data.Get("realm_id").(string),
+		Id:          data.Id(),
 		Alias:       data.Get("alias").(string),
 		ProviderId:  data.Get("provider_id").(string),
 		Description: data.Get("description").(string),
@@ -75,9 +82,25 @@ func resourceKeycloakAuthenticationFlowCreate(ctx context.Context, data *schema.
 
 	authenticationFlow := mapFromDataToAuthenticationFlow(data)
 
-	err := keycloakClient.NewAuthenticationFlow(ctx, authenticationFlow)
-	if err != nil {
-		return diag.FromErr(err)
+	if data.Get("import").(bool) {
+		existingAuthFlow, err := keycloakClient.GetAuthenticationFlowFromAlias(ctx, data.Get("realm_id").(string), data.Get("alias").(string))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if err = mergo.Merge(authenticationFlow, existingAuthFlow); err != nil {
+			return diag.FromErr(err)
+		}
+
+		err = keycloakClient.UpdateAuthenticationFlow(ctx, authenticationFlow)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		err := keycloakClient.NewAuthenticationFlow(ctx, authenticationFlow)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	mapFromAuthenticationFlowToData(data, authenticationFlow)
@@ -115,6 +138,9 @@ func resourceKeycloakAuthenticationFlowUpdate(ctx context.Context, data *schema.
 }
 
 func resourceKeycloakAuthenticationFlowDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	if data.Get("import").(bool) {
+		return nil
+	}
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -138,6 +164,7 @@ func resourceKeycloakAuthenticationFlowImport(ctx context.Context, d *schema.Res
 	}
 
 	d.Set("realm_id", parts[0])
+	d.Set("import", false)
 	d.SetId(parts[1])
 
 	diagnostics := resourceKeycloakAuthenticationFlowRead(ctx, d, meta)
