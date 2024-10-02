@@ -94,4 +94,6 @@ make testacc
 
 ## License
 
-[MIT](https://github.com/mrparkers/terraform-provider-keycloak/blob/master/LICENSE)
+This software is licensed under Apache License, Version 2.0, (LICENSE-APACHE-2.0 or https://www.apache.org/licenses/LICENSE-2.0)
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this software by you shall be licensed under the Apache License, Version 2.0, without any additional terms or conditions.
