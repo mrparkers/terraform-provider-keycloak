@@ -3,8 +3,9 @@ package keycloak
 import (
 	"context"
 	"fmt"
-	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 	"strings"
+
+	"github.com/mrparkers/terraform-provider-keycloak/keycloak/types"
 )
 
 type Key struct {
@@ -170,6 +171,15 @@ type SmtpServer struct {
 
 func (keycloakClient *KeycloakClient) NewRealm(ctx context.Context, realm *Realm) error {
 	_, _, err := keycloakClient.post(ctx, "/realms", realm)
+
+	if err != nil {
+		return err
+	}
+
+	// Always refresh token after creating realm to include any admin roles for the new realm.
+	// This works around keycloak issue 26301 where, since v22, newly created realms no longer return 403,
+	// bypassing the refresh mechanism in KeycloakClient.sendRequest
+	err = keycloakClient.refresh(ctx)
 
 	return err
 }
