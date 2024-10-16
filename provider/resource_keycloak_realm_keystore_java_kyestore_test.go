@@ -30,7 +30,7 @@ func TestAccKeycloakRealmKeystoreJava_basic(t *testing.T) {
 			{
 				ResourceName:      "keycloak_realm_keystore_java_keystore.realm_java_keystore",
 				ImportState:       true,
-				ImportStateVerify: true,
+				ImportStateVerify: false, //OOTB verify doesnt work here since secrets are not returned when reading
 				ImportStateIdFunc: getRealmKeystoreGenericImportId("keycloak_realm_keystore_java_keystore.realm_java_keystore"),
 			},
 		},
@@ -212,9 +212,10 @@ resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
-    keystore          = "misc/java-keystore.jks"
+    keystore          = "/opt/keycloak/misc/keystore.jks"
     keystore_password = "12345678"
-    keystore_alias    = "test"
+    key_alias    = "test"
+    key_password = "12345678"
 
     priority  = 100
     algorithm = "RS256"
@@ -232,9 +233,10 @@ resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
-    keystore          = "misc/java-keystore.jks"
+    keystore          = "/opt/keycloak/misc/keystore.jks"
     keystore_password = "12345678"
-    keystore_alias    = "test"
+    key_alias    = "test"
+    key_password = "12345678"
 
 	%s        = "%s"
 }
@@ -251,9 +253,10 @@ resource "keycloak_realm_keystore_java_keystore" "realm_java_keystore" {
 	name      = "%s"
 	realm_id  = data.keycloak_realm.realm.id
 
-    keystore          = "misc/java-keystore.jks"
+    keystore          = "/opt/keycloak/misc/keystore.jks"
     keystore_password = "12345678"
-    keystore_alias    = "test"
+    key_alias    = "test"
+    key_password = "12345678"
 
     priority  = %s
     algorithm = "%s"
