@@ -51,6 +51,7 @@ resource "keycloak_authentication_execution" "execution_two" {
 - `parent_flow_alias` - (Required) The alias of the flow this execution is attached to.
 - `authenticator` - (Required) The name of the authenticator. This can be found by experimenting with the GUI and looking at HTTP requests within the network tab of your browser's development tools.
 - `requirement`- (Optional) The requirement setting, which can be one of `REQUIRED`, `ALTERNATIVE`, `OPTIONAL`, `CONDITIONAL`, or `DISABLED`. Defaults to `DISABLED`.
+- `import` - (Optional) When `true`, the authentication execution with the specified `authenticator` inside the authentication flow with the specified alias `parent_flow_alias` is assumed to already exist, and it will be imported into state instead of being created. This attribute is useful when dealing with authentication executions that Keycloak creates automatically during realm creation, such as `browser/identity-provider-redirector` and `registration/registration-user-creation`. Note, that the execution will not be removed during destruction if `import` is `true`.
 
 ## Import
 

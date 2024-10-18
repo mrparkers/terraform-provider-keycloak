@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -31,6 +32,31 @@ func TestAccKeycloakAuthenticationExecution_basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccKeycloakAuthenticationExecution_import(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationExecutionNotDestroyed(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakAuthenticationExecution_import("non-existing-flow", "non-existing-execution", "REQUIRED"),
+				ExpectError: regexp.MustCompile("no parent flow with alias non-existing-flow exists"),
+			},
+			{
+				Config:      testKeycloakAuthenticationExecution_import("browser", "non-existing-execution", "REQUIRED"),
+				ExpectError: regexp.MustCompile("no authentication execution under parent flow alias browser with authenticator non-existing-execution"),
+			},
+			{
+				Config: testKeycloakAuthenticationExecution_import("browser", "identity-provider-redirector", "REQUIRED"),
+				Check:  testAccCheckKeycloakAuthenticationExecutionExistsWithRequirement("keycloak_authentication_execution.imported-execution", "REQUIRED"),
+			},
+		},
+	})
+
 }
 
 func TestAccKeycloakAuthenticationExecution_createAfterManualDestroy(t *testing.T) {
@@ -180,6 +206,42 @@ func getExecutionImportId(resourceName string) resource.ImportStateIdFunc {
 	}
 }
 
+func testAccCheckKeycloakAuthenticationExecutionExistsWithRequirement(resourceName, expectedReq string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		exec, err := getAuthenticationExecutionFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if exec.Requirement != expectedReq {
+			return fmt.Errorf("expected authentication execution's requirement to be %s, but was %s", expectedReq, exec.Requirement)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakAuthenticationExecutionNotDestroyed() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "keycloak_authentication_execution" {
+				continue
+			}
+
+			id := rs.Primary.ID
+			realm := rs.Primary.Attributes["realm_id"]
+			parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
+
+			execution, _ := keycloakClient.GetAuthenticationExecution(testCtx, realm, parentFlowAlias, id)
+			if execution == nil {
+				return fmt.Errorf("execution %s does not exists", id)
+			}
+		}
+
+		return nil
+	}
+}
+
 func testKeycloakAuthenticationExecution_basic(parentAlias string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
@@ -217,4 +279,21 @@ resource "keycloak_authentication_execution" "execution" {
 	requirement       = "%s"
 }
 	`, testAccRealm.Realm, parentAlias, requirement)
+}
+
+func testKeycloakAuthenticationExecution_import(parentAlias, authenticator, newReq string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_authentication_execution" "imported-execution" {
+	realm_id          = data.keycloak_realm.realm.id
+	parent_flow_alias = "%s"
+
+	authenticator     = "%s"
+	requirement       = "%s"
+	import 			  = true
+}
+	`, testAccRealm.Realm, parentAlias, authenticator, newReq)
 }

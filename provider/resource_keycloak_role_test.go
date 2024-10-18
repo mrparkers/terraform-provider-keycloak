@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -127,6 +128,45 @@ func TestAccKeycloakRole_basicRealmUpdate(t *testing.T) {
 				Config: testKeycloakRole_basicRealm(roleName),
 				Check:  testAccCheckKeycloakRoleExists("keycloak_role.role"),
 			},
+		},
+	})
+}
+
+func TestAccKeycloakRole_import(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakRoleNotDestroyed(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakRole_importRealmRole("non-existing-role", "updated-descr"),
+				ExpectError: regexp.MustCompile("Could not find role"),
+			},
+			{
+				Config:      testKeycloakRole_importClientRole("view-profile", "non-existing-client", "updated-descr"),
+				ExpectError: regexp.MustCompile("openid client with name non-existing-client does not exist"),
+			},
+			{
+				Config:      testKeycloakRole_importClientRole("non-existing-role", "account", "updated-descr"),
+				ExpectError: regexp.MustCompile("Could not find role"),
+			},
+			{
+				Config: testKeycloakRole_importRealmRole("offline_access", "updated-descr"),
+				Check:  testAccCheckKeycloakRoleHasDescription("keycloak_role.imported-realm-role", "updated-descr"),
+			},
+			{
+				Config: testKeycloakRole_importClientRole("view-profile", "account", "updated-descr"),
+				Check:  testAccCheckKeycloakRoleHasDescription("keycloak_role.imported-client-role", "updated-descr"),
+			},
+			//{
+			//	// TODO: fix permadiff error "After applying this test step, the plan was not empty."
+			//	// https://googlecloudplatform.github.io/magic-modules/develop/permadiff/
+			// 	// commented out for now, because the change itself works
+			//	Config: testKeycloakRole_importCompositeRole("default-roles-"+testAccRealm.Realm, "offline_access"),
+			//	Check:  testAccCheckKeycloakRoleHasComposites("keycloak_role.imported-composite-role", []string{"offline_access"}),
+			//},
 		},
 	})
 }
@@ -303,6 +343,26 @@ func testAccCheckKeycloakRoleExists(resourceName string) resource.TestCheckFunc 
 	}
 }
 
+func testAccCheckKeycloakRoleNotDestroyed() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "keycloak_role" {
+				continue
+			}
+
+			id := rs.Primary.ID
+			realm := rs.Primary.Attributes["realm_id"]
+
+			role, _ := keycloakClient.GetRole(testCtx, realm, id)
+			if role == nil {
+				return fmt.Errorf("role %s does not exists", id)
+			}
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakRoleDestroy() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
@@ -348,6 +408,21 @@ func testAccCheckKeycloakRoleHasAttribute(resourceName, attributeName, attribute
 
 		if len(role.Attributes) != 1 || role.Attributes[attributeName][0] != attributeValue {
 			return fmt.Errorf("expected role %s to have attribute %s with value %s", role.Name, attributeName, attributeValue)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakRoleHasDescription(resourceName, expectedDescr string) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		role, err := getRoleFromState(state, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if role.Description != expectedDescr {
+			return fmt.Errorf("expected role's description to be %s, but was %s", expectedDescr, role.Description)
 		}
 
 		return nil
@@ -578,4 +653,63 @@ resource "keycloak_role" "role" {
 	}
 }
 	`, testAccRealm.Realm, role, attributeName, attributeValue)
+}
+
+func testKeycloakRole_importRealmRole(name, newDescr string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_role" "imported-realm-role" {
+	name     	= "%s"
+	realm_id 	= data.keycloak_realm.realm.id
+	import 		= true
+	description = "%s"
+}
+	`, testAccRealm.Realm, name, newDescr)
+}
+
+func testKeycloakRole_importClientRole(name, clientId, newDescr string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client" "imported-client" {
+	realm_id    = data.keycloak_realm.realm.id
+	client_id   = "%s"
+	import		= true
+	access_type = "PUBLIC"
+}
+
+resource "keycloak_role" "imported-client-role" {
+	realm_id 	= data.keycloak_realm.realm.id
+	client_id 	= keycloak_openid_client.imported-client.id
+	name     	= "%s"
+	import 		= true
+	description = "%s"
+}
+	`, testAccRealm.Realm, clientId, name, newDescr)
+}
+
+func testKeycloakRole_importCompositeRole(name, nestedRoleName string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_role" "imported-noncomposite-role" {
+	name     	= "%s"
+	realm_id 	= data.keycloak_realm.realm.id
+	import		= true
+}
+
+resource "keycloak_role" "imported-composite-role" {
+	name     	= "%s"
+	realm_id 	= data.keycloak_realm.realm.id
+	import 		= true
+	composite_roles = [keycloak_role.imported-noncomposite-role.id]
+}
+	`, testAccRealm.Realm, nestedRoleName, name)
 }

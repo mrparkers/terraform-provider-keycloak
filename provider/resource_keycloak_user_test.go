@@ -42,6 +42,26 @@ func TestAccKeycloakUser_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakUser_import(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakUserNotDestroyed(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakUser_import("master", "non-existing-username"),
+				ExpectError: regexp.MustCompile("no user found for username non-existing-username"),
+			},
+			{
+				Config: testKeycloakUser_import("master", "service-account-terraform"),
+				Check:  testAccCheckKeycloakUserExistsWithUsername("keycloak_user.user", "service-account-terraform"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakUser_withInitialPassword(t *testing.T) {
 	t.Parallel()
 	username := acctest.RandomWithPrefix("tf-acc")
@@ -323,6 +343,21 @@ func testAccCheckKeycloakUserExists(resourceName string) resource.TestCheckFunc 
 	}
 }
 
+func testAccCheckKeycloakUserExistsWithUsername(resourceName, username string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		user, err := getUserFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if user.Username != username {
+			return fmt.Errorf("no user found for username %s", username)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckKeycloakUserFetch(resourceName string, user *keycloak.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		fetchedUser, err := getUserFromState(s, resourceName)
@@ -390,6 +425,26 @@ func testAccCheckKeycloakUserDestroy() resource.TestCheckFunc {
 	}
 }
 
+func testAccCheckKeycloakUserNotDestroyed() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "keycloak_user" {
+				continue
+			}
+
+			id := rs.Primary.ID
+			realm := rs.Primary.Attributes["realm_id"]
+
+			user, _ := keycloakClient.GetUser(testCtx, realm, id)
+			if user == nil {
+				return fmt.Errorf("user %s does not exists", id)
+			}
+		}
+
+		return nil
+	}
+}
+
 func getUserFromState(s *terraform.State, resourceName string) (*keycloak.User, error) {
 	rs, ok := s.RootModule().Resources[resourceName]
 	if !ok {
@@ -421,6 +476,20 @@ resource "keycloak_user" "user" {
 	}
 }
 	`, testAccRealm.Realm, username, attributeName, attributeValue)
+}
+
+func testKeycloakUser_import(realmId, username string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_user" "user" {
+	realm_id = data.keycloak_realm.realm.id
+	username = "%s"
+	import = "true"
+}
+	`, realmId, username)
 }
 
 func testKeycloakUser_initialPassword(username string, password string, clientId string) string {

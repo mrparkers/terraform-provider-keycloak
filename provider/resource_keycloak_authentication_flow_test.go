@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mrparkers/terraform-provider-keycloak/keycloak"
+	"regexp"
 	"testing"
 )
 
@@ -121,11 +122,47 @@ func TestAccKeycloakAuthenticationFlow_updateRealm(t *testing.T) {
 	})
 }
 
+func TestAccKeycloakAuthenticationFlow_import(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakAuthenticationFlowNotDestroyed(),
+		Steps: []resource.TestStep{
+			{
+				Config:      testKeycloakAuthenticationFlow_import("non-existing-auth-flow", "client-flow"),
+				ExpectError: regexp.MustCompile("no authentication flow found for alias non-existing-auth-flow"),
+			},
+			{
+				// use existing browser flow and change the provider-id to be "client-flow" (instead of "basic-flow")
+				Config: testKeycloakAuthenticationFlow_import("browser", "descr"),
+				Check:  testAccCheckKeycloakAuthenticationFlowExistsWithDescription("keycloak_authentication_flow.flow", "descr"),
+			},
+		},
+	})
+}
+
 func testAccCheckKeycloakAuthenticationFlowExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, err := getAuthenticationFlowFromState(s, resourceName)
 		if err != nil {
 			return err
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakAuthenticationFlowExistsWithDescription(resourceName string, description string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		flow, err := getAuthenticationFlowFromState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		if flow.Description != description {
+			return fmt.Errorf("expected authentication flow's description to be %s, but was %s", description, flow.Description)
 		}
 
 		return nil
@@ -174,6 +211,26 @@ func testAccCheckKeycloakAuthenticationFlowDestroy() resource.TestCheckFunc {
 			authenticationFlow, _ := keycloakClient.GetAuthenticationFlow(testCtx, realm, id)
 			if authenticationFlow != nil {
 				return fmt.Errorf("authentication flow with id %s still exists", id)
+			}
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckKeycloakAuthenticationFlowNotDestroyed() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "keycloak_authentication_flow" {
+				continue
+			}
+
+			id := rs.Primary.ID
+			realm := rs.Primary.Attributes["realm_id"]
+
+			flow, _ := keycloakClient.GetAuthenticationFlow(testCtx, realm, id)
+			if flow == nil {
+				return fmt.Errorf("authentication flow %s does not exists", id)
 			}
 		}
 
@@ -243,4 +300,19 @@ resource "keycloak_authentication_flow" "flow" {
 	realm_id = data.keycloak_realm.realm_2.id
 }
 	`, testAccRealm.Realm, testAccRealmTwo.Realm, alias)
+}
+
+func testKeycloakAuthenticationFlow_import(flowAlias string, description string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_authentication_flow" "flow" {
+	realm_id    = data.keycloak_realm.realm.id
+	alias   = "%s"
+	import      = true
+	description   = "%s"
+}
+	`, testAccRealm.Realm, flowAlias, description)
 }
