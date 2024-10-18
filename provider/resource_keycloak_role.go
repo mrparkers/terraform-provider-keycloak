@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/imdario/mergo"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -52,6 +53,12 @@ func resourceKeycloakRole() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
+			"import": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -95,33 +102,61 @@ func resourceKeycloakRoleCreate(ctx context.Context, data *schema.ResourceData, 
 
 	role := mapFromDataToRole(data)
 
-	var compositeRoles []*keycloak.Role
-	if v, ok := data.GetOk("composite_roles"); ok {
-		compositeRolesTf := v.(*schema.Set).List()
+	if data.Get("import").(bool) {
+		realmId := data.Get("realm_id").(string)
+		name := data.Get("name").(string)
+		clientId := data.Get("client_id").(string)
+		compositeRoles, err := keycloakClient.MapCompositeRoleIdsToRoleObjects(ctx, data.Get("composite_roles").(*schema.Set).List(), role.RealmId)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if len(compositeRoles) != 0 {
+			role.Composite = true
+		}
 
-		for _, compositeRoleId := range compositeRolesTf {
-			compositeRoleToAdd, err := keycloakClient.GetRole(ctx, role.RealmId, compositeRoleId.(string))
-			if err != nil {
+		existingRole, err := keycloakClient.GetRoleByName(ctx, realmId, clientId, name)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if err = mergo.Merge(role, existingRole); err != nil {
+			return diag.FromErr(err)
+		}
+		if err = keycloakClient.UpdateRole(ctx, role); err != nil {
+			return diag.FromErr(err)
+		}
+
+		existingCompositeRoles, err := keycloakClient.GetRoleComposites(ctx, role)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if role.Composite {
+			if err = keycloakClient.RemoveCompositesFromRole(ctx, role, existingCompositeRoles); err != nil {
 				return diag.FromErr(err)
 			}
+			if err = keycloakClient.AddCompositesToRole(ctx, role, compositeRoles); err != nil {
+				return diag.FromErr(err)
+			}
+		}
 
-			compositeRoles = append(compositeRoles, compositeRoleToAdd)
+	} else {
+		compositeRoles, err := keycloakClient.MapCompositeRoleIdsToRoleObjects(ctx, data.Get("composite_roles").(*schema.Set).List(), role.RealmId)
+		if err != nil {
+			return diag.FromErr(err)
 		}
 
 		if len(compositeRoles) != 0 { // technically you can still specify composite_roles = [] in HCL
 			role.Composite = true
 		}
-	}
 
-	err := keycloakClient.CreateRole(ctx, role)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if role.Composite {
-		err = keycloakClient.AddCompositesToRole(ctx, role, compositeRoles)
-		if err != nil {
+		if err = keycloakClient.CreateRole(ctx, role); err != nil {
 			return diag.FromErr(err)
+		}
+
+		if role.Composite {
+			if err = keycloakClient.AddCompositesToRole(ctx, role, compositeRoles); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
@@ -232,6 +267,10 @@ func resourceKeycloakRoleUpdate(ctx context.Context, data *schema.ResourceData, 
 }
 
 func resourceKeycloakRoleDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	if data.Get("import").(bool) {
+		return nil
+	}
+
 	keycloakClient := meta.(*keycloak.KeycloakClient)
 
 	realmId := data.Get("realm_id").(string)
@@ -254,6 +293,7 @@ func resourceKeycloakRoleImport(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	d.Set("realm_id", parts[0])
+	d.Set("import", false)
 	d.SetId(parts[1])
 
 	diagnostics := resourceKeycloakRoleRead(ctx, d, meta)

@@ -174,6 +174,20 @@ func (keycloakClient *KeycloakClient) DeleteRole(ctx context.Context, realmId, i
 	return nil
 }
 
+func (keycloakClient *KeycloakClient) MapCompositeRoleIdsToRoleObjects(ctx context.Context, compositeRoleIds []interface{}, realmId string) ([]*Role, error) {
+	var compositeRoles []*Role
+
+	for _, compositeRoleId := range compositeRoleIds {
+		compositeRoleToAdd, err := keycloakClient.GetRole(ctx, realmId, compositeRoleId.(string))
+		if err != nil {
+			return nil, err
+		}
+
+		compositeRoles = append(compositeRoles, compositeRoleToAdd)
+	}
+	return compositeRoles, nil
+}
+
 func (keycloakClient *KeycloakClient) AddCompositesToRole(ctx context.Context, role *Role, compositeRoles []*Role) error {
 	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/roles-by-id/%s/composites", role.RealmId, role.Id), compositeRoles)
 	if err != nil {
