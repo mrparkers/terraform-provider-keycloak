@@ -228,8 +228,8 @@ func testAccCheckKeycloakAuthenticationFlowNotDestroyed() resource.TestCheckFunc
 			id := rs.Primary.ID
 			realm := rs.Primary.Attributes["realm_id"]
 
-			client, _ := keycloakClient.GetAuthenticationFlow(testCtx, realm, id)
-			if client == nil {
+			flow, _ := keycloakClient.GetAuthenticationFlow(testCtx, realm, id)
+			if flow == nil {
 				return fmt.Errorf("authentication flow %s does not exists", id)
 			}
 		}

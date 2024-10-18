@@ -208,9 +208,9 @@ func testAccCheckKeycloakAuthenticationSubFlowNotDestroyed() resource.TestCheckF
 			realm := rs.Primary.Attributes["realm_id"]
 			parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
 
-			client, _ := keycloakClient.GetAuthenticationSubFlow(testCtx, realm, parentFlowAlias, id)
-			if client == nil {
-				return fmt.Errorf("authentication flow %s does not exists", id)
+			subflow, _ := keycloakClient.GetAuthenticationSubFlow(testCtx, realm, parentFlowAlias, id)
+			if subflow == nil {
+				return fmt.Errorf("authentication subflow %s does not exists", id)
 			}
 		}
 

@@ -232,8 +232,8 @@ func testAccCheckKeycloakAuthenticationExecutionNotDestroyed() resource.TestChec
 			realm := rs.Primary.Attributes["realm_id"]
 			parentFlowAlias := rs.Primary.Attributes["parent_flow_alias"]
 
-			client, _ := keycloakClient.GetAuthenticationExecution(testCtx, realm, parentFlowAlias, id)
-			if client == nil {
+			execution, _ := keycloakClient.GetAuthenticationExecution(testCtx, realm, parentFlowAlias, id)
+			if execution == nil {
 				return fmt.Errorf("execution %s does not exists", id)
 			}
 		}
