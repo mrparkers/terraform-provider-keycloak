@@ -528,15 +528,6 @@ func resourceKeycloakOpenidClientCreate(ctx context.Context, data *schema.Resour
 	}
 
 	if data.Get("import").(bool) {
-		existingClient, err := keycloakClient.GetOpenidClientByClientId(ctx, client.RealmId, client.ClientId)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		if err = mergo.Merge(client, existingClient); err != nil {
-			return diag.FromErr(err)
-		}
-
 		err = keycloakClient.UpdateOpenidClient(ctx, client)
 		if err != nil {
 			return diag.FromErr(err)
