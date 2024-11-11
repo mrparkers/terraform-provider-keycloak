@@ -53,7 +53,7 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}:${{ matrix.keycloak-version }}
           labels: ${{ steps.meta.outputs.labels }}
           file: test/Dockerfile
           build-args: |
