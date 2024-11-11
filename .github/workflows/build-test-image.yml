@@ -14,8 +14,7 @@ env:
 
 jobs:
   build:
-    #    runs-on: ubuntu-latest
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         keycloak-version:
