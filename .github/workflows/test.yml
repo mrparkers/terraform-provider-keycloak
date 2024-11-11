@@ -56,10 +56,11 @@ jobs:
       (needs.verify.outputs.code-files-changed || startsWith(github.ref, 'refs/tags/v'))
     needs:
       - verify
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         keycloak-version:
+          - '26.0.5'
           - '25.0.2'
           - '24.0.5'
           - '23.0.7'
