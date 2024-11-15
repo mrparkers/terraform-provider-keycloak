@@ -1,6 +1,9 @@
 # terraform-provider-keycloak
 Terraform provider for [Keycloak](https://www.keycloak.org/).
 
+[!NOTE]
+Please note that this is currently work-in-progress, please be patient while we are preparing for the first release in the new organization.
+
 ## Docs
 
 All documentation for this provider can now be found on the Terraform Registry: https://registry.terraform.io/providers/mrparkers/keycloak/latest/docs
@@ -91,6 +94,11 @@ KEYCLOAK_REALM=master \
 KEYCLOAK_URL="http://localhost:8080" \
 make testacc
 ```
+
+## Acknowledgments
+
+The Keycloak Terraform Provider was originally created by [Michael Parker](https://github.com/mrparkers). Many thanks for the hard work and dedication in building the foundation for this project.
+Also, many thanks to all the contributors extending it and approving the license change to maintain it as part of the [Keycloak](https://www.keycloak.org/) project.
 
 ## License
 
