@@ -1,8 +1,8 @@
 # terraform-provider-keycloak
 Terraform provider for [Keycloak](https://www.keycloak.org/).
 
-[!NOTE]
-Please note that this is currently work-in-progress, please be patient while we are preparing for the first release in the new organization.
+> [!NOTE]
+> Please note that this is currently work-in-progress, please be patient while we are preparing for the first release in the new organization.
 
 ## Docs
 
