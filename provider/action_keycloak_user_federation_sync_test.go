@@ -14,6 +14,12 @@ import (
 	"github.com/keycloak/terraform-provider-keycloak/keycloak"
 )
 
+const (
+	testLdapConnectionUrl  = "ldap://openldap"
+	testLdapBindDn         = "cn=admin,dc=example,dc=org"
+	testLdapBindCredential = "adminpassword"
+)
+
 func TestAccKeycloakUserFederationSyncAction_ldap(t *testing.T) {
 	t.Parallel()
 
@@ -21,7 +27,10 @@ func TestAccKeycloakUserFederationSyncAction_ldap(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			skipIfLdapServerIsNotAvailable(t)
+		},
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			// actions are supported since Terraform 1.14
 			tfversion.SkipBelow(tfversion.Version1_14_0),
@@ -37,6 +46,9 @@ func TestAccKeycloakUserFederationSyncAction_ldap(t *testing.T) {
 }
 
 // the action is not limited to LDAP, it works for every user storage provider which supports synchronization.
+// The custom user federation example imports a user on sync, which records the kind of the last sync. This makes
+// the sync observable without the need for an LDAP server. Note that this test does not use the realm of the LDAP
+// tests, since user lookups fail on older Keycloak versions if the realm contains an unreachable LDAP user federation.
 func TestAccKeycloakUserFederationSyncAction_custom(t *testing.T) {
 	t.Parallel()
 
@@ -51,25 +63,13 @@ func TestAccKeycloakUserFederationSyncAction_custom(t *testing.T) {
 		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakCustomUserFederation_basic(name, "custom") + `
-action "keycloak_user_federation_sync" "custom" {
-	config {
-		realm_id           = data.keycloak_realm.realm.id
-		user_federation_id = keycloak_custom_user_federation.custom.id
-		mode               = "changed_users"
-	}
-}
-
-resource "terraform_data" "trigger" {
-	lifecycle {
-		action_trigger {
-			events  = [after_create]
-			actions = [action.keycloak_user_federation_sync.custom]
-		}
-	}
-}
-`,
-				Check: testAccCheckKeycloakCustomUserFederationExists("keycloak_custom_user_federation.custom"),
+				Config: testKeycloakUserFederationSyncAction_custom(name, "dummy", "full"),
+				Check:  testAccCheckKeycloakCustomUserFederationWasSynced(name, "full"),
+			},
+			{
+				// the update of the user federation triggers the action again
+				Config: testKeycloakUserFederationSyncAction_custom(name, "dummy-updated", "changed_users"),
+				Check:  testAccCheckKeycloakCustomUserFederationWasSynced(name, "changed"),
 			},
 		},
 	})
@@ -93,6 +93,16 @@ func TestAccKeycloakUserFederationSyncAction_invalidMode(t *testing.T) {
 			},
 		},
 	})
+}
+
+// The sync of an LDAP user federation requires an LDAP server, which is available in the local environment (see
+// docker-compose.yml), but not on CI. A sync which does not depend on an LDAP server is covered by
+// TestAccKeycloakUserFederationSyncAction_custom.
+func skipIfLdapServerIsNotAvailable(t *testing.T) {
+	err := keycloakClient.TestLdapAuthentication(testCtx, testAccRealmUserFederation.Realm, testLdapConnectionUrl, testLdapBindDn, testLdapBindCredential)
+	if err != nil {
+		t.Skipf("skipping: Keycloak cannot reach the LDAP server %s: %s", testLdapConnectionUrl, err)
+	}
 }
 
 // the sync triggered by the action already imported all LDAP users, so another full sync must only report updates.
@@ -122,6 +132,64 @@ func testAccCheckKeycloakUserFederationWasSynced(resourceName string) resource.T
 	}
 }
 
+func testAccCheckKeycloakCustomUserFederationWasSynced(name, syncMode string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		username := name + "-synced"
+
+		user, err := keycloakClient.GetUserByUsername(testCtx, testAccRealm.Realm, username)
+		if err != nil {
+			return err
+		}
+
+		if user == nil {
+			return fmt.Errorf("expected user %s to be imported by the sync action", username)
+		}
+
+		// the custom user federation example records the kind of the last sync as last name
+		if user.LastName != syncMode {
+			return fmt.Errorf("expected user %s to be imported by a %s sync, but got: %q", username, syncMode, user.LastName)
+		}
+
+		return nil
+	}
+}
+
+func testKeycloakUserFederationSyncAction_custom(name, dummyConfig, mode string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_custom_user_federation" "custom" {
+	name        = "%s"
+	realm_id    = data.keycloak_realm.realm.id
+	provider_id = "custom"
+
+	enabled     = true
+
+	config = {
+		dummyConfig      = "%s"
+		importUserOnSync = "true"
+	}
+
+	lifecycle {
+		action_trigger {
+			events  = [after_create, after_update]
+			actions = [action.keycloak_user_federation_sync.custom]
+		}
+	}
+}
+
+action "keycloak_user_federation_sync" "custom" {
+	config {
+		realm_id           = data.keycloak_realm.realm.id
+		user_federation_id = keycloak_custom_user_federation.custom.id
+		mode               = "%s"
+	}
+}
+	`, testAccRealm.Realm, name, dummyConfig, mode)
+}
+
 func testKeycloakUserFederationSyncAction_ldap(ldap, mode string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
@@ -142,10 +210,10 @@ resource "keycloak_ldap_user_federation" "openldap" {
 	user_object_classes     = [
 		"inetOrgPerson"
 	]
-	connection_url          = "ldap://openldap"
+	connection_url          = "%s"
 	users_dn                = "ou=users,dc=example,dc=org"
-	bind_dn                 = "cn=admin,dc=example,dc=org"
-	bind_credential         = "adminpassword"
+	bind_dn                 = "%s"
+	bind_credential         = "%s"
 
 	lifecycle {
 		action_trigger {
@@ -163,5 +231,5 @@ action "keycloak_user_federation_sync" "openldap" {
 		client_timeout     = 60
 	}
 }
-	`, testAccRealmUserFederation.Realm, ldap, mode)
+	`, testAccRealmUserFederation.Realm, ldap, testLdapConnectionUrl, testLdapBindDn, testLdapBindCredential, mode)
 }

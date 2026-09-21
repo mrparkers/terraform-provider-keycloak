@@ -3,8 +3,10 @@ package com.github.keycloak
 import org.keycloak.component.ComponentModel
 import org.keycloak.models.KeycloakSession
 import org.keycloak.models.KeycloakSessionFactory
+import org.keycloak.models.utils.KeycloakModelUtils
 import org.keycloak.provider.ProviderConfigProperty
 import org.keycloak.storage.UserStorageProviderFactory
+import org.keycloak.storage.UserStoragePrivateUtil
 import org.keycloak.storage.UserStorageProviderModel
 import org.keycloak.storage.user.ImportSynchronization
 import org.keycloak.storage.user.SynchronizationResult
@@ -33,16 +35,63 @@ class CustomUserStorageProviderFactory : UserStorageProviderFactory<CustomUserSt
 			property.setType(ProviderConfigProperty.STRING_TYPE)
 			property.setHelpText("Dummy config for testing")
 			configPropertyList.add(property)
+
+			val importUserOnSync = ProviderConfigProperty()
+			importUserOnSync.setName(IMPORT_USER_ON_SYNC)
+			importUserOnSync.setLabel("Import user on sync")
+			importUserOnSync.setDefaultValue("false")
+			importUserOnSync.setType(ProviderConfigProperty.BOOLEAN_TYPE)
+			importUserOnSync.setHelpText("Imports the user '<federation name>-synced' on sync, which makes a sync observable for testing")
+			configPropertyList.add(importUserOnSync)
 		}
+
+		const val IMPORT_USER_ON_SYNC = "importUserOnSync"
 	}
 
 	override fun sync(sessionFactory: KeycloakSessionFactory?, realmId: String?, model: UserStorageProviderModel?):
-		SynchronizationResult = SynchronizationResult()
+		SynchronizationResult = importUserOnSync(sessionFactory, realmId, model, "full")
 
 	override fun syncSince(
 		lastSync: Date?,
 		sessionFactory: KeycloakSessionFactory?,
 		realmId: String?,
 		model: UserStorageProviderModel?
-	): SynchronizationResult = SynchronizationResult()
+	): SynchronizationResult = importUserOnSync(sessionFactory, realmId, model, "changed")
+
+	// imports a user, which records the kind of the last sync as last name, to make a sync observable for testing
+	private fun importUserOnSync(
+		sessionFactory: KeycloakSessionFactory?,
+		realmId: String?,
+		model: UserStorageProviderModel?,
+		syncMode: String
+	): SynchronizationResult {
+		val result = SynchronizationResult()
+
+		if (sessionFactory == null || realmId == null || model == null || !model.get(IMPORT_USER_ON_SYNC, false)) {
+			return result
+		}
+
+		KeycloakModelUtils.runJobInTransaction(sessionFactory) { session ->
+			val realm = session.realms().getRealm(realmId)
+			session.context.realm = realm
+
+			val localUsers = UserStoragePrivateUtil.userLocalStorage(session)
+			val username = "${model.name}-synced".lowercase()
+
+			var user = localUsers.getUserByUsername(realm, username)
+			if (user == null) {
+				user = localUsers.addUser(realm, username)
+				user.federationLink = model.id
+				user.isEnabled = true
+				result.increaseAdded()
+			} else {
+				result.increaseUpdated()
+			}
+
+			// the kind of the last sync is recorded as last name, since unmanaged attributes are not exposed by default
+			user.lastName = syncMode
+		}
+
+		return result
+	}
 }

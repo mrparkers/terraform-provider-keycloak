@@ -38,3 +38,24 @@ func (keycloakClient *KeycloakClient) SyncUserFederation(ctx context.Context, re
 
 	return &result, nil
 }
+
+type ldapConnectionTest struct {
+	Action         string `json:"action"`
+	ConnectionUrl  string `json:"connectionUrl"`
+	AuthType       string `json:"authType"`
+	BindDn         string `json:"bindDn"`
+	BindCredential string `json:"bindCredential"`
+}
+
+// TestLdapAuthentication checks if Keycloak is able to connect and bind to the given LDAP server.
+func (keycloakClient *KeycloakClient) TestLdapAuthentication(ctx context.Context, realmId, connectionUrl, bindDn, bindCredential string) error {
+	_, _, err := keycloakClient.post(ctx, fmt.Sprintf("/realms/%s/testLDAPConnection", realmId), ldapConnectionTest{
+		Action:         "testAuthentication",
+		ConnectionUrl:  connectionUrl,
+		AuthType:       "simple",
+		BindDn:         bindDn,
+		BindCredential: bindCredential,
+	})
+
+	return err
+}

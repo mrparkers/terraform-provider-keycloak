@@ -45,17 +45,16 @@ resource "keycloak_ldap_user_federation" "ldap_user_federation" {
   }
 }
 
-# the triggering resource is available via the "caller" symbol
 action "keycloak_user_federation_sync" "ldap" {
   config {
-    realm_id           = caller.realm_id
-    user_federation_id = caller.id
+    realm_id           = keycloak_realm.realm.id
+    user_federation_id = keycloak_ldap_user_federation.ldap_user_federation.id
     mode               = "full"
   }
 }
 ```
 
--> Terraform versions without support for the `caller` symbol can reference the resource directly instead, e.g. `keycloak_ldap_user_federation.ldap_user_federation.id`.
+-> Terraform 1.16 and later warn about references to the triggering resource. There the triggering resource should be accessed via the `caller` symbol instead, e.g. `realm_id = caller.realm_id` and `user_federation_id = caller.id`. Note that `caller` is not available in earlier Terraform versions.
 
 An action can also be invoked on demand. Note that this requires a dedicated action, which is not used within an `action_trigger` of the resource it refers to:
 
