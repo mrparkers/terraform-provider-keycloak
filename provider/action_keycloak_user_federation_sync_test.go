@@ -46,9 +46,10 @@ func TestAccKeycloakUserFederationSyncAction_ldap(t *testing.T) {
 }
 
 // the action is not limited to LDAP, it works for every user storage provider which supports synchronization.
-// The custom user federation example imports a user on sync, which records the kind of the last sync. This makes
-// the sync observable without the need for an LDAP server. Note that this test does not use the realm of the LDAP
-// tests, since user lookups fail on older Keycloak versions if the realm contains an unreachable LDAP user federation.
+// The custom user federation example imports a user on sync, whose username contains the kind of the sync. This makes
+// the sync observable without the need for an LDAP server. Note that this test uses a dedicated realm, since the
+// lookup of the imported user must not depend on the state of a shared realm, e.g. user federations or the user
+// profile managed by other tests.
 func TestAccKeycloakUserFederationSyncAction_custom(t *testing.T) {
 	t.Parallel()
 
@@ -132,22 +133,18 @@ func testAccCheckKeycloakUserFederationWasSynced(resourceName string) resource.T
 	}
 }
 
+// the custom user federation example imports the user '<federation name>-synced-<full|changed>' on sync
 func testAccCheckKeycloakCustomUserFederationWasSynced(name, syncMode string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		username := name + "-synced"
+		username := fmt.Sprintf("%s-synced-%s", name, syncMode)
 
-		user, err := keycloakClient.GetUserByUsername(testCtx, testAccRealm.Realm, username)
+		user, err := keycloakClient.GetUserByUsername(testCtx, name, username)
 		if err != nil {
 			return err
 		}
 
 		if user == nil {
-			return fmt.Errorf("expected user %s to be imported by the sync action", username)
-		}
-
-		// the custom user federation example records the kind of the last sync as last name
-		if user.LastName != syncMode {
-			return fmt.Errorf("expected user %s to be imported by a %s sync, but got: %q", username, syncMode, user.LastName)
+			return fmt.Errorf("expected user %s to be imported by a %s sync triggered by the action", username, syncMode)
 		}
 
 		return nil
@@ -156,13 +153,13 @@ func testAccCheckKeycloakCustomUserFederationWasSynced(name, syncMode string) re
 
 func testKeycloakUserFederationSyncAction_custom(name, dummyConfig, mode string) string {
 	return fmt.Sprintf(`
-data "keycloak_realm" "realm" {
+resource "keycloak_realm" "realm" {
 	realm = "%s"
 }
 
 resource "keycloak_custom_user_federation" "custom" {
 	name        = "%s"
-	realm_id    = data.keycloak_realm.realm.id
+	realm_id    = keycloak_realm.realm.id
 	provider_id = "custom"
 
 	enabled     = true
@@ -182,12 +179,12 @@ resource "keycloak_custom_user_federation" "custom" {
 
 action "keycloak_user_federation_sync" "custom" {
 	config {
-		realm_id           = data.keycloak_realm.realm.id
+		realm_id           = keycloak_realm.realm.id
 		user_federation_id = keycloak_custom_user_federation.custom.id
 		mode               = "%s"
 	}
 }
-	`, testAccRealm.Realm, name, dummyConfig, mode)
+	`, name, name, dummyConfig, mode)
 }
 
 func testKeycloakUserFederationSyncAction_ldap(ldap, mode string) string {

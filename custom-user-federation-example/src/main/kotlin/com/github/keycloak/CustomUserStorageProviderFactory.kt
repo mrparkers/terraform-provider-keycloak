@@ -41,7 +41,7 @@ class CustomUserStorageProviderFactory : UserStorageProviderFactory<CustomUserSt
 			importUserOnSync.setLabel("Import user on sync")
 			importUserOnSync.setDefaultValue("false")
 			importUserOnSync.setType(ProviderConfigProperty.BOOLEAN_TYPE)
-			importUserOnSync.setHelpText("Imports the user '<federation name>-synced' on sync, which makes a sync observable for testing")
+			importUserOnSync.setHelpText("Imports the user '<federation name>-synced-<full|changed>' on sync, which makes a sync observable for testing")
 			configPropertyList.add(importUserOnSync)
 		}
 
@@ -58,7 +58,7 @@ class CustomUserStorageProviderFactory : UserStorageProviderFactory<CustomUserSt
 		model: UserStorageProviderModel?
 	): SynchronizationResult = importUserOnSync(sessionFactory, realmId, model, "changed")
 
-	// imports a user, which records the kind of the last sync as last name, to make a sync observable for testing
+	// imports the user '<federation name>-synced-<full|changed>' to make a sync observable for testing
 	private fun importUserOnSync(
 		sessionFactory: KeycloakSessionFactory?,
 		realmId: String?,
@@ -76,7 +76,8 @@ class CustomUserStorageProviderFactory : UserStorageProviderFactory<CustomUserSt
 			session.context.realm = realm
 
 			val localUsers = UserStoragePrivateUtil.userLocalStorage(session)
-			val username = "${model.name}-synced".lowercase()
+			// the kind of the sync is part of the username, since other user attributes might be hidden by the user profile
+			val username = "${model.name}-synced-$syncMode".lowercase()
 
 			var user = localUsers.getUserByUsername(realm, username)
 			if (user == null) {
@@ -88,8 +89,6 @@ class CustomUserStorageProviderFactory : UserStorageProviderFactory<CustomUserSt
 				result.increaseUpdated()
 			}
 
-			// the kind of the last sync is recorded as last name, since unmanaged attributes are not exposed by default
-			user.lastName = syncMode
 		}
 
 		return result
