@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	actionschema "github.com/hashicorp/terraform-plugin-framework/action/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/keycloak/terraform-provider-keycloak/keycloak"
@@ -90,15 +91,34 @@ func (a *userFederationSyncAction) ValidateConfig(ctx context.Context, req actio
 		return
 	}
 
+	resp.Diagnostics.Append(config.validate()...)
+}
+
+// validate is used during config validation as well as invocation, since values which are not known during
+// validation, e.g. values provided via variables, are skipped there.
+func (config *userFederationSyncActionModel) validate() diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	if !config.Mode.IsNull() && !config.Mode.IsUnknown() {
 		if _, ok := userFederationSyncModes[config.Mode.ValueString()]; !ok {
-			resp.Diagnostics.AddAttributeError(path.Root("mode"), "invalid mode", fmt.Sprintf("expected mode to be one of %q or %q, got %q", userFederationSyncModeFull, userFederationSyncModeChangedUsers, config.Mode.ValueString()))
+			diags.AddAttributeError(path.Root("mode"), "invalid mode", fmt.Sprintf("expected mode to be one of %q or %q, got %q", userFederationSyncModeFull, userFederationSyncModeChangedUsers, config.Mode.ValueString()))
 		}
 	}
 
-	if !config.ClientTimeout.IsNull() && !config.ClientTimeout.IsUnknown() && config.ClientTimeout.ValueInt64() <= 0 {
-		resp.Diagnostics.AddAttributeError(path.Root("client_timeout"), "invalid client_timeout", fmt.Sprintf("expected client_timeout to be greater than 0, got %d", config.ClientTimeout.ValueInt64()))
+	diags.Append(validateActionClientTimeout(config.ClientTimeout)...)
+
+	return diags
+}
+
+// validateActionClientTimeout ensures a positive timeout, since a timeout of 0 would disable the request timeout altogether.
+func validateActionClientTimeout(clientTimeout types.Int64) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if !clientTimeout.IsNull() && !clientTimeout.IsUnknown() && clientTimeout.ValueInt64() <= 0 {
+		diags.AddAttributeError(path.Root("client_timeout"), "invalid client_timeout", fmt.Sprintf("expected client_timeout to be greater than 0, got %d", clientTimeout.ValueInt64()))
 	}
+
+	return diags
 }
 
 func (a *userFederationSyncAction) Invoke(ctx context.Context, req action.InvokeRequest, resp *action.InvokeResponse) {
@@ -108,12 +128,17 @@ func (a *userFederationSyncAction) Invoke(ctx context.Context, req action.Invoke
 		return
 	}
 
+	resp.Diagnostics.Append(config.validate()...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	mode := userFederationSyncModeFull
-	if !config.Mode.IsNull() {
+	if !config.Mode.IsNull() && !config.Mode.IsUnknown() {
 		mode = config.Mode.ValueString()
 	}
 
-	if !config.ClientTimeout.IsNull() {
+	if !config.ClientTimeout.IsNull() && !config.ClientTimeout.IsUnknown() {
 		ctx = keycloak.WithRequestTimeout(ctx, time.Duration(config.ClientTimeout.ValueInt64())*time.Second)
 	}
 

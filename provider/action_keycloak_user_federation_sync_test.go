@@ -1,12 +1,15 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
+	"net"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-testing/config"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -76,6 +79,53 @@ func TestAccKeycloakUserFederationSyncAction_custom(t *testing.T) {
 	})
 }
 
+// Values provided via variables are not known during config validation, so they must be validated on invocation.
+// A client_timeout of 0 would otherwise disable the request timeout altogether.
+func TestAccKeycloakUserFederationSyncAction_invalidClientTimeoutViaVariable(t *testing.T) {
+	t.Parallel()
+
+	name := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		CheckDestroy: testAccCheckKeycloakCustomUserFederationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakUserFederationSyncAction_custom(name, "dummy", "full") + `
+variable "sync_timeout" {
+	type = number
+}
+
+action "keycloak_user_federation_sync" "with_variable" {
+	config {
+		realm_id           = keycloak_realm.realm.id
+		user_federation_id = keycloak_custom_user_federation.custom.id
+		client_timeout     = var.sync_timeout
+	}
+}
+
+resource "terraform_data" "trigger" {
+	lifecycle {
+		action_trigger {
+			events  = [after_create]
+			actions = [action.keycloak_user_federation_sync.with_variable]
+		}
+	}
+}
+`,
+				ConfigVariables: config.Variables{
+					"sync_timeout": config.IntegerVariable(0),
+				},
+				ExpectError: regexp.MustCompile("invalid client_timeout"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakUserFederationSyncAction_invalidMode(t *testing.T) {
 	t.Parallel()
 
@@ -125,7 +175,8 @@ func testAccCheckKeycloakUserFederationWasSynced(resourceName string) resource.T
 
 		// the request timeout can be overridden per request
 		_, err = keycloakClient.SyncUserFederation(keycloak.WithRequestTimeout(testCtx, time.Nanosecond), rs.Primary.Attributes["realm_id"], rs.Primary.ID, keycloak.UserFederationSyncFull)
-		if err == nil || !strings.Contains(err.Error(), "Client.Timeout") {
+		var netErr net.Error
+		if !errors.As(err, &netErr) || !netErr.Timeout() {
 			return fmt.Errorf("expected sync request to run into the overridden request timeout, but got: %v", err)
 		}
 
@@ -136,7 +187,7 @@ func testAccCheckKeycloakUserFederationWasSynced(resourceName string) resource.T
 // the custom user federation example imports the user '<federation name>-synced-<full|changed>' on sync
 func testAccCheckKeycloakCustomUserFederationWasSynced(name, syncMode string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		username := fmt.Sprintf("%s-synced-%s", name, syncMode)
+		username := strings.ToLower(fmt.Sprintf("%s-synced-%s", name, syncMode))
 
 		user, err := keycloakClient.GetUserByUsername(testCtx, name, username)
 		if err != nil {

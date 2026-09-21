@@ -85,7 +85,8 @@ func (p *keycloakFrameworkProvider) Schema(ctx context.Context, _ fwprovider.Sch
 				DeprecationMessage: deprecationMessage,
 			}
 		case attribute.Type.Is(tftypes.Number):
-			attributes[attribute.Name] = fwschema.Int64Attribute{
+			// covers TypeInt as well as TypeFloat of the SDKv2
+			attributes[attribute.Name] = fwschema.NumberAttribute{
 				Required:           attribute.Required,
 				Optional:           attribute.Optional,
 				Sensitive:          attribute.Sensitive,
@@ -102,6 +103,7 @@ func (p *keycloakFrameworkProvider) Schema(ctx context.Context, _ fwprovider.Sch
 				DeprecationMessage: deprecationMessage,
 			}
 		default:
+			// fail early with a clear message if the SDKv2 provider schema starts to use other types
 			resp.Diagnostics.AddError("unsupported provider attribute type", fmt.Sprintf("attribute %q has type %s, which cannot be mapped to the framework provider schema", attribute.Name, attribute.Type))
 		}
 	}

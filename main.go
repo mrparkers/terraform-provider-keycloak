@@ -27,7 +27,8 @@ func main() {
 		serveOpts = append(serveOpts, tf5server.WithManagedDebug())
 	}
 
-	// using local provider address for debugging:
+	// The provider address is only used for logging and for the reattach configuration in debug mode, the same as
+	// the ProviderAddr of the plugin.ServeOpts of the SDKv2. It does not affect how Terraform resolves the provider.
 	err = tf5server.Serve("terraform.local/keycloak/keycloak", func() tfprotov5.ProviderServer {
 		return muxServer
 	}, serveOpts...)

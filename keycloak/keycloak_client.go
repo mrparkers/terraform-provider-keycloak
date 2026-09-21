@@ -489,7 +489,7 @@ func (keycloakClient *KeycloakClient) sendRequest(ctx context.Context, request *
 
 	response, err := httpClient.Do(request)
 	if err != nil {
-		return nil, "", fmt.Errorf("error sending request: %v", err)
+		return nil, "", fmt.Errorf("error sending request: %w", err)
 	}
 	defer response.Body.Close()
 
@@ -512,7 +512,7 @@ func (keycloakClient *KeycloakClient) sendRequest(ctx context.Context, request *
 		}
 		response, err = httpClient.Do(request)
 		if err != nil {
-			return nil, "", fmt.Errorf("error sending request after refresh: %v", err)
+			return nil, "", fmt.Errorf("error sending request after refresh: %w", err)
 		}
 		defer response.Body.Close()
 	}
