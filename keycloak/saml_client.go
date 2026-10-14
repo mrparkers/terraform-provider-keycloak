@@ -152,6 +152,10 @@ func (keycloakClient *KeycloakClient) GetSamlClientDefaultScopes(ctx context.Con
 	return keycloakClient.getSamlClientScopes(ctx, realmId, clientId, "default")
 }
 
+func (keycloakClient *KeycloakClient) GetSamlClientOptionalScopes(ctx context.Context, realmId, clientId string) ([]*SamlClientScope, error) {
+	return keycloakClient.getSamlClientScopes(ctx, realmId, clientId, "optional")
+}
+
 func (keycloakClient *KeycloakClient) attachSamlClientScopes(ctx context.Context, realmId, clientId, t string, scopeNames []string) error {
 	_, err := keycloakClient.GetSamlClient(ctx, realmId, clientId)
 	if err != nil && ErrorIs404(err) {
@@ -199,6 +203,10 @@ func (keycloakClient *KeycloakClient) attachSamlClientScopes(ctx context.Context
 
 func (keycloakClient *KeycloakClient) AttachSamlClientDefaultScopes(ctx context.Context, realmId, clientId string, scopeNames []string) error {
 	return keycloakClient.attachSamlClientScopes(ctx, realmId, clientId, "default", scopeNames)
+}
+
+func (keycloakClient *KeycloakClient) AttachSamlClientOptionalScopes(ctx context.Context, realmId, clientId string, scopeNames []string) error {
+	return keycloakClient.attachSamlClientScopes(ctx, realmId, clientId, "optional", scopeNames)
 }
 
 func (keycloakClient *KeycloakClient) detachSamlClientScopes(ctx context.Context, realmId, clientId, t string, scopeNames []string) error {
