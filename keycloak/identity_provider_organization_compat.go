@@ -118,10 +118,12 @@ func (keycloakClient *KeycloakClient) readLegacyIdentityProviderOrganization(ctx
 	}
 	idp.Config.OrgDomain = ""
 	idp.Config.OrgRedirectModeEmailMatches = false
-	for _, link := range idp.OrganizationLinks {
-		if preferredOrganizationId != "" && link.OrganizationId == preferredOrganizationId {
-			idp.OrganizationId = preferredOrganizationId
-			break
+	if preferredOrganizationId != "" {
+		for _, link := range idp.OrganizationLinks {
+			if link.OrganizationId == preferredOrganizationId {
+				idp.OrganizationId = preferredOrganizationId
+				break
+			}
 		}
 	}
 	if idp.OrganizationId == "" {

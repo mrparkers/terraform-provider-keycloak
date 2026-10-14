@@ -104,7 +104,7 @@ resource "keycloak_organization" "partner" {
 - `description` - (Optional) The description of the organization.
 - `redirect_url` - (Optional) The landing page after user completes registration or accepts an invitation to the organization. If left empty, the user will be redirected to the account console by default.
 - `domain` - (Optional) A list of [domains](#domain-arguments).
-- `identity_provider` - (Optional) A list of [identity providers](#identity-provider-arguments) that this resource links to the organization. Requires Keycloak 26.8 or later. Links that this resource did not make, such as those of an identity provider resource with `organization_id`, are kept. When set, this resource also manages the identity provider routing of every domain, so do not set `org_domain` on an identity provider resource for this organization.
+- `identity_provider` - (Optional) A list of [identity providers](#identity-provider-arguments) that this resource links to the organization. Requires Keycloak 26.8 or later. Links that this resource did not make, such as those of an identity provider resource with `organization_id`, are kept. Do not list an identity provider here that also sets `organization_id` to this organization: removing its block would remove that link. When set, this resource also manages the identity provider routing of every domain, so do not set `org_domain` on an identity provider resource for this organization.
 - `attributes` - (Optional) A map representing attributes for the group. In order to add multivalued attributes, use `##` to separate the values. Max length for each value is 255 chars.
 
 ### Domain arguments
@@ -117,13 +117,17 @@ resource "keycloak_organization" "partner" {
 ### Identity provider arguments
 
 - `alias` - (Required) The alias of the identity provider.
-- `auto_membership` - (Optional) When `true`, users who authenticate through the identity provider are added as members of the organization, if the organization has no domain or one of its domains matches their email. Default is true.
-- `membership_type` - (Optional) The membership type of the users that `auto_membership` adds: `UNMANAGED`, or `MANAGED` to remove a user's account together with the membership. Keycloak allows `MANAGED` on one organization per identity provider, and only with `auto_membership`. Default is `UNMANAGED`.
+- `auto_membership` - (Optional) When `true`, users who authenticate through the identity provider are added as members of the organization, if the organization has no domain or one of its domains matches their email. Default is true. On Keycloak 26.8 the domain check can accept an email that the identity provider did not verify ([keycloak/keycloak#53815](https://github.com/keycloak/keycloak/issues/53815), fixed in Keycloak 27.0), so set it to `false` for an identity provider that does not verify email.
+- `membership_type` - (Optional) The membership type of the users that `auto_membership` adds: `UNMANAGED`, or `MANAGED`. Keycloak deletes the account of a managed member when the member leaves the organization or the organization is deleted. Keycloak allows `MANAGED` on one organization per identity provider, counting the links of identity provider resources with `organization_id`, which are always `MANAGED`, and only with `auto_membership`. Keycloak 26.8 migrated the links that existed before the upgrade as `MANAGED`; set `MANAGED` to keep that. Default is `UNMANAGED`.
 
 ## Import
 
 Organizations can be imported using the format `{{realm_id}}/{{organization_id}}`, where `organization_id` is the unique ID that Keycloak
 assigns to the organizations upon creation. This value can be found in the URI when editing this organization in the GUI, and is typically a GUID.
+
+An import does not read `identity_provider` blocks or the identity provider routing of the domains. The next apply writes them from
+the configuration, and the links and routing in Keycloak stay the same. In the same way, on Keycloak 26.8 or later an imported
+identity provider resource does not read `organization_id`, `org_domain` or `org_redirect_mode_email_matches`.
 
 Example:
 

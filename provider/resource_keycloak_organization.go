@@ -21,6 +21,7 @@ func resourceKeycloakOrganization() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceKeycloakOrganizationImport,
 		},
+		CustomizeDiff: validateKeycloakOrganizationIdentityProviders(),
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
@@ -133,11 +134,6 @@ func getOrganizationFromData(data *schema.ResourceData) (*keycloak.Organization,
 		RedirectUrl: data.Get("redirect_url").(string),
 	}
 
-	identityProviderAliases := make(map[string]bool)
-	for _, identityProvider := range getOrganizationIdentityProvidersFromData(data) {
-		identityProviderAliases[identityProvider.Alias] = true
-	}
-
 	domains := make([]keycloak.OrganizationDomain, 0)
 	if v, ok := data.GetOk("domain"); ok {
 		for _, domain := range v.(*schema.Set).List() {
@@ -147,13 +143,6 @@ func getOrganizationFromData(data *schema.ResourceData) (*keycloak.Organization,
 				Verified:              domainMap["verified"].(bool),
 				IdentityProviderAlias: domainMap["identity_provider_alias"].(string),
 				AutoRedirect:          domainMap["auto_redirect"].(bool),
-			}
-			// Keycloak routes a domain only to an identity provider linked to the organization.
-			if orgDomain.IdentityProviderAlias != "" && !identityProviderAliases[orgDomain.IdentityProviderAlias] {
-				return nil, fmt.Errorf("domain \"%s\" of organization \"%s\" routes to identity provider \"%s\", which is not in an identity_provider block", orgDomain.Name, organization.Name, orgDomain.IdentityProviderAlias)
-			}
-			if orgDomain.AutoRedirect && orgDomain.IdentityProviderAlias == "" {
-				return nil, fmt.Errorf("auto_redirect on domain \"%s\" of organization \"%s\" requires identity_provider_alias", orgDomain.Name, organization.Name)
 			}
 			domains = append(domains, orgDomain)
 		}
@@ -170,6 +159,39 @@ func getOrganizationFromData(data *schema.ResourceData) (*keycloak.Organization,
 	organization.Attributes = attributes
 
 	return organization, nil
+}
+
+// validateKeycloakOrganizationIdentityProviders refuses at plan time what Keycloak refuses at apply
+// time: a domain routed to an identity provider that is not linked to the organization, and a
+// MANAGED link without auto membership.
+func validateKeycloakOrganizationIdentityProviders() schema.CustomizeDiffFunc {
+	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+		if !d.NewValueKnown("identity_provider") || !d.NewValueKnown("domain") {
+			return nil
+		}
+
+		identityProviderAliases := make(map[string]bool)
+		for _, identityProvider := range getOrganizationIdentityProvidersFromSet(d.Get("identity_provider").(*schema.Set)) {
+			if identityProvider.MembershipType == "MANAGED" && !identityProvider.AutoMembership {
+				return fmt.Errorf("identity provider \"%s\": membership_type MANAGED requires auto_membership", identityProvider.Alias)
+			}
+			identityProviderAliases[identityProvider.Alias] = true
+		}
+
+		for _, domain := range d.Get("domain").(*schema.Set).List() {
+			domainMap := domain.(map[string]interface{})
+			name := domainMap["name"].(string)
+			identityProviderAlias := domainMap["identity_provider_alias"].(string)
+			if identityProviderAlias != "" && !identityProviderAliases[identityProviderAlias] {
+				return fmt.Errorf("domain \"%s\" routes to identity provider \"%s\", which is not in an identity_provider block", name, identityProviderAlias)
+			}
+			if domainMap["auto_redirect"].(bool) && identityProviderAlias == "" {
+				return fmt.Errorf("auto_redirect on domain \"%s\" requires identity_provider_alias", name)
+			}
+		}
+
+		return nil
+	}
 }
 
 func getOrganizationIdentityProvidersFromData(data *schema.ResourceData) []keycloak.OrganizationIdentityProvider {
@@ -219,7 +241,7 @@ func setOrganizationData(data *schema.ResourceData, organization *keycloak.Organ
 	return nil
 }
 
-func setOrganizationIdentityProvidersData(data *schema.ResourceData, identityProviders []keycloak.OrganizationIdentityProvider) {
+func setOrganizationIdentityProvidersData(data *schema.ResourceData, identityProviders []keycloak.OrganizationIdentityProvider) error {
 	identityProviderMaps := make([]map[string]interface{}, 0, len(identityProviders))
 	for _, identityProvider := range identityProviders {
 		identityProviderMaps = append(identityProviderMaps, map[string]interface{}{
@@ -229,7 +251,7 @@ func setOrganizationIdentityProvidersData(data *schema.ResourceData, identityPro
 		})
 	}
 
-	data.Set("identity_provider", identityProviderMaps)
+	return data.Set("identity_provider", identityProviderMaps)
 }
 
 func withoutDomainRouting(domains []keycloak.OrganizationDomain) []keycloak.OrganizationDomain {
@@ -245,7 +267,11 @@ func withoutDomainRouting(domains []keycloak.OrganizationDomain) []keycloak.Orga
 }
 
 func checkOrganizationIdentityProvidersSupported(ctx context.Context, keycloakClient *keycloak.KeycloakClient, organization *keycloak.Organization) error {
-	if ok, _ := keycloakClient.VersionIsLessThan(ctx, keycloak.Version_26_8); ok {
+	ok, err := keycloakClient.VersionIsLessThan(ctx, keycloak.Version_26_8)
+	if err != nil {
+		return err
+	}
+	if ok {
 		return fmt.Errorf("identity_provider in organization \"%s\" is not supported by your Keycloak version (requires >= %s)", organization.Name, keycloak.Version_26_8)
 	}
 
@@ -257,12 +283,16 @@ func checkOrganizationIdentityProvidersSupported(ctx context.Context, keycloakCl
 func linkOrganizationIdentityProviders(ctx context.Context, keycloakClient *keycloak.KeycloakClient, organization *keycloak.Organization, identityProviders []keycloak.OrganizationIdentityProvider) error {
 	for _, identityProvider := range identityProviders {
 		current, err := keycloakClient.GetOrganizationIdentityProvider(ctx, organization.Realm, organization.Id, identityProvider.Alias)
-		if keycloak.ErrorIs404(err) {
-			if err := keycloakClient.LinkIdentityProviderWithOrganization(ctx, organization.Realm, identityProvider.Alias, organization.Id); err != nil {
+		if err != nil {
+			return err
+		}
+		if current == nil {
+			// 409: the link exists although the read did not show it. Keycloak leaves out the
+			// links that the caller may not view (keycloak/keycloak#53307).
+			err := keycloakClient.LinkIdentityProviderWithOrganization(ctx, organization.Realm, identityProvider.Alias, organization.Id)
+			if err != nil && !keycloak.ErrorIs409(err) {
 				return err
 			}
-		} else if err != nil {
-			return err
 		}
 		if current == nil || *current != identityProvider {
 			if err := keycloakClient.UpdateOrganizationIdentityProviderLink(ctx, organization.Realm, organization.Id, identityProvider); err != nil {
@@ -371,20 +401,21 @@ func resourceKeycloakOrganizationRead(ctx context.Context, data *schema.Resource
 	identityProviders := make([]keycloak.OrganizationIdentityProvider, 0, len(stateIdentityProviders))
 	for _, stateIdentityProvider := range stateIdentityProviders {
 		identityProvider, err := keycloakClient.GetOrganizationIdentityProvider(ctx, realm, id, stateIdentityProvider.Alias)
-		if keycloak.ErrorIs404(err) {
-			continue
-		}
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		identityProviders = append(identityProviders, *identityProvider)
+		if identityProvider != nil {
+			identityProviders = append(identityProviders, *identityProvider)
+		}
 	}
 	if len(stateIdentityProviders) == 0 {
 		// Without identity_provider blocks the routing of the domains belongs to the
 		// identity provider resources that set organization_id.
 		Organization.Domains = withoutDomainRouting(Organization.Domains)
 	}
-	setOrganizationIdentityProvidersData(data, identityProviders)
+	if err = setOrganizationIdentityProvidersData(data, identityProviders); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diag.FromErr(setOrganizationData(data, Organization))
 }
@@ -407,6 +438,10 @@ func resourceKeycloakOrganizationUpdate(ctx context.Context, data *schema.Resour
 		if err = linkOrganizationIdentityProviders(ctx, keycloakClient, Organization, identityProviders); err != nil {
 			return diag.FromErr(err)
 		}
+	}
+	// The routing stays with this resource for the update that removes its last identity_provider
+	// block, so that the update clears the routing before it unlinks.
+	if len(identityProviders) > 0 || len(oldIdentityProviders) > 0 {
 		err = keycloakClient.UpdateOrganizationWithDomainRouting(ctx, Organization)
 	} else {
 		err = keycloakClient.UpdateOrganization(ctx, Organization)
@@ -419,8 +454,6 @@ func resourceKeycloakOrganizationUpdate(ctx context.Context, data *schema.Resour
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	setOrganizationIdentityProvidersData(data, identityProviders)
 
 	return diag.FromErr(setOrganizationData(data, Organization))
 }

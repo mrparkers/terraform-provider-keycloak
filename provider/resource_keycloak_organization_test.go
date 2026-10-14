@@ -239,6 +239,14 @@ func TestAccKeycloakOrganization_identityProviders(t *testing.T) {
 				),
 			},
 			{
+				// An import reads no identity_provider blocks, and so no domain routing either.
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     testAccRealm.Realm + "/",
+				ImportStateVerifyIgnore: []string{"identity_provider", "domain"},
+			},
+			{
 				Config: testKeycloakOrganization_identityProvidersUpdate(organizationName, domainName, firstAlias, secondAlias),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOrganizationHasIdentityProvider(resourceName, firstAlias, true, "MANAGED"),
@@ -336,6 +344,91 @@ func TestAccKeycloakOrganization_domainRoutingValidation(t *testing.T) {
 				Config:      testKeycloakOrganization_domainAutoRedirectWithoutIdentityProvider(organizationName, domainName),
 				ExpectError: regexp.MustCompile("requires identity_provider_alias"),
 			},
+			{
+				Config:      testKeycloakOrganization_managedIdentityProviderWithoutAutoMembership(organizationName, domainName, alias),
+				ExpectError: regexp.MustCompile("membership_type MANAGED requires auto_membership"),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOrganization_identityProviderUnlinkedOutOfBand(t *testing.T) {
+	skipIfVersionIsLessThan(testCtx, t, keycloakClient, keycloak.Version_26_8)
+
+	organization := &keycloak.Organization{}
+	organizationName := acctest.RandomWithPrefix("tf-acc")
+	domainName := acctest.RandomWithPrefix("tf-acc") + ".example.com"
+	firstAlias := acctest.RandomWithPrefix("tf-acc")
+	secondAlias := acctest.RandomWithPrefix("tf-acc")
+
+	resourceName := "keycloak_organization.organization"
+
+	unlinkSecond := func() {
+		err := keycloakClient.UnlinkIdentityProviderFromOrganization(testCtx, organization.Realm, secondAlias, organization.Id)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccCheckKeycloakOrganizationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOrganization_identityProviders(organizationName, domainName, firstAlias, secondAlias),
+				Check:  testAccCheckKeycloakOrganizationFetch(resourceName, organization),
+			},
+			{
+				PreConfig:          unlinkSecond,
+				Config:             testKeycloakOrganization_identityProviders(organizationName, domainName, firstAlias, secondAlias),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				Config: testKeycloakOrganization_identityProviders(organizationName, domainName, firstAlias, secondAlias),
+				Check:  testAccCheckKeycloakOrganizationHasIdentityProvider(resourceName, secondAlias, false, "UNMANAGED"),
+			},
+			{
+				PreConfig: unlinkSecond,
+				Config:    testKeycloakOrganization_identityProvidersUpdate(organizationName, domainName, firstAlias, secondAlias),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOrganizationHasIdentityProvider(resourceName, firstAlias, true, "MANAGED"),
+					testAccCheckKeycloakOrganizationHasNoIdentityProvider(resourceName, secondAlias),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeycloakOrganization_identityProvidersFromOrganizationId(t *testing.T) {
+	skipIfVersionIsLessThan(testCtx, t, keycloakClient, keycloak.Version_26_8)
+
+	organizationName := acctest.RandomWithPrefix("tf-acc")
+	domainName := acctest.RandomWithPrefix("tf-acc") + ".example.com"
+	alias := acctest.RandomWithPrefix("tf-acc")
+
+	resourceName := "keycloak_organization.organization"
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccCheckKeycloakOrganizationDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOrganization_organizationIdOnIdentityProvider(organizationName, domainName, alias),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOrganizationHasIdentityProvider(resourceName, alias, true, "MANAGED"),
+					testAccCheckKeycloakOrganizationDomainRoutesTo(resourceName, domainName, alias, true),
+				),
+			},
+			{
+				Config: testKeycloakOrganization_organizationIdReplacedByBlock(organizationName, domainName, alias),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOrganizationHasIdentityProvider(resourceName, alias, true, "MANAGED"),
+					testAccCheckKeycloakOrganizationDomainRoutesTo(resourceName, domainName, alias, true),
+				),
+			},
 		},
 	})
 }
@@ -425,7 +518,11 @@ func testAccCheckKeycloakOrganizationHasIdentityProvider(resourceName, alias str
 
 		identityProvider, err := keycloakClient.GetOrganizationIdentityProvider(testCtx, organization.Realm, organization.Id, alias)
 		if err != nil {
-			return fmt.Errorf("expected organization %s to have identity provider %s: %s", organization.Name, alias, err)
+			return err
+		}
+
+		if identityProvider == nil {
+			return fmt.Errorf("expected organization %s to have identity provider %s", organization.Name, alias)
 		}
 
 		if identityProvider.AutoMembership != autoMembership || identityProvider.MembershipType != membershipType {
@@ -443,12 +540,13 @@ func testAccCheckKeycloakOrganizationHasNoIdentityProvider(resourceName, alias s
 			return err
 		}
 
-		_, err = keycloakClient.GetOrganizationIdentityProvider(testCtx, organization.Realm, organization.Id, alias)
-		if err == nil {
-			return fmt.Errorf("expected organization %s to not have identity provider %s", organization.Name, alias)
-		}
-		if !keycloak.ErrorIs404(err) {
+		identityProvider, err := keycloakClient.GetOrganizationIdentityProvider(testCtx, organization.Realm, organization.Id, alias)
+		if err != nil {
 			return err
+		}
+
+		if identityProvider != nil {
+			return fmt.Errorf("expected organization %s to not have identity provider %s", organization.Name, alias)
 		}
 
 		return nil
@@ -702,6 +800,92 @@ resource "keycloak_oidc_identity_provider" "second" {
 	organization_id = keycloak_organization.organization.id
 }
 	`, testAccRealm.Realm, firstAlias, organizationName, identityProvider, domainName, secondAlias)
+}
+
+func testKeycloakOrganization_organizationIdOnIdentityProvider(organizationName, domainName, alias string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_organization" "organization" {
+	name  = "%s"
+	realm = data.keycloak_realm.realm.id
+
+	domain {
+		name = "%s"
+	}
+}
+
+resource "keycloak_oidc_identity_provider" "oidc" {
+	realm             = data.keycloak_realm.realm.id
+	alias             = "%s"
+	authorization_url = "https://example.com/auth"
+	token_url         = "https://example.com/token"
+	client_id         = "example_id"
+	client_secret     = "example_token"
+
+	organization_id                 = keycloak_organization.organization.id
+	org_domain                      = "%s"
+	org_redirect_mode_email_matches = true
+}
+	`, testAccRealm.Realm, organizationName, domainName, alias, domainName)
+}
+
+func testKeycloakOrganization_organizationIdReplacedByBlock(organizationName, domainName, alias string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_oidc_identity_provider" "oidc" {
+	realm             = data.keycloak_realm.realm.id
+	alias             = "%s"
+	authorization_url = "https://example.com/auth"
+	token_url         = "https://example.com/token"
+	client_id         = "example_id"
+	client_secret     = "example_token"
+}
+
+resource "keycloak_organization" "organization" {
+	name  = "%s"
+	realm = data.keycloak_realm.realm.id
+
+	identity_provider {
+		alias           = keycloak_oidc_identity_provider.oidc.alias
+		membership_type = "MANAGED"
+	}
+
+	domain {
+		name                    = "%s"
+		identity_provider_alias = keycloak_oidc_identity_provider.oidc.alias
+		auto_redirect           = true
+	}
+}
+	`, testAccRealm.Realm, alias, organizationName, domainName)
+}
+
+func testKeycloakOrganization_managedIdentityProviderWithoutAutoMembership(organizationName, domainName, alias string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_organization" "organization" {
+	name  = "%s"
+	realm = data.keycloak_realm.realm.id
+
+	identity_provider {
+		alias           = "%s"
+		auto_membership = false
+		membership_type = "MANAGED"
+	}
+
+	domain {
+		name = "%s"
+	}
+}
+	`, testAccRealm.Realm, organizationName, alias, domainName)
 }
 
 func testKeycloakOrganization_sharedIdentityProvider(firstOrganizationName, secondOrganizationName, firstDomainName, secondDomainName, alias string) string {

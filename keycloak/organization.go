@@ -102,14 +102,18 @@ func (keycloakClient *KeycloakClient) UpdateOrganizationWithDomainRouting(ctx co
 	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/organizations/%s", organization.Realm, organization.Id), organization)
 }
 
-// GetOrganizationIdentityProvider reads one link with its own request. The list of an organization's
-// identity providers is not used: Keycloak 26.8.0 writes that list after its transaction ends, and
-// fails with "Cannot parse the JSON" when another organization linked to the same identity provider
-// is not cached.
+// GetOrganizationIdentityProvider reads one link, and returns nil when the identity provider is not
+// linked to the organization. It does not use the list of the organization's identity providers:
+// on Keycloak 26.8.0 that list was seen to fail with 400 "Cannot parse the JSON" while two
+// organizations shared an identity provider, because the server loads the other organization after
+// the request's database session has closed.
 func (keycloakClient *KeycloakClient) GetOrganizationIdentityProvider(ctx context.Context, realm, organizationId, alias string) (*OrganizationIdentityProvider, error) {
 	var representation organizationIdentityProviderRepresentation
 
 	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/organizations/%s/identity-providers/%s", realm, organizationId, alias), &representation, nil)
+	if ErrorIs404(err) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +128,7 @@ func (keycloakClient *KeycloakClient) GetOrganizationIdentityProvider(ctx contex
 		}
 	}
 
-	return nil, fmt.Errorf("identity provider %s of organization %s has no link to the organization", alias, organizationId)
+	return nil, nil
 }
 
 func (keycloakClient *KeycloakClient) UpdateOrganizationIdentityProviderLink(ctx context.Context, realm, organizationId string, identityProvider OrganizationIdentityProvider) error {
