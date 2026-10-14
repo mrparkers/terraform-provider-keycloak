@@ -404,9 +404,11 @@ func TestAccKeycloakOrganization_identityProviderUnlinkedOutOfBand(t *testing.T)
 func TestAccKeycloakOrganization_identityProvidersFromOrganizationId(t *testing.T) {
 	skipIfVersionIsLessThan(testCtx, t, keycloakClient, keycloak.Version_26_8)
 
+	organization := &keycloak.Organization{}
 	organizationName := acctest.RandomWithPrefix("tf-acc")
 	domainName := acctest.RandomWithPrefix("tf-acc") + ".example.com"
 	alias := acctest.RandomWithPrefix("tf-acc")
+	username := acctest.RandomWithPrefix("tf-acc")
 
 	resourceName := "keycloak_organization.organization"
 
@@ -420,13 +422,29 @@ func TestAccKeycloakOrganization_identityProvidersFromOrganizationId(t *testing.
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOrganizationHasIdentityProvider(resourceName, alias, true, "MANAGED"),
 					testAccCheckKeycloakOrganizationDomainRoutesTo(resourceName, domainName, alias, true),
+					testAccCheckKeycloakOrganizationFetch(resourceName, organization),
 				),
 			},
 			{
+				// The move removes the link and adds it again. A managed member must stay: removing
+				// a managed member deletes the user.
+				PreConfig: func() {
+					user := &keycloak.User{RealmId: organization.Realm, Username: username, Enabled: true}
+					if err := keycloakClient.NewUser(testCtx, user); err != nil {
+						t.Fatal(err)
+					}
+					if err := keycloakClient.AddUserToOrganization(testCtx, organization.Realm, organization.Id, user.Id); err != nil {
+						t.Fatal(err)
+					}
+					if err := keycloakClient.UpdateOrganizationMembershipType(testCtx, organization.Realm, organization.Id, user.Id, "MANAGED"); err != nil {
+						t.Fatal(err)
+					}
+				},
 				Config: testKeycloakOrganization_organizationIdReplacedByBlock(organizationName, domainName, alias),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKeycloakOrganizationHasIdentityProvider(resourceName, alias, true, "MANAGED"),
 					testAccCheckKeycloakOrganizationDomainRoutesTo(resourceName, domainName, alias, true),
+					testAccCheckKeycloakOrganizationHasManagedMember(resourceName, username),
 				),
 			},
 		},
@@ -550,6 +568,32 @@ func testAccCheckKeycloakOrganizationHasNoIdentityProvider(resourceName, alias s
 		}
 
 		return nil
+	}
+}
+
+func testAccCheckKeycloakOrganizationHasManagedMember(resourceName, username string) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		organization, err := getOrganizationFromState(state, resourceName)
+		if err != nil {
+			return err
+		}
+
+		members, err := keycloakClient.GetOrganizationMembers(testCtx, organization.Realm, organization.Id)
+		if err != nil {
+			return err
+		}
+
+		for _, member := range members {
+			if member.Username != username {
+				continue
+			}
+			if member.MembershipType != "MANAGED" {
+				return fmt.Errorf("expected member %s of organization %s to be MANAGED, got %s", username, organization.Name, member.MembershipType)
+			}
+			return nil
+		}
+
+		return fmt.Errorf("expected organization %s to have managed member %s", organization.Name, username)
 	}
 }
 

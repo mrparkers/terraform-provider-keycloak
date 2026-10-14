@@ -12,7 +12,8 @@ import (
 )
 
 // Serialize organization read/modify/write operations within this provider process.
-// UpdateOrganization must use the same lock (see the accompanying patch).
+// UpdateOrganization must use the same lock (see the accompanying patch), and so do the
+// link changes of keycloak_organization (organization.go).
 var identityProviderOrganizationMutex sync.Mutex
 
 type IdentityProviderOrganizationLink struct {
@@ -290,6 +291,8 @@ func (keycloakClient *KeycloakClient) ReconcileLegacyIdentityProviderOrganizatio
 			return err
 		}
 	}
+	// Always MANAGED with auto membership, as before 26.8. The keycloak_organization docs rely on
+	// it (TestAccKeycloakOrganization_identityProvidersKeepOtherLinks).
 	if !exists || !link.AutoMembership || link.MembershipType != "MANAGED" {
 		link = IdentityProviderOrganizationLink{OrganizationId: desired.OrganizationId, AutoMembership: true, MembershipType: "MANAGED"}
 		if err := keycloakClient.put(ctx, path+"/"+url.PathEscape(desired.Alias), link); err != nil {

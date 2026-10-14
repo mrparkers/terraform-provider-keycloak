@@ -166,6 +166,8 @@ func getOrganizationFromData(data *schema.ResourceData) (*keycloak.Organization,
 // MANAGED link without auto membership.
 func validateKeycloakOrganizationIdentityProviders() schema.CustomizeDiffFunc {
 	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+		// An alias that is not known yet, such as a computed one, skips the checks. Keycloak then
+		// refuses the same mistakes at apply time.
 		if !d.NewValueKnown("identity_provider") || !d.NewValueKnown("domain") {
 			return nil
 		}
@@ -278,51 +280,23 @@ func checkOrganizationIdentityProvidersSupported(ctx context.Context, keycloakCl
 	return nil
 }
 
-// linkOrganizationIdentityProviders links each identity provider to the organization, or updates
-// its link, so that a domain can route to it.
-func linkOrganizationIdentityProviders(ctx context.Context, keycloakClient *keycloak.KeycloakClient, organization *keycloak.Organization, identityProviders []keycloak.OrganizationIdentityProvider) error {
-	for _, identityProvider := range identityProviders {
-		current, err := keycloakClient.GetOrganizationIdentityProvider(ctx, organization.Realm, organization.Id, identityProvider.Alias)
-		if err != nil {
-			return err
-		}
-		if current == nil {
-			// 409: the link exists although the read did not show it. Keycloak leaves out the
-			// links that the caller may not view (keycloak/keycloak#53307).
-			err := keycloakClient.LinkIdentityProviderWithOrganization(ctx, organization.Realm, identityProvider.Alias, organization.Id)
-			if err != nil && !keycloak.ErrorIs409(err) {
-				return err
-			}
-		}
-		if current == nil || *current != identityProvider {
-			if err := keycloakClient.UpdateOrganizationIdentityProviderLink(ctx, organization.Realm, organization.Id, identityProvider); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-// unlinkOrganizationIdentityProviders removes the links that the resource had and no longer has.
-// Links made elsewhere, such as by an identity provider resource with organization_id, are kept.
-func unlinkOrganizationIdentityProviders(ctx context.Context, keycloakClient *keycloak.KeycloakClient, organization *keycloak.Organization, identityProviders, oldIdentityProviders []keycloak.OrganizationIdentityProvider) error {
+// removedOrganizationIdentityProviderAliases lists the identity providers that the resource had and no
+// longer has. Links made elsewhere, such as by an identity provider resource with organization_id,
+// are not in the list, so they are kept.
+func removedOrganizationIdentityProviderAliases(identityProviders, oldIdentityProviders []keycloak.OrganizationIdentityProvider) []string {
 	wanted := make(map[string]bool, len(identityProviders))
 	for _, identityProvider := range identityProviders {
 		wanted[identityProvider.Alias] = true
 	}
 
+	removed := make([]string, 0)
 	for _, identityProvider := range oldIdentityProviders {
-		if wanted[identityProvider.Alias] {
-			continue
-		}
-		err := keycloakClient.UnlinkIdentityProviderFromOrganization(ctx, organization.Realm, identityProvider.Alias, organization.Id)
-		if err != nil && !keycloak.ErrorIs404(err) {
-			return err
+		if !wanted[identityProvider.Alias] {
+			removed = append(removed, identityProvider.Alias)
 		}
 	}
 
-	return nil
+	return removed
 }
 
 func resourceKeycloakOrganizationImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -377,7 +351,7 @@ func resourceKeycloakOrganizationCreate(ctx context.Context, data *schema.Resour
 	}
 
 	if len(identityProviders) > 0 {
-		if err = linkOrganizationIdentityProviders(ctx, keycloakClient, Organization, identityProviders); err != nil {
+		if err = keycloakClient.LinkOrganizationIdentityProviders(ctx, Organization, identityProviders); err != nil {
 			return diag.FromErr(err)
 		}
 		if err = keycloakClient.UpdateOrganizationWithDomainRouting(ctx, Organization); err != nil {
@@ -435,7 +409,7 @@ func resourceKeycloakOrganizationUpdate(ctx context.Context, data *schema.Resour
 		if err = checkOrganizationIdentityProvidersSupported(ctx, keycloakClient, Organization); err != nil {
 			return diag.FromErr(err)
 		}
-		if err = linkOrganizationIdentityProviders(ctx, keycloakClient, Organization, identityProviders); err != nil {
+		if err = keycloakClient.LinkOrganizationIdentityProviders(ctx, Organization, identityProviders); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -450,7 +424,7 @@ func resourceKeycloakOrganizationUpdate(ctx context.Context, data *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	err = unlinkOrganizationIdentityProviders(ctx, keycloakClient, Organization, identityProviders, oldIdentityProviders)
+	err = keycloakClient.UnlinkOrganizationIdentityProviders(ctx, Organization, removedOrganizationIdentityProviderAliases(identityProviders, oldIdentityProviders))
 	if err != nil {
 		return diag.FromErr(err)
 	}

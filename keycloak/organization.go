@@ -141,6 +141,50 @@ func (keycloakClient *KeycloakClient) UpdateOrganizationIdentityProviderLink(ctx
 	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/organizations/%s/identity-providers/%s", realm, organizationId, identityProvider.Alias), link)
 }
 
+// LinkOrganizationIdentityProviders links each identity provider to the organization, or updates its
+// link, so that a domain can route to it.
+func (keycloakClient *KeycloakClient) LinkOrganizationIdentityProviders(ctx context.Context, organization *Organization, identityProviders []OrganizationIdentityProvider) error {
+	identityProviderOrganizationMutex.Lock()
+	defer identityProviderOrganizationMutex.Unlock()
+
+	for _, identityProvider := range identityProviders {
+		current, err := keycloakClient.GetOrganizationIdentityProvider(ctx, organization.Realm, organization.Id, identityProvider.Alias)
+		if err != nil {
+			return err
+		}
+		if current == nil {
+			// 409: another client linked it after the read.
+			err := keycloakClient.LinkIdentityProviderWithOrganization(ctx, organization.Realm, identityProvider.Alias, organization.Id)
+			if err != nil && !ErrorIs409(err) {
+				return err
+			}
+		}
+		if current == nil || *current != identityProvider {
+			if err := keycloakClient.UpdateOrganizationIdentityProviderLink(ctx, organization.Realm, organization.Id, identityProvider); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// UnlinkOrganizationIdentityProviders removes the links of the given identity providers. A link that is
+// already gone is not an error.
+func (keycloakClient *KeycloakClient) UnlinkOrganizationIdentityProviders(ctx context.Context, organization *Organization, aliases []string) error {
+	identityProviderOrganizationMutex.Lock()
+	defer identityProviderOrganizationMutex.Unlock()
+
+	for _, alias := range aliases {
+		err := keycloakClient.UnlinkIdentityProviderFromOrganization(ctx, organization.Realm, alias, organization.Id)
+		if err != nil && !ErrorIs404(err) {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (keycloakClient *KeycloakClient) DeleteOrganization(ctx context.Context, realmId, id string) error {
 	return keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/organizations/%s", realmId, id), nil)
 }
@@ -175,6 +219,10 @@ func (keycloakClient *KeycloakClient) GetOrganizationMembers(ctx context.Context
 func (keycloakClient *KeycloakClient) AddUserToOrganization(ctx context.Context, realm, orgId, userId string) error {
 	_, err := keycloakClient.sendRaw(ctx, fmt.Sprintf("/realms/%s/organizations/%s/members", realm, orgId), []byte(userId))
 	return err
+}
+
+func (keycloakClient *KeycloakClient) UpdateOrganizationMembershipType(ctx context.Context, realm, orgId, userId, membershipType string) error {
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/organizations/%s/members/%s/membership-type", realm, orgId, userId), membershipType)
 }
 
 func (keycloakClient *KeycloakClient) RemoveUserFromOrganization(ctx context.Context, realm, orgId, userId string) error {
