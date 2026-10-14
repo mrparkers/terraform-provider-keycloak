@@ -73,3 +73,20 @@ func TestKeycloakOpenidClient_suppressionDefaultFromLegacyState(t *testing.T) {
 		t.Fatalf("refresh must persist false for older state, got %q (present=%t)", value, exists)
 	}
 }
+
+func TestKeycloakOpenidClient_dataSourceWithoutSuppressionOption(t *testing.T) {
+	data, err := schema.InternalMap(dataSourceKeycloakOpenidClient().Schema).Data(&terraform.InstanceState{
+		ID:         "existing-client",
+		Attributes: map[string]string{"client_id": "existing", "realm_id": "example", "access_type": "PUBLIC"},
+	}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := &keycloak.OpenidClient{Id: "existing-client", ClientId: "existing", RealmId: "example", PublicClient: true}
+	if err := setOpenidClientData(context.Background(), nil, data, client); err != nil {
+		t.Fatal(err)
+	}
+	if _, exists := data.State().Attributes["suppress_client_secret"]; exists {
+		t.Fatal("data source must not acquire the resource-only suppression field")
+	}
+}

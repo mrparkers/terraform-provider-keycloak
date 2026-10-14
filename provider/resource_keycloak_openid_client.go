@@ -668,8 +668,11 @@ func setOpenidClientData(ctx context.Context, keycloakClient *keycloak.KeycloakC
 
 	// Persist the configuration-only default during refresh of older state.
 	// Otherwise its absent value produces an unnecessary client update.
-	data.Set("suppress_client_secret", data.Get("suppress_client_secret").(bool))
-	if data.Get("suppress_client_secret").(bool) {
+	suppressClientSecret, hasSuppression := data.Get("suppress_client_secret").(bool)
+	if hasSuppression {
+		data.Set("suppress_client_secret", suppressClientSecret)
+	}
+	if suppressClientSecret {
 		data.Set("client_secret", "")
 	} else if v, ok := data.GetOk("client_secret_wo_version"); ok && v != nil {
 		data.Set("client_secret_wo_version", v.(string))
