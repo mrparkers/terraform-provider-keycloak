@@ -175,8 +175,20 @@ func (keycloakClient *KeycloakClient) attachSamlClientScopes(ctx context.Context
 		}
 	}
 
+	// Keycloak does not allow a client scope to be attached as a default and an optional scope at the same time, so
+	// detach it from the conflicting type first, mirroring the behavior of the Keycloak admin console.
+	conflictingType := "default"
+	if t == "default" {
+		conflictingType = "optional"
+	}
+
 	for _, samlClientScope := range allSamlClientScopes {
-		err := keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, samlClientScope.Id), nil)
+		err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, conflictingType, samlClientScope.Id), nil)
+		if err != nil && !ErrorIs404(err) {
+			return err
+		}
+
+		err = keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, samlClientScope.Id), nil)
 		if err != nil {
 			return err
 		}
@@ -197,7 +209,7 @@ func (keycloakClient *KeycloakClient) detachSamlClientScopes(ctx context.Context
 
 	for _, samlClientScope := range allSamlClientScopes {
 		err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, samlClientScope.Id), nil)
-		if err != nil {
+		if err != nil && !ErrorIs404(err) {
 			return err
 		}
 	}

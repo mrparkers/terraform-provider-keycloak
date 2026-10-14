@@ -280,7 +280,7 @@ func TestAccKeycloakOpenidClientDefaultScopes_noImportNeeded(t *testing.T) {
 	})
 }
 
-// Keycloak throws a 500 if you attempt to attach an default scope that is already attached as an optional scope
+// Keycloak throws a 500 if you attempt to attach a default scope that is already attached as an optional scope
 // but the provider will remove the existing scope and re-attach as a default scope
 func TestAccKeycloakOpenidClientDefaultScopes_validateDuplicateScopeAssignment(t *testing.T) {
 	t.Parallel()
