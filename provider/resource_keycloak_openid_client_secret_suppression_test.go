@@ -1,7 +1,11 @@
 package provider
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/keycloak/terraform-provider-keycloak/keycloak"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -50,4 +54,22 @@ func TestAccKeycloakOpenidClient_suppressSecretDuringAccessTypeDrift(t *testing.
 			{Config: config, Check: check},
 		},
 	})
+}
+
+func TestKeycloakOpenidClient_suppressionDefaultFromLegacyState(t *testing.T) {
+	data, err := schema.InternalMap(resourceKeycloakOpenidClient().Schema).Data(&terraform.InstanceState{
+		ID:         "legacy-client",
+		Attributes: map[string]string{"client_id": "legacy", "realm_id": "example", "access_type": "PUBLIC"},
+	}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := &keycloak.OpenidClient{Id: "legacy-client", ClientId: "legacy", RealmId: "example", PublicClient: true}
+	if err := setOpenidClientData(context.Background(), nil, data, client); err != nil {
+		t.Fatal(err)
+	}
+	value, exists := data.State().Attributes["suppress_client_secret"]
+	if !exists || value != "false" {
+		t.Fatalf("refresh must persist false for older state, got %q (present=%t)", value, exists)
+	}
 }
