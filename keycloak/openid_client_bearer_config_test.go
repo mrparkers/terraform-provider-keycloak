@@ -41,7 +41,8 @@ func TestOpenidClientBearerConfiguration(t *testing.T) {
 		client OpenidClient
 		valid  bool
 	}{
-		{"factory_bearer", OpenidClient{BearerOnly: true, StandardFlowEnabled: true}, true},
+		{"factory_bearer", OpenidClient{Id: "existing", BearerOnly: true, StandardFlowEnabled: true}, true},
+		{"new_bearer_standard_rejected", OpenidClient{BearerOnly: true, StandardFlowEnabled: true}, false},
 		{"public_browser_requires_redirect", OpenidClient{PublicClient: true, StandardFlowEnabled: true}, false},
 		{"bearer_implicit_rejected", OpenidClient{BearerOnly: true, ImplicitFlowEnabled: true}, false},
 		{"bearer_password_rejected", OpenidClient{BearerOnly: true, DirectAccessGrantsEnabled: true}, false},

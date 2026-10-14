@@ -112,7 +112,7 @@ func (keycloakClient *KeycloakClient) GetOpenidClientServiceAccountUserId(ctx co
 func (keycloakClient *KeycloakClient) ValidateOpenidClient(ctx context.Context, client *OpenidClient) error {
 	// Generated bearer-only clients retain standardFlowEnabled=true, although
 	// the server never issues tokens for them. Preserve that stored flag.
-	if client.BearerOnly && (client.ImplicitFlowEnabled || client.DirectAccessGrantsEnabled || client.ServiceAccountsEnabled) {
+	if client.BearerOnly && ((client.Id == "" && client.StandardFlowEnabled) || client.ImplicitFlowEnabled || client.DirectAccessGrantsEnabled || client.ServiceAccountsEnabled) {
 		return fmt.Errorf("validation error: Keycloak cannot issue tokens for bearer-only clients; no oauth2 flows can be enabled for this client")
 	}
 
