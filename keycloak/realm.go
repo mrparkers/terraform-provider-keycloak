@@ -232,7 +232,32 @@ func (keycloakClient *KeycloakClient) GetRealmKeys(ctx context.Context, name str
 }
 
 func (keycloakClient *KeycloakClient) UpdateRealm(ctx context.Context, realm *Realm) error {
-	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s", realm.Realm), realm)
+	// These zero, false, and empty values reset existing realm settings. Keep them explicit
+	// on updates while retaining omitted creation values and server defaults.
+	payload := struct {
+		*Realm
+		SsoSessionIdleTimeoutRememberMe  int    `json:"ssoSessionIdleTimeoutRememberMe"`
+		SsoSessionMaxLifespanRememberMe  int    `json:"ssoSessionMaxLifespanRememberMe"`
+		OfflineSessionMaxLifespanEnabled bool   `json:"offlineSessionMaxLifespanEnabled"`
+		LoginTheme                       string `json:"loginTheme"`
+		AccountTheme                     string `json:"accountTheme"`
+		AdminTheme                       string `json:"adminTheme"`
+		EmailTheme                       string `json:"emailTheme"`
+		OrganizationsEnabled             bool   `json:"organizationsEnabled"`
+		AdminPermissionsEnabled          bool   `json:"adminPermissionsEnabled"`
+	}{
+		Realm:                            realm,
+		SsoSessionIdleTimeoutRememberMe:  realm.SsoSessionIdleTimeoutRememberMe,
+		SsoSessionMaxLifespanRememberMe:  realm.SsoSessionMaxLifespanRememberMe,
+		OfflineSessionMaxLifespanEnabled: realm.OfflineSessionMaxLifespanEnabled,
+		LoginTheme:                       realm.LoginTheme,
+		AccountTheme:                     realm.AccountTheme,
+		AdminTheme:                       realm.AdminTheme,
+		EmailTheme:                       realm.EmailTheme,
+		OrganizationsEnabled:             realm.OrganizationsEnabled,
+		AdminPermissionsEnabled:          realm.AdminPermissionsEnabled,
+	}
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s", realm.Realm), payload)
 }
 
 func (keycloakClient *KeycloakClient) DeleteRealm(ctx context.Context, name string) error {
