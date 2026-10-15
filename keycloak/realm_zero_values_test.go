@@ -7,11 +7,14 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/go-version"
 )
 
 func TestRealmZeroValueUpdates(t *testing.T) {
 	for _, tc := range []struct {
 		name          string
+		serverVersion string
 		create        bool
 		idle, maximum int
 		enabled       bool
@@ -19,6 +22,9 @@ func TestRealmZeroValueUpdates(t *testing.T) {
 		{name: "creation keeps omitted server defaults", create: true},
 		{name: "update resets zero and false values"},
 		{name: "update retains positive and true values", idle: 123, maximum: 456, enabled: true},
+		{name: "26.0 update omits unsupported false admin permissions", serverVersion: "26.0.8"},
+		{name: "26.0 preserves explicit true validation", serverVersion: "26.0.8", enabled: true},
+		{name: "26.1 update resets admin permissions", serverVersion: "26.1.0"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			realm := &Realm{Realm: "fixture", Enabled: true, SslRequired: "all", AccessTokenLifespan: 300,
@@ -55,6 +61,13 @@ func TestRealmZeroValueUpdates(t *testing.T) {
 					want[k] = v
 				}
 			}
+			serverVersion := tc.serverVersion
+			if serverVersion == "" {
+				serverVersion = "26.8.1"
+			}
+			if serverVersion == "26.0.8" && !tc.enabled {
+				delete(want, "adminPermissionsEnabled")
+			}
 			writes := 0
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				writes++
@@ -75,7 +88,7 @@ func TestRealmZeroValueUpdates(t *testing.T) {
 				w.WriteHeader(status)
 			}))
 			defer server.Close()
-			client := &KeycloakClient{baseUrl: server.URL, httpClient: server.Client(), initialLogin: true, clientCredentials: &ClientCredentials{AccessToken: "fixture", TokenType: "Bearer"}}
+			client := &KeycloakClient{version: version.Must(version.NewVersion(serverVersion)), baseUrl: server.URL, httpClient: server.Client(), initialLogin: true, clientCredentials: &ClientCredentials{AccessToken: "fixture", TokenType: "Bearer"}}
 			if tc.create {
 				err = client.NewRealm(context.Background(), realm)
 			} else {
