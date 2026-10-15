@@ -170,19 +170,20 @@ func (keycloakClient *KeycloakClient) LinkOrganizationIdentityProviders(ctx cont
 }
 
 // UnlinkOrganizationIdentityProviders removes the links of the given identity providers. A link that is
-// already gone is not an error.
-func (keycloakClient *KeycloakClient) UnlinkOrganizationIdentityProviders(ctx context.Context, organization *Organization, aliases []string) error {
+// already gone is not an error. When a removal fails, it returns the aliases that it did not remove: the
+// one that failed and those after it.
+func (keycloakClient *KeycloakClient) UnlinkOrganizationIdentityProviders(ctx context.Context, organization *Organization, aliases []string) ([]string, error) {
 	identityProviderOrganizationMutex.Lock()
 	defer identityProviderOrganizationMutex.Unlock()
 
-	for _, alias := range aliases {
+	for i, alias := range aliases {
 		err := keycloakClient.UnlinkIdentityProviderFromOrganization(ctx, organization.Realm, alias, organization.Id)
 		if err != nil && !ErrorIs404(err) {
-			return err
+			return aliases[i:], err
 		}
 	}
 
-	return nil
+	return nil, nil
 }
 
 func (keycloakClient *KeycloakClient) DeleteOrganization(ctx context.Context, realmId, id string) error {

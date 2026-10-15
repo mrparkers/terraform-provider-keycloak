@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -11,6 +12,28 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/keycloak/terraform-provider-keycloak/keycloak"
 )
+
+func TestOrganizationIdentityProvidersAfterFailedUnlink(t *testing.T) {
+	t.Parallel()
+
+	old := []keycloak.OrganizationIdentityProvider{
+		{Alias: "kept", AutoMembership: true, MembershipType: "UNMANAGED"},
+		{Alias: "unlinked", AutoMembership: true, MembershipType: "UNMANAGED"},
+		{Alias: "refused", AutoMembership: true, MembershipType: "MANAGED"},
+	}
+	planned := []keycloak.OrganizationIdentityProvider{
+		{Alias: "kept", AutoMembership: false, MembershipType: "UNMANAGED"},
+		{Alias: "added", AutoMembership: true, MembershipType: "UNMANAGED"},
+	}
+
+	// The link that was not removed stays in state with its old settings, so that the next plan
+	// removes it again. The planned links stay as planned: a refresh corrects them.
+	got := organizationIdentityProvidersAfterFailedUnlink(planned, old, []string{"refused"})
+	want := []keycloak.OrganizationIdentityProvider{planned[0], planned[1], old[2]}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("expected %v, got %v", want, got)
+	}
+}
 
 func TestAccKeycloakOrganization_basic(t *testing.T) {
 	organizationName := acctest.RandomWithPrefix("tf-acc")
@@ -347,6 +370,10 @@ func TestAccKeycloakOrganization_domainRoutingValidation(t *testing.T) {
 			{
 				Config:      testKeycloakOrganization_managedIdentityProviderWithoutAutoMembership(organizationName, domainName, alias),
 				ExpectError: regexp.MustCompile("membership_type MANAGED requires auto_membership"),
+			},
+			{
+				Config:      testKeycloakOrganization_duplicateIdentityProvider(organizationName, domainName, alias),
+				ExpectError: regexp.MustCompile("is in more than one identity_provider block"),
 			},
 		},
 	})
@@ -930,6 +957,33 @@ resource "keycloak_organization" "organization" {
 	}
 }
 	`, testAccRealm.Realm, organizationName, alias, domainName)
+}
+
+func testKeycloakOrganization_duplicateIdentityProvider(organizationName, domainName, alias string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_organization" "organization" {
+	name  = "%s"
+	realm = data.keycloak_realm.realm.id
+
+	identity_provider {
+		alias           = "%s"
+		auto_membership = false
+	}
+
+	identity_provider {
+		alias           = "%s"
+		auto_membership = true
+	}
+
+	domain {
+		name = "%s"
+	}
+}
+	`, testAccRealm.Realm, organizationName, alias, alias, domainName)
 }
 
 func testKeycloakOrganization_sharedIdentityProvider(firstOrganizationName, secondOrganizationName, firstDomainName, secondDomainName, alias string) string {

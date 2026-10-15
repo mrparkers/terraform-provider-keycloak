@@ -163,7 +163,9 @@ func getOrganizationFromData(data *schema.ResourceData) (*keycloak.Organization,
 
 // validateKeycloakOrganizationIdentityProviders refuses at plan time what Keycloak refuses at apply
 // time: a domain routed to an identity provider that is not linked to the organization, and a
-// MANAGED link without auto membership.
+// MANAGED link without auto membership. It also refuses an alias in two identity_provider blocks: the
+// set keeps both when their settings differ, but Keycloak has one link per alias, so the resource would
+// never converge.
 func validateKeycloakOrganizationIdentityProviders() schema.CustomizeDiffFunc {
 	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 		// An alias that is not known yet, such as a computed one, skips the checks. Keycloak then
@@ -174,6 +176,9 @@ func validateKeycloakOrganizationIdentityProviders() schema.CustomizeDiffFunc {
 
 		identityProviderAliases := make(map[string]bool)
 		for _, identityProvider := range getOrganizationIdentityProvidersFromSet(d.Get("identity_provider").(*schema.Set)) {
+			if identityProviderAliases[identityProvider.Alias] {
+				return fmt.Errorf("identity provider \"%s\" is in more than one identity_provider block", identityProvider.Alias)
+			}
 			if identityProvider.MembershipType == "MANAGED" && !identityProvider.AutoMembership {
 				return fmt.Errorf("identity provider \"%s\": membership_type MANAGED requires auto_membership", identityProvider.Alias)
 			}
@@ -297,6 +302,26 @@ func removedOrganizationIdentityProviderAliases(identityProviders, oldIdentityPr
 	}
 
 	return removed
+}
+
+// organizationIdentityProvidersAfterFailedUnlink is the identity_provider value to keep in state when an
+// update could not remove some links: the planned links, and the old ones that were not removed. The SDK
+// otherwise saves the planned value, and a refresh reads only the links in state, so a link that failed
+// to be removed would never be removed again.
+func organizationIdentityProvidersAfterFailedUnlink(identityProviders, oldIdentityProviders []keycloak.OrganizationIdentityProvider, remainingAliases []string) []keycloak.OrganizationIdentityProvider {
+	remaining := make(map[string]bool, len(remainingAliases))
+	for _, alias := range remainingAliases {
+		remaining[alias] = true
+	}
+
+	kept := append([]keycloak.OrganizationIdentityProvider{}, identityProviders...)
+	for _, identityProvider := range oldIdentityProviders {
+		if remaining[identityProvider.Alias] {
+			kept = append(kept, identityProvider)
+		}
+	}
+
+	return kept
 }
 
 func resourceKeycloakOrganizationImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -424,9 +449,13 @@ func resourceKeycloakOrganizationUpdate(ctx context.Context, data *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	err = keycloakClient.UnlinkOrganizationIdentityProviders(ctx, Organization, removedOrganizationIdentityProviderAliases(identityProviders, oldIdentityProviders))
+	remainingAliases, err := keycloakClient.UnlinkOrganizationIdentityProviders(ctx, Organization, removedOrganizationIdentityProviderAliases(identityProviders, oldIdentityProviders))
 	if err != nil {
-		return diag.FromErr(err)
+		diags := diag.FromErr(err)
+		if setErr := setOrganizationIdentityProvidersData(data, organizationIdentityProvidersAfterFailedUnlink(identityProviders, oldIdentityProviders, remainingAliases)); setErr != nil {
+			diags = append(diags, diag.FromErr(setErr)...)
+		}
+		return diags
 	}
 
 	return diag.FromErr(setOrganizationData(data, Organization))
