@@ -88,3 +88,35 @@ func TestOpenidClientSecretReads(t *testing.T) {
 		})
 	}
 }
+
+// A missing value in one client's response must not inherit the previous secret.
+func TestOpenidClientsSecretResponseIsolation(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/admin/serverinfo":
+			fmt.Fprint(w, `{"systemInfo":{"version":"26.8.1"},"themes":{}}`)
+		case "/admin/realms/fixture/clients":
+			fmt.Fprint(w, `[{"id":"first","clientId":"first"},{"id":"second","clientId":"second"}]`)
+		case "/admin/realms/fixture/clients/first/client-secret":
+			fmt.Fprint(w, `{"value":"first-secret"}`)
+		case "/admin/realms/fixture/clients/second/client-secret":
+			fmt.Fprint(w, `{}`)
+		default:
+			t.Errorf("unexpected request %s", r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+	api := &KeycloakClient{baseUrl: server.URL, httpClient: server.Client(), clientCredentials: &ClientCredentials{AccessToken: "fixture-token", TokenType: "Bearer"}, accessTokenProvided: true}
+	clients, err := api.GetOpenidClients(context.Background(), "fixture", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(clients) != 2 {
+		t.Fatalf("got %d clients, want 2", len(clients))
+	}
+	if clients[0].ClientSecret != "first-secret" || clients[1].ClientSecret != "" {
+		t.Fatal("list response did not isolate each client's secret response")
+	}
+}
