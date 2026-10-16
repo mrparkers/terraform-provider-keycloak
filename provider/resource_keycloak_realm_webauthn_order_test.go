@@ -109,6 +109,10 @@ func TestRealmWebAuthnSignatureAlgorithmsOrdered(t *testing.T) {
 resource "keycloak_realm" "test" {
  realm = "ordered-test"
  %s { %s = %s }
+}
+data "keycloak_realm" "test" {
+ realm = keycloak_realm.test.realm
+ depends_on = [keycloak_realm.test]
 }`, server.URL, block, attribute, values)
 			}
 			ordered := config("signature_algorithms_ordered", `["RS256", "ES256"]`)
@@ -129,6 +133,18 @@ resource "keycloak_realm" "test" {
 							attribute := fmt.Sprintf("%s.0.signature_algorithms_ordered.%d", block, index)
 							if got, present := attributes[attribute]; !present || got != algorithm {
 								return fmt.Errorf("state %s = %q (present %t), want %q", attribute, got, present, algorithm)
+							}
+						}
+					}
+					if len(legacyState) == 0 {
+						dataAttributes := state.RootModule().Resources["data.keycloak_realm.test"].Primary.Attributes
+						if got := dataAttributes[countKey]; got != strconv.Itoa(len(want)) {
+							return fmt.Errorf("data source %s = %q, want %d", countKey, got, len(want))
+						}
+						for index, algorithm := range want {
+							attribute := fmt.Sprintf("%s.0.signature_algorithms_ordered.%d", block, index)
+							if got, present := dataAttributes[attribute]; !present || got != algorithm {
+								return fmt.Errorf("data source %s = %q (present %t), want %q", attribute, got, present, algorithm)
 							}
 						}
 					}
