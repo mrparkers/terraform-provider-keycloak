@@ -14,7 +14,7 @@ configuring a custom identity provider mapper via Terraform.
 
 ## Example Usage
 
-Following is provisioning a user attribute importer mapper through the extra_config. Name of the keys can be verified in keycloak source code:
+The following example provisions a user attribute importer mapper through `extra_config`. The key names can be verified in the Keycloak source code:
 * [user.attribute](https://github.com/keycloak/keycloak/blob/44956e10d00b79b0000583ed964130712abe5353/services/src/main/java/org/keycloak/broker/oidc/mappers/UserAttributeMapper.java#L52)
 * [claim](https://github.com/keycloak/keycloak/blob/44956e10d00b79b0000583ed964130712abe5353/services/src/main/java/org/keycloak/broker/oidc/mappers/AbstractClaimMapper.java#L41)
 
