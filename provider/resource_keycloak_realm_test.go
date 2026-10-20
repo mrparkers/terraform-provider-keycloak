@@ -735,9 +735,10 @@ func TestResolveMaxSecondaryAuthFailures(t *testing.T) {
 	})
 }
 
-// Deterministic (no TF_ACC, no live Keycloak) coverage for resolveAdminPermissionsEnabled, since
-// TestAccKeycloakRealm_admin_permissions_enabled skips entirely on Keycloak < 26.2.0 and so never
-// exercises the unsupported-version branch on any real server.
+// Covers both branches of resolveAdminPermissionsEnabled whatever the Keycloak version under test,
+// since TestAccKeycloakRealm_admin_permissions_enabled skips entirely on Keycloak < 26.2.0 and so
+// never exercises the unsupported-version branch. It does not need TF_ACC, but like every test in
+// this package it still goes through TestMain, which requires a reachable Keycloak.
 func TestResolveAdminPermissionsEnabled(t *testing.T) {
 	oldVersion, err := version.NewVersion("26.1.0")
 	if err != nil {
