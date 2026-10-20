@@ -83,3 +83,30 @@ resource "keycloak_realm" "realm" {
 		},
 	})
 }
+
+func TestAccKeycloakRealm_maxTemporaryLockoutsCanBeReset(t *testing.T) {
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	config := func(maximum int) string {
+		return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+ realm = %q
+ security_defenses {
+  brute_force_detection {
+   permanent_lockout = true
+   max_temporary_lockouts = %d
+  }
+ }
+}
+`, realmName, maximum)
+	}
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccCheckKeycloakRealmDestroy(),
+		Steps: []resource.TestStep{
+			{Config: config(3), Check: resource.TestCheckResourceAttr("keycloak_realm.realm", "security_defenses.0.brute_force_detection.0.max_temporary_lockouts", "3")},
+			{Config: config(0), Check: resource.TestCheckResourceAttr("keycloak_realm.realm", "security_defenses.0.brute_force_detection.0.max_temporary_lockouts", "0")},
+			{Config: config(0), PlanOnly: true, ExpectNonEmptyPlan: false},
+		},
+	})
+}
