@@ -92,7 +92,7 @@ type Realm struct {
 	BruteForceProtected          bool   `json:"bruteForceProtected"`
 	PermanentLockout             bool   `json:"permanentLockout"`
 	BruteForceStrategy           string `json:"bruteForceStrategy,omitempty"`       // Strategy to increase wait time
-	MaxTemporaryLockouts         int    `json:"maxTemporaryLockouts,omitempty"`     //Max Temporary Lockouts
+	MaxTemporaryLockouts         *int   `json:"maxTemporaryLockouts,omitempty"`     //Max Temporary Lockouts
 	FailureFactor                int    `json:"failureFactor"`                      //Max Login Failures
 	MaxSecondaryAuthFailures     *int   `json:"maxSecondaryAuthFailures,omitempty"` //Max Secondary Auth Failures (requires Keycloak >= 26.6.0)
 	WaitIncrementSeconds         int    `json:"waitIncrementSeconds"`
@@ -232,7 +232,41 @@ func (keycloakClient *KeycloakClient) GetRealmKeys(ctx context.Context, name str
 }
 
 func (keycloakClient *KeycloakClient) UpdateRealm(ctx context.Context, realm *Realm) error {
-	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s", realm.Realm), realm)
+	supportsAdminPermissions, err := keycloakClient.VersionIsGreaterThanOrEqualTo(ctx, Version_26_1)
+	if err != nil {
+		return err
+	}
+
+	// These zero, false, and empty values reset existing realm settings. Keep them explicit
+	// on updates while retaining omitted creation values and server defaults.
+	payload := struct {
+		*Realm
+		SsoSessionIdleTimeoutRememberMe  int    `json:"ssoSessionIdleTimeoutRememberMe"`
+		SsoSessionMaxLifespanRememberMe  int    `json:"ssoSessionMaxLifespanRememberMe"`
+		OfflineSessionMaxLifespanEnabled bool   `json:"offlineSessionMaxLifespanEnabled"`
+		LoginTheme                       string `json:"loginTheme"`
+		AccountTheme                     string `json:"accountTheme"`
+		AdminTheme                       string `json:"adminTheme"`
+		EmailTheme                       string `json:"emailTheme"`
+		OrganizationsEnabled             bool   `json:"organizationsEnabled"`
+		AdminPermissionsEnabled          *bool  `json:"adminPermissionsEnabled,omitempty"`
+	}{
+		Realm:                            realm,
+		SsoSessionIdleTimeoutRememberMe:  realm.SsoSessionIdleTimeoutRememberMe,
+		SsoSessionMaxLifespanRememberMe:  realm.SsoSessionMaxLifespanRememberMe,
+		OfflineSessionMaxLifespanEnabled: realm.OfflineSessionMaxLifespanEnabled,
+		LoginTheme:                       realm.LoginTheme,
+		AccountTheme:                     realm.AccountTheme,
+		AdminTheme:                       realm.AdminTheme,
+		EmailTheme:                       realm.EmailTheme,
+		OrganizationsEnabled:             realm.OrganizationsEnabled,
+	}
+	// Keycloak 26.0 rejects even a false adminPermissionsEnabled field. Keep its
+	// previous omission behavior there, without hiding explicitly enabled values.
+	if supportsAdminPermissions || realm.AdminPermissionsEnabled {
+		payload.AdminPermissionsEnabled = &realm.AdminPermissionsEnabled
+	}
+	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s", realm.Realm), payload)
 }
 
 func (keycloakClient *KeycloakClient) DeleteRealm(ctx context.Context, name string) error {
