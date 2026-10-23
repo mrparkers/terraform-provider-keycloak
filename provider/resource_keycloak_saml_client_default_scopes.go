@@ -15,6 +15,7 @@ func resourceKeycloakSamlClientDefaultScopes() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceKeycloakSamldClientDefaultScopesReconcile,
 		ReadContext:   resourceKeycloakSamlClientDefaultScopesRead,
+		CustomizeDiff: claimScopesOnPlan("default", "default_scopes", samlClientScopeOwnerKeyOnPlan),
 		DeleteContext: resourceKeycloakSamlClientDefaultScopesDelete,
 		UpdateContext: resourceKeycloakSamldClientDefaultScopesReconcile,
 		Importer: &schema.ResourceImporter{
