@@ -210,7 +210,26 @@ func (keycloakClient *KeycloakClient) AttachSamlClientOptionalScopes(ctx context
 }
 
 func (keycloakClient *KeycloakClient) detachSamlClientScopes(ctx context.Context, realmId, clientId, t string, scopeNames []string) error {
-	allSamlClientScopes, err := keycloakClient.ListSamlClientScopesWithFilter(ctx, realmId, IncludeSamlClientScopesMatchingNames(scopeNames))
+	// Keycloak ignores the scope type on DELETE and removes the assignment whatever its type, so only detach scopes
+	// that are currently attached as this type to avoid undoing a scope that has since moved to the other type.
+	currentScopes, err := keycloakClient.getSamlClientScopes(ctx, realmId, clientId, t)
+	if err != nil {
+		return err
+	}
+
+	currentNames := make(map[string]bool, len(currentScopes))
+	for _, s := range currentScopes {
+		currentNames[s.Name] = true
+	}
+
+	var namesToDetach []string
+	for _, name := range scopeNames {
+		if currentNames[name] {
+			namesToDetach = append(namesToDetach, name)
+		}
+	}
+
+	allSamlClientScopes, err := keycloakClient.ListSamlClientScopesWithFilter(ctx, realmId, IncludeSamlClientScopesMatchingNames(namesToDetach))
 	if err != nil {
 		return err
 	}
