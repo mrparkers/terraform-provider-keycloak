@@ -373,6 +373,53 @@ func TestAccKeycloakOpenidClientDefaultScopes_conflictWithAppliedResourceFailsPl
 	})
 }
 
+// A scope that is moved to optional outside of Terraform after the default scopes resource was applied is moved back
+// to default by the next apply, and the optional scopes resource does not take it over.
+func TestAccKeycloakOpenidClientDefaultScopes_overridesOptionalAssignmentAfterApply(t *testing.T) {
+	t.Parallel()
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
+
+	defaultWithScope := append(slices.Clone(preAssignedDefaultClientScopes), clientScope)
+	config := testKeycloakOpenidClientScopes_defaultAndOptional(client, clientScope, defaultWithScope, getPreAssignedOptionalClientScopes())
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+			},
+			{
+				PreConfig: func() {
+					openidClient, err := keycloakClient.GetOpenidClientByClientId(testCtx, testAccRealm.Realm, client)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					err = keycloakClient.AttachOpenidClientOptionalScopes(testCtx, testAccRealm.Realm, openidClient.Id, []string{clientScope})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					optionalScopes, err := keycloakClient.GetOpenidClientOptionalScopes(testCtx, testAccRealm.Realm, openidClient.Id)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if !slices.ContainsFunc(optionalScopes, func(s *keycloak.OpenidClientScope) bool { return s.Name == clientScope }) {
+						t.Fatalf("expected %s to be moved to optional outside of terraform", clientScope)
+					}
+				},
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", defaultWithScope),
+					testAccCheckKeycloakOpenidClientOptionalScopeIsNotAttached("keycloak_openid_client.client", clientScope),
+				),
+			},
+		},
+	})
+}
+
 // The default and optional scopes resources are not ordered against each other, so moving a scope between them has to
 // work whichever resource reconciles first.
 func TestAccKeycloakOpenidClientDefaultScopes_moveBetweenResourcesWithoutDependency(t *testing.T) {
