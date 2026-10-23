@@ -12,6 +12,7 @@ func resourceKeycloakRealmOptionalClientScopes() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceKeycloakRealmOptionalClientScopesReconcile,
 		ReadContext:   resourceKeycloakRealmOptionalClientScopesRead,
+		CustomizeDiff: claimScopesOnPlan("optional", "optional_scopes", realmScopeOwnerKeyOnPlan),
 		DeleteContext: resourceKeycloakRealmOptionalClientScopesDelete,
 		UpdateContext: resourceKeycloakRealmOptionalClientScopesReconcile,
 		Importer: &schema.ResourceImporter{
