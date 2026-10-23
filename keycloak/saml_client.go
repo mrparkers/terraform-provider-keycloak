@@ -179,20 +179,43 @@ func (keycloakClient *KeycloakClient) attachSamlClientScopes(ctx context.Context
 		}
 	}
 
+	currentScopes, err := keycloakClient.getSamlClientScopes(ctx, realmId, clientId, t)
+	if err != nil {
+		return err
+	}
+
 	// Keycloak does not allow a client scope to be attached as a default and an optional scope at the same time, so
 	// detach it from the conflicting type first, mirroring the behavior of the Keycloak admin console.
-	conflictingType := "default"
-	if t == "default" {
-		conflictingType = "optional"
+	conflictingType := otherScopeType(t)
+	conflictingScopes, err := keycloakClient.getSamlClientScopes(ctx, realmId, clientId, conflictingType)
+	if err != nil {
+		return err
+	}
+
+	attached := make(map[string]bool, len(currentScopes))
+	for _, s := range currentScopes {
+		attached[s.Id] = true
+	}
+	conflicting := make(map[string]bool, len(conflictingScopes))
+	for _, s := range conflictingScopes {
+		conflicting[s.Id] = true
 	}
 
 	for _, samlClientScope := range allSamlClientScopes {
-		err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, conflictingType, samlClientScope.Id), nil)
-		if err != nil && !ErrorIs404(err) {
-			return err
+		if attached[samlClientScope.Id] {
+			continue
 		}
 
-		err = keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, samlClientScope.Id), nil)
+		// Keycloak ignores the scope type on DELETE, so only delete scopes that are attached as the conflicting type.
+		// Deleting any other scope would detach it whatever its type.
+		if conflicting[samlClientScope.Id] {
+			err := keycloakClient.delete(ctx, fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, conflictingType, samlClientScope.Id), nil)
+			if err != nil && !ErrorIs404(err) {
+				return err
+			}
+		}
+
+		err := keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/clients/%s/%s-client-scopes/%s", realmId, clientId, t, samlClientScope.Id), nil)
 		if err != nil {
 			return err
 		}

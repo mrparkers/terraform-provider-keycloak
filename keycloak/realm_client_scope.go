@@ -64,31 +64,61 @@ func (keycloakClient *KeycloakClient) resolveAndHandleClientScopes(ctx context.C
 	return nil
 }
 
-func (keycloakClient *KeycloakClient) markClientScopeAs(ctx context.Context, realmId, scopeId, t string) error {
-	// Keycloak does not allow a client scope to be a realm default and a realm optional scope at the same time, so
-	// remove it from the conflicting type first, mirroring the behavior of the Keycloak admin console.
-	conflictingType := "default"
-	if t == "default" {
-		conflictingType = "optional"
-	}
-
-	if err := keycloakClient.unmarkClientScopeAs(ctx, realmId, scopeId, conflictingType); err != nil {
+func (keycloakClient *KeycloakClient) markClientScopesAs(ctx context.Context, realmId string, scopeNames []string, t string) error {
+	scopeIds, err := keycloakClient.resolveClientScopeNamesIntoIds(ctx, realmId, scopeNames)
+	if err != nil {
 		return err
 	}
 
-	return keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/default-%s-client-scopes/%s", realmId, t, scopeId), nil)
+	currentScopes, err := keycloakClient.getRealmClientScopesOfType(ctx, realmId, t)
+	if err != nil {
+		return err
+	}
+
+	// Keycloak does not allow a client scope to be a realm default and a realm optional scope at the same time, so
+	// remove it from the conflicting type first, mirroring the behavior of the Keycloak admin console.
+	conflictingType := otherScopeType(t)
+	conflictingScopes, err := keycloakClient.getRealmClientScopesOfType(ctx, realmId, conflictingType)
+	if err != nil {
+		return err
+	}
+
+	marked := make(map[string]bool, len(currentScopes))
+	for _, s := range currentScopes {
+		marked[s.Id] = true
+	}
+	conflicting := make(map[string]bool, len(conflictingScopes))
+	for _, s := range conflictingScopes {
+		conflicting[s.Id] = true
+	}
+
+	for _, scopeId := range scopeIds {
+		if marked[scopeId] {
+			continue
+		}
+
+		// Keycloak ignores the type on DELETE, so only unmark scopes that are marked as the conflicting type.
+		// Unmarking any other scope would unmark it whatever its type.
+		if conflicting[scopeId] {
+			if err := keycloakClient.unmarkClientScopeAs(ctx, realmId, scopeId, conflictingType); err != nil {
+				return err
+			}
+		}
+
+		if err := keycloakClient.put(ctx, fmt.Sprintf("/realms/%s/default-%s-client-scopes/%s", realmId, t, scopeId), nil); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (keycloakClient *KeycloakClient) MarkClientScopesAsRealmDefault(ctx context.Context, realmId string, scopeNames []string) error {
-	return keycloakClient.resolveAndHandleClientScopes(ctx, realmId, scopeNames, func(ctx context.Context, realmId, scopeId string) error {
-		return keycloakClient.markClientScopeAs(ctx, realmId, scopeId, "default")
-	})
+	return keycloakClient.markClientScopesAs(ctx, realmId, scopeNames, "default")
 }
 
 func (keycloakClient *KeycloakClient) MarkClientScopesAsRealmOptional(ctx context.Context, realmId string, scopeNames []string) error {
-	return keycloakClient.resolveAndHandleClientScopes(ctx, realmId, scopeNames, func(ctx context.Context, realmId, scopeId string) error {
-		return keycloakClient.markClientScopeAs(ctx, realmId, scopeId, "optional")
-	})
+	return keycloakClient.markClientScopesAs(ctx, realmId, scopeNames, "optional")
 }
 
 func (keycloakClient *KeycloakClient) unmarkClientScopeAs(ctx context.Context, realmId, scopeId, t string) error {
