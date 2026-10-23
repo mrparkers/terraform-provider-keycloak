@@ -377,7 +377,26 @@ func (keycloakClient *KeycloakClient) AttachOpenidClientOptionalScopes(ctx conte
 }
 
 func (keycloakClient *KeycloakClient) detachOpenidClientScopes(ctx context.Context, realmId, clientId, t string, scopeNames []string) error {
-	allOpenidClientScopes, err := keycloakClient.ListOpenidClientScopesWithFilter(ctx, realmId, IncludeOpenidClientScopesMatchingNames(scopeNames))
+	// Keycloak ignores the scope type on DELETE and removes the assignment whatever its type, so only detach scopes
+	// that are currently attached as this type to avoid undoing a scope that has since moved to the other type.
+	currentScopes, err := keycloakClient.getOpenidClientScopes(ctx, realmId, clientId, t)
+	if err != nil {
+		return err
+	}
+
+	currentNames := make(map[string]bool, len(currentScopes))
+	for _, s := range currentScopes {
+		currentNames[s.Name] = true
+	}
+
+	var namesToDetach []string
+	for _, name := range scopeNames {
+		if currentNames[name] {
+			namesToDetach = append(namesToDetach, name)
+		}
+	}
+
+	allOpenidClientScopes, err := keycloakClient.ListOpenidClientScopesWithFilter(ctx, realmId, IncludeOpenidClientScopesMatchingNames(namesToDetach))
 	if err != nil {
 		return err
 	}
