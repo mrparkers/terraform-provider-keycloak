@@ -197,6 +197,48 @@ func TestAccKeycloakRealmDefaultClientScopes_conflictWithAppliedResourceFailsPla
 	})
 }
 
+// A scope that is moved to optional outside of Terraform after the default scopes resource was applied is moved back
+// to default by the next apply, and the optional scopes resource does not take it over.
+func TestAccKeycloakRealmDefaultClientScopes_overridesOptionalAssignmentAfterApply(t *testing.T) {
+	t.Parallel()
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
+
+	defaultWithScope := append(slices.Clone(preAssignedRealmDefaultClientScopes), clientScope)
+	config := testKeycloakRealmScopes_defaultAndOptional(realmName, clientScope, defaultWithScope, preAssignedRealmOptionalClientScopes)
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+			},
+			{
+				PreConfig: func() {
+					err := keycloakClient.MarkClientScopesAsRealmOptional(testCtx, realmName, []string{clientScope})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					optionalScopes, err := keycloakClient.GetRealmOptionalClientScopes(testCtx, realmName)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if !slices.ContainsFunc(optionalScopes, func(s *keycloak.OpenidClientScope) bool { return s.Name == clientScope }) {
+						t.Fatalf("expected %s to be moved to optional outside of terraform", clientScope)
+					}
+				},
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmHasDefaultScopes("keycloak_realm_default_client_scopes.default_scopes", slices.Clone(defaultWithScope)),
+					testAccCheckKeycloakRealmHasOptionalScopes("keycloak_realm_optional_client_scopes.optional_scopes", slices.Clone(preAssignedRealmOptionalClientScopes)),
+				),
+			},
+		},
+	})
+}
+
 // The default and optional scopes resources are not ordered against each other, so moving a scope between them has to
 // work whichever resource reconciles first.
 func TestAccKeycloakRealmDefaultClientScopes_moveBetweenResourcesWithoutDependency(t *testing.T) {
