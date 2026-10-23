@@ -44,6 +44,7 @@ type KeycloakClient struct {
 	accessTokenProvided bool
 	keycloakVersion     string
 	Mutex               *mutex.KeyValue
+	scopeClaims         scopeClaims
 
 	// fgapv2Cached memoises the FGAPv2 feature-flag lookup, which is a
 	// server-level setting that does not change during a Terraform run.
