@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 
@@ -647,6 +648,40 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 	default_scopes = %s
 }
 	`, testAccRealm.Realm, client, clientScopeResources.String(), arrayOfStringsForTerraformResource(attachedClientScopesInterpolated))
+}
+
+// Keycloak removes a scope assignment whatever its type, so detaching a stale optional scope must not remove the scope
+// once it has moved to default.
+func TestAccKeycloakOpenidClientDefaultScopes_staleOptionalDetachKeepsDefaultScope(t *testing.T) {
+	t.Parallel()
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClientOptionalScopes_noOptionalScopes(client, clientScope),
+				Check: func(s *terraform.State) error {
+					openidClient, err := keycloakClient.GetOpenidClientByClientId(testCtx, testAccRealm.Realm, client)
+					if err != nil {
+						return err
+					}
+
+					if err = keycloakClient.AttachOpenidClientDefaultScopes(testCtx, testAccRealm.Realm, openidClient.Id, []string{clientScope}); err != nil {
+						return err
+					}
+
+					if err = keycloakClient.DetachOpenidClientOptionalScopes(testCtx, testAccRealm.Realm, openidClient.Id, []string{clientScope}); err != nil {
+						return err
+					}
+
+					return testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client.client", append(slices.Clone(preAssignedDefaultClientScopes), clientScope))(s)
+				},
+			},
+		},
+	})
 }
 
 func testKeycloakOpenidClientScopes_defaultAndOptional(client, clientScope string, defaultScopes, optionalScopes []string) string {
