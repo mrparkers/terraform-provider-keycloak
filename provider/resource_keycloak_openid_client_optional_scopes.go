@@ -14,6 +14,7 @@ func resourceKeycloakOpenidClientOptionalScopes() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceKeycloakOpenidClientOptionalScopesReconcile,
 		ReadContext:   resourceKeycloakOpenidClientOptionalScopesRead,
+		CustomizeDiff: claimScopesOnPlan("optional", "optional_scopes", openidClientScopeOwnerKeyOnPlan),
 		DeleteContext: resourceKeycloakOpenidClientOptionalScopesDelete,
 		UpdateContext: resourceKeycloakOpenidClientOptionalScopesReconcile,
 		Importer: &schema.ResourceImporter{

@@ -14,6 +14,7 @@ func resourceKeycloakOpenidClientDefaultScopes() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceKeycloakOpenidClientDefaultScopesReconcile,
 		ReadContext:   resourceKeycloakOpenidClientDefaultScopesRead,
+		CustomizeDiff: claimScopesOnPlan("default", "default_scopes", openidClientScopeOwnerKeyOnPlan),
 		DeleteContext: resourceKeycloakOpenidClientDefaultScopesDelete,
 		UpdateContext: resourceKeycloakOpenidClientDefaultScopesReconcile,
 		Importer: &schema.ResourceImporter{
