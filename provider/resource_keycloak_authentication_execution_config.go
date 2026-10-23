@@ -63,12 +63,12 @@ func getAuthenticationExecutionConfigFromData(data *schema.ResourceData) *keyclo
 // value Keycloak masked (secret config properties are returned as "**********" since Keycloak 26.6.7 / 26.7.3)
 // is replaced by the value that is already known from the Terraform config or state. Keycloak interprets the
 // masked value on update as "keep the stored value", so keeping the known value does not break updates and
-// avoids a perpetual diff. A value that is not known (e.g. right after an import) is kept masked.
+// avoids a perpetual diff. A value that is not known at all (e.g. right after an import) is kept masked.
 func mergeMaskedAuthenticationExecutionConfig(remote map[string]string, known map[string]interface{}) map[string]string {
 	merged := make(map[string]string, len(remote))
 	for key, value := range remote {
 		if value == keycloakMaskedSecret {
-			if knownValue, ok := known[key].(string); ok && knownValue != "" {
+			if knownValue, ok := known[key].(string); ok {
 				value = knownValue
 			}
 		}
