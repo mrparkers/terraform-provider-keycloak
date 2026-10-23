@@ -70,3 +70,13 @@ func TestScopeClaims_failedClaimIsNotRecorded(t *testing.T) {
 		t.Fatalf("unexpected error: %s", err)
 	}
 }
+
+func TestScopeClaims_newRunStartsWithoutClaims(t *testing.T) {
+	c := &KeycloakClient{}
+	owner := RealmScopeOwnerKey("realm")
+
+	_ = c.ClaimScopes(owner, "default", []string{"email"})
+	if err := c.ForNewRun().ClaimScopes(owner, "optional", []string{"email"}); err != nil {
+		t.Fatalf("a new run must not see the claims of an earlier run: %s", err)
+	}
+}

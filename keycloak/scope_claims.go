@@ -60,6 +60,28 @@ func (keycloakClient *KeycloakClient) ClaimScopes(ownerKey, t string, scopeNames
 	return nil
 }
 
+// ForNewRun returns a client that shares the connection, authentication and locks of keycloakClient, but has its own
+// scope claims. Scope claims must only ever reflect a single Terraform run, which a provider that reuses a client
+// across runs gets by configuring each run with ForNewRun.
+func (keycloakClient *KeycloakClient) ForNewRun() *KeycloakClient {
+	return &KeycloakClient{
+		baseUrl:             keycloakClient.baseUrl,
+		authUrl:             keycloakClient.authUrl,
+		realm:               keycloakClient.realm,
+		clientCredentials:   keycloakClient.clientCredentials,
+		httpClient:          keycloakClient.httpClient,
+		initialLogin:        keycloakClient.initialLogin,
+		userAgent:           keycloakClient.userAgent,
+		version:             keycloakClient.version,
+		additionalHeaders:   keycloakClient.additionalHeaders,
+		debug:               keycloakClient.debug,
+		redHatSSO:           keycloakClient.redHatSSO,
+		accessTokenProvided: keycloakClient.accessTokenProvided,
+		keycloakVersion:     keycloakClient.keycloakVersion,
+		Mutex:               keycloakClient.Mutex,
+	}
+}
+
 // ReleaseScopes removes the claim of the given type for the scope owner.
 func (keycloakClient *KeycloakClient) ReleaseScopes(ownerKey, t string) {
 	c := &keycloakClient.scopeClaims
