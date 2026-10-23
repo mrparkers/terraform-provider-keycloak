@@ -164,6 +164,39 @@ func TestAccKeycloakRealmDefaultClientScopes_conflictWithOptionalScopesResource(
 	})
 }
 
+// Adding a scope to the optional scopes resource that an already applied default scopes resource reconciles must fail
+// the plan, even though the default scopes resource itself does not change.
+func TestAccKeycloakRealmDefaultClientScopes_conflictWithAppliedResourceFailsPlan(t *testing.T) {
+	t.Parallel()
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
+
+	defaultWithScope := append(slices.Clone(preAssignedRealmDefaultClientScopes), clientScope)
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealmScopes_defaultAndOptional(realmName, clientScope, defaultWithScope, preAssignedRealmOptionalClientScopes),
+			},
+			{
+				Config: testKeycloakRealmScopes_defaultAndOptional(realmName, clientScope, defaultWithScope,
+					append(slices.Clone(preAssignedRealmOptionalClientScopes), clientScope)),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(fmt.Sprintf("scopes \\[%s\\] are configured as both default and optional scopes", clientScope)),
+			},
+			{
+				Config: testKeycloakRealmScopes_defaultAndOptional(realmName, clientScope, defaultWithScope, preAssignedRealmOptionalClientScopes),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmHasDefaultScopes("keycloak_realm_default_client_scopes.default_scopes", slices.Clone(defaultWithScope)),
+					testAccCheckKeycloakRealmHasOptionalScopes("keycloak_realm_optional_client_scopes.optional_scopes", slices.Clone(preAssignedRealmOptionalClientScopes)),
+				),
+			},
+		},
+	})
+}
+
 // The default and optional scopes resources are not ordered against each other, so moving a scope between them has to
 // work whichever resource reconciles first.
 func TestAccKeycloakRealmDefaultClientScopes_moveBetweenResourcesWithoutDependency(t *testing.T) {
