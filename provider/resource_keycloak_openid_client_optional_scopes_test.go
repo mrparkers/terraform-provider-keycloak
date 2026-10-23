@@ -273,22 +273,33 @@ func TestAccKeycloakOpenidClientOptionalScopes_validateDuplicateScopeAssignment(
 	client := acctest.RandomWithPrefix("tf-acc")
 	clientScope := acctest.RandomWithPrefix("tf-acc")
 
-	defaultClientScopes := append(preAssignedDefaultClientScopes, clientScope)
 	expectedOptionalClientScopes := append(getPreAssignedOptionalClientScopes(), clientScope)
 
 	resource.Test(t, resource.TestCase{
 		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
 		PreCheck:                 func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
-			// attach default scopes, including the custom scope
 			{
-				Config: testKeycloakOpenidClientDefaultScopes_basic(client, clientScope),
-				Check:  testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", defaultClientScopes),
+				Config: testKeycloakOpenidClientDefaultScopes_noDefaultScopes(client, clientScope),
 			},
-			// move the custom scope from default to optional; the default scopes resource is dropped so only one resource owns the scope
+			// attach the custom scope as default outside of terraform, so no resource owns it and cleans it up
 			{
+				PreConfig: func() {
+					openidClient, err := keycloakClient.GetOpenidClientByClientId(testCtx, testAccRealm.Realm, client)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					err = keycloakClient.AttachOpenidClientDefaultScopes(testCtx, testAccRealm.Realm, openidClient.Id, []string{clientScope})
+					if err != nil {
+						t.Fatal(err)
+					}
+				},
 				Config: testKeycloakOpenidClientOptionalScopes_duplicateScopeAssignment(client, clientScope),
-				Check:  testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", expectedOptionalClientScopes),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasOptionalScopes("keycloak_openid_client_optional_scopes.optional_scopes", expectedOptionalClientScopes),
+					testAccCheckKeycloakOpenidClientDefaultScopeIsNotAttached("keycloak_openid_client.client", clientScope),
+				),
 			},
 		},
 	})
