@@ -13,7 +13,7 @@ import (
 func resourceKeycloakOpenidClientDefaultScopes() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceKeycloakOpenidClientDefaultScopesReconcile,
-		ReadContext:   resourceKeycloakOpenidClientDefaultScopesRead,
+		ReadContext:   clearScopeClaimOnRefresh(openidClientScopeOwnerKey, "default", resourceKeycloakOpenidClientDefaultScopesRead),
 		DeleteContext: resourceKeycloakOpenidClientDefaultScopesDelete,
 		UpdateContext: resourceKeycloakOpenidClientDefaultScopesReconcile,
 		Importer: &schema.ResourceImporter{

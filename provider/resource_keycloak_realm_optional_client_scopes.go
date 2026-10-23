@@ -11,7 +11,7 @@ import (
 func resourceKeycloakRealmOptionalClientScopes() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceKeycloakRealmOptionalClientScopesReconcile,
-		ReadContext:   resourceKeycloakRealmOptionalClientScopesRead,
+		ReadContext:   clearScopeClaimOnRefresh(realmScopeOwnerKey, "optional", resourceKeycloakRealmOptionalClientScopesRead),
 		DeleteContext: resourceKeycloakRealmOptionalClientScopesDelete,
 		UpdateContext: resourceKeycloakRealmOptionalClientScopesReconcile,
 		Importer: &schema.ResourceImporter{
