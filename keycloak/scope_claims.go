@@ -27,7 +27,7 @@ func otherScopeType(t string) string {
 // owner, replacing any previous claim of that type. It returns an error, without recording the claim, if the other
 // type has claimed any of the same scopes.
 func (keycloakClient *KeycloakClient) ClaimScopes(ownerKey, t string, scopeNames []string) error {
-	c := &keycloakClient.scopeClaims
+	c := keycloakClient.scopeClaims
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -60,31 +60,19 @@ func (keycloakClient *KeycloakClient) ClaimScopes(ownerKey, t string, scopeNames
 	return nil
 }
 
-// ForNewRun returns a client that shares the connection, authentication and locks of keycloakClient, but has its own
-// scope claims. Scope claims must only ever reflect a single Terraform run, which a provider that reuses a client
+// ForNewRun returns a copy of keycloakClient that shares everything with it, including the connection,
+// authentication, locks and server caches, except for the scope claims, which are empty. Scope claims must only ever reflect a single Terraform run, which a provider that reuses a client
 // across runs gets by configuring each run with ForNewRun.
 func (keycloakClient *KeycloakClient) ForNewRun() *KeycloakClient {
-	return &KeycloakClient{
-		baseUrl:             keycloakClient.baseUrl,
-		authUrl:             keycloakClient.authUrl,
-		realm:               keycloakClient.realm,
-		clientCredentials:   keycloakClient.clientCredentials,
-		httpClient:          keycloakClient.httpClient,
-		initialLogin:        keycloakClient.initialLogin,
-		userAgent:           keycloakClient.userAgent,
-		version:             keycloakClient.version,
-		additionalHeaders:   keycloakClient.additionalHeaders,
-		debug:               keycloakClient.debug,
-		redHatSSO:           keycloakClient.redHatSSO,
-		accessTokenProvided: keycloakClient.accessTokenProvided,
-		keycloakVersion:     keycloakClient.keycloakVersion,
-		Mutex:               keycloakClient.Mutex,
-	}
+	c := *keycloakClient
+	c.scopeClaims = &scopeClaims{}
+
+	return &c
 }
 
 // ReleaseScopes removes the claim of the given type for the scope owner.
 func (keycloakClient *KeycloakClient) ReleaseScopes(ownerKey, t string) {
-	c := &keycloakClient.scopeClaims
+	c := keycloakClient.scopeClaims
 	c.lock.Lock()
 	defer c.lock.Unlock()
 

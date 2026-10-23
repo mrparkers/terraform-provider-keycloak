@@ -6,7 +6,7 @@ import (
 )
 
 func TestScopeClaims_conflictingTypesError(t *testing.T) {
-	c := &KeycloakClient{}
+	c := (&KeycloakClient{}).ForNewRun()
 	owner := OpenidClientScopeOwnerKey("realm", "client")
 
 	if err := c.ClaimScopes(owner, "default", []string{"email", "profile"}); err != nil {
@@ -23,7 +23,7 @@ func TestScopeClaims_conflictingTypesError(t *testing.T) {
 }
 
 func TestScopeClaims_sameTypeReplacesClaim(t *testing.T) {
-	c := &KeycloakClient{}
+	c := (&KeycloakClient{}).ForNewRun()
 	owner := RealmScopeOwnerKey("realm")
 
 	if err := c.ClaimScopes(owner, "default", []string{"email"}); err != nil {
@@ -39,7 +39,7 @@ func TestScopeClaims_sameTypeReplacesClaim(t *testing.T) {
 }
 
 func TestScopeClaims_releaseAndOwnerIsolation(t *testing.T) {
-	c := &KeycloakClient{}
+	c := (&KeycloakClient{}).ForNewRun()
 	owner := SamlClientScopeOwnerKey("realm", "client")
 
 	if err := c.ClaimScopes(owner, "default", []string{"email"}); err != nil {
@@ -57,7 +57,7 @@ func TestScopeClaims_releaseAndOwnerIsolation(t *testing.T) {
 }
 
 func TestScopeClaims_failedClaimIsNotRecorded(t *testing.T) {
-	c := &KeycloakClient{}
+	c := (&KeycloakClient{}).ForNewRun()
 	owner := RealmScopeOwnerKey("realm")
 
 	_ = c.ClaimScopes(owner, "default", []string{"email"})
@@ -72,7 +72,7 @@ func TestScopeClaims_failedClaimIsNotRecorded(t *testing.T) {
 }
 
 func TestScopeClaims_newRunStartsWithoutClaims(t *testing.T) {
-	c := &KeycloakClient{}
+	c := (&KeycloakClient{}).ForNewRun()
 	owner := RealmScopeOwnerKey("realm")
 
 	_ = c.ClaimScopes(owner, "default", []string{"email"})
