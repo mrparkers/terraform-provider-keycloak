@@ -15,7 +15,7 @@ By default, Keycloak sets the `role_list` scope as default scope for every newly
 for the first time and do not include this scope, a following run of `terraform plan` will result in changes.
 
 Additionally, if a scope is set as optional, this resource will remove and re-add it as a default scope.
-Warning: Defining an optional and a default resource for the same scope is undefined behavior.
+Note: this provider has no resource for managing optional scopes of SAML clients, so there is no resource to conflict with. Scopes attached as optional outside of Terraform are moved to default.
 
 ## Example Usage
 

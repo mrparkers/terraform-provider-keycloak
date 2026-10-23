@@ -10,7 +10,7 @@ Note that this resource attempts to be an **authoritative** source over the opti
 so any Keycloak defaults and manual adjustments will be overwritten.
 
 Additionally, if a scope is set as default, this resource will remove and re-add it as an optional scope.
-Warning: Defining an optional and a default resource for the same scope is undefined behavior.
+Warning: Configuring the same scope in both this resource and `keycloak_realm_default_client_scopes` for the same realm is an error, and the apply fails with `scopes [...] are configured as both default and optional scopes`. The check covers resources applied in the same Terraform run.
 
 
 ## Example Usage
