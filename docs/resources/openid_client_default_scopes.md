@@ -18,7 +18,7 @@ created client. If you create this resource for the first time and do not includ
 `terraform plan` will result in changes.
 
 Additionally, if a scope is set as optional, this resource will remove and re-add it as a default scope.
-Warning: Configuring the same scope in both this resource and `keycloak_openid_client_optional_scopes` for the same client is an error, and the apply fails with `scopes [...] are configured as both default and optional scopes`. The check covers resources applied in the same Terraform run.
+Warning: Configuring the same scope in both this resource and `keycloak_openid_client_optional_scopes` for the same client is an error, and the plan fails with `scopes [...] are configured as both default and optional scopes`. The check covers resources in the same Terraform configuration. If the client is created in the same run, the error is reported during apply instead.
 
 ## Example Usage
 
