@@ -73,6 +73,8 @@ func resourceKeycloakOpenidClientOptionalScopesReconcile(ctx context.Context, da
 	clientId := data.Get("client_id").(string)
 	tfOpenidClientOptionalScopes := data.Get("optional_scopes").(*schema.Set)
 
+	defer keycloakClient.LockScopeOwner(keycloak.OpenidClientScopeOwnerKey(realmId, clientId))()
+
 	keycloakOpenidClientOptionalScopes, err := keycloakClient.GetOpenidClientOptionalScopes(ctx, realmId, clientId)
 	if err != nil {
 		if keycloak.ErrorIs404(err) {
@@ -116,6 +118,8 @@ func resourceKeycloakOpenidClientOptionalScopesDelete(ctx context.Context, data 
 	realmId := data.Get("realm_id").(string)
 	clientId := data.Get("client_id").(string)
 	optionalScopes := data.Get("optional_scopes").(*schema.Set)
+
+	defer keycloakClient.LockScopeOwner(keycloak.OpenidClientScopeOwnerKey(realmId, clientId))()
 
 	return diag.FromErr(keycloakClient.DetachOpenidClientOptionalScopes(ctx, realmId, clientId, interfaceSliceToStringSlice(optionalScopes.List())))
 }
