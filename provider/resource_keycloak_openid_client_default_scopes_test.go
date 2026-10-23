@@ -339,6 +339,40 @@ func TestAccKeycloakOpenidClientDefaultScopes_conflictWithOptionalScopesResource
 	})
 }
 
+// Adding a scope to the optional scopes resource that an already applied default scopes resource reconciles must fail
+// the plan, even though the default scopes resource itself does not change.
+func TestAccKeycloakOpenidClientDefaultScopes_conflictWithAppliedResourceFailsPlan(t *testing.T) {
+	t.Parallel()
+	client := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
+
+	defaultWithScope := append(slices.Clone(preAssignedDefaultClientScopes), clientScope)
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakOpenidClientScopes_defaultAndOptional(client, clientScope, defaultWithScope, getPreAssignedOptionalClientScopes()),
+				Check:  testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", defaultWithScope),
+			},
+			{
+				Config: testKeycloakOpenidClientScopes_defaultAndOptional(client, clientScope, defaultWithScope,
+					append(getPreAssignedOptionalClientScopes(), clientScope)),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(fmt.Sprintf("scopes \\[%s\\] are configured as both default and optional scopes", clientScope)),
+			},
+			{
+				Config: testKeycloakOpenidClientScopes_defaultAndOptional(client, clientScope, defaultWithScope, getPreAssignedOptionalClientScopes()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakOpenidClientHasDefaultScopes("keycloak_openid_client_default_scopes.default_scopes", defaultWithScope),
+					testAccCheckKeycloakOpenidClientOptionalScopeIsNotAttached("keycloak_openid_client.client", clientScope),
+				),
+			},
+		},
+	})
+}
+
 // The default and optional scopes resources are not ordered against each other, so moving a scope between them has to
 // work whichever resource reconciles first.
 func TestAccKeycloakOpenidClientDefaultScopes_moveBetweenResourcesWithoutDependency(t *testing.T) {
