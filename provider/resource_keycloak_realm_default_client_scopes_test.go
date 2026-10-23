@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
 	"slices"
 	"sort"
 	"testing"
@@ -142,6 +143,154 @@ resource "keycloak_realm_default_client_scopes" "default_scopes" {
 	default_scopes = []
 }
 	`, realmName)
+}
+
+func TestAccKeycloakRealmDefaultClientScopes_conflictWithOptionalScopesResource(t *testing.T) {
+	t.Parallel()
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealmScopes_defaultAndOptional(realmName, clientScope,
+					append(slices.Clone(preAssignedRealmDefaultClientScopes), clientScope),
+					append(slices.Clone(preAssignedRealmOptionalClientScopes), clientScope)),
+				ExpectError: regexp.MustCompile(fmt.Sprintf("scopes \\[%s\\] are configured as both default and optional scopes", clientScope)),
+			},
+		},
+	})
+}
+
+// The default and optional scopes resources are not ordered against each other, so moving a scope between them has to
+// work whichever resource reconciles first.
+func TestAccKeycloakRealmDefaultClientScopes_moveBetweenResourcesWithoutDependency(t *testing.T) {
+	t.Parallel()
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
+
+	defaultWithScope := append(slices.Clone(preAssignedRealmDefaultClientScopes), clientScope)
+	optionalWithScope := append(slices.Clone(preAssignedRealmOptionalClientScopes), clientScope)
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealmScopes_defaultAndOptional(realmName, clientScope, preAssignedRealmDefaultClientScopes, optionalWithScope),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmHasDefaultScopes("keycloak_realm_default_client_scopes.default_scopes", slices.Clone(preAssignedRealmDefaultClientScopes)),
+					testAccCheckKeycloakRealmHasOptionalScopes("keycloak_realm_optional_client_scopes.optional_scopes", slices.Clone(optionalWithScope)),
+				),
+			},
+			// optional to default
+			{
+				Config: testKeycloakRealmScopes_defaultAndOptional(realmName, clientScope, defaultWithScope, preAssignedRealmOptionalClientScopes),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmHasDefaultScopes("keycloak_realm_default_client_scopes.default_scopes", slices.Clone(defaultWithScope)),
+					testAccCheckKeycloakRealmHasOptionalScopes("keycloak_realm_optional_client_scopes.optional_scopes", slices.Clone(preAssignedRealmOptionalClientScopes)),
+				),
+			},
+			// and back to optional
+			{
+				Config: testKeycloakRealmScopes_defaultAndOptional(realmName, clientScope, preAssignedRealmDefaultClientScopes, optionalWithScope),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeycloakRealmHasDefaultScopes("keycloak_realm_default_client_scopes.default_scopes", slices.Clone(preAssignedRealmDefaultClientScopes)),
+					testAccCheckKeycloakRealmHasOptionalScopes("keycloak_realm_optional_client_scopes.optional_scopes", slices.Clone(optionalWithScope)),
+				),
+			},
+		},
+	})
+}
+
+// Keycloak removes a scope assignment whatever its type, so unmarking a stale realm optional scope must not remove the
+// scope once it has moved to default.
+func TestAccKeycloakRealmDefaultClientScopes_staleOptionalUnmarkKeepsDefaultScope(t *testing.T) {
+	t.Parallel()
+	realmName := acctest.RandomWithPrefix("tf-acc")
+	clientScope := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakRealmScopes_realmAndClientScope(realmName, clientScope),
+				Check: func(s *terraform.State) error {
+					if err := keycloakClient.MarkClientScopesAsRealmDefault(testCtx, realmName, []string{clientScope}); err != nil {
+						return err
+					}
+
+					// stale optional unmark, as if the optional resource had read the scope before it moved
+					if err := keycloakClient.UnmarkClientScopesAsRealmOptional(testCtx, realmName, []string{clientScope}); err != nil {
+						return err
+					}
+
+					defaultScopes, err := keycloakClient.GetRealmDefaultClientScopes(testCtx, realmName)
+					if err != nil {
+						return err
+					}
+
+					for _, defaultScope := range defaultScopes {
+						if defaultScope.Name == clientScope {
+							return nil
+						}
+					}
+
+					return fmt.Errorf("expected client scope %s to still be a realm default scope", clientScope)
+				},
+			},
+		},
+	})
+}
+
+func testKeycloakRealmScopes_realmAndClientScope(realmName, clientScope string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name        = "%s"
+	realm_id    = keycloak_realm.realm.id
+
+	description = "test description"
+}
+	`, realmName, clientScope)
+}
+
+var preAssignedRealmDefaultClientScopes = []string{"profile", "email", "roles", "role_list", "web-origins"}
+var preAssignedRealmOptionalClientScopes = []string{"address", "phone", "offline_access"}
+
+func testKeycloakRealmScopes_defaultAndOptional(realmName, clientScope string, defaultScopes, optionalScopes []string) string {
+	return fmt.Sprintf(`
+resource "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_openid_client_scope" "client_scope" {
+	name        = "%s"
+	realm_id    = keycloak_realm.realm.id
+
+	description = "test description"
+}
+
+resource "keycloak_realm_default_client_scopes" "default_scopes" {
+	realm_id       = keycloak_realm.realm.id
+	default_scopes = %s
+
+	depends_on = [keycloak_openid_client_scope.client_scope]
+}
+
+resource "keycloak_realm_optional_client_scopes" "optional_scopes" {
+	realm_id        = keycloak_realm.realm.id
+	optional_scopes = %s
+
+	depends_on = [keycloak_openid_client_scope.client_scope]
+}
+	`, realmName, clientScope, arrayOfStringsForTerraformResource(defaultScopes), arrayOfStringsForTerraformResource(optionalScopes))
 }
 
 // Keycloak throws a 500 if you attempt to mark a client scope as a realm default scope while it is marked as a realm
