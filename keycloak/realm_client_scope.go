@@ -49,21 +49,6 @@ ScopeNames:
 	return scopeIds, nil
 }
 
-func (keycloakClient *KeycloakClient) resolveAndHandleClientScopes(ctx context.Context, realmId string, scopeNames []string, handler func(context.Context, string, string) error) error {
-	scopeIds, err := keycloakClient.resolveClientScopeNamesIntoIds(ctx, realmId, scopeNames)
-	if err != nil {
-		return err
-	}
-
-	for _, scopeId := range scopeIds {
-		if err := handler(ctx, realmId, scopeId); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (keycloakClient *KeycloakClient) markClientScopesAs(ctx context.Context, realmId string, scopeNames []string, t string) error {
 	scopeIds, err := keycloakClient.resolveClientScopeNamesIntoIds(ctx, realmId, scopeNames)
 	if err != nil {
@@ -130,18 +115,27 @@ func (keycloakClient *KeycloakClient) unmarkClientScopeAs(ctx context.Context, r
 	return nil
 }
 
-// unmarkClientScopeIfCurrently only unmarks the scope if it is currently of the given type. Keycloak ignores the
-// type on DELETE and removes the assignment whatever its type, so this avoids undoing a scope that has since moved
-// to the other type.
-func (keycloakClient *KeycloakClient) unmarkClientScopeIfCurrently(ctx context.Context, realmId, scopeId, t string) error {
-	current, err := keycloakClient.getRealmClientScopesOfType(ctx, realmId, t)
-	if err != nil {
+// unmarkClientScopesAs only unmarks scopes that are currently marked as the given type. Keycloak ignores the type on
+// DELETE and removes the assignment whatever its type, so this avoids undoing a scope that has since moved to the other
+// type.
+func (keycloakClient *KeycloakClient) unmarkClientScopesAs(ctx context.Context, realmId string, scopeNames []string, t string) error {
+	currentScopes, err := keycloakClient.getRealmClientScopesOfType(ctx, realmId, t)
+	if ErrorIs404(err) {
+		return nil
+	} else if err != nil {
 		return err
 	}
 
-	for _, s := range current {
-		if s.Id == scopeId {
-			return keycloakClient.unmarkClientScopeAs(ctx, realmId, scopeId, t)
+	names := make(map[string]bool, len(scopeNames))
+	for _, name := range scopeNames {
+		names[name] = true
+	}
+
+	for _, s := range currentScopes {
+		if names[s.Name] {
+			if err := keycloakClient.unmarkClientScopeAs(ctx, realmId, s.Id, t); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -149,13 +143,9 @@ func (keycloakClient *KeycloakClient) unmarkClientScopeIfCurrently(ctx context.C
 }
 
 func (keycloakClient *KeycloakClient) UnmarkClientScopesAsRealmDefault(ctx context.Context, realmId string, scopeNames []string) error {
-	return keycloakClient.resolveAndHandleClientScopes(ctx, realmId, scopeNames, func(ctx context.Context, realmId, scopeId string) error {
-		return keycloakClient.unmarkClientScopeIfCurrently(ctx, realmId, scopeId, "default")
-	})
+	return keycloakClient.unmarkClientScopesAs(ctx, realmId, scopeNames, "default")
 }
 
 func (keycloakClient *KeycloakClient) UnmarkClientScopesAsRealmOptional(ctx context.Context, realmId string, scopeNames []string) error {
-	return keycloakClient.resolveAndHandleClientScopes(ctx, realmId, scopeNames, func(ctx context.Context, realmId, scopeId string) error {
-		return keycloakClient.unmarkClientScopeIfCurrently(ctx, realmId, scopeId, "optional")
-	})
+	return keycloakClient.unmarkClientScopesAs(ctx, realmId, scopeNames, "optional")
 }
