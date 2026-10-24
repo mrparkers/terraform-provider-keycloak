@@ -733,7 +733,12 @@ resource "keycloak_openid_client_default_scopes" "default_scopes" {
 
 // Keycloak removes a scope assignment whatever its type, so detaching a stale optional scope must not remove the scope
 // once it has moved to default.
-func TestAccKeycloakOpenidClientDefaultScopes_staleOptionalDetachKeepsDefaultScope(t *testing.T) {
+//
+// This tests the API client rather than the resources: it calls the attach and detach functions directly (from Check,
+// after applying a config that only creates the client and scope) so that the default attach always runs before the
+// stale optional detach. Terraform does not guarantee this order when a scope moves between the resources, so
+// moveBetweenResourcesWithoutDependency cannot reliably cover it.
+func TestAccKeycloakOpenidClientDefaultScopes_apiClientStaleOptionalDetachKeepsDefaultScope(t *testing.T) {
 	t.Parallel()
 	client := acctest.RandomWithPrefix("tf-acc")
 	clientScope := acctest.RandomWithPrefix("tf-acc")

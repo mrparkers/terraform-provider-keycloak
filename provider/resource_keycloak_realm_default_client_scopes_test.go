@@ -282,7 +282,12 @@ func TestAccKeycloakRealmDefaultClientScopes_moveBetweenResourcesWithoutDependen
 
 // Keycloak removes a scope assignment whatever its type, so unmarking a stale realm optional scope must not remove the
 // scope once it has moved to default.
-func TestAccKeycloakRealmDefaultClientScopes_staleOptionalUnmarkKeepsDefaultScope(t *testing.T) {
+//
+// This tests the API client rather than the resources: it calls the mark and unmark functions directly (from Check,
+// after applying a config that only creates the realm and scope) so that the default mark always runs before the
+// stale optional unmark. Terraform does not guarantee this order when a scope moves between the resources, so
+// moveBetweenResourcesWithoutDependency cannot reliably cover it.
+func TestAccKeycloakRealmDefaultClientScopes_apiClientStaleOptionalUnmarkKeepsDefaultScope(t *testing.T) {
 	t.Parallel()
 	realmName := acctest.RandomWithPrefix("tf-acc")
 	clientScope := acctest.RandomWithPrefix("tf-acc")
