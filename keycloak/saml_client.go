@@ -236,7 +236,9 @@ func (keycloakClient *KeycloakClient) detachSamlClientScopes(ctx context.Context
 	// Keycloak ignores the scope type on DELETE and removes the assignment whatever its type, so only detach scopes
 	// that are currently attached as this type to avoid undoing a scope that has since moved to the other type.
 	currentScopes, err := keycloakClient.getSamlClientScopes(ctx, realmId, clientId, t)
-	if err != nil {
+	if ErrorIs404(err) {
+		return nil
+	} else if err != nil {
 		return err
 	}
 

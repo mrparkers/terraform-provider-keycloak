@@ -403,7 +403,9 @@ func (keycloakClient *KeycloakClient) detachOpenidClientScopes(ctx context.Conte
 	// Keycloak ignores the scope type on DELETE and removes the assignment whatever its type, so only detach scopes
 	// that are currently attached as this type to avoid undoing a scope that has since moved to the other type.
 	currentScopes, err := keycloakClient.getOpenidClientScopes(ctx, realmId, clientId, t)
-	if err != nil {
+	if ErrorIs404(err) {
+		return nil
+	} else if err != nil {
 		return err
 	}
 
