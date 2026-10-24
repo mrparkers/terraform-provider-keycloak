@@ -368,7 +368,7 @@ resource "keycloak_realm_optional_client_scopes" "optional_scopes" {
 	`, realmName, clientScope, arrayOfStringsForTerraformResource(defaultScopes), arrayOfStringsForTerraformResource(optionalScopes))
 }
 
-// Keycloak throws a 500 if you attempt to mark a client scope as a realm default scope while it is marked as a realm
+// Keycloak returns a 409 if you attempt to mark a client scope as a realm default scope while it is marked as a realm
 // optional scope, but the provider will unmark the existing scope and re-mark it as a realm default scope
 func TestAccKeycloakRealmDefaultClientScopes_duplicateScopeAssignment(t *testing.T) {
 	t.Parallel()

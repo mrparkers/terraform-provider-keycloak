@@ -255,7 +255,7 @@ func TestAccKeycloakSamlClientDefaultScopes_validateScopeDoesNotExist(t *testing
 	})
 }
 
-// Keycloak throws a 500 if you attempt to attach a default scope that is already attached as an optional scope, but
+// Keycloak silently ignores an attempt to attach a default scope that is already attached as an optional scope, but
 // the provider will detach the existing scope and re-attach it as a default scope.
 // Note that optional scopes cannot be managed for saml clients by this provider or by the Keycloak admin console, so
 // the conflicting optional scope is attached directly via the Keycloak API.
